@@ -1,0 +1,87 @@
+﻿@page "/"
+@using SimpleCircuit;
+@using System.IO;
+@using System.Xml;
+@using System.Timers;
+
+<div class="split-screen">
+    <div class="input-script">
+        <form>
+            <textarea @bind="Code" @bind:event="oninput" rows="20" cols="50"></textarea>
+        </form>
+    </div>
+    <div class="svg-output">
+        <style>
+            path, polyline, line, circle {
+                stroke: black;
+                stroke-width: 0.5pt;
+                fill: transparent;
+                stroke-linecap: round;
+            }
+            .point circle {
+                fill: black;
+            }
+            .plane {
+                stroke-width: 1pt;
+            }
+            text {
+                font: 4pt Tahoma, Verdana, Segoe, sans-serif;
+            }
+        </style>
+        @if (_svg != null)
+            @((MarkupString)_svg)
+    </div>
+</div>
+
+@code{
+    private string _svg;
+    private string _code;
+    private Timer _timer;
+    private Task _task = null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _timer = new Timer(1000);
+        _timer.Elapsed += OnTimerElapsed;
+        _timer.AutoReset = false;
+    }
+
+    public string Code
+    {
+        get => _code;
+        set
+        {
+            _code = value;
+            _timer.Stop();
+            _timer.Start();
+        }
+    }
+
+    private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+    {
+        // Wait for a previous task to finish
+        if (_task != null && !_task.IsCompleted)
+        {
+            _timer.Stop();
+            _timer.Start();
+        }
+        else
+            _task = Task.Run(Render);
+    }
+
+    private void Render()
+    {
+        var parser = new SimpleCircuitParser();
+        var ckt = parser.Parse(_code);
+        var doc = ckt.Render();
+
+        using var sw = new StringWriter();
+        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            doc.WriteTo(xml);
+        _svg = sw.ToString();
+
+        // Force an update
+        StateHasChanged();
+    }
+}
