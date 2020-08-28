@@ -1,1 +1,2 @@
-autocrlf=false
+# Any files in this directory should be treated as binary files
+* binary
