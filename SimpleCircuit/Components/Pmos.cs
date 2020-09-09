@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Contributions;
+﻿using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("Mp")]
     public class Pmos : IComponent
     {
-        private readonly IContributor _x, _y, _sx, _sy, _a;
+        private readonly Contributor _x, _y, _sx, _sy, _a;
 
         /// <inheritdoc />
         public string Name { get; }
@@ -36,7 +36,7 @@ namespace SimpleCircuit.Components
         public IReadOnlyList<IPin> Pins { get; }
 
         /// <inheritdoc />
-        public IEnumerable<IContributor> Contributors => new IContributor[] { _x, _y, _sx, _sy, _a };
+        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y, _sx, _sy, _a };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Nmos"/> class.
@@ -50,13 +50,12 @@ namespace SimpleCircuit.Components
             _sx = new DirectContributor(name + ".SX", UnknownTypes.ScaleX);
             _sy = new ConstantContributor(UnknownTypes.ScaleY, 1.0);
             _a = new DirectContributor(name + ".A", UnknownTypes.Angle);
-            var sy = 1.0.SY();
             Pins = new[]
             {
-                new Pin(this, _x, _y, _sx, sy, _a, new Vector2(0, -8), -Math.PI / 2, new[] { "s", "source" }),
-                new Pin(this, _x, _y, _sx, sy, _a, new Vector2(-11, 0), Math.PI, new[] { "g", "gate" }),
-                new Pin(this, _x, _y, _sx, sy, _a, new Vector2(0, 0), 0, new[] { "b", "bulk" }),
-                new Pin(this, _x, _y, _sx, sy, _a, new Vector2(0, 8), Math.PI / 2, new[] { "d", "drain" }),
+                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, -8), -Math.PI / 2, new[] { "s", "source" }),
+                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(-11, 0), Math.PI, new[] { "g", "gate" }),
+                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, 0), 0, new[] { "b", "bulk" }),
+                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, 8), Math.PI / 2, new[] { "d", "drain" }),
             };
         }
 

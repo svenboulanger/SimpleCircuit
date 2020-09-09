@@ -1,6 +1,8 @@
 ﻿using SimpleCircuit.Algebra;
+using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace SimpleCircuit.Contributions
 {
@@ -22,7 +24,13 @@ namespace SimpleCircuit.Contributions
         public ISparseSolver<double> Solver { get; }
 
         /// <inheritdoc/>
-        public HashSet<int> Unknowns => null;
+        public IEnumerable<int> Unknowns
+        {
+            get
+            {
+                yield break;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConstantContribution"/> class.
@@ -35,7 +43,6 @@ namespace SimpleCircuit.Contributions
         {
             Row = row;
             Solver = solver ?? throw new ArgumentNullException(nameof(solver));
-            Value = value;
             switch (type)
             {
                 case UnknownTypes.Angle: Value = Utility.Wrap(value); break;

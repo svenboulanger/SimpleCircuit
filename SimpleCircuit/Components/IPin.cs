@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Contributions;
-using SimpleCircuit.Contributions.Contributors;
+﻿using SimpleCircuit.Contributors;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
@@ -24,7 +23,7 @@ namespace SimpleCircuit.Components
         /// <value>
         /// The x-coordinate.
         /// </value>
-        IContributor X { get; }
+        Contributor X { get; }
 
         /// <summary>
         /// Gets the y-coordinate of the pin.
@@ -32,7 +31,7 @@ namespace SimpleCircuit.Components
         /// <value>
         /// The y-coordinate.
         /// </value>
-        IContributor Y { get; }
+        Contributor Y { get; }
 
         /// <summary>
         /// Determines whether the pin is identified by the specified name.
@@ -48,6 +47,6 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="normal">The normal.</param>
         /// <returns>The contributor that gets the projection on the normal.</returns>
-        IContributor Projection(Vector2 normal);
+        Contributor Projection(Vector2 normal);
     }
 }

@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Contributions;
+﻿using SimpleCircuit.Contributors;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components
         /// <value>
         /// The contributors.
         /// </value>
-        IEnumerable<IContributor> Contributors { get; }
+        IEnumerable<Contributor> Contributors { get; }
 
         /// <summary>
         /// Renders the component in the specified drawing.

@@ -24,17 +24,10 @@ namespace SimpleCircuit.Contributions
         public int Row => _a.Row;
 
         /// <inheritdoc/>
-        public HashSet<int> Unknowns
-        {
-            get
-            {
-                var combined = new HashSet<int>();
-                combined.UnionWith(_sx.Unknowns ?? Enumerable.Empty<int>());
-                combined.UnionWith(_sy.Unknowns ?? Enumerable.Empty<int>());
-                combined.UnionWith(_a.Unknowns ?? Enumerable.Empty<int>());
-                return combined;
-            }
-        }
+        public IEnumerable<int> Unknowns =>
+            _sx.Unknowns
+                .Union(_sy.Unknowns)
+                .Union(_a.Unknowns);
 
         /// <inheritdoc/>
         public ISparseSolver<double> Solver => _a.Solver;

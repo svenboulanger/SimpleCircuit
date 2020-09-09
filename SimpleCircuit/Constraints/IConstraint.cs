@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Algebra;
-using SimpleCircuit.Contributions;
+using SimpleCircuit.Contributors;
 
 namespace SimpleCircuit.Constraints
 {
@@ -8,6 +8,22 @@ namespace SimpleCircuit.Constraints
     /// </summary>
     public interface IConstraint
     {
+        /// <summary>
+        /// Gets a value indicating whether the constraint is already resolved.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the constraint is already resolved; otherwise, <c>false</c>.
+        /// </value>
+        bool IsResolved { get; }
+
+        /// <summary>
+        /// Tries to resolve the constraint.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the constraint was resolved; otherwise, <c>false</c>.
+        /// </returns>
+        bool TryResolve();
+
         /// <summary>
         /// Sets up the constraint for the specified solver.
         /// </summary>

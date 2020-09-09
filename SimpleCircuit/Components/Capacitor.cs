@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Contributions;
+﻿using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("C")]
     public class Capacitor : IComponent
     {
-        private readonly IContributor _x, _y, _sx, _sy, _a;
+        private readonly Contributor _x, _y, _sx, _sy, _a;
 
         /// <inheritdoc/>
         public string Name { get; }
@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components
         public IReadOnlyList<IPin> Pins { get; }
 
         /// <inheritdoc/>
-        public IEnumerable<IContributor> Contributors => new IContributor[] { _x, _y, _sx, _sy, _a };
+        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y, _sx, _sy, _a };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Capacitor"/> class.

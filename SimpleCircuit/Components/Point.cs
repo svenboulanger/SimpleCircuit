@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Contributions;
+﻿using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("X")]
     public class Point : IComponent
     {
-        private readonly IContributor _x, _y;
+        private readonly Contributor _x, _y;
 
         /// <inheritdoc/>
         public string Name { get; }
@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components
         public IReadOnlyList<IPin> Pins { get; }
 
         /// <inheritdoc/>
-        public IEnumerable<IContributor> Contributors => new IContributor[] { _x, _y };
+        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y };
 
         /// <summary>
         /// Gets or sets the number of wires that are connected to this point.
@@ -41,7 +41,11 @@ namespace SimpleCircuit.Components
             _y = new DirectContributor(name + ".Y", UnknownTypes.Y);
             Pins = new IPin[]
             {
-                new Pin(this, _x, _y, 1.0.SX(), 1.0.SY(), 0.0.A(), new Vector2(), 0.0, new[] { ".", "a", "p" })
+                new Pin(this, _x, _y, 
+                    new ConstantContributor(UnknownTypes.ScaleX, 1.0),
+                    new ConstantContributor(UnknownTypes.ScaleY, 1.0),
+                    new ConstantContributor(UnknownTypes.Angle, 0.0),
+                    new Vector2(), 0.0, new[] { ".", "a", "p" })
             };
         }
 

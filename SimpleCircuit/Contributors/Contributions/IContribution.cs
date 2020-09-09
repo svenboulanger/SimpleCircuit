@@ -30,7 +30,7 @@ namespace SimpleCircuit.Contributions
         /// <value>
         /// The unknowns.
         /// </value>
-        HashSet<int> Unknowns { get; }
+        IEnumerable<int> Unknowns { get; }
 
         /// <summary>
         /// Gets the solver that the contribution applies to.

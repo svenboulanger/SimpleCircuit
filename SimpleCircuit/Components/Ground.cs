@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Contributions;
+﻿using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("GND")]
     public class Ground : IComponent
     {
-        private readonly IContributor _x, _y, _a;
+        private readonly Contributor _x, _y, _a;
 
         /// <inheritdoc/>
         public string Name { get; }
@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components
         public IReadOnlyList<IPin> Pins { get; }
 
         /// <inheritdoc/>
-        public IEnumerable<IContributor> Contributors => new IContributor[] { _x, _y, _a };
+        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y, _a };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
@@ -33,7 +33,7 @@ namespace SimpleCircuit.Components
             _a = new DirectContributor(name + ".A", UnknownTypes.Angle);
             Pins = new[]
             {
-                new Pin(this, _x, _y, 1.0.SX(), 1.0.SY(), _a, new Vector2(), Math.PI / 2, new[] { ".", "a" })
+                new Pin(this, _x, _y, new ConstantContributor(UnknownTypes.ScaleX, 1.0), new ConstantContributor(UnknownTypes.ScaleY, 1.0), _a, new Vector2(), Math.PI / 2, new[] { ".", "a" })
             };
         }
 

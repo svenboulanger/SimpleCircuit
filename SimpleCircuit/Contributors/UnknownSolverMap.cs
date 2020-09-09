@@ -1,7 +1,6 @@
-﻿using SimpleCircuit.Components;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SimpleCircuit.Contributions
+namespace SimpleCircuit.Contributors
 {
 
     /// <summary>
@@ -11,9 +10,9 @@ namespace SimpleCircuit.Contributions
     {
         private struct Node
         {
-            public readonly IContributor Owner;
+            public readonly Contributor Owner;
             public readonly UnknownTypes Type;
-            public Node(IContributor owner, UnknownTypes type)
+            public Node(Contributor owner, UnknownTypes type)
             {
                 Owner = owner;
                 Type = type;
@@ -79,7 +78,7 @@ namespace SimpleCircuit.Contributions
         /// <returns>
         /// The index/column that this variable will use in the solver.
         /// </returns>
-        public int GetUnknown(IContributor owner, UnknownTypes type)
+        public int GetUnknown(Contributor owner, UnknownTypes type)
         {
             var node = new Node(owner, type);
             if (!_invMap.TryGetValue(node, out var index))
@@ -97,7 +96,7 @@ namespace SimpleCircuit.Contributions
         /// </summary>
         /// <param name="index">The index.</param>
         /// <returns>The contributor that owns this unknown.</returns>
-        public IContributor GetOwner(int index) => _map[index].Owner;
+        public Contributor GetOwner(int index) => _map[index].Owner;
 
         /// <summary>
         /// Tries the index of the get.
@@ -106,7 +105,7 @@ namespace SimpleCircuit.Contributions
         /// <param name="type">The type.</param>
         /// <param name="index">The index.</param>
         /// <returns></returns>
-        public bool TryGetIndex(IContributor owner, UnknownTypes type, out int index)
+        public bool TryGetIndex(Contributor owner, UnknownTypes type, out int index)
             => _invMap.TryGetValue(new Node(owner, type), out index);
     }
 }

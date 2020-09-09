@@ -155,6 +155,8 @@ namespace SimpleCircuit.Algebra
                 index1 = index2;
                 index2 = tmp;
             }
+            if (index2 > Length)
+                Length = index2;
 
             // Get the two elements
             Element first = null, second = null;

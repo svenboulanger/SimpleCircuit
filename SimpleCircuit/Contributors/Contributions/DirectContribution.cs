@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Algebra;
 using SimpleCircuit.Contributions;
+using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 
@@ -22,7 +23,13 @@ namespace SimpleCircuit
         public int Row { get; }
 
         /// <inheritdoc/>
-        public HashSet<int> Unknowns => new HashSet<int>() { _index };
+        public IEnumerable<int> Unknowns
+        {
+            get
+            {
+                yield return _index;
+            }
+        }
 
         /// <inheritdoc/>
         public ISparseSolver<double> Solver { get; }
@@ -58,7 +65,7 @@ namespace SimpleCircuit
             switch (_type)
             {
                 case UnknownTypes.Angle: Value = Utility.Wrap(Value); break;
-                case UnknownTypes.Length: Value = Math.Min(Value, 0); break;
+                case UnknownTypes.Length: Value = Math.Max(Value, 0); break;
             }
         }
     }

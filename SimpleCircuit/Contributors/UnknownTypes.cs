@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Contributions
+﻿namespace SimpleCircuit.Contributors
 {
     /// <summary>
     /// The types of unknowns.

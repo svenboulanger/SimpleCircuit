@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Constraints;
+using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,14 @@ namespace SimpleCircuit.Circuits
     /// </summary>
     public class Wire
     {
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string Name { get; }
+
         /// <summary>
         /// Gets the starting pin.
         /// </summary>
@@ -28,25 +37,36 @@ namespace SimpleCircuit.Circuits
         public IPin PinB { get; }
 
         /// <summary>
-        /// Gets the preferred orientation.
+        /// Gets the length of the wire.
         /// </summary>
         /// <value>
-        /// The preferred orientation.
+        /// The length.
         /// </value>
-        public double PreferredOrientation { get; }
+        public Contributor Length { get; }
+
+        /// <summary>
+        /// Gets the definition of the length.
+        /// </summary>
+        /// <value>
+        /// The definition.
+        /// </value>
+        public IConstraint Definition { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Wire"/> class.
         /// </summary>
+        /// <param name="name">The name of the wire.</param>
         /// <param name="pinA">The pin of the first component.</param>
         /// <param name="pinB">The pin of the second component.</param>
-        /// <param name="preferredOrientation">The preferred orientation of the wire.</param>
+        /// <param name="definition">The definition for the length of the wire.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="a"/> or <paramref name="b"/> is <c>null</c>.</exception>
-        public Wire(IPin pinA, IPin pinB, double preferredOrientation)
+        public Wire(string name, IPin pinA, IPin pinB, Contributor definition)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             PinA = pinA ?? throw new ArgumentNullException(nameof(pinA));
             PinB = pinB ?? throw new ArgumentNullException(nameof(pinB));
-            PreferredOrientation = preferredOrientation;
+            Length = new DirectContributor($"{Name}.Length", UnknownTypes.Length);
+            Definition = new EqualsConstraint(Length, definition ?? throw new ArgumentNullException(nameof(definition)));
 
             if (PinA.Parent is Point ptA)
                 ptA.Wires++;
@@ -74,7 +94,7 @@ namespace SimpleCircuit.Circuits
         /// </returns>
         public override string ToString()
         {
-            return $"Wire from pin '{PinA}' to pin '{PinB}'";
+            return $"{Name} ({PinA}-{PinB})";
         }
     }
 }

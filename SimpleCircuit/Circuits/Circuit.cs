@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Xml;
 using SimpleCircuit.Algebra;
 using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
 using SimpleCircuit.Constraints;
-using SimpleCircuit.Contributions;
+using SimpleCircuit.Contributors;
 
 namespace SimpleCircuit
 {
@@ -25,7 +24,7 @@ namespace SimpleCircuit
             {
                 Constraint = constraint;
             }
-            public override string ToString() => $"{Constraint} ({(Suppressed ? "suppressed" : $"{LastRow-FirstRow} rows")})";
+            public override string ToString() => $"{Constraint} ({(Suppressed ? "suppressed" : $"{LastRow - FirstRow} rows")})";
         }
         private readonly Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
         private readonly HashSet<ConstraintItem> _constraints = new HashSet<ConstraintItem>();
@@ -169,27 +168,64 @@ namespace SimpleCircuit
             return drawing.GetDocument();
         }
 
-        /// <summary>
-        /// Resolves the variables.
-        /// </summary>
-        private void ResolveVariables()
+        private void Load(SparseRealSolver solver, IVector<double> solution)
         {
-            var solver = BuildSolver();
-            var solution = new DenseVector<double>(_variables.Count);
-
-            // Apply a first time for testing
             solver.Reset();
             foreach (var c in _constraints.Where(c => !c.Suppressed))
             {
                 c.Constraint.Update(solution);
                 c.Constraint.Apply();
             }
+        }
+
+        /// <summary>
+        /// Tries to resolve as many constraints possible to reduce the number of unknowns that need to be solved by
+        /// Newton-Raphson.
+        /// </summary>
+        private void ResolveConstraints()
+        {
+            bool needsMoreResolving = true;
+            while (needsMoreResolving)
+            {
+                needsMoreResolving = false;
+                foreach (var constraint in _constraints.Where(c => !c.Suppressed).ToArray())
+                {
+                    if (constraint.Constraint.TryResolve())
+                    {
+                        constraint.Suppressed = true;
+                        needsMoreResolving = true;
+                        Console.WriteLine($"- Could resolve {constraint.Constraint}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resolves the variables.
+        /// </summary>
+        private void ResolveVariables()
+        {
+            // Add the wire constraint if necessary
+            foreach (var wire in Wires)
+            {
+                if (!_constraints.Any(c => ReferenceEquals(c.Constraint, wire.Definition)))
+                    AddConstraint(wire.Definition);
+            }
+
+            // First try to resolve all the constraints where possible
+            Console.WriteLine("Resolving constraints without using the nonlinear solver:");
+            ResolveConstraints();
+
+            var solver = BuildSolver();
             if (_variables.Count == 0)
                 return;
+            var solution = BuildSolution();
+
+            // Apply a first time and see how many constraints are actually working out
+            Load(solver, solution);
             var steps = solver.OrderAndFactor();
-            
-            // We have an over-constrained thing here...
-            // Throw away the last constraints
+
+            // Remove constraints if there are too many
             if (solver.Size > _variables.Count)
             {
                 Console.WriteLine($"Overconstrained problem!");
@@ -208,26 +244,22 @@ namespace SimpleCircuit
                 steps = solver.OrderAndFactor();
             }
 
-            // See if something changed
+            // If the solver is underconstrained, add our own constraints
             if (steps < _variables.Count)
             {
-                Constrain(solver, steps);
-                solver = BuildSolver();
+                Constrain();
+                ResolveConstraints();
+                solver = BuildSolver();                
             }
 
             // Solve for real this time
             var iterations = 0;
             double error = 1.0;
-            solution = new DenseVector<double>(_variables.Count);
+            solution = BuildSolution();
             var oldSolution = new DenseVector<double>(solution.Length);
             while (error > 1e-9)
             {
-                solver.Reset();
-                foreach (var c in _constraints.Where(c => !c.Suppressed))
-                {
-                    c.Constraint.Update(solution);
-                    c.Constraint.Apply();
-                }
+                Load(solver, solution);
                 iterations++;
                 Console.WriteLine($"- iteration {iterations}");
                 solver.Print();
@@ -270,7 +302,10 @@ namespace SimpleCircuit
                         case UnknownTypes.Length:
                             e = Math.Abs(solution[i] - oldSolution[i]);
                             if (solution[i] < 0)
+                            {
                                 solution[i] = 0.0;
+                                Console.WriteLine($"The solution for {_variables.GetOwner(i)} became negative.");
+                            }
                             error = Math.Max(error, e);
                             break;
                         default:
@@ -293,20 +328,20 @@ namespace SimpleCircuit
                             break;
                     }
 
-                    Console.WriteLine($"solution[{i}] = {solution[i]}");
+                    Console.WriteLine($"solution of {_variables.GetOwner(i)} = {solution[i]}");
                 }
 
                 if (error < 1e-9)
                     break;
-                if (iterations > 100)
+                if (iterations > 10)
                 {
                     Console.WriteLine("Could not converge...");
                     return;
-                }    
+                }
             }
 
             // Update all contributions once more
-            foreach (var c in _constraints)
+            foreach (var c in _constraints.Where(c => !c.Suppressed))
                 c.Constraint.Update(solution);
 
             // List all of them now
@@ -317,6 +352,10 @@ namespace SimpleCircuit
             }
         }
 
+        /// <summary>
+        /// Build a new solver from scratch using the current constraints and variables.
+        /// </summary>
+        /// <returns>The solver.</returns>
         private SparseRealSolver BuildSolver()
         {
             _variables.Clear();
@@ -337,328 +376,194 @@ namespace SimpleCircuit
                 c.Constraint.Setup(solver, c.FirstRow, _variables);
                 c.LastRow = solver.UsedRows + 1;
                 if (c.FirstRow == c.LastRow)
-                {
-                    Console.WriteLine($"Constraint {c.Constraint} doesn't solve any unknowns.");
                     c.Suppressed = true;
-                }
-                else
-                    Console.WriteLine($"Constraint '{c.Constraint}' uses {c.LastRow - c.FirstRow} rows, starting at {c.FirstRow}.");
             }
+
             return solver;
         }
 
-        private void Constrain(SparseRealSolver solver, int steps)
+        /// <summary>
+        /// Build a new solution from scratch using the current constraints and variables.
+        /// </summary>
+        /// <returns>An initial solution vector.</returns>
+        private IVector<double> BuildSolution()
         {
-            Console.WriteLine("Underconstrained problem:");
+            var solution = new DenseVector<double>(_variables.Count);
+            for (var i = 1; i <= _variables.Count; i++)
+            {
+                switch (_variables[i])
+                {
+                    case UnknownTypes.Length: solution[i] = DefaultWireLength; break;
+                }
+            }
+            return solution;
+        }
+
+        /// <summary>
+        /// Try constraining an underconstrained circuit.
+        /// </summary>
+        private void Constrain()
+        {
+            Console.WriteLine("------------------ Underconstrained problem ------------------");
+
+            // Let's bring all the wire lengths to the end of the solver and restrict it from being used
+            var solver = BuildSolver();
+            var solution = BuildSolution();
+            int count = _variables.Count;
+            solver.Precondition((matrix, rhs) =>
+            {
+                foreach (var wire in Wires)
+                {
+                    if (!wire.Length.IsFixed)
+                    {
+                        var row = _constraints.First(c => ReferenceEquals(c.Constraint, wire.Definition)).FirstRow;
+                        if (_variables.TryGetIndex(wire.Length, UnknownTypes.Length, out var col))
+                        {
+                            var loc = solver.ExternalToInternal(new MatrixLocation(col, col));
+                            matrix.SwapRows(row, count);
+                            matrix.SwapColumns(loc.Column, count);
+                            count--;
+                        }
+                    }
+                }
+                solver.Degeneracy = _variables.Count - count;
+                solver.PivotSearchReduction = _variables.Count - count;
+            });
+
+            // Look at the wiring of the structure
+            Load(solver, solution);
+            var steps = solver.OrderAndFactor();
+            if (steps == count)
+            {
+                Console.WriteLine("Already fully constrained...");
+                return;
+            }
+
             DumpReordered(solver);
 
-            // Let's first make a list of problems
-            HashSet<int> looseVariables = new HashSet<int>(LooseVariables(solver, steps));
-            var names = looseVariables.Select(v =>
-            {
-                var loc = solver.InternalToExternal(new MatrixLocation(v, v));
-                return _variables.GetOwner(loc.Column);
-            });
-            Console.WriteLine($"- Trying to fix variables: {string.Join(", ", names)}.");
-
-            // Start by suppressing the constraints that are giving problems
-            foreach (var ci in _constraints)
-            {
-                if (ci.FirstRow <= steps)
-                    continue;
-                Console.WriteLine($"- Suppressing constraint: '{ci}'.");
-                ci.Suppressed = true;
-                ci.FirstRow = -1;
-                ci.LastRow = -1;
-            }
-
-            // Let's try to resolve the variables that are still giving issues
-
-            // We can use wires to our advantage!
-            // Keep adding constraints using wires until our problems don't reduce
-            while (looseVariables.Count > 0)
-            {
-                int Ext(int internalIndex)
-                {
-                    var loc = solver.InternalToExternal(new MatrixLocation(internalIndex, internalIndex));
-                    return loc.Column;
-                }
-                bool hasFixed = false;
-
-                // First try to fix some components if possible
-                foreach (var w in Wires)
-                    hasFixed |= FixByWire(w, solver, looseVariables);
-                if (hasFixed)
-                    continue;
-
-                // Then try to just constrain them if fixing wasn't possible
-                foreach (var w in Wires)
-                    hasFixed |= ConstrainByWire(w, solver, looseVariables);
-                if (hasFixed)
-                    continue;
-
-                // We are out of options... Just pick a loose variable and set it to a fixed value...
-                // First try to set lengths
-                int option = looseVariables.FirstOrDefault(index => _variables[Ext(index)] == UnknownTypes.Length);
-                if (option > 0)
-                {
-                    var o = _variables.GetOwner(Ext(option));
-                    Console.WriteLine($"- Setting the length {o} to {DefaultWireLength}.");
-                    AddConstraint(new EqualsConstraint(o, new ConstantContributor(o.Type, DefaultWireLength)));
-                    FixVariables(solver, looseVariables, option);
-                    continue;
-                }
-
-                // Then try scaling stuff
-                option = looseVariables.FirstOrDefault(index =>
-                {
-                    var e = _variables[Ext(index)];
-                    if (e == UnknownTypes.ScaleX || e == UnknownTypes.ScaleY)
-                        return true;
-                    return false;
-                });
-                if (option > 0)
-                {
-                    var o = _variables.GetOwner(Ext(option));
-                    Console.WriteLine($"- Setting the scale {o} to 1.");
-                    AddConstraint(new EqualsConstraint(o, new ConstantContributor(o.Type, 1.0)));
-                    FixVariables(solver, looseVariables, option);
-                    continue;
-                }
-
-                // Orientations are next
-                option = looseVariables.FirstOrDefault(index => _variables[Ext(index)] == UnknownTypes.Angle);
-                if (option > 0)
-                {
-                    var o = _variables.GetOwner(Ext(option));
-                    Console.WriteLine($"- Setting the angle {o} to 0.");
-                    AddConstraint(new EqualsConstraint(o, new ConstantContributor(o.Type, 0.0)));
-                    FixVariables(solver, looseVariables, option);
-                    continue;
-                }
-
-                // Just whatever now...
-                option = looseVariables.First();
-                var c = _variables.GetOwner(Ext(option));
-                Console.WriteLine($"- Setting the unknown {c} to 0.");
-                AddConstraint(new EqualsConstraint(c, new ConstantContributor(c.Type, 0.0)));
-                FixVariables(solver, looseVariables, option);
-            }
-        }
-
-        /// <summary>
-        /// Finds all variables that are fixed. The solver should be ordered and factored.
-        /// </summary>
-        /// <param name="solver">The solver.</param>
-        /// <param name="steps">The number of steps that were succesfully eliminated.</param>
-        /// <returns>All variables that are nicely fixed to a single possible value.</returns>
-        private IEnumerable<int> LooseVariables(ISparsePivotingSolver<double> solver, int steps)
-        {
-            var areNotFixed = new HashSet<int>();
-            var areFixed = new HashSet<int>();
+            // Constrain any constants that aren't connected to our wires
+            var possibleRows = new HashSet<int>();
+            for (var i = count + 1; i <= _variables.Count; i++)
+                possibleRows.Add(i);
+            var possibleColumns = new HashSet<int>();
             solver.Precondition((matrix, rhs) =>
             {
-                // Get the already unset variables and potentially set variables
-                for (var i = 1; i <= steps; i++)
-                    areFixed.Add(i);
-                for (var i = steps + 1; i <= _variables.Count; i++)
-                    areNotFixed.Add(i);
-
-                // The unfixed variables propagate, so let's find these
-                var count = 0;
-                while (areNotFixed.Count > count)
+                for (var i = steps + 1; i <= count; i++)
                 {
-                    count = areNotFixed.Count;
-                    foreach (var index in areFixed.ToArray())
+                    var elt = matrix.GetLastInColumn(i);
+                    if (elt == null || elt.Row < count)
                     {
-                        var elt = matrix.GetFirstInRow(index);
-                        while (elt != null)
+                        var ext = solver.InternalToExternal(new MatrixLocation(i, i));
+                        var owner = _variables.GetOwner(ext.Column);
+                        Contributor reference;
+                        switch (owner.Type)
                         {
-                            if (areNotFixed.Contains(elt.Column))
-                            {
-                                areFixed.Remove(elt.Row);
-                                areNotFixed.Add(elt.Row);
-                                break;
-                            }
-                            elt = elt.Right;
+                            case UnknownTypes.Length: reference = new ConstantContributor(UnknownTypes.Length, DefaultWireLength); break;
+                            case UnknownTypes.ScaleX:
+                            case UnknownTypes.ScaleY: reference = new ConstantContributor(owner.Type, 1.0); break;
+                            default: reference = new ConstantContributor(owner.Type, 0.0); break;
                         }
-                    }
-                }
-            });
-            return areNotFixed;
-        }
-
-        /// <summary>
-        /// Fixes the variables.
-        /// </summary>
-        /// <param name="solver">The solver.</param>
-        /// <param name="looseVariables">The loose variables.</param>
-        /// <param name="toFix">The variable that just was fixed.</param>
-        private void FixVariables(ISparsePivotingSolver<double> solver, HashSet<int> looseVariables, int toFix)
-        {
-            looseVariables.Remove(toFix);
-
-            // Finds a row that uniquely determines a variable
-            int IsFixingRow(ISparseMatrix<double> matrix, int row)
-            {
-                var elt = matrix.GetFirstInRow(row);
-                if (elt == null)
-                    return -1;
-                int looseElements = 0, fixedElements = 0;
-                int result = -1;
-                while (elt != null)
-                {
-                    if (looseVariables.Contains(elt.Column))
-                    {
-                        looseElements++;
-                        result = elt.Column;
+                        AddConstraint(new EqualsConstraint(owner, reference));
+                        Console.WriteLine($"    - Fixed {owner} to {reference}.");
                     }
                     else
-                        fixedElements++;
-                    elt = elt.Right;
-                }
-                if (looseElements == 1 && fixedElements > 0)
-                    return result;
-                return elt?.Column ?? 0;
-            }
-
-            solver.Precondition((matrix, rhs) =>
-            {
-                var count = looseVariables.Count + 1;
-                while (looseVariables.Count < count)
-                {
-                    count = looseVariables.Count;
-                    for (var i = 1; i < matrix.Size; i++)
-                    {
-                        var fixVar = IsFixingRow(matrix, i);
-                        if (fixVar > 0)
-                        {
-                            looseVariables.Remove(fixVar);
-                            var loc = solver.InternalToExternal(new MatrixLocation(fixVar, fixVar));
-                            Console.WriteLine($"\t- This also fixed variable {_variables.GetOwner(loc.Column)}.");
-                        }
-                    }
+                        possibleColumns.Add(i);
                 }
             });
-        }
 
-        /// <summary>
-        /// Fixes pins by using their wires.
-        /// </summary>
-        /// <param name="wire">The wire.</param>
-        /// <param name="solver">The solver.</param>
-        /// <param name="looseVariables">The loose variables.</param>
-        /// <returns><c>true</c> if the wire could be used to constrain a variable.</returns>
-        private bool FixByWire(Wire wire, SparseRealSolver solver, HashSet<int> looseVariables)
-        {
-            if (double.IsNaN(wire.PreferredOrientation))
-                return false;
-            int Int(int externalIndex)
+            // The wire unknowns are unknowns that are defined by wire lengths, let's deal with them!
+            var dependents = new DependentWires();
+            while (possibleRows.Count > 0)
             {
-                var loc = solver.ExternalToInternal(new MatrixLocation(externalIndex, externalIndex));
-                return loc.Column;
-            }
+                // Start with the first wire and extract all linked wires
+                dependents.Clear();
+                dependents.AddRow(solver, possibleRows.First(), possibleRows, possibleColumns);
 
-            // Let's see if this wire can fix some of our problems along the X-axis
-            var unknownsA = wire.PinA.X.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            var unknownsB = wire.PinB.X.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            if (unknownsA.Length == 1 && !wire.PinA.X.IsFixed && wire.PinB.X.IsFixed)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsA[0])}");
-                if (wire.PinA.X.Fix(wire.PinB.X.Value - DefaultWireLength * Math.Cos(wire.PreferredOrientation)))
+                Wire GetWire(int row)
                 {
-                    FixVariables(solver, looseVariables, Int(unknownsA[0]));
-                    return true;
+                    var ext = solver.InternalToExternal(new MatrixLocation(row, row));
+                    var constraint = _constraints.First(c => !c.Suppressed && c.FirstRow == ext.Row);
+                    return Wires.First(w => ReferenceEquals(w.Definition, constraint.Constraint));
+                }
+                void Constrain(int[] ws)
+                {
+                    if (ws.Length > 0)
+                    {
+                        if (ws.Length == 1)
+                        {
+                            var wire = GetWire(ws[0]);
+                            AddConstraint(new EqualsConstraint(wire.Length, new ConstantContributor(UnknownTypes.Length, DefaultWireLength)));
+                            Console.WriteLine($"- Fixing {wire} length to {DefaultWireLength}.");
+                        }
+                        else
+                        {
+                            var wire = GetWire(ws[0]);
+                            Contributor contributor = new SkewedContributor(DefaultWireLength - wire.Length);
+                            for (var i = 1; i < ws.Length; i++)
+                            {
+                                wire = GetWire(ws[i]);
+                                contributor += new SkewedContributor(DefaultWireLength - wire.Length);
+                            }
+                            AddConstraint(new EqualsConstraint(contributor, new ConstantContributor(UnknownTypes.Length, 1.0)));
+                            Console.WriteLine($"- Fixing {contributor} to 1.");
+                        }
+                        foreach (var wire in ws)
+                            dependents.ConstrainWire(wire);
+                    }
+                }
+
+                // If these are loose, then fix the left-most unknown
+                if (dependents.IsLoose)
+                {
+                    var uk = dependents.LeftMostUnknowns.First();
+                    var ext = solver.InternalToExternal(new MatrixLocation(uk, uk));
+                    var owner = _variables.GetOwner(ext.Column);
+                    Console.WriteLine($"- Loose wire group: fixed {owner}.");
+                    AddConstraint(new EqualsConstraint(owner, new ConstantContributor(owner.Type, 0)));
+                    dependents.ConstrainUnknown(uk);
+                }
+
+                // These wire lengths will be fixed, so remove them from the possibilities
+                foreach (var row in dependents.Rows)
+                    possibleRows.Remove(row);
+
+                // Constrain wires to fixed points
+                var wires = dependents.RightOf(0).ToArray();
+                Constrain(wires);
+
+                // Let's work our way from left to right, start with the wires starting from the left-most
+                while (dependents.Count > 0)
+                {
+                    // Remove any loose wires
+                    bool redo = true;
+                    while (redo)
+                    {
+                        redo = false;
+                        foreach (var s in dependents.Starts.ToArray())
+                        {
+                            wires = dependents.RightOf(s).ToArray();
+                            Constrain(wires);
+                            redo = true;
+                        }
+                        foreach (var e in dependents.Ends.ToArray())
+                        {
+                            wires = dependents.LeftOf(e).ToArray();
+                            Constrain(wires);
+                            redo = true;
+                        }
+                    }
+
+                    // Work from left to right
+                    var unknown = dependents.LeftMostUnknowns.FirstOrDefault();
+                    if (unknown > 0)
+                    {
+                        wires = dependents.RightOf(unknown).ToArray();
+                        Constrain(wires);
+                    }
                 }
             }
-            else if (unknownsB.Length == 1 && !wire.PinB.X.IsFixed && wire.PinA.X.IsFixed)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsB[0])}");
-                if (wire.PinB.X.Fix(wire.PinA.X.Value + DefaultWireLength * Math.Cos(wire.PreferredOrientation)))
-                {
-                    FixVariables(solver, looseVariables, Int(unknownsB[0]));
-                    return true;
-                }
-            }
 
-            // Let's see if this wire can fix some of our problems along the Y-axis
-            unknownsA = wire.PinA.Y.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            unknownsB = wire.PinB.Y.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            if (unknownsA.Length == 1 && !wire.PinA.Y.IsFixed && wire.PinB.Y.IsFixed)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsA[0])}");
-                if (wire.PinA.Y.Fix(wire.PinB.Y.Value - DefaultWireLength * Math.Sin(wire.PreferredOrientation)))
-                {
-                    FixVariables(solver, looseVariables, Int(unknownsA[0]));
-                    return true;
-                }
-            }
-            else if (unknownsB.Length == 1 && !wire.PinB.Y.IsFixed && wire.PinA.Y.IsFixed)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsB[0])}");
-                if (wire.PinB.Y.Fix(wire.PinA.Y.Value + DefaultWireLength * Math.Sin(wire.PreferredOrientation)))
-                {
-                    FixVariables(solver, looseVariables, Int(unknownsB[0]));
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Constrains pins by using their wires.
-        /// </summary>
-        /// <param name="wire">The wire.</param>
-        /// <param name="solver">The solver.</param>
-        /// <param name="looseVariables">The loose variables.</param>
-        /// <returns><c>true</c> if the wire could be used to constrain a variable.</returns>
-        private bool ConstrainByWire(Wire wire, SparseRealSolver solver, HashSet<int> looseVariables)
-        {
-            if (double.IsNaN(wire.PreferredOrientation))
-                return false;
-
-            int Int(int externalIndex)
-            {
-                var loc = solver.ExternalToInternal(new MatrixLocation(externalIndex, externalIndex));
-                return loc.Column;
-            }
-
-            // Let's see if this wire can fix some of our problems along the X-axis
-            var unknownsA = wire.PinA.X.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            var unknownsB = wire.PinB.X.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            if (unknownsA.Length == 1 && unknownsB.Length == 0)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsA[0])}");
-                AddConstraint(new EqualsConstraint(new OffsetContributor(wire.PinA.X, DefaultWireLength * Math.Cos(wire.PreferredOrientation), UnknownTypes.X), wire.PinB.X));
-                FixVariables(solver, looseVariables, Int(unknownsA[0]));
-                return true;
-            }
-            else if (unknownsB.Length == 1 && unknownsA.Length == 0)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsB[0])}");
-                AddConstraint(new EqualsConstraint(new OffsetContributor(wire.PinA.X, DefaultWireLength * Math.Cos(wire.PreferredOrientation), UnknownTypes.X), wire.PinB.X));
-                FixVariables(solver, looseVariables, Int(unknownsB[0]));
-                return true;
-            }
-
-            // Let's see if this wire can fix some of our problems along the Y-axis
-            unknownsA = wire.PinA.Y.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            unknownsB = wire.PinB.Y.GetUnknowns(_variables).Where(c => looseVariables.Contains(Int(c))).ToArray();
-            if (unknownsA.Length == 1 && unknownsB.Length == 0)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsA[0])}");
-                AddConstraint(new EqualsConstraint(new OffsetContributor(wire.PinA.Y, DefaultWireLength * Math.Sin(wire.PreferredOrientation), UnknownTypes.Y), wire.PinB.Y));
-                FixVariables(solver, looseVariables, Int(unknownsA[0]));
-                return true;
-            }
-            else if (unknownsB.Length == 1 && unknownsA.Length == 0)
-            {
-                Console.WriteLine($"- Using wire {wire} to fix {_variables.GetOwner(unknownsB[0])}");
-                AddConstraint(new EqualsConstraint(new OffsetContributor(wire.PinA.Y, DefaultWireLength * Math.Sin(wire.PreferredOrientation), UnknownTypes.Y), wire.PinB.Y));
-                FixVariables(solver, looseVariables, Int(unknownsB[0]));
-                return true;
-            }
-            return false;
+            Console.WriteLine("------------------ End of constraining ------------------");
         }
 
         private void DumpReordered(SparseRealSolver solver)
@@ -670,6 +575,10 @@ namespace SimpleCircuit
                 var constraint = _constraints.FirstOrDefault(c => loc.Row >= c.FirstRow && loc.Row < c.LastRow);
                 if (constraint != null)
                     Console.WriteLine($"Row {i} = {constraint}");
+            }
+            for (var i = 1; i <= _variables.Count; i++)
+            {
+                var loc = solver.InternalToExternal(new MatrixLocation(i, i));
                 Console.WriteLine($"Column {i} = {_variables.GetOwner(loc.Column)}");
             }
         }

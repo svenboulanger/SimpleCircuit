@@ -26,18 +26,11 @@ namespace SimpleCircuit.Contributions
         public ISparseSolver<double> Solver => _y.Solver;
 
         /// <inheritdoc/>
-        public HashSet<int> Unknowns
-        {
-            get
-            {
-                var combined = new HashSet<int>();
-                combined.UnionWith(_y.Unknowns ?? Enumerable.Empty<int>());
-                combined.UnionWith(_sx.Unknowns ?? Enumerable.Empty<int>());
-                combined.UnionWith(_sy.Unknowns ?? Enumerable.Empty<int>());
-                combined.UnionWith(_a.Unknowns ?? Enumerable.Empty<int>());
-                return combined;
-            }
-        }
+        public IEnumerable<int> Unknowns =>
+            _y.Unknowns
+                .Union(_sx.Unknowns)
+                .Union(_sy.Unknowns)
+                .Union(_a.Unknowns);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OffsetXContribution"/> class.

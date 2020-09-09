@@ -1,25 +1,26 @@
 ﻿using SimpleCircuit.Algebra;
+using SimpleCircuit.Contributions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SimpleCircuit.Contributions
+namespace SimpleCircuit.Contributors
 {
     /// <summary>
     /// A contributor for an orientation, which is basically the in-product with a vector.
     /// </summary>
-    /// <seealso cref="IContributor" />
-    public class ProjectionContributor : IContributor
+    /// <seealso cref="Contributor" />
+    public class ProjectionContributor : Contributor
     {
-        private readonly IContributor _sx, _sy, _a;
+        private readonly Contributor _sx, _sy, _a;
         private readonly double _angle;
         private readonly Vector2 _normal;
 
         /// <inheritdoc/>
-        public UnknownTypes Type => UnknownTypes.Scalar;
+        public override UnknownTypes Type => UnknownTypes.Scalar;
 
         /// <inheritdoc/>
-        public double Value
+        public override double Value
         {
             get
             {
@@ -44,7 +45,7 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public bool IsFixed
+        public override bool IsFixed
         {
             get
             {
@@ -76,7 +77,7 @@ namespace SimpleCircuit.Contributions
         /// <param name="angle">The angle offset.</param>
         /// <param name="normal">The normal with which the in-product is calculated.</param>
         /// <exception cref="ArgumentNullException">Thrown if any contributor is <c>null</c>.</exception>
-        public ProjectionContributor(IContributor sx, IContributor sy, IContributor a, double angle, Vector2 normal)
+        public ProjectionContributor(Contributor sx, Contributor sy, Contributor a, double angle, Vector2 normal)
         {
             _sx = sx ?? throw new ArgumentNullException(nameof(sx));
             _sy = sy ?? throw new ArgumentNullException(nameof(sy));
@@ -88,7 +89,7 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
+        public override IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
         {
             IContribution sx, sy;
             if (Math.Cos(_angle).IsZero())
@@ -104,7 +105,7 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public bool Fix(double value)
+        public override bool Fix(double value)
         {
             double px = Math.Cos(_angle), py = Math.Sin(_angle);
             double dx1 = px * _normal.X, dx2 = py * _normal.Y;
@@ -179,7 +180,7 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public void Reset()
+        public override void Reset()
         {
             _sx.Reset();
             _sy.Reset();
@@ -187,7 +188,7 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public IEnumerable<int> GetUnknowns(UnknownSolverMap map)
+        public override IEnumerable<int> GetUnknowns(UnknownSolverMap map)
         {
             IEnumerable<int> result = Enumerable.Empty<int>();
             double x = _normal.X, y = _normal.Y;

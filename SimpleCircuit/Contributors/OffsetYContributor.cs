@@ -1,27 +1,28 @@
 ﻿using SimpleCircuit.Algebra;
+using SimpleCircuit.Contributions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SimpleCircuit.Contributions.Contributors
+namespace SimpleCircuit.Contributors
 {
     /// <summary>
     /// A contributor that represents an offset to a parent object that can rotate, scale and move.
     /// </summary>
-    /// <seealso cref="IContributor" />
-    public class OffsetYContributor : IContributor
+    /// <seealso cref="Contributor" />
+    public class OffsetYContributor : Contributor
     {
-        private readonly IContributor _y, _sx, _sy, _a;
+        private readonly Contributor _y, _sx, _sy, _a;
         private readonly Vector2 _relative;
 
         /// <inheritdoc/>
-        public UnknownTypes Type => UnknownTypes.Y;
+        public override UnknownTypes Type => UnknownTypes.Y;
 
         /// <inheritdoc/>
-        public double Value => _y.Value + _sx.Value * _relative.X * Math.Sin(_a.Value) + _sy.Value * _relative.Y * Math.Cos(_a.Value);
+        public override double Value => _y.Value + _sx.Value * _relative.X * Math.Sin(_a.Value) + _sy.Value * _relative.Y * Math.Cos(_a.Value);
 
         /// <inheritdoc/>
-        public bool IsFixed
+        public override bool IsFixed
         {
             get
             {
@@ -55,7 +56,7 @@ namespace SimpleCircuit.Contributions.Contributors
         /// <param name="a">a.</param>
         /// <param name="relative">The relative.</param>
         /// <exception cref="ArgumentNullException">Thrown if any contributor is <c>null</c>.</exception>
-        public OffsetYContributor(IContributor y, IContributor sx, IContributor sy, IContributor a, Vector2 relative)
+        public OffsetYContributor(Contributor y, Contributor sx, Contributor sy, Contributor a, Vector2 relative)
         {
             _y = y ?? throw new ArgumentNullException(nameof(y));
             _sx = sx ?? throw new ArgumentNullException(nameof(sx));
@@ -65,7 +66,7 @@ namespace SimpleCircuit.Contributions.Contributors
         }
 
         /// <inheritdoc/>
-        public IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
+        public override IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
         {
             // Let's try to save some unnecessary unknown calculations
             IContribution sx, sy, a;
@@ -85,7 +86,7 @@ namespace SimpleCircuit.Contributions.Contributors
         }
 
         /// <inheritdoc/>
-        public bool Fix(double value)
+        public override bool Fix(double value)
         {
             // No offset?
             if (_relative.X.Equals(0.0) && _relative.Y.Equals(0.0))
@@ -147,7 +148,7 @@ namespace SimpleCircuit.Contributions.Contributors
         }
 
         /// <inheritdoc/>
-        public void Reset()
+        public override void Reset()
         {
             _y.Reset();
             _sx.Reset();
@@ -156,7 +157,7 @@ namespace SimpleCircuit.Contributions.Contributors
         }
 
         /// <inheritdoc/>
-        public IEnumerable<int> GetUnknowns(UnknownSolverMap map)
+        public override IEnumerable<int> GetUnknowns(UnknownSolverMap map)
         {
             var result = _y.GetUnknowns(map);
             double c = 1.0, s = 1.0;

@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Algebra;
 using SimpleCircuit.Contributions;
+using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,11 @@ namespace SimpleCircuit.Constraints
     /// <seealso cref="IConstraint" />
     public class EqualsConstraint : IConstraint
     {
-        private readonly IContributor _a, _b;
+        private readonly Contributor _a, _b;
         private IContribution _ca, _cb;
+
+        /// <inheritdoc/>
+        public bool IsResolved => _a.IsFixed && _b.IsFixed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EqualsConstraint"/> class.
@@ -21,7 +25,7 @@ namespace SimpleCircuit.Constraints
         /// <param name="a">a.</param>
         /// <param name="b">The b.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="a"/> or <paramref name="b"/> is <c>null</c>.</exception>
-        public EqualsConstraint(IContributor a, IContributor b)
+        public EqualsConstraint(Contributor a, Contributor b)
         {
             _a = a ?? throw new ArgumentNullException(nameof(a));
             _b = b ?? throw new ArgumentNullException(nameof(b));
@@ -41,9 +45,8 @@ namespace SimpleCircuit.Constraints
             _cb = _b.CreateContribution(solver, row, map);
 
             // Get the number of variables
-            var variables = _ca.Unknowns ?? new HashSet<int>();
-            variables.UnionWith(_cb.Unknowns ?? Enumerable.Empty<int>());
-            if (variables.Count == 0)
+            var variables = _ca.Unknowns.Union(_cb.Unknowns).Distinct().Count();
+            if (variables == 0)
                 return false;
             return true;
         }
@@ -53,6 +56,16 @@ namespace SimpleCircuit.Constraints
         {
             _ca.Update(solution);
             _cb.Update(solution);
+        }
+
+        /// <inheritdoc/>
+        public bool TryResolve()
+        {
+            if (_a.IsFixed && !_b.IsFixed)
+                return _b.Fix(_a.Value);
+            if (_b.IsFixed && !_a.IsFixed)
+                return _a.Fix(_b.Value);
+            return false;
         }
 
         /// <summary>

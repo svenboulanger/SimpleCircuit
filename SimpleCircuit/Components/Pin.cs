@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Contributions;
-using SimpleCircuit.Contributions.Contributors;
+﻿using SimpleCircuit.Contributors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +13,16 @@ namespace SimpleCircuit.Components
     {
         private readonly string[] _names;
         private readonly double _angle;
-        private readonly IContributor _sx, _sy, _a;
+        private readonly Contributor _sx, _sy, _a;
 
         /// <inheritdoc/>
         public IComponent Parent { get; }
 
         /// <inheritdoc/>
-        public IContributor X { get; }
+        public Contributor X { get; }
 
         /// <inheritdoc/>
-        public IContributor Y { get; }
+        public Contributor Y { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pin2D"/> class.
@@ -33,7 +32,7 @@ namespace SimpleCircuit.Components
         /// <param name="angle">The angle.</param>
         /// <param name="names">The names.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="parent"/> or <paramref name="names"/> is <c>null</c>.</exception>
-        public Pin(IComponent parent, IContributor cx, IContributor cy, IContributor sx, IContributor sy, IContributor a, Vector2 relative, double angle, string[] names)
+        public Pin(IComponent parent, Contributor cx, Contributor cy, Contributor sx, Contributor sy, Contributor a, Vector2 relative, double angle, string[] names)
         {
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             _names = names ?? throw new ArgumentNullException(nameof(names));
@@ -46,7 +45,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc/>
-        public IContributor Projection(Vector2 normal) => new ProjectionContributor(_sx, _sy, _a, _angle, normal);
+        public Contributor Projection(Vector2 normal) => new ProjectionContributor(_sx, _sy, _a, _angle, normal);
 
         /// <inheritdoc/>
         public bool Is(string name, IEqualityComparer<string> comparer = null)

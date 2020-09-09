@@ -1,26 +1,28 @@
 ﻿using SimpleCircuit.Algebra;
+using SimpleCircuit.Contributions;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Contributions
+namespace SimpleCircuit.Contributors
 {
     /// <summary>
     /// A contributor for an unknown that represents the unknown itself.
     /// </summary>
-    /// <seealso cref="IContributor" />
-    public class DirectContributor : IContributor
+    /// <seealso cref="Contributor" />
+    public class DirectContributor : Contributor
     {
         private readonly string _name;
         private double _fixedValue;
+        private bool _isFixed;
         private IContribution _contribution;
 
         /// <inheritdoc/>
-        public UnknownTypes Type { get; }
+        public override UnknownTypes Type { get; }
 
         /// <inheritdoc/>
-        public double Value => IsFixed ? _fixedValue : _contribution?.Value ?? 0.0;
+        public override double Value => IsFixed ? _fixedValue : _contribution?.Value ?? 0.0;
 
         /// <inheritdoc/>
-        public bool IsFixed { get; private set; }
+        public override bool IsFixed => _isFixed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DirectContributor"/> class.
@@ -32,30 +34,30 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
+        public override IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
             => _contribution = IsFixed ? 
                 (IContribution)new ConstantContribution(solver, row, _fixedValue, Type) :
                 (IContribution)new DirectContribution(solver, row, map.GetUnknown(this, Type), Type);
 
         /// <inheritdoc/>
-        public void Reset()
+        public override void Reset()
         {
-            IsFixed = false;
+            _isFixed = false;
             _contribution = null;
         }
 
         /// <inheritdoc/>
-        public bool Fix(double value)
+        public override bool Fix(double value)
         {
             if (IsFixed)
                 return false;
             _fixedValue = value;
-            IsFixed = true;
+            _isFixed = true;
             return true;
         }
 
         /// <inheritdoc/>
-        public IEnumerable<int> GetUnknowns(UnknownSolverMap map)
+        public override IEnumerable<int> GetUnknowns(UnknownSolverMap map)
         {
             if (map.TryGetIndex(this, Type, out var index))
                 yield return index;

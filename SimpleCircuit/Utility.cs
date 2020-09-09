@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Contributions;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace SimpleCircuit
 {
@@ -43,14 +42,5 @@ namespace SimpleCircuit
             var tol = Math.Max(Math.Abs(a), Math.Abs(b)) * 1e-9;
             return Math.Abs(a - b) < tol;
         }
-
-        public static ConstantContributor X(this double value) => new ConstantContributor(UnknownTypes.X, value);
-        public static ConstantContributor Y(this double value) => new ConstantContributor(UnknownTypes.Y, value);
-        public static ConstantContributor A(this double value) => new ConstantContributor(UnknownTypes.Angle, value);
-        public static ConstantContributor SX(this double value) => new ConstantContributor(UnknownTypes.ScaleX, value);
-        public static ConstantContributor SY(this double value) => new ConstantContributor(UnknownTypes.ScaleY, value);
-        public static ConstantContributor Scalar(this double value) => new ConstantContributor(UnknownTypes.Scalar, value);
-        public static IContributor Add(this IContributor b, double value) => new OffsetContributor(b, value, b.Type);
-        public static IContributor Subtract(this IContributor b, double value) => new OffsetContributor(b, -value, b.Type);
     }
 }

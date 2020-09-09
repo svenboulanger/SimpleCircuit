@@ -1,23 +1,23 @@
 ﻿using SimpleCircuit.Algebra;
-using System.Collections;
+using SimpleCircuit.Contributions;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Contributions
+namespace SimpleCircuit.Contributors
 {
     /// <summary>
     /// A contributor for a constant value.
     /// </summary>
-    /// <seealso cref="IContributor" />
-    public class ConstantContributor : IContributor
+    /// <seealso cref="Contributor" />
+    public class ConstantContributor : Contributor
     {
         /// <inheritdoc/>
-        public UnknownTypes Type { get; }
+        public override UnknownTypes Type { get; }
 
         /// <inheritdoc/>
-        public double Value { get; }
+        public override double Value { get; }
 
         /// <inheritdoc/>
-        public bool IsFixed => true;
+        public override bool IsFixed => true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConstantContributor"/> class.
@@ -30,20 +30,20 @@ namespace SimpleCircuit.Contributions
         }
 
         /// <inheritdoc/>
-        public IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
+        public override IContribution CreateContribution(ISparseSolver<double> solver, int row, UnknownSolverMap map)
             => new ConstantContribution(solver, row, Value, Type);
 
         /// <inheritdoc/>
-        public IEnumerable<int> GetUnknowns(UnknownSolverMap map)
+        public override IEnumerable<int> GetUnknowns(UnknownSolverMap map)
         {
             yield break;
         }
 
         /// <inheritdoc/>
-        public bool Fix(double value) => false;
+        public override bool Fix(double value) => false;
 
         /// <inheritdoc/>
-        public void Reset() { }
+        public override void Reset() { }
 
         /// <summary>
         /// Converts to string.
