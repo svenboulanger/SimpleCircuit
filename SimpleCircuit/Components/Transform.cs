@@ -26,6 +26,15 @@ namespace SimpleCircuit.Components
             _a22 = _a11;
         }
 
+        public Transform(double x, double y, Vector2 nx, Vector2 ny)
+        {
+            _origin = new Vector2(x, y);
+            _a11 = nx.X;
+            _a21 = nx.Y;
+            _a12 = ny.X;
+            _a22 = ny.Y;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Transform"/> struct.
         /// </summary>

@@ -15,6 +15,22 @@ namespace SimpleCircuit
         private readonly Bounds _bounds;
         private readonly XmlDocument _document;
 
+        /// <summary>
+        /// Gets the height of a line of text.
+        /// </summary>
+        /// <value>
+        /// The height of a line of text.
+        /// </value>
+        public double LineHeight { get; set; } = 5.0;
+
+        /// <summary>
+        /// Gets or sets the width of a character.
+        /// </summary>
+        /// <value>
+        /// The width of the character.
+        /// </value>
+        public double CharacterWidth { get; set; } = 3.0;
+
         public enum Extend
         {
             Left,
@@ -207,51 +223,96 @@ namespace SimpleCircuit
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
+            var lines = value.Split(new char[] { '\r', '\n', '\\' });
+            var width = 0.0;
+            foreach (var l in lines)
+                width = Math.Max(width, l.Length * CharacterWidth);
+            var height = lines.Length * LineHeight;
+
             var text = _document.CreateElement("text");
             text.SetAttribute("x", Convert(location.X));
             text.SetAttribute("y", Convert(location.Y));
 
+            // Expand the X-direction
             List<string> styles = new List<string>();
             if (expand.X.IsZero())
             {
                 styles.Add("text-anchor: middle;");
-                _bounds.Expand(location - new Vector2(value.Length * 5, 0));
-                _bounds.Expand(location + new Vector2(value.Length * 5, 0));
+                _bounds.Expand(location - new Vector2(width / 2, 0));
+                _bounds.Expand(location + new Vector2(width / 2, 0));
             }
             else if (expand.X > 0)
             {
                 styles.Add("text-anchor: start;");
                 _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(value.Length * 10, 0));
+                _bounds.Expand(location + new Vector2(width, 0));
             }
             else
             {
                 styles.Add("text-anchor: end;");
-                _bounds.Expand(location - new Vector2(value.Length * 10, 0));
+                _bounds.Expand(location - new Vector2(width, 0));
                 _bounds.Expand(location);
             }
+
+            // Draw the text with multiple lines
             if (expand.Y.IsZero())
             {
                 styles.Add("dominant-baseline: middle;");
-                _bounds.Expand(location - new Vector2(0, 5));
-                _bounds.Expand(location + new Vector2(0, 5));
+                _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length / 2));
+                _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length / 2));
+
+                // Center everything
+                var dy = -(height - LineHeight) * 0.5;
+                foreach (var l in lines)
+                {
+                    var tspan = _document.CreateElement("tspan");
+                    tspan.InnerText = l;
+                    tspan.SetAttribute("y", Convert(location.Y + dy));
+                    tspan.SetAttribute("x", Convert(location.X));
+                    text.AppendChild(tspan);
+                    dy += LineHeight;
+                }
+
             }
             else if (expand.Y > 0)
             {
                 styles.Add("dominant-baseline: hanging;");
                 _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(0, 10));
+                _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length));
+
+                // Make sure everything is below
+                double dy = 0;
+                foreach (var l in lines)
+                {
+                    var tspan = _document.CreateElement("tspan");
+                    tspan.InnerText = l;
+                    tspan.SetAttribute("y", Convert(location.Y + dy));
+                    tspan.SetAttribute("x", Convert(location.X));
+                    text.AppendChild(tspan);
+                    dy += LineHeight;
+                }
             }
             else
             {
                 styles.Add("dominant-baseline: auto;");
-                _bounds.Expand(location - new Vector2(0, 10));
+                _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length));
                 _bounds.Expand(location);
+
+                // Make sure everything is above
+                double dy = -height + LineHeight;
+                foreach (var l in lines)
+                {
+                    var tspan = _document.CreateElement("tspan");
+                    tspan.InnerText = l;
+                    tspan.SetAttribute("y", Convert(location.Y + dy));
+                    tspan.SetAttribute("x", Convert(location.X));
+                    text.AppendChild(tspan);
+                    dy += LineHeight;
+                }
             }
             text.SetAttribute("style", string.Join(" ", styles));
             if (!string.IsNullOrWhiteSpace(classes))
                 text.SetAttribute("class", classes);
-            text.InnerText = value;
             _current.AppendChild(text);
         }
 

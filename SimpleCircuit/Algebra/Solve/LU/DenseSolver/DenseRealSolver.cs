@@ -45,8 +45,6 @@ namespace SimpleCircuit.Algebra
         public void Solve(IVector<double> solution, int size)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException();
             if (solution.Length != Size)
                 throw new ArgumentException();
 
@@ -89,8 +87,6 @@ namespace SimpleCircuit.Algebra
         public void SolveTransposed(IVector<double> solution, int steps)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException();
             if (solution.Length != Size)
                 throw new ArgumentException();
 

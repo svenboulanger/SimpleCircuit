@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
-using SimpleCircuit.Constraints;
-using SimpleCircuit.Contributors;
+using SimpleCircuit.Functions;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
@@ -15,8 +14,6 @@ namespace SimpleCircuit
     /// </summary>
     public class SimpleCircuitParser
     {
-        private static readonly Contributor _one = new ConstantContributor(UnknownTypes.Scalar, 1.0);
-
         /// <summary>
         /// Gets the factory that is used by parsers to create components based on their name.
         /// </summary>
@@ -33,9 +30,9 @@ namespace SimpleCircuit
         private class ComponentNode
         {
             public readonly IComponent Component;
-            public readonly IPin PinBefore;
-            public readonly IPin PinAfter;
-            public ComponentNode(IComponent component, IPin pinBefore, IPin pinAfter)
+            public readonly Pin PinBefore;
+            public readonly Pin PinAfter;
+            public ComponentNode(IComponent component, Pin pinBefore, Pin pinAfter)
             {
                 Component = component ?? throw new ArgumentNullException(nameof(component));
                 PinBefore = pinBefore;
@@ -81,9 +78,9 @@ namespace SimpleCircuit
                         if (!match.Success)
                             throw new Exception($"Could not parse component {it.Current}.");
                         var component = GetComponent(ckt, match.Groups["name"].Value);
-                        IPin pin = null;
+                        Pin pin = null;
                         if (match.Groups["pin"].Success)
-                            pin = component.Pins.First(p => p.Is(match.Groups["pin"].Value));
+                            pin = component.Pins[match.Groups["pin"].Value];
                         nodes.Add(new ComponentNode(component, null, pin));
                     }
                     switch (dir)
@@ -98,14 +95,14 @@ namespace SimpleCircuit
 
         private void AlignX(Circuit ckt, IEnumerable<ComponentNode> nodes)
         {
-            Contributor refX = null;
+            Function refX = null;
             foreach (var node in nodes)
             {
-                Contributor toFix;
+                Function toFix = null;
                 if (node.PinAfter != null)
                     toFix = node.PinAfter.X;
                 else
-                    toFix = node.Component.Contributors.First(c => c.Type == UnknownTypes.X);
+                    toFix = node.Component.X;
 
                 if (refX == null)
                     refX = toFix;
@@ -113,7 +110,7 @@ namespace SimpleCircuit
                 {
                     if (toFix != null)
                     {
-                        ckt.AddConstraint(new EqualsConstraint(refX, toFix));
+                        ckt.Add(refX - toFix);
                         refX = toFix;
                     }
                 }
@@ -122,14 +119,14 @@ namespace SimpleCircuit
 
         private void AlignY(Circuit ckt, IEnumerable<ComponentNode> nodes)
         {
-            Contributor refY = null;
+            Function refY = null;
             foreach (var node in nodes)
             {
-                Contributor toFix;
+                Function toFix;
                 if (node.PinAfter != null)
                     toFix = node.PinAfter.Y;
                 else
-                    toFix = node.Component.Contributors.First(c => c.Type == UnknownTypes.Y);
+                    toFix = node.Component.Y;
 
                 if (refY == null)
                     refY = toFix;
@@ -137,7 +134,7 @@ namespace SimpleCircuit
                 {
                     if (toFix != null)
                     {
-                        ckt.AddConstraint(new EqualsConstraint(refY, toFix));
+                        ckt.Add(refY - toFix);
                         refY = toFix;
                     }
                 }
@@ -181,8 +178,8 @@ namespace SimpleCircuit
             var component = GetComponent(ckt, name);
 
             // Add the component to the circuit and return the component pin
-            var pin1 = match.Groups["pin1"].Success ? component.Pins.First(p => p.Is(match.Groups["pin1"].Value)) : null;
-            var pin2 = match.Groups["pin2"].Success ? component.Pins.First(p => p.Is(match.Groups["pin2"].Value)) : null;
+            var pin1 = match.Groups["pin1"].Success ? component.Pins[match.Groups["pin1"].Value] : null;
+            var pin2 = match.Groups["pin2"].Success ? component.Pins[match.Groups["pin2"].Value] : null;
             return new ComponentNode(component, pin1, pin2);
         }
 
@@ -265,8 +262,8 @@ namespace SimpleCircuit
                 throw new ArgumentException("Invalid wire description.");
 
             // Draw all wires
-            IComponent nextComponent;
-            IPin lastPin = start.PinAfter ?? start.Component.Pins.Last(), nextPin;
+            IComponent nextComponent = null, lastComponent = start.Component;
+            Pin lastPin = start.PinAfter ?? start.Component.Pins[start.Component.Pins.Count - 1], nextPin;
             for (var i = 0; i < wires; i++)
             {
                 if (i < wires - 1)
@@ -277,6 +274,7 @@ namespace SimpleCircuit
                 }
                 else
                 {
+                    nextComponent = end.Component;
                     nextPin = end.PinBefore ?? end.PinAfter ?? end.Component.Pins[0];
                 }
 
@@ -284,70 +282,70 @@ namespace SimpleCircuit
                 // Use the information to constrain the elements surrounding it
                 var dir = match.Groups["dir"].Captures[i].Value;
                 var l = match.Groups["length"].Captures[i].Value;
-                Contributor definition = null;
+                var w = new Wire($"W{++_anonWireIndex}", lastPin, nextPin);
 
                 switch (dir)
                 {
                     case "u":
                     case "n":
                     case "t":
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Projection(new Vector2(0, -1)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(nextPin.Projection(new Vector2(0, 1)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.X, nextPin.X));
-                        definition = lastPin.Y - nextPin.Y;
+                        ckt.Add(lastPin.NormalX);
+                        ckt.Add(lastPin.NormalY + 1);
+                        ckt.Add(nextPin.NormalX);
+                        ckt.Add(nextPin.NormalY - 1);
+                        ckt.Add(lastPin.X - nextPin.X);
+                        ckt.Add(lastPin.Y - nextPin.Y - w.Length);
                         break;
                     case "d":
                     case "b":
                     case "s":
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Projection(new Vector2(0, 1)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(nextPin.Projection(new Vector2(0, -1)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.X, nextPin.X));
-                        definition = nextPin.Y - lastPin.Y;
+                        ckt.Add(lastPin.NormalX);
+                        ckt.Add(lastPin.NormalY - 1);
+                        ckt.Add(nextPin.NormalX);
+                        ckt.Add(nextPin.NormalY + 1);
+                        ckt.Add(lastPin.X - nextPin.X);
+                        ckt.Add(nextPin.Y - lastPin.Y - w.Length);
                         break;
                     case "l":
                     case "w":
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Projection(new Vector2(-1, 0)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(nextPin.Projection(new Vector2(1, 0)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Y, nextPin.Y));
-                        definition = lastPin.X - nextPin.X;
+                        ckt.Add(lastPin.NormalX + 1);
+                        ckt.Add(lastPin.NormalY);
+                        ckt.Add(nextPin.NormalX - 1);
+                        ckt.Add(nextPin.NormalY);
+                        ckt.Add(lastPin.Y - nextPin.Y);
+                        ckt.Add(lastPin.X - nextPin.X - w.Length);
                         break;
                     case "r":
                     case "e":
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Projection(new Vector2(1, 0)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(nextPin.Projection(new Vector2(-1, 0)), _one));
-                        ckt.AddConstraint(new EqualsConstraint(lastPin.Y, nextPin.Y));
-                        definition = nextPin.X - lastPin.X;
+                        ckt.Add(lastPin.NormalX - 1);
+                        ckt.Add(lastPin.NormalY);
+                        ckt.Add(nextPin.NormalX + 1);
+                        ckt.Add(nextPin.NormalY);
+                        ckt.Add(lastPin.Y - nextPin.Y);
+                        ckt.Add(nextPin.X - lastPin.X - w.Length);
                         break;
                 }
 
                 // Add the wire to the circuit
-                var wire = new Wire($"W{++_anonWireIndex}", lastPin, nextPin, definition);
                 if (l.Length > 0)
-                    ckt.AddConstraint(new EqualsConstraint(wire.Length, new ConstantContributor(UnknownTypes.Length, double.Parse(l))));
-                ckt.Wires.Add(wire);
+                    ckt.Add(w.Length - double.Parse(l));
+                ckt.Wires.Add(w);
+
+                // Count wires to a point
+                if (lastComponent is Point ptl)
+                    ptl.Wires++;
+                if (nextComponent is Point ptn)
+                    ptn.Wires++;
 
                 // Go to the next component
                 lastPin = nextPin;
+                lastComponent = nextComponent;
             }
             return end;
         }
         private IEnumerable<string> GetTokens(string line)
         {
             return line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        /// <summary>
-        /// Constrains two contributors together.
-        /// </summary>
-        /// <param name="ckt">The circuit to apply the constraint to.</param>
-        /// <param name="a">The first contributor.</param>
-        /// <param name="b">The second contributor.</param>
-        public void Constrain(Circuit ckt, Contributor a, Contributor b)
-        {
-            // Cannot constrain what doesn't exist
-            if (a == null || b == null)
-                return;
-            ckt.AddConstraint(new EqualsConstraint(a, b));
         }
     }
 }

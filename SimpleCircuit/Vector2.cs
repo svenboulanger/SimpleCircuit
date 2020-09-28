@@ -24,6 +24,14 @@ namespace SimpleCircuit
         public double Y { get; }
 
         /// <summary>
+        /// Gets the vector that is perpendicular and of the same length.
+        /// </summary>
+        /// <value>
+        /// The perpendicular vector.
+        /// </value>
+        public Vector2 Perpendicular => new Vector2(-Y, X);
+
+        /// <summary>
         /// Gets the length of the vector.
         /// </summary>
         /// <value>
@@ -124,6 +132,7 @@ namespace SimpleCircuit
             return $"({X:G4}, {Y:G4})";
         }
 
+        public static Vector2 operator -(Vector2 a) => new Vector2(-a.X, -a.Y);
         public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
         public static Vector2 operator -(Vector2 a, Vector2 b) => new Vector2(a.X - b.X, a.Y - b.Y);
         public static Vector2 operator *(Vector2 a, double f) => new Vector2(a.X * f, a.Y * f);

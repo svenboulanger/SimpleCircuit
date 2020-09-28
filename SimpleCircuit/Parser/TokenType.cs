@@ -11,6 +11,7 @@
         Whitespace,
         Word,
         Number,
+        String,
         Newline,
         OpenBracket,
         CloseBracket,

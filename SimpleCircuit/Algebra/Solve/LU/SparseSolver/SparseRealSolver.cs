@@ -46,8 +46,6 @@ namespace SimpleCircuit.Algebra
         public override void Solve(IVector<double> solution)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException("The solver was not fully factored.");
             if (solution.Length != Size)
                 throw new ArgumentException();
             if (_intermediate == null || _intermediate.Length != Size + 1)
@@ -112,8 +110,6 @@ namespace SimpleCircuit.Algebra
         public override void SolveTransposed(IVector<double> solution)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException();
             if (solution.Length != Size)
                 throw new ArgumentException();
 

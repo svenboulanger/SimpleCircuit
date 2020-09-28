@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Contributions;
-using System;
+﻿using System;
 
 namespace SimpleCircuit
 {
@@ -41,6 +40,14 @@ namespace SimpleCircuit
         {
             var tol = Math.Max(Math.Abs(a), Math.Abs(b)) * 1e-9;
             return Math.Abs(a - b) < tol;
+        }
+
+        public static void Error(string msg)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(msg);
+            Console.ForegroundColor = color;
         }
     }
 }

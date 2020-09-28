@@ -1,68 +1,55 @@
-﻿using SimpleCircuit.Contributors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using SimpleCircuit.Functions;
 
 namespace SimpleCircuit.Components
 {
-    /// <summary>
-    /// A pin that is fixed to a parent component.
-    /// </summary>
-    /// <seealso cref="IPin" />
-    public class Pin : IPin
+    public class Pin
     {
-        private readonly string[] _names;
-        private readonly double _angle;
-        private readonly Contributor _sx, _sy, _a;
-
-        /// <inheritdoc/>
-        public IComponent Parent { get; }
-
-        /// <inheritdoc/>
-        public Contributor X { get; }
-
-        /// <inheritdoc/>
-        public Contributor Y { get; }
+        /// <summary>
+        /// Gets the x-coordinate of the pin.
+        /// </summary>
+        /// <value>
+        /// The x.
+        /// </value>
+        public Function X { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Pin2D"/> class.
+        /// Gets the y-coordinate of the pin.
         /// </summary>
-        /// <param name="parent">The parent.</param>
-        /// <param name="relative">The relative.</param>
-        /// <param name="angle">The angle.</param>
-        /// <param name="names">The names.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="parent"/> or <paramref name="names"/> is <c>null</c>.</exception>
-        public Pin(IComponent parent, Contributor cx, Contributor cy, Contributor sx, Contributor sy, Contributor a, Vector2 relative, double angle, string[] names)
-        {
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            _names = names ?? throw new ArgumentNullException(nameof(names));
-            X = new OffsetXContributor(cx, sx, sy, a, relative);
-            Y = new OffsetYContributor(cy, sx, sy, a, relative);
-            _angle = angle;
-            _sx = sx;
-            _sy = sy;
-            _a = a;
-        }
-
-        /// <inheritdoc/>
-        public Contributor Projection(Vector2 normal) => new ProjectionContributor(_sx, _sy, _a, _angle, normal);
-
-        /// <inheritdoc/>
-        public bool Is(string name, IEqualityComparer<string> comparer = null)
-        {
-            comparer = comparer ?? EqualityComparer<string>.Default;
-            return _names.Any(n => comparer.Equals(n, name));
-        }
+        /// <value>
+        /// The y.
+        /// </value>
+        public Function Y { get; }
 
         /// <summary>
-        /// Converts to string.
+        /// Gets the normal x-coordinate.
         /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public override string ToString()
+        /// <value>
+        /// The normal x.
+        /// </value>
+        public Function NormalX { get; }
+
+        /// <summary>
+        /// Gets the normal y.
+        /// </summary>
+        /// <value>
+        /// The normal y.
+        /// </value>
+        public Function NormalY { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Pin"/> class.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <param name="nx">The nx.</param>
+        /// <param name="ny">The ny.</param>
+        public Pin(Function x, Function y, Function nx, Function ny)
         {
-            return $"{Parent}.{(_names != null && _names.Length > 0 ? _names[0] : "?")}";
+            X = x ?? throw new ArgumentNullException(nameof(x));
+            Y = y ?? throw new ArgumentNullException(nameof(y));
+            NormalX = nx ?? throw new ArgumentNullException(nameof(nx));
+            NormalY = ny ?? throw new ArgumentNullException(nameof(ny));
         }
     }
 }

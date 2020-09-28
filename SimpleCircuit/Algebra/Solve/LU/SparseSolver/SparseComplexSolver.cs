@@ -27,8 +27,6 @@ namespace SimpleCircuit.Algebra
         public override void Solve(IVector<Complex> solution)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException();
             if (solution.Length != Size)
                 throw new ArgumentException();
 
@@ -94,8 +92,6 @@ namespace SimpleCircuit.Algebra
         public override void SolveTransposed(IVector<Complex> solution)
         {
             solution.ThrowIfNull(nameof(solution));
-            if (!IsFactored)
-                throw new AlgebraException();
             if (solution.Length != Size)
                 throw new ArgumentException();
             if (_intermediate == null || _intermediate.Length != Size + 1)

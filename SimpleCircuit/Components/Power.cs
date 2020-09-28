@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Contributors;
-using System;
-using System.Collections.Generic;
+﻿using SimpleCircuit.Functions;
 
 namespace SimpleCircuit.Components
 {
@@ -11,7 +9,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("POW")]
     public class Power : IComponent
     {
-        private readonly Contributor _x, _y, _a;
+        private readonly Unknown _x, _y, _nx, _ny;
 
         /// <inheritdoc/>
         public string Name { get; }
@@ -24,11 +22,13 @@ namespace SimpleCircuit.Components
         /// </value>
         public string Label { get; set; }
 
-        /// <inheritdoc/>
-        public IReadOnlyList<IPin> Pins { get; }
+        public Function X => _x;
+        public Function Y => _y;
+        public Function NormalX => _nx;
+        public Function NormalY => _ny;
+        public Function MirrorScale => 1.0;
 
-        /// <inheritdoc/>
-        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y, _a };
+        public PinCollection Pins { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
@@ -36,23 +36,32 @@ namespace SimpleCircuit.Components
         public Power(string name)
         {
             Name = name;
-            _x = new DirectContributor(name + ".X", UnknownTypes.X);
-            _y = new DirectContributor(name + ".Y", UnknownTypes.Y);
-            _a = new DirectContributor(name + ".A", UnknownTypes.Angle);
-            Pins = new[]
-            {
-                new Pin(this, _x, _y, new ConstantContributor(UnknownTypes.ScaleX, 1.0), new ConstantContributor(UnknownTypes.ScaleY, 1.0), _a, new Vector2(), -Math.PI / 2, new[] { ".", "a" })
-            };
+            _x = new Unknown(name + ".x", UnknownTypes.X);
+            _y = new Unknown(name + ".y", UnknownTypes.Y);
+            _nx = new Unknown(name + ".nx", UnknownTypes.NormalX);
+            _ny = new Unknown(name + ".ny", UnknownTypes.NormalY);
+            Pins = new PinCollection(this);
+            Pins.Add(new[] { ".", "a" }, new Vector2(), new Vector2(0, -1));
         }
 
         /// <inheritdoc/>
         public void Render(SvgDrawing drawing)
         {
-            var tf = new Transform(_x.Value, _y.Value, _a.Value);
+            var normal = new Vector2(_nx.Value, _ny.Value);
+            var tf = new Transform(_x.Value, _y.Value, normal, normal.Perpendicular);
             drawing.Line(tf.Apply(new Vector2(0, 0)), tf.Apply(new Vector2(0, 3)));
             drawing.Line(tf.Apply(new Vector2(-5, 3)), tf.Apply(new Vector2(5, 3)), "plane");
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, tf.Apply(new Vector2(0, 6)), tf.ApplyDirection(new Vector2(0, 1)));
+        }
+
+        /// <summary>
+        /// Applies some functions to the minimizer if necessary.
+        /// </summary>
+        /// <param name="minimizer">The minimizer.</param>
+        public void Apply(Minimizer minimizer)
+        {
+            minimizer.Minimize += new Squared(_x) + new Squared(_y) + new Squared(_nx) + new Squared(_ny - 1);
         }
 
         /// <summary>

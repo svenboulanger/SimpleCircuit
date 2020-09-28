@@ -1,6 +1,5 @@
-﻿using SimpleCircuit.Contributors;
+﻿using SimpleCircuit.Functions;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -11,7 +10,7 @@ namespace SimpleCircuit.Components
     [SimpleKey("Mp")]
     public class Pmos : IComponent
     {
-        private readonly Contributor _x, _y, _sx, _sy, _a;
+        private readonly Unknown _x, _y, _nx, _ny, _s;
 
         /// <inheritdoc />
         public string Name { get; }
@@ -24,6 +23,12 @@ namespace SimpleCircuit.Components
         /// </value>
         public string Label { get; set; }
 
+        public Function X => _x;
+        public Function Y => _y;
+        public Function NormalX => _nx;
+        public Function NormalY => _ny;
+        public Function MirrorScale => _s;
+
         /// <summary>
         /// Gets or sets a value indicating whether the bulk contact should be rendered.
         /// </summary>
@@ -32,11 +37,7 @@ namespace SimpleCircuit.Components
         /// </value>
         public bool ShowBulk { get; set; } = false;
 
-        /// <inheritdoc />
-        public IReadOnlyList<IPin> Pins { get; }
-
-        /// <inheritdoc />
-        public IEnumerable<Contributor> Contributors => new Contributor[] { _x, _y, _sx, _sy, _a };
+        public PinCollection Pins { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Nmos"/> class.
@@ -44,47 +45,56 @@ namespace SimpleCircuit.Components
         /// <param name="name"></param>
         public Pmos(string name)
         {
-            Name = name;
-            _x = new DirectContributor(name + ".X", UnknownTypes.X);
-            _y = new DirectContributor(name + ".Y", UnknownTypes.Y);
-            _sx = new DirectContributor(name + ".SX", UnknownTypes.ScaleX);
-            _sy = new ConstantContributor(UnknownTypes.ScaleY, 1.0);
-            _a = new DirectContributor(name + ".A", UnknownTypes.Angle);
-            Pins = new[]
-            {
-                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, -8), -Math.PI / 2, new[] { "s", "source" }),
-                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(-11, 0), Math.PI, new[] { "g", "gate" }),
-                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, 0), 0, new[] { "b", "bulk" }),
-                new Pin(this, _x, _y, _sx, _sy, _a, new Vector2(0, 8), Math.PI / 2, new[] { "d", "drain" }),
-            };
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            _x = new Unknown(name + ".x", UnknownTypes.X);
+            _y = new Unknown(name + ".y", UnknownTypes.Y);
+            _nx = new Unknown(name + ".nx", UnknownTypes.NormalX);
+            _ny = new Unknown(name + ".ny", UnknownTypes.NormalY);
+            _s = new Unknown(name + ".s", UnknownTypes.MirrorScale);
+            Pins = new PinCollection(this);
+            Pins.Add(new[] { "s", "source" }, new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "g", "gate" }, new Vector2(0, 11), new Vector2(0, 1));
+            Pins.Add(new[] { "b", "bulk" }, new Vector2(0, 0), new Vector2(0, -1));
+            Pins.Add(new[] { "d", "drain" }, new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
         public void Render(SvgDrawing drawing)
         {
-            var tf = new Transform(_x.Value, _y.Value, _sx.Value, _sy.Value, _a.Value);
+            var normal = new Vector2(_nx.Value, _ny.Value);
+            var tf = new Transform(_x.Value, _y.Value, normal, normal.Perpendicular * _s.Value);
             drawing.Segments(tf.Apply(new[]
             {
-                new Vector2(-11, 0), new Vector2(-9, 0),
-                new Vector2(-6, 6), new Vector2(-6, -6),
-                new Vector2(-4, 6), new Vector2(-4, -6)
+                new Vector2(0, 11), new Vector2(0, 9),
+                new Vector2(-6, 6), new Vector2(6, 6),
+                new Vector2(-6, 4), new Vector2(6, 4)
             }));
-            drawing.Circle(tf.Apply(new Vector2(-7.5, 0)), 1.5);
+            drawing.Circle(tf.Apply(new Vector2(0, 7.5)), 1.5);
 
             drawing.Poly(tf.Apply(new[]
             {
-                new Vector2(-4, 4), new Vector2(0, 4), new Vector2(0, 8)
+                new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4)
             }));
             drawing.Poly(tf.Apply(new[]
             {
-                new Vector2(-4, -4), new Vector2(0, -4), new Vector2(0, -8)
+                new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4)
             }));
 
             if (ShowBulk)
-                drawing.Line(tf.Apply(new Vector2(-4, 0)), tf.Apply(new Vector2(0, 0)));
+                drawing.Line(tf.Apply(new Vector2(0, 4)), tf.Apply(new Vector2(0, 0)));
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(4, 4)), tf.ApplyDirection(new Vector2(1, 1)));
+                drawing.Text(Label, tf.Apply(new Vector2(2, -2)), tf.ApplyDirection(new Vector2(1, -1)));
+        }
+
+        /// <summary>
+        /// Applies some functions to the minimizer if necessary.
+        /// </summary>
+        /// <param name="minimizer">The minimizer.</param>
+        public void Apply(Minimizer minimizer)
+        {
+            minimizer.Minimize += new Squared(_x) + new Squared(_y) + new Squared(_nx) + new Squared(_ny - 1);
+            minimizer.AddConstraint(new Squared(_s) - 1);
         }
     }
 }

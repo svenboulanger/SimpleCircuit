@@ -28,15 +28,6 @@ namespace SimpleCircuit.Algebra
         int Size { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this solver has been factored.
-        /// A solver needs to be factored becore it can solve for a solution.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if this solver is factored; otherwise, <c>false</c>.
-        /// </value>
-        bool IsFactored { get; }
-
-        /// <summary>
         /// Gets or sets the value of the matrix at the specified row and column.
         /// </summary>
         /// <value>

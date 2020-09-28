@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace SimpleCircuit.Parser
 {
@@ -95,12 +96,14 @@ namespace SimpleCircuit.Parser
                     return TokenType.Plus;
                 case '(':
                 case '[':
+                case '<':
                     content = c.ToString();
                     _index++;
                     Position++;
                     return TokenType.OpenBracket;
                 case ')':
                 case ']':
+                case '>':
                     content = c.ToString();
                     _index++;
                     Position++;
@@ -120,6 +123,11 @@ namespace SimpleCircuit.Parser
                     ReadWhitespace();
                     content = _tokenBuilder.ToString();
                     return TokenType.Whitespace;
+                case '"':
+                    
+                    ReadString();
+                    content = _tokenBuilder.ToString();
+                    return TokenType.String;
                 default:
                     throw new LexerException($"Unrecognized character '{c}' at line {Line}, position {Position}.");
             }
@@ -209,6 +217,22 @@ namespace SimpleCircuit.Parser
             var c = _input[_index];
             while (c == ' ' || c == '\t')
                 c = Store(c);
+        }
+        private void ReadString()
+        {
+            _tokenBuilder.Clear();
+            var c = _input[_index];
+            c = Store(c);
+            while (c != '\"' && c != '\0')
+            {
+                if (c == '\\')
+                    c = Store(c);
+                c = Store(c);
+            }
+            if (c == '\"')
+                Store(c);
+            else
+                throw new LexerException("Lexer error: Expected closing quote.");
         }
         private char Store(char c)
         {

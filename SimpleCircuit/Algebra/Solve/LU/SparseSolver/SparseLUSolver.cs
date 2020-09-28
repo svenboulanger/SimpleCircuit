@@ -58,7 +58,6 @@ namespace SimpleCircuit.Algebra.Solve
         /// <inheritdoc/>
         public override bool Factor()
         {
-            IsFactored = false;
             var order = Size - Degeneracy;
             for (var step = 1; step <= order; step++)
             {
@@ -69,14 +68,12 @@ namespace SimpleCircuit.Algebra.Solve
                     return false;
                 Eliminate(Matrix.FindDiagonalElement(step));
             }
-            IsFactored = true;
             return true;
         }
 
         /// <inheritdoc/>
         public override int OrderAndFactor()
         {
-            IsFactored = false;
             int step = 1;
             var order = Size - Degeneracy;
             int max = Size - PivotSearchReduction;
@@ -97,10 +94,7 @@ namespace SimpleCircuit.Algebra.Solve
                 }
 
                 if (!NeedsReordering)
-                {
-                    IsFactored = true;
                     return order;
-                }
             }
 
             // Setup the strategy for some real kick-ass pivoting action
@@ -119,7 +113,6 @@ namespace SimpleCircuit.Algebra.Solve
                 Eliminate(pivot.Element);
             }
 
-            IsFactored = true;
             NeedsReordering = false;
             return order;
         }

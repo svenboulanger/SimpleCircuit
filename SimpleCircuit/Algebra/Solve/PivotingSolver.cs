@@ -40,9 +40,6 @@ namespace SimpleCircuit.Algebra.Solve
         }
 
         /// <inheritdoc/>
-        public bool IsFactored { get; protected set; }
-
-        /// <inheritdoc/>
         public bool NeedsReordering { get; set; }
 
         /// <inheritdoc/>
@@ -117,7 +114,6 @@ namespace SimpleCircuit.Algebra.Solve
             Matrix = matrix;
             Vector = vector;
             NeedsReordering = true;
-            IsFactored = false;
         }
 
         /// <inheritdoc/>
@@ -158,7 +154,6 @@ namespace SimpleCircuit.Algebra.Solve
         {
             Matrix.Reset();
             Vector.Reset();
-            IsFactored = false;
         }
 
         /// <inheritdoc/>
@@ -168,7 +163,6 @@ namespace SimpleCircuit.Algebra.Solve
             Vector.Clear();
             Row.Clear();
             Column.Clear();
-            IsFactored = false;
             NeedsReordering = true;
             Degeneracy = 0;
         }

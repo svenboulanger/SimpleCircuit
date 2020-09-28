@@ -8,16 +8,6 @@
     <Compile Remove="Components\Component.cs" />
     <Compile Remove="Components\IPinDescription.cs" />
     <Compile Remove="Components\PinDescription.cs" />
-    <Compile Remove="Constraints\AngleConstraint.cs" />
-    <Compile Remove="Constraints\EqualConstraint.cs" />
-    <Compile Remove="Constraints\ExtendedPinConstraint.cs" />
-    <Compile Remove="Constraints\FixedAngleConstraint.cs" />
-    <Compile Remove="Constraints\FixedXConstraint.cs" />
-    <Compile Remove="Constraints\FixedYConstraint.cs" />
-    <Compile Remove="Constraints\OffsetContributions.cs" />
-    <Compile Remove="Constraints\VariableConstraint.cs" />
-    <Compile Remove="Constraints\XConstraint.cs" />
-    <Compile Remove="Constraints\YConstraint.cs" />
   </ItemGroup>
 
   <ItemGroup>

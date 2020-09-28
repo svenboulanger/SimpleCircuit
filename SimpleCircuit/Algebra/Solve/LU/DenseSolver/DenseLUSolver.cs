@@ -78,7 +78,6 @@ namespace SimpleCircuit.Algebra.Solve
                     return false;
                 Eliminate(step, size);
             }
-            IsFactored = true;
             return true;
         }
 
@@ -104,10 +103,7 @@ namespace SimpleCircuit.Algebra.Solve
                 }
 
                 if (!NeedsReordering)
-                {
-                    IsFactored = true;
                     return order;
-                }
             }
 
             for (; step <= order; step++)
@@ -119,7 +115,6 @@ namespace SimpleCircuit.Algebra.Solve
                 SwapColumns(pivot.Element.Column, step);
                 Eliminate(step, size);
             }
-            IsFactored = true;
             NeedsReordering = false;
             return order;
         }
