@@ -6,7 +6,7 @@ html, body {
     height: 100%;
 }
 
-div, form, textarea {
+textarea.full-height, div.full-height, form.full-height {
     height: 100%;
 }
 
