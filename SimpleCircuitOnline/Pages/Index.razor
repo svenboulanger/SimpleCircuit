@@ -39,6 +39,7 @@
     private string _code;
     private Timer _timer;
     private Task _task = null;
+    private SimpleCircuitParser _parser;
 
     protected override void OnInitialized()
     {
@@ -46,6 +47,7 @@
         _timer = new Timer(1000);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
+        _parser = new SimpleCircuitParser();
     }
 
     public string Code
@@ -73,14 +75,20 @@
 
     private void Render()
     {
-        var parser = new SimpleCircuitParser();
-        var ckt = parser.Parse(_code);
-        var doc = ckt.Render();
-
-        using var sw = new StringWriter();
-        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
-            doc.WriteTo(xml);
-        _svg = sw.ToString();
+        try
+        {
+            var ckt = _parser.Parse(_code);
+            var doc = ckt.Render();
+            using var sw = new StringWriter();
+            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+                doc.WriteTo(xml);
+            _svg = sw.ToString();
+            Console.WriteLine("Exported succesfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Something went wrong: " + ex.Message);
+        }
 
         // Force an update
         StateHasChanged();

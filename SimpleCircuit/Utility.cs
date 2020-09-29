@@ -2,6 +2,9 @@
 
 namespace SimpleCircuit
 {
+    /// <summary>
+    /// General helper methods.
+    /// </summary>
     public static class Utility
     {
         /// <summary>

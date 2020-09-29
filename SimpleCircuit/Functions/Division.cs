@@ -40,43 +40,24 @@ namespace SimpleCircuit.Functions
             }
         }
 
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
+        /// <inheritdoc/>
         public override double Value => _a.Value / _b.Value;
 
-        /// <summary>
-        /// Gets a flag that shows whether or not the function is a constant value.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> the function is constant; otherwise, <c>false</c>.
-        /// </value>
+        /// <inheritdoc/>
         public override bool IsConstant => _a.IsConstant && _b.IsConstant;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Division"/> class.
         /// </summary>
-        /// <param name="a">a.</param>
-        /// <param name="b">The b.</param>
-        /// <exception cref="ArgumentNullException">
-        /// a
-        /// or
-        /// b
-        /// </exception>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
         public Division(Function a, Function b)
         {
             _a = a ?? throw new ArgumentNullException(nameof(a));
             _b = b ?? throw new ArgumentNullException(nameof(b));
         }
 
-        /// <summary>
-        /// Sets up the function for the specified solver.
-        /// </summary>
-        /// <param name="coefficient">The coefficient.</param>
-        /// <param name="equations">The produced equations for each unknown.</param>
+        /// <inheritdoc/>
         public override void Differentiate(Function coefficient, Dictionary<Unknown, Function> equations)
         {
             if (coefficient == null)
@@ -95,15 +76,7 @@ namespace SimpleCircuit.Functions
             }
         }
 
-        /// <summary>
-        /// Creates a row equation at the specified row, in the specified solver.
-        /// </summary>
-        /// <param name="row">The row index.</param>
-        /// <param name="mapper">The mapper.</param>
-        /// <param name="solver">The solver.</param>
-        /// <returns>
-        /// The row equation.
-        /// </returns>
+        /// <inheritdoc/>
         public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver)
         {
             var a = _a.CreateEquation(row, mapper, solver);
@@ -111,13 +84,7 @@ namespace SimpleCircuit.Functions
             return new RowEquation(a, b, solver, row);
         }
 
-        /// <summary>
-        /// Tries to resolve unknowns.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if one ore more unknowns were resolved; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override bool Resolve(double value)
         {
             // value = a / b

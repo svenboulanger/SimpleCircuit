@@ -27,37 +27,22 @@ namespace SimpleCircuit.Functions
             }
         }
 
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
+        /// <inheritdoc/>
         public override double Value => -_a.Value;
 
-        /// <summary>
-        /// Gets a flag that shows whether or not the function is a constant value.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> the function is constant; otherwise, <c>false</c>.
-        /// </value>
+        /// <inheritdoc/>
         public override bool IsConstant => _a.IsConstant;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Negative"/> class.
         /// </summary>
-        /// <param name="a">a.</param>
-        /// <exception cref="ArgumentNullException">a</exception>
+        /// <param name="a">The first argument.</param>
         public Negative(Function a)
         {
             _a = a ?? throw new ArgumentNullException(nameof(a));
         }
 
-        /// <summary>
-        /// Sets up the function for the specified solver.
-        /// </summary>
-        /// <param name="coefficient">The coefficient.</param>
-        /// <param name="equations">The produced equations for each unknown.</param>
+        /// <inheritdoc/>
         public override void Differentiate(Function coefficient, Dictionary<Unknown, Function> equations)
         {
             if (_a.IsConstant)
@@ -68,24 +53,10 @@ namespace SimpleCircuit.Functions
                 _a.Differentiate(-coefficient, equations);
         }
 
-        /// <summary>
-        /// Creates a row equation at the specified row, in the specified solver.
-        /// </summary>
-        /// <param name="row">The row index.</param>
-        /// <param name="mapper">The mapper.</param>
-        /// <param name="solver">The solver.</param>
-        /// <returns>
-        /// The row equation.
-        /// </returns>
+        /// <inheritdoc/>
         public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver) => new RowEquation(_a.CreateEquation(row, mapper, solver));
 
-        /// <summary>
-        /// Tries to resolve unknowns.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if one ore more unknowns were resolved; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc/>
         public override bool Resolve(double value) => _a.Resolve(-value);
 
         /// <summary>

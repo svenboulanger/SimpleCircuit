@@ -259,7 +259,7 @@ namespace SimpleCircuit.Functions
                 _equations.Add(eq.Key, rowEquation);
                 switch (eq.Key.Type)
                 {
-                    case UnknownTypes.MirrorScale:
+                    case UnknownTypes.Scale:
                         _solution[index] = 1.0;
                         _oldSolution[index] = 1.0;
                         break;

@@ -1,33 +1,17 @@
 ﻿using SimpleCircuit.Functions;
-using System;
 
 namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An NMOS transistor.
     /// </summary>
-    /// <seealso cref="IComponent" />
+    /// <seealso cref="SimpleCircuit.Components.TransformingComponent" />
+    /// <seealso cref="SimpleCircuit.Components.ILabeled" />
     [SimpleKey("Mn")]
-    public class Nmos : IComponent
+    public class Nmos : TransformingComponent, ILabeled
     {
-        private readonly Unknown _x, _y, _nx, _ny, _s;
-
         /// <inheritdoc />
-        public string Name { get; }
-
-        /// <summary>
-        /// Gets or sets the label.
-        /// </summary>
-        /// <value>
-        /// The label.
-        /// </value>
         public string Label { get; set; }
-
-        public Function X => _x;
-        public Function Y => _y;
-        public Function NormalX => _nx;
-        public Function NormalY => _ny;
-        public Function MirrorScale => _s;
 
         /// <summary>
         /// Gets or sets a value indicating whether the bulk contact should be rendered.
@@ -37,21 +21,13 @@ namespace SimpleCircuit.Components
         /// </value>
         public bool ShowBulk { get; set; } = false;
 
-        public PinCollection Pins { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Nmos"/> class.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The name.</param>
         public Nmos(string name)
+            : base(name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            _x = new Unknown(name + ".x", UnknownTypes.X);
-            _y = new Unknown(name + ".y", UnknownTypes.Y);
-            _nx = new Unknown(name + ".nx", UnknownTypes.NormalX);
-            _ny = new Unknown(name + ".ny", UnknownTypes.NormalY);
-            _s = new Unknown(name + ".s", UnknownTypes.MirrorScale);
-            Pins = new PinCollection(this);
             Pins.Add(new[] { "s", "source" }, new Vector2(-8, 0), new Vector2(-1, 0));
             Pins.Add(new[] { "g", "gate" }, new Vector2(0, 8), new Vector2(0, 1));
             Pins.Add(new[] { "b", "bulk" }, new Vector2(0, 0), new Vector2(0, -1));
@@ -59,10 +35,10 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc/>
-        public void Render(SvgDrawing drawing)
+        public override void Render(SvgDrawing drawing)
         {
-            var normal = new Vector2(_nx.Value, _ny.Value);
-            var tf = new Transform(_x.Value, _y.Value, normal, normal.Perpendicular * _s.Value);
+            var normal = new Vector2(NormalX.Value, NormalY.Value);
+            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
             drawing.Segments(tf.Apply(new[]
             {
                 new Vector2(0, 8), new Vector2(0, 6),
@@ -83,17 +59,23 @@ namespace SimpleCircuit.Components
                 drawing.Line(tf.Apply(new Vector2(0, 4)), tf.Apply(new Vector2(0, 0)));
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(2, -2)), tf.ApplyDirection(new Vector2(1, -1)));
+                drawing.Text(Label, tf.Apply(new Vector2(-1, -3)), tf.ApplyDirection(new Vector2(-1, -1)));
+        }
+
+        /// <inheritdoc/>
+        public override void Apply(Minimizer minimizer)
+        {
+            minimizer.Minimize +=
+                new Squared(X) + new Squared(Y) +
+                new Squared(Scale - 1);
         }
 
         /// <summary>
-        /// Applies some functions to the minimizer if necessary.
+        /// Converts to string.
         /// </summary>
-        /// <param name="minimizer">The minimizer.</param>
-        public void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(_x) + new Squared(_y) + new Squared(_nx) + new Squared(_ny - 1);
-            minimizer.AddConstraint(new Squared(_s) - 1);
-        }
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString() => $"NMOS {Name}";
     }
 }

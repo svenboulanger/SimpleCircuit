@@ -31,14 +31,6 @@ namespace SimpleCircuit
         /// </value>
         public double CharacterWidth { get; set; } = 3.0;
 
-        public enum Extend
-        {
-            Left,
-            Right,
-            Top,
-            Bottom
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgDrawing"/> class.
         /// </summary>
@@ -47,7 +39,6 @@ namespace SimpleCircuit
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", "http://www.w3.org/2000/svg");
             _document.AppendChild(_current);
-
             _bounds = new Bounds();
         }
 
@@ -152,6 +143,11 @@ namespace SimpleCircuit
             _current.AppendChild(path);
         }
 
+        /// <summary>
+        /// Draws a smooth bezier curve.
+        /// </summary>
+        /// <param name="points">The points.</param>
+        /// <param name="classes">The classes.</param>
         public void SmoothBezier(IEnumerable<Vector2> points, string classes = null)
         {
             var sb = new StringBuilder(128);
@@ -166,7 +162,7 @@ namespace SimpleCircuit
                     if (!it.MoveNext())
                         return;
 
-                    // Get the first handle
+                    // Get the handles
                     var handle1 = it.Current;
                     if (!it.MoveNext())
                         return;
@@ -217,7 +213,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="location">The location.</param>
-        /// <param name="expand">The expand.</param>
+        /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="classes">The classes.</param>
         public void Text(string value, Vector2 location, Vector2 expand, string classes = null)
         {
@@ -333,7 +329,7 @@ namespace SimpleCircuit
         }
 
         /// <summary>
-        /// Ends the group.
+        /// Ends the last opened group.
         /// </summary>
         public void EndGroup()
         {

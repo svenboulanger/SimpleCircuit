@@ -8,19 +8,18 @@ namespace SimpleCircuit.Components
     /// </summary>
     /// <seealso cref="IComponent" />
     [SimpleKey("X")]
-    public class Point : IComponent
+    public class Point : IComponent, ITranslating
     {
-        private readonly Unknown _x, _y;
-
         /// <inheritdoc/>
         public string Name { get; }
 
-        public Function X => _x;
-        public Function Y => _y;
-        public Function NormalX => 0.0;
-        public Function NormalY => -1.0;
-        public Function MirrorScale => 1.0;
+        /// <inheritdoc/>
+        public Function X { get; }
 
+        /// <inheritdoc/>
+        public Function Y { get; }
+
+        /// <inheritdoc/>
         public PinCollection Pins { get; }
 
         /// <summary>
@@ -38,8 +37,8 @@ namespace SimpleCircuit.Components
         public Point(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            _x = new Unknown(name + ".x", UnknownTypes.X);
-            _y = new Unknown(name + ".y", UnknownTypes.Y);
+            X = new Unknown(name + ".x", UnknownTypes.X);
+            Y = new Unknown(name + ".y", UnknownTypes.Y);
             Pins = new PinCollection(this);
             Pins.Add(new[] { ".", "a", "p" }, new Vector2(), new Vector2(0, -1));
             Wires = 0;
@@ -50,18 +49,21 @@ namespace SimpleCircuit.Components
         {
             // If there are more than 2 wires, then let's draw a point
             if (Wires > 2)
-                drawing.Circle(new Vector2(_x.Value, _y.Value), 1);
+                drawing.Circle(new Vector2(X.Value, Y.Value), 1);
+        }
+
+        /// <inheritdoc/>
+        public void Apply(Minimizer minimizer)
+        {
+            minimizer.Minimize += new Squared(X) + new Squared(Y);
         }
 
         /// <summary>
-        /// Applies some functions to the minimizer if necessary.
+        /// Converts to string.
         /// </summary>
-        /// <param name="minimizer">The minimizer.</param>
-        public void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(_x) + new Squared(_y);
-        }
-
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString() => $"Point {Name}";
     }
 }

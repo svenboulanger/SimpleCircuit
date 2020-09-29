@@ -4,8 +4,6 @@ using SimpleCircuit.Functions;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace SimpleCircuit
 {
@@ -22,330 +20,352 @@ namespace SimpleCircuit
         /// </value>
         public static ComponentFactory Factory { get; } = new ComponentFactory();
 
-        private int _anonIndex = 0, _anonWireIndex = 0;
-        private readonly Regex _doublePin = new Regex(@"^((?<name>\w+)|(?<name>\w+)\.(?<pin2>\w+)|(?<pin1>\w+)\.(?<name>\w+)\.(?<pin2>\w+))$");
-        private readonly Regex _singlePin = new Regex(@"^(?<name>\w+)(\.(?<pin>\w+))?$");
-        private readonly Regex _wire = new Regex(@"^((?<dir>[udrlneswtb\-])(?<length>\d*))+$");
-
-        private class ComponentNode
+        private class WireDescription
         {
-            public readonly IComponent Component;
-            public readonly Pin PinBefore;
-            public readonly Pin PinAfter;
-            public ComponentNode(IComponent component, Pin pinBefore, Pin pinAfter)
-            {
-                Component = component ?? throw new ArgumentNullException(nameof(component));
-                PinBefore = pinBefore;
-                PinAfter = pinAfter;
-            }
+            public string Direction;
+            public double Length;
         }
+        private class PinDescription
+        {
+            public Pin Before;
+            public IComponent Component;
+            public Pin After;
+        }
+
+        private int _anonIndex = 0, _wireIndex = 0;
 
         /// <summary>
         /// Parses the specified description.
         /// </summary>
-        /// <param name="description">The description.</param>
-        public Circuit Parse(string description)
+        /// <param name="input">The description.</param>
+        public Circuit Parse(string input)
         {
-            var lines = description.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var lexer = new SimpleCircuitLexer(input);
+            if (!lexer.Next())
+                return new Circuit();
             var ckt = new Circuit();
-            foreach (var line in lines)
-            {
-                if (line[0] == '-')
-                    ParseConstraint(ckt, line.Substring(1));
-                else
-                    ParseComponentChain(ckt, line);
-            }
+            ParseLines(lexer, ckt);
             return ckt;
         }
 
-        private void ParseConstraint(Circuit ckt, string line)
+        private void ParseLines(SimpleCircuitLexer lexer, Circuit ckt)
         {
-            var it = GetTokens(line).GetEnumerator();
-            if (!it.MoveNext())
-                return;
-
-            switch (it.Current)
+            do
             {
-                case "align":
-                    if (!it.MoveNext())
-                        return;
-                    var dir = it.Current;
-                    var nodes = new List<ComponentNode>();
-                    while (it.MoveNext())
-                    {
-                        // Get the component and pin
-                        var match = _singlePin.Match(it.Current);
-                        if (!match.Success)
-                            throw new Exception($"Could not parse component {it.Current}.");
-                        var component = GetComponent(ckt, match.Groups["name"].Value);
-                        Pin pin = null;
-                        if (match.Groups["pin"].Success)
-                            pin = component.Pins[match.Groups["pin"].Value];
-                        nodes.Add(new ComponentNode(component, null, pin));
-                    }
-                    switch (dir)
-                    {
-                        case "x": AlignX(ckt, nodes); return;
-                        case "y": AlignY(ckt, nodes); return;
-                        default:
-                            throw new ArgumentException($"Invalid alignment {dir}");
-                    }
+                ParseLine(lexer, ckt);
+                if (!lexer.Is(TokenType.Newline) && !lexer.Is(TokenType.EndOfContent))
+                    throw new ArgumentException();
+                while (lexer.Is(TokenType.Newline))
+                    lexer.Next();
             }
+            while (!lexer.Is(TokenType.EndOfContent));
         }
-
-        private void AlignX(Circuit ckt, IEnumerable<ComponentNode> nodes)
+        private void ParseLine(SimpleCircuitLexer lexer, Circuit ckt)
         {
-            Function refX = null;
-            foreach (var node in nodes)
-            {
-                Function toFix = null;
-                if (node.PinAfter != null)
-                    toFix = node.PinAfter.X;
-                else
-                    toFix = node.Component.X;
-
-                if (refX == null)
-                    refX = toFix;
-                else
-                {
-                    if (toFix != null)
-                    {
-                        ckt.Add(refX - toFix);
-                        refX = toFix;
-                    }
-                }
-            }
-        }
-
-        private void AlignY(Circuit ckt, IEnumerable<ComponentNode> nodes)
-        {
-            Function refY = null;
-            foreach (var node in nodes)
-            {
-                Function toFix;
-                if (node.PinAfter != null)
-                    toFix = node.PinAfter.Y;
-                else
-                    toFix = node.Component.Y;
-
-                if (refY == null)
-                    refY = toFix;
-                else
-                {
-                    if (toFix != null)
-                    {
-                        ckt.Add(refY - toFix);
-                        refY = toFix;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parses a line.
-        /// </summary>
-        /// <param name="line">The line.</param>
-        private void ParseComponentChain(Circuit ckt, string line)
-        {
-            ComponentNode last;
-            var it = GetTokens(line).GetEnumerator();
-            if (!it.MoveNext())
-                return;
-
-            // First get the component pin
-            last = ParseComponentPin(ckt, it.Current);
-            while (it.MoveNext())
-            {
-                // Read a wire
-                var wireDescription = it.Current;
-
-                // Read the next component
-                if (!it.MoveNext())
-                    return;
-                var next = ParseComponentPin(ckt, it.Current);
-                ParseWire(ckt, last, next, wireDescription);
-                last = next;
-            }
-        }
-
-        private ComponentNode ParseComponentPin(Circuit ckt, string token)
-        {
-            var match = _doublePin.Match(token);
-            if (!match.Success)
-                throw new ArgumentException($"Could not parse component token '{token}'.");
-
-            var name = match.Groups["name"].Value;
-            var component = GetComponent(ckt, name);
-
-            // Add the component to the circuit and return the component pin
-            var pin1 = match.Groups["pin1"].Success ? component.Pins[match.Groups["pin1"].Value] : null;
-            var pin2 = match.Groups["pin2"].Success ? component.Pins[match.Groups["pin2"].Value] : null;
-            return new ComponentNode(component, pin1, pin2);
-        }
-
-        private IComponent GetComponent(Circuit ckt, string name)
-        {
-            // Is it an anonymous name?
-            IComponent component = null;
-            string label = name;
-            if (name.Length == 1)
-                name = $"{name}:{++_anonIndex}";
+            if (lexer.Is(TokenType.Dash))
+                ParseEquation(lexer, ckt);
             else
-                ckt.TryGetValue(name, out component);
-
-            if (component == null)
+                ParseChain(lexer, ckt);
+        }
+        private void ParseChain(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var start = ParsePin(lexer, ckt);
+            while (lexer.Is(TokenType.OpenBracket))
             {
-                switch (name[0])
+                if (start.Component is Point pts)
+                    pts.Wires++;
+                var wires = ParseWire(lexer);
+                var end = ParseDoublePin(lexer, ckt);
+
+                // String them together
+                var lastPin = start.After ?? start.Component.Pins[start.Component.Pins.Count - 1];
+                for (var i = 0; i < wires.Count; i++)
                 {
-                    case 'r':
-                    case 'R':
-                        component = new Resistor(name) { Label = label };
-                        break;
-                    case 'l':
-                    case 'L':
-                        component = new Inductor(name) { Label = label };
-                        break;
-                    case 'c':
-                    case 'C':
-                        component = new Capacitor(name) { Label = label };
-                        break;
-                    case 'i':
-                    case 'I':
-                        component = new CurrentSource(name) { Label = label };
-                        break;
-                    case 'n':
-                    case 'N':
-                        component = new Nmos(name) { Label = label };
-                        break;
-                    case 'p':
-                    case 'P':
-                        component = new Pmos(name) { Label = label };
-                        break;
-                    case 'g':
-                    case 'G':
-                        component = new Ground(name);
-                        break;
-                    case 'v':
-                    case 'V':
-                        component = new VoltageSource(name) { Label = label };
-                        break;
-                    case 'o':
-                    case 'O':
-                        component = new Opamp(name);
-                        break;
-                    case 'x':
-                    case 'X':
-                        component = new Point(name);
-                        break;
-                    case 's':
-                    case 'S':
-                        component = new Power(name) { Label = "VDD" };
-                        break;
-                    default:
-                        throw new Exception($"Unrecognized component {name}.");
+                    Pin nextPin;
+                    if (i < wires.Count - 1)
+                    {
+                        var pt = new Point("X" + (_anonIndex++));
+                        ckt.Add(pt);
+                        nextPin = pt.Pins[0];
+                        pt.Wires += 2;
+                    }
+                    else
+                    {
+                        nextPin = end.Before ?? end.Component.Pins[0];
+                        if (end.Component is Point pte)
+                            pte.Wires++;
+                    }
+
+                    var wire = new Wire("W" + (_wireIndex++), lastPin, nextPin);
+                    ckt.Wires.Add(wire);
+
+                    // Add the necessary constraints
+                    switch (wires[i].Direction)
+                    {
+                        case "u":
+                        case "U":
+                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - wire.Length);
+                            ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
+                            ckt.Add(lastPin.NormalY + 1); ckt.Add(nextPin.NormalY - 1);
+                            break;
+                        case "d":
+                        case "D":
+                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - wire.Length);
+                            ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
+                            ckt.Add(lastPin.NormalY - 1); ckt.Add(nextPin.NormalY + 1);
+                            break;
+                        case "l":
+                        case "L":
+                            ckt.Add(lastPin.X - nextPin.X - wire.Length); ckt.Add(lastPin.Y - nextPin.Y);
+                            ckt.Add(lastPin.NormalX + 1); ckt.Add(nextPin.NormalX - 1);
+                            ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
+                            break;
+                        case "r":
+                        case "R":
+                            ckt.Add(nextPin.X - lastPin.X - wire.Length); ckt.Add(lastPin.Y - nextPin.Y);
+                            ckt.Add(lastPin.NormalX - 1); ckt.Add(nextPin.NormalX + 1);
+                            ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
+                            break;
+                    }
+                    if (wires[i].Length >= 0)
+                        ckt.Add(wire.Length - wires[i].Length);
+
+                    lastPin = nextPin;
                 }
-                ckt.Add(component);
+                start = end;
+            }
+        }
+        private PinDescription ParsePin(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var result = new PinDescription();
+            result.Component = ParseComponentLabel(lexer, ckt);
+            if (lexer.Is(TokenType.OpenBracket, "["))
+            {
+                lexer.Next();
+                var pin = ParseName(lexer);
+                lexer.Check(TokenType.CloseBracket, "]");
+                result.After = result.Component.Pins[pin];
+            }
+            return result;
+        }
+        private PinDescription ParseDoublePin(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            string beforePin = null;
+            if (lexer.Is(TokenType.OpenBracket, "["))
+            {
+                lexer.Next();
+                beforePin = ParseName(lexer);
+                lexer.Check(TokenType.CloseBracket, "]");
+            }
+            var result = ParsePin(lexer, ckt);
+            if (beforePin != null)
+                result.Before = result.Component.Pins[beforePin];
+            return result;
+        }
+        private IComponent ParseComponentLabel(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var component = ParseComponent(lexer, ckt);
+            if (lexer.Is(TokenType.OpenBracket, "("))
+            {
+                lexer.Next();
+                var label = ParseLabel(lexer);
+                if (component is ILabeled lbl)
+                    lbl.Label = label;
+                lexer.Check(TokenType.CloseBracket, ")");
             }
             return component;
         }
 
-        private ComponentNode ParseWire(Circuit ckt, ComponentNode start, ComponentNode end, string token)
+        private List<WireDescription> ParseWire(SimpleCircuitLexer lexer)
         {
-            // Let's try breaking it down into chunks
-            var match = _wire.Match(token);
-            if (!match.Success)
-                throw new ArgumentException("Invalid wire description.");
-
-            // Get the number of wires
-            var wires = match.Groups["dir"].Captures.Count;
-            if (wires == 0)
-                throw new ArgumentException("Invalid wire description.");
-
-            // Draw all wires
-            IComponent nextComponent = null, lastComponent = start.Component;
-            Pin lastPin = start.PinAfter ?? start.Component.Pins[start.Component.Pins.Count - 1], nextPin;
-            for (var i = 0; i < wires; i++)
+            var wires = new List<WireDescription>();
+            lexer.Check(TokenType.OpenBracket, "<");
+            do
             {
-                if (i < wires - 1)
+                var direction = ParseDirection(lexer);
+                wires.Add(new WireDescription
                 {
-                    nextComponent = new Point($"X:{++_anonIndex}");
-                    ckt.Add(nextComponent);
-                    nextPin = nextComponent.Pins[0];
-                }
-                else
+                    Direction = direction,
+                    Length = -1.0
+                });
+                if (lexer.Is(TokenType.Number))
                 {
-                    nextComponent = end.Component;
-                    nextPin = end.PinBefore ?? end.PinAfter ?? end.Component.Pins[0];
+                    wires[wires.Count - 1].Length = double.Parse(lexer.Content);
+                    lexer.Next();
                 }
-
-
-                // Use the information to constrain the elements surrounding it
-                var dir = match.Groups["dir"].Captures[i].Value;
-                var l = match.Groups["length"].Captures[i].Value;
-                var w = new Wire($"W{++_anonWireIndex}", lastPin, nextPin);
-
-                switch (dir)
+            }
+            while (lexer.Is(TokenType.Word));
+            lexer.Check(TokenType.CloseBracket, ">");
+            return wires;
+        }
+        private string ParseDirection(SimpleCircuitLexer lexer)
+        {
+            if (lexer.Is(TokenType.Word))
+            {
+                switch (lexer.Content)
                 {
                     case "u":
-                    case "n":
-                    case "t":
-                        ckt.Add(lastPin.NormalX);
-                        ckt.Add(lastPin.NormalY + 1);
-                        ckt.Add(nextPin.NormalX);
-                        ckt.Add(nextPin.NormalY - 1);
-                        ckt.Add(lastPin.X - nextPin.X);
-                        ckt.Add(lastPin.Y - nextPin.Y - w.Length);
-                        break;
                     case "d":
-                    case "b":
-                    case "s":
-                        ckt.Add(lastPin.NormalX);
-                        ckt.Add(lastPin.NormalY - 1);
-                        ckt.Add(nextPin.NormalX);
-                        ckt.Add(nextPin.NormalY + 1);
-                        ckt.Add(lastPin.X - nextPin.X);
-                        ckt.Add(nextPin.Y - lastPin.Y - w.Length);
-                        break;
                     case "l":
-                    case "w":
-                        ckt.Add(lastPin.NormalX + 1);
-                        ckt.Add(lastPin.NormalY);
-                        ckt.Add(nextPin.NormalX - 1);
-                        ckt.Add(nextPin.NormalY);
-                        ckt.Add(lastPin.Y - nextPin.Y);
-                        ckt.Add(lastPin.X - nextPin.X - w.Length);
-                        break;
                     case "r":
-                    case "e":
-                        ckt.Add(lastPin.NormalX - 1);
-                        ckt.Add(lastPin.NormalY);
-                        ckt.Add(nextPin.NormalX + 1);
-                        ckt.Add(nextPin.NormalY);
-                        ckt.Add(lastPin.Y - nextPin.Y);
-                        ckt.Add(nextPin.X - lastPin.X - w.Length);
-                        break;
+                        var dir = lexer.Content;
+                        lexer.Next();
+                        return dir;
                 }
-
-                // Add the wire to the circuit
-                if (l.Length > 0)
-                    ckt.Add(w.Length - double.Parse(l));
-                ckt.Wires.Add(w);
-
-                // Count wires to a point
-                if (lastComponent is Point ptl)
-                    ptl.Wires++;
-                if (nextComponent is Point ptn)
-                    ptn.Wires++;
-
-                // Go to the next component
-                lastPin = nextPin;
-                lastComponent = nextComponent;
             }
-            return end;
+            throw new ArgumentException();
         }
-        private IEnumerable<string> GetTokens(string line)
+        private void ParseEquation(SimpleCircuitLexer lexer, Circuit ckt)
         {
-            return line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (!lexer.Is(TokenType.Dash))
+                throw new ArgumentException();
+            lexer.Next();
+
+            // Add the first equation
+            var a = ParseSum(lexer, ckt);
+            lexer.Check(TokenType.Equals);
+            var b = ParseSum(lexer, ckt);
+            ckt.Add(a - b);
+
+            while (lexer.Is(TokenType.Equals))
+            {
+                lexer.Next();
+                a = b;
+                b = ParseSum(lexer, ckt);
+                ckt.Add(a - b);
+            }
+        }
+        private Function ParseSum(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var result = ParseTerm(lexer, ckt);
+            while (lexer.Is(TokenType.Plus) || lexer.Is(TokenType.Dash))
+            {
+                var op = lexer.Type;
+                lexer.Next();
+                if (op == TokenType.Plus)
+                    result += ParseTerm(lexer, ckt);
+                else
+                    result -= ParseTerm(lexer, ckt);
+            }
+            return result;
+        }
+        private Function ParseTerm(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var result = ParseUnary(lexer, ckt);
+            while (lexer.Is(TokenType.Times) || lexer.Is(TokenType.Divide))
+            {
+                var op = lexer.Type;
+                lexer.Next();
+                if (op == TokenType.Times)
+                    result *= ParseUnary(lexer, ckt);
+                else
+                    result /= ParseUnary(lexer, ckt);
+            }
+            return result;
+        }
+        private Function ParseUnary(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            if (lexer.Is(TokenType.Plus))
+            {
+                lexer.Next();
+                return ParseUnary(lexer, ckt);
+            }
+            if (lexer.Is(TokenType.Dash))
+            {
+                lexer.Next();
+                return -ParseUnary(lexer, ckt);
+            }
+            if (lexer.Is(TokenType.OpenBracket, "("))
+            {
+                lexer.Next();
+                var result = ParseSum(lexer, ckt);
+                lexer.Check(TokenType.CloseBracket, ")");
+                return result;
+            }
+            return ParseFactor(lexer, ckt);
+        }
+        private Function ParseFactor(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            if (lexer.Is(TokenType.Number))
+            {
+                var result = double.Parse(lexer.Content);
+                lexer.Next();
+                return result;
+            }
+            else
+            {
+                object result = ParseComponent(lexer, ckt);
+                if (result == null)
+                    throw new ArgumentException();
+                if (lexer.Is(TokenType.OpenBracket, "["))
+                {
+                    lexer.Next();
+                    var pinName = ParseName(lexer);
+                    if (!lexer.Is(TokenType.CloseBracket, "]"))
+                        throw new ArgumentException();
+                    lexer.Next();
+                    result = ((IComponent)result).Pins[pinName];
+                }
+                lexer.Check(TokenType.Dot);
+                var propertyName = ParseName(lexer);
+                switch (propertyName)
+                {
+                    case "x":
+                    case "X":
+                        if (!(result is ITranslating posx))
+                            throw new ArgumentException();
+                        return posx.X;
+                    case "y":
+                    case "Y":
+                        if (!(result is ITranslating posy))
+                            throw new ArgumentException();
+                        return posy.Y;
+                    case "nx":
+                    case "NX":
+                        if (!(result is IRotating orx))
+                            throw new ArgumentException();
+                        return orx.NormalX;
+                    case "ny":
+                    case "NY":
+                        if (!(result is IRotating ory))
+                            throw new ArgumentException();
+                        return ory.NormalY;
+                    case "s":
+                    case "S":
+                        if (!(result is IScaling m))
+                            throw new ArgumentException();
+                        return m.Scale;
+                }
+                throw new ArgumentException();
+            }
+        }
+        private string ParseName(SimpleCircuitLexer lexer)
+        {
+            if (!lexer.Is(TokenType.Word))
+                throw new ArgumentException();
+            var word = lexer.Content;
+            lexer.Next();
+            return word;
+        }
+        private string ParseLabel(SimpleCircuitLexer lexer)
+        {
+            if (!lexer.Is(TokenType.String))
+                throw new ArgumentException();
+            var text = lexer.Content.Substring(1, lexer.Content.Length - 2);
+            lexer.Next();
+            return text;
+        }
+        private IComponent ParseComponent(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            var name = ParseName(lexer);
+            if (Factory.IsExact(name))
+                name += ":" + (_anonIndex++);
+            if (!ckt.TryGetValue(name, out var component))
+            {
+                component = Factory.Create(name);
+                ckt.Add(component);
+            }
+            return component;
         }
     }
 }

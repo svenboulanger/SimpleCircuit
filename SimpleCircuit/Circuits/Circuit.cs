@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
@@ -7,6 +6,9 @@ using SimpleCircuit.Functions;
 
 namespace SimpleCircuit
 {
+    /// <summary>
+    /// Represents a circuit of interconnected components.
+    /// </summary>
     public class Circuit
     {
         private readonly Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();

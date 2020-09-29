@@ -59,22 +59,101 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public override string ToString() => Name;
 
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator -(Unknown a)
             => new Negative(a);
+
+        /// <summary>
+        /// Implements the operator +.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator +(Unknown a, Unknown b)
             => new Addition(a, b);
+
+        /// <summary>
+        /// Implements the operator +.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator +(Unknown a, double b)
             => new Addition(a, b);
+
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator -(Unknown a, Unknown b)
             => new Subtraction(a, b);
+
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator -(Unknown a, double b)
             => new Subtraction(a, b);
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator *(Unknown a, Unknown b)
             => new Multiplication(a, b);
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator *(Unknown a, double b)
             => new Multiplication(a, b);
+
+        /// <summary>
+        /// Implements the operator /.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator /(Unknown a, Unknown b)
             => new Division(a, b);
+
+        /// <summary>
+        /// Implements the operator /.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator /(Unknown a, double b)
             => new Division(a, b);
     }

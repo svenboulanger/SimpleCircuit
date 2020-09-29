@@ -12,18 +12,10 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var lexer = new SimpleCircuitLexer("G <ud> n.R.p");
-            var token = lexer.Next(out string content);
-            while (token != TokenType.EndOfContent)
-            {
-                Console.WriteLine($"{content} ({token})");
-                token = lexer.Next(out content);
-            }
+            var parser = new SimpleCircuitParser();
+            var ckt = parser.Parse(@"GND1 <u> V1");
 
-            /*
-            var p = new SimpleCircuitParser();
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
-            var ckt = p.Parse(@"G d R");
             var doc = ckt.Render();
 
             using var sw = new StringWriter();
@@ -62,7 +54,6 @@ namespace Sandbox
                 fw.WriteLine("</html>");
             }
             Process.Start(@"""C:\Program Files (x86)\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
-            */
         }
     }
 }

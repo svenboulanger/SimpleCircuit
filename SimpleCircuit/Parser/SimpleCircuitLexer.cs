@@ -29,6 +29,22 @@ namespace SimpleCircuit.Parser
         public int Position { get; private set; }
 
         /// <summary>
+        /// Gets the type of the current token.
+        /// </summary>
+        /// <value>
+        /// The type of the current token.
+        /// </value>
+        public TokenType Type { get; private set; }
+
+        /// <summary>
+        /// Gets the content of the current token.
+        /// </summary>
+        /// <value>
+        /// The content.
+        /// </value>
+        public string Content { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SimpleCircuitLexer"/> class.
         /// </summary>
         /// <param name="input">The input.</param>
@@ -52,85 +68,134 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="content">The content of the token.</param>
         /// <returns>The token type.</returns>
-        public TokenType Next(out string content)
+        public bool Next()
         {
-            if (_index >= _input.Length)
+            Type = TokenType.Whitespace;
+            while (Type == TokenType.Whitespace)
             {
-                content = "";
-                return TokenType.EndOfContent;
-            }
-            var c = _input[_index];
+                if (_index >= _input.Length)
+                {
+                    Content = "";
+                    Type = TokenType.EndOfContent;
+                    return false;
+                }
+                var c = _input[_index];
 
-            // Read a word
-            if (char.IsLetter(c))
-            {
-                ReadWord();
-                content = _tokenBuilder.ToString();
-                return TokenType.Word;
-            }
-            
-            // Read a number
-            if (char.IsDigit(c))
-            {
-                ReadNumber();
-                content = _tokenBuilder.ToString();
-                return TokenType.Number;
-            }
+                // Read a word
+                if (char.IsLetter(c))
+                {
+                    ReadWord();
+                    Content = _tokenBuilder.ToString();
+                    Type = TokenType.Word;
+                    return true;
+                }
 
-            switch (c)
-            {
-                case '.':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.Dot;
-                case '-':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.Dash;
-                case '+':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.Plus;
-                case '(':
-                case '[':
-                case '<':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.OpenBracket;
-                case ')':
-                case ']':
-                case '>':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.CloseBracket;
-                case '=':
-                    content = c.ToString();
-                    _index++;
-                    Position++;
-                    return TokenType.Equals;
-                case '\r':
-                case '\n':
-                    ReadNewline();
-                    content = _tokenBuilder.ToString();
-                    return TokenType.Newline;
-                case ' ':
-                case '\t':
-                    ReadWhitespace();
-                    content = _tokenBuilder.ToString();
-                    return TokenType.Whitespace;
-                case '"':
-                    
-                    ReadString();
-                    content = _tokenBuilder.ToString();
-                    return TokenType.String;
-                default:
-                    throw new LexerException($"Unrecognized character '{c}' at line {Line}, position {Position}.");
+                // Read a number
+                if (char.IsDigit(c))
+                {
+                    ReadNumber();
+                    Content = _tokenBuilder.ToString();
+                    Type = TokenType.Number;
+                    return true;
+                }
+
+                switch (c)
+                {
+                    case '.':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Dot;
+                        break;
+                    case '-':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Dash;
+                        break;
+                    case '+':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Plus;
+                        break;
+                    case '(':
+                    case '[':
+                    case '<':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.OpenBracket;
+                        break;
+                    case ')':
+                    case ']':
+                    case '>':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.CloseBracket;
+                        break;
+                    case '=':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Equals;
+                        break;
+                    case '\r':
+                    case '\n':
+                        ReadNewline();
+                        Content = _tokenBuilder.ToString();
+                        Type = TokenType.Newline;
+                        break;
+                    case ' ':
+                    case '\t':
+                        ReadWhitespace();
+                        Content = _tokenBuilder.ToString();
+                        Type = TokenType.Whitespace;
+                        break;
+                    case '"':
+                        ReadString();
+                        Content = _tokenBuilder.ToString();
+                        Type = TokenType.String;
+                        break;
+                    default:
+                        throw new LexerException($"Unrecognized character '{c}' at line {Line}, position {Position}.");
+                }
             }
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether the current token if of the specified type and has the specified content.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="content">The content.</param>
+        /// <returns>
+        ///   <c>true</c> if the type and content matches; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Is(TokenType type, string content = null)
+        {
+            if (Type != type)
+                return false;
+            if (content != null && string.CompareOrdinal(content, Content) != 0)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Checks for the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="content">The content.</param>
+        /// <exception cref="ArgumentException"></exception>
+        public void Check(TokenType type, string content = null)
+        {
+            var error = Type != type;
+            if (content != null && string.CompareOrdinal(content, Content) != 0)
+                error = true;
+            if (error)
+                throw new ArgumentException();
+            Next();
         }
 
         private void ReadWord()

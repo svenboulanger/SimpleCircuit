@@ -7,31 +7,37 @@ namespace SimpleCircuit.Components
     /// </summary>
     /// <seealso cref="Component" />
     [SimpleKey("GND")]
-    public class Ground : IComponent
+    public class Ground : IComponent, ITranslating, IRotating
     {
-        private readonly Unknown _x, _y, _nx, _ny;
-
         /// <inheritdoc/>
         public string Name { get; }
 
-        public Function X => _x;
-        public Function Y => _y;
-        public Function NormalX => _nx;
-        public Function NormalY => _ny;
-        public Function MirrorScale => 1.0;
+        /// <inheritdoc/>
+        public Function X { get; }
 
+        /// <inheritdoc/>
+        public Function Y { get; }
+
+        /// <inheritdoc/>
+        public Function NormalX { get; }
+
+        /// <inheritdoc/>
+        public Function NormalY { get; }
+
+        /// <inheritdoc/>
         public PinCollection Pins { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
         /// </summary>
+        /// <param name="name">The name.</param>
         public Ground(string name)
         {
             Name = name;
-            _x = new Unknown(name + ".x", UnknownTypes.X);
-            _y = new Unknown(name + ".y", UnknownTypes.Y);
-            _nx = new Unknown(name + ".nx", UnknownTypes.X);
-            _ny = new Unknown(name + ".ny", UnknownTypes.Y);
+            X = new Unknown(name + ".x", UnknownTypes.X);
+            Y = new Unknown(name + ".y", UnknownTypes.Y);
+            NormalX = new Unknown(name + ".nx", UnknownTypes.X);
+            NormalY = new Unknown(name + ".ny", UnknownTypes.Y);
             Pins = new PinCollection(this);
             Pins.Add(new[] { ".", "a" }, new Vector2(), new Vector2(0, 1));
         }
@@ -39,8 +45,8 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public void Render(SvgDrawing drawing)
         {
-            var normal = new Vector2(_nx.Value, _ny.Value);
-            var tf = new Transform(_x.Value, _y.Value, normal, normal.Perpendicular);
+            var normal = new Vector2(NormalX.Value, NormalY.Value);
+            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
             drawing.Segments(tf.Apply(new Vector2[]
             {
                 new Vector2(0, 0), new Vector2(0, -3),
@@ -50,13 +56,10 @@ namespace SimpleCircuit.Components
             }));
         }
 
-        /// <summary>
-        /// Applies some functions to the minimizer if necessary.
-        /// </summary>
-        /// <param name="minimizer">The minimizer.</param>
+        /// <inheritdoc/>
         public void Apply(Minimizer minimizer)
         {
-            minimizer.Minimize += new Squared(_x) + new Squared(_y) + new Squared(_nx) + new Squared(_ny - 1);
+            minimizer.Minimize += new Squared(X) + new Squared(Y);
         }
 
         /// <summary>

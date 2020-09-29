@@ -50,12 +50,28 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public abstract bool Resolve(double value);
 
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator -(Function a)
         {
             if (a.IsConstant)
                 return new ConstantFunction(-a.Value);
             return new Negative(a);
         }
+
+        /// <summary>
+        /// Implements the operator +.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator +(Function a, Function b)
         {
             if (a.IsConstant)
@@ -72,6 +88,15 @@ namespace SimpleCircuit.Functions
             }
             return new Addition(a, b);
         }
+
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator -(Function a, Function b)
         {
             if (a.IsConstant)
@@ -88,6 +113,15 @@ namespace SimpleCircuit.Functions
             }
             return new Subtraction(a, b);
         }
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator *(Function a, Function b)
         {
             if (a.IsConstant && b.IsConstant)
@@ -108,6 +142,15 @@ namespace SimpleCircuit.Functions
             }
             return new Multiplication(a, b);
         }
+
+        /// <summary>
+        /// Implements the operator /.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Function operator /(Function a, Function b)
         {
             if (a.IsConstant)
@@ -124,8 +167,24 @@ namespace SimpleCircuit.Functions
             }
             return new Division(a, b);
         }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="System.Double"/> to <see cref="Function"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
         public static implicit operator Function(double value)
             => new ConstantFunction(value);
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="Unknown"/> to <see cref="Function"/>.
+        /// </summary>
+        /// <param name="unknown">The unknown.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
         public static implicit operator Function(Unknown unknown)
         {
             if (unknown.IsFixed)

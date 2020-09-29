@@ -17,46 +17,6 @@ namespace SimpleCircuit.Components
         string Name { get; }
 
         /// <summary>
-        /// Gets the x-coordinate of the component.
-        /// </summary>
-        /// <value>
-        /// The x-coordinate.
-        /// </value>
-        Function X { get; }
-
-        /// <summary>
-        /// Gets the y-coordinate of the component.
-        /// </summary>
-        /// <value>
-        /// The y-coordinate.
-        /// </value>
-        Function Y { get; }
-
-        /// <summary>
-        /// Gets the X-coordinate of the normal of the component (orientation).
-        /// </summary>
-        /// <value>
-        /// The normal x-coordinate.
-        /// </value>
-        Function NormalX { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the normal of the component (orientation).
-        /// </summary>
-        /// <value>
-        /// The normal y-coordinate.
-        /// </value>
-        Function NormalY { get; }
-
-        /// <summary>
-        /// Gets the mirror scale (in case the component is mirrored).
-        /// </summary>
-        /// <value>
-        /// The mirror scale.
-        /// </value>
-        Function MirrorScale { get; }
-
-        /// <summary>
         /// Gets the pins.
         /// </summary>
         /// <value>

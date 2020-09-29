@@ -3,7 +3,7 @@
 namespace SimpleCircuit
 {
     /// <summary>
-    /// A vector.
+    /// A 2D vector.
     /// </summary>
     public struct Vector2 : IEquatable<Vector2>
     {
@@ -132,12 +132,73 @@ namespace SimpleCircuit
             return $"({X:G4}, {Y:G4})";
         }
 
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator -(Vector2 a) => new Vector2(-a.X, -a.Y);
+
+        /// <summary>
+        /// Implements the operator +.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The b.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
+
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The b.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator -(Vector2 a, Vector2 b) => new Vector2(a.X - b.X, a.Y - b.Y);
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="f">The factor.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator *(Vector2 a, double f) => new Vector2(a.X * f, a.Y * f);
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The b.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static double operator *(Vector2 a, Vector2 b) => a.X * b.X + a.Y * b.Y;
+
+        /// <summary>
+        /// Implements the operator /.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="f">The factor.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator /(Vector2 a, double f) => new Vector2(a.X / f, a.Y / f);
+
+        /// <summary>
+        /// Implements the operator *.
+        /// </summary>
+        /// <param name="f">The factor.</param>
+        /// <param name="a">The first argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static Vector2 operator *(double f, Vector2 a) => a * f;
     }
 }

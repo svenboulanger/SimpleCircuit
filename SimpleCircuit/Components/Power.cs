@@ -3,31 +3,34 @@
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A power supply.
+    /// A supply voltage.
     /// </summary>
     /// <seealso cref="IComponent" />
+    /// <seealso cref="ITranslating" />
+    /// <seealso cref="IRotating" />
+    /// <seealso cref="ILabeled" />
     [SimpleKey("POW")]
-    public class Power : IComponent
+    public class Power : IComponent, ITranslating, IRotating, ILabeled
     {
-        private readonly Unknown _x, _y, _nx, _ny;
-
         /// <inheritdoc/>
         public string Name { get; }
 
-        /// <summary>
-        /// Gets the label.
-        /// </summary>
-        /// <value>
-        /// The label.
-        /// </value>
-        public string Label { get; set; }
+        /// <inheritdoc/>
+        public string Label { get; set; } = "VDD";
 
-        public Function X => _x;
-        public Function Y => _y;
-        public Function NormalX => _nx;
-        public Function NormalY => _ny;
-        public Function MirrorScale => 1.0;
+        /// <inheritdoc/>
+        public Function X { get; }
 
+        /// <inheritdoc/>
+        public Function Y { get; }
+
+        /// <inheritdoc/>
+        public Function NormalX { get; }
+
+        /// <inheritdoc/>
+        public Function NormalY { get; }
+
+        /// <inheritdoc/>
         public PinCollection Pins { get; }
 
         /// <summary>
@@ -36,10 +39,10 @@ namespace SimpleCircuit.Components
         public Power(string name)
         {
             Name = name;
-            _x = new Unknown(name + ".x", UnknownTypes.X);
-            _y = new Unknown(name + ".y", UnknownTypes.Y);
-            _nx = new Unknown(name + ".nx", UnknownTypes.NormalX);
-            _ny = new Unknown(name + ".ny", UnknownTypes.NormalY);
+            X = new Unknown(name + ".x", UnknownTypes.X);
+            Y = new Unknown(name + ".y", UnknownTypes.Y);
+            NormalX = new Unknown(name + ".nx", UnknownTypes.NormalX);
+            NormalY = new Unknown(name + ".ny", UnknownTypes.NormalY);
             Pins = new PinCollection(this);
             Pins.Add(new[] { ".", "a" }, new Vector2(), new Vector2(0, -1));
         }
@@ -47,21 +50,18 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public void Render(SvgDrawing drawing)
         {
-            var normal = new Vector2(_nx.Value, _ny.Value);
-            var tf = new Transform(_x.Value, _y.Value, normal, normal.Perpendicular);
+            var normal = new Vector2(NormalX.Value, NormalY.Value);
+            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
             drawing.Line(tf.Apply(new Vector2(0, 0)), tf.Apply(new Vector2(0, 3)));
             drawing.Line(tf.Apply(new Vector2(-5, 3)), tf.Apply(new Vector2(5, 3)), "plane");
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, tf.Apply(new Vector2(0, 6)), tf.ApplyDirection(new Vector2(0, 1)));
         }
 
-        /// <summary>
-        /// Applies some functions to the minimizer if necessary.
-        /// </summary>
-        /// <param name="minimizer">The minimizer.</param>
+        /// <inheritdoc/>
         public void Apply(Minimizer minimizer)
         {
-            minimizer.Minimize += new Squared(_x) + new Squared(_y) + new Squared(_nx) + new Squared(_ny - 1);
+            minimizer.Minimize += new Squared(X) + new Squared(Y);
         }
 
         /// <summary>

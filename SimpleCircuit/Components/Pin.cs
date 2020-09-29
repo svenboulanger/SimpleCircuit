@@ -3,7 +3,7 @@ using SimpleCircuit.Functions;
 
 namespace SimpleCircuit.Components
 {
-    public class Pin
+    public class Pin : ITranslating, IRotating
     {
         /// <summary>
         /// Gets the x-coordinate of the pin.

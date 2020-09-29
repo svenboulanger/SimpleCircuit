@@ -8,6 +8,8 @@
         Dot,
         Dash,
         Plus,
+        Times,
+        Divide,
         Whitespace,
         Word,
         Number,

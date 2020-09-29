@@ -17,6 +17,14 @@ namespace SimpleCircuit.Parser
         private Node _root = new Node();
 
         /// <summary>
+        /// Gets the number of factories.
+        /// </summary>
+        /// <value>
+        /// The count.
+        /// </value>
+        public int Count { get; private set; }
+
+        /// <summary>
         /// Adds a value for the specified search key string.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -44,6 +52,7 @@ namespace SimpleCircuit.Parser
                 throw new ArgumentException($"There is already a value for {key}");
             current.Result = value;
             current.IsSet = true;
+            Count++;
         }
 
         /// <summary>
@@ -61,7 +70,7 @@ namespace SimpleCircuit.Parser
                 var c = char.ToLower(key[i]);
                 if (c < 'a' || c > 'z')
                     return false;
-                if (current.Next[c - 'a'] != null)
+                if (current.Next != null && current.Next[c - 'a'] != null)
                 {
                     current = current.Next[c - 'a'];
                     value = current.IsSet ? current.Result : value;

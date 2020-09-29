@@ -23,7 +23,7 @@ namespace SimpleCircuit.Functions
         /// Maps the specified unknown.
         /// </summary>
         /// <param name="unknown">The unknown.</param>
-        /// <returns></returns>
+        /// <returns>The index of the unknown.</returns>
         public int Map(Unknown unknown)
         {
             if (!_unknowns.TryGetValue(unknown, out var index))
@@ -34,8 +34,21 @@ namespace SimpleCircuit.Functions
             return index;
         }
 
+        /// <summary>
+        /// Tries to get the index associated with the specified unknown.
+        /// </summary>
+        /// <param name="unknown">The unknown.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>
+        ///     <c>true</c> if the unknown is mapped; otherwise, <c>false</c>.
+        /// </returns>
         public bool TryGet(Unknown unknown, out int index) => _unknowns.TryGetValue(unknown, out index);
 
+        /// <summary>
+        /// Gets the unknown associated with the specified index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>The unknown.</returns>
         public Unknown Reverse(int index)
         {
             return _unknowns.FirstOrDefault(p => p.Value == index).Key;
@@ -49,6 +62,12 @@ namespace SimpleCircuit.Functions
             _unknowns.Clear();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// An enumerator that can be used to iterate through the collection.
+        /// </returns>
         public IEnumerator<KeyValuePair<Unknown, int>> GetEnumerator()
             => _unknowns.GetEnumerator();
 

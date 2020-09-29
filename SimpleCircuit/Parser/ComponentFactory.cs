@@ -52,10 +52,19 @@ namespace SimpleCircuit.Parser
         /// <returns></returns>
         public IComponent Create(string name)
         {
+            if (_search.Count == 0)
+                RegisterAssembly(GetType().Assembly);
             _search.Search(name, out var factory);
-            if (factory != null)
-                return factory(name);
-            return null;
+            return factory(name);
         }
+
+        /// <summary>
+        /// Determines whether the specified name is an exact identifier.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified name is exact; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsExact(string name) => _search.Search(name, out _);
     }
 }
