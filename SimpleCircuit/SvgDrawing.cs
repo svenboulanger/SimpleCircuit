@@ -10,6 +10,11 @@ namespace SimpleCircuit
     /// </summary>
     public class SvgDrawing
     {
+        /// <summary>
+        /// The namespace for SVG nodes.
+        /// </summary>
+        public const string Namespace = "http://www.w3.org/2000/svg";
+
         private XmlElement _current;
         private readonly Stack<XmlElement> _group = new Stack<XmlElement>();
         private readonly Bounds _bounds;
@@ -37,7 +42,7 @@ namespace SimpleCircuit
         public SvgDrawing()
         {
             _document = new XmlDocument();
-            _current = _document.CreateElement("svg", "http://www.w3.org/2000/svg");
+            _current = _document.CreateElement("svg", Namespace);
             _document.AppendChild(_current);
             _bounds = new Bounds();
         }
@@ -54,7 +59,7 @@ namespace SimpleCircuit
             _bounds.Expand(start.X, start.Y);
             _bounds.Expand(end.X, end.Y);
 
-            var line = _document.CreateElement("line");
+            var line = _document.CreateElement("line", Namespace);
             line.SetAttribute("x1", Convert(start.X));
             line.SetAttribute("y1", Convert(start.Y));
             line.SetAttribute("x2", Convert(end.X));
@@ -77,7 +82,7 @@ namespace SimpleCircuit
             _bounds.Expand(position.X - radius, position.Y - radius);
             _bounds.Expand(position.X + radius, position.Y + radius);
 
-            var circle = _document.CreateElement("circle");
+            var circle = _document.CreateElement("circle", Namespace);
             circle.SetAttribute("cx", Convert(position.X));
             circle.SetAttribute("cy", Convert(position.Y));
             circle.SetAttribute("r", Convert(radius));
@@ -106,7 +111,7 @@ namespace SimpleCircuit
                 sb.Append($"{Convert(point.X)},{Convert(point.Y)}");
             }
 
-            var poly = _document.CreateElement("polyline");
+            var poly = _document.CreateElement("polyline", Namespace);
             poly.SetAttribute("points", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 poly.SetAttribute("class", classes);
@@ -136,7 +141,7 @@ namespace SimpleCircuit
                 sb.Append($"M {Convert(first.X)} {Convert(first.Y)} L {Convert(second.X)} {Convert(second.Y)}");
             }
 
-            var path = _document.CreateElement("path");
+            var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 path.SetAttribute("class", classes);
@@ -201,7 +206,7 @@ namespace SimpleCircuit
                 }
             }
 
-            var path = _document.CreateElement("path");
+            var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 path.SetAttribute("class", classes);
@@ -225,7 +230,7 @@ namespace SimpleCircuit
                 width = Math.Max(width, l.Length * CharacterWidth);
             var height = lines.Length * LineHeight;
 
-            var text = _document.CreateElement("text");
+            var text = _document.CreateElement("text", Namespace);
             text.SetAttribute("x", Convert(location.X));
             text.SetAttribute("y", Convert(location.Y));
 
@@ -261,7 +266,7 @@ namespace SimpleCircuit
                 var dy = -(height - LineHeight) * 0.5;
                 foreach (var l in lines)
                 {
-                    var tspan = _document.CreateElement("tspan");
+                    var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
                     tspan.SetAttribute("y", Convert(location.Y + dy));
                     tspan.SetAttribute("x", Convert(location.X));
@@ -280,7 +285,7 @@ namespace SimpleCircuit
                 double dy = 0;
                 foreach (var l in lines)
                 {
-                    var tspan = _document.CreateElement("tspan");
+                    var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
                     tspan.SetAttribute("y", Convert(location.Y + dy));
                     tspan.SetAttribute("x", Convert(location.X));
@@ -298,7 +303,7 @@ namespace SimpleCircuit
                 double dy = -height + LineHeight;
                 foreach (var l in lines)
                 {
-                    var tspan = _document.CreateElement("tspan");
+                    var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
                     tspan.SetAttribute("y", Convert(location.Y + dy));
                     tspan.SetAttribute("x", Convert(location.X));
@@ -319,7 +324,7 @@ namespace SimpleCircuit
         /// <param name="classes">The classes.</param>
         public void StartGroup(string id, string classes = null)
         {
-            var elt = _document.CreateElement("g");
+            var elt = _document.CreateElement("g", Namespace);
             if (!string.IsNullOrEmpty(id))
                 elt.SetAttribute("id", id);
             if (!string.IsNullOrWhiteSpace(classes))

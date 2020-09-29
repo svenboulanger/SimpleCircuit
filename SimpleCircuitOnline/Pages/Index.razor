@@ -3,11 +3,14 @@
 @using System.IO;
 @using System.Xml;
 @using System.Timers;
+@inject IJSRuntime Runtime 
 
 <div class="split-screen">
     <div class="input-script">
         <form>
-            <textarea @bind="Code" @bind:event="oninput" rows="20" cols="50"></textarea>
+            <div class="form-group">
+                <textarea class="form-control" @bind="Code" @bind:event="oninput"></textarea>
+            </div>
         </form>
     </div>
     <div class="svg-output">
@@ -31,6 +34,9 @@
         </style>
         @if (_svg != null)
             @((MarkupString)_svg)
+        <p>
+            <a href="javascript:void(0);" class="btn btn-primary" @onclick="DownloadSvg">Download SVG</a>
+        </p>
     </div>
 </div>
 
@@ -40,6 +46,8 @@
     private Timer _timer;
     private Task _task = null;
     private SimpleCircuitParser _parser;
+
+    public string Export { get; set; }
 
     protected override void OnInitialized()
     {
@@ -59,6 +67,26 @@
             _timer.Stop();
             _timer.Start();
         }
+    }
+
+    public async Task DownloadSvg()
+    {
+        // Parse it again
+        var ckt = _parser.Parse(_code);
+        var doc = ckt.Render();
+
+        // Add the style to the svg file
+        var style = doc.CreateElement("style", SvgDrawing.Namespace);
+        style.InnerText = @"path, polyline, line, circle { stroke: black; stroke-width: 0.5pt; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+            .point circle { fill: black; } .plane { stroke-width: 1pt; } text { font: 4pt Tahoma, Verdana, Segoe, sans-serif; }";
+        doc.DocumentElement.PrependChild(style);
+
+        using var sw = new StringWriter();
+        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+            doc.WriteTo(xml);
+
+        byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
+        await Runtime.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
     }
 
     private void OnTimerElapsed(object sender, ElapsedEventArgs e)

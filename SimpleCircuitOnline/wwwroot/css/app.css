@@ -6,6 +6,10 @@ html, body {
     height: 100%;
 }
 
+div, form, textarea {
+    height: 100%;
+}
+
 a, .btn-link {
     color: #0366d6;
 }

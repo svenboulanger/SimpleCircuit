@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit;
-using SimpleCircuit.Components;
-using SimpleCircuit.Parser;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,6 +16,14 @@ namespace Sandbox
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
 
+            var style = doc.CreateElement("style", SvgDrawing.Namespace);
+            style.InnerText = @"path, polyline, line, circle { stroke: black; stroke-width: 0.5pt;
+                fill: transparent; stroke-linecap: round; stroke-linejoin: round; }
+            .point circle { fill: black; }
+            .plane { stroke-width: 1pt; }
+            text { font: 4pt Tahoma, Verdana, Segoe, sans-serif; }";
+            doc.DocumentElement.PrependChild(style);
+
             using var sw = new StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                 doc.WriteTo(xml);
@@ -29,7 +35,7 @@ namespace Sandbox
             {
                 fw.WriteLine("<html>");
                 fw.WriteLine("<head>");
-                fw.WriteLine("<style>");
+                /* fw.WriteLine("<style>");
                 fw.WriteLine(@"
                 path, polyline, line, circle {
                     stroke: black;
@@ -46,7 +52,7 @@ namespace Sandbox
                 text {
                     font: 4pt Tahoma, Verdana, Segoe, sans-serif;
                 }");
-                fw.WriteLine("</style>");
+                fw.WriteLine("</style>"); */
                 fw.WriteLine("</head>");
                 fw.WriteLine("<body>");
                 fw.WriteLine(sw.ToString());
