@@ -88,9 +88,9 @@ namespace SimpleCircuit.Functions
         public override bool Resolve(double value)
         {
             // value = a / b
-            if (_a.IsConstant)
+            if (_a.IsConstant && !value.IsZero())
                 return _b.Resolve(_a.Value / value);
-            if (_b.IsConstant)
+            if (_b.IsConstant && !_b.Value.IsZero())
                 return _a.Resolve(_b.Value * value);
             return false;
         }

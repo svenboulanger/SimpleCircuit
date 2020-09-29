@@ -49,6 +49,24 @@ namespace SimpleCircuit.Functions
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type;
+            switch (type)
+            {
+                case UnknownTypes.Scalar:
+                case UnknownTypes.X:
+                case UnknownTypes.Y:
+                case UnknownTypes.NormalY:
+                    Value = 0.0;
+                    break;
+                case UnknownTypes.NormalX:
+                    Value = -1.0; // This is just because the canvas is usually inverted
+                    break;
+                case UnknownTypes.Scale:
+                    Value = 1.0;
+                    break;
+                case UnknownTypes.Length:
+                    Value = 10.0;
+                    break;
+            }
         }
 
         /// <summary>

@@ -36,8 +36,8 @@ namespace SimpleCircuit.Components
             Name = name;
             X = new Unknown(name + ".x", UnknownTypes.X);
             Y = new Unknown(name + ".y", UnknownTypes.Y);
-            NormalX = new Unknown(name + ".nx", UnknownTypes.X);
-            NormalY = new Unknown(name + ".ny", UnknownTypes.Y);
+            NormalX = new Unknown(name + ".nx", UnknownTypes.NormalX);
+            NormalY = new Unknown(name + ".ny", UnknownTypes.NormalY);
             Pins = new PinCollection(this);
             Pins.Add(new[] { ".", "a" }, new Vector2(), new Vector2(0, 1));
         }

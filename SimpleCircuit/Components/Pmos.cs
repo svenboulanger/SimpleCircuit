@@ -67,8 +67,8 @@ namespace SimpleCircuit.Components
         public override void Apply(Minimizer minimizer)
         {
             minimizer.Minimize += 
-                new Squared(X) + new Squared(Y) + 
-                new Squared(Scale - 1);
+                new Squared(X) + new Squared(Y);
+            minimizer.AddConstraint(new Squared(Scale) - 1);
         }
 
         /// <summary>

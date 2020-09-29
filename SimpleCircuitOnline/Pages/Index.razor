@@ -9,7 +9,7 @@
     <div class="input-script">
         <form class="full-height">
             <div class="form-group full-height">
-                <textarea class="form-control full-height" @bind="Code" @bind:event="oninput"></textarea>
+                <textarea class="form-control full-height" @bind="Script" @bind:event="oninput"></textarea>
             </div>
         </form>
     </div>
@@ -32,11 +32,45 @@
                 font: 4pt Tahoma, Verdana, Segoe, sans-serif;
             }
         </style>
+        <div style="min-height: 100px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
         @if (_svg != null)
+        {
             @((MarkupString)_svg)
+        }
+        else
+        {
+            <h2 class="text-muted">Preview</h2>
+        }
+        </div>
         <p>
             <a href="javascript:void(0);" class="btn btn-primary" @onclick="DownloadSvg">Download SVG</a>
+            <a href="javascript:void(0);" class="btn btn-secondary" @onclick="ToggleHelp">@(_showHelp ? "Hide help" : "Show help")</a>
         </p>
+        @if (_showHelp)
+        {
+        <p>
+            <div class="d-flex flex-wrap">
+            @foreach (var pair in Utility.Components(typeof(SimpleCircuitParser).Assembly).OrderBy(p => p.Item1))
+            {
+                <div class="card" style="width: 12.5rem; margin: 5px;">
+                    <div class="card-img-top" style="background-color: #eeeeee; text-align: center; padding: 5px; min-height: 80px; line-height: 80px;">
+                        @((MarkupString)GenerateSymbol(pair.Item1, out bool isLabeled, out bool isPositioned, out bool isRotated, out bool isScaled))
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@pair.Item1 / @pair.Item1<span class="text-muted small">name</span></h5>
+                        <p class="card-text">
+                            @pair.Item2.Name<br />
+                            <span class="badge badge-@(isLabeled ? "primary" : "danger")">Label</span>
+                            <span class="badge badge-@(isPositioned ? "primary" : "danger")">Position</span>
+                            <span class="badge badge-@(isRotated ? "primary" : "danger")">Rotates</span>
+                            <span class="badge badge-@(isScaled ? "primary" : "danger")">Mirror/scale</span>
+                        </p>
+                    </div>
+                </div>
+            }
+            </div>
+        </p>
+        }
     </div>
 </div>
 
@@ -45,9 +79,33 @@
     private string _code;
     private Timer _timer;
     private Task _task = null;
+    private bool _showHelp = false;
     private SimpleCircuitParser _parser;
 
     public string Export { get; set; }
+
+    private string GenerateSymbol(string key, out bool isLabeled, out bool isPositioned, out bool isRotated, out bool isScaled)
+    {
+        var drawing = new SvgDrawing();
+        var component = SimpleCircuitParser.Factory.Create(key);
+        component.Render(drawing);
+        var doc = drawing.GetDocument();
+
+        using var sw = new StringWriter();
+        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            doc.WriteTo(xml);
+        isLabeled = component is SimpleCircuit.Components.ILabeled;
+        isPositioned = component is SimpleCircuit.Components.ITranslating;
+        isRotated = component is SimpleCircuit.Components.IRotating;
+        isScaled = component is SimpleCircuit.Components.IScaling;
+        return sw.ToString();
+    }
+
+    private void ToggleHelp()
+    {
+        _showHelp = !_showHelp;
+        StateHasChanged();
+    }
 
     protected override void OnInitialized()
     {
@@ -58,7 +116,7 @@
         _parser = new SimpleCircuitParser();
     }
 
-    public string Code
+    public string Script
     {
         get => _code;
         set

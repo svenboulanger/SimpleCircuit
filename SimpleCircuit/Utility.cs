@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace SimpleCircuit
 {
@@ -43,6 +46,21 @@ namespace SimpleCircuit
         {
             var tol = Math.Max(Math.Abs(a), Math.Abs(b)) * 1e-9;
             return Math.Abs(a - b) < tol;
+        }
+
+        /// <summary>
+        /// Gets all the component keys and types in an assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns>The components in the assembly.</returns>
+        public static IEnumerable<Tuple<string, Type>> Components(Assembly assembly)
+        {
+            foreach (var t in assembly.GetTypes())
+            {
+                var attributes = t.GetCustomAttributes<SimpleKeyAttribute>(false);
+                foreach (var attribute in attributes)
+                    yield return Tuple.Create(attribute.Key, t);
+            }
         }
 
         public static void Error(string msg)
