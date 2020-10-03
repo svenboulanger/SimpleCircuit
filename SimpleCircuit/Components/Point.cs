@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components
             X = new Unknown(name + ".x", UnknownTypes.X);
             Y = new Unknown(name + ".y", UnknownTypes.Y);
             Pins = new PinCollection(this);
-            Pins.Add(new[] { ".", "a", "p" }, new Vector2(), new Vector2(0, -1));
+            Pins.Add(new[] { "a", "p" }, "The point.", new Vector2(), new Vector2(0, -1));
             Wires = 0;
         }
 

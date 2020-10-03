@@ -20,8 +20,8 @@ namespace SimpleCircuit.Components
         public Resistor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "+", "pos", "a" }, new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "-", "neg", "b" }, new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "p", "pos", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "n", "neg", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
             var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-            drawing.Poly(tf.Apply(
+            drawing.Polyline(tf.Apply(
                 new Vector2[]
                 {
                     new Vector2(-8, 0),

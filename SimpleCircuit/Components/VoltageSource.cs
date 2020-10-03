@@ -19,8 +19,8 @@ namespace SimpleCircuit.Components
         public VoltageSource(string name)
             : base(name)
         {
-            Pins.Add(new[] { "n", "-", "neg" }, new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "p", "+", "pos" }, new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "n", "neg" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "p", "pos" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

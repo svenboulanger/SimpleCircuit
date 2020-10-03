@@ -15,6 +15,32 @@ namespace SimpleCircuit
         private readonly HashSet<Function> _constraints = new HashSet<Function>();
 
         /// <summary>
+        /// The default style for drawings.
+        /// </summary>
+        public static string DefaultStyle = @"path, polyline, line, circle {
+                stroke: black;
+                stroke-width: 0.5pt;
+                fill: transparent;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            polygon {
+                stroke: black;
+                stroke-width: 0.5pt;
+                fill: black;
+                stroke-linejoin: round;
+            }
+            .point circle {
+                fill: black;
+            }
+            .plane {
+                stroke-width: 1pt;
+            }
+            text {
+                font: 4pt Tahoma, Verdana, Segoe, sans-serif;
+            }";
+
+        /// <summary>
         /// Gets the components.
         /// </summary>
         /// <value>
@@ -125,8 +151,9 @@ namespace SimpleCircuit
         /// <summary>
         /// Renders the circuit.
         /// </summary>
+        /// <param name="style">The style sheet information.</param>
         /// <returns>The circuit.</returns>
-        public XmlDocument Render()
+        public XmlDocument Render(string style = null)
         {
             var minimizer = new Minimizer();
 
@@ -169,6 +196,7 @@ namespace SimpleCircuit
 
             // Create our drawing
             var drawing = new SvgDrawing();
+            drawing.Style = style ?? DefaultStyle;
 
             // Draw all components
             foreach (var c in _components)

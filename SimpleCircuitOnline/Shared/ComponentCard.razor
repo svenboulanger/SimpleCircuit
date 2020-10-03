@@ -1,0 +1,56 @@
+﻿@using SimpleCircuit;
+@using System.IO;
+@using System.Xml;
+
+<div class="card" style="width: 12.5rem; margin: 5px;">
+    <div class="card-img-top" style="background-color: #eeeeee; text-align: center; padding: 5px; min-height: 80px; line-height: 80px;">
+        @((MarkupString)CreateSvg(Component))
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">@Key / @Key<span class="text-muted small">name</span></h5>
+        <p class="card-text">
+            @Component.GetType().Name<br />
+            <span class="badge badge-@(Component is SimpleCircuit.Components.ILabeled ? "primary" : "danger")">Label</span>
+            <span class="badge badge-@(Component is SimpleCircuit.Components.ITranslating ? "primary" : "danger")">Position</span>
+            <span class="badge badge-@(Component is SimpleCircuit.Components.IRotating ? "primary" : "danger")">Rotates</span>
+            <span class="badge badge-@(Component is SimpleCircuit.Components.IScaling ? "primary" : "danger")">Mirror/scale</span>
+        </p>
+    </div>
+    @if (Component.Pins.Count > 0)
+    {
+        <ul class="list-group list-group-flush">
+            @for (var i = 0; i < Component.Pins.Count; i++)
+            {
+                <li class="list-group-item p-1">
+                    @foreach (var name in Component.Pins.NamesOf(Component.Pins[i]))
+                    {
+                        <span class="badge badge-dark">@name</span>
+                    }
+                    <p class="m-0">@Component.Pins[i].Description</p>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Key { get; set; }
+
+    [Parameter]
+    public SimpleCircuit.Components.IComponent Component { get; set; }
+
+    private string CreateSvg(SimpleCircuit.Components.IComponent component)
+    {
+        var drawing = new SvgDrawing();
+        component.Render(drawing);
+        drawing.Style = Circuit.DefaultStyle;
+        var doc = drawing.GetDocument();
+
+        using var sw = new StringWriter();
+        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            doc.WriteTo(xml);
+        return sw.ToString();
+
+    }
+}

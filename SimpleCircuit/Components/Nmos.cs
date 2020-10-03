@@ -28,10 +28,10 @@ namespace SimpleCircuit.Components
         public Nmos(string name)
             : base(name)
         {
-            Pins.Add(new[] { "s", "source" }, new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "g", "gate" }, new Vector2(0, 8), new Vector2(0, 1));
-            Pins.Add(new[] { "b", "bulk" }, new Vector2(0, 0), new Vector2(0, -1));
-            Pins.Add(new[] { "d", "drain" }, new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "s", "source" }, "The source.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "g", "gate" }, "The gate.", new Vector2(0, 8), new Vector2(0, 1));
+            Pins.Add(new[] { "b", "bulk" }, "The bulk.", new Vector2(0, 0), new Vector2(0, -1));
+            Pins.Add(new[] { "d", "drain" }, "The drain.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
@@ -46,11 +46,11 @@ namespace SimpleCircuit.Components
                 new Vector2(-6, 4), new Vector2(6, 4)
             }));
 
-            drawing.Poly(tf.Apply(new[]
+            drawing.Polyline(tf.Apply(new[]
             {
                 new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4)
             }));
-            drawing.Poly(tf.Apply(new[]
+            drawing.Polyline(tf.Apply(new[]
             {
                 new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4)
             }));

@@ -20,8 +20,8 @@ namespace SimpleCircuit.Components
         public CurrentSource(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "+", "pos", "a" }, new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "-", "neg", "b" }, new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "p", "b" }, "The current end point.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "n", "a" }, "The current starting point.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

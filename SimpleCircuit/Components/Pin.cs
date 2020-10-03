@@ -3,8 +3,21 @@ using SimpleCircuit.Functions;
 
 namespace SimpleCircuit.Components
 {
+    /// <summary>
+    /// A pin.
+    /// </summary>
+    /// <seealso cref="ITranslating" />
+    /// <seealso cref="IRotating" />
     public class Pin : ITranslating, IRotating
     {
+        /// <summary>
+        /// Gets the description of the pin.
+        /// </summary>
+        /// <value>
+        /// The description.
+        /// </value>
+        public string Description { get; }
+
         /// <summary>
         /// Gets the x-coordinate of the pin.
         /// </summary>
@@ -44,8 +57,10 @@ namespace SimpleCircuit.Components
         /// <param name="y">The y.</param>
         /// <param name="nx">The nx.</param>
         /// <param name="ny">The ny.</param>
-        public Pin(Function x, Function y, Function nx, Function ny)
+        public Pin(string description, Function x, Function y, Function nx, Function ny)
         {
+            Description = description;
+            Description = description ?? throw new ArgumentNullException(nameof(description));
             X = x ?? throw new ArgumentNullException(nameof(x));
             Y = y ?? throw new ArgumentNullException(nameof(y));
             NormalX = nx ?? throw new ArgumentNullException(nameof(nx));

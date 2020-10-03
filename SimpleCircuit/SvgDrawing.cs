@@ -21,6 +21,14 @@ namespace SimpleCircuit
         private readonly XmlDocument _document;
 
         /// <summary>
+        /// Gets or sets the style of the drawing.
+        /// </summary>
+        /// <value>
+        /// The style.
+        /// </value>
+        public string Style { get; set; }
+
+        /// <summary>
         /// Gets the height of a line of text.
         /// </summary>
         /// <value>
@@ -93,11 +101,11 @@ namespace SimpleCircuit
         }
 
         /// <summary>
-        /// Draws a polygon.
+        /// Draws a polyline (connected lines).
         /// </summary>
         /// <param name="points">The points.</param>
-        /// <param name="style">The style.</param>
-        public void Poly(IEnumerable<Vector2> points, string classes = null)
+        /// <param name="classes">The classes.</param>
+        public void Polyline(IEnumerable<Vector2> points, string classes = null)
         {
             var sb = new StringBuilder(32);
             bool isFirst = true;
@@ -112,6 +120,33 @@ namespace SimpleCircuit
             }
 
             var poly = _document.CreateElement("polyline", Namespace);
+            poly.SetAttribute("points", sb.ToString());
+            if (!string.IsNullOrWhiteSpace(classes))
+                poly.SetAttribute("class", classes);
+
+            _current.AppendChild(poly);
+        }
+
+        /// <summary>
+        /// Draws a polygon (a closed shape of straight lines).
+        /// </summary>
+        /// <param name="points">The points.</param>
+        /// <param name="classes">The classes.</param>
+        public void Polygon(IEnumerable<Vector2> points, string classes = null)
+        {
+            var sb = new StringBuilder(32);
+            bool isFirst = true;
+            foreach (var point in points)
+            {
+                if (isFirst)
+                    isFirst = false;
+                else
+                    sb.Append(" ");
+                _bounds.Expand(point.X, point.Y);
+                sb.Append($"{Convert(point.X)},{Convert(point.Y)}");
+            }
+
+            var poly = _document.CreateElement("polygon", Namespace);
             poly.SetAttribute("points", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 poly.SetAttribute("class", classes);
@@ -355,6 +390,15 @@ namespace SimpleCircuit
             _current.SetAttribute("width", ((int)(_bounds.Width * 5)).ToString());
             _current.SetAttribute("height", ((int)(_bounds.Height * 5)).ToString());
             _current.SetAttribute("viewBox", $"{Convert(_bounds.Left)} {Convert(_bounds.Top)} {Convert(_bounds.Width)} {Convert(_bounds.Height)}");
+
+            // Add stylesheet info if necessary
+            if (!string.IsNullOrWhiteSpace(Style))
+            {
+                var style = _document.CreateElement("style", Namespace);
+                style.InnerText = Style;
+                _current.PrependChild(style);
+            }
+
             return _document;
         }
 

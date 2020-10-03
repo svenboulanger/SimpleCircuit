@@ -20,9 +20,9 @@ namespace SimpleCircuit.Components
         public Opamp(string name)
             : base(name)
         {
-            Pins.Add(new[] { "-", "n" }, new Vector2(-8, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "+", "p" }, new Vector2(-8, 4), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "n" }, "The negative input.", new Vector2(-8, -4), new Vector2(-1, 0));
+            Pins.Add(new[] { "p" }, "The positive input.", new Vector2(-8, 4), new Vector2(-1, 0));
+            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
@@ -30,7 +30,7 @@ namespace SimpleCircuit.Components
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
             var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-            drawing.Poly(tf.Apply(new[] {
+            drawing.Polyline(tf.Apply(new[] {
                 new Vector2(-8, -8),
                 new Vector2(8, 0),
                 new Vector2(-8, 8),
