@@ -71,7 +71,7 @@ namespace SimpleCircuit.Parser
         public bool Next()
         {
             Type = TokenType.Whitespace;
-            while (Type == TokenType.Whitespace)
+            while (Type == TokenType.Whitespace || Type == TokenType.Comment)
             {
                 if (_index >= _input.Length)
                 {
@@ -153,13 +153,18 @@ namespace SimpleCircuit.Parser
                         Content = _tokenBuilder.ToString();
                         Type = TokenType.Whitespace;
                         break;
+                    case '/':
+                        ReadComment();
+                        Content = _tokenBuilder.ToString();
+                        Type = TokenType.Comment;
+                        break;
                     case '"':
                         ReadString();
                         Content = _tokenBuilder.ToString();
                         Type = TokenType.String;
                         break;
                     default:
-                        throw new LexerException($"Unrecognized character '{c}' at line {Line}, position {Position}.");
+                        throw new ParseException($"Unrecognized character '{c}'", Line, Position);
                 }
             }
             return true;
@@ -245,7 +250,7 @@ namespace SimpleCircuit.Parser
             {
                 c = Store(c);
                 if (!char.IsDigit(c))
-                    throw new LexerException($"A number was detected but stops at a decimal point at line {Line}, position {Position}.");
+                    throw new ParseException($"A number was detected but stops at a decimal point", Line, Position);
                 c = Store(c);
                 while (c >= '0' && c <= '9')
                 {
@@ -260,13 +265,13 @@ namespace SimpleCircuit.Parser
             {
                 c = Store(c);
                 if (!char.IsDigit(_input[_index]) && _input[_index] != '+' && _input[_index] != '-')
-                    throw new LexerException($"A number was detected but stops at the exponential character at line {Line}, position {Position}.");
+                    throw new ParseException($"A number was detected but stops at the exponential character", Line, Position);
                 c = Store(c);
                 if (c == '+' || c == '-')
                 {
                     c = Store(c);
                     if (!char.IsDigit(c))
-                        throw new LexerException($"A number was detected but stops at the exponential sign at line {Line}, position {Position}.");
+                        throw new ParseException($"A number was detected but stops at the exponential sign", Line, Position);
                 }
                 while (c >= '0' && c <= '9')
                 {
@@ -283,6 +288,21 @@ namespace SimpleCircuit.Parser
             while (c == ' ' || c == '\t')
                 c = Store(c);
         }
+        private void ReadComment()
+        {
+            _tokenBuilder.Clear();
+            var c = _input[_index];
+            if (c == '/')
+                c = Store(c);
+            else
+                throw new ParseException("Unrecognized comment statement", Line, Position);
+            if (c == '/')
+                c = Store(c);
+            else
+                throw new ParseException("Unrecognized comment statement", Line, Position);
+            while (c != '\r' && c != '\n')
+                c = Store(c);
+        }
         private void ReadString()
         {
             _tokenBuilder.Clear();
@@ -297,7 +317,7 @@ namespace SimpleCircuit.Parser
             if (c == '\"')
                 Store(c);
             else
-                throw new LexerException("Lexer error: Expected closing quote.");
+                throw new ParseException("Lexer error: Expected closing quote", Line, Position);
         }
         private char Store(char c)
         {

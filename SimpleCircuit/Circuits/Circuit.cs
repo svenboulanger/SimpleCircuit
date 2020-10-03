@@ -17,28 +17,23 @@ namespace SimpleCircuit
         /// <summary>
         /// The default style for drawings.
         /// </summary>
-        public static string DefaultStyle = @"path, polyline, line, circle {
-                stroke: black;
-                stroke-width: 0.5pt;
-                fill: transparent;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-            }
-            polygon {
-                stroke: black;
-                stroke-width: 0.5pt;
-                fill: black;
-                stroke-linejoin: round;
-            }
-            .point circle {
-                fill: black;
-            }
-            .plane {
-                stroke-width: 1pt;
-            }
-            text {
-                font: 4pt Tahoma, Verdana, Segoe, sans-serif;
-            }";
+        public static string DefaultStyle =
+@"path, polyline, line, circle, polygon {
+    stroke: black;
+    stroke-width: 0.5pt;
+    fill: transparent;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+polygon, .point circle {
+    fill: black;
+}
+.plane {
+    stroke-width: 1pt;
+}
+text {
+    font: 4pt Tahoma, Verdana, Segoe, sans-serif;
+}";
 
         /// <summary>
         /// Gets the components.

@@ -11,6 +11,7 @@
         Times,
         Divide,
         Whitespace,
+        Comment,
         Word,
         Number,
         String,

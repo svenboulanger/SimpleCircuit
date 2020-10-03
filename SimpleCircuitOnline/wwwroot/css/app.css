@@ -191,14 +191,18 @@ app {
 
 .split-screen {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: 100%;
+    grid-template-columns: 10px [script-start style-start] minmax(400px, 30%) [script-end style-end] 10px [output-start] 1fr [output-end] 10px;
+    grid-template-rows: 10px [script-start output-start] minmax(400px, 60%) [script-end] 10px [style-start] 1fr [style-end output-end] 10px;
     width: 100%;
-    grid-template-areas: "input output";
+    height: 100%;
 }
 
 .input-script {
-    grid-area: input;
+    grid-area: script;
+}
+
+.input-style {
+    grid-area: style;
 }
 
 .svg-output {

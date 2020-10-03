@@ -62,7 +62,9 @@ namespace SimpleCircuit
         }
         private void ParseLine(SimpleCircuitLexer lexer, Circuit ckt)
         {
-            if (lexer.Is(TokenType.Dash))
+            if (lexer.Is(TokenType.Newline))
+                return;
+            else if (lexer.Is(TokenType.Dash))
                 ParseEquation(lexer, ckt);
             else
                 ParseChain(lexer, ckt);
@@ -323,7 +325,7 @@ namespace SimpleCircuit
                     case "nx":
                     case "NX":
                         if (!(result is IRotating orx))
-                            throw new ArgumentException();
+                            throw new ParseException("Component cannot rotate", lexer.Line, lexer.Position);
                         return orx.NormalX;
                     case "ny":
                     case "NY":
@@ -342,7 +344,7 @@ namespace SimpleCircuit
         private string ParseName(SimpleCircuitLexer lexer)
         {
             if (!lexer.Is(TokenType.Word))
-                throw new ArgumentException();
+                throw new ParseException("Name expected", lexer.Line, lexer.Position);
             var word = lexer.Content;
             lexer.Next();
             return word;
@@ -350,7 +352,7 @@ namespace SimpleCircuit
         private string ParseLabel(SimpleCircuitLexer lexer)
         {
             if (!lexer.Is(TokenType.String))
-                throw new ArgumentException();
+                throw new ParseException("Label expected", lexer.Line, lexer.Position);
             var text = lexer.Content.Substring(1, lexer.Content.Length - 2);
             lexer.Next();
             return text;

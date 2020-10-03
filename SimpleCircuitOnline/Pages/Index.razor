@@ -1,17 +1,25 @@
 ﻿@page "/"
-@using SimpleCircuit;
 @using System.IO;
 @using System.Xml;
 @using System.Timers;
 @inject IJSRuntime Runtime 
 
 <div class="split-screen">
-    <div class="input-script">
-        <form class="full-height">
-            <div class="form-group full-height">
-                <textarea class="form-control full-height" @bind="Script" @bind:event="oninput"></textarea>
-            </div>
-        </form>
+    <div class="input-script card">
+        <div class="card-header">
+            Circuit
+        </div>
+        <div class="card-body">
+            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnDidChangeCursorPosition="Defer" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+        </div>
+    </div>
+    <div class="input-style card">
+        <div class="card-header">
+            Style (CSS)
+        </div>
+        <div class="card-body">
+            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnDidChangeCursorPosition="Defer" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+        </div>
     </div>
     <div class="svg-output">
         <div style="min-height: 100px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
@@ -30,34 +38,35 @@
 
 @code{
     private string _svg;
-    private string _code, _style;
     private Timer _timer;
     private Task _task = null;
     private bool _showHelp = false;
     private SimpleCircuitParser _parser;
+    private MonacoEditor _scriptEditor, _styleEditor;
 
-    public string Export { get; set; }
-
-    public string Script
+    private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
     {
-        get => _code;
-        set
+        return new StandaloneEditorConstructionOptions
         {
-            _code = value;
+            AutomaticLayout = true,
+            Language = "text/css"
+        };
+    }
+
+    private void Defer()
+    {
+        if (_timer.Enabled)
+        {
             _timer.Stop();
             _timer.Start();
         }
     }
 
-    public string Style
+    private void Update()
     {
-        get => _style;
-        set
-        {
-            _style = value;
+        if (_timer.Enabled)
             _timer.Stop();
-            _timer.Start();
-        }
+        _timer.Start();
     }
 
     private void ToggleComponents()
@@ -66,20 +75,42 @@
         StateHasChanged();
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
         _timer = new Timer(1000);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
         _parser = new SimpleCircuitParser();
+
+        // Register our own language
+        await Runtime.InvokeVoidAsync("registerLanguage");
+        var model = await _scriptEditor.GetModel();
+        await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
+        await MonacoEditorBase.SetTheme("simpleCircuitTheme");
+
+        // Set the default values
+        await _scriptEditor.SetValue(
+            string.Join(Environment.NewLine, new[] {
+                "// This chain starts with a ground and continues up to V1, up-right to R, right-down to C and down to another ground",
+                "GND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2",
+                "",
+                "// Here we align the y-coordinates to make it look a little bit nicer",
+                "- GND1.y = GND2.y",
+                "- V1.y = C1.y"
+                }
+            ));
+        await _styleEditor.SetValue(Circuit.DefaultStyle);
+        await Render();
     }
 
     public async Task DownloadSvg()
     {
         // Parse it again
-        var ckt = _parser.Parse(_code);
-        var doc = ckt.Render();
+        var code = await _scriptEditor.GetValue();
+        var style = await _styleEditor.GetValue();
+        var ckt = _parser.Parse(code);
+        var doc = ckt.Render(style);
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
             doc.WriteTo(xml);
@@ -100,12 +131,14 @@
             _task = Task.Run(Render);
     }
 
-    private void Render()
+    private async Task Render()
     {
         try
         {
-            var ckt = _parser.Parse(_code);
-            var doc = ckt.Render();
+            var code = await _scriptEditor.GetValue();
+            var style = await _styleEditor.GetValue();
+            var ckt = _parser.Parse(code);
+            var doc = ckt.Render(style);
             using var sw = new StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                 doc.WriteTo(xml);

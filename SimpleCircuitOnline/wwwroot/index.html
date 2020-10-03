@@ -2,26 +2,27 @@
 <html>
 
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<title>SimpleCircuitOnline</title>
-	<!-- <base href="/SimpleCircuit/" /> -->
-	<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-	<link href="css/app.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SimpleCircuitOnline</title>
+    <!-- <base href="/SimpleCircuit/" /> -->
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css" rel="stylesheet" />
 </head>
 
 <body>
-	<app>Loading...</app>
+    <app>Loading...</app>
 
-	<div id="blazor-error-ui">
-		An unhandled error has occurred.
-		<a href="" class="reload">Reload</a>
-		<a class="dismiss">🗙</a>
-	</div>
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
 
-	<script src="js/decode.min.js"></script>
-	<script src="_framework/blazor.webassembly.js" autostart="false"></script>
-	<script>
+    <script src="js/decode.min.js"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
         // Source code copied from Gérald Barré
         function BlazorDownloadFile(filename, contentType, content) {
             // Blazor marshall byte[] to a base64 string, so we first need to convert the string (content) to a Uint8Array to create the File
@@ -69,26 +70,110 @@
             return taBytes;
         }
 
-		Blazor.start({
-			loadBootResource: function (type, name, defaultUri, integrity) {
-				// For framework resources, use the precompressed .br files for faster downloads
-				// This is needed only because GitHub pages doesn't natively support Brotli (or even gzip for .dll files)
-				if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
-					return (async function () {
-						const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
-						if (!response.ok) {
-							throw new Error(response.statusText);
-						}
-						const originalResponseBuffer = await response.arrayBuffer();
-						const originalResponseArray = new Int8Array(originalResponseBuffer);
-						const decompressedResponseArray = BrotliDecode(originalResponseArray);
-						const contentType = type === 'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
-						return new Response(decompressedResponseArray, { headers: { 'content-type': contentType } });
-					})();
-				}
-			}
-		});
-	</script>
+        Blazor.start({
+            loadBootResource: function (type, name, defaultUri, integrity) {
+                // For framework resources, use the precompressed .br files for faster downloads
+                // This is needed only because GitHub pages doesn't natively support Brotli (or even gzip for .dll files)
+                if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
+                    return (async function () {
+                        const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        const originalResponseBuffer = await response.arrayBuffer();
+                        const originalResponseArray = new Int8Array(originalResponseBuffer);
+                        const decompressedResponseArray = BrotliDecode(originalResponseArray);
+                        const contentType = type === 'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
+                        return new Response(decompressedResponseArray, { headers: { 'content-type': contentType } });
+                    })();
+                }
+            }
+        });
+    </script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
+    <script>
+        function registerLanguage()
+        {
+            // Register a new language
+            monaco.languages.register({ id: 'simpleCircuit' });
+
+            // Register a tokens provider for the language
+            monaco.languages.setMonarchTokensProvider('simpleCircuit', {
+                tokenizer: {
+                    root: [
+                        [/\d+(\.\d+)?/, 'number'],
+                        [/^\/\/.*/, 'comment'],
+                        [/\w+/, 'word'],
+                        [/\</, { token: 'bracketWire', next: '@wire_block' }],
+                        [/\[/, { token: 'bracketPin', next: '@pin_block' }],
+                        [/\(/, { token: 'bracket', next: '@label_block' }],
+                        [/-/, { token: 'dash', next: '@constraint_block' }]
+                    ],
+                    wire_block: [
+                        [/\>/, { token: 'bracketWire', next: '@pop' }],
+                        [/\d+(\.\d+)?/, 'number'],
+                        [/\w+/, 'pindirection'],
+                    ],
+                    pin_block: [
+                        [/\]/, { token: 'bracketPin', next: '@pop' }],
+                        [/\w+/, 'wordPin'],
+                    ],
+                    label_block: [
+                        [/\)/, { token: 'bracket', next: '@pop' }],
+                        [/\"([^\\\"]|\\.)*\"/, 'string'],
+                    ],
+                    constraint_block: [
+                        [/\d+(\.\d+)?/, {
+                            cases: {
+                                '@eos': { token: 'number', next: '@pop' },
+                                '@default': 'number'
+                            }
+                        }],
+                        [/\=/, 'equals'],
+                        [/\w+/, {
+                            cases: {
+                                '@eos': { token: 'word', next: '@pop' },
+                                '@default': 'word'
+                            }
+                        }],
+                        [/\./, 'dot'],
+                        [/[\+\-\*\/]/, 'operator'],
+                        [/\[/, { token: 'bracketPin', next: '@pin_block' }],
+                        [/\(|\)/, {
+                            cases: {
+                                '@eos': { token: 'bracket', next: '@pop' },
+                                '@default': 'bracket'
+                            }
+                        }]
+                    ]
+                }
+            });
+
+            // Define a new theme that contains only rules that match this language
+            monaco.editor.defineTheme('simpleCircuitTheme', {
+                base: 'vs',
+                inherit: true,
+                rules: [
+                    { token: 'word', foreground: '0000ff', fontStyle: 'bold' },
+                    { token: 'wordPin', foreground: '7a92cf' },
+                    { token: 'bracket', foreground: 'ff0000' },
+                    { token: 'bracketWire', foreground: 'cc0000' },
+                    { token: 'bracketPin', foreground: '7a92cf' },
+                    { token: 'number', foreground: 'a0a0a0' },
+                    { token: 'comment', foreground: '00a000' },
+                    { token: 'pindirection', foreground: 'cc0000' },
+                    { token: 'string', foreground: 'a633f2' },
+                    { token: 'operator', foreground: '660000' },
+                    { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
+                    { token: 'dot', foreground: 'cc0000' },
+                    { token: 'dash', foreground: '0000cc', fontStyle: 'bold' }
+                ]
+            });
+        }
+    </script>
 </body>
 
 </html>

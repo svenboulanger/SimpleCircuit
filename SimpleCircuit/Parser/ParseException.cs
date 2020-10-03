@@ -6,14 +6,14 @@ namespace SimpleCircuit.Parser
     /// An exception for a lexer.
     /// </summary>
     /// <seealso cref="Exception" />
-    public class LexerException : Exception
+    public class ParseException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LexerException"/> class.
+        /// Initializes a new instance of the <see cref="ParseException"/> class.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public LexerException(string message)
-            : base(message)
+        public ParseException(string message, int line, int position)
+            : base($"{message} at line {line}, position {position}")
         {
         }
     }

@@ -11,8 +11,11 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"GND <u r> mn1
-mn1[g] <u> R");
+            var ckt = parser.Parse(@"// This chain starts with a ground and continues up to V1, up-right to R, right-down to C and down to another ground
+GND1 <u> V1 <u r> R <r d> C <d> GND2
+
+// Here we align the y-coordinates of GND1 and GND2 to make it look a little bit nicer
+- GND1.y = GND2.y");
 
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
