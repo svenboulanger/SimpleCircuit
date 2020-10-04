@@ -23,11 +23,25 @@
     </div>
     <div class="svg-output">
         <div style="min-height: 100px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
-            @(_svg != null ? (MarkupString)_svg : (MarkupString)"<h2 class=\"text-muted\">Preview</h2>")
+            @if (_error != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Oops!</h4>
+                    <p>@_error</p>
+                </div>
+            }
+            else if (_svg != null)
+            {
+                @((MarkupString)_svg)
+            }
+            else
+            {
+                <h2 class="text-muted">Preview</h2>
+            }
         </div>
         <p>
-            <a href="javascript:void(0);" class="btn btn-primary" @onclick="DownloadSvg">Download SVG</a>
-            <a href="javascript:void(0);" class="btn btn-secondary" @onclick="ToggleComponents">@(_showHelp ? "Hide components" : "Show components")</a>
+            <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
+            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="ToggleComponents">@(_showHelp ? "Hide components" : "Show components")</a>
         </p>
         @if (_showHelp)
         {
@@ -37,7 +51,7 @@
 </div>
 
 @code{
-    private string _svg;
+    private string _svg, _error;
     private Timer _timer;
     private Task _task = null;
     private bool _showHelp = false;
@@ -133,6 +147,7 @@
 
     private async Task Render()
     {
+        _error = null;
         try
         {
             var code = await _scriptEditor.GetValue();
@@ -147,7 +162,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Something went wrong: " + ex.Message);
+            _error = ex.Message;
         }
 
         // Force an update

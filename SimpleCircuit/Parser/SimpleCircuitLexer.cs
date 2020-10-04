@@ -51,6 +51,9 @@ namespace SimpleCircuit.Parser
         public SimpleCircuitLexer(string input)
         {
             _input = input;
+            Line = 1;
+            Position = 1;
+            _index = 0;
         }
 
         /// <summary>
@@ -59,8 +62,8 @@ namespace SimpleCircuit.Parser
         public void Reset()
         {
             _index = 0;
-            Line = 0;
-            Position = 0;
+            Line = 1;
+            Position = 1;
         }
 
         /// <summary>
@@ -119,6 +122,28 @@ namespace SimpleCircuit.Parser
                         Position++;
                         Type = TokenType.Plus;
                         break;
+                    case '*':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Times;
+                        break;
+                    case '/':
+                        Content = c.ToString();
+                        c = Store(c);
+                        if (c == '/')
+                        {
+                            ReadComment();
+                            Content = _tokenBuilder.ToString();
+                            Type = TokenType.Comment;
+                        }
+                        else
+                        {
+                            Position++;
+                            Content = "/";
+                            Type = TokenType.Divide;
+                        }
+                        break;
                     case '(':
                     case '[':
                     case '<':
@@ -152,11 +177,6 @@ namespace SimpleCircuit.Parser
                         ReadWhitespace();
                         Content = _tokenBuilder.ToString();
                         Type = TokenType.Whitespace;
-                        break;
-                    case '/':
-                        ReadComment();
-                        Content = _tokenBuilder.ToString();
-                        Type = TokenType.Comment;
                         break;
                     case '"':
                         ReadString();
@@ -192,14 +212,13 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="content">The content.</param>
-        /// <exception cref="ArgumentException"></exception>
-        public void Check(TokenType type, string content = null)
+        public void Check(SimpleCircuitLexer lexer, TokenType type, string content = null)
         {
             var error = Type != type;
             if (content != null && string.CompareOrdinal(content, Content) != 0)
                 error = true;
             if (error)
-                throw new ArgumentException();
+                throw new ParseException($"Expected {(content != null ? content : $"a {type}")}", lexer.Line, lexer.Position);
             Next();
         }
 
@@ -214,23 +233,16 @@ namespace SimpleCircuit.Parser
         {
             _tokenBuilder.Clear();
             var c = _input[_index];
-            var last = '?';
-            while (c == '\r' || c == '\n')
+            if (c == '\r')
             {
                 c = Store(c);
-
-                // Detect \r\n, \r and \n as new lines
-                if (c == '\n' && last == '\r' || last == '?' || last == c)
-                    Line++;
-                if (_index >= _input.Length)
-                {
-                    Position = 0;
-                    return;
-                }
-                last = c;
-                c = _input[_index];
+                if (c == '\n')
+                    Store(c);
             }
-            Position = 0;
+            else
+                Store(c);
+            Position = 1;
+            Line++;
         }
         private void ReadNumber()
         {
@@ -292,10 +304,6 @@ namespace SimpleCircuit.Parser
         {
             _tokenBuilder.Clear();
             var c = _input[_index];
-            if (c == '/')
-                c = Store(c);
-            else
-                throw new ParseException("Unrecognized comment statement", Line, Position);
             if (c == '/')
                 c = Store(c);
             else

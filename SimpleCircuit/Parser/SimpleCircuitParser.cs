@@ -54,7 +54,7 @@ namespace SimpleCircuit
             {
                 ParseLine(lexer, ckt);
                 if (!lexer.Is(TokenType.Newline) && !lexer.Is(TokenType.EndOfContent))
-                    throw new ArgumentException();
+                    throw new ParseException($"Expected a new line", lexer.Line, lexer.Position);
                 while (lexer.Is(TokenType.Newline))
                     lexer.Next();
             }
@@ -66,8 +66,10 @@ namespace SimpleCircuit
                 return;
             else if (lexer.Is(TokenType.Dash))
                 ParseEquation(lexer, ckt);
-            else
+            else if (lexer.Is(TokenType.Word))
                 ParseChain(lexer, ckt);
+            else
+                throw new ParseException($"Could not read {lexer.Content}", lexer.Line, lexer.Position);
         }
         private void ParseChain(SimpleCircuitLexer lexer, Circuit ckt)
         {
@@ -145,7 +147,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 var pin = ParseName(lexer);
-                lexer.Check(TokenType.CloseBracket, "]");
+                lexer.Check(lexer, TokenType.CloseBracket, "]");
                 result.After = result.Component.Pins[pin];
             }
             return result;
@@ -157,7 +159,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 beforePin = ParseName(lexer);
-                lexer.Check(TokenType.CloseBracket, "]");
+                lexer.Check(lexer, TokenType.CloseBracket, "]");
             }
             var result = ParsePin(lexer, ckt);
             if (beforePin != null)
@@ -173,7 +175,7 @@ namespace SimpleCircuit
                 var label = ParseLabel(lexer);
                 if (component is ILabeled lbl)
                     lbl.Label = label;
-                lexer.Check(TokenType.CloseBracket, ")");
+                lexer.Check(lexer, TokenType.CloseBracket, ")");
             }
             return component;
         }
@@ -181,7 +183,7 @@ namespace SimpleCircuit
         private List<WireDescription> ParseWire(SimpleCircuitLexer lexer)
         {
             var wires = new List<WireDescription>();
-            lexer.Check(TokenType.OpenBracket, "<");
+            lexer.Check(lexer, TokenType.OpenBracket, "<");
             do
             {
                 var direction = ParseDirection(lexer);
@@ -197,7 +199,7 @@ namespace SimpleCircuit
                 }
             }
             while (lexer.Is(TokenType.Word));
-            lexer.Check(TokenType.CloseBracket, ">");
+            lexer.Check(lexer, TokenType.CloseBracket, ">");
             return wires;
         }
         private string ParseDirection(SimpleCircuitLexer lexer)
@@ -215,17 +217,17 @@ namespace SimpleCircuit
                         return dir;
                 }
             }
-            throw new ArgumentException();
+            throw new ParseException($"Expected a direction", lexer.Line, lexer.Position);
         }
         private void ParseEquation(SimpleCircuitLexer lexer, Circuit ckt)
         {
             if (!lexer.Is(TokenType.Dash))
-                throw new ArgumentException();
+                throw new ParseException($"A dash was expected", lexer.Line, lexer.Position);
             lexer.Next();
 
             // Add the first equation
             var a = ParseSum(lexer, ckt);
-            lexer.Check(TokenType.Equals);
+            lexer.Check(lexer, TokenType.Equals);
             var b = ParseSum(lexer, ckt);
             ckt.Add(a - b);
 
@@ -281,7 +283,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 var result = ParseSum(lexer, ckt);
-                lexer.Check(TokenType.CloseBracket, ")");
+                lexer.Check(lexer, TokenType.CloseBracket, ")");
                 return result;
             }
             return ParseFactor(lexer, ckt);
@@ -298,53 +300,53 @@ namespace SimpleCircuit
             {
                 object result = ParseComponent(lexer, ckt);
                 if (result == null)
-                    throw new ArgumentException();
+                    throw new ParseException("A component was expected", lexer.Line, lexer.Position);
                 if (lexer.Is(TokenType.OpenBracket, "["))
                 {
                     lexer.Next();
                     var pinName = ParseName(lexer);
                     if (!lexer.Is(TokenType.CloseBracket, "]"))
-                        throw new ArgumentException();
+                        throw new ParseException("A closing bracket was expected", lexer.Line, lexer.Position);
                     lexer.Next();
                     result = ((IComponent)result).Pins[pinName];
                 }
-                lexer.Check(TokenType.Dot);
+                lexer.Check(lexer, TokenType.Dot);
                 var propertyName = ParseName(lexer);
                 switch (propertyName)
                 {
                     case "x":
                     case "X":
                         if (!(result is ITranslating posx))
-                            throw new ArgumentException();
+                            throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
                         return posx.X;
                     case "y":
                     case "Y":
                         if (!(result is ITranslating posy))
-                            throw new ArgumentException();
+                            throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
                         return posy.Y;
                     case "nx":
                     case "NX":
                         if (!(result is IRotating orx))
-                            throw new ParseException("Component cannot rotate", lexer.Line, lexer.Position);
+                            throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
                         return orx.NormalX;
                     case "ny":
                     case "NY":
                         if (!(result is IRotating ory))
-                            throw new ArgumentException();
+                            throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
                         return ory.NormalY;
                     case "s":
                     case "S":
                         if (!(result is IScaling m))
-                            throw new ArgumentException();
+                            throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
                         return m.Scale;
                 }
-                throw new ArgumentException();
+                throw new ParseException($"Could not find property '{propertyName}' of {result}", lexer.Line, lexer.Position);
             }
         }
         private string ParseName(SimpleCircuitLexer lexer)
         {
             if (!lexer.Is(TokenType.Word))
-                throw new ParseException("Name expected", lexer.Line, lexer.Position);
+                throw new ParseException("A name was expected", lexer.Line, lexer.Position);
             var word = lexer.Content;
             lexer.Next();
             return word;
@@ -352,7 +354,7 @@ namespace SimpleCircuit
         private string ParseLabel(SimpleCircuitLexer lexer)
         {
             if (!lexer.Is(TokenType.String))
-                throw new ParseException("Label expected", lexer.Line, lexer.Position);
+                throw new ParseException("A label was expected", lexer.Line, lexer.Position);
             var text = lexer.Content.Substring(1, lexer.Content.Length - 2);
             lexer.Next();
             return text;
