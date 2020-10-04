@@ -5,8 +5,8 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// An NMOS transistor.
     /// </summary>
-    /// <seealso cref="SimpleCircuit.Components.TransformingComponent" />
-    /// <seealso cref="SimpleCircuit.Components.ILabeled" />
+    /// <seealso cref="TransformingComponent" />
+    /// <seealso cref="ILabeled" />
     [SimpleKey("Mn")]
     public class Nmos : TransformingComponent, ILabeled
     {
@@ -65,8 +65,7 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public override void Apply(Minimizer minimizer)
         {
-            minimizer.Minimize +=
-                new Squared(X) + new Squared(Y);
+            minimizer.Minimize += new Squared(X) + new Squared(Y);
             minimizer.AddConstraint(new Squared(Scale) - 1);
         }
 
