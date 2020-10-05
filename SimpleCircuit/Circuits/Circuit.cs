@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
@@ -160,7 +161,10 @@ text {
                 foreach (var c in _constraints)
                 {
                     if (c.Resolve(0.0))
+                    {
                         resolvedConstraints = true;
+                        Console.WriteLine($"Managed to resolve {c}");
+                    }
                 }
             }
 

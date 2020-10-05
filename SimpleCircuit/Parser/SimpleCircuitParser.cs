@@ -88,7 +88,7 @@ namespace SimpleCircuit
                     Pin nextPin;
                     if (i < wires.Count - 1)
                     {
-                        var pt = new Point("X" + (_anonIndex++));
+                        var pt = new Point("X:" + (_anonIndex++));
                         ckt.Add(pt);
                         nextPin = pt.Pins[0];
                         pt.Wires += 2;

@@ -68,7 +68,12 @@ namespace SimpleCircuit.Functions
         public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver) => new RowEquation(_a.CreateEquation(row, mapper, solver), solver, row);
 
         /// <inheritdoc/>
-        public override bool Resolve(double value) => false;
+        public override bool Resolve(double value)
+        {
+            if (value.IsZero())
+                return _a.Resolve(0.0);
+            return false;
+        }
 
         /// <summary>
         /// Converts to string.

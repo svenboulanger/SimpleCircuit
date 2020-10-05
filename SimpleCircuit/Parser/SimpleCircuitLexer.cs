@@ -308,7 +308,7 @@ namespace SimpleCircuit.Parser
                 c = Store(c);
             else
                 throw new ParseException("Unrecognized comment statement", Line, Position);
-            while (c != '\r' && c != '\n')
+            while (c != '\r' && c != '\n' && c != '\0')
                 c = Store(c);
         }
         private void ReadString()
