@@ -26,7 +26,7 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-polygon, .point circle {
+.point circle {
     fill: black;
 }
 .plane {
