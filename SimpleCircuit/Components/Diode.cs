@@ -1,16 +1,22 @@
 ﻿using SimpleCircuit.Functions;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
 namespace SimpleCircuit.Components
 {
+    /// <summary>
+    /// A diode.
+    /// </summary>
+    /// <seealso cref="TransformingComponent" />
+    /// <seealso cref="ILabeled" />
     [SimpleKey("D")]
     public class Diode : TransformingComponent, ILabeled
     {
+        /// <inheritdoc/>
         public string Label { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Diode"/> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
         public Diode(string name)
             : base(name)
         {
@@ -18,6 +24,7 @@ namespace SimpleCircuit.Components
             Pins.Add(new[] { "n", "b", "c" }, "The cathode.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
+        /// <inheritdoc />
         public override void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
@@ -40,12 +47,12 @@ namespace SimpleCircuit.Components
                 drawing.Text(Label, tf.Apply(new Vector2(0, -6)), tf.ApplyDirection(new Vector2(0, -1)));
         }
 
-        public override void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(X) + new Squared(Y);
-            minimizer.AddConstraint(new Squared(Scale) - 1);
-        }
-
+        /// <summary>
+        /// Converts to string.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString() => $"Diode {Name}";
     }
 }

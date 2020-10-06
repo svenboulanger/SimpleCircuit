@@ -55,18 +55,11 @@ namespace SimpleCircuit.Components
                 new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4)
             }));
 
-            if (ShowBulk)
+            if (Pins.IsUsed("b"))
                 drawing.Line(tf.Apply(new Vector2(0, 4)), tf.Apply(new Vector2(0, 0)));
 
             if (!string.IsNullOrEmpty(Label))
                 drawing.Text(Label, tf.Apply(new Vector2(-1, -3)), tf.ApplyDirection(new Vector2(-1, -1)));
-        }
-
-        /// <inheritdoc/>
-        public override void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(X) + new Squared(Y);
-            minimizer.AddConstraint(new Squared(Scale) - 1);
         }
 
         /// <summary>

@@ -45,13 +45,6 @@ namespace SimpleCircuit.Components
                 drawing.Text(Label, tf.Apply(new Vector2(0, -8)), tf.ApplyDirection(new Vector2(0, -1)));
         }
 
-        /// <inheritdoc/>
-        public override void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(X) + new Squared(Y);
-            minimizer.AddConstraint(new Squared(Scale) - 1);
-        }
-
         /// <summary>
         /// Converts to string.
         /// </summary>

@@ -12,9 +12,15 @@ namespace SimpleCircuit.Components
     /// <seealso cref="IEnumerable{Pin}" />
     public class PinCollection : IEnumerable<Pin>
     {
+        private class Node
+        {
+            public Pin Pin;
+            public bool Used;
+        }
+
         private readonly IComponent _parent;
-        private readonly Dictionary<string, Pin> _pins;
-        private readonly List<Pin> _ordered = new List<Pin>();
+        private readonly Dictionary<string, Node> _pins;
+        private readonly List<Node> _ordered = new List<Node>();
 
         /// <summary>
         /// Gets the number of pins.
@@ -32,16 +38,16 @@ namespace SimpleCircuit.Components
         public PinCollection(IComponent parent, IEqualityComparer<string> comparer = null)
         {
             _parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            _pins = new Dictionary<string, Pin>(comparer);
+            _pins = new Dictionary<string, Node>(comparer);
         }
 
         /// <summary>
-        /// Adds the specified pin.
+        /// Adds a pin with the specified names.
         /// </summary>
-        /// <param name="names">The names of the pin.</param>
-        /// <param name="description">The node description.</param>
-        /// <param name="offset">The offset of the pin.</param>
-        /// <param name="normal">The normal of the pin.</param>
+        /// <param name="names">The names.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="normal">The normal.</param>
         public void Add(string[] names, string description, Vector2 offset, Vector2 normal)
         {
             // Use the component orientation to transform the offset and normal
@@ -63,8 +69,11 @@ namespace SimpleCircuit.Components
                 ny = normal.X * or.NormalY + normal.Y * ms * or.NormalX;
             }
 
-            var pin = new Pin(description, x, y, nx, ny);
-
+            var pin = new Node
+            {
+                Pin = new Pin(description, x, y, nx, ny),
+                Used = false
+            };
             _ordered.Add(pin);
             foreach (var name in names)
                 _pins[name] = pin;
@@ -76,9 +85,23 @@ namespace SimpleCircuit.Components
         /// <returns>
         /// An enumerator that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<Pin> GetEnumerator() => _ordered.GetEnumerator();
+        public IEnumerator<Pin> GetEnumerator() => _ordered.Select(o => o.Pin).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether the pin with the specified name is used.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified name is used; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsUsed(string name)
+        {
+            if (_pins.TryGetValue(name, out var pin))
+                return pin.Used;
+            return false;
+        }
 
         /// <summary>
         /// Gets the <see cref="Pin"/> with the specified name.
@@ -87,13 +110,16 @@ namespace SimpleCircuit.Components
         /// The <see cref="Pin"/>.
         /// </value>
         /// <param name="name">The name.</param>
-        /// <returns>The pin.</returns>
+        /// <returns></returns>
         public Pin this[string name]
         {
             get
             {
                 if (_pins.TryGetValue(name, out var pin))
-                    return pin;
+                {
+                    pin.Used = true;
+                    return pin.Pin;
+                }
                 return null;
             }
         }
@@ -106,13 +132,21 @@ namespace SimpleCircuit.Components
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns>The pin.</returns>
-        public Pin this[int index] => _ordered[index];
+        public Pin this[int index]
+        {
+            get
+            {
+                var pin = _ordered[index];
+                pin.Used = true;
+                return pin.Pin;
+            }
+        }
 
         /// <summary>
-        /// Gets the names of the specified pin.
+        /// Gets the names of a specified pin.
         /// </summary>
         /// <param name="pin">The pin.</param>
-        /// <returns>The pins.</returns>
+        /// <returns>The names.</returns>
         public IEnumerable<string> NamesOf(Pin pin) => _pins.Where(p => ReferenceEquals(p.Value, pin)).Select(p => p.Key);
     }
 }

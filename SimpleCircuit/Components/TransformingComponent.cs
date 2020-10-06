@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components
         public string Name { get; }
 
         /// <inheritdoc/>
-        public PinCollection Pins { get; }
+        public PinCollection Pins { get; protected set; }
 
         /// <inheritdoc/>
         public Function X { get; }
@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="TransformingComponent"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
+        /// <param name="pc">The pin collection.</param>
         protected TransformingComponent(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -48,7 +48,11 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc/>
-        public abstract void Apply(Minimizer minimizer);
+        public virtual void Apply(Minimizer minimizer)
+        {
+            minimizer.Minimize += new Squared(X) + new Squared(Y);
+            minimizer.AddConstraint(new Squared(Scale) - 1);
+        }
 
         /// <inheritdoc/>
         public abstract void Render(SvgDrawing drawing);
