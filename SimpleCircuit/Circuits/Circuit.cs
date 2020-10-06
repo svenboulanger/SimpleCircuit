@@ -22,19 +22,13 @@ namespace SimpleCircuit
 @"path, polyline, line, circle, polygon {
     stroke: black;
     stroke-width: 0.5pt;
-    fill: transparent;
+    fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.point circle {
-    fill: black;
-}
-.plane {
-    stroke-width: 1pt;
-}
-text {
-    font: 4pt Tahoma, Verdana, Segoe, sans-serif;
-}";
+.point circle { fill: black; }
+.plane { stroke-width: 1pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
         /// <summary>
         /// Gets the components.

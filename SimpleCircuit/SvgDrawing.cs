@@ -255,7 +255,7 @@ namespace SimpleCircuit
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="classes">The classes.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, string classes = null)
+        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, string classes = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
@@ -265,27 +265,25 @@ namespace SimpleCircuit
                 width = Math.Max(width, l.Length * CharacterWidth);
             var height = lines.Length * LineHeight;
 
+            // Create the text element
             var text = _document.CreateElement("text", Namespace);
-            text.SetAttribute("x", Convert(location.X));
-            text.SetAttribute("y", Convert(location.Y));
 
             // Expand the X-direction
-            List<string> styles = new List<string>();
             if (expand.X.IsZero())
             {
-                styles.Add("text-anchor: middle;");
+                text.SetAttribute("text-anchor", "middle");
                 _bounds.Expand(location - new Vector2(width / 2, 0));
                 _bounds.Expand(location + new Vector2(width / 2, 0));
             }
             else if (expand.X > 0)
             {
-                styles.Add("text-anchor: start;");
+                text.SetAttribute("text-anchor", "start");
                 _bounds.Expand(location);
                 _bounds.Expand(location + new Vector2(width, 0));
             }
             else
             {
-                styles.Add("text-anchor: end;");
+                text.SetAttribute("text-anchor", "end");
                 _bounds.Expand(location - new Vector2(width, 0));
                 _bounds.Expand(location);
             }
@@ -293,7 +291,6 @@ namespace SimpleCircuit
             // Draw the text with multiple lines
             if (expand.Y.IsZero())
             {
-                styles.Add("dominant-baseline: middle;");
                 _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length / 2));
                 _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length / 2));
 
@@ -303,7 +300,7 @@ namespace SimpleCircuit
                 {
                     var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy));
+                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize / 4.0));
                     tspan.SetAttribute("x", Convert(location.X));
                     text.AppendChild(tspan);
                     dy += LineHeight;
@@ -312,7 +309,6 @@ namespace SimpleCircuit
             }
             else if (expand.Y > 0)
             {
-                styles.Add("dominant-baseline: hanging;");
                 _bounds.Expand(location);
                 _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length));
 
@@ -322,7 +318,7 @@ namespace SimpleCircuit
                 {
                     var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy));
+                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize));
                     tspan.SetAttribute("x", Convert(location.X));
                     text.AppendChild(tspan);
                     dy += LineHeight;
@@ -330,7 +326,6 @@ namespace SimpleCircuit
             }
             else
             {
-                styles.Add("dominant-baseline: auto;");
                 _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length));
                 _bounds.Expand(location);
 
@@ -346,7 +341,11 @@ namespace SimpleCircuit
                     dy += LineHeight;
                 }
             }
-            text.SetAttribute("style", string.Join(" ", styles));
+
+            text.SetAttribute("x", Convert(location.X));
+            text.SetAttribute("y", Convert(location.Y));
+            text.SetAttribute("font-size", $"{Convert(fontSize)}pt");
+
             if (!string.IsNullOrWhiteSpace(classes))
                 text.SetAttribute("class", classes);
             _current.AppendChild(text);
