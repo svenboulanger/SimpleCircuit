@@ -2,7 +2,6 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Functions;
 using SimpleCircuit.Parser;
-using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuit

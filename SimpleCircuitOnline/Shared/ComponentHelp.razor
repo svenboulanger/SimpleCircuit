@@ -3,6 +3,6 @@
 <div class="d-flex flex-wrap" style="width: 100%">
     @foreach (var pair in Utility.Components(typeof(SimpleCircuitParser).Assembly).OrderBy(p => p.Item1))
     {
-        <ComponentCard Component="@SimpleCircuit.SimpleCircuitParser.Factory.Create(pair.Item1)" Key="@pair.Item1" />
+        <ComponentCard Component="@SimpleCircuit.SimpleCircuitParser.Factory.Create(pair.Item1)" Name="@pair.Item2" Key="@pair.Item1" />
     }
 </div>

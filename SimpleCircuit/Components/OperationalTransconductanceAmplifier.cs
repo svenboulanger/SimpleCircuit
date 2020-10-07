@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An Operational Transconductance Amplifier (OTA)
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("OTA")]
+    [SimpleKey("OTA", "Operational transconductance amplifier")]
     public class OperationalTransconductanceAmplifier : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

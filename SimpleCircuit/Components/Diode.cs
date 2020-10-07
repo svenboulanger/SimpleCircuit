@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A diode.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("D")]
+    [SimpleKey("D", "Diode")]
     public class Diode : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

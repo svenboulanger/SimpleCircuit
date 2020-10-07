@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An operational amplifier.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("OA")]
+    [SimpleKey("OA", "Opamp")]
     public class Opamp : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

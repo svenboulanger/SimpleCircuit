@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components
     /// <seealso cref="ITranslating" />
     /// <seealso cref="IRotating" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("POW")]
+    [SimpleKey("POW", "Power plane")]
     public class Power : IComponent, ITranslating, IRotating, ILabeled
     {
         /// <inheritdoc/>

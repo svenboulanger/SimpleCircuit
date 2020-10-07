@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An NPN transistor.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("Qn"), SimpleKey("Npn")]
+    [SimpleKey("QN", "NPN-type BJT"), SimpleKey("NPN", "NPN-type BJT")]
     public class BipolarNpnTransistor : TransformingComponent, ILabeled
     {
         /// <inheritdoc />

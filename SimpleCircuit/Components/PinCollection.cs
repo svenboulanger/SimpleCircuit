@@ -147,6 +147,6 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="pin">The pin.</param>
         /// <returns>The names.</returns>
-        public IEnumerable<string> NamesOf(Pin pin) => _pins.Where(p => ReferenceEquals(p.Value, pin)).Select(p => p.Key);
+        public IEnumerable<string> NamesOf(Pin pin) => _pins.Where(p => ReferenceEquals(p.Value.Pin, pin)).Select(p => p.Key);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -53,13 +52,13 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns>The components in the assembly.</returns>
-        public static IEnumerable<Tuple<string, Type>> Components(Assembly assembly)
+        public static IEnumerable<Tuple<string, string, Type>> Components(Assembly assembly)
         {
             foreach (var t in assembly.GetTypes())
             {
                 var attributes = t.GetCustomAttributes<SimpleKeyAttribute>(false);
                 foreach (var attribute in attributes)
-                    yield return Tuple.Create(attribute.Key, t);
+                    yield return Tuple.Create(attribute.Key, attribute.Name, t);
             }
         }
 

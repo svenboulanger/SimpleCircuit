@@ -1,8 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
-    [SimpleKey("A")]
+    /// <summary>
+    /// An amplifier.
+    /// </summary>
+    /// <seealso cref="TransformingComponent" />
+    /// <seealso cref="ILabeled" />
+    [SimpleKey("A", "Amplifier")]
     public class Amplifier : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>
@@ -36,7 +39,7 @@ namespace SimpleCircuit.Components
             }));
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, tf.Apply(new Vector2()), new Vector2());
+                drawing.Text(Label, tf.Apply(new Vector2(-2.5, 0)), new Vector2());
         }
 
         /// <summary>

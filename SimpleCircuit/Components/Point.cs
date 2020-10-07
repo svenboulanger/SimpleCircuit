@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components
     /// A point that can serve as an inflection point or a node for multiple wires.
     /// </summary>
     /// <seealso cref="IComponent" />
-    [SimpleKey("X")]
+    [SimpleKey("X", "Point")]
     public class Point : IComponent, ITranslating
     {
         /// <inheritdoc/>

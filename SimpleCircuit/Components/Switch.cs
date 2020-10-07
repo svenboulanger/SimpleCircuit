@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A switch.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("S")]
+    [SimpleKey("S", "Voltage switch")]
     public class Switch : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

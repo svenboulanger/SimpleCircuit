@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components
     /// <seealso cref="ITranslating" />
     /// <seealso cref="IRotating" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("T"), SimpleKey("P")]
+    [SimpleKey("T", "Terminal"), SimpleKey("P", "Pin")]
     public class Terminal : IComponent, ITranslating, IRotating, ILabeled
     {
         /// <inheritdoc/>

@@ -300,7 +300,7 @@ namespace SimpleCircuit
                 {
                     var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize / 4.0));
+                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize / 3.0));
                     tspan.SetAttribute("x", Convert(location.X));
                     text.AppendChild(tspan);
                     dy += LineHeight;

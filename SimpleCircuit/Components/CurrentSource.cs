@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A voltage source.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("I")]
+    [SimpleKey("I", "Current source")]
     public class CurrentSource : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

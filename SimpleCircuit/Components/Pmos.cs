@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A PMOS transistor.
     /// </summary>
-    /// <seealso cref="SimpleCircuit.Components.TransformingComponent" />
-    /// <seealso cref="SimpleCircuit.Components.ILabeled" />
-    [SimpleKey("Mp")]
+    /// <seealso cref="TransformingComponent" />
+    /// <seealso cref="ILabeled" />
+    [SimpleKey("MP", "PMOS transistor"), SimpleKey("PMOS", "PMOS transistor")]
     public class Pmos : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

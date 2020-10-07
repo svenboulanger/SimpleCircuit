@@ -9,7 +9,7 @@
     <div class="card-body">
         <h5 class="card-title">@Key / @Key<span class="text-muted small">name</span></h5>
         <p class="card-text">
-            @Component.GetType().Name<br />
+            @Name<br />
             <span class="badge badge-@(Component is SimpleCircuit.Components.ILabeled ? "primary" : "danger")">Label</span>
             <span class="badge badge-@(Component is SimpleCircuit.Components.ITranslating ? "primary" : "danger")">Position</span>
             <span class="badge badge-@(Component is SimpleCircuit.Components.IRotating ? "primary" : "danger")">Rotates</span>
@@ -36,6 +36,9 @@
 @code {
     [Parameter]
     public string Key { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
 
     [Parameter]
     public SimpleCircuit.Components.IComponent Component { get; set; }

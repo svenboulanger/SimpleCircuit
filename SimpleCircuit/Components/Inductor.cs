@@ -1,13 +1,11 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An inductor.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("L")]
+    [SimpleKey("L", "Inductor")]
     public class Inductor : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

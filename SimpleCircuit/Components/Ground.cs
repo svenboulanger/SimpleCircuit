@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// A ground terminal.
     /// </summary>
     /// <seealso cref="Component" />
-    [SimpleKey("GND")]
+    [SimpleKey("GND", "Ground")]
     public class Ground : IComponent, ITranslating, IRotating
     {
         /// <inheritdoc/>

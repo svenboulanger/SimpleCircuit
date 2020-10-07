@@ -18,13 +18,22 @@ namespace SimpleCircuit
         public string Key { get; }
 
         /// <summary>
+        /// Gets the name of the component.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string Name { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SimpleKeyAttribute"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is <c>null</c>.</exception>
-        public SimpleKeyAttribute(string key)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> or <paramref name="name"/> is <c>null</c>.</exception>
+        public SimpleKeyAttribute(string key, string name)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
     }
 }
