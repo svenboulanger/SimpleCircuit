@@ -30,7 +30,6 @@ namespace SimpleCircuit
             public IComponent Component;
             public Pin After;
         }
-
         private int _anonIndex = 0, _wireIndex = 0;
 
         /// <summary>
@@ -82,6 +81,8 @@ namespace SimpleCircuit
 
                 // String them together
                 var lastPin = start.After ?? start.Component.Pins[start.Component.Pins.Count - 1];
+                var wire = new Wire(lastPin);
+                ckt.Add(wire);
                 for (var i = 0; i < wires.Count; i++)
                 {
                     Pin nextPin;
@@ -99,39 +100,42 @@ namespace SimpleCircuit
                             pte.Wires++;
                     }
 
-                    var wire = new Wire("W" + (_wireIndex++), lastPin, nextPin);
-                    ckt.Wires.Add(wire);
+                    // Create a new segment for our wire
+                    var length = new Unknown($"W{++_wireIndex}.Length", UnknownTypes.Length);
+                    wire.To(nextPin, length);
 
                     // Add the necessary constraints
                     switch (wires[i].Direction)
                     {
                         case "u":
                         case "U":
-                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - wire.Length);
+                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - length);
                             ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
                             ckt.Add(lastPin.NormalY + 1); ckt.Add(nextPin.NormalY - 1);
                             break;
                         case "d":
                         case "D":
-                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - wire.Length);
+                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - length);
                             ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
                             ckt.Add(lastPin.NormalY - 1); ckt.Add(nextPin.NormalY + 1);
                             break;
                         case "l":
                         case "L":
-                            ckt.Add(lastPin.X - nextPin.X - wire.Length); ckt.Add(lastPin.Y - nextPin.Y);
+                            ckt.Add(lastPin.X - nextPin.X - length); ckt.Add(lastPin.Y - nextPin.Y);
                             ckt.Add(lastPin.NormalX + 1); ckt.Add(nextPin.NormalX - 1);
                             ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
                             break;
                         case "r":
                         case "R":
-                            ckt.Add(nextPin.X - lastPin.X - wire.Length); ckt.Add(lastPin.Y - nextPin.Y);
+                            ckt.Add(nextPin.X - lastPin.X - length); ckt.Add(lastPin.Y - nextPin.Y);
                             ckt.Add(lastPin.NormalX - 1); ckt.Add(nextPin.NormalX + 1);
                             ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
                             break;
                     }
+
+                    // Fix the wire length if necessary
                     if (wires[i].Length >= 0)
-                        ckt.Add(wire.Length - wires[i].Length);
+                        ckt.Add(length - wires[i].Length);
 
                     lastPin = nextPin;
                 }

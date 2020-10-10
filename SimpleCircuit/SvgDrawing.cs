@@ -61,7 +61,7 @@ namespace SimpleCircuit
         /// <param name="start">The start.</param>
         /// <param name="end">The end.</param>
         /// <param name="style">The style.</param>
-        public void Line(Vector2 start, Vector2 end, string classes = null)
+        public void Line(Vector2 start, Vector2 end, string classes = null, string id = null)
         {
             // Expand the bounds
             _bounds.Expand(start.X, start.Y);
@@ -74,6 +74,8 @@ namespace SimpleCircuit
             line.SetAttribute("y2", Convert(end.Y));
             if (!string.IsNullOrWhiteSpace(classes))
                 line.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                line.SetAttribute("id", id);
 
             _current.AppendChild(line);
         }
@@ -84,7 +86,7 @@ namespace SimpleCircuit
         /// <param name="position">The position.</param>
         /// <param name="radius">The radius.</param>
         /// <param name="style">The style.</param>
-        public void Circle(Vector2 position, double radius, string classes = null)
+        public void Circle(Vector2 position, double radius, string classes = null, string id = null)
         {
             // Expand the bounds
             _bounds.Expand(position.X - radius, position.Y - radius);
@@ -96,6 +98,8 @@ namespace SimpleCircuit
             circle.SetAttribute("r", Convert(radius));
             if (!string.IsNullOrWhiteSpace(classes))
                 circle.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                circle.SetAttribute("id", id);
 
             _current.AppendChild(circle);
         }
@@ -105,7 +109,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void Polyline(IEnumerable<Vector2> points, string classes = null)
+        public void Polyline(IEnumerable<Vector2> points, string classes = null, string id = null)
         {
             var sb = new StringBuilder(32);
             bool isFirst = true;
@@ -123,6 +127,8 @@ namespace SimpleCircuit
             poly.SetAttribute("points", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 poly.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                poly.SetAttribute("id", id);
 
             _current.AppendChild(poly);
         }
@@ -132,7 +138,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void Polygon(IEnumerable<Vector2> points, string classes = null)
+        public void Polygon(IEnumerable<Vector2> points, string classes = null, string id = null)
         {
             var sb = new StringBuilder(32);
             bool isFirst = true;
@@ -150,6 +156,8 @@ namespace SimpleCircuit
             poly.SetAttribute("points", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 poly.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                poly.SetAttribute("id", id);
 
             _current.AppendChild(poly);
         }
@@ -188,7 +196,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void SmoothBezier(IEnumerable<Vector2> points, string classes = null)
+        public void SmoothBezier(IEnumerable<Vector2> points, string classes = null, string id = null)
         {
             var sb = new StringBuilder(128);
             var it = points.GetEnumerator();
@@ -245,6 +253,8 @@ namespace SimpleCircuit
             path.SetAttribute("d", sb.ToString());
             if (!string.IsNullOrWhiteSpace(classes))
                 path.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                path.SetAttribute("id", id);
             _current.AppendChild(path);
         }
 
@@ -255,7 +265,7 @@ namespace SimpleCircuit
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="classes">The classes.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, string classes = null)
+        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, string classes = null, string id = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
@@ -348,6 +358,8 @@ namespace SimpleCircuit
 
             if (!string.IsNullOrWhiteSpace(classes))
                 text.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                text.SetAttribute("id", id);
             _current.AppendChild(text);
         }
 

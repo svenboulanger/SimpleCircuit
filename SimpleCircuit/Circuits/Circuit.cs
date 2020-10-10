@@ -14,6 +14,7 @@ namespace SimpleCircuit
     {
         private readonly Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
         private readonly HashSet<Function> _constraints = new HashSet<Function>();
+        private readonly List<Wire> _wires = new List<Wire>();
 
         /// <summary>
         /// Gets or sets the minimum length of a wire.
@@ -45,14 +46,6 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// The components.
         /// </value>
         public IEnumerable<IComponent> Components => _components.Values;
-
-        /// <summary>
-        /// Gets the wires that connect pins together in the order that they are drawn.
-        /// </summary>
-        /// <value>
-        /// The wires.
-        /// </value>
-        public List<Wire> Wires { get; } = new List<Wire>();
 
         /// <summary>
         /// Gets the count.
@@ -92,6 +85,17 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (constraint == null || constraint.IsConstant)
                 return;
             _constraints.Add(constraint);
+        }
+
+        /// <summary>
+        /// Adds the specified wire.
+        /// </summary>
+        /// <param name="wire">The wire.</param>
+        public void Add(Wire wire)
+        {
+            if (wire == null)
+                return;
+            _wires.Add(wire);
         }
 
         /// <summary>
@@ -143,7 +147,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         {
             _components.Clear();
             _constraints.Clear();
-            Wires.Clear();
+            _wires.Clear();
         }
 
         /// <summary>
@@ -171,13 +175,16 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             }
 
             // Build the function that needs to be minimized
-            for (var i = 0; i < Wires.Count; i++)
+            for (var i = 0; i < _wires.Count; i++)
             {
-                if (Wires[i].Length.IsFixed)
-                    continue;
-                var x = Wires[i].Length - MinimumWireLength;
-                minimizer.Minimize += 1.0e3 * new Squared(0.1 * x + new Exp(-x));
-                minimizer.AddMinimum(Wires[i].Length, 0.0, MinimumWireLength);
+                foreach (var length in _wires[i].Lengths)
+                {
+                    if (length.IsFixed)
+                        continue;
+                    var x = length - MinimumWireLength;
+                    minimizer.Minimize += 1.0e3 * new Squared(0.1 * x + new Exp(-x));
+                    minimizer.AddMinimum(length, 0.0, MinimumWireLength);
+                }
             }
 
             foreach (var c in _components)
@@ -203,12 +210,11 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 drawing.EndGroup();
             }
 
-            // Draw all wires
-            var drawn = new List<Wire>();
-            foreach (var w in Wires)
+            var drawn = new HashSet<Wire>();
+            foreach (var wire in _wires)
             {
-                w.Render(drawn, drawing);
-                drawn.Add(w);
+                wire.Render(drawn, drawing);
+                drawn.Add(wire);
             }
 
             // Return the XML document
