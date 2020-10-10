@@ -265,7 +265,7 @@ namespace SimpleCircuit
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="classes">The classes.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, string classes = null, string id = null)
+        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, string classes = null, string id = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
@@ -310,7 +310,7 @@ namespace SimpleCircuit
                 {
                     var tspan = _document.CreateElement("tspan", Namespace);
                     tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize / 3.0));
+                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize * midLineFactor));
                     tspan.SetAttribute("x", Convert(location.X));
                     text.AppendChild(tspan);
                     dy += LineHeight;
