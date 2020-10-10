@@ -20,8 +20,18 @@ namespace SimpleCircuit.Functions
             public Function Local { get; set; }
             public Function Original { get; set; }
         }
+        private struct Minimum
+        {
+            public double Strict { get; }
+            public double Initial { get; }
+            public Minimum(double strict, double initial)
+            {
+                Strict = strict;
+                Initial = initial;
+            }
+        }
 
-        private readonly Dictionary<Unknown, double> _minimum = new Dictionary<Unknown, double>();
+        private readonly Dictionary<Unknown, Minimum> _minimum = new Dictionary<Unknown, Minimum>();
         private readonly HashSet<Function> _constraints = new HashSet<Function>();
         private readonly UnknownMap _map = new UnknownMap();
         private readonly Dictionary<Unknown, IRowEquation> _equations = new Dictionary<Unknown, IRowEquation>();
@@ -43,7 +53,7 @@ namespace SimpleCircuit.Functions
         /// <value>
         /// The minimize.
         /// </value>
-        public Function Minimize { get; set; }
+        public Function Minimize { get; set; } = 1.0;
 
         /// <summary>
         /// Adds the constraint to the circuit.
@@ -60,12 +70,13 @@ namespace SimpleCircuit.Functions
         /// Adds a function that needs to be.
         /// </summary>
         /// <param name="unknown">The unknown with a minimum value.</param>
-        /// <param name="minimum">The minimum value for the unknown.</param>
-        public void AddMinimum(Unknown unknown, double minimum)
+        /// <param name="strict">The strict minimum value for the unknown.</param>
+        /// <param name="initial">The loose minimum value for the unknown.</param>
+        public void AddMinimum(Unknown unknown, double strict, double initial)
         {
             if (unknown == null)
                 return;
-            _minimum.Add(unknown, minimum);
+            _minimum.Add(unknown, new Minimum(strict, initial));
         }
 
         /// <summary>
@@ -184,14 +195,13 @@ namespace SimpleCircuit.Functions
                 {
                     if (_map.TryGet(m.Key, out var index))
                     {
-                        if (_solution[index] < m.Value)
+                        if (_solution[index] < m.Value.Strict)
                         {
-                            alpha = Math.Min(alpha, (m.Value - _oldSolution[index]) / (_solution[index] - _oldSolution[index]));
+                            alpha = Math.Min(alpha, (m.Value.Strict - _oldSolution[index]) / (_solution[index] - _oldSolution[index]));
                             error = 1;
                         }
-
-                        if (_solution[index] <= m.Value)
-                            _solution[index] = m.Value + 1e-6;
+                        if (_solution[index] <= m.Value.Strict)
+                            _solution[index] = m.Value.Strict + 1e-6;
                     }
                 }
                 if (LogInfo)
@@ -244,9 +254,11 @@ namespace SimpleCircuit.Functions
                 if (m.Key.IsFixed)
                     continue;
                 if (diffs.TryGetValue(m.Key, out var eq))
-                    diffs[m.Key] = eq * (m.Key - m.Value) - 1e-2;
+                    // Make sure the solution doesn't go below the minimum
+                    diffs[m.Key] = eq * (m.Key - m.Value.Strict) - 1e-2;
                 else
-                    diffs.Add(m.Key, m.Key - m.Value);
+                    // This is a completely loose unknown, so use the wish value instead
+                    diffs.Add(m.Key, m.Key - m.Value.Initial);
             }
 
             // Setup the equations and solution
@@ -275,8 +287,8 @@ namespace SimpleCircuit.Functions
             {
                 if (_map.TryGet(m.Key, out index))
                 {
-                    _solution[index] = m.Value + 5e-4;
-                    _oldSolution[index] = m.Value + 5e-4;
+                    _solution[index] = m.Value.Initial;
+                    _oldSolution[index] = m.Value.Initial;
                 }
             }
         }

@@ -107,7 +107,11 @@ namespace SimpleCircuit.Functions
         /// The result of the operator.
         /// </returns>
         public static Function operator +(Unknown a, double b)
-            => new Addition(a, b);
+        {
+            if (b.IsZero())
+                return new UnknownFunction(a);
+            return new Addition(a, b);
+        }
 
         /// <summary>
         /// Implements the operator -.
@@ -129,7 +133,26 @@ namespace SimpleCircuit.Functions
         /// The result of the operator.
         /// </returns>
         public static Function operator -(Unknown a, double b)
-            => new Subtraction(a, b);
+        {
+            if (b.IsZero())
+                return a;
+            return new Subtraction(a, b);
+        }
+
+        /// <summary>
+        /// Implements the operator -.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static Function operator -(double a, Unknown b)
+        {
+            if (a.IsZero())
+                return -b;
+            return new Subtraction(a, b);
+        }
 
         /// <summary>
         /// Implements the operator *.
@@ -151,7 +174,11 @@ namespace SimpleCircuit.Functions
         /// The result of the operator.
         /// </returns>
         public static Function operator *(Unknown a, double b)
-            => new Multiplication(a, b);
+        {
+            if ((b - 1).IsZero())
+                return a;
+            return new Multiplication(a, b);
+        }
 
         /// <summary>
         /// Implements the operator /.
@@ -173,6 +200,10 @@ namespace SimpleCircuit.Functions
         /// The result of the operator.
         /// </returns>
         public static Function operator /(Unknown a, double b)
-            => new Division(a, b);
+        {
+            if ((b - 1).IsZero())
+                return a;
+            return new Division(a, b);
+        }
     }
 }

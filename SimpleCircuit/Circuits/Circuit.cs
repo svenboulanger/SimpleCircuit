@@ -16,6 +16,14 @@ namespace SimpleCircuit
         private readonly HashSet<Function> _constraints = new HashSet<Function>();
 
         /// <summary>
+        /// Gets or sets the minimum length of a wire.
+        /// </summary>
+        /// <value>
+        /// The minimum length of the wire.
+        /// </value>
+        public static double MinimumWireLength { get; set; } = 7.5;
+
+        /// <summary>
         /// The default style for drawings.
         /// </summary>
         public static string DefaultStyle =
@@ -167,14 +175,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             {
                 if (Wires[i].Length.IsFixed)
                     continue;
-                if (minimizer.Minimize == null)
-                    minimizer.Minimize = Wires[i].Length / 10.0;
-                else
-                    minimizer.Minimize *= Wires[i].Length / 10.0;
-                minimizer.AddMinimum(Wires[i].Length, 10.0);
+                var x = Wires[i].Length - MinimumWireLength;
+                minimizer.Minimize += 1.0e3 * new Squared(0.1 * x + new Exp(-x));
+                minimizer.AddMinimum(Wires[i].Length, 0.0, MinimumWireLength);
             }
-            if (minimizer.Minimize == null)
-                minimizer.Minimize = 0.0;
 
             foreach (var c in _components)
                 c.Value.Apply(minimizer);
