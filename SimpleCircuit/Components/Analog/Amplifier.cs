@@ -23,18 +23,15 @@
         }
 
         /// <inheritdoc/>
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-
-            drawing.Polygon(tf.Apply(new[]
+            drawing.Polygon(new[]
             {
                 new Vector2(-6, 6), new Vector2(6, 0), new Vector2(-6, -6)
-            }));
+            });
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(-2.5, 0)), new Vector2());
+                drawing.Text(Label, new Vector2(-2.5, 0), new Vector2());
         }
 
         /// <summary>

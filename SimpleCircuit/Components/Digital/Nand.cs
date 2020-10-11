@@ -20,20 +20,17 @@
         }
 
         /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-
-            drawing.ClosedBezier(tf.Apply(new[]
+            drawing.ClosedBezier(new[]
             {
                 new Vector2(-6, 5),
                 new Vector2(-6, 5), new Vector2(1, 5), new Vector2(1, 5),
                 new Vector2(4, 5), new Vector2(6, 2), new Vector2(6, 0),
                 new Vector2(6, -2), new Vector2(4, -5), new Vector2(1, -5),
                 new Vector2(1, -5), new Vector2(-6, -5), new Vector2(-6, -5)
-            }));
-            drawing.Circle(tf.Apply(new Vector2(7.5, 0)), 1.5);
+            });
+            drawing.Circle(new Vector2(7.5, 0), 1.5);
         }
 
         /// <summary>

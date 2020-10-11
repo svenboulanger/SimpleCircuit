@@ -48,6 +48,7 @@ namespace SimpleCircuit.Components
         public void Render(SvgDrawing drawing)
         {
             // If there are more than 2 wires, then let's draw a point
+            drawing.TF = Transform.Identity;
             if (Wires > 2)
                 drawing.Circle(new Vector2(X.Value, Y.Value), 1);
         }

@@ -46,14 +46,14 @@ namespace SimpleCircuit.Components
         public void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
-            drawing.Segments(tf.Apply(new Vector2[]
+            drawing.TF = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
+            drawing.Segments(new Vector2[]
             {
                 new Vector2(0, 0), new Vector2(0, -3),
                 new Vector2(-5, -3), new Vector2(5, -3),
                 new Vector2(-3, -5), new Vector2(3, -5),
                 new Vector2(-1, -7), new Vector2(1, -7)
-            }));
+            });
         }
 
         /// <inheritdoc/>

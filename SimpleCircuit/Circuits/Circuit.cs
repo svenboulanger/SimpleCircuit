@@ -210,6 +210,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 drawing.EndGroup();
             }
 
+            // Draw wires
+            drawing.TF = Transform.Identity;
             var drawn = new HashSet<Wire>();
             foreach (var wire in _wires)
             {

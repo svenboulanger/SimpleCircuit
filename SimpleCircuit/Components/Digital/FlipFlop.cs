@@ -25,27 +25,27 @@
         }
 
         /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
             var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
 
-            drawing.Polygon(tf.Apply(new[]
+            drawing.Polygon(new[]
             {
                 new Vector2(-8, 11), new Vector2(8, 11),
                 new Vector2(8, -11), new Vector2(-8, -11)
-            }));
-            drawing.Polyline(tf.Apply(new[]
+            });
+            drawing.Polyline(new[]
             {
                 new Vector2(-8, -4), new Vector2(-6, -6), new Vector2(-8, -8)
-            }));
+            });
 
-            drawing.Text("D", tf.Apply(new Vector2(-7, 5.5)), tf.ApplyDirection(new Vector2(1, 0)), 3, 0.5);
-            drawing.Text("C", tf.Apply(new Vector2(-5, -5.5)), tf.ApplyDirection(new Vector2(1, 0)), 3, 0.5);
-            drawing.Text("Q", tf.Apply(new Vector2(7, 5.5)), tf.ApplyDirection(new Vector2(-1, 0)), 3, 0.5);
-            drawing.Text("NQ", tf.Apply(new Vector2(7, -5.5)), tf.ApplyDirection(new Vector2(-1, 0)), 3, 0.5);
+            drawing.Text("D", new Vector2(-7, 5.5), new Vector2(1, 0), 3, 0.5);
+            drawing.Text("C", new Vector2(-5, -5.5), new Vector2(1, 0), 3, 0.5);
+            drawing.Text("Q", new Vector2(7, 5.5), new Vector2(-1, 0), 3, 0.5);
+            drawing.Text("NQ", new Vector2(7, -5.5), new Vector2(-1, 0), 3, 0.5);
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(10, 8)), tf.ApplyDirection(new Vector2(1, 1)));
+                drawing.Text(Label, new Vector2(10, 8), new Vector2(1, 1));
         }
 
         /// <summary>

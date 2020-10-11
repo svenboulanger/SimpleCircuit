@@ -51,11 +51,11 @@ namespace SimpleCircuit.Components
         public void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
-            drawing.Line(tf.Apply(new Vector2(0, 0)), tf.Apply(new Vector2(0, 3)));
-            drawing.Line(tf.Apply(new Vector2(-5, 3)), tf.Apply(new Vector2(5, 3)), "plane");
+            drawing.TF = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
+            drawing.Line(new Vector2(0, 0), new Vector2(0, 3));
+            drawing.Line(new Vector2(-5, 3), new Vector2(5, 3), "plane");
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(0, 6)), tf.ApplyDirection(new Vector2(0, 1)));
+                drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
         }
 
         /// <inheritdoc/>

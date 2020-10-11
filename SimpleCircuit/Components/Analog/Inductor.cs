@@ -23,17 +23,14 @@
         }
 
         /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-
-            drawing.Segments(tf.Apply(new[]
+            drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            }));
-            drawing.SmoothBezier(tf.Apply(new[]
+            });
+            drawing.SmoothBezier(new[]
             {
                 new Vector2(-6, 0),
                 new Vector2(-6, -4), new Vector2(-2, -4), new Vector2(-2, 0),
@@ -43,9 +40,9 @@
                 new Vector2(4, -4), new Vector2(4, 0),
                 new Vector2(2, 4), new Vector2(2, 0),
                 new Vector2(6, -4), new Vector2(6, 0)
-            }));
+            });
 
-            drawing.Text(Label, tf.Apply(new Vector2(0, -6)), tf.ApplyDirection(new Vector2(0, -1)));
+            drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
         }
 
         /// <summary>

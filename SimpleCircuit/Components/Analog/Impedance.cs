@@ -23,23 +23,18 @@
         }
 
         /// <inheritdoc/>
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-            drawing.Segments(tf.Apply(new[]
+            drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            }));
-            drawing.Polygon(tf.Apply(new[]
-            {
-                new Vector2(-6, 3), new Vector2(6, 3), new Vector2(6, -3), new Vector2(-6, -3)
-            }));
+            });
+            drawing.Polygon(new[] { new Vector2(-6, 3), new Vector2(6, 3), new Vector2(6, -3), new Vector2(-6, -3) });
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(0, -7)), tf.ApplyDirection(new Vector2(0, -1)));
+                drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
         }
 
         /// <summary>

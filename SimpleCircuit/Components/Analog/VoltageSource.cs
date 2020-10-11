@@ -22,24 +22,21 @@
         }
 
         /// <inheritdoc/>
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-
-            drawing.Circle(tf.Apply(new Vector2(0, 0)), 6);
-            drawing.Segments(tf.Apply(new[]
+            drawing.Circle(new Vector2(0, 0), 6);
+            drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(-3, -1), new Vector2(-3, 1),
                 new Vector2(3, -1), new Vector2(3, 1),
                 new Vector2(2, 0), new Vector2(4, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            }));
+            });
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(0, -8)), tf.ApplyDirection(new Vector2(0, -1)));
+                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
         }
 
         /// <summary>

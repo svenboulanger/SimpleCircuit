@@ -55,6 +55,17 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc/>
-        public abstract void Render(SvgDrawing drawing);
+        public virtual void Render(SvgDrawing drawing)
+        {
+            var normal = new Vector2(NormalX.Value, NormalY.Value);
+            drawing.TF = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
+            Draw(drawing);
+        }
+
+        /// <summary>
+        /// Draws the transforming component (the transform has been applied).
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        protected abstract void Draw(SvgDrawing drawing);
     }
 }

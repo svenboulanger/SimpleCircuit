@@ -24,27 +24,16 @@
         }
 
         /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-            drawing.Segments(tf.Apply(new[]
+            drawing.Segments(new[]
             {
                 new Vector2(0, 6), new Vector2(0, 4),
                 new Vector2(-6, 4), new Vector2(6, 4) 
-            }));
-            drawing.Polyline(tf.Apply(new[]
-            {
-                new Vector2(-3, 4), new Vector2(-6, 0), new Vector2(-8, 0)
-            }));
-            drawing.Polyline(tf.Apply(new[]
-            {
-                new Vector2(3, 4), new Vector2(6, 0), new Vector2(8, 0)
-            }));
-            drawing.Polygon(tf.Apply(new[]
-            {
-                new Vector2(-6, 0), new Vector2(-3.7, 1.4), new Vector2(-5.3, 2.6)
-            }));
+            });
+            drawing.Polyline(new[] { new Vector2(-3, 4), new Vector2(-6, 0), new Vector2(-8, 0) });
+            drawing.Polyline(new[] { new Vector2(3, 4), new Vector2(6, 0), new Vector2(8, 0) });
+            drawing.Polygon(new[] { new Vector2(-6, 0), new Vector2(-3.7, 1.4), new Vector2(-5.3, 2.6) });
         }
 
         /// <summary>

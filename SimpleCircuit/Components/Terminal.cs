@@ -59,12 +59,12 @@ namespace SimpleCircuit.Components
         public void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
+            drawing.TF = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
 
-            drawing.Line(tf.Apply(new Vector2()), tf.Apply(new Vector2(-4, 0)));
-            drawing.Circle(tf.Apply(new Vector2(-5.5, 0)), 1.5, "terminal");
+            drawing.Line(new Vector2(), new Vector2(-4, 0));
+            drawing.Circle(new Vector2(-5.5, 0), 1.5, "terminal");
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(-10, 0)), tf.ApplyDirection(new Vector2(-1, 0)));
+                drawing.Text(Label, new Vector2(-10, 0), new Vector2(-1, 0));
         }
 
         /// <summary>

@@ -24,25 +24,23 @@
         }
 
         /// <inheritdoc/>
-        public override void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
-            drawing.Polygon(tf.Apply(new[] {
+            drawing.Polygon(new[] {
                 new Vector2(-5, -8),
                 new Vector2(5, -4),
                 new Vector2(5, 4),
                 new Vector2(-5, 8)
-            }));
-            drawing.Segments(tf.Apply(new[]
+            });
+            drawing.Segments(new[]
             {
                 new Vector2(-3, -4), new Vector2(-1, -4),
                 new Vector2(-2, 5), new Vector2(-2, 3),
                 new Vector2(-3, 4), new Vector2(-1, 4)
-            }));
+            });
 
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(5, 5)), tf.ApplyDirection(new Vector2(1, 1)));
+                drawing.Text(Label, new Vector2(5, 5), new Vector2(1, 1));
         }
 
         /// <summary>

@@ -12,6 +12,14 @@ namespace SimpleCircuit.Components
         private readonly double _a11, _a12, _a21, _a22;
 
         /// <summary>
+        /// Gets the identity transform.
+        /// </summary>
+        /// <value>
+        /// The identity.
+        /// </value>
+        public static Transform Identity => new Transform(0.0, 0.0, new Vector2(1, 0), new Vector2(0, 1));
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Transform"/> struct.
         /// </summary>
         /// <param name="x">The final translation along the x-axis.</param>
