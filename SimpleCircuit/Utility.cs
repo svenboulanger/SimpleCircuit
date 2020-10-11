@@ -9,13 +9,13 @@ namespace SimpleCircuit
     /// </summary>
     public static class Utility
     {
-        public class Description
+        public class ComponentDescription
         {
             public string Key { get; }
             public string Name { get; }
             public string Category { get; }
             public Type Type { get; }
-            public Description(string key, string name, string category, Type type)
+            public ComponentDescription(string key, string name, string category, Type type)
             {
                 Key = key;
                 Name = name;
@@ -67,13 +67,13 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns>The components in the assembly.</returns>
-        public static IEnumerable<Description> Components(Assembly assembly)
+        public static IEnumerable<ComponentDescription> Components(Assembly assembly)
         {
             foreach (var t in assembly.GetTypes())
             {
                 var attributes = t.GetCustomAttributes<SimpleKeyAttribute>(false);
                 foreach (var attribute in attributes)
-                    yield return new Description(attribute.Key, attribute.Name, attribute.Category, t);
+                    yield return new ComponentDescription(attribute.Key, attribute.Name, attribute.Category, t);
             }
         }
 

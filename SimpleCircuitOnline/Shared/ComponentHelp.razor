@@ -21,7 +21,7 @@
 @code
 {
     private string _current = "General";
-    private Dictionary<string, List<Utility.Description>> _categories = new Dictionary<string, List<Utility.Description>>();
+    private Dictionary<string, List<Utility.ComponentDescription>> _categories = new Dictionary<string, List<Utility.ComponentDescription>>();
 
     private void Select(string category)
     {
@@ -39,7 +39,7 @@
             string category = description.Category ?? "General";
             if (!_categories.TryGetValue(category, out var list))
             {
-                list = new List<Utility.Description>();
+                list = new List<Utility.ComponentDescription>();
                 _categories.Add(category, list);
             }
             list.Add(description);
