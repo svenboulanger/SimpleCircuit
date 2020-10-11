@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// Single-pole double throw switch.

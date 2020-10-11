@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// An Operational Transconductance Amplifier (OTA)
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("OTA", "Operational transconductance amplifier", Category = "Analog")]
-    public class OperationalTransconductanceAmplifier : TransformingComponent, ILabeled
+    [SimpleKey("MUX", "Multiplexer", Category = "Digital")]
+    public class Multiplexer : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -15,11 +15,11 @@
         /// Initializes a new instance of the <see cref="OperationalTransconductanceAmplifier"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public OperationalTransconductanceAmplifier(string name)
+        public Multiplexer(string name)
             : base(name)
         {
-            Pins.Add(new[] { "n" }, "The negative input.", new Vector2(-5, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "p" }, "The positive input.", new Vector2(-5, 4), new Vector2(-1, 0));
+            Pins.Add(new[] { "zero", "a" }, "The '0' input.", new Vector2(-5, -4), new Vector2(-1, 0));
+            Pins.Add(new[] { "one", "b" }, "The '1' input.", new Vector2(-5, 4), new Vector2(-1, 0));
             Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
         }
 
@@ -34,13 +34,9 @@
                 new Vector2(5, 4),
                 new Vector2(-5, 8)
             }));
-            drawing.Segments(tf.Apply(new[]
-            {
-                new Vector2(-3, -4), new Vector2(-1, -4),
-                new Vector2(-2, 5), new Vector2(-2, 3),
-                new Vector2(-3, 4), new Vector2(-1, 4)
-            }));
 
+            drawing.Text("1", tf.Apply(new Vector2(-4, -4)), tf.ApplyDirection(new Vector2(1, 0)), 3, 0.5);
+            drawing.Text("0", tf.Apply(new Vector2(-4, 4)), tf.ApplyDirection(new Vector2(1, 0)), 3, 0.5);
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, tf.Apply(new Vector2(5, 5)), tf.ApplyDirection(new Vector2(1, 1)));
         }

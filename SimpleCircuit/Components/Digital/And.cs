@@ -1,22 +1,22 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// And gate.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
-    [SimpleKey("NAND", "Nand gate.", Category = "Digital")]
-    public class Nand : TransformingComponent
+    [SimpleKey("AND", "And gate.", Category = "Digital")]
+    public class And : TransformingComponent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Or"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Nand(string name)
+        public And(string name)
             : base(name)
         {
             Pins.Add(new[] { "a", "in1" }, "First input.", new Vector2(-6, 2), new Vector2(-1, 0));
             Pins.Add(new[] { "b", "in2" }, "Second input.", new Vector2(-6, -2), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "Output.", new Vector2(9, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "o", "out" }, "Output.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />
@@ -33,7 +33,6 @@
                 new Vector2(6, -2), new Vector2(4, -5), new Vector2(1, -5),
                 new Vector2(1, -5), new Vector2(-6, -5), new Vector2(-6, -5)
             }));
-            drawing.Circle(tf.Apply(new Vector2(7.5, 0)), 1.5);
         }
 
         /// <summary>

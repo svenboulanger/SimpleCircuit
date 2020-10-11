@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// An amplifier.

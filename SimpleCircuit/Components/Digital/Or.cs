@@ -1,21 +1,21 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// And gate.
     /// </summary>
     /// <seealso cref="TransformingComponent" />
-    [SimpleKey("XOR", "Xor gate.", Category = "Digital")]
-    public class Xor : TransformingComponent
+    [SimpleKey("OR", "Or gate.", Category = "Digital")]
+    public class Or : TransformingComponent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Or"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Xor(string name)
+        public Or(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a", "in1" }, "First input.", new Vector2(-5.31, 2), new Vector2(-1, 0));
-            Pins.Add(new[] { "b", "in2" }, "Second input.", new Vector2(-5.31, -2), new Vector2(-1, 0));
+            Pins.Add(new[] { "a", "in1" }, "First input.", new Vector2(-3.81, 2), new Vector2(-1, 0));
+            Pins.Add(new[] { "b", "in2" }, "Second input.", new Vector2(-3.81, -2), new Vector2(-1, 0));
             Pins.Add(new[] { "o", "out" }, "Output.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
@@ -32,10 +32,6 @@
                 new Vector2(4, -3), new Vector2(1, -5), new Vector2(-4, -5),
                 new Vector2(-4, -5), new Vector2(-3, -5), new Vector2(-5, -5),
                 new Vector2(-3, -2), new Vector2(-3, 2), new Vector2(-5, 5)
-            }));
-            drawing.OpenBezier(tf.Apply(new[]
-            {
-                new Vector2(-6.5, -5), new Vector2(-4.5, -2), new Vector2(-4.5, 2), new Vector2(-6.5, 5)
             }));
         }
 

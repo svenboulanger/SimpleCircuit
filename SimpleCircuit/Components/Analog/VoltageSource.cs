@@ -1,25 +1,24 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
-    /// An impedance/admittance.
+    /// A voltage source.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("Z", "Impedance", Category = "Analog"), SimpleKey("Y", "Admittance", Category = "Analog")]
-    public class Impedance : TransformingComponent, ILabeled
+    /// <seealso cref="IComponent" />
+    [SimpleKey("V", "Voltage source", Category = "Analog")]
+    public class VoltageSource : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Impedance"/> class.
+        /// Initializes a new instance of the <see cref="VoltageSource"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Impedance(string name)
+        public VoltageSource(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "pos", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "neg", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "n", "neg" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "p", "pos" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
@@ -27,19 +26,20 @@
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
             var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
+
+            drawing.Circle(tf.Apply(new Vector2(0, 0)), 6);
             drawing.Segments(tf.Apply(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
+                new Vector2(-3, -1), new Vector2(-3, 1),
+                new Vector2(3, -1), new Vector2(3, 1),
+                new Vector2(2, 0), new Vector2(4, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            }));
-            drawing.Polygon(tf.Apply(new[]
-            {
-                new Vector2(-6, 3), new Vector2(6, 3), new Vector2(6, -3), new Vector2(-6, -3)
             }));
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, tf.Apply(new Vector2(0, -7)), tf.ApplyDirection(new Vector2(0, -1)));
+                drawing.Text(Label, tf.Apply(new Vector2(0, -8)), tf.ApplyDirection(new Vector2(0, -1)));
         }
 
         /// <summary>
@@ -48,7 +48,6 @@
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"Impedance {Name}";
-
+        public override string ToString() => $"Voltage source {Name}";
     }
 }
