@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("OTA", "Operational transconductance amplifier")]
+    [SimpleKey("OTA", "Operational transconductance amplifier", Category = "Analog")]
     public class OperationalTransconductanceAmplifier : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

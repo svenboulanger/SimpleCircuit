@@ -45,6 +45,14 @@
 
     private string CreateSvg(SimpleCircuit.Components.IComponent component)
     {
+        if (component is SimpleCircuit.Components.IRotating rot)
+        {
+            rot.NormalX.Resolve(1.0);
+            rot.NormalY.Resolve(0.0);
+        }
+        if (component is SimpleCircuit.Components.IScaling scaling)
+            scaling.Scale.Resolve(-1.0);
+
         var drawing = new SvgDrawing();
         component.Render(drawing);
         drawing.Style = Circuit.DefaultStyle;

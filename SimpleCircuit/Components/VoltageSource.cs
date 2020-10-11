@@ -4,7 +4,7 @@
     /// A voltage source.
     /// </summary>
     /// <seealso cref="IComponent" />
-    [SimpleKey("V", "Voltage source")]
+    [SimpleKey("V", "Voltage source", Category = "Analog")]
     public class VoltageSource : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("R", "Resistor")]
+    [SimpleKey("R", "Resistor", Category = "Analog")]
     public class Resistor : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>
@@ -19,6 +19,7 @@
             : base(name)
         {
             Pins.Add(new[] { "p", "pos", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 8), new Vector2(0, 1));
             Pins.Add(new[] { "n", "neg", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
@@ -41,6 +42,15 @@
                     new Vector2(6, 0),
                     new Vector2(8, 0)
                 }));
+
+            if (Pins.IsUsed("c"))
+            {
+                drawing.Line(tf.Apply(new Vector2(0, 4)), tf.Apply(new Vector2(0, 8)));
+                drawing.Polygon(tf.Apply(new[]
+                {
+                    new Vector2(0, 4), new Vector2(-1, 7), new Vector2(1, 7)
+                }));
+            }
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))

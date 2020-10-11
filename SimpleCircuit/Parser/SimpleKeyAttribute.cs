@@ -26,6 +26,14 @@ namespace SimpleCircuit
         public string Name { get; }
 
         /// <summary>
+        /// Gets the category.
+        /// </summary>
+        /// <value>
+        /// The category.
+        /// </value>
+        public string Category { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SimpleKeyAttribute"/> class.
         /// </summary>
         /// <param name="key">The key.</param>

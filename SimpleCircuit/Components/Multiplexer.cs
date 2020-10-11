@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("MUX", "Multiplexer")]
+    [SimpleKey("MUX", "Multiplexer", Category = "Digital")]
     public class Multiplexer : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

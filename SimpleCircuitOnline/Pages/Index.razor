@@ -39,10 +39,10 @@
                 <h2 class="text-muted">Preview</h2>
             }
         </div>
-        <p>
+        <div class="clearfix">
             <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
             <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="ToggleComponents">@(_showHelp ? "Hide components" : "Show components")</a>
-        </p>
+        </div>
         @if (_showHelp)
         {
             <ComponentHelp />
@@ -50,7 +50,8 @@
     </div>
 </div>
 
-@code{
+@code
+{
     private string _svg, _error;
     private Timer _timer;
     private Task _task = null;
@@ -63,7 +64,8 @@
         return new StandaloneEditorConstructionOptions
         {
             AutomaticLayout = true,
-            Language = "text/css"
+            Language = "text/css",
+            WordWrap = "on"
         };
     }
 
@@ -110,8 +112,7 @@
                 "GND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2",
                 "",
                 "// Here we align the y-coordinates to make it look a little bit nicer",
-                "- GND1.y = GND2.y",
-                "- V1.y = C1.y"
+                "- GND1.y = GND2.y"
                 }
             ));
         await _styleEditor.SetValue(Circuit.DefaultStyle);

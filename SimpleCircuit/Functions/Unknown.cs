@@ -58,7 +58,7 @@ namespace SimpleCircuit.Functions
                     Value = 0.0;
                     break;
                 case UnknownTypes.NormalX:
-                    Value = -1.0; // This is just because the canvas is usually inverted
+                    Value = 1.0;
                     break;
                 case UnknownTypes.Scale:
                     Value = 1.0;

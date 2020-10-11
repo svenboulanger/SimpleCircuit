@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("MN", "NMOS transistor"), SimpleKey("NMOS", "NMOS transistor")]
+    [SimpleKey("MN", "NMOS transistor", Category = "Analog"), SimpleKey("NMOS", "NMOS transistor", Category = "Analog")]
     public class Nmos : TransformingComponent, ILabeled
     {
         /// <inheritdoc />

@@ -11,19 +11,10 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"gnd1 <u 1> r <u 1 r> r <r d> c <d> gnd2
-- gnd1.y = gnd2.y");
+            var ckt = parser.Parse(@"X <r> xor");
 
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
-
-            var style = doc.CreateElement("style", SvgDrawing.Namespace);
-            style.InnerText = @"path, polyline, line, circle { stroke: black; stroke-width: 0.5pt;
-                fill: transparent; stroke-linecap: round; stroke-linejoin: round; }
-            .point circle { fill: black; }
-            .plane { stroke-width: 1pt; }
-            text { font: 4pt Tahoma, Verdana, Segoe, sans-serif; }";
-            doc.DocumentElement.PrependChild(style);
 
             using var sw = new StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))

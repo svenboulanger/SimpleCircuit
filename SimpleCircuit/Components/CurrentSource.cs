@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("I", "Current source")]
+    [SimpleKey("I", "Current source", Category = "Analog")]
     public class CurrentSource : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

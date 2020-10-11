@@ -259,6 +259,99 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Closed bezier curve.
+        /// </summary>
+        /// <param name="pointsAndHandles">The points and handles.</param>
+        /// <param name="classes">The classes.</param>
+        /// <param name="id">The identifier.</param>
+        public void ClosedBezier(IEnumerable<Vector2> pointsAndHandles, string classes = null, string id = null)
+        {
+            var sb = new StringBuilder(128);
+            var it = pointsAndHandles.GetEnumerator();
+            bool isFirst = true;
+            while (it.MoveNext())
+            {
+                if (isFirst)
+                {
+                    var m = it.Current;
+                    sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
+                    _bounds.Expand(m);
+                    isFirst = false;
+                }
+                else
+                {
+                    var h1 = it.Current;
+                    if (!it.MoveNext())
+                        break;
+                    var h2 = it.Current;
+                    if (!it.MoveNext())
+                        break;
+                    var end = it.Current;
+                    sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
+                    _bounds.Expand(h1);
+                    _bounds.Expand(h2);
+                    _bounds.Expand(end);
+                }
+            }
+
+            // Close the path
+            sb.Append("Z");
+
+            var path = _document.CreateElement("path", Namespace);
+            path.SetAttribute("d", sb.ToString());
+            if (!string.IsNullOrWhiteSpace(classes))
+                path.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                path.SetAttribute("id", id);
+            _current.AppendChild(path);
+        }
+
+        /// <summary>
+        /// Open bezier curve.
+        /// </summary>
+        /// <param name="pointsAndHandles">The points and handles.</param>
+        /// <param name="classes">The classes.</param>
+        /// <param name="id">The identifier.</param>
+        public void OpenBezier(IEnumerable<Vector2> pointsAndHandles, string classes = null, string id = null)
+        {
+            var sb = new StringBuilder(128);
+            var it = pointsAndHandles.GetEnumerator();
+            bool isFirst = true;
+            while (it.MoveNext())
+            {
+                if (isFirst)
+                {
+                    var m = it.Current;
+                    sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
+                    _bounds.Expand(m);
+                    isFirst = false;
+                }
+                else
+                {
+                    var h1 = it.Current;
+                    if (!it.MoveNext())
+                        break;
+                    var h2 = it.Current;
+                    if (!it.MoveNext())
+                        break;
+                    var end = it.Current;
+                    sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
+                    _bounds.Expand(h1);
+                    _bounds.Expand(h2);
+                    _bounds.Expand(end);
+                }
+            }
+
+            var path = _document.CreateElement("path", Namespace);
+            path.SetAttribute("d", sb.ToString());
+            if (!string.IsNullOrWhiteSpace(classes))
+                path.SetAttribute("class", classes);
+            if (!string.IsNullOrWhiteSpace(id))
+                path.SetAttribute("id", id);
+            _current.AppendChild(path);
+        }
+
+        /// <summary>
         /// Draws text.
         /// </summary>
         /// <param name="value">The value.</param>

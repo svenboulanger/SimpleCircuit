@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("D", "Diode")]
+    [SimpleKey("D", "Diode", Category = "Analog")]
     public class Diode : TransformingComponent, ILabeled
     {
         /// <inheritdoc/>

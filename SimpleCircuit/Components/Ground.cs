@@ -39,14 +39,14 @@ namespace SimpleCircuit.Components
             NormalX = new Unknown(name + ".nx", UnknownTypes.NormalX);
             NormalY = new Unknown(name + ".ny", UnknownTypes.NormalY);
             Pins = new PinCollection(this);
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, 1));
+            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
         }
 
         /// <inheritdoc/>
         public void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
-            var tf = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
+            var tf = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
             drawing.Segments(tf.Apply(new Vector2[]
             {
                 new Vector2(0, 0), new Vector2(0, -3),

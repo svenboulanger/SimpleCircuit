@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="TransformingComponent" />
     /// <seealso cref="ILabeled" />
-    [SimpleKey("QN", "NPN-type BJT"), SimpleKey("NPN", "NPN-type BJT")]
+    [SimpleKey("QN", "NPN-type BJT", Category = "Analog"), SimpleKey("NPN", "NPN-type BJT", Category = "Analog")]
     public class BipolarNpnTransistor : TransformingComponent, ILabeled
     {
         /// <inheritdoc />

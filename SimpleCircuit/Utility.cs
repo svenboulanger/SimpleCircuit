@@ -9,6 +9,21 @@ namespace SimpleCircuit
     /// </summary>
     public static class Utility
     {
+        public class Description
+        {
+            public string Key { get; }
+            public string Name { get; }
+            public string Category { get; }
+            public Type Type { get; }
+            public Description(string key, string name, string category, Type type)
+            {
+                Key = key;
+                Name = name;
+                Category = category;
+                Type = type;
+            }
+        }
+
         /// <summary>
         /// Finds the difference in angle between a1 and a2 (or a1 - a2).
         /// </summary>
@@ -52,13 +67,13 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns>The components in the assembly.</returns>
-        public static IEnumerable<Tuple<string, string, Type>> Components(Assembly assembly)
+        public static IEnumerable<Description> Components(Assembly assembly)
         {
             foreach (var t in assembly.GetTypes())
             {
                 var attributes = t.GetCustomAttributes<SimpleKeyAttribute>(false);
                 foreach (var attribute in attributes)
-                    yield return Tuple.Create(attribute.Key, attribute.Name, t);
+                    yield return new Description(attribute.Key, attribute.Name, attribute.Category, t);
             }
         }
 

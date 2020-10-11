@@ -1,8 +1,48 @@
 ﻿@using SimpleCircuit;
 
-<div class="d-flex flex-wrap" style="width: 100%">
-    @foreach (var pair in Utility.Components(typeof(SimpleCircuitParser).Assembly).OrderBy(p => p.Item1))
+<ul class="nav nav-tabs">
+    @foreach (var category in _categories.Keys)
     {
-        <ComponentCard Component="@SimpleCircuit.SimpleCircuitParser.Factory.Create(pair.Item1)" Name="@pair.Item2" Key="@pair.Item1" />
+        <li class="nav-item">
+            <a class="nav-link@(string.CompareOrdinal(category, _current) == 0 ? " active" : "")" style="cursor: pointer" @onclick="x => Select(category)">@category</a>
+        </li>
+    }
+</ul>
+<div class="d-flex flex-wrap" style="width: 100%">
+    @if (_categories != null && _categories.TryGetValue(_current, out var list))
+    {
+        @foreach (var d in list)
+        {
+            <ComponentCard Component="@SimpleCircuit.SimpleCircuitParser.Factory.Create(d.Key)" Name="@d.Name" Key="@d.Key" />
+        }
     }
 </div>
+
+@code
+{
+    private string _current = "General";
+    private Dictionary<string, List<Utility.Description>> _categories = new Dictionary<string, List<Utility.Description>>();
+
+    private void Select(string category)
+    {
+        _current = category;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Find the categories
+        foreach (var description in Utility.Components(typeof(SimpleCircuitParser).Assembly).OrderBy(d => d.Name))
+        {
+            string category = description.Category ?? "General";
+            if (!_categories.TryGetValue(category, out var list))
+            {
+                list = new List<Utility.Description>();
+                _categories.Add(category, list);
+            }
+            list.Add(description);
+        }
+    }
+}
