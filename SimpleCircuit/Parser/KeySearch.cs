@@ -78,7 +78,10 @@ namespace SimpleCircuit.Parser
                 else
                     return false;
             }
-            return true;
+
+            // We reached the end of the key!
+            // If the current node is also a set value, then we have an exact match!
+            return current.IsSet;
         }
 
         /// <summary>

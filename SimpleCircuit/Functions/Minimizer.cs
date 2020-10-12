@@ -310,8 +310,8 @@ namespace SimpleCircuit.Functions
                         }
                         break;
                     default:
-                        _solution[index] = 0.0;
-                        _oldSolution[index] = 0.0;
+                        _solution[index] = eq.Key.Value;
+                        _oldSolution[index] = eq.Key.Value;
                         break;
                 }
                 if (LogInfo)

@@ -53,7 +53,8 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public virtual void Apply(Minimizer minimizer)
         {
-            minimizer.Minimize += new Squared(0.01 * X) + new Squared(0.01 * Y);
+            // Make any minimization of the coordinates very weak to avoid having issues with our other minimizations
+            minimizer.Minimize += new Squared(1e-6 * X) + new Squared(1e-6 * Y);
         }
 
         /// <inheritdoc/>

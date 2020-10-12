@@ -19,7 +19,7 @@
         public Power(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
+            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, 1));
         }
 
         /// <inheritdoc/>

@@ -49,5 +49,11 @@ namespace SimpleCircuit.Components
             drawing.TF = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
             Draw(drawing);
         }
+
+        public override void Apply(Minimizer minimizer)
+        {
+            base.Apply(minimizer);
+            minimizer.AddConstraint(new Squared(NormalX) + new Squared(NormalY) - 1);
+        }
     }
 }

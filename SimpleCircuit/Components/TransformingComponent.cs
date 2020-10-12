@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components
         public override void Apply(Minimizer minimizer)
         {
             base.Apply(minimizer);
-            minimizer.Minimize += 1e3 * (new Squared(Scale) + 1.0 / new Squared(Scale));
+            minimizer.Minimize += 1e6 * (new Squared(Scale) + 1.0 / new Squared(Scale));
         }
 
         /// <inheritdoc/>
