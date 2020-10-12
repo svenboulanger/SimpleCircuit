@@ -12,6 +12,14 @@
         public string Label { get; set; }
 
         /// <summary>
+        /// Gets or sets the throwing position.
+        /// </summary>
+        /// <value>
+        /// The throw.
+        /// </value>
+        public double Throw { get; set; } = 1.0;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SwitchSinglePoleDoubleThrow"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -36,7 +44,13 @@
             drawing.Circle(new Vector2(-5, 0), 1);
             drawing.Circle(new Vector2(5, 4), 1);
             drawing.Circle(new Vector2(5, -4), 1);
-            drawing.Line(new Vector2(-4, 0), new Vector2(4, 4));
+
+            if (Throw.IsZero())
+                drawing.Line(new Vector2(-4, 0), new Vector2(5, 0));
+            else if (Throw > 0)
+                drawing.Line(new Vector2(-4, 0), new Vector2(4, 4));
+            else
+                drawing.Line(new Vector2(-4, 0), new Vector2(4, -4));
 
             if (Pins.IsUsed("c"))
                 drawing.Line(new Vector2(0, 2), new Vector2(0, 6));

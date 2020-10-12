@@ -46,12 +46,20 @@ namespace SimpleCircuit
         public double LineHeight { get; set; } = 5.0;
 
         /// <summary>
-        /// Gets or sets the width of a character.
+        /// Gets or sets the width of a lowercase character.
         /// </summary>
         /// <value>
-        /// The width of the character.
+        /// The width of a lowercase character.
         /// </value>
-        public double CharacterWidth { get; set; } = 3.0;
+        public double LowerCharacterWidth { get; set; } = 3.0;
+
+        /// <summary>
+        /// Gets or sets the width of an uppercase character.
+        /// </summary>
+        /// <value>
+        /// The width of an uppercase character.
+        /// </value>
+        public double UpperCharacterWidth { get; set; } = 4.0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgDrawing"/> class.
@@ -387,7 +395,12 @@ namespace SimpleCircuit
             var lines = value.Split(new char[] { '\r', '\n', '\\' });
             var width = 0.0;
             foreach (var l in lines)
-                width = Math.Max(width, l.Length * CharacterWidth);
+            {
+                var w = 0.0;
+                foreach (var c in l)
+                    w += char.IsLower(c) ? LowerCharacterWidth : UpperCharacterWidth;
+                width = Math.Max(width, w);
+            }
             var height = lines.Length * LineHeight;
 
             // Create the text element

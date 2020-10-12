@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml;
 using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
@@ -167,10 +166,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 foreach (var c in _constraints)
                 {
                     if (c.Resolve(0.0))
-                    {
                         resolvedConstraints = true;
-                        Console.WriteLine($"Managed to resolve {c}");
-                    }
                 }
             }
 
@@ -182,8 +178,9 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                     if (length.IsFixed)
                         continue;
                     var x = length - MinimumWireLength;
-                    minimizer.Minimize += 1.0e3 * new Squared(0.1 * x + new Exp(-x));
-                    minimizer.AddMinimum(length, 0.0, MinimumWireLength);
+                    minimizer.Minimize += 1e3 * (x + new Exp(-x));
+                    length.Value = MinimumWireLength;
+                    minimizer.AddMinimum(length, 0.0);
                 }
             }
 

@@ -20,8 +20,13 @@
         {
             Pins.Add(new[] { "d" }, "Data.", new Vector2(-8, 6), new Vector2(-1, 0));
             Pins.Add(new[] { "c", "clk" }, "Clock.", new Vector2(-8, -6), new Vector2(-1, 0));
+            Pins.Add(new[] { "r", "rst" }, "Reset.", new Vector2(0, -11), new Vector2(0, -1));
+            Pins.Add(new[] { "s", "set" }, "Set.", new Vector2(0, 11), new Vector2(0, 1));
             Pins.Add(new[] { "nq", "qn" }, "Inverted output.", new Vector2(8, -6), new Vector2(1, 0));
             Pins.Add(new[] { "q" }, "Output", new Vector2(8, 6), new Vector2(1, 0));
+
+            // This is just for having a bit nicer initial values
+            UnknownScale.Value = -1;
         }
 
         /// <inheritdoc />
@@ -43,7 +48,8 @@
             drawing.Text("D", new Vector2(-7, 5.5), new Vector2(1, 0), 3, 0.5);
             drawing.Text("C", new Vector2(-5, -5.5), new Vector2(1, 0), 3, 0.5);
             drawing.Text("Q", new Vector2(7, 5.5), new Vector2(-1, 0), 3, 0.5);
-            drawing.Text("NQ", new Vector2(7, -5.5), new Vector2(-1, 0), 3, 0.5);
+            if (Pins.IsUsed("nq"))
+                drawing.Text("NQ", new Vector2(7, -5.5), new Vector2(-1, 0), 3, 0.5);
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(10, 8), new Vector2(1, 1));
         }

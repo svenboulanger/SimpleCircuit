@@ -225,7 +225,7 @@ namespace SimpleCircuit.Parser
         {
             _tokenBuilder.Clear();
             var c = _input[_index];
-            while (char.IsLetterOrDigit(c))
+            while (char.IsLetterOrDigit(c) || c == '_')
                 c = Store(c);
         }
         private void ReadNewline()

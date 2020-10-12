@@ -11,7 +11,10 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"X <r> xor");
+            var ckt = parser.Parse(@"spdt1 <r 10> [t2]spdt2
+spdt1[t1] <r 10> [t1]spdt2
+- spdt1.x = 0
+- spdt1.y = 0");
 
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();

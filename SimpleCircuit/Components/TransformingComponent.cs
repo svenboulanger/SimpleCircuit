@@ -1,35 +1,24 @@
 ﻿using SimpleCircuit.Functions;
-using System;
 
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// Base class for transforming components.
+    /// A component that translates, rotates and scales.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    /// <seealso cref="I2DTransforming" />
-    public abstract class TransformingComponent : IComponent, I2DTransforming
+    /// <seealso cref="RotatingComponent" />
+    /// <seealso cref="IScaling" />
+    public abstract class TransformingComponent : RotatingComponent, IScaling
     {
-        /// <inheritdoc/>
-        public string Name { get; }
+        /// <summary>
+        /// Gets the unknown scale.
+        /// </summary>
+        /// <value>
+        /// The unknown scale.
+        /// </value>
+        protected Unknown UnknownScale { get; }
 
         /// <inheritdoc/>
-        public PinCollection Pins { get; protected set; }
-
-        /// <inheritdoc/>
-        public Function X { get; }
-
-        /// <inheritdoc/>
-        public Function Y { get; }
-
-        /// <inheritdoc/>
-        public Function NormalX { get; }
-
-        /// <inheritdoc/>
-        public Function NormalY { get; }
-
-        /// <inheritdoc/>
-        public Function Scale { get; }
+        public Function Scale => UnknownScale;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformingComponent"/> class.
@@ -37,35 +26,24 @@ namespace SimpleCircuit.Components
         /// <param name="name">The name.</param>
         /// <param name="pc">The pin collection.</param>
         protected TransformingComponent(string name)
+            : base(name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            X = new Unknown(name + ".x", UnknownTypes.X);
-            Y = new Unknown(name + ".y", UnknownTypes.Y);
-            NormalX = new Unknown(name + ".nx", UnknownTypes.NormalX);
-            NormalY = new Unknown(name + ".ny", UnknownTypes.NormalY);
-            Scale = new Unknown(name + ".s", UnknownTypes.Scale);
-            Pins = new PinCollection(this);
+            UnknownScale = new Unknown(name + ".s", UnknownTypes.Scale);
         }
 
         /// <inheritdoc/>
-        public virtual void Apply(Minimizer minimizer)
+        public override void Apply(Minimizer minimizer)
         {
-            minimizer.Minimize += new Squared(X) + new Squared(Y);
-            minimizer.AddConstraint(new Squared(Scale) - 1);
+            base.Apply(minimizer);
+            minimizer.Minimize += 1e3 * (new Squared(Scale) + 1.0 / new Squared(Scale));
         }
 
         /// <inheritdoc/>
-        public virtual void Render(SvgDrawing drawing)
+        public override void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
             drawing.TF = new Transform(X.Value, Y.Value, normal, normal.Perpendicular * Scale.Value);
             Draw(drawing);
         }
-
-        /// <summary>
-        /// Draws the transforming component (the transform has been applied).
-        /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        protected abstract void Draw(SvgDrawing drawing);
     }
 }

@@ -1,17 +1,19 @@
 ﻿namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A ground terminal.
+    /// An earth terminal.
     /// </summary>
-    /// <seealso cref="Component" />
-    [SimpleKey("GND", "Ground")]
-    public class Ground : RotatingComponent
+    /// <seealso cref="IComponent" />
+    /// <seealso cref="ITranslating" />
+    /// <seealso cref="IRotating" />
+    [SimpleKey("EARTH", "Earth")]
+    public class Earth : RotatingComponent
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Ground"/> class.
+        /// Initializes a new instance of the <see cref="Earth"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Ground(string name)
+        public Earth(string name)
             : base(name)
         {
             Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
@@ -24,8 +26,9 @@
             {
                 new Vector2(0, 0), new Vector2(0, 3),
                 new Vector2(-5, 3), new Vector2(5, 3),
-                new Vector2(-3, 5), new Vector2(3, 5),
-                new Vector2(-1, 7), new Vector2(1, 7)
+                new Vector2(-5, 3), new Vector2(-7, 7),
+                new Vector2(0, 3), new Vector2(-2, 7),
+                new Vector2(5, 3), new Vector2(3, 7)
             });
         }
 
@@ -35,6 +38,6 @@
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"Ground {Name}";
+        public override string ToString() => $"Earth {Name}";
     }
 }

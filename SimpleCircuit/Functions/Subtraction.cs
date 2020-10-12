@@ -95,6 +95,6 @@ namespace SimpleCircuit.Functions
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"{_a}-{_b}";
+        public override string ToString() => $"({_a})-({_b})";
     }
 }

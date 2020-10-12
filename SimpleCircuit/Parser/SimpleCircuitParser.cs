@@ -3,6 +3,7 @@ using SimpleCircuit.Components;
 using SimpleCircuit.Functions;
 using SimpleCircuit.Parser;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SimpleCircuit
 {
@@ -11,6 +12,13 @@ namespace SimpleCircuit
     /// </summary>
     public class SimpleCircuitParser
     {
+        private class ComponentProperty
+        {
+            public object Source;
+            public PropertyInfo Property;
+            public override string ToString() => $"Property '{Property?.Name ?? "?"}' of '{Source}'";
+        }
+
         /// <summary>
         /// Gets the factory that is used by parsers to create components based on their name.
         /// </summary>
@@ -232,45 +240,72 @@ namespace SimpleCircuit
             var a = ParseSum(lexer, ckt);
             lexer.Check(lexer, TokenType.Equals);
             var b = ParseSum(lexer, ckt);
-            ckt.Add(a - b);
+            if (a is Function fa && b is Function fb)
+                ckt.Add(fa - fb);
+            else if (a is ComponentProperty cp)
+            {
+                if (cp.Property.PropertyType == typeof(double) && b is Function fb2 && fb2.IsConstant)
+                    cp.Property.SetValue(cp.Source, fb2.Value);
+                else if (cp.Property.PropertyType == b.GetType())
+                    cp.Property.SetValue(cp.Source, b);
+                else
+                    throw new ParseException($"Invalid type: cannot assign {b} to {a}", lexer.Line, lexer.Position);
+            }
+            else
+                throw new ParseException($"Cannot assign {b} to {a}", lexer.Line, lexer.Position);
 
             while (lexer.Is(TokenType.Equals))
             {
                 lexer.Next();
                 a = b;
                 b = ParseSum(lexer, ckt);
-                ckt.Add(a - b);
+                if (a is Function fa2 && b is Function fb2)
+                    ckt.Add(fa2 - fb2);
+                else
+                    throw new ParseException($"Cannot assign {a} to {b}", lexer.Line, lexer.Position);
             }
         }
-        private Function ParseSum(SimpleCircuitLexer lexer, Circuit ckt)
+        private object ParseSum(SimpleCircuitLexer lexer, Circuit ckt)
         {
             var result = ParseTerm(lexer, ckt);
             while (lexer.Is(TokenType.Plus) || lexer.Is(TokenType.Dash))
             {
                 var op = lexer.Type;
                 lexer.Next();
-                if (op == TokenType.Plus)
-                    result += ParseTerm(lexer, ckt);
+                var sec = ParseTerm(lexer, ckt);
+                if (result is Function r && sec is Function f)
+                {
+                    if (op == TokenType.Plus)
+                        result = r + f;
+                    else
+                        result = r - f;
+                }
                 else
-                    result -= ParseTerm(lexer, ckt);
+                    throw new ParseException($"Cannot add/subtract {sec}", lexer.Line, lexer.Position);
             }
             return result;
         }
-        private Function ParseTerm(SimpleCircuitLexer lexer, Circuit ckt)
+        private object ParseTerm(SimpleCircuitLexer lexer, Circuit ckt)
         {
             var result = ParseUnary(lexer, ckt);
             while (lexer.Is(TokenType.Times) || lexer.Is(TokenType.Divide))
             {
                 var op = lexer.Type;
                 lexer.Next();
-                if (op == TokenType.Times)
-                    result *= ParseUnary(lexer, ckt);
+                var sec = ParseUnary(lexer, ckt);
+                if (result is Function r && sec is Function f)
+                {
+                    if (op == TokenType.Times)
+                        result = r * f;
+                    else
+                        result = r / f;
+                }
                 else
-                    result /= ParseUnary(lexer, ckt);
+                    throw new ParseException($"Cannot multiply/divide {sec}", lexer.Line, lexer.Position);
             }
             return result;
         }
-        private Function ParseUnary(SimpleCircuitLexer lexer, Circuit ckt)
+        private object ParseUnary(SimpleCircuitLexer lexer, Circuit ckt)
         {
             if (lexer.Is(TokenType.Plus))
             {
@@ -280,7 +315,11 @@ namespace SimpleCircuit
             if (lexer.Is(TokenType.Dash))
             {
                 lexer.Next();
-                return -ParseUnary(lexer, ckt);
+                var arg = ParseUnary(lexer, ckt);
+                if (arg is Function f)
+                    return -f;
+                else
+                    throw new ParseException($"Cannot negate {arg}", lexer.Line, lexer.Position);
             }
             if (lexer.Is(TokenType.OpenBracket, "("))
             {
@@ -291,19 +330,28 @@ namespace SimpleCircuit
             }
             return ParseFactor(lexer, ckt);
         }
-        private Function ParseFactor(SimpleCircuitLexer lexer, Circuit ckt)
+        private object ParseFactor(SimpleCircuitLexer lexer, Circuit ckt)
         {
             if (lexer.Is(TokenType.Number))
             {
                 var result = double.Parse(lexer.Content);
                 lexer.Next();
+                return (Function)result;
+            }
+            else if (lexer.Is(TokenType.String))
+            {
+                var result = lexer.Content.Substring(1, lexer.Content.Length - 2);
+                lexer.Next();
                 return result;
             }
             else
             {
+                // Get the component
                 object result = ParseComponent(lexer, ckt);
                 if (result == null)
                     throw new ParseException("A component was expected", lexer.Line, lexer.Position);
+
+                // Optional pin
                 if (lexer.Is(TokenType.OpenBracket, "["))
                 {
                     lexer.Next();
@@ -313,38 +361,58 @@ namespace SimpleCircuit
                     lexer.Next();
                     result = ((IComponent)result).Pins[pinName];
                 }
+
+                // Then the property
                 lexer.Check(lexer, TokenType.Dot);
                 var propertyName = ParseName(lexer);
-                switch (propertyName)
+
+                // Detect unknowns (fixed names)
+                if (result is IComponent || result is Pin)
                 {
-                    case "x":
-                    case "X":
-                        if (!(result is ITranslating posx))
-                            throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                        return posx.X;
-                    case "y":
-                    case "Y":
-                        if (!(result is ITranslating posy))
-                            throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                        return posy.Y;
-                    case "nx":
-                    case "NX":
-                        if (!(result is IRotating orx))
-                            throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                        return orx.NormalX;
-                    case "ny":
-                    case "NY":
-                        if (!(result is IRotating ory))
-                            throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                        return ory.NormalY;
-                    case "s":
-                    case "S":
-                        if (!(result is IScaling m))
-                            throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
-                        return m.Scale;
+                    switch (propertyName)
+                    {
+                        case "x":
+                        case "X":
+                            if (!(result is ITranslating posx))
+                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                            return posx.X;
+                        case "y":
+                        case "Y":
+                            if (!(result is ITranslating posy))
+                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                            return posy.Y;
+                        case "nx":
+                        case "NX":
+                            if (!(result is IRotating orx))
+                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                            return orx.NormalX;
+                        case "ny":
+                        case "NY":
+                            if (!(result is IRotating ory))
+                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                            return ory.NormalY;
+                        case "s":
+                        case "S":
+                            if (!(result is IScaling m))
+                                throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
+                            return m.Scale;
+                    }
                 }
-                throw new ParseException($"Could not find property '{propertyName}' of {result}", lexer.Line, lexer.Position);
+
+                // Else get the description
+                var pi = result.GetType().GetTypeInfo().GetProperty(propertyName);
+                if (pi != null && pi.CanWrite && pi.CanRead)
+                {
+                    return new ComponentProperty
+                    {
+                        Source = result,
+                        Property = pi
+                    };
+                }
+                else
+                    throw new ParseException($"Cannot find property '{propertyName}' for '{result}'", lexer.Line, lexer.Position);
             }
+            throw new ParseException($"Cannot read {lexer.Content}", lexer.Line, lexer.Position);
         }
         private string ParseName(SimpleCircuitLexer lexer)
         {

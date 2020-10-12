@@ -34,8 +34,8 @@ namespace SimpleCircuit.Functions
             {
                 _a.Update();
                 Value = Math.Exp(_a.Value);
-                if (Value > 1e12)
-                    Value = 1e12;
+                if (Value > 1e20)
+                    Value = 1e20;
             }
         }
 

@@ -10,6 +10,8 @@ namespace SimpleCircuit.Functions
     /// </summary>
     public class Minimizer
     {
+        private readonly Random _rnd = new Random();
+
         /// <summary>
         /// If <c>true</c>, logging info is shown.
         /// </summary>
@@ -20,18 +22,8 @@ namespace SimpleCircuit.Functions
             public Function Local { get; set; }
             public Function Original { get; set; }
         }
-        private struct Minimum
-        {
-            public double Strict { get; }
-            public double Initial { get; }
-            public Minimum(double strict, double initial)
-            {
-                Strict = strict;
-                Initial = initial;
-            }
-        }
 
-        private readonly Dictionary<Unknown, Minimum> _minimum = new Dictionary<Unknown, Minimum>();
+        private readonly Dictionary<Unknown, double> _minimum = new Dictionary<Unknown, double>();
         private readonly HashSet<Function> _constraints = new HashSet<Function>();
         private readonly UnknownMap _map = new UnknownMap();
         private readonly Dictionary<Unknown, IRowEquation> _equations = new Dictionary<Unknown, IRowEquation>();
@@ -72,11 +64,11 @@ namespace SimpleCircuit.Functions
         /// <param name="unknown">The unknown with a minimum value.</param>
         /// <param name="strict">The strict minimum value for the unknown.</param>
         /// <param name="initial">The loose minimum value for the unknown.</param>
-        public void AddMinimum(Unknown unknown, double strict, double initial)
+        public void AddMinimum(Unknown unknown, double strict)
         {
             if (unknown == null)
                 return;
-            _minimum.Add(unknown, new Minimum(strict, initial));
+            _minimum.Add(unknown, strict);
         }
 
         /// <summary>
@@ -137,7 +129,17 @@ namespace SimpleCircuit.Functions
 
                 // Update the solution
                 if (LogInfo)
+                {
                     Console.WriteLine($"- Iteration {iterations} ({steps}/{_solver.Size} rows factored)");
+                    if (steps < _solution.Length)
+                    {
+                        for (var i = steps + 1; i <= _solution.Length; i++)
+                        {
+                            var ext = _solver.InternalToExternal(new MatrixLocation(i, i));
+                            Console.WriteLine($"    (Could not solve equation for {_map.Reverse(ext.Row)} or unknown {_map.Reverse(ext.Column)})");
+                        }    
+                    }
+                }
                 _solver.Degeneracy = _solver.Size - steps;
                 _solution.CopyTo(_oldSolution);
                 _solver.Solve(_solution);
@@ -177,8 +179,24 @@ namespace SimpleCircuit.Functions
                         {
                             case UnknownTypes.Length:
                                 e = Math.Abs(_solution[i] - _oldSolution[i]);
+
+                                // Add some randomization to avoid invalid "local minimum" solutions
                                 if (_solution[i] < 0)
-                                    _solution[i] = 0;
+                                    _solution[i] = 1e-6 / (_rnd.NextDouble() + 1);
+                                error = Math.Max(error, e);
+                                break;
+                            case UnknownTypes.Scale:
+                                e = Math.Abs(_solution[i] - _oldSolution[i]);
+
+                                // Add some random variation to stay away from zero to avoid invalid "local minimum" solutions
+                                if (_solution[i].IsZero())
+                                {
+                                    var r = _rnd.NextDouble();
+                                    if (r > 0.5)
+                                        _solution[i] = 1e-3 / (r + 1.0);
+                                    else
+                                        _solution[i] = -1e-3 / (r + 1.0);
+                                }
                                 error = Math.Max(error, e);
                                 break;
                             default:
@@ -195,13 +213,13 @@ namespace SimpleCircuit.Functions
                 {
                     if (_map.TryGet(m.Key, out var index))
                     {
-                        if (_solution[index] < m.Value.Strict)
+                        if (_solution[index] < m.Value)
                         {
-                            alpha = Math.Min(alpha, (m.Value.Strict - _oldSolution[index]) / (_solution[index] - _oldSolution[index]));
+                            alpha = Math.Min(alpha, (m.Value - _oldSolution[index]) / (_solution[index] - _oldSolution[index]));
                             error = 1;
                         }
-                        if (_solution[index] <= m.Value.Strict)
-                            _solution[index] = m.Value.Strict + 1e-6;
+                        if (_solution[index] <= m.Value)
+                            _solution[index] = m.Value + 1e-9;
                     }
                 }
                 if (LogInfo)
@@ -254,11 +272,7 @@ namespace SimpleCircuit.Functions
                 if (m.Key.IsFixed)
                     continue;
                 if (diffs.TryGetValue(m.Key, out var eq))
-                    // Make sure the solution doesn't go below the minimum
-                    diffs[m.Key] = eq * (m.Key - m.Value.Strict) - 1e-2;
-                else
-                    // This is a completely loose unknown, so use the wish value instead
-                    diffs.Add(m.Key, m.Key - m.Value.Initial);
+                    diffs[m.Key] = eq - 0.01 / (m.Key - m.Value);
             }
 
             // Setup the equations and solution
@@ -272,8 +286,28 @@ namespace SimpleCircuit.Functions
                 switch (eq.Key.Type)
                 {
                     case UnknownTypes.Scale:
-                        _solution[index] = 1.0;
-                        _oldSolution[index] = 1.0;
+                        if (eq.Key.Value.IsZero())
+                        {
+                            _solution[index] = 1.0;
+                            _oldSolution[index] = 1.0;
+                        }
+                        else
+                        {
+                            _solution[index] = eq.Key.Value;
+                            _oldSolution[index] = eq.Key.Value;
+                        }
+                        break;
+                    case UnknownTypes.Length:
+                        if (eq.Key.Value < 0)
+                        {
+                            _solution[index] = 0;
+                            _oldSolution[index] = 0;
+                        }
+                        else
+                        {
+                            _solution[index] = eq.Key.Value;
+                            _oldSolution[index] = eq.Key.Value;
+                        }
                         break;
                     default:
                         _solution[index] = 0.0;
@@ -285,10 +319,13 @@ namespace SimpleCircuit.Functions
             }
             foreach (var m in _minimum)
             {
-                if (_map.TryGet(m.Key, out index))
+                if (m.Key.Value <= m.Value)
                 {
-                    _solution[index] = m.Value.Initial;
-                    _oldSolution[index] = m.Value.Initial;
+                    if (_map.TryGet(m.Key, out index))
+                    {
+                        _solution[index] = m.Value + 1e-9;
+                        _oldSolution[index] = m.Value + 1e-9;
+                    }
                 }
             }
         }

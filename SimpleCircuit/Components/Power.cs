@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Functions;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A supply voltage.
@@ -10,58 +8,27 @@ namespace SimpleCircuit.Components
     /// <seealso cref="IRotating" />
     /// <seealso cref="ILabeled" />
     [SimpleKey("POW", "Power plane")]
-    public class Power : IComponent, ITranslating, IRotating, ILabeled
+    public class Power : RotatingComponent, ILabeled
     {
         /// <inheritdoc/>
-        public string Name { get; }
-
-        /// <inheritdoc/>
         public string Label { get; set; } = "VDD";
-
-        /// <inheritdoc/>
-        public Function X { get; }
-
-        /// <inheritdoc/>
-        public Function Y { get; }
-
-        /// <inheritdoc/>
-        public Function NormalX { get; }
-
-        /// <inheritdoc/>
-        public Function NormalY { get; }
-
-        /// <inheritdoc/>
-        public PinCollection Pins { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
         /// </summary>
         public Power(string name)
+            : base(name)
         {
-            Name = name;
-            X = new Unknown(name + ".x", UnknownTypes.X);
-            Y = new Unknown(name + ".y", UnknownTypes.Y);
-            NormalX = new Unknown(name + ".nx", UnknownTypes.NormalX);
-            NormalY = new Unknown(name + ".ny", UnknownTypes.NormalY);
-            Pins = new PinCollection(this);
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, 1));
+            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
         }
 
         /// <inheritdoc/>
-        public void Render(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
-            var normal = new Vector2(NormalX.Value, NormalY.Value);
-            drawing.TF = new Transform(X.Value, Y.Value, normal, -normal.Perpendicular);
-            drawing.Line(new Vector2(0, 0), new Vector2(0, 3));
-            drawing.Line(new Vector2(-5, 3), new Vector2(5, 3), "plane");
+            drawing.Line(new Vector2(0, 0), new Vector2(0, -3));
+            drawing.Line(new Vector2(-5, -3), new Vector2(5, -3), "plane");
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
-        }
-
-        /// <inheritdoc/>
-        public void Apply(Minimizer minimizer)
-        {
-            minimizer.Minimize += new Squared(X) + new Squared(Y);
+                drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
         }
 
         /// <summary>

@@ -139,6 +139,7 @@
                                 '@default': 'word'
                             }
                         }],
+                        [/\"([^\\\"]|\\.)*\"/, 'string'],
                         [/\./, 'dot'],
                         [/[\+\-\*\/]/, 'operator'],
                         [/\[/, { token: 'bracketPin', next: '@pin_block' }],
