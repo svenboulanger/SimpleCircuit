@@ -19,6 +19,7 @@
         OpenBracket,
         CloseBracket,
         Equals,
+        Question,
         EndOfContent
     }
 }

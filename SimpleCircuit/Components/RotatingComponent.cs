@@ -53,6 +53,7 @@ namespace SimpleCircuit.Components
         public override void Apply(Minimizer minimizer)
         {
             base.Apply(minimizer);
+            minimizer.Minimize += new Squared(NormalX - 1) / 1e4;
             minimizer.AddConstraint(new Squared(NormalX) + new Squared(NormalY) - 1);
         }
     }

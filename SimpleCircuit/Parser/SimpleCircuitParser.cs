@@ -139,6 +139,23 @@ namespace SimpleCircuit
                             ckt.Add(lastPin.NormalX - 1); ckt.Add(nextPin.NormalX + 1);
                             ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
                             break;
+                        case "?":
+                            if (!lastPin.NormalX.IsConstant && !lastPin.NormalY.IsConstant)
+                            {
+                                if (!nextPin.NormalX.IsConstant && !nextPin.NormalY.IsConstant)
+                                {
+                                    ckt.Add(lastPin.NormalX + nextPin.NormalX);
+                                    ckt.Add(lastPin.NormalY + nextPin.NormalY);
+                                }
+                                ckt.Add(lastPin.X + lastPin.NormalX * length - nextPin.X);
+                                ckt.Add(lastPin.Y + lastPin.NormalY * length - nextPin.Y);
+                            }
+                            else if (!nextPin.NormalX.IsConstant && !nextPin.NormalY.IsConstant)
+                            {
+                                ckt.Add(nextPin.X + nextPin.NormalX * length - lastPin.X);
+                                ckt.Add(nextPin.Y + nextPin.NormalY * length - lastPin.Y);
+                            }
+                            break;
                     }
 
                     // Fix the wire length if necessary
@@ -205,12 +222,12 @@ namespace SimpleCircuit
                 });
                 if (lexer.Is(TokenType.Number))
                 {
-                    wires[wires.Count - 1].Length = double.Parse(lexer.Content);
+                    wires[wires.Count - 1].Length = double.Parse(lexer.Content, System.Globalization.CultureInfo.InvariantCulture);
                     lexer.Next();
                 }
             }
-            while (lexer.Is(TokenType.Word));
-            lexer.Check(lexer, TokenType.CloseBracket, ">");
+            while (!lexer.Is(TokenType.CloseBracket, ">"));
+            lexer.Next();
             return wires;
         }
         private string ParseDirection(SimpleCircuitLexer lexer)
@@ -227,6 +244,11 @@ namespace SimpleCircuit
                         lexer.Next();
                         return dir;
                 }
+            }
+            if (lexer.Is(TokenType.Question))
+            {
+                lexer.Next();
+                return "?";
             }
             throw new ParseException($"Expected a direction", lexer.Line, lexer.Position);
         }
@@ -334,7 +356,7 @@ namespace SimpleCircuit
         {
             if (lexer.Is(TokenType.Number))
             {
-                var result = double.Parse(lexer.Content);
+                var result = double.Parse(lexer.Content, System.Globalization.CultureInfo.InvariantCulture);
                 lexer.Next();
                 return (Function)result;
             }

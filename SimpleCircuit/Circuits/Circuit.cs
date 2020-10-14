@@ -182,7 +182,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                     if (length.IsFixed)
                         continue;
                     var x = length - MinimumWireLength;
-                    minimizer.Minimize += 1e3 * (x + new Exp(-x));
+                    minimizer.Minimize += 1e3 * (x + new Squared(x) + new Exp(-x));
                     length.Value = MinimumWireLength;
                     minimizer.AddMinimum(length, 0.0);
                 }

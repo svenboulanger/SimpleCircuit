@@ -127,6 +127,12 @@ namespace SimpleCircuit.Parser
                         Position++;
                         Type = TokenType.Times;
                         break;
+                    case '?':
+                        Content = c.ToString();
+                        _index++;
+                        Position++;
+                        Type = TokenType.Question;
+                        break;
                     case '/':
                         Content = c.ToString();
                         c = Store(c);
