@@ -11,13 +11,9 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"gnd1 <u> mn1 <u> Xo <u> mp1 <u> pow
-mn1[g] <l u> Xi <u r> [g]mp1
-
-Xi <l 15 d> [p]V[n] <d> gnd2
-Xo <r 15 d> C <d> gnd3
-
-- gnd1.y = gnd2.y = gnd3.y");
+            var ckt = parser.Parse(@"X1 <r u> X2
+- X1.x = 0
+- X1.y = 0");
 
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();

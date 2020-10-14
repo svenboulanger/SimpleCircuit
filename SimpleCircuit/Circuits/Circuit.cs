@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using SimpleCircuit.Circuits;
 using SimpleCircuit.Components;
@@ -166,7 +167,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 foreach (var c in _constraints)
                 {
                     if (c.Resolve(0.0))
+                    {
                         resolvedConstraints = true;
+                        Console.WriteLine($"Resolved {c}");
+                    }
                 }
             }
 

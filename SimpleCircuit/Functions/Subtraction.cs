@@ -83,9 +83,9 @@ namespace SimpleCircuit.Functions
         {
             // value = a - b
             if (_a.IsConstant)
-                return _b.Resolve(_a.Value + value);
+                return _b.Resolve(_a.Value - value);
             if (_b.IsConstant)
-                return _a.Resolve(_b.Value - value);
+                return _a.Resolve(_b.Value + value);
             return false;
         }
 
