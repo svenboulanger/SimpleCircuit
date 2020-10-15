@@ -32,6 +32,23 @@ namespace SimpleCircuit.Functions
         private IVector<double> _solution = null, _oldSolution = null;
 
         /// <summary>
+        /// Gets a random "fixing" factor between 0.5 and 1 or -0.5 and -1.
+        /// </summary>
+        /// <value>
+        /// The fix.
+        /// </value>
+        protected double Fix
+        {
+            get
+            {
+                var d = _rnd.NextDouble() - 0.5;
+                if (d > 0)
+                    return 1.0 / (1 + 2 * d);
+                return -1.0 / (1 + 2 * d);
+            }
+        }
+
+        /// <summary>
         /// Gets the unknowns.
         /// </summary>
         /// <value>
@@ -287,46 +304,36 @@ namespace SimpleCircuit.Functions
                 {
                     case UnknownTypes.Scale:
                         if (eq.Key.Value.IsZero())
-                        {
                             _solution[index] = 1.0;
-                            _oldSolution[index] = 1.0;
-                        }
                         else
-                        {
                             _solution[index] = eq.Key.Value;
-                            _oldSolution[index] = eq.Key.Value;
-                        }
                         break;
                     case UnknownTypes.Length:
                         if (eq.Key.Value < 0)
-                        {
                             _solution[index] = 0;
-                            _oldSolution[index] = 0;
-                        }
                         else
-                        {
                             _solution[index] = eq.Key.Value;
-                            _oldSolution[index] = eq.Key.Value;
-                        }
+                        break;
+                    case UnknownTypes.X:
+                    case UnknownTypes.Y:
+                        _solution[index] = Fix;
                         break;
                     default:
                         _solution[index] = eq.Key.Value;
-                        _oldSolution[index] = eq.Key.Value;
                         break;
                 }
+                _oldSolution[index] = _solution[index];
                 if (LogInfo)
                     Console.WriteLine($"df/d{eq.Key} = {eq.Value}");
             }
             foreach (var m in _minimum)
             {
+                var initial = m.Key.Value;
                 if (m.Key.Value <= m.Value)
-                {
-                    if (_map.TryGet(m.Key, out index))
-                    {
-                        _solution[index] = m.Value + 1e-9;
-                        _oldSolution[index] = m.Value + 1e-9;
-                    }
-                }
+                    initial = m.Value + 1e-9;
+                if (_map.TryGet(m.Key, out index))
+                    _solution[index] = initial;
+                _oldSolution[index] = _solution[index];
             }
         }
     }

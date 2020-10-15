@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Functions;
+using System;
 
 namespace SimpleCircuit.Components
 {
@@ -30,6 +31,24 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc/>
         public Function NormalY => UnknownNormalY;
+
+        /// <summary>
+        /// Sets the angle.
+        /// </summary>
+        /// <value>
+        /// The angle.
+        /// </value>
+        public double Angle
+        {
+            set
+            {
+                var ang = value / 180.0 * Math.PI;
+                UnknownNormalX.IsFixed = true;
+                UnknownNormalX.Value = Math.Cos(ang);
+                UnknownNormalY.IsFixed = true;
+                UnknownNormalY.Value = Math.Sin(ang);
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RotatingComponent"/> class.

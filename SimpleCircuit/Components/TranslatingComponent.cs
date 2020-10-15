@@ -54,7 +54,8 @@ namespace SimpleCircuit.Components
         public virtual void Apply(Minimizer minimizer)
         {
             // Make any minimization of the coordinates very weak to avoid having issues with our other minimizations
-            minimizer.Minimize += new Squared(1e-6 * X) + new Squared(1e-6 * Y);
+            // We will give a small priority to Y-coordinates to avoid problems with arbitrary rotational
+            minimizer.Minimize += new Squared(1e-6 * X) + new Squared(1.1e-6 * Y);
         }
 
         /// <inheritdoc/>

@@ -155,6 +155,11 @@ namespace SimpleCircuit
                                 ckt.Add(nextPin.X + nextPin.NormalX * length - lastPin.X);
                                 ckt.Add(nextPin.Y + nextPin.NormalY * length - lastPin.Y);
                             }
+                            else
+                            {
+                                // This is kind of a bad way, but we don't have a choice...
+                                ckt.Add(new Squared(nextPin.X - lastPin.X) + new Squared(nextPin.Y - lastPin.Y) - length * length);
+                            }
                             break;
                     }
 
@@ -266,10 +271,25 @@ namespace SimpleCircuit
                 ckt.Add(fa - fb);
             else if (a is ComponentProperty cp)
             {
-                if (cp.Property.PropertyType == typeof(double) && b is Function fb2 && fb2.IsConstant)
-                    cp.Property.SetValue(cp.Source, fb2.Value);
-                else if (cp.Property.PropertyType == b.GetType())
+                // Extract the property value if necessary
+                if (b is ComponentProperty cpb)
+                {
+                    if (!cp.Property.CanRead)
+                        throw new ParseException($"{cpb} cannot be extracted", lexer.Line, lexer.Position);
+                    b = cp.Property.GetValue(cp.Source);
+                }
+
+                // Extract function values if necessary
+                if (b is Function fb2 && fb2.IsConstant)
+                    b = fb2.Value;
+
+                // Set the property
+                if (cp.Property.PropertyType == b.GetType())
+                {
+                    if (!cp.Property.CanWrite)
+                        throw new ParseException($"{cp} cannot be set", lexer.Line, lexer.Position);
                     cp.Property.SetValue(cp.Source, b);
+                }
                 else
                     throw new ParseException($"Invalid type: cannot assign {b} to {a}", lexer.Line, lexer.Position);
             }
@@ -423,7 +443,7 @@ namespace SimpleCircuit
 
                 // Else get the description
                 var pi = result.GetType().GetTypeInfo().GetProperty(propertyName);
-                if (pi != null && pi.CanWrite && pi.CanRead)
+                if (pi != null)
                 {
                     return new ComponentProperty
                     {
