@@ -22,5 +22,13 @@ namespace SimpleCircuit.Components
         /// The normal y-coordinate.
         /// </value>
         Function NormalY { get; }
+
+        /// <summary>
+        /// Gets the angle.
+        /// </summary>
+        /// <value>
+        /// The angle.
+        /// </value>
+        Function Angle { get; }
     }
 }

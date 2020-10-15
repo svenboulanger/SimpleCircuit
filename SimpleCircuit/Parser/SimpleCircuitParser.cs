@@ -445,6 +445,11 @@ namespace SimpleCircuit
                 var pi = result.GetType().GetTypeInfo().GetProperty(propertyName);
                 if (pi != null)
                 {
+                    // Deal with functions
+                    if (pi.PropertyType == typeof(Function) && pi.CanRead)
+                        return pi.GetValue(result);
+
+                    // Just general component properties
                     return new ComponentProperty
                     {
                         Source = result,

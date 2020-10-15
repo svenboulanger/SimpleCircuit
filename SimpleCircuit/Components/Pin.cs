@@ -18,37 +18,20 @@ namespace SimpleCircuit.Components
         /// </value>
         public string Description { get; }
 
-        /// <summary>
-        /// Gets the x-coordinate of the pin.
-        /// </summary>
-        /// <value>
-        /// The x.
-        /// </value>
+        /// <inheritdoc/>
         public Function X { get; }
 
-        /// <summary>
-        /// Gets the y-coordinate of the pin.
-        /// </summary>
-        /// <value>
-        /// The y.
-        /// </value>
+        /// <inheritdoc/>
         public Function Y { get; }
 
-        /// <summary>
-        /// Gets the normal x-coordinate.
-        /// </summary>
-        /// <value>
-        /// The normal x.
-        /// </value>
+        /// <inheritdoc/>
         public Function NormalX { get; }
 
-        /// <summary>
-        /// Gets the normal y.
-        /// </summary>
-        /// <value>
-        /// The normal y.
-        /// </value>
+        /// <inheritdoc/>
         public Function NormalY { get; }
+
+        /// <inheritdoc/>
+        public Function Angle { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pin"/> class.
@@ -65,6 +48,7 @@ namespace SimpleCircuit.Components
             Y = y ?? throw new ArgumentNullException(nameof(y));
             NormalX = nx ?? throw new ArgumentNullException(nameof(nx));
             NormalY = ny ?? throw new ArgumentNullException(nameof(ny));
+            Angle = new NormalAtan2(ny, nx);
         }
     }
 }

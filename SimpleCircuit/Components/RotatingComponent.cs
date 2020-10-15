@@ -11,6 +11,11 @@ namespace SimpleCircuit.Components
     public abstract class RotatingComponent : TranslatingComponent, IRotating
     {
         /// <summary>
+        /// The conversion factor for radians to degrees.
+        /// </summary>
+        public const double Rad2Deg = 57.2957795131;
+
+        /// <summary>
         /// Gets the unknown normal x.
         /// </summary>
         /// <value>
@@ -27,28 +32,18 @@ namespace SimpleCircuit.Components
         protected Unknown UnknownNormalY { get; }
 
         /// <inheritdoc/>
-        public Function NormalX => UnknownNormalX;
+        public Function NormalX { get; }
 
         /// <inheritdoc/>
-        public Function NormalY => UnknownNormalY;
+        public Function NormalY { get; }
 
         /// <summary>
-        /// Sets the angle.
+        /// Gets the angle.
         /// </summary>
         /// <value>
         /// The angle.
         /// </value>
-        public double Angle
-        {
-            set
-            {
-                var ang = value / 180.0 * Math.PI;
-                UnknownNormalX.IsFixed = true;
-                UnknownNormalX.Value = Math.Cos(ang);
-                UnknownNormalY.IsFixed = true;
-                UnknownNormalY.Value = Math.Sin(ang);
-            }
-        }
+        public Function Angle { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RotatingComponent"/> class.
@@ -59,6 +54,9 @@ namespace SimpleCircuit.Components
         {
             UnknownNormalX = new Unknown($"{Name}.nx", UnknownTypes.NormalX);
             UnknownNormalY = new Unknown($"{Name}.ny", UnknownTypes.NormalY);
+            NormalX = UnknownNormalX;
+            NormalY = UnknownNormalY;
+            Angle = new NormalAtan2(NormalY, NormalX) * Rad2Deg;
         }
 
         /// <inheritdoc/>
