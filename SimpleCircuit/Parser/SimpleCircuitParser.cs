@@ -2,7 +2,9 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Functions;
 using SimpleCircuit.Parser;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleCircuit
@@ -12,13 +14,6 @@ namespace SimpleCircuit
     /// </summary>
     public class SimpleCircuitParser
     {
-        private class ComponentProperty
-        {
-            public object Source;
-            public PropertyInfo Property;
-            public override string ToString() => $"Property '{Property?.Name ?? "?"}' of '{Source}'";
-        }
-
         /// <summary>
         /// Gets the factory that is used by parsers to create components based on their name.
         /// </summary>
@@ -27,6 +22,12 @@ namespace SimpleCircuit
         /// </value>
         public static ComponentFactory Factory { get; } = new ComponentFactory();
 
+        private class ComponentProperty
+        {
+            public object Source;
+            public PropertyInfo Property;
+            public override string ToString() => $"Property '{Property?.Name ?? "?"}' of '{Source}'";
+        }
         private class WireDescription
         {
             public string Direction;
@@ -38,7 +39,13 @@ namespace SimpleCircuit
             public IComponent Component;
             public Pin After;
         }
+        private class SubcircuitDescription
+        {
+            public Circuit Circuit { get; set; }
+            public IEnumerable<Pin> Pins { get; set; }
+        }
         private int _anonIndex = 0, _wireIndex = 0;
+        private readonly KeySearch<SubcircuitDescription> _subcircuits = new KeySearch<SubcircuitDescription>();
 
         /// <summary>
         /// Parses the specified description.
@@ -72,6 +79,8 @@ namespace SimpleCircuit
                 return;
             else if (lexer.Is(TokenType.Dash))
                 ParseEquation(lexer, ckt);
+            else if (lexer.Is(TokenType.Dot))
+                ParseOption(lexer, ckt);
             else if (lexer.Is(TokenType.Word))
                 ParseChain(lexer, ckt);
             else
@@ -180,7 +189,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 var pin = ParseName(lexer);
-                lexer.Check(lexer, TokenType.CloseBracket, "]");
+                lexer.Check(TokenType.CloseBracket, "]");
                 result.After = result.Component.Pins[pin];
             }
             return result;
@@ -192,7 +201,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 beforePin = ParseName(lexer);
-                lexer.Check(lexer, TokenType.CloseBracket, "]");
+                lexer.Check(TokenType.CloseBracket, "]");
             }
             var result = ParsePin(lexer, ckt);
             if (beforePin != null)
@@ -208,7 +217,7 @@ namespace SimpleCircuit
                 var label = ParseLabel(lexer);
                 if (component is ILabeled lbl)
                     lbl.Label = label;
-                lexer.Check(lexer, TokenType.CloseBracket, ")");
+                lexer.Check(TokenType.CloseBracket, ")");
             }
             return component;
         }
@@ -216,7 +225,7 @@ namespace SimpleCircuit
         private List<WireDescription> ParseWire(SimpleCircuitLexer lexer)
         {
             var wires = new List<WireDescription>();
-            lexer.Check(lexer, TokenType.OpenBracket, "<");
+            lexer.Check(TokenType.OpenBracket, "<");
             do
             {
                 var direction = ParseDirection(lexer);
@@ -265,7 +274,7 @@ namespace SimpleCircuit
 
             // Add the first equation
             var a = ParseSum(lexer, ckt);
-            lexer.Check(lexer, TokenType.Equals);
+            lexer.Check(TokenType.Equals);
             var b = ParseSum(lexer, ckt);
             if (a is Function fa && b is Function fb)
                 ckt.Add(fa - fb);
@@ -367,7 +376,7 @@ namespace SimpleCircuit
             {
                 lexer.Next();
                 var result = ParseSum(lexer, ckt);
-                lexer.Check(lexer, TokenType.CloseBracket, ")");
+                lexer.Check(TokenType.CloseBracket, ")");
                 return result;
             }
             return ParseFactor(lexer, ckt);
@@ -405,7 +414,7 @@ namespace SimpleCircuit
                 }
 
                 // Then the property
-                lexer.Check(lexer, TokenType.Dot);
+                lexer.Check(TokenType.Dot);
                 var propertyName = ParseName(lexer);
 
                 // Detect unknowns (fixed names)
@@ -480,14 +489,101 @@ namespace SimpleCircuit
         private IComponent ParseComponent(SimpleCircuitLexer lexer, Circuit ckt)
         {
             var name = ParseName(lexer);
+            IComponent component;
+
+            // First try to find subcircuits
+            var exact = _subcircuits.Search(name, out var definition);
+            if (definition != null)
+            {
+                if (exact)
+                    name += ":" + (_anonIndex++);
+                if (ckt.TryGetValue(name, out component))
+                    return component;
+
+                component = new Subcircuit(name, definition.Circuit, definition.Pins);
+                ckt.Add(component);
+                return component;
+            }
+
+            // Get the component from the circuit or create a standard component
             if (Factory.IsExact(name))
                 name += ":" + (_anonIndex++);
-            if (!ckt.TryGetValue(name, out var component))
-            {
-                component = Factory.Create(name);
-                ckt.Add(component);
-            }
+            if (ckt.TryGetValue(name, out component))
+                return component;
+
+            component = Factory.Create(name);
+            ckt.Add(component);
             return component;
+        }
+
+        private void ParseOption(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            lexer.Check(TokenType.Dot);
+            if (lexer.Is(TokenType.Word))
+            {
+                switch (lexer.Content.ToLower())
+                {
+                    case "subckt":
+                        lexer.Next();
+                        ParseSubcircuit(lexer, ckt);
+                        break;
+
+                    default:
+                        throw new ParseException($"Could not use option {lexer.Content}", lexer.Line, lexer.Position);
+                }
+            }
+            else
+                throw new ParseException($"Expected a word", lexer.Line, lexer.Position);
+        }
+        private void ParseSubcircuit(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            // Read the name
+            if (!lexer.Is(TokenType.Word))
+                throw new ParseException($"Expected subcircuit name", lexer.Line, lexer.Position);
+            var subcktName = lexer.Content;
+            lexer.Next();
+
+            // First check if the subcircuit doesn't already exist
+            if (_subcircuits.Search(subcktName, out _))
+                throw new ParseException($"The subcircuit '{subcktName}' already exists", lexer.Line, lexer.Position);
+
+            // Create our subcircuit
+            var subckt = new Circuit();
+
+            // First come pins
+            var pins = new List<PinDescription>();
+            while (!lexer.Is(TokenType.Newline) && !lexer.Is(TokenType.EndOfContent))
+                pins.Add(ParsePin(lexer, subckt));
+
+            // We will now begin reading a different circuit!
+            while (!lexer.Is(TokenType.EndOfContent))
+            {
+                if (lexer.Is(TokenType.Newline))
+                    lexer.Next();
+                else if (lexer.Is(TokenType.Dot))
+                {
+                    lexer.Next();
+                    if (lexer.Is(TokenType.Word, "ends") || lexer.Is(TokenType.Word, "end"))
+                    {
+                        lexer.Next();
+                        break;
+                    }
+                }
+                else if (lexer.Is(TokenType.Word))
+                    ParseChain(lexer, subckt);
+                else if (lexer.Is(TokenType.Dash))
+                    ParseEquation(lexer, subckt);
+                else
+                    throw new ParseException($"Unrecognized '{lexer.Content}' inside the subcircuit definition", lexer.Line, lexer.Position);
+            }
+
+            // Store the subcircuit definition
+            var definition = new SubcircuitDescription
+            {
+                Circuit = subckt,
+                Pins = pins.Select(p => p.After ?? p.Component.Pins[p.Component.Pins.Count - 1])
+            };
+            _subcircuits.Add(subcktName, definition);
         }
     }
 }

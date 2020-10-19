@@ -18,8 +18,8 @@
         public Diode(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The anode.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "b", "c" }, "The cathode.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(Name, new[] { "p", "a" }, "The anode.", new Vector2(-6, 0), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "n", "b", "c" }, "The cathode.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

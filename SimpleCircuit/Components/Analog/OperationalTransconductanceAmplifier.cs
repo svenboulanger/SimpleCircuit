@@ -18,9 +18,9 @@
         public OperationalTransconductanceAmplifier(string name)
             : base(name)
         {
-            Pins.Add(new[] { "n" }, "The negative input.", new Vector2(-5, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "p" }, "The positive input.", new Vector2(-5, 4), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
+            Pins.Add(Name, new[] { "n" }, "The negative input.", new Vector2(-5, -4), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "p" }, "The positive input.", new Vector2(-5, 4), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

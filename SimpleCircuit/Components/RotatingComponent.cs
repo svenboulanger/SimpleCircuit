@@ -63,8 +63,9 @@ namespace SimpleCircuit.Components
         public override void Render(SvgDrawing drawing)
         {
             var normal = new Vector2(NormalX.Value, NormalY.Value);
-            drawing.TF = new Transform(X.Value, Y.Value, normal, normal.Perpendicular);
+            drawing.BeginTransform(new Transform(X.Value, Y.Value, normal, normal.Perpendicular));
             Draw(drawing);
+            drawing.EndTransform();
         }
 
         public override void Apply(Minimizer minimizer)

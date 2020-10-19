@@ -20,14 +20,15 @@ namespace SimpleCircuit
         private readonly Stack<XmlElement> _group = new Stack<XmlElement>();
         private readonly Bounds _bounds;
         private readonly XmlDocument _document;
+        private readonly Stack<Transform> _tf = new Stack<Transform>();
 
         /// <summary>
-        /// Gets or sets the current transform.
+        /// Gets the current transform.
         /// </summary>
         /// <value>
-        /// The current.
+        /// The current transform.
         /// </value>
-        public Transform TF { get; set; } = Transform.Identity;
+        protected Transform CurrentTransform => _tf.Peek();
 
         /// <summary>
         /// Gets or sets the style of the drawing.
@@ -70,6 +71,27 @@ namespace SimpleCircuit
             _current = _document.CreateElement("svg", Namespace);
             _document.AppendChild(_current);
             _bounds = new Bounds();
+            _tf.Push(Transform.Identity);
+        }
+
+        /// <summary>
+        /// Begins a new transform on top of previous transforms.
+        /// </summary>
+        /// <param name="tf">The transform.</param>
+        public void BeginTransform(Transform tf)
+        {
+            // _tf.Push(tf.Apply(TF));
+            _tf.Push(tf.Apply(CurrentTransform));
+        }
+
+        /// <summary>
+        /// Ends the last transform transform.
+        /// </summary>
+        public void EndTransform()
+        {
+            _tf.Pop();
+            if (_tf.Count == 0)
+                _tf.Push(Transform.Identity);
         }
 
         /// <summary>
@@ -80,8 +102,8 @@ namespace SimpleCircuit
         /// <param name="style">The style.</param>
         public void Line(Vector2 start, Vector2 end, string classes = null, string id = null)
         {
-            start = TF.Apply(start);
-            end = TF.Apply(end);
+            start = CurrentTransform.Apply(start);
+            end = CurrentTransform.Apply(end);
 
             // Expand the bounds
             _bounds.Expand(start.X, start.Y);
@@ -108,7 +130,7 @@ namespace SimpleCircuit
         /// <param name="style">The style.</param>
         public void Circle(Vector2 position, double radius, string classes = null, string id = null)
         {
-            position = TF.Apply(position);
+            position = CurrentTransform.Apply(position);
 
             // Expand the bounds
             _bounds.Expand(position.X - radius, position.Y - radius);
@@ -141,7 +163,7 @@ namespace SimpleCircuit
                     isFirst = false;
                 else
                     sb.Append(" ");
-                var pt = TF.Apply(point);
+                var pt = CurrentTransform.Apply(point);
                 _bounds.Expand(pt.X, pt.Y);
                 sb.Append($"{Convert(pt.X)},{Convert(pt.Y)}");
             }
@@ -171,7 +193,7 @@ namespace SimpleCircuit
                     isFirst = false;
                 else
                     sb.Append(" ");
-                var pt = TF.Apply(point);
+                var pt = CurrentTransform.Apply(point);
                 _bounds.Expand(pt.X, pt.Y);
                 sb.Append($"{Convert(pt.X)},{Convert(pt.Y)}");
             }
@@ -202,8 +224,8 @@ namespace SimpleCircuit
                     return;
                 var second = it.Current;
 
-                first = TF.Apply(first);
-                second = TF.Apply(second);
+                first = CurrentTransform.Apply(first);
+                second = CurrentTransform.Apply(second);
                 _bounds.Expand(first);
                 _bounds.Expand(second);
                 if (sb.Length > 0)
@@ -233,18 +255,18 @@ namespace SimpleCircuit
             {
                 if (isFirst)
                 {
-                    Vector2 first = TF.Apply(it.Current);
+                    Vector2 first = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         return;
 
                     // Get the handles
-                    var handle1 = TF.Apply(it.Current);
+                    var handle1 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         return;
-                    var handle2 = TF.Apply(it.Current);
+                    var handle2 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         return;
-                    end = TF.Apply(it.Current);
+                    end = CurrentTransform.Apply(it.Current);
 
                     // Expand bounds
                     _bounds.Expand(first);
@@ -262,10 +284,10 @@ namespace SimpleCircuit
                 }
                 else
                 {
-                    var handle = TF.Apply(it.Current);
+                    var handle = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         return;
-                    end = TF.Apply(it.Current);
+                    end = CurrentTransform.Apply(it.Current);
 
                     _bounds.Expand(handle);
                     _bounds.Expand(end);
@@ -300,20 +322,20 @@ namespace SimpleCircuit
             {
                 if (isFirst)
                 {
-                    var m = TF.Apply(it.Current);
+                    var m = CurrentTransform.Apply(it.Current);
                     sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
                     _bounds.Expand(m);
                     isFirst = false;
                 }
                 else
                 {
-                    var h1 = TF.Apply(it.Current);
+                    var h1 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         break;
-                    var h2 = TF.Apply(it.Current);
+                    var h2 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         break;
-                    var end = TF.Apply(it.Current);
+                    var end = CurrentTransform.Apply(it.Current);
                     sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
                     _bounds.Expand(h1);
                     _bounds.Expand(h2);
@@ -348,20 +370,20 @@ namespace SimpleCircuit
             {
                 if (isFirst)
                 {
-                    var m = TF.Apply(it.Current);
+                    var m = CurrentTransform.Apply(it.Current);
                     sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
                     _bounds.Expand(m);
                     isFirst = false;
                 }
                 else
                 {
-                    var h1 = TF.Apply(it.Current);
+                    var h1 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         break;
-                    var h2 = TF.Apply(it.Current);
+                    var h2 = CurrentTransform.Apply(it.Current);
                     if (!it.MoveNext())
                         break;
-                    var end = TF.Apply(it.Current);
+                    var end = CurrentTransform.Apply(it.Current);
                     sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
                     _bounds.Expand(h1);
                     _bounds.Expand(h2);
@@ -387,8 +409,8 @@ namespace SimpleCircuit
         /// <param name="classes">The classes.</param>
         public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, string classes = null, string id = null)
         {
-            location = TF.Apply(location);
-            expand = TF.ApplyDirection(expand);
+            location = CurrentTransform.Apply(location);
+            expand = CurrentTransform.ApplyDirection(expand);
 
             if (string.IsNullOrWhiteSpace(value))
                 return;

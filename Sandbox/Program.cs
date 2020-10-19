@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit;
+using SimpleCircuit.Components;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -11,8 +12,12 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"- R1.Angle = 45");
-
+            var ckt = parser.Parse(@".subckt lpf R1[p] Xo
+R1 <r> X1 <d> C <d> gnd
+X1 <r 0> Xo
+.ends
+lpf1 <r> lpf
+- lpf1[R1_p].X = 0");
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
 

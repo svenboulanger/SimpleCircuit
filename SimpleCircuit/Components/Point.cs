@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="IComponent" />
     [SimpleKey("X", "Point")]
-    public class Point : TranslatingComponent
+    public class Point : RotatingComponent
     {
         /// <summary>
         /// Gets or sets the number of wires that are connected to this point.
@@ -22,7 +22,8 @@
         public Point(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a", "p" }, "The point.", new Vector2(), new Vector2(0, -1));
+            Pins.Add(Name, new[] { "a", "p", "normal" }, "The entry point.", new Vector2(), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "b", "opposite" }, "The opposite point.", new Vector2(), new Vector2(1, 0));
             Wires = 0;
         }
 

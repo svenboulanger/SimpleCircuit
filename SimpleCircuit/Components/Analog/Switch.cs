@@ -26,9 +26,9 @@
         public Switch(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 6), new Vector2(0, 1));
-            Pins.Add(new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(Name, new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 6), new Vector2(0, 1));
+            Pins.Add(Name, new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

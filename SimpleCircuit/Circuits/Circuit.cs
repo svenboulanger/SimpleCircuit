@@ -25,6 +25,14 @@ namespace SimpleCircuit
         public static double MinimumWireLength { get; set; } = 7.5;
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Circuit"/> is solved.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if solved; otherwise, <c>false</c>.
+        /// </value>
+        public bool Solved { get; set; }
+
+        /// <summary>
         /// The default style for drawings.
         /// </summary>
         public static string DefaultStyle =
@@ -74,6 +82,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (component == null)
                 return;
             _components.Add(component.Name, component);
+            Solved = false;
         }
 
         /// <summary>
@@ -85,6 +94,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (constraint == null || constraint.IsConstant)
                 return;
             _constraints.Add(constraint);
+            Solved = false;
         }
 
         /// <summary>
@@ -96,6 +106,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (wire == null)
                 return;
             _wires.Add(wire);
+            Solved = false;
         }
 
         /// <summary>
@@ -107,6 +118,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (_components.ContainsKey(name))
             {
                 _components.Remove(name);
+                Solved = false;
                 return true;
             }
             return false;
@@ -148,14 +160,13 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             _components.Clear();
             _constraints.Clear();
             _wires.Clear();
+            Solved = false;
         }
 
         /// <summary>
-        /// Renders the circuit.
+        /// Solves the unknowns in this circuit.
         /// </summary>
-        /// <param name="style">The style sheet information.</param>
-        /// <returns>The circuit.</returns>
-        public XmlDocument Render(string style = null)
+        public void Solve()
         {
             var minimizer = new Minimizer();
 
@@ -198,11 +209,15 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             }
 
             minimizer.Solve();
+            Solved = true;
+        }
 
-            // Create our drawing
-            var drawing = new SvgDrawing();
-            drawing.Style = style ?? DefaultStyle;
-
+        /// <summary>
+        /// Renders the specified drawing.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        public void Render(SvgDrawing drawing)
+        {
             // Draw all components
             foreach (var c in _components)
             {
@@ -212,13 +227,30 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             }
 
             // Draw wires
-            drawing.TF = Transform.Identity;
             var drawn = new HashSet<Wire>();
             foreach (var wire in _wires)
             {
                 wire.Render(drawn, drawing);
                 drawn.Add(wire);
             }
+        }
+
+        /// <summary>
+        /// Renders the circuit.
+        /// </summary>
+        /// <param name="style">The style sheet information.</param>
+        /// <returns>The circuit.</returns>
+        public XmlDocument Render(string style = null)
+        {
+            if (!Solved)
+                Solve();
+
+            // Create our drawing
+            var drawing = new SvgDrawing();
+            drawing.Style = style ?? DefaultStyle;
+
+            // Draw
+            Render(drawing);
 
             // Return the XML document
             return drawing.GetDocument();

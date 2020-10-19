@@ -61,8 +61,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public virtual void Render(SvgDrawing drawing)
         {
-            drawing.TF = new Transform(X.Value, Y.Value, new Vector2(1, 0), new Vector2(0, 1));
+            drawing.BeginTransform(new Transform(X.Value, Y.Value, new Vector2(1, 0), new Vector2(0, 1)));
             Draw(drawing);
+            drawing.EndTransform();
         }
 
         /// <summary>

@@ -217,13 +217,13 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="content">The content.</param>
-        public void Check(SimpleCircuitLexer lexer, TokenType type, string content = null)
+        public void Check(TokenType type, string content = null)
         {
             var error = Type != type;
             if (content != null && string.CompareOrdinal(content, Content) != 0)
                 error = true;
             if (error)
-                throw new ParseException($"Expected {(content != null ? content : $"a {type}")}", lexer.Line, lexer.Position);
+                throw new ParseException($"Expected {(content != null ? content : $"a {type}")}", Line, Position);
             Next();
         }
 

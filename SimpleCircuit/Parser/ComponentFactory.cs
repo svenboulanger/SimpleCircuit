@@ -65,6 +65,12 @@ namespace SimpleCircuit.Parser
         /// <returns>
         ///   <c>true</c> if the specified name is exact; otherwise, <c>false</c>.
         /// </returns>
-        public bool IsExact(string name) => _search.Search(name, out _);
+        public bool IsExact(string name)
+        {
+
+            if (_search.Count == 0)
+                RegisterAssembly(GetType().Assembly);
+            return _search.Search(name, out _);
+        }
     }
 }

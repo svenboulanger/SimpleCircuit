@@ -44,11 +44,12 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Adds a pin with the specified names.
         /// </summary>
+        /// <param name="componentName">The component name.</param>
         /// <param name="names">The names.</param>
         /// <param name="description">The description.</param>
         /// <param name="offset">The offset.</param>
         /// <param name="normal">The normal.</param>
-        public void Add(string[] names, string description, Vector2 offset, Vector2 normal)
+        public void Add(string componentName, string[] names, string description, Vector2 offset, Vector2 normal)
         {
             // Use the component orientation to transform the offset and normal
             Function x = 0.0;
@@ -71,7 +72,7 @@ namespace SimpleCircuit.Components
 
             var pin = new Node
             {
-                Pin = new Pin(description, x, y, nx, ny),
+                Pin = new Pin($"{componentName}.{names[0]}", description, _parent, x, y, nx, ny),
                 Used = false
             };
             _ordered.Add(pin);

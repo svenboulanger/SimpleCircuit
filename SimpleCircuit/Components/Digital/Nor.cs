@@ -14,9 +14,9 @@
         public Nor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a", "in1" }, "First input.", new Vector2(-3.81, 2), new Vector2(-1, 0));
-            Pins.Add(new[] { "b", "in2" }, "Second input.", new Vector2(-3.81, -2), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "Output.", new Vector2(9, 0), new Vector2(1, 0));
+            Pins.Add(Name, new[] { "a", "in1" }, "First input.", new Vector2(-3.81, 2), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "b", "in2" }, "Second input.", new Vector2(-3.81, -2), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "o", "out" }, "Output.", new Vector2(9, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

@@ -22,18 +22,10 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Initializes a new instance of the <see cref="Transform"/> struct.
         /// </summary>
-        /// <param name="x">The final translation along the x-axis.</param>
-        /// <param name="y">The final translation along the y-axis.</param>
-        /// <param name="angle">The orientation angle.</param>
-        public Transform(double x, double y, double angle)
-        {
-            _origin = new Vector2(x, y);
-            _a11 = Math.Cos(angle);
-            _a21 = Math.Sin(angle);
-            _a12 = -_a21;
-            _a22 = _a11;
-        }
-
+        /// <param name="x">The x-coordinate.</param>
+        /// <param name="y">The y-coordinate.</param>
+        /// <param name="nx">The nx.</param>
+        /// <param name="ny">The ny.</param>
         public Transform(double x, double y, Vector2 nx, Vector2 ny)
         {
             _origin = new Vector2(x, y);
@@ -41,27 +33,6 @@ namespace SimpleCircuit.Components
             _a21 = nx.Y;
             _a12 = ny.X;
             _a22 = ny.Y;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Transform"/> struct.
-        /// </summary>
-        /// <param name="x">The x-coordinate.</param>
-        /// <param name="y">The y-coordinate.</param>
-        /// <param name="sx">The scaling factor along the x-axis.</param>
-        /// <param name="sy">The scaling factor along the y-axis.</param>
-        /// <param name="angle">The angle.</param>
-        public Transform(double x, double y, double sx, double sy, double angle)
-        {
-            _origin = new Vector2(x, y);
-            _a11 = Math.Cos(angle);
-            _a21 = Math.Sin(angle);
-            _a12 = -_a21;
-            _a22 = _a11;
-            _a11 *= sx;
-            _a21 *= sx;
-            _a21 *= sy;
-            _a22 *= sy;
         }
 
         /// <summary>
@@ -75,6 +46,22 @@ namespace SimpleCircuit.Components
                 _origin.X + _a11 * input.X + _a12 * input.Y,
                 _origin.Y + _a21 * input.X + _a22 * input.Y
                 );
+        }
+
+        /// <summary>
+        /// Applies a transform to another transform, resulting in the combined transform.
+        /// </summary>
+        /// <param name="tf">The first transform.</param>
+        /// <returns>The combined transform.</returns>
+        public Transform Apply(Transform tf)
+        {
+            // Transform the normal directions
+            var nx = tf.ApplyDirection(new Vector2(_a11, _a21));
+            var ny = tf.ApplyDirection(new Vector2(_a12, _a22));
+
+            // Transform the position
+            var pos = tf.Apply(new Vector2(_origin.X, _origin.Y));
+            return new Transform(pos.X, pos.Y, nx, ny);
         }
 
         /// <summary>

@@ -18,9 +18,9 @@
         public Multiplexer(string name)
             : base(name)
         {
-            Pins.Add(new[] { "zero", "a" }, "The '0' input.", new Vector2(-5, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "one", "b" }, "The '1' input.", new Vector2(-5, 4), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
+            Pins.Add(Name, new[] { "zero", "a" }, "The '0' input.", new Vector2(-5, -4), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "one", "b" }, "The '1' input.", new Vector2(-5, 4), new Vector2(-1, 0));
+            Pins.Add(Name, new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
