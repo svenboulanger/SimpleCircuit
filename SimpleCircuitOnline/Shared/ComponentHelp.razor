@@ -1,5 +1,7 @@
 ﻿@using SimpleCircuit;
 
+@if (Show)
+{
 <ul class="nav nav-tabs">
     @foreach (var category in _categories.Keys)
     {
@@ -17,9 +19,25 @@
         }
     }
 </div>
+}
 
 @code
 {
+    [Parameter]
+    public bool Show
+    {
+        get => _show;
+        set
+        {
+            if (_show != value)
+            {
+                _show = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private bool _show = false;
     private string _current = "General";
     private Dictionary<string, List<Utility.ComponentDescription>> _categories = new Dictionary<string, List<Utility.ComponentDescription>>();
 

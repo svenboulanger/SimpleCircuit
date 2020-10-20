@@ -1,0 +1,58 @@
+﻿@if (_warnings != null && _warnings.Length > 0 || _errors != null && _errors.Length > 0)
+{
+    <div style="width: 100%; padding: 3px;">
+        @if (_errors != null && _errors.Length > 0)
+        {
+            @foreach (var error in _errors)
+            {
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Oops!</h4>
+                <p>@error</p>
+            </div>
+            }
+        }
+        @if (_warnings != null && _warnings.Length > 0)
+        {
+            @foreach (var warning in _warnings)
+            {
+            <div class="alert alert-warning">
+                <h4 class="alert-heading">Mhmm...</h4>
+                <p>@warning</p>
+            </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Error
+    {
+        get => string.Join(Environment.NewLine, _errors);
+        set
+        {
+            if (value != null)
+                _errors = value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            else
+                _errors = null;
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public string Warning
+    {
+        get => string.Join(Environment.NewLine, _warnings);
+        set
+        {
+            if (value != null)
+                _warnings = value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            else
+                _warnings = null;
+            StateHasChanged();
+        }
+    }
+
+    private string[] _errors;
+    private string[] _warnings;
+}

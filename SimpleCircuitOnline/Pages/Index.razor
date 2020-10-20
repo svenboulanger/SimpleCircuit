@@ -22,58 +22,24 @@
         </div>
     </div>
     <div class="svg-output">
-        <div style="min-height: 75px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
-            @if (_svg != null)
-            {
-                @((MarkupString)_svg)
-            }
-            else
-            {
-                <h2 class="text-muted">Preview</h2>
-            }
-        </div>
-        @if (_warnings != null && _warnings.Count > 0 || _error != null)
-        {
-        <div style="width: 100%">
-            @if (_error != null)
-            {
-                <div class="alert alert-danger" role="alert">
-                    <h4 class="alert-heading">Oops!</h4>
-                    <p>@_error</p>
-                </div>
-            }
-            @if (_warnings != null && _warnings.Count > 0)
-            {
-                @foreach (var warning in _warnings)
-                {
-                    <div class="alert alert-warning">
-                        <h4 class="alert-heading">Mhmm...</h4>
-                        <p>@warning</p>
-                    </div>
-                }
-            }
-        </div>
-        }
+        <SvgOutput Svg="@_svg" />
+        <Errors Error="@_errors" Warning="@_warnings" />
         <div class="clearfix">
             <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
             <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="ToggleComponents">@(_showHelp ? "Hide components" : "Show components")</a>
         </div>
-        @if (_showHelp)
-        {
-            <ComponentHelp />
-        }
+        <ComponentHelp Show="_showHelp" />
     </div>
 </div>
 
 @code
 {
-    private string _svg, _error;
+    private string _svg, _errors, _warnings;
     private Timer _timer;
     private Task _task = null;
     private bool _showHelp = false;
     private SimpleCircuitParser _parser;
     private MonacoEditor _scriptEditor, _styleEditor;
-    private List<string> _warnings = new List<string>();
 
     private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
     {
@@ -139,9 +105,9 @@
     {
         // Parse it again
         var code = await _scriptEditor.GetValue();
-        var style = await _styleEditor.GetValue();
         var ckt = _parser.Parse(code);
-        var doc = ckt.Render(style);
+        ckt.Style = await _styleEditor.GetValue();
+        var doc = ckt.Render();
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
             doc.WriteTo(xml);
@@ -159,38 +125,37 @@
             _timer.Start();
         }
         else
+        {
+            _timer.Stop();
             _task = Task.Run(Render);
+        }
     }
 
     private async Task Render()
     {
-        _error = null;
-        _warnings.Clear();
+        _errors = null;
+        _warnings = null;
         try
         {
-            var warnings = new List<string>();
             var code = await _scriptEditor.GetValue();
-            var style = await _styleEditor.GetValue();
             var ckt = _parser.Parse(code);
+            ckt.Style = await _styleEditor.GetValue();
             if (ckt.ComponentCount > 0 || ckt.WireCount > 0)
             {
-                ckt.Warning += (sender, args) => _warnings.Add(args.Message);
-                var doc = ckt.Render(style);
+                ckt.Warning += (sender, args) => _warnings += Environment.NewLine + args.Message;
+                var doc = ckt.Render();
 
                 using var sw = new StringWriter();
                 using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                     doc.WriteTo(xml);
                 _svg = sw.ToString();
-                foreach (var w in warnings)
-                    Console.WriteLine(w);
-                Console.WriteLine("Exported succesfully");
             }
             else
                 _svg = null;
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            _errors = ex.Message;
             _svg = null;
         }
 

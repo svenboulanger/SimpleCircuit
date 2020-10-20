@@ -1,0 +1,25 @@
+﻿<div style="min-height: 75px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
+    @if (_svg != null)
+    {
+        @((MarkupString)_svg)
+    }
+    else
+    {
+        <h2 class="text-muted">Preview</h2>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Svg
+    {
+        get => _svg;
+        set
+        {
+            _svg = value;
+            StateHasChanged();
+        }
+    }
+
+    private string _svg;
+}

@@ -22,12 +22,44 @@ namespace SimpleCircuit
         public event EventHandler<WarningEventArgs> Warning;
 
         /// <summary>
-        /// Gets or sets the minimum length of a wire.
+        /// Gets or sets the style for the graphics.
         /// </summary>
         /// <value>
-        /// The minimum length of the wire.
+        /// The cascading stylesheet.
         /// </value>
-        public static double MinimumWireLength { get; set; } = 7.5;
+        public string Style { get; set; } = DefaultStyle;
+
+        /// <summary>
+        /// Gets or sets the target length of a wire.
+        /// </summary>
+        /// <value>
+        /// The target length of the wire.
+        /// </value>
+        public double WireLength { get; set; } = 7.5;
+
+        /// <summary>
+        /// Gets or sets the text line height.
+        /// </summary>
+        /// <value>
+        /// The line height.
+        /// </value>
+        public double LineHeight { get; set; } = 5.0;
+
+        /// <summary>
+        /// Gets or sets the width of a lower-case character.
+        /// </summary>
+        /// <value>
+        /// The width of a lowercase character.
+        /// </value>
+        public double LowerCharacterWidth { get; set; } = 3.0;
+
+        /// <summary>
+        /// Gets or sets the width of an upper-case character.
+        /// </summary>
+        /// <value>
+        /// The width of an uppercase character.
+        /// </value>
+        public double UpperCharacterWidth { get; set; } = 4.0;
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Circuit"/> is solved.
@@ -191,9 +223,9 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 {
                     if (length.IsFixed)
                         continue;
-                    var x = length - MinimumWireLength;
+                    var x = length - WireLength;
                     minimizer.Minimize += 1e3 * (x + new Squared(x) + new Exp(-x));
-                    length.Value = MinimumWireLength;
+                    length.Value = WireLength;
                     minimizer.AddMinimum(length, 0.0);
                 }
             }
@@ -242,7 +274,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="style">The style sheet information.</param>
         /// <returns>The circuit.</returns>
-        public XmlDocument Render(string style = null)
+        public XmlDocument Render()
         {
             if (!Solved)
                 Solve();
@@ -250,7 +282,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             // Create our drawing
             var drawing = new SvgDrawing
             {
-                Style = style ?? DefaultStyle
+                Style = Style,
+                LineHeight = LineHeight,
+                UpperCharacterWidth = UpperCharacterWidth,
+                LowerCharacterWidth = LowerCharacterWidth
             };
 
             // Draw
