@@ -12,12 +12,11 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@".subckt lpf R1[p] Xo
-R1 <r> X1 <d> C <d> gnd
-X1 <r 0> Xo
-.ends
-lpf1 <r> lpf
-- lpf1[R1_p].X = 0");
+            var ckt = parser.Parse(@"gnd <u> V <u r> X1
+X1 <?> R1 <? ?> R <?> X2
+X1 <?> R2 <? ?> R <?> X2
+- R1.Angle = 45
+- R2.Angle = -45");
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
 

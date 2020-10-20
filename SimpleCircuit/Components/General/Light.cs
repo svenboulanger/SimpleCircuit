@@ -22,8 +22,8 @@ namespace SimpleCircuit.Components
         public Light(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "a", "p" }, "The positive pin.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "b", "n" }, "The negative pin.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "a", "p" }, "The positive pin.", new Vector2(-6, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "b", "n" }, "The negative pin.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

@@ -37,21 +37,32 @@ namespace SimpleCircuit.Functions
             }
         }
 
+        /// <inheritdoc/>
         public override double Value => Math.Log(_a.Value);
 
+        /// <inheritdoc/>
+        public override bool IsConstant => _a.IsConstant;
+
+        /// <summary>
+        /// Creates the natural logarithm.
+        /// </summary>
+        /// <param name="a">The argument.</param>
         public Ln(Function a)
         {
             _a = a ?? throw new ArgumentNullException(nameof(a));
         }
 
-        public override bool IsConstant => _a.IsConstant;
+        /// <inheritdoc/>
+        public override bool IsFixed => _a.IsFixed;
 
+        /// <inheritdoc/>
         public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver)
             => new RowEquation(_a.CreateEquation(row, mapper, solver), solver, row);
 
+        /// <inheritdoc/>
         public override void Differentiate(Function coefficient, Dictionary<Unknown, Function> equations)
         {
-            if (_a.IsConstant)
+            if (_a.IsFixed)
                 return;
             if (coefficient == null)
                 _a.Differentiate(1.0 / _a, equations);
@@ -59,9 +70,14 @@ namespace SimpleCircuit.Functions
                 _a.Differentiate(coefficient / _a, equations);
         }
 
+        /// <inheritdoc/>
         public override bool Resolve(double value)
             => _a.Resolve(Math.Exp(value));
 
+        /// <summary>
+        /// Converts to a string.
+        /// </summary>
+        /// <returns>The string representation.</returns>
         public override string ToString() => $"ln({_a})";
     }
 }

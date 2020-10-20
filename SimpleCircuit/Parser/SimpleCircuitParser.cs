@@ -35,14 +35,14 @@ namespace SimpleCircuit
         }
         private class PinDescription
         {
-            public Pin Before;
+            public TranslatingPin Before;
             public IComponent Component;
-            public Pin After;
+            public TranslatingPin After;
         }
         private class SubcircuitDescription
         {
             public Circuit Circuit { get; set; }
-            public IEnumerable<Pin> Pins { get; set; }
+            public IEnumerable<IPin> Pins { get; set; }
         }
         private int _anonIndex = 0, _wireIndex = 0;
         private readonly KeySearch<SubcircuitDescription> _subcircuits = new KeySearch<SubcircuitDescription>();
@@ -54,6 +54,7 @@ namespace SimpleCircuit
         public Circuit Parse(string input)
         {
             var lexer = new SimpleCircuitLexer(input);
+            _subcircuits.Clear();
             if (!lexer.Next())
                 return new Circuit();
             var ckt = new Circuit();
@@ -97,22 +98,22 @@ namespace SimpleCircuit
                 var end = ParseDoublePin(lexer, ckt);
 
                 // String them together
-                var lastPin = start.After ?? start.Component.Pins[start.Component.Pins.Count - 1];
+                var lastPin = start.After ?? (TranslatingPin)start.Component.Pins.Last(p => p is TranslatingPin);
                 var wire = new Wire(lastPin);
                 ckt.Add(wire);
                 for (var i = 0; i < wires.Count; i++)
                 {
-                    Pin nextPin;
+                    TranslatingPin nextPin;
                     if (i < wires.Count - 1)
                     {
                         var pt = new Point("X:" + (_anonIndex++));
                         ckt.Add(pt);
-                        nextPin = pt.Pins[0];
+                        nextPin = (TranslatingPin)pt.Pins.First(p => p is TranslatingPin);
                         pt.Wires += 2;
                     }
                     else
                     {
-                        nextPin = end.Before ?? end.Component.Pins[0];
+                        nextPin = end.Before ?? (TranslatingPin)end.Component.Pins.First(p => p is TranslatingPin);
                         if (end.Component is Point pte)
                             pte.Wires++;
                     }
@@ -120,56 +121,45 @@ namespace SimpleCircuit
                     // Create a new segment for our wire
                     var length = new Unknown($"W{++_wireIndex}.Length", UnknownTypes.Length);
                     wire.To(nextPin, length);
+                    var dir = wires[i].Direction.ToLower();
 
-                    // Add the necessary constraints
-                    switch (wires[i].Direction)
+                    // Constrain the positions
+                    switch (dir)
                     {
-                        case "u":
-                        case "U":
-                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - length);
-                            ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
-                            ckt.Add(lastPin.NormalY + 1); ckt.Add(nextPin.NormalY - 1);
-                            break;
-                        case "d":
-                        case "D":
-                            ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - length);
-                            ckt.Add(lastPin.NormalX); ckt.Add(nextPin.NormalX);
-                            ckt.Add(lastPin.NormalY - 1); ckt.Add(nextPin.NormalY + 1);
-                            break;
-                        case "l":
-                        case "L":
-                            ckt.Add(lastPin.X - nextPin.X - length); ckt.Add(lastPin.Y - nextPin.Y);
-                            ckt.Add(lastPin.NormalX + 1); ckt.Add(nextPin.NormalX - 1);
-                            ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
-                            break;
-                        case "r":
-                        case "R":
-                            ckt.Add(nextPin.X - lastPin.X - length); ckt.Add(lastPin.Y - nextPin.Y);
-                            ckt.Add(lastPin.NormalX - 1); ckt.Add(nextPin.NormalX + 1);
-                            ckt.Add(lastPin.NormalY); ckt.Add(nextPin.NormalY);
-                            break;
-                        case "?":
-                            if (!lastPin.NormalX.IsConstant && !lastPin.NormalY.IsConstant)
-                            {
-                                if (!nextPin.NormalX.IsConstant && !nextPin.NormalY.IsConstant)
-                                {
-                                    ckt.Add(lastPin.NormalX + nextPin.NormalX);
-                                    ckt.Add(lastPin.NormalY + nextPin.NormalY);
-                                }
-                                ckt.Add(lastPin.X + lastPin.NormalX * length - nextPin.X);
-                                ckt.Add(lastPin.Y + lastPin.NormalY * length - nextPin.Y);
-                            }
-                            else if (!nextPin.NormalX.IsConstant && !nextPin.NormalY.IsConstant)
-                            {
-                                ckt.Add(nextPin.X + nextPin.NormalX * length - lastPin.X);
-                                ckt.Add(nextPin.Y + nextPin.NormalY * length - lastPin.Y);
-                            }
-                            else
-                            {
-                                // This is kind of a bad way, but we don't have a choice...
-                                ckt.Add(new Squared(nextPin.X - lastPin.X) + new Squared(nextPin.Y - lastPin.Y) - length * length);
-                            }
-                            break;
+                        case "u": ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - length); break;
+                        case "d": ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - length); break;
+                        case "l": ckt.Add(lastPin.X - nextPin.X - length); ckt.Add(lastPin.Y - nextPin.Y); break;
+                        case "r": ckt.Add(nextPin.X - lastPin.X - length); ckt.Add(lastPin.Y - nextPin.Y); break;
+                    }
+
+                    // Constrain the directions
+                    if (lastPin is IRotating rlastPin)
+                    {
+                        switch (dir)
+                        {
+                            case "u": ckt.Add(rlastPin.NormalY + 1); ckt.Add(rlastPin.NormalX); break;
+                            case "d": ckt.Add(rlastPin.NormalY - 1); ckt.Add(rlastPin.NormalX); break;
+                            case "l": ckt.Add(rlastPin.NormalY); ckt.Add(rlastPin.NormalX + 1); break;
+                            case "r": ckt.Add(rlastPin.NormalY); ckt.Add(rlastPin.NormalX - 1); break;
+                            case "?":
+                                ckt.Add(lastPin.X + rlastPin.NormalX * length - nextPin.X);
+                                ckt.Add(lastPin.Y + rlastPin.NormalY * length - nextPin.Y);
+                                break;
+                        }
+                    }
+                    if (nextPin is IRotating rnextPin)
+                    {
+                        switch (dir)
+                        {
+                            case "u": ckt.Add(rnextPin.NormalY - 1); ckt.Add(rnextPin.NormalX); break;
+                            case "d": ckt.Add(rnextPin.NormalY + 1); ckt.Add(rnextPin.NormalX); break;
+                            case "l": ckt.Add(rnextPin.NormalY); ckt.Add(rnextPin.NormalX - 1); break;
+                            case "r": ckt.Add(rnextPin.NormalY); ckt.Add(rnextPin.NormalX + 1); break;
+                            case "?":
+                                ckt.Add(nextPin.X + rnextPin.NormalX * length - lastPin.X);
+                                ckt.Add(nextPin.Y + rnextPin.NormalY * length - lastPin.Y);
+                                break;
+                        }
                     }
 
                     // Fix the wire length if necessary
@@ -190,7 +180,7 @@ namespace SimpleCircuit
                 lexer.Next();
                 var pin = ParseName(lexer);
                 lexer.Check(TokenType.CloseBracket, "]");
-                result.After = result.Component.Pins[pin];
+                result.After = (TranslatingPin)result.Component.Pins[pin];
             }
             return result;
         }
@@ -205,7 +195,7 @@ namespace SimpleCircuit
             }
             var result = ParsePin(lexer, ckt);
             if (beforePin != null)
-                result.Before = result.Component.Pins[beforePin];
+                result.Before = (TranslatingPin)result.Component.Pins[beforePin];
             return result;
         }
         private IComponent ParseComponentLabel(SimpleCircuitLexer lexer, Circuit ckt)
@@ -289,7 +279,7 @@ namespace SimpleCircuit
                 }
 
                 // Extract function values if necessary
-                if (b is Function fb2 && fb2.IsConstant)
+                if (b is Function fb2 && fb2.IsFixed)
                     b = fb2.Value;
 
                 // Set the property
@@ -418,32 +408,27 @@ namespace SimpleCircuit
                 var propertyName = ParseName(lexer);
 
                 // Detect unknowns (fixed names)
-                if (result is IComponent || result is Pin)
+                if (result is IComponent || result is RotatingPin)
                 {
-                    switch (propertyName)
+                    switch (propertyName.ToLower())
                     {
                         case "x":
-                        case "X":
                             if (!(result is ITranslating posx))
                                 throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
                             return posx.X;
                         case "y":
-                        case "Y":
                             if (!(result is ITranslating posy))
                                 throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
                             return posy.Y;
                         case "nx":
-                        case "NX":
                             if (!(result is IRotating orx))
                                 throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
                             return orx.NormalX;
                         case "ny":
-                        case "NY":
                             if (!(result is IRotating ory))
                                 throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
                             return ory.NormalY;
                         case "s":
-                        case "S":
                             if (!(result is IScaling m))
                                 throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
                             return m.Scale;

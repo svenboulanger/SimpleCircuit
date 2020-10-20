@@ -39,10 +39,19 @@ namespace SimpleCircuit.Functions
             }
         }
 
+        /// <inheritdoc/>
         public override double Value => Math.Exp(_a.Value);
 
+        /// <inheritdoc/>
+        public override bool IsFixed => _a.IsFixed;
+
+        /// <inheritdoc/>
         public override bool IsConstant => _a.IsConstant;
 
+        /// <summary>
+        /// Creates an exponential.
+        /// </summary>
+        /// <param name="a">The argument.</param>
         public Exp(Function a)
         {
             _a = a ?? throw new ArgumentNullException(nameof(a));

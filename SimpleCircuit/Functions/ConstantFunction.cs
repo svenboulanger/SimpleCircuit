@@ -33,6 +33,9 @@ namespace SimpleCircuit.Functions
         public override double Value => _value;
 
         /// <inheritdoc/>
+        public override bool IsFixed => true;
+
+        /// <inheritdoc/>
         public override bool IsConstant => true;
 
         /// <summary>

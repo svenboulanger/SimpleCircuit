@@ -17,10 +17,18 @@ namespace SimpleCircuit.Functions
         public abstract double Value { get; }
 
         /// <summary>
-        /// Gets a flag that shows whether or not the function is a constant value.
+        /// Gets a flag that shows whether or not the function has been fixed to a certain value.
         /// </summary>
         /// <value>
         ///   <c>true</c> the function is constant; otherwise, <c>false</c>.
+        /// </value>
+        public abstract bool IsFixed { get; }
+
+        /// <summary>
+        /// Gets a flag that shows whether or not the function is constant.
+        /// </summary>
+        /// <value>
+        ///     <c>true</c> if the function doesn't contain any unknowns; otherwise, <c>false</c>.
         /// </value>
         public abstract bool IsConstant { get; }
 
@@ -59,7 +67,7 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public static Function operator -(Function a)
         {
-            if (a.IsConstant)
+            if (a.IsFixed)
                 return new ConstantFunction(-a.Value);
             return new Negative(a);
         }
@@ -74,14 +82,14 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public static Function operator +(Function a, Function b)
         {
-            if (a.IsConstant)
+            if (a.IsFixed)
             {
-                if (b.IsConstant)
+                if (b.IsFixed)
                     return new ConstantFunction(a.Value + b.Value);
                 if (a.Value.IsZero())
                     return b;
             }
-            else if (b.IsConstant)
+            else if (b.IsFixed)
             {
                 if (b.Value.IsZero())
                     return a;
@@ -99,14 +107,14 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public static Function operator -(Function a, Function b)
         {
-            if (a.IsConstant)
+            if (a.IsFixed)
             {
-                if (b.IsConstant)
+                if (b.IsFixed)
                     return new ConstantFunction(a.Value - b.Value);
                 if (a.Value.IsZero())
                     return -b;
             }
-            else if (b.IsConstant)
+            else if (b.IsFixed)
             {
                 if (b.Value.IsZero())
                     return a;
@@ -124,16 +132,16 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public static Function operator *(Function a, Function b)
         {
-            if (a.IsConstant && b.IsConstant)
+            if (a.IsFixed && b.IsFixed)
                 return new ConstantFunction(a.Value * b.Value);
-            if (a.IsConstant)
+            if (a.IsFixed)
             {
                 if (a.Value.IsZero())
                     return 0.0;
                 if ((a.Value - 1).IsZero())
                     return b;
             }
-            if (b.IsConstant)
+            if (b.IsFixed)
             {
                 if (b.Value.IsZero())
                     return 0.0;
@@ -153,14 +161,14 @@ namespace SimpleCircuit.Functions
         /// </returns>
         public static Function operator /(Function a, Function b)
         {
-            if (a.IsConstant)
+            if (a.IsFixed)
             {
-                if (b.IsConstant)
+                if (b.IsFixed)
                     return new ConstantFunction(a.Value / b.Value);
                 if (a.Value.IsZero())
                     return 0.0;
             }
-            else if (b.IsConstant)
+            else if (b.IsFixed)
             {
                 if ((b.Value - 1).IsZero())
                     return a;

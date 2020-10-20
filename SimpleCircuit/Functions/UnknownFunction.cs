@@ -52,7 +52,10 @@ namespace SimpleCircuit.Functions
         public override double Value => _unknown.Value;
 
         /// <inheritdoc/>
-        public override bool IsConstant => _unknown.IsFixed;
+        public override bool IsFixed => _unknown.IsFixed;
+
+        /// <inheritdoc/>
+        public override bool IsConstant => false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnknownFunction"/> class.

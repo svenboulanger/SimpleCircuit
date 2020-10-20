@@ -18,12 +18,12 @@
         public FlipFlop(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "d" }, "Data.", new Vector2(-8, 6), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "c", "clk" }, "Clock.", new Vector2(-8, -6), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "r", "rst" }, "Reset.", new Vector2(0, -11), new Vector2(0, -1));
-            Pins.Add(Name, new[] { "s", "set" }, "Set.", new Vector2(0, 11), new Vector2(0, 1));
-            Pins.Add(Name, new[] { "nq", "qn" }, "Inverted output.", new Vector2(8, -6), new Vector2(1, 0));
-            Pins.Add(Name, new[] { "q" }, "Output", new Vector2(8, 6), new Vector2(1, 0));
+            Pins.Add(new[] { "d" }, "Data.", new Vector2(-8, 6), new Vector2(-1, 0));
+            Pins.Add(new[] { "c", "clk" }, "Clock.", new Vector2(-8, -6), new Vector2(-1, 0));
+            Pins.Add(new[] { "r", "rst" }, "Reset.", new Vector2(0, -11), new Vector2(0, -1));
+            Pins.Add(new[] { "s", "set" }, "Set.", new Vector2(0, 11), new Vector2(0, 1));
+            Pins.Add(new[] { "nq", "qn" }, "Inverted output.", new Vector2(8, -6), new Vector2(1, 0));
+            Pins.Add(new[] { "q" }, "Output", new Vector2(8, 6), new Vector2(1, 0));
 
             // This is just for having a bit nicer initial values
             UnknownScale.Value = -1;

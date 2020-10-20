@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="Subcircuit"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Subcircuit(string name, Circuit definition, IEnumerable<Pin> pins)
+        public Subcircuit(string name, Circuit definition, IEnumerable<IPin> pins)
             : base(name)
         {
             _ckt = definition ?? throw new ArgumentNullException(nameof(definition));
@@ -26,12 +26,10 @@ namespace SimpleCircuit.Components
             // Find the pins in the subcircuit
             foreach (var pin in pins)
             {
-                Pins.Add(
-                    Name,
-                    new[] { pin.Name.Replace('.', '_') }, 
-                    pin.ToString(),
-                    new Vector2(pin.X.Value, pin.Y.Value),
-                    new Vector2(pin.NormalX.Value, pin.NormalY.Value));
+                if (pin is RotatingPin rpin)
+                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(rpin.X.Value, rpin.Y.Value), new Vector2(rpin.NormalX.Value, rpin.NormalY.Value));
+                else if (pin is TranslatingPin tpin)
+                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(tpin.X.Value, tpin.Y.Value));                
             }
         }
 

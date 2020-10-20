@@ -18,10 +18,10 @@
         public Pmos(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "d", "drain" }, "The drain.", new Vector2(8, 0), new Vector2(1, 0));
-            Pins.Add(Name, new[] { "g", "gate" }, "The gate.", new Vector2(0, 11), new Vector2(0, 1));
-            Pins.Add(Name, new[] { "b", "bulk" }, "The bulk.", new Vector2(0, 0), new Vector2(0, -1));
-            Pins.Add(Name, new[] { "s", "source" }, "The source.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "d", "drain" }, "The drain.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "g", "gate" }, "The gate.", new Vector2(0, 11), new Vector2(0, 1));
+            Pins.Add(new[] { "b", "bulk" }, "The bulk.", new Vector2(0, 0), new Vector2(0, -1));
+            Pins.Add(new[] { "s", "source" }, "The source.", new Vector2(-8, 0), new Vector2(-1, 0));
         }
 
         /// <inheritdoc/>

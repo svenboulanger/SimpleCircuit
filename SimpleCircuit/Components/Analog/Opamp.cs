@@ -18,11 +18,11 @@
         public Opamp(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "n" }, "The negative input.", new Vector2(-8, -4), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "p" }, "The positive input.", new Vector2(-8, 4), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "vn" }, "The power supply on the negative input side.", new Vector2(0, -6), new Vector2(0, -1));
-            Pins.Add(Name, new[] { "vp" }, "The power supply on the positive input side.", new Vector2(0, 6), new Vector2(0, 1));
-            Pins.Add(Name, new[] { "o", "out" }, "The output.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "n" }, "The negative input.", new Vector2(-8, -4), new Vector2(-1, 0));
+            Pins.Add(new[] { "p" }, "The positive input.", new Vector2(-8, 4), new Vector2(-1, 0));
+            Pins.Add(new[] { "vn" }, "The power supply on the negative input side.", new Vector2(0, -6), new Vector2(0, -1));
+            Pins.Add(new[] { "vp" }, "The power supply on the positive input side.", new Vector2(0, 6), new Vector2(0, 1));
+            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

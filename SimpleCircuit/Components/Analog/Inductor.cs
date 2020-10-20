@@ -18,8 +18,8 @@
         public Inductor(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

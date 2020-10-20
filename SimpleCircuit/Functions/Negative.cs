@@ -31,6 +31,9 @@ namespace SimpleCircuit.Functions
         public override double Value => -_a.Value;
 
         /// <inheritdoc/>
+        public override bool IsFixed => _a.IsFixed;
+
+        /// <inheritdoc/>
         public override bool IsConstant => _a.IsConstant;
 
         /// <summary>
@@ -45,7 +48,7 @@ namespace SimpleCircuit.Functions
         /// <inheritdoc/>
         public override void Differentiate(Function coefficient, Dictionary<Unknown, Function> equations)
         {
-            if (_a.IsConstant)
+            if (_a.IsFixed)
                 return;
             if (coefficient == null)
                 _a.Differentiate(null, equations);

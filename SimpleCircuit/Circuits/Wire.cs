@@ -11,7 +11,7 @@ namespace SimpleCircuit.Circuits
     /// </summary>
     public class Wire
     {
-        private readonly LinkedList<Pin> _points = new LinkedList<Pin>();
+        private readonly LinkedList<TranslatingPin> _points = new LinkedList<TranslatingPin>();
         private readonly HashSet<Unknown> _lengths = new HashSet<Unknown>();
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace SimpleCircuit.Circuits
         /// Initializes a new instance of the <see cref="Wire"/> class.
         /// </summary>
         /// <param name="start">The start.</param>
-        public Wire(Pin start)
+        public Wire(TranslatingPin start)
         {
             _points.AddLast(start);
         }
@@ -36,7 +36,7 @@ namespace SimpleCircuit.Circuits
         /// </summary>
         /// <param name="pin">The pin.</param>
         /// <param name="length">The length of the segment.</param>
-        public void To(Pin pin, Unknown length)
+        public void To(TranslatingPin pin, Unknown length)
         {
             pin.ThrowIfNull(nameof(pin));
             length.ThrowIfNull(nameof(length));

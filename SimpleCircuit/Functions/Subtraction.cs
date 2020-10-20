@@ -38,7 +38,10 @@ namespace SimpleCircuit.Functions
         public override double Value => _a.Value - _b.Value;
 
         /// <inheritdoc/>
-        public override bool IsConstant => _a.IsConstant && _b.IsConstant;
+        public override bool IsFixed => _a.IsFixed && _b.IsFixed;
+
+        /// <inheritdoc/>
+        public override bool IsConstant => _a.IsConstant;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subtraction"/> class.
@@ -56,16 +59,16 @@ namespace SimpleCircuit.Functions
         {
             if (coefficient == null)
             {
-                if (!_a.IsConstant)
+                if (!_a.IsFixed)
                     _a.Differentiate(null, equations);
-                if (!_b.IsConstant)
+                if (!_b.IsFixed)
                     _b.Differentiate(-1.0, equations);
             }
             else
             {
-                if (!_a.IsConstant)
+                if (!_a.IsFixed)
                     _a.Differentiate(coefficient, equations);
-                if (!_b.IsConstant)
+                if (!_b.IsFixed)
                     _b.Differentiate(-coefficient, equations);
             }
         }
@@ -82,9 +85,9 @@ namespace SimpleCircuit.Functions
         public override bool Resolve(double value)
         {
             // value = a - b
-            if (_a.IsConstant)
+            if (_a.IsFixed)
                 return _b.Resolve(_a.Value - value);
-            if (_b.IsConstant)
+            if (_b.IsFixed)
                 return _a.Resolve(_b.Value + value);
             return false;
         }

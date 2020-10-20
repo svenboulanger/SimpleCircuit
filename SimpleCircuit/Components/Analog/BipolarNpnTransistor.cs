@@ -18,9 +18,9 @@
         public BipolarNpnTransistor(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "e", "emitter" }, "The emitter.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "b", "base" }, "The base.", new Vector2(0, 6), new Vector2(0, 1));
-            Pins.Add(Name, new[] { "c", "collectr" }, "The collector.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "e", "emitter" }, "The emitter.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "b", "base" }, "The base.", new Vector2(0, 6), new Vector2(0, 1));
+            Pins.Add(new[] { "c", "collectr" }, "The collector.", new Vector2(8, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

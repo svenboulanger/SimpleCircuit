@@ -22,8 +22,7 @@
         public Point(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "a", "p", "normal" }, "The entry point.", new Vector2(), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "b", "opposite" }, "The opposite point.", new Vector2(), new Vector2(1, 0));
+            Pins.Add(new[] { "x", "p" }, "The entry point.", new Vector2());
             Wires = 0;
         }
 

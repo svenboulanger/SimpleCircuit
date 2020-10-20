@@ -10,11 +10,11 @@ namespace SimpleCircuit.Components
     /// A collection of pins.
     /// </summary>
     /// <seealso cref="IEnumerable{Pin}" />
-    public class PinCollection : IEnumerable<Pin>
+    public class PinCollection : IEnumerable<IPin>
     {
         private class Node
         {
-            public Pin Pin;
+            public IPin Pin;
             public bool Used;
         }
 
@@ -44,12 +44,11 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Adds a pin with the specified names.
         /// </summary>
-        /// <param name="componentName">The component name.</param>
         /// <param name="names">The names.</param>
         /// <param name="description">The description.</param>
         /// <param name="offset">The offset.</param>
         /// <param name="normal">The normal.</param>
-        public void Add(string componentName, string[] names, string description, Vector2 offset, Vector2 normal)
+        public void Add(string[] names, string description, Vector2 offset, Vector2 normal)
         {
             // Use the component orientation to transform the offset and normal
             Function x = 0.0;
@@ -69,10 +68,54 @@ namespace SimpleCircuit.Components
                 nx = normal.X * or.NormalX - normal.Y * ms * or.NormalY;
                 ny = normal.X * or.NormalY + normal.Y * ms * or.NormalX;
             }
+            else
+            {
+                x += offset.X;
+                y += offset.Y;
+            }
 
             var pin = new Node
             {
-                Pin = new Pin($"{componentName}.{names[0]}", description, _parent, x, y, nx, ny),
+                Pin = new RotatingPin(names[0], description, _parent, x, y, nx, ny),
+                Used = false
+            };
+            _ordered.Add(pin);
+            foreach (var name in names)
+                _pins[name] = pin;
+        }
+
+        /// <summary>
+        /// Adds a pin with the specified names. The pin does not have a specific orientation and defaults to (1, 0) but
+        /// cannot be rotated.
+        /// </summary>
+        /// <param name="names">The names.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="offset">The offset.</param>
+        public void Add(string[] names, string description, Vector2 offset)
+        {
+            // Use the component orientation to transform the offset and normal
+            Function x = 0.0;
+            Function y = 0.0;
+            if (_parent is ITranslating pos)
+            {
+                x = pos.X;
+                y = pos.Y;
+            }
+            if (_parent is IRotating or)
+            {
+                var ms = _parent is IScaling m ? m.Scale : 1.0;
+                x += offset.X * or.NormalX - offset.Y * ms * or.NormalY;
+                y += offset.X * or.NormalY + offset.Y * ms * or.NormalX;
+            }
+            else
+            {
+                x += offset.X;
+                y += offset.Y;
+            }
+
+            var pin = new Node
+            {
+                Pin = new TranslatingPin(names[0], description, _parent, x, y),
                 Used = false
             };
             _ordered.Add(pin);
@@ -86,7 +129,7 @@ namespace SimpleCircuit.Components
         /// <returns>
         /// An enumerator that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<Pin> GetEnumerator() => _ordered.Select(o => o.Pin).GetEnumerator();
+        public IEnumerator<IPin> GetEnumerator() => _ordered.Select(o => o.Pin).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -105,14 +148,14 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
-        /// Gets the <see cref="Pin"/> with the specified name.
+        /// Gets the <see cref="RotatingPin"/> with the specified name.
         /// </summary>
         /// <value>
-        /// The <see cref="Pin"/>.
+        /// The <see cref="RotatingPin"/>.
         /// </value>
         /// <param name="name">The name.</param>
         /// <returns></returns>
-        public Pin this[string name]
+        public IPin this[string name]
         {
             get
             {
@@ -126,14 +169,14 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
-        /// Gets the <see cref="Pin"/> at the specified index.
+        /// Gets the <see cref="RotatingPin"/> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="Pin"/>.
+        /// The <see cref="RotatingPin"/>.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns>The pin.</returns>
-        public Pin this[int index]
+        public IPin this[int index]
         {
             get
             {
@@ -148,6 +191,6 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="pin">The pin.</param>
         /// <returns>The names.</returns>
-        public IEnumerable<string> NamesOf(Pin pin) => _pins.Where(p => ReferenceEquals(p.Value.Pin, pin)).Select(p => p.Key);
+        public IEnumerable<string> NamesOf(IPin pin) => _pins.Where(p => ReferenceEquals(p.Value.Pin, pin)).Select(p => p.Key);
     }
 }

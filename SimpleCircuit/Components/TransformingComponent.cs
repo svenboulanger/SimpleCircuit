@@ -9,6 +9,8 @@ namespace SimpleCircuit.Components
     /// <seealso cref="IScaling" />
     public abstract class TransformingComponent : RotatingComponent, IScaling
     {
+        private readonly bool _strictMirror;
+
         /// <summary>
         /// Gets the unknown scale.
         /// </summary>
@@ -24,18 +26,22 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="TransformingComponent"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <param name="pc">The pin collection.</param>
-        protected TransformingComponent(string name)
+        /// <param name="strictlyMirror">If <c>true</c>, the component can be mirrored but not scaled.</param>
+        protected TransformingComponent(string name, bool strictlyMirror = true)
             : base(name)
         {
             UnknownScale = new Unknown(name + ".s", UnknownTypes.Scale);
+            _strictMirror = strictlyMirror;
         }
 
         /// <inheritdoc/>
         public override void Apply(Minimizer minimizer)
         {
             base.Apply(minimizer);
-            minimizer.Minimize += 1e6 * (new Squared(Scale) + 1.0 / new Squared(Scale));
+            if (_strictMirror)
+                minimizer.AddConstraint(new Squared(Scale) - 1);
+            else
+                minimizer.Minimize += 1e6 * (new Squared(Scale) + 1.0 / new Squared(Scale));
         }
 
         /// <inheritdoc/>

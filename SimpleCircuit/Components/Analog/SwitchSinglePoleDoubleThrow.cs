@@ -26,10 +26,10 @@
         public SwitchSinglePoleDoubleThrow(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "p" }, "The pole pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 6), new Vector2(0, 1));
-            Pins.Add(Name, new[] { "t1" }, "The first throwing pin.", new Vector2(8, 4), new Vector2(1, 0));
-            Pins.Add(Name, new[] { "t2" }, "The second throwing pin.", new Vector2(8, -4), new Vector2(1, 0));
+            Pins.Add(new[] { "p" }, "The pole pin.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 6), new Vector2(0, 1));
+            Pins.Add(new[] { "t1" }, "The first throwing pin.", new Vector2(8, 4), new Vector2(1, 0));
+            Pins.Add(new[] { "t2" }, "The second throwing pin.", new Vector2(8, -4), new Vector2(1, 0));
         }
 
         /// <inheritdoc />

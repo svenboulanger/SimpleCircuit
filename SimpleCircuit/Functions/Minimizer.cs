@@ -261,35 +261,59 @@ namespace SimpleCircuit.Functions
         /// <returns>The solver.</returns>
         private void BuildSolver()
         {
-            _lambdas.Clear();
             _solver = new SparseRealSolver();
             _map.Clear();
 
             // Build our total function
-            var f = Minimize ?? 1.0;
-            int index = 1;
-            foreach (var c in _constraints)
-            {
-                if (c.IsConstant)
-                    continue;
-                var lambda = new Unknown($"lambda{index++}", UnknownTypes.Scalar);
-                f += lambda * c;
-                _lambdas.Add(lambda);
-            }
-
-            // Differentiate the Lagrangian function
-            if (LogInfo)
-                Console.WriteLine(f);
+            bool hasResolved = true;
             var diffs = new Dictionary<Unknown, Function>();
-            f.Differentiate(null, diffs);
-
-            // Handle unknowns that need to be minimized
-            foreach (var m in _minimum)
+            while (hasResolved)
             {
-                if (m.Key.IsFixed)
-                    continue;
-                if (diffs.TryGetValue(m.Key, out var eq))
-                    diffs[m.Key] = eq - 0.01 / (m.Key - m.Value);
+                hasResolved = false;
+                _lambdas.Clear();
+                var f = Minimize ?? 1.0;
+                int index = 1;
+                foreach (var c in _constraints)
+                {
+                    if (c.IsFixed)
+                        continue;
+                    var lambda = new Unknown($"lambda{index++}", UnknownTypes.Scalar);
+                    f += lambda * c;
+                    _lambdas.Add(lambda);
+                }
+
+                // Differentiate the Lagrangian function
+                if (LogInfo)
+                    Console.WriteLine(f);
+                diffs.Clear();
+                f.Differentiate(null, diffs);
+
+                // Handle unknowns that need to be minimized
+                foreach (var m in _minimum)
+                {
+                    if (m.Key.IsFixed)
+                        continue;
+                    if (diffs.TryGetValue(m.Key, out var eq))
+                        diffs[m.Key] = eq - 0.01 / (m.Key - m.Value);
+                }
+
+                // First try to precompute as many constraints as possible
+                bool localResolved;
+                do
+                {
+                    localResolved = false;
+                    foreach (var c in diffs.Values)
+                    {
+                        if (c.Resolve(0.0))
+                        {
+                            hasResolved = true;
+                            localResolved = true;
+                            if (LogInfo)
+                                Console.WriteLine($"Resolved {c}");
+                        }
+                    }
+                }
+                while (localResolved);
             }
 
             // Setup the equations and solution
@@ -297,7 +321,7 @@ namespace SimpleCircuit.Functions
             _oldSolution = new DenseVector<double>(_equations.Count);
             foreach (var eq in diffs)
             {
-                index = _map.Map(eq.Key);
+                var index = _map.Map(eq.Key);
                 var rowEquation = eq.Value.CreateEquation(index, _map, _solver);
                 _equations.Add(eq.Key, rowEquation);
                 switch (eq.Key.Type)
@@ -331,9 +355,11 @@ namespace SimpleCircuit.Functions
                 var initial = m.Key.Value;
                 if (m.Key.Value <= m.Value)
                     initial = m.Value + 1e-9;
-                if (_map.TryGet(m.Key, out index))
+                if (_map.TryGet(m.Key, out var index))
+                {
                     _solution[index] = initial;
-                _oldSolution[index] = _solution[index];
+                    _oldSolution[index] = _solution[index];
+                }
             }
         }
     }

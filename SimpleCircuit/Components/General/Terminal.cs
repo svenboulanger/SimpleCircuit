@@ -20,7 +20,7 @@
         public Terminal(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "p", "a", "o", "i" }, "The pin.", new Vector2(), new Vector2(1, 0));
+            Pins.Add(new[] { "p", "a", "o", "i" }, "The pin.", new Vector2(), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>

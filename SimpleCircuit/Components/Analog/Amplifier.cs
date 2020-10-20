@@ -18,8 +18,8 @@
         public Amplifier(string name)
             : base(name)
         {
-            Pins.Add(Name, new[] { "in" }, "The input.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(Name, new[] { "out" }, "The output.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(new[] { "in" }, "The input.", new Vector2(-6, 0), new Vector2(-1, 0));
+            Pins.Add(new[] { "out" }, "The output.", new Vector2(6, 0), new Vector2(1, 0));
         }
 
         /// <inheritdoc/>
@@ -31,7 +31,7 @@
             });
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, new Vector2(-2.5, 0), new Vector2());
+                drawing.Text(Label, new Vector2(-2.5, 0), new Vector2(), 3, 0.5);
         }
 
         /// <summary>

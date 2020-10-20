@@ -44,6 +44,9 @@ namespace SimpleCircuit.Functions
         public override double Value => _a.Value / _b.Value;
 
         /// <inheritdoc/>
+        public override bool IsFixed => _a.IsFixed && _b.IsFixed;
+
+        /// <inheritdoc/>
         public override bool IsConstant => _a.IsConstant && _b.IsConstant;
 
         /// <summary>
@@ -62,16 +65,16 @@ namespace SimpleCircuit.Functions
         {
             if (coefficient == null)
             {
-                if (!_a.IsConstant)
+                if (!_a.IsFixed)
                     _a.Differentiate(1.0 / _b, equations);
-                if (!_b.IsConstant)
+                if (!_b.IsFixed)
                     _b.Differentiate(_a / _b / _b, equations);
             }
             else
             {
-                if (!_a.IsConstant)
+                if (!_a.IsFixed)
                     _a.Differentiate(coefficient / _b, equations);
-                if (!_b.IsConstant)
+                if (!_b.IsFixed)
                     _b.Differentiate(-coefficient * _a / _b / _b, equations);
             }
         }
@@ -88,9 +91,9 @@ namespace SimpleCircuit.Functions
         public override bool Resolve(double value)
         {
             // value = a / b
-            if (_a.IsConstant && !value.IsZero())
+            if (_a.IsFixed && !value.IsZero())
                 return _b.Resolve(_a.Value / value);
-            if (_b.IsConstant && !_b.Value.IsZero())
+            if (_b.IsFixed && !_b.Value.IsZero())
                 return _a.Resolve(_b.Value * value);
             return false;
         }

@@ -46,6 +46,9 @@ namespace SimpleCircuit.Functions
         public override double Value => Math.Atan2(_ny.Value, _nx.Value);
 
         /// <inheritdoc/>
+        public override bool IsFixed => _nx.IsFixed && _ny.IsFixed;
+
+        /// <inheritdoc/>
         public override bool IsConstant => _nx.IsConstant && _ny.IsConstant;
 
         /// <summary>

@@ -91,7 +91,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="constraint">The constraint.</param>
         public void Add(Function constraint)
         {
-            if (constraint == null || constraint.IsConstant)
+            if (constraint == null || constraint.IsFixed)
                 return;
             _constraints.Add(constraint);
             Solved = false;
@@ -170,21 +170,6 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         {
             var minimizer = new Minimizer();
 
-            // First try to precompute as many constraints as possible
-            bool resolvedConstraints = true;
-            while (resolvedConstraints)
-            {
-                resolvedConstraints = false;
-                foreach (var c in _constraints)
-                {
-                    if (c.Resolve(0.0))
-                    {
-                        resolvedConstraints = true;
-                        Console.WriteLine($"Resolved {c}");
-                    }
-                }
-            }
-
             // Build the function that needs to be minimized
             for (var i = 0; i < _wires.Count; i++)
             {
@@ -204,7 +189,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             foreach (var c in _constraints)
             {
-                if (!c.IsConstant)
+                if (!c.IsFixed)
                     minimizer.AddConstraint(c);
             }
 
