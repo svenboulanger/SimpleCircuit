@@ -17,6 +17,11 @@ namespace SimpleCircuit
         private readonly List<Wire> _wires = new List<Wire>();
 
         /// <summary>
+        /// Occurs when a warning is generated.
+        /// </summary>
+        public event EventHandler<WarningEventArgs> Warning;
+
+        /// <summary>
         /// Gets or sets the minimum length of a wire.
         /// </summary>
         /// <value>
@@ -56,12 +61,20 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         public IEnumerable<IComponent> Components => _components.Values;
 
         /// <summary>
-        /// Gets the count.
+        /// Gets the component count.
         /// </summary>
         /// <value>
         /// The count.
         /// </value>
-        public int Count => _components.Count;
+        public int ComponentCount => _components.Count;
+
+        /// <summary>
+        /// Gets the wire count.
+        /// </summary>
+        /// <value>
+        /// The wire count.
+        /// </value>
+        public int WireCount => _wires.Count;
 
         /// <summary>
         /// Gets the <see cref="IComponent"/> with the specified name.
@@ -169,6 +182,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         public void Solve()
         {
             var minimizer = new Minimizer();
+            minimizer.Warning += Proxy;
 
             // Build the function that needs to be minimized
             for (var i = 0; i < _wires.Count; i++)
@@ -195,7 +209,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             minimizer.Solve();
             Solved = true;
+            minimizer.Warning -= Proxy;
         }
+
+        private void Proxy(object sender, WarningEventArgs args) => Warning?.Invoke(sender, args);
 
         /// <summary>
         /// Renders the specified drawing.
@@ -231,8 +248,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 Solve();
 
             // Create our drawing
-            var drawing = new SvgDrawing();
-            drawing.Style = style ?? DefaultStyle;
+            var drawing = new SvgDrawing
+            {
+                Style = style ?? DefaultStyle
+            };
 
             // Draw
             Render(drawing);

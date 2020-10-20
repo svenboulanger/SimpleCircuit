@@ -12,11 +12,8 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(@"gnd <u> V <u r> X1
-X1 <?> R1 <? ?> R <?> X2
-X1 <?> R2 <? ?> R <?> X2
-- R1.Angle = 45
-- R2.Angle = -45");
+            var ckt = parser.Parse(@"OA1[p] <u> R1 <u> [n]OA1");
+            ckt.Warning += (sender, args) => Console.WriteLine("WARNING: " + args.Message);
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
             var doc = ckt.Render();
 

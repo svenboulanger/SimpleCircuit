@@ -13,6 +13,11 @@ namespace SimpleCircuit.Functions
         private readonly Random _rnd = new Random();
 
         /// <summary>
+        /// Occurs when a warning is generated.
+        /// </summary>
+        public event EventHandler<WarningEventArgs> Warning;
+
+        /// <summary>
         /// If <c>true</c>, logging info is shown.
         /// </summary>
         public static bool LogInfo = false;
@@ -250,6 +255,7 @@ namespace SimpleCircuit.Functions
                 {
                     if (LogInfo)
                         Console.WriteLine("Could not converge...");
+                    Warning?.Invoke(this, new WarningEventArgs("Could not converge to a solution."));
                     return;
                 }
             }
