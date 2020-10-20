@@ -39,10 +39,13 @@
             drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4) });
 
             if (Pins.IsUsed("b"))
+            {
                 drawing.Line(new Vector2(0, 4), new Vector2(0, 0));
-
-            if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, new Vector2(1, -3), new Vector2(1, -1));
+                if (!string.IsNullOrEmpty(Label))
+                    drawing.Text(Label, new Vector2(-3, -3), new Vector2(-1, -1));
+            }
+            else if (!string.IsNullOrEmpty(Label))
+                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
         }
 
         /// <summary>
