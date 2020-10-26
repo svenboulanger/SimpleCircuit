@@ -1,4 +1,10 @@
-﻿<div style="min-height: 75px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee;">
+﻿<div style="min-height: 75px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee; position: relative;">
+    @if (_loading)
+    {
+        <div class="spinner-border loading-icon text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    }
     @if (_svg != null)
     {
         @((MarkupString)_svg)
@@ -21,5 +27,20 @@
         }
     }
 
+    [Parameter]
+    public bool Loading
+    {
+        get => _loading;
+        set
+        {
+            if (value != _loading)
+            {
+                _loading = value;
+                StateHasChanged();
+            }
+        }
+    }
+
     private string _svg;
+    private bool _loading;
 }

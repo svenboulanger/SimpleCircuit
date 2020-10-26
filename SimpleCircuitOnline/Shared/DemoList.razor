@@ -1,0 +1,43 @@
+﻿
+@if (Show && Demo.Demos != null)
+{
+    <table class="table table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var demo in Demo.Demos)
+            {
+                <tr>
+                    <td><a href="javascript:void(0);" @onclick="@(x => Update(demo.Code))">@demo.Title</a></td>
+                    <td>@demo.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public bool Show
+    {
+        get => _show;
+        set
+        {
+            if (_show != value)
+            {
+                _show = value;
+                StateHasChanged();
+            }
+        }
+    }
+    private bool _show = false;
+
+    [Parameter]
+    public EventCallback<string> DemoSelected { get; set; }
+
+    private async Task Update(string code) => await DemoSelected.InvokeAsync(code);
+}

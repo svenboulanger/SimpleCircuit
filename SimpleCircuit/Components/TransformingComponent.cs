@@ -27,7 +27,7 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="strictlyMirror">If <c>true</c>, the component can be mirrored but not scaled.</param>
-        protected TransformingComponent(string name, bool strictlyMirror = true)
+        protected TransformingComponent(string name, bool strictlyMirror = false)
             : base(name)
         {
             UnknownScale = new Unknown(name + ".s", UnknownTypes.Scale);

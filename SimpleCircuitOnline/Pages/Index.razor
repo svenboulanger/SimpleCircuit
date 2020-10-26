@@ -10,7 +10,7 @@
             Circuit
         </div>
         <div class="card-body">
-            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnDidChangeCursorPosition="Defer" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
         </div>
     </div>
     <div class="input-style card">
@@ -18,17 +18,19 @@
             Style (CSS)
         </div>
         <div class="card-body">
-            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnDidChangeCursorPosition="Defer" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
         </div>
     </div>
     <div class="svg-output">
-        <SvgOutput Svg="@_svg" />
+        <SvgOutput Svg="@_svg" Loading="_loading" />
         <Errors Error="@_errors" Warning="@_warnings" />
         <div class="clearfix">
             <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
-            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="ToggleComponents">@(_showHelp ? "Hide components" : "Show components")</a>
+            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showHelp = !_showHelp)">@(_showHelp ? "Hide components" : "Show components")</a>
+            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showDemo = !_showDemo)">@(_showDemo ? "Hide demo's" : "Show demo's")</a>
         </div>
         <ComponentHelp Show="_showHelp" />
+        <DemoList Show="_showDemo" DemoSelected="@(x => { _scriptEditor.SetValue(x); Update(new KeyboardEvent()); })" />
     </div>
 </div>
 
@@ -37,7 +39,7 @@
     private string _svg, _errors, _warnings;
     private Timer _timer;
     private Task _task = null;
-    private bool _showHelp = false;
+    private bool _showHelp = false, _showDemo = false, _loading = false, _running = false;
     private SimpleCircuitParser _parser;
     private MonacoEditor _scriptEditor, _styleEditor;
 
@@ -51,32 +53,45 @@
         };
     }
 
-    private void Defer()
+    private void Update(KeyboardEvent e)
     {
-        if (_timer.Enabled)
+        if (_loading)
         {
             _timer.Stop();
             _timer.Start();
+            return;
         }
-    }
 
-    private void Update()
-    {
-        if (_timer.Enabled)
-            _timer.Stop();
+        // Ignore some key codes
+        switch (e.KeyCode)
+        {
+            case KeyCode.DownArrow:
+            case KeyCode.UpArrow:
+            case KeyCode.RightArrow:
+            case KeyCode.LeftArrow:
+            case KeyCode.NumLock:
+            case KeyCode.PageDown:
+            case KeyCode.PageUp:
+            case KeyCode.Shift:
+            case KeyCode.Ctrl:
+            case KeyCode.Alt:
+            case KeyCode.CapsLock:
+            case KeyCode.Escape:
+            case KeyCode.Home:
+            case KeyCode.Insert:
+            case KeyCode.PauseBreak:
+            case KeyCode.ScrollLock:
+                return;
+        }
+        _timer.Stop();
         _timer.Start();
-    }
-
-    private void ToggleComponents()
-    {
-        _showHelp = !_showHelp;
-        StateHasChanged();
+        _loading = true;
     }
 
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
-        _timer = new Timer(1000);
+        _timer = new Timer(1500);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
         _parser = new SimpleCircuitParser();
@@ -88,15 +103,7 @@
         await MonacoEditorBase.SetTheme("simpleCircuitTheme");
 
         // Set the default values
-        await _scriptEditor.SetValue(
-            string.Join(Environment.NewLine, new[] {
-                "// This chain starts with a ground and continues up to V1, up-right to R, right-down to C and down to another ground",
-                "GND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2",
-                "",
-                "// Here we align the y-coordinates to make it look a little bit nicer",
-                "- GND1.y = GND2.y"
-                }
-            ));
+        await _scriptEditor.SetValue(Demo.Demos[0].Code);
         await _styleEditor.SetValue(Circuit.DefaultStyle);
         await Render();
     }
@@ -118,14 +125,15 @@
 
     private void OnTimerElapsed(object sender, ElapsedEventArgs e)
     {
-        // Wait for a previous task to finish
-        if (_task != null && !_task.IsCompleted)
+        // If another task is still running, restart the timer
+        if (_running)
         {
             _timer.Stop();
             _timer.Start();
         }
         else
         {
+            _running = true;
             _timer.Stop();
             _task = Task.Run(Render);
         }
@@ -160,6 +168,8 @@
         }
 
         // Force an update
+        _loading = false;
+        _running = false;
         StateHasChanged();
     }
 }

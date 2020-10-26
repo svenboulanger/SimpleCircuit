@@ -48,6 +48,14 @@ namespace SimpleCircuit
         private readonly KeySearch<SubcircuitDescription> _subcircuits = new KeySearch<SubcircuitDescription>();
 
         /// <summary>
+        /// Gets or sets the style for the graphics.
+        /// </summary>
+        /// <value>
+        /// The cascading stylesheet.
+        /// </value>
+        public string Style { get; set; } = Circuit.DefaultStyle;
+
+        /// <summary>
         /// Parses the specified description.
         /// </summary>
         /// <param name="input">The description.</param>
@@ -57,7 +65,10 @@ namespace SimpleCircuit
             _subcircuits.Clear();
             if (!lexer.Next())
                 return new Circuit();
-            var ckt = new Circuit();
+            var ckt = new Circuit
+            {
+                Style = Style
+            };
             ParseLines(lexer, ckt);
             return ckt;
         }
@@ -513,12 +524,18 @@ namespace SimpleCircuit
                         ParseSubcircuit(lexer, ckt);
                         break;
 
+                    case "option":
+                    case "options":
+                        lexer.Next();
+                        ParseOptions(lexer, ckt);
+                        break;
+
                     default:
-                        throw new ParseException($"Could not use option {lexer.Content}", lexer.Line, lexer.Position);
+                        throw new ParseException($"Could not recognize '{lexer.Content}'", lexer.Line, lexer.Position);
                 }
             }
             else
-                throw new ParseException($"Expected a word", lexer.Line, lexer.Position);
+                throw new ParseException($"Could not recognized '{lexer.Content}', expected a word", lexer.Line, lexer.Position);
         }
         private void ParseSubcircuit(SimpleCircuitLexer lexer, Circuit ckt)
         {
@@ -569,6 +586,43 @@ namespace SimpleCircuit
                 Pins = pins.Select(p => p.After ?? p.Component.Pins[p.Component.Pins.Count - 1])
             };
             _subcircuits.Add(subcktName, definition);
+        }
+        private void ParseOptions(SimpleCircuitLexer lexer, Circuit ckt)
+        {
+            while (!lexer.Is(TokenType.Newline) && !lexer.Is(TokenType.EndOfContent))
+            {
+                if (!lexer.Is(TokenType.Word))
+                    throw new ParseException($"An option key was expected", lexer.Line, lexer.Position);
+                var name = lexer.Content;
+                lexer.Next();
+                lexer.Check(TokenType.Equals);
+                switch (name.ToLower())
+                {
+                    case "wirelength":
+                        if (!lexer.Is(TokenType.Number))
+                            throw new ParseException("A number was expected", lexer.Line, lexer.Position);
+                        ckt.WireLength = double.Parse(lexer.Content);
+                        lexer.Next();
+                        break;
+
+                    case "uppercasewidth":
+                        if (!lexer.Is(TokenType.Number))
+                            throw new ParseException("A number was expected", lexer.Line, lexer.Position);
+                        ckt.UpperCharacterWidth = double.Parse(lexer.Content);
+                        lexer.Next();
+                        break;
+
+                    case "lowercasewidth":
+                        if (!lexer.Is(TokenType.Number))
+                            throw new ParseException("A number was expected", lexer.Line, lexer.Position);
+                        ckt.LowerCharacterWidth = double.Parse(lexer.Content);
+                        lexer.Next();
+                        break;
+
+                    default:
+                        throw new ParseException($"Could not read option {lexer.Content}", lexer.Line, lexer.Position);
+                }
+            }
         }
     }
 }
