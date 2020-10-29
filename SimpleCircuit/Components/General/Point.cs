@@ -5,7 +5,7 @@
     /// </summary>
     /// <seealso cref="IComponent" />
     [SimpleKey("X", "Point")]
-    public class Point : RotatingComponent
+    public class Point : TranslatingComponent
     {
         /// <summary>
         /// Gets or sets the number of wires that are connected to this point.

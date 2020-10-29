@@ -44,7 +44,9 @@ namespace SimpleCircuitOnline
             Code = code;
         }
 
-
+        /// <summary>
+        /// The demos.
+        /// </summary>
         public static Demo[] Demos { get; } = new[]
         {
             // Low-pass RC filter
@@ -98,8 +100,8 @@ namespace SimpleCircuitOnline
                 "- GND1.y = GND2.y"
             })),
 
-            // Bridge
-            new Demo("Wheatstone bridge", "A Wheatstone bridge with the typical diamond resistor structure.", string.Join(Environment.NewLine, new[]
+            // Wheatstone bridge
+            new Demo("Wheatstone bridge", "A Wheatstone bridge with the typical diamond-like resistor structure.", string.Join(Environment.NewLine, new[]
             {
                 "// Build the schematic",
                 "X1 <l 40 u> V1(\"Vs\") <u r 40> X2",
@@ -136,6 +138,36 @@ namespace SimpleCircuitOnline
                 "// Align the terminals (for niceness)",
                 "- Tlt.x = Tlb.x",
                 "- Trt.x = Trb.x"
+            })),
+
+            // Pixel array with 3-Transistor read-out
+            new Demo("3T Pixel array", "An array of CMOS 3T pixels. Also a demonstration of subcircuits.", string.Join(Environment.NewLine, new[] {
+                "// Define a single pixel",
+                ".subckt pixel dirleft dirtop dirbottom dirright",
+                "// Reset",
+                "gnd <u> D <u> Xd <u> Mnrst <u> pow",
+                "Mnrst[g] <l 0> T(\"RST\")",
+                "Xd <r> [g]Mnsf[d] <u> pow",
+                "Mnsf[s] <d r> Mnsel <r> Xcol",
+                "Mnsel[g] <u 60> Xrow",
+                "",
+                "// Make column and row lines",
+                "Xcol <u 70> dirtop",
+                "Xcol <d 15> dirbottom",
+                "Xrow <l 50> dirleft",
+                "Xrow <r 20> dirright",
+                ".ends",
+                "",
+                "// The grid of pixels",
+                "pixel1 <r> pixel2",
+                "pixel1[dirbottom_out] <d> [dirtop_out]pixel3",
+                "pixel3 <r> pixel4[dirtop_out] <u> [dirbottom_out]pixel2",
+                "",
+                "// Add some terminals",
+                "pixel1[dirtop_out] <u 0> T(\"COL OUT k\")",
+                "pixel2[dirtop_out] <u 0> T(\"COL OUT k+1\")",
+                "pixel2[dirright_out] <r 0> T(\"ROW SEL i\")",
+                "pixel4[dirright_out] <r 0> T(\"ROW SEL i+1\")"
             }))
         };
     }
