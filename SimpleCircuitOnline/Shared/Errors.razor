@@ -1,22 +1,22 @@
-﻿@if (_warnings != null && _warnings.Length > 0 || _errors != null && _errors.Length > 0)
+﻿@if (_warnings != null && _warnings.Count > 0 || _errors != null && _errors.Count > 0)
 {
     <div style="width: 100%; padding: 3px;">
-        @if (_errors != null && _errors.Length > 0)
+        @if (_errors != null && _errors.Count > 0)
         {
             @foreach (var error in _errors)
             {
             <div class="alert alert-danger" role="alert">
-                <h4 class="alert-heading">Oops!</h4>
+                <h4 class="alert-heading">Error</h4>
                 <p>@error</p>
             </div>
             }
         }
-        @if (_warnings != null && _warnings.Length > 0)
+        @if (_warnings != null && _warnings.Count > 0)
         {
             @foreach (var warning in _warnings)
             {
             <div class="alert alert-warning">
-                <h4 class="alert-heading">Mhmm...</h4>
+                <h4 class="alert-heading">Warning</h4>
                 <p>@warning</p>
             </div>
             }
@@ -31,10 +31,10 @@
         get => string.Join(Environment.NewLine, _errors);
         set
         {
+            _errors.Clear();
             if (value != null)
-                _errors = value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            else
-                _errors = null;
+                foreach (var line in value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    _errors.Add(line);
             StateHasChanged();
         }
     }
@@ -45,14 +45,14 @@
         get => string.Join(Environment.NewLine, _warnings);
         set
         {
+            _warnings.Clear();
             if (value != null)
-                _warnings = value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            else
-                _warnings = null;
+                foreach (var line in value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    _warnings.Add(line);
             StateHasChanged();
         }
     }
 
-    private string[] _errors;
-    private string[] _warnings;
+    private readonly HashSet<string> _errors = new HashSet<string>();
+    private readonly HashSet<string> _warnings = new HashSet<string>();
 }

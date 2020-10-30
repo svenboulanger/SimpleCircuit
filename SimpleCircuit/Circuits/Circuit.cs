@@ -13,7 +13,7 @@ namespace SimpleCircuit
     public class Circuit
     {
         private readonly Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
-        private readonly HashSet<Function> _constraints = new HashSet<Function>();
+        private readonly Dictionary<Function, string> _constraints = new Dictionary<Function, string>();
         private readonly List<Wire> _wires = new List<Wire>();
 
         /// <summary>
@@ -134,11 +134,14 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// Adds the specified function as a constraint.
         /// </summary>
         /// <param name="constraint">The constraint.</param>
-        public void Add(Function constraint)
+        /// <param name="description">The description.</param>
+        public void Add(Function constraint, string description = null)
         {
             if (constraint == null || constraint.IsFixed)
                 return;
-            _constraints.Add(constraint);
+            if (_constraints.ContainsKey(constraint))
+                return;
+            _constraints.Add(constraint, description);
             Solved = false;
         }
 
@@ -214,7 +217,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         public void Solve()
         {
             var minimizer = new Minimizer();
-            minimizer.Warning += Proxy;
+            minimizer.Warning += Warn;
 
             // Build the function that needs to be minimized
             for (var i = 0; i < _wires.Count; i++)
@@ -222,7 +225,11 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 foreach (var length in _wires[i].Lengths)
                 {
                     if (length.IsFixed)
+                    {
+                        if (length.Value < 0.0)
+                            Warn(this, new WarningEventArgs($"Wire length '{length}' is smaller than 0."));
                         continue;
+                    }
                     var x = length - WireLength;
                     minimizer.Minimize += 1e3 * (x + new Squared(x) + new Exp(-x));
                     length.Value = WireLength;
@@ -235,16 +242,26 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             foreach (var c in _constraints)
             {
-                if (!c.IsFixed)
-                    minimizer.AddConstraint(c);
+                if (!c.Key.IsFixed)
+                    minimizer.AddConstraint(c.Key, c.Value);
+                else
+                {
+                    if (!c.Key.Value.IsZero())
+                        Warn(this, new WarningEventArgs($"Could not {c.Value}"));
+                }
             }
 
             minimizer.Solve();
             Solved = true;
-            minimizer.Warning -= Proxy;
+            minimizer.Warning -= Warn;
         }
 
-        private void Proxy(object sender, WarningEventArgs args) => Warning?.Invoke(sender, args);
+        /// <summary>
+        /// Warn the user.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="args">The warning arguments.</param>
+        protected void Warn(object sender, WarningEventArgs args) => Warning?.Invoke(sender, args);
 
         /// <summary>
         /// Renders the specified drawing.

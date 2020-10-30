@@ -22,6 +22,11 @@ namespace SimpleCircuit
         /// </value>
         public static ComponentFactory Factory { get; } = new ComponentFactory();
 
+        /// <summary>
+        /// Occurs when a warning is issued.
+        /// </summary>
+        public event EventHandler<WarningEventArgs> Warning;
+
         private class ComponentProperty
         {
             public object Source;
@@ -36,8 +41,11 @@ namespace SimpleCircuit
         private class PinDescription
         {
             public TranslatingPin Before;
+            public string BeforeName;
             public IComponent Component;
+            public string ComponentName;
             public TranslatingPin After;
+            public string AfterName;
         }
         private class SubcircuitDescription
         {
@@ -101,12 +109,13 @@ namespace SimpleCircuit
         private void ParseChain(SimpleCircuitLexer lexer, Circuit ckt)
         {
             var start = ParsePin(lexer, ckt);
+            PinDescription end = null;
             while (lexer.Is(TokenType.OpenBracket))
             {
                 if (start.Component is Point pts)
                     pts.Wires++;
                 var wires = ParseWire(lexer);
-                var end = ParseDoublePin(lexer, ckt);
+                end = ParseDoublePin(lexer, ckt);
 
                 // String them together
                 var lastPin = start.After ?? (TranslatingPin)start.Component.Pins.Last(p => p is TranslatingPin);
@@ -137,10 +146,10 @@ namespace SimpleCircuit
                     // Constrain the positions
                     switch (dir)
                     {
-                        case "u": ckt.Add(nextPin.X - lastPin.X); ckt.Add(lastPin.Y - nextPin.Y - length); break;
-                        case "d": ckt.Add(nextPin.X - lastPin.X); ckt.Add(nextPin.Y - lastPin.Y - length); break;
-                        case "l": ckt.Add(lastPin.X - nextPin.X - length); ckt.Add(lastPin.Y - nextPin.Y); break;
-                        case "r": ckt.Add(nextPin.X - lastPin.X - length); ckt.Add(lastPin.Y - nextPin.Y); break;
+                        case "u": ckt.Add(nextPin.X - lastPin.X, $"align {nextPin} with {lastPin} (line {lexer.Line})"); ckt.Add(lastPin.Y - nextPin.Y - length, $"define wire {length} (line {lexer.Line})"); break;
+                        case "d": ckt.Add(nextPin.X - lastPin.X, $"align {nextPin} with {lastPin} (line {lexer.Line})"); ckt.Add(nextPin.Y - lastPin.Y - length, $"define wire {length} (line {lexer.Line})"); break;
+                        case "l": ckt.Add(lastPin.X - nextPin.X - length, $"define wire {length} (line {lexer.Line})"); ckt.Add(lastPin.Y - nextPin.Y, $"align {nextPin} and {lastPin} (line {lexer.Line})"); break;
+                        case "r": ckt.Add(nextPin.X - lastPin.X - length, $"define wire {length} (line {lexer.Line})"); ckt.Add(lastPin.Y - nextPin.Y, $"align {nextPin} and {lastPin} (line {lexer.Line})"); break;
                     }
 
                     // Constrain the directions
@@ -148,13 +157,13 @@ namespace SimpleCircuit
                     {
                         switch (dir)
                         {
-                            case "u": ckt.Add(rlastPin.NormalY + 1); ckt.Add(rlastPin.NormalX); break;
-                            case "d": ckt.Add(rlastPin.NormalY - 1); ckt.Add(rlastPin.NormalX); break;
-                            case "l": ckt.Add(rlastPin.NormalY); ckt.Add(rlastPin.NormalX + 1); break;
-                            case "r": ckt.Add(rlastPin.NormalY); ckt.Add(rlastPin.NormalX - 1); break;
+                            case "u": ckt.Add(rlastPin.NormalY + 1, $"point {rlastPin} up (line {lexer.Line})"); ckt.Add(rlastPin.NormalX, $"point {rlastPin} up (line {lexer.Line})"); break;
+                            case "d": ckt.Add(rlastPin.NormalY - 1, $"point {rlastPin} down (line {lexer.Line})"); ckt.Add(rlastPin.NormalX, $"point {rlastPin} down (line {lexer.Line})"); break;
+                            case "l": ckt.Add(rlastPin.NormalY, $"point {rlastPin} left (line {lexer.Line})"); ckt.Add(rlastPin.NormalX + 1, $"point {rlastPin} left (line {lexer.Line})"); break;
+                            case "r": ckt.Add(rlastPin.NormalY, $"point {rlastPin} right (line {lexer.Line})"); ckt.Add(rlastPin.NormalX - 1, $"point {rlastPin} right (line {lexer.Line})"); break;
                             case "?":
-                                ckt.Add(lastPin.X + rlastPin.NormalX * length - nextPin.X);
-                                ckt.Add(lastPin.Y + rlastPin.NormalY * length - nextPin.Y);
+                                ckt.Add(lastPin.X + rlastPin.NormalX * length - nextPin.X, $"point {rlastPin} to {nextPin} (line {lexer.Line})");
+                                ckt.Add(lastPin.Y + rlastPin.NormalY * length - nextPin.Y, $"point {rlastPin} to {nextPin} (line {lexer.Line})");
                                 break;
                         }
                     }
@@ -162,35 +171,45 @@ namespace SimpleCircuit
                     {
                         switch (dir)
                         {
-                            case "u": ckt.Add(rnextPin.NormalY - 1); ckt.Add(rnextPin.NormalX); break;
-                            case "d": ckt.Add(rnextPin.NormalY + 1); ckt.Add(rnextPin.NormalX); break;
-                            case "l": ckt.Add(rnextPin.NormalY); ckt.Add(rnextPin.NormalX - 1); break;
-                            case "r": ckt.Add(rnextPin.NormalY); ckt.Add(rnextPin.NormalX + 1); break;
+                            case "u": ckt.Add(rnextPin.NormalY - 1, $"point {rnextPin} up (line {lexer.Line})"); ckt.Add(rnextPin.NormalX, $"point {rnextPin} up (line {lexer.Line})"); break;
+                            case "d": ckt.Add(rnextPin.NormalY + 1, $"point {rnextPin} down (line {lexer.Line})"); ckt.Add(rnextPin.NormalX, $"point {rnextPin} down (line {lexer.Line})"); break;
+                            case "l": ckt.Add(rnextPin.NormalY, $"point {rnextPin} left (line {lexer.Line})"); ckt.Add(rnextPin.NormalX - 1, $"point {rnextPin} left (line {lexer.Line})"); break;
+                            case "r": ckt.Add(rnextPin.NormalY, $"point {rnextPin} right (line {lexer.Line})"); ckt.Add(rnextPin.NormalX + 1, $"point {rnextPin} right (line {lexer.Line})"); break;
                             case "?":
-                                ckt.Add(nextPin.X + rnextPin.NormalX * length - lastPin.X);
-                                ckt.Add(nextPin.Y + rnextPin.NormalY * length - lastPin.Y);
+                                ckt.Add(nextPin.X + rnextPin.NormalX * length - lastPin.X, $"point {rnextPin} to {lastPin} (line {lexer.Line})");
+                                ckt.Add(nextPin.Y + rnextPin.NormalY * length - lastPin.Y, $"point {rnextPin} to {lastPin} (line {lexer.Line})");
                                 break;
                         }
                     }
 
                     // Fix the wire length if necessary
                     if (wires[i].Length >= 0)
-                        ckt.Add(length - wires[i].Length);
+                        ckt.Add(length - wires[i].Length, $"fix wire length {length} to {wires[i].Length} (line {lexer.Line})");
 
                     lastPin = nextPin;
                 }
                 start = end;
             }
+
+            if (end != null && end.AfterName != null)
+            {
+                if (end.BeforeName == null)
+                    Warn(this, new WarningEventArgs($"Pin {end.AfterName} was specified at the end of line {lexer.Line}, but it isn't used. Did you mean \"[{end.AfterName}]{end.ComponentName}\" instead of \"{end.ComponentName}[{end.AfterName}]\"?"));
+                else
+                    Warn(this, new WarningEventArgs($"Pin {end.AfterName} was specified at the end of line {lexer.Line}, but it isn't used."));
+            }
         }
         private PinDescription ParsePin(SimpleCircuitLexer lexer, Circuit ckt)
         {
             var result = new PinDescription();
+            result.ComponentName = lexer.Content;
             result.Component = ParseComponentLabel(lexer, ckt);
             if (lexer.Is(TokenType.OpenBracket, "["))
             {
                 lexer.Next();
                 var pin = ParseName(lexer);
                 lexer.Check(TokenType.CloseBracket, "]");
+                result.AfterName = pin;
                 result.After = (TranslatingPin)result.Component.Pins[pin];
             }
             return result;
@@ -206,7 +225,10 @@ namespace SimpleCircuit
             }
             var result = ParsePin(lexer, ckt);
             if (beforePin != null)
+            {
+                result.BeforeName = beforePin;
                 result.Before = (TranslatingPin)result.Component.Pins[beforePin];
+            }
             return result;
         }
         private IComponent ParseComponentLabel(SimpleCircuitLexer lexer, Circuit ckt)
@@ -278,7 +300,7 @@ namespace SimpleCircuit
             lexer.Check(TokenType.Equals);
             var b = ParseSum(lexer, ckt);
             if (a is Function fa && b is Function fb)
-                ckt.Add(fa - fb);
+                ckt.Add(fa - fb, $"keep {fa} and {fb} equal");
             else if (a is ComponentProperty cp)
             {
                 // Extract the property value if necessary
@@ -312,7 +334,7 @@ namespace SimpleCircuit
                 a = b;
                 b = ParseSum(lexer, ckt);
                 if (a is Function fa2 && b is Function fb2)
-                    ckt.Add(fa2 - fb2);
+                    ckt.Add(fa2 - fb2, $"keep {fa2} and {fb2} equal");
                 else
                     throw new ParseException($"Cannot assign {a} to {b}", lexer.Line, lexer.Position);
             }
@@ -624,5 +646,14 @@ namespace SimpleCircuit
                 }
             }
         }
+
+
+        /// <summary>
+        /// Warn the user.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="args">The warning arguments.</param>
+        protected void Warn(object sender, WarningEventArgs args) => Warning?.Invoke(sender, args);
+
     }
 }

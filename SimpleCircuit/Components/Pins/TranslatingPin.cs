@@ -39,5 +39,11 @@ namespace SimpleCircuit.Components
             X = x ?? throw new ArgumentNullException(nameof(x));
             Y = y ?? throw new ArgumentNullException(nameof(y));
         }
+
+        /// <summary>
+        /// Convert to a string.
+        /// </summary>
+        /// <returns>The string representation.</returns>
+        public override string ToString() => $"{Owner.Name}.{Name}";
     }
 }

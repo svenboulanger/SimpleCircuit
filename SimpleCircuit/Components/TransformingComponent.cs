@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components
         {
             base.Apply(minimizer);
             if (_strictMirror)
-                minimizer.AddConstraint(new Squared(Scale) - 1);
+                minimizer.AddConstraint(new Squared(Scale) - 1, $"keep scale of {Name}");
             else
                 minimizer.Minimize += 1e6 * (new Squared(Scale) + 1.0 / new Squared(Scale));
         }

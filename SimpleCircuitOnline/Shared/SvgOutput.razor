@@ -1,7 +1,7 @@
 ﻿<div style="min-height: 75px; width: 100%; text-align: center; padding: 5px; border: 1px solid #eeeeee; position: relative;">
-    @if (_loading)
+    @if (_loading > 0)
     {
-        <div class="spinner-border loading-icon text-primary" role="status">
+        <div class="spinner-border loading-icon @((_loading > 1 ? "text-danger" : "text-primary"))" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     }
@@ -28,7 +28,7 @@
     }
 
     [Parameter]
-    public bool Loading
+    public int Loading
     {
         get => _loading;
         set
@@ -42,5 +42,5 @@
     }
 
     private string _svg;
-    private bool _loading;
+    private int _loading;
 }

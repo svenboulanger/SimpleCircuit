@@ -72,7 +72,7 @@ namespace SimpleCircuit.Components
         {
             base.Apply(minimizer);
             minimizer.Minimize += new Squared(NormalX - 1) / 1e4;
-            minimizer.AddConstraint(new Squared(NormalX) + new Squared(NormalY) - 1);
+            minimizer.AddConstraint(new Squared(NormalX) + new Squared(NormalY) - 1, $"fix orientation of {Name}");
         }
     }
 }

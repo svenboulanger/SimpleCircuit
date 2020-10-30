@@ -39,7 +39,8 @@
     private string _svg, _errors, _warnings;
     private Timer _timer;
     private Task _task = null;
-    private bool _showHelp = false, _showDemo = false, _loading = false, _running = false;
+    private bool _showHelp = false, _showDemo = false;
+    private int _loading;
     private SimpleCircuitParser _parser;
     private MonacoEditor _scriptEditor, _styleEditor;
 
@@ -55,7 +56,7 @@
 
     private void Update(KeyboardEvent e)
     {
-        if (_loading)
+        if (_loading > 0)
         {
             _timer.Stop();
             _timer.Start();
@@ -85,7 +86,7 @@
         }
         _timer.Stop();
         _timer.Start();
-        _loading = true;
+        _loading = 1;
     }
 
     protected override async Task OnInitializedAsync()
@@ -95,6 +96,7 @@
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
         _parser = new SimpleCircuitParser();
+        _parser.Warning += (sender, args) => _warnings += Environment.NewLine + args.Message;
 
         // Register our own language
         await Runtime.InvokeVoidAsync("registerLanguage");
@@ -126,16 +128,19 @@
     private void OnTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If another task is still running, restart the timer
-        if (_running)
+        if (_loading > 1)
         {
             _timer.Stop();
             _timer.Start();
         }
         else
         {
-            _running = true;
+            _loading = 2;
+            StateHasChanged();
             _timer.Stop();
-            _task = Task.Run(Render);
+            _task =
+                Task.Run(Render)
+                .ContinueWith(task => { _loading = 0; StateHasChanged(); });
         }
     }
 
@@ -166,10 +171,5 @@
             _errors = ex.Message;
             _svg = null;
         }
-
-        // Force an update
-        _loading = false;
-        _running = false;
-        StateHasChanged();
     }
 }

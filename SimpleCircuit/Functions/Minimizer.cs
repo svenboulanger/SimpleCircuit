@@ -22,14 +22,8 @@ namespace SimpleCircuit.Functions
         /// </summary>
         public static bool LogInfo = false;
 
-        private class Constraint
-        {
-            public Function Local { get; set; }
-            public Function Original { get; set; }
-        }
-
         private readonly Dictionary<Unknown, double> _minimum = new Dictionary<Unknown, double>();
-        private readonly HashSet<Function> _constraints = new HashSet<Function>();
+        private readonly Dictionary<Function, string> _constraints = new Dictionary<Function, string>();
         private readonly UnknownMap _map = new UnknownMap();
         private readonly Dictionary<Unknown, IRowEquation> _equations = new Dictionary<Unknown, IRowEquation>();
         private readonly HashSet<Unknown> _lambdas = new HashSet<Unknown>();
@@ -72,12 +66,13 @@ namespace SimpleCircuit.Functions
         /// <summary>
         /// Adds the constraint to the circuit.
         /// </summary>
-        /// <param name="constraint">The constraint.</param>
-        public void AddConstraint(Function function)
+        /// <param name="function">The constraint.</param>
+        /// <param name="description">The description.</param>
+        public void AddConstraint(Function function, string description = null)
         {
             if (function == null)
                 return;
-            _constraints.Add(function);
+            _constraints.Add(function, description ?? function.ToString());
         }
 
         /// <summary>
@@ -85,7 +80,6 @@ namespace SimpleCircuit.Functions
         /// </summary>
         /// <param name="unknown">The unknown with a minimum value.</param>
         /// <param name="strict">The strict minimum value for the unknown.</param>
-        /// <param name="initial">The loose minimum value for the unknown.</param>
         public void AddMinimum(Unknown unknown, double strict)
         {
             if (unknown == null)
@@ -255,11 +249,18 @@ namespace SimpleCircuit.Functions
                 {
                     if (LogInfo)
                         Console.WriteLine("Could not converge...");
-                    Warning?.Invoke(this, new WarningEventArgs("Could not converge to a solution."));
+                    Warn(this, new WarningEventArgs("Could not converge to a solution."));
                     return;
                 }
             }
         }
+
+        /// <summary>
+        /// Warns the user.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="args">The argument.</param>
+        protected void Warn(object sender, WarningEventArgs args) => Warning?.Invoke(sender, args);
 
         /// <summary>
         /// Build a new solver from scratch using the current constraints and variables.
@@ -279,10 +280,14 @@ namespace SimpleCircuit.Functions
                 _lambdas.Clear();
                 var f = Minimize ?? 1.0;
                 int index = 1;
-                foreach (var c in _constraints)
+                foreach (var c in _constraints.Keys)
                 {
                     if (c.IsFixed)
+                    {
+                        if (!c.Value.IsZero())
+                            Warn(this, new WarningEventArgs($"Could not {_constraints[c]}."));
                         continue;
+                    }
                     var lambda = new Unknown($"lambda{index++}", UnknownTypes.Scalar);
                     f += lambda * c;
                     _lambdas.Add(lambda);
@@ -298,28 +303,49 @@ namespace SimpleCircuit.Functions
                 foreach (var m in _minimum)
                 {
                     if (m.Key.IsFixed)
+                    {
+                        if (m.Key.Value < m.Value)
+                            Warn(this, new WarningEventArgs($"Minimum was violated for {m.Key}."));
                         continue;
+                    }
                     if (diffs.TryGetValue(m.Key, out var eq))
                         diffs[m.Key] = eq - 0.01 / (m.Key - m.Value);
                 }
 
                 // First try to precompute as many constraints as possible
-                bool localResolved;
+                var done = new HashSet<Unknown>();
                 do
                 {
-                    localResolved = false;
-                    foreach (var c in diffs.Values)
+                    done.Clear();
+                    foreach (var pair in diffs)
                     {
+                        var c = pair.Value;
+
+                        // Skip the ones we already resolved
                         if (c.Resolve(0.0))
                         {
                             hasResolved = true;
-                            localResolved = true;
                             if (LogInfo)
                                 Console.WriteLine($"Resolved {c}");
+
+                            // This has been fixed!
+                            done.Add(pair.Key);
+                        }
+                        else if (c.IsFixed && !c.Value.IsZero())
+                        {
+                            if (_constraints.TryGetValue(c, out var description))
+                                Warn(this, new WarningEventArgs($"Could not {description}."));
+                            else
+                                Warn(this, new WarningEventArgs($"Could not {c}."));
+
+                            // This has been fixed!
+                            done.Add(pair.Key);
                         }
                     }
+                    foreach (var key in done)
+                        diffs.Remove(key);
                 }
-                while (localResolved);
+                while (done.Count > 0);
             }
 
             // Setup the equations and solution
