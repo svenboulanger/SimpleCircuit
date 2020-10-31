@@ -41,7 +41,7 @@ namespace SimpleCircuit.Functions
         public override bool IsFixed => _a.IsFixed && _b.IsFixed;
 
         /// <inheritdoc/>
-        public override bool IsConstant => _a.IsConstant;
+        public override bool IsConstant => _a.IsConstant && _b.IsConstant;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subtraction"/> class.

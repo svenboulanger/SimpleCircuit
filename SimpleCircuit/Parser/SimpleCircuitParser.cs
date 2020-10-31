@@ -233,7 +233,7 @@ namespace SimpleCircuit
         }
         private IComponent ParseComponentLabel(SimpleCircuitLexer lexer, Circuit ckt)
         {
-            var component = ParseComponent(lexer, ckt);
+            var component = GetComponent(ParseName(lexer), ckt);
             if (lexer.Is(TokenType.OpenBracket, "("))
             {
                 lexer.Next();
@@ -421,70 +421,99 @@ namespace SimpleCircuit
             else
             {
                 // Get the component
-                object result = ParseComponent(lexer, ckt);
-                if (result == null)
-                    throw new ParseException("A component was expected", lexer.Line, lexer.Position);
-
-                // Optional pin
-                if (lexer.Is(TokenType.OpenBracket, "["))
+                var name = ParseName(lexer);
+                if (lexer.Is(TokenType.OpenBracket, "("))
                 {
                     lexer.Next();
-                    var pinName = ParseName(lexer);
-                    if (!lexer.Is(TokenType.CloseBracket, "]"))
-                        throw new ParseException("A closing bracket was expected", lexer.Line, lexer.Position);
-                    lexer.Next();
-                    result = ((IComponent)result).Pins[pinName];
-                }
 
-                // Then the property
-                lexer.Check(TokenType.Dot);
-                var propertyName = ParseName(lexer);
-
-                // Detect unknowns (fixed names)
-                if (result is IComponent || result is RotatingPin)
-                {
-                    switch (propertyName.ToLower())
+                    // We have a function!
+                    switch (name.ToLower())
                     {
-                        case "x":
-                            if (!(result is ITranslating posx))
-                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                            return posx.X;
-                        case "y":
-                            if (!(result is ITranslating posy))
-                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                            return posy.Y;
-                        case "nx":
-                            if (!(result is IRotating orx))
-                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                            return orx.NormalX;
-                        case "ny":
-                            if (!(result is IRotating ory))
-                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                            return ory.NormalY;
-                        case "s":
-                            if (!(result is IScaling m))
-                                throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
-                            return m.Scale;
+                        case "exp":
+                            var arg = ParseSum(lexer, ckt);
+                            lexer.Check(TokenType.CloseBracket, ")");
+                            if (arg is Function f)
+                                return new Exp(f);
+                            throw new ParseException("A function was expected as the argument", lexer.Line, lexer.Position);
+
+                        case "wrap":
+                            arg = ParseSum(lexer, ckt);
+                            lexer.Check(TokenType.CloseBracket, ")");
+                            if (arg is Function f2)
+                                return new Wrap(f2, 360.0);
+                            throw new ParseException("A function was expected as the argument", lexer.Line, lexer.Position);
+
+                        default:
+                            throw new ParseException($"Could not recognized a function with the name '{name}'", lexer.Line, lexer.Position);
                     }
                 }
-
-                // Else get the description
-                var pi = result.GetType().GetTypeInfo().GetProperty(propertyName);
-                if (pi != null)
-                {
-                    // Deal with functions
-                    if (pi.PropertyType == typeof(Function) && pi.CanRead)
-                        return pi.GetValue(result);
-
-                    // Just general component properties
-                    return new ComponentProperty
-                    {
-                        Source = result,
-                        Property = pi
-                    };
-                }
                 else
-                    throw new ParseException($"Cannot find property '{propertyName}' for '{result}'", lexer.Line, lexer.Position);
+                {
+                    object result = GetComponent(name, ckt);
+                    if (result == null)
+                        throw new ParseException("A component was expected", lexer.Line, lexer.Position);
+
+                    // Optional pin
+                    if (lexer.Is(TokenType.OpenBracket, "["))
+                    {
+                        lexer.Next();
+                        var pinName = ParseName(lexer);
+                        if (!lexer.Is(TokenType.CloseBracket, "]"))
+                            throw new ParseException("A closing bracket was expected", lexer.Line, lexer.Position);
+                        lexer.Next();
+                        result = ((IComponent)result).Pins[pinName];
+                    }
+
+                    // Then the property
+                    lexer.Check(TokenType.Dot);
+                    var propertyName = ParseName(lexer);
+
+                    // Detect unknowns (fixed names)
+                    if (result is IComponent || result is RotatingPin)
+                    {
+                        switch (propertyName.ToLower())
+                        {
+                            case "x":
+                                if (!(result is ITranslating posx))
+                                    throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                                return posx.X;
+                            case "y":
+                                if (!(result is ITranslating posy))
+                                    throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                                return posy.Y;
+                            case "nx":
+                                if (!(result is IRotating orx))
+                                    throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                                return orx.NormalX;
+                            case "ny":
+                                if (!(result is IRotating ory))
+                                    throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                                return ory.NormalY;
+                            case "s":
+                                if (!(result is IScaling m))
+                                    throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
+                                return m.Scale;
+                        }
+                    }
+
+                    // Else get the description
+                    var pi = result.GetType().GetTypeInfo().GetProperty(propertyName);
+                    if (pi != null)
+                    {
+                        // Deal with functions
+                        if (pi.PropertyType == typeof(Function) && pi.CanRead)
+                            return pi.GetValue(result);
+
+                        // Just general component properties
+                        return new ComponentProperty
+                        {
+                            Source = result,
+                            Property = pi
+                        };
+                    }
+                    else
+                        throw new ParseException($"Cannot find property '{propertyName}' for '{result}'", lexer.Line, lexer.Position);
+                }
             }
             throw new ParseException($"Cannot read {lexer.Content}", lexer.Line, lexer.Position);
         }
@@ -504,9 +533,8 @@ namespace SimpleCircuit
             lexer.Next();
             return text;
         }
-        private IComponent ParseComponent(SimpleCircuitLexer lexer, Circuit ckt)
+        private IComponent GetComponent(string name, Circuit ckt)
         {
-            var name = ParseName(lexer);
             IComponent component;
 
             // First try to find subcircuits

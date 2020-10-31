@@ -37,7 +37,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="angle">The angle.</param>
         /// <returns>The wrapped angle.</returns>
-        public static double Wrap(double angle) => angle - Math.Round(angle / Math.PI / 2) * Math.PI * 2;
+        public static double Wrap(double angle, double modulus = 2 * Math.PI) => angle - Math.Round(angle / modulus) * modulus;
 
         /// <summary>
         /// Determines whether the specified value is zero.

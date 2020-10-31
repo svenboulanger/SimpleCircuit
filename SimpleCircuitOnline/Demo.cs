@@ -101,7 +101,7 @@ namespace SimpleCircuitOnline
             })),
 
             // Wheatstone bridge
-            new Demo("Wheatstone bridge", "A Wheatstone bridge with the typical diamond-like resistor structure.", string.Join(Environment.NewLine, new[]
+            new Demo("Wheatstone bridge", "A Wheatstone bridge with the typical diamond-like (45 degree angled) resistor structure.", string.Join(Environment.NewLine, new[]
             {
                 "// Build the schematic",
                 "X1 <l 40 u> V1(\"Vs\") <u r 40> X2",
@@ -112,10 +112,11 @@ namespace SimpleCircuitOnline
                 "Xleft <r> Ta(\"-\")",
                 "",
                 "// Specify the angles",
+                "// The function wrap() keeps an angle between -180 to 180",
                 "- R1.Angle = -45",
-                "- R2.Angle = 180-R1.Angle",
+                "- R2.Angle = wrap(R1.Angle - 90)",
                 "- R3.Angle = -180+45",
-                "- R4.Angle = 180-R3.Angle",
+                "- R4.Angle = wrap(R3.Angle + 90)",
                 "",
                 "// We want enough space between the terminals",
                 "- Tb.X - Ta.X = 30"
