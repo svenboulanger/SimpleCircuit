@@ -20,6 +20,10 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
     <script src="js/decode.min.js"></script>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script>
@@ -90,13 +94,8 @@
             }
         });
     </script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
-    <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
-    <script src="_content/BlazorMonaco/jsInterop.js"></script>
     <script>
-        function registerLanguage()
-        {
+        function registerLanguage() {
             // Register a new language
             monaco.languages.register({ id: 'simpleCircuit' });
 
