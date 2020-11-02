@@ -10,7 +10,7 @@
             Circuit
         </div>
         <div class="card-body">
-            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
         </div>
     </div>
     <div class="input-style card">
@@ -18,7 +18,7 @@
             Style (CSS)
         </div>
         <div class="card-body">
-            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnKeyUp="Update" ConstructionOptions="GetStyleOptions" />
+            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
         </div>
     </div>
     <div class="svg-output">
@@ -30,7 +30,7 @@
             <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showDemo = !_showDemo)">@(_showDemo ? "Hide demo's" : "Show demo's")</a>
         </div>
         <ComponentHelp Show="_showHelp" />
-        <DemoList Show="_showDemo" DemoSelected="@(x => { _scriptEditor.SetValue(x); Update(new KeyboardEvent()); })" />
+        <DemoList Show="_showDemo" DemoSelected="@(x => { _scriptEditor.SetValue(x); })" />
     </div>
 </div>
 
@@ -54,39 +54,12 @@
         };
     }
 
-    private void Update(KeyboardEvent e)
+    private void Update(ModelContentChangedEvent e)
     {
-        if (_loading > 0)
-        {
-            _timer.Stop();
-            _timer.Start();
-            return;
-        }
-
-        // Ignore some key codes
-        switch (e.KeyCode)
-        {
-            case KeyCode.DownArrow:
-            case KeyCode.UpArrow:
-            case KeyCode.RightArrow:
-            case KeyCode.LeftArrow:
-            case KeyCode.NumLock:
-            case KeyCode.PageDown:
-            case KeyCode.PageUp:
-            case KeyCode.Shift:
-            case KeyCode.Ctrl:
-            case KeyCode.Alt:
-            case KeyCode.CapsLock:
-            case KeyCode.Escape:
-            case KeyCode.Home:
-            case KeyCode.Insert:
-            case KeyCode.PauseBreak:
-            case KeyCode.ScrollLock:
-                return;
-        }
         _timer.Stop();
         _timer.Start();
-        _loading = 1;
+        if (_loading == 0)
+            _loading = 1;
     }
 
     protected override async Task OnInitializedAsync()
