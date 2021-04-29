@@ -40,11 +40,11 @@ namespace SimpleCircuit
         }
         private class PinDescription
         {
-            public TranslatingPin Before;
+            public IPin Before;
             public string BeforeName;
             public IComponent Component;
             public string ComponentName;
-            public TranslatingPin After;
+            public IPin After;
             public string AfterName;
         }
         private class SubcircuitDescription
@@ -118,22 +118,22 @@ namespace SimpleCircuit
                 end = ParseDoublePin(lexer, ckt);
 
                 // String them together
-                var lastPin = start.After ?? (TranslatingPin)start.Component.Pins.Last(p => p is TranslatingPin);
+                var lastPin = start.After ?? start.Component.Pins.Last();
                 var wire = new Wire(lastPin);
                 ckt.Add(wire);
                 for (var i = 0; i < wires.Count; i++)
                 {
-                    TranslatingPin nextPin;
+                    IPin nextPin;
                     if (i < wires.Count - 1)
                     {
                         var pt = new Point("X:" + (_anonIndex++));
                         ckt.Add(pt);
-                        nextPin = (TranslatingPin)pt.Pins.First(p => p is TranslatingPin);
+                        nextPin = pt.Pins.First();
                         pt.Wires += 2;
                     }
                     else
                     {
-                        nextPin = end.Before ?? (TranslatingPin)end.Component.Pins.First(p => p is TranslatingPin);
+                        nextPin = end.Before ?? end.Component.Pins.First();
                         if (end.Component is Point pte)
                             pte.Wires++;
                     }
@@ -210,7 +210,7 @@ namespace SimpleCircuit
                 var pin = ParseName(lexer);
                 lexer.Check(TokenType.CloseBracket, "]");
                 result.AfterName = pin;
-                result.After = (TranslatingPin)result.Component.Pins[pin];
+                result.After = result.Component.Pins[pin];
             }
             return result;
         }
@@ -227,7 +227,7 @@ namespace SimpleCircuit
             if (beforePin != null)
             {
                 result.BeforeName = beforePin;
-                result.Before = (TranslatingPin)result.Component.Pins[beforePin];
+                result.Before = result.Component.Pins[beforePin];
             }
             return result;
         }
@@ -244,7 +244,6 @@ namespace SimpleCircuit
             }
             return component;
         }
-
         private List<WireDescription> ParseWire(SimpleCircuitLexer lexer)
         {
             var wires = new List<WireDescription>();
@@ -468,32 +467,36 @@ namespace SimpleCircuit
                     lexer.Check(TokenType.Dot);
                     var propertyName = ParseName(lexer);
 
-                    // Detect unknowns (fixed names)
-                    if (result is IComponent || result is RotatingPin)
+                    switch (propertyName.ToLower())
                     {
-                        switch (propertyName.ToLower())
-                        {
-                            case "x":
-                                if (!(result is ITranslating posx))
-                                    throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                                return posx.X;
-                            case "y":
-                                if (!(result is ITranslating posy))
-                                    throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
-                                return posy.Y;
-                            case "nx":
-                                if (!(result is IRotating orx))
-                                    throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                                return orx.NormalX;
-                            case "ny":
-                                if (!(result is IRotating ory))
-                                    throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
-                                return ory.NormalY;
-                            case "s":
-                                if (!(result is IScaling m))
-                                    throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
-                                return m.Scale;
-                        }
+                        case "x":
+                            if (!(result is ITranslating posx))
+                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                            return posx.X;
+                        case "y":
+                            if (!(result is ITranslating posy))
+                                throw new ParseException($"No translation is possible for {result}", lexer.Line, lexer.Position);
+                            return posy.Y;
+                        case "nx":
+                            if (!(result is IRotating orx))
+                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                            return orx.NormalX;
+                        case "ny":
+                            if (!(result is IRotating ory))
+                                throw new ParseException($"No orientation is possible for {result}", lexer.Line, lexer.Position);
+                            return ory.NormalY;
+                        case "s":
+                            if (!(result is IScaling m))
+                                throw new ParseException($"No scaling is possible for {result}", lexer.Line, lexer.Position);
+                            return m.Scale;
+                        case "width":
+                            if (!(result is ISizeable sw))
+                                throw new ParseException($"No width is possible for {result}", lexer.Line, lexer.Position);
+                            return sw.Width;
+                        case "height":
+                            if (!(result is ISizeable sh))
+                                throw new ParseException($"No height is possible for {result}", lexer.Line, lexer.Position);
+                            return sh.Height;
                     }
 
                     // Else get the description
@@ -561,7 +564,6 @@ namespace SimpleCircuit
             ckt.Add(component);
             return component;
         }
-
         private void ParseOption(SimpleCircuitLexer lexer, Circuit ckt)
         {
             lexer.Check(TokenType.Dot);
@@ -674,7 +676,6 @@ namespace SimpleCircuit
                 }
             }
         }
-
 
         /// <summary>
         /// Warn the user.

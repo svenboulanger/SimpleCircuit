@@ -32,6 +32,8 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         public PinCollection Pins { get; }
 
+        IPinCollection IComponent.Pins => Pins;
+
         /// <inheritdoc/>
         public Function X => UnknownX;
 

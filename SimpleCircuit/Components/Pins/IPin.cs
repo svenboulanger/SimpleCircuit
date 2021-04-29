@@ -1,6 +1,6 @@
 ﻿namespace SimpleCircuit.Components
 {
-    public interface IPin
+    public interface IPin : ITranslating
     {
         /// <summary>
         /// Gets the name of the pin.

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
@@ -26,10 +25,10 @@ namespace SimpleCircuit.Components
             // Find the pins in the subcircuit
             foreach (var pin in pins)
             {
-                if (pin is RotatingPin rpin)
-                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(rpin.X.Value, rpin.Y.Value), new Vector2(rpin.NormalX.Value, rpin.NormalY.Value));
-                else if (pin is TranslatingPin tpin)
-                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(tpin.X.Value, tpin.Y.Value));                
+                if (pin is IRotating rpin)
+                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(pin.X.Value, pin.Y.Value), new Vector2(rpin.NormalX.Value, rpin.NormalY.Value));
+                else
+                    Pins.Add(new[] { $"{pin.Owner.Name}_{pin.Name}" }, pin.Description, new Vector2(pin.X.Value, pin.Y.Value));                
             }
         }
 

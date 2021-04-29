@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A pin that has a position.
     /// </summary>
-    public class TranslatingPin : IPin, ITranslating
+    public class TranslatingPin : IPin
     {
         /// <inheritdoc/>
         public string Name { get; }

@@ -121,7 +121,7 @@
     {
         _errors = null;
         _warnings = null;
-        try
+        // try
         {
             var code = await _scriptEditor.GetValue();
             var ckt = _parser.Parse(code);
@@ -139,10 +139,11 @@
             else
                 _svg = null;
         }
-        catch (Exception ex)
+        /* catch (Exception ex)
         {
             _errors = ex.Message;
             _svg = null;
         }
+        */
     }
 }

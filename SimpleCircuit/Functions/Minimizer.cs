@@ -193,6 +193,8 @@ namespace SimpleCircuit.Functions
                         double e;
                         switch (uk.Type)
                         {
+                            case UnknownTypes.Width:
+                            case UnknownTypes.Height:
                             case UnknownTypes.Length:
                                 e = Math.Abs(_solution[i] - _oldSolution[i]);
 
@@ -364,6 +366,8 @@ namespace SimpleCircuit.Functions
                         else
                             _solution[index] = eq.Key.Value;
                         break;
+                    case UnknownTypes.Width:
+                    case UnknownTypes.Height:
                     case UnknownTypes.Length:
                         if (eq.Key.Value < 0)
                             _solution[index] = 0;

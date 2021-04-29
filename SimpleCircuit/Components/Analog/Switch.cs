@@ -42,14 +42,14 @@
             drawing.Circle(new Vector2(-5, 0), 1);
             drawing.Circle(new Vector2(5, 0), 1);
 
-            if (Closed.IsZero())
+            if (!Closed.IsZero())
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 0));
             else
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 4));
 
             if (Pins.IsUsed("c"))
             {
-                if (Closed.IsZero())
+                if (!Closed.IsZero())
                     drawing.Line(new Vector2(0, 0), new Vector2(0, 6));
                 else
                     drawing.Line(new Vector2(0, 2), new Vector2(0, 6));

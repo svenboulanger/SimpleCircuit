@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components
     /// A collection of pins.
     /// </summary>
     /// <seealso cref="IEnumerable{Pin}" />
-    public class PinCollection : IEnumerable<IPin>
+    public class PinCollection : IPinCollection
     {
         private class Node
         {

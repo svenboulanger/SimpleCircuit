@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components
         /// <value>
         /// The pins.
         /// </value>
-        PinCollection Pins { get; }
+        IPinCollection Pins { get; }
 
         /// <summary>
         /// Renders the component in the specified drawing.

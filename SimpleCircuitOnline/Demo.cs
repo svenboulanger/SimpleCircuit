@@ -169,7 +169,44 @@ namespace SimpleCircuitOnline
                 "pixel2[dirtop_out] <u 0> T(\"COL OUT k+1\")",
                 "pixel2[dirright_out] <r 0> T(\"ROW SEL i\")",
                 "pixel4[dirright_out] <r 0> T(\"ROW SEL i+1\")"
-            }))
+            })),
+
+            // Subcircuit demo
+            new Demo("Subcircuit definition", "Demo on how to use a subcircuit definition", string.Join(Environment.NewLine, new[] {
+                ".subckt ABC R1[p] R2[n]",
+                "R1 <r> R2",
+                ".ends",
+                "",
+                "ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1",
+                "",
+                "Xs <?> ABC <?> Xe" })),
+
+            // Black-box demo
+            new Demo("Black box demo", "Demo on how to use a black box", string.Join(Environment.NewLine, new[] {
+                "// The order in which pins appear also determines",
+                "// the order (left-to-right or top-to-bottom)",
+                "BB1[nVDD] <u> POW",
+                "BB1[sVSS] <d> GND",
+                "BB1[wInput1] <l> T(\"in1\")",
+                "BB1[wInput2] <l> T(\"in2\")",
+                "BB1[eOutput1]",
+                "BB1[eOutput2]",
+                "",
+                "// We can just specify a width or height",
+                "- BB1.Width = 50",
+                "",
+                "// Let's connect a resistor to the output",
+                "// This will also space out the output pins",
+                "BB1[eOutput1] <r d> R <d l> [eOutput2]BB1",
+                "",
+                "// We can align pins",
+                "- BB1[wInput1].y = BB1[eOutput1].y",
+                "- BB1[wInput2].y = BB1[eOutput2].y",
+                "",
+                "// The top-left corner is the origin of the black box",
+                "- BB1[nVDD].x = BB1.x + BB1.Width - 10",
+                "- BB1[sVSS].x = BB1.x + 10",
+            })),
         };
     }
 }

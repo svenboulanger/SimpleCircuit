@@ -38,6 +38,9 @@
         /// <summary>
         /// The length.
         /// </summary>
-        Length
+        Length,
+
+        Width,
+        Height
     }
 }
