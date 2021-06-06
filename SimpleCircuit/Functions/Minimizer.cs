@@ -11,6 +11,7 @@ namespace SimpleCircuit.Functions
     public class Minimizer
     {
         private readonly Random _rnd = new Random();
+        private double _convGmin = 1e-12;
 
         /// <summary>
         /// Occurs when a warning is generated.
@@ -64,6 +65,19 @@ namespace SimpleCircuit.Functions
         public Function Minimize { get; set; } = 1.0;
 
         /// <summary>
+        /// Gets a convergence factor that can help.
+        /// </summary>
+        public UnsolvableFunction Gmin { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Minimizer"/> class.
+        /// </summary>
+        public Minimizer()
+        {
+            Gmin = new UnsolvableFunction(x => _convGmin = x, () => _convGmin);
+        }
+
+        /// <summary>
         /// Adds the constraint to the circuit.
         /// </summary>
         /// <param name="function">The constraint.</param>
@@ -113,6 +127,8 @@ namespace SimpleCircuit.Functions
             bool needsReordering = true;
             while (error > 1e-9)
             {
+                bool helpConvergence = false;
+
                 // Build the matrix
                 _solver.Reset();
                 foreach (var eq in _map)
@@ -137,6 +153,7 @@ namespace SimpleCircuit.Functions
                     if (!_solver.Factor())
                     {
                         needsReordering = true;
+                        _convGmin *= 2.0;
                         continue;
                     }
                     else
@@ -200,7 +217,10 @@ namespace SimpleCircuit.Functions
 
                                 // Add some randomization to avoid invalid "local minimum" solutions
                                 if (_solution[i] < 0)
+                                {
                                     _solution[i] = 1e-6 / (_rnd.NextDouble() + 1);
+                                    helpConvergence = true;
+                                }
                                 error = Math.Max(error, e);
                                 break;
                             case UnknownTypes.Scale:
@@ -214,6 +234,7 @@ namespace SimpleCircuit.Functions
                                         _solution[i] = 1e-3 / (r + 1.0);
                                     else
                                         _solution[i] = -1e-3 / (r + 1.0);
+                                    helpConvergence = true;
                                 }
                                 error = Math.Max(error, e);
                                 break;
@@ -242,8 +263,16 @@ namespace SimpleCircuit.Functions
                 }
                 if (LogInfo)
                     Console.WriteLine($"Alpha = {alpha}");
+                if (alpha < 0.5)
+                    helpConvergence = true;
                 for (var i = 1; i <= _map.Count; i++)
                     _solution[i] = _solution[i] * alpha + _oldSolution[i] * (1 - alpha);
+
+                // Can help a little bit
+                if (helpConvergence)
+                    _convGmin *= 2.0;
+                else if (_convGmin > 1e-12)
+                    _convGmin /= 2.0;
 
                 if (error < 1e-6)
                     break;

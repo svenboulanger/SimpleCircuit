@@ -64,7 +64,7 @@
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
-        _timer = new Timer(1500);
+        _timer = new Timer(750);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
 
