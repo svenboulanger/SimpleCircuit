@@ -41,7 +41,6 @@
     private Task _task = null;
     private bool _showHelp = false, _showDemo = false;
     private int _loading;
-    private SimpleCircuitParser _parser;
     private MonacoEditor _scriptEditor, _styleEditor;
 
     private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
@@ -68,8 +67,6 @@
         _timer = new Timer(1500);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
-        _parser = new SimpleCircuitParser();
-        _parser.Warning += (sender, args) => _warnings += Environment.NewLine + args.Message;
 
         // Register our own language
         await Runtime.InvokeVoidAsync("registerLanguage");
@@ -87,7 +84,10 @@
     {
         // Parse it again
         var code = await _scriptEditor.GetValue();
-        var ckt = _parser.Parse(code);
+        var context = new SimpleCircuit.Parser.ParsingContext();
+        var lexer = new SimpleCircuit.Parser.Lexer(code);
+        SimpleCircuit.Parser.Parser.Parse(lexer, context);
+        var ckt = context.Circuit;
         ckt.Style = await _styleEditor.GetValue();
         var doc = ckt.Render();
         using var sw = new StringWriter();
@@ -121,10 +121,13 @@
     {
         _errors = null;
         _warnings = null;
-        // try
+        try
         {
             var code = await _scriptEditor.GetValue();
-            var ckt = _parser.Parse(code);
+            var context = new SimpleCircuit.Parser.ParsingContext();
+            var lexer = new SimpleCircuit.Parser.Lexer(code);
+            SimpleCircuit.Parser.Parser.Parse(lexer, context);
+            var ckt = context.Circuit;
             ckt.Style = await _styleEditor.GetValue();
             if (ckt.ComponentCount > 0 || ckt.WireCount > 0)
             {
@@ -139,11 +142,10 @@
             else
                 _svg = null;
         }
-        /* catch (Exception ex)
+        catch (Exception ex)
         {
             _errors = ex.Message;
             _svg = null;
         }
-        */
     }
 }

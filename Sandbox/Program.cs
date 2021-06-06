@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit;
 using SimpleCircuit.Components;
+using SimpleCircuit.Parser;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -11,12 +12,19 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var parser = new SimpleCircuitParser();
-            var ckt = parser.Parse(
-                "BB1[nabc] <u> X1" + Environment.NewLine +
-                "- BB1.Height = 50");
-            ckt.Warning += (sender, args) => Console.WriteLine("WARNING: " + args.Message);
+            var lexer = new Lexer(string.Join(Environment.NewLine, new[] {
+".subckt ABC R1[p] R2[n]",
+"R1 <r> R2",
+".ends",
+"",
+"ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1",
+"",
+"Xs <?> ABC <?> Xe",
+            }));
+            var context = new ParsingContext();
+            Parser.Parse(lexer, context);
             SimpleCircuit.Functions.Minimizer.LogInfo = true;
+            var ckt = context.Circuit;
             var doc = ckt.Render();
 
             using var sw = new StringWriter();

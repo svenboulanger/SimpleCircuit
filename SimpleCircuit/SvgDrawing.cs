@@ -633,7 +633,6 @@ namespace SimpleCircuit
             _current.AppendChild(text);
         }
 
-
         /// <summary>
         /// Starts a group.
         /// </summary>

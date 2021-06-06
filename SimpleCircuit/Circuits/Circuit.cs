@@ -201,6 +201,13 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         public bool TryGetValue(string name, out IComponent value) => _components.TryGetValue(name, out value);
 
         /// <summary>
+        /// Checks whether the circuit contains a component with the specified key.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the component exists; otherwise, <c>false</c>.</returns>
+        public bool ContainsKey(string name) => _components.ContainsKey(name);
+
+        /// <summary>
         /// Clears this instance.
         /// </summary>
         public void Clear()

@@ -16,5 +16,15 @@ namespace SimpleCircuit.Parser
             : base($"{message} at line {line}, position {position}")
         {
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParseException"/> class.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="message">The message.</param>
+        public ParseException(Lexer lexer, string message)
+            : base($"{message} at line {lexer.Line}, column {lexer.Column}")
+        {
+        }
     }
 }

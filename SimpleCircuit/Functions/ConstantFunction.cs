@@ -51,7 +51,8 @@ namespace SimpleCircuit.Functions
         public override void Differentiate(Function coefficient, Dictionary<Unknown, Function> equations) { }
 
         /// <inheritdoc/>
-        public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver) => new RowEquation(row, solver, _value);
+        public override IRowEquation CreateEquation(int row, UnknownMap mapper, ISparseSolver<double> solver)
+            => new RowEquation(row, solver, _value);
 
         /// <inheritdoc/>
         public override bool Resolve(double value) => false;
