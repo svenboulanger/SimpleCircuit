@@ -70,8 +70,9 @@ namespace SimpleCircuit.Components
             }
             else
             {
+                var ms = _parent is IScaling m ? m.Scale : 1.0;
                 x += offset.X;
-                y += offset.Y;
+                y += offset.Y * ms;
             }
 
             var pin = new Node

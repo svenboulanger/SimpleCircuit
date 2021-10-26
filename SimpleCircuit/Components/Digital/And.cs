@@ -8,7 +8,7 @@
     public class And : TransformingComponent
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Or"/> class.
+        /// Initializes a new instance of the <see cref="And"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
         public And(string name)

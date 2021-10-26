@@ -11,6 +11,9 @@
         /// <inheritdoc/>
         public string Label { get; set; }
 
+        /// <inheritdoc/>
+        public double Programmable { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Amplifier"/> class.
         /// </summary>
@@ -29,6 +32,16 @@
             {
                 new Vector2(-6, 6), new Vector2(6, 0), new Vector2(-6, -6)
             });
+
+            if (!Programmable.IsZero())
+            {
+                // Programmable gain amplifier
+                drawing.Polyline(new[] {
+                    new Vector2(-6.5, 8), new Vector2(3, -7.5),
+                    new Vector2(3, -7.5), new Vector2(3, -5.5),
+                    new Vector2(3, -7.5), new Vector2(1.25, -6.5)
+                });
+            }
 
             if (!string.IsNullOrEmpty(Label))
                 drawing.Text(Label, new Vector2(-2.5, 0), new Vector2(), 3, 0.5);

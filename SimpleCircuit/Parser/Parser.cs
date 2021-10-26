@@ -150,24 +150,38 @@ namespace SimpleCircuit.Parser
             // Read the direction of the wire
             List<WireInfo> wires = new List<WireInfo>();
             lexer.SkipWhile(TokenType.Whitespace);
-            while (lexer.Type == TokenType.Word || lexer.Type == TokenType.Question)
+            while (lexer.Type != TokenType.CloseBeak)
             {
+                // Get whether it has a bus cross
+                bool isBus = false;
+                if (lexer.Type == TokenType.Equals)
+                {
+                    isBus = true;
+                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                }
+
+                // Get whether it is a bus
+                bool hasBusCross = false;
+                if (lexer.Type == TokenType.Divide)
+                {
+                    hasBusCross = true;
+                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                }
+
                 // Get the direction
                 string direction = lexer.Content;
-                lexer.Next();
+                lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
                 // See if there is a length
-                lexer.SkipWhile(TokenType.Whitespace);
                 if (lexer.Type == TokenType.Number)
                 {
                     double length = double.Parse(lexer.Content);
-                    wires.Add(new WireInfo(direction[0], length));
-                    lexer.Next();
-                    lexer.SkipWhile(TokenType.Whitespace);
+                    wires.Add(new WireInfo(direction[0], length, isBus, hasBusCross));
+                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
                 }
                 else
                 {
-                    wires.Add(new WireInfo(direction[0]));
+                    wires.Add(new WireInfo(direction[0], isBus, hasBusCross));
                 }
             }
 
@@ -200,7 +214,11 @@ namespace SimpleCircuit.Parser
             int index = 0;
             for (int i = 0; i < wire.Count; i++)
             {
-                var newWire = new Wire(last);
+                var newWire = new Wire(last)
+                {
+                    IsBus = wire[i].IsBus,
+                    HasBusCross = wire[i].HasBusCross
+                };
                 context.Circuit.Add(newWire);
 
                 // Create a new point
@@ -715,7 +733,7 @@ namespace SimpleCircuit.Parser
                                     return new UnsolvableFunction(sm, gm);
                                 }
                             }
-                            throw new ParseException(lexer, $"Cannot recognize property {name} of {component}");
+                            throw new ParseException(lexer, $"Cannot recognize property {lexer.Content} of {component}");
                     }
                 }
                 else

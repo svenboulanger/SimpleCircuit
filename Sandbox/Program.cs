@@ -13,13 +13,10 @@ namespace Sandbox
         static void Main(string[] args)
         {
             var lexer = new Lexer(string.Join(Environment.NewLine, new[] {
-".subckt ABC R1[p] R2[n]",
-"R1 <r> R2",
-".ends",
-"",
-"ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1",
-"",
-"Xs <?> ABC <?> Xe",
+"- pmos1.Packaged = 1",
+"- nmos1.Packaged = 1",
+"pow <d> [s]pmos1[d] <d> [d]nmos1[s] <d> gnd",
+"pmos1[g] <l d r> [g]nmos1"
             }));
             var context = new ParsingContext();
             Parser.Parse(lexer, context);

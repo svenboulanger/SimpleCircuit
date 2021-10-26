@@ -80,6 +80,7 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+.bus { stroke-width: 0.75pt; }
 .point circle { fill: black; }
 .plane { stroke-width: 1pt; }
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
@@ -238,7 +239,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                         continue;
                     }
                     var x = length - WireLength;
-                    minimizer.Minimize += 1e3 * (minimizer.Gmin * x + new Squared(x) + new Exp(-x / 0.1));
+                    minimizer.Minimize += 1e4 * (x + minimizer.Gmin * new Squared(x) + new Exp(-x / 0.1));
                     length.Value = WireLength;
                     minimizer.AddMinimum(length, 0.0);
                 }
