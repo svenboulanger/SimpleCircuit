@@ -3,19 +3,30 @@
 @using System.Xml;
 
 <div class="card" style="width: 12.5rem; margin: 5px;">
+    <div class="card-header">@Key<span class="text-muted small">name</span></div>
     <div class="card-img-top" style="background-color: #eeeeee; text-align: center; padding: 5px; min-height: 80px; line-height: 80px;">
         @((MarkupString)CreateSvg(Component))
     </div>
-    <div class="card-body">
-        <h5 class="card-title">@Key / @Key<span class="text-muted small">name</span></h5>
-        <p class="card-text">
-            @Name<br />
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item p-1">@Name</li>
+        <li class="list-group-item p-1">
+            <h6>Type</h6>
             <span class="badge badge-@(Component is SimpleCircuit.Components.ILabeled ? "primary" : "danger")">Label</span>
             <span class="badge badge-@(Component is SimpleCircuit.Components.ITranslating ? "primary" : "danger")">Position</span>
             <span class="badge badge-@(Component is SimpleCircuit.Components.IRotating ? "primary" : "danger")">Rotates</span>
             <span class="badge badge-@(Component is SimpleCircuit.Components.IScaling ? "primary" : "danger")">Mirror/scale</span>
-        </p>
-    </div>
+        </li>
+        @if (GetProperties(Component).Any())
+        {
+        <li class="list-group-item p-1">
+            <h6>Properties</h6>
+            @foreach (var name in GetProperties(Component))
+            {
+                <span class="badge badge-secondary">@name</span>
+            }
+        </li>
+        }
+    </ul>
     @if (Component.Pins.Count > 0)
     {
         <ul class="list-group list-group-flush">
@@ -45,6 +56,8 @@
 
     private string CreateSvg(SimpleCircuit.Components.IComponent component)
     {
+        if (component == null)
+            return "";
         if (component is SimpleCircuit.Components.IRotating rot)
         {
             rot.NormalX.Resolve(1.0);
@@ -62,6 +75,16 @@
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
             doc.WriteTo(xml);
         return sw.ToString();
+    }
 
+    private IEnumerable<string> GetProperties(SimpleCircuit.Components.IComponent component)
+    {
+        if (component == null)
+            yield break;
+        foreach (var p in component.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+        {
+            if (p.PropertyType == typeof(double) && p.CanRead && p.CanWrite)
+                yield return p.Name;
+        }
     }
 }

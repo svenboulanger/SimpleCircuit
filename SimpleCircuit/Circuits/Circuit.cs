@@ -12,9 +12,9 @@ namespace SimpleCircuit
     /// </summary>
     public class Circuit
     {
-        private readonly Dictionary<string, IComponent> _components = new Dictionary<string, IComponent>();
-        private readonly Dictionary<Function, string> _constraints = new Dictionary<Function, string>();
-        private readonly List<Wire> _wires = new List<Wire>();
+        private readonly Dictionary<string, IComponent> _components = new();
+        private readonly Dictionary<Function, string> _constraints = new();
+        private readonly List<Wire> _wires = new();
 
         /// <summary>
         /// Occurs when a warning is generated.
@@ -80,7 +80,6 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.bus { stroke-width: 0.75pt; }
 .point circle { fill: black; }
 .plane { stroke-width: 1pt; }
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";

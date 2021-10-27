@@ -11,7 +11,10 @@
         /// <inheritdoc/>
         public string Label { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// If <c>true</c>, the amplifier is displayed with a
+        /// programmable gain (diagonal arrow).
+        /// </summary>
         public double Programmable { get; set; }
 
         /// <summary>

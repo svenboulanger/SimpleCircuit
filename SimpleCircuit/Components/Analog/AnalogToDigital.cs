@@ -36,7 +36,7 @@ namespace SimpleCircuit.Components.Analog
 
             if (!string.IsNullOrWhiteSpace(Label))
             {
-                drawing.Text(Label, new Vector2(-10, 0), new Vector2(1, 0));
+                drawing.Text(Label, new Vector2(-8, 0), new Vector2(1, 0));
             }
         }
 

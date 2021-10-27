@@ -160,15 +160,18 @@ namespace SimpleCircuit.Parser
                     lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
                 }
 
-                // Get whether it is a bus
-                bool hasBusCross = false;
-                if (lexer.Type == TokenType.Divide)
-                {
-                    hasBusCross = true;
-                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
-                }
-
                 // Get the direction
+                switch (lexer.Content)
+                {
+                    case "u":
+                    case "d":
+                    case "l":
+                    case "r":
+                    case "?":
+                        break;
+                    default:
+                        throw new ParseException(lexer, "Direction expected");
+                }
                 string direction = lexer.Content;
                 lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
@@ -176,12 +179,12 @@ namespace SimpleCircuit.Parser
                 if (lexer.Type == TokenType.Number)
                 {
                     double length = double.Parse(lexer.Content);
-                    wires.Add(new WireInfo(direction[0], length, isBus, hasBusCross));
+                    wires.Add(new WireInfo(direction[0], length, isBus));
                     lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
                 }
                 else
                 {
-                    wires.Add(new WireInfo(direction[0], isBus, hasBusCross));
+                    wires.Add(new WireInfo(direction[0], isBus));
                 }
             }
 
@@ -217,7 +220,6 @@ namespace SimpleCircuit.Parser
                 var newWire = new Wire(last)
                 {
                     IsBus = wire[i].IsBus,
-                    HasBusCross = wire[i].HasBusCross
                 };
                 context.Circuit.Add(newWire);
 
