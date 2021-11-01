@@ -9,13 +9,6 @@
     </div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item p-1">@Name</li>
-        <li class="list-group-item p-1">
-            <h6>Type</h6>
-            <span class="badge badge-@(Component is SimpleCircuit.Components.ILabeled ? "primary" : "danger")">Label</span>
-            <span class="badge badge-@(Component is SimpleCircuit.Components.ITranslating ? "primary" : "danger")">Position</span>
-            <span class="badge badge-@(Component is SimpleCircuit.Components.IRotating ? "primary" : "danger")">Rotates</span>
-            <span class="badge badge-@(Component is SimpleCircuit.Components.IScaling ? "primary" : "danger")">Mirror/scale</span>
-        </li>
         @if (GetProperties(Component).Any())
         {
         <li class="list-group-item p-1">
@@ -52,23 +45,16 @@
     public string Name { get; set; }
 
     [Parameter]
-    public SimpleCircuit.Components.IComponent Component { get; set; }
+    public SimpleCircuit.Components.IDrawable Component { get; set; }
 
-    private string CreateSvg(SimpleCircuit.Components.IComponent component)
+    private string CreateSvg(SimpleCircuit.Components.IDrawable component)
     {
         if (component == null)
             return "";
-        if (component is SimpleCircuit.Components.IRotating rot)
-        {
-            rot.NormalX.Resolve(1.0);
-            rot.NormalY.Resolve(0.0);
-        }
-        if (component is SimpleCircuit.Components.IScaling scaling)
-            scaling.Scale.Resolve(-1.0);
 
         var drawing = new SvgDrawing();
         component.Render(drawing);
-        drawing.Style = Circuit.DefaultStyle;
+        drawing.Style = GraphicalCircuit.DefaultStyle;
         var doc = drawing.GetDocument();
 
         using var sw = new StringWriter();
@@ -77,14 +63,24 @@
         return sw.ToString();
     }
 
-    private IEnumerable<string> GetProperties(SimpleCircuit.Components.IComponent component)
+    private IEnumerable<string> GetProperties(SimpleCircuit.Components.IDrawable component)
     {
         if (component == null)
             yield break;
         foreach (var p in component.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
         {
-            if (p.PropertyType == typeof(double) && p.CanRead && p.CanWrite)
-                yield return p.Name;
+            var type = p.PropertyType;
+            string typeName;
+            if (type == typeof(double) || type == typeof(int))
+                typeName = "number";
+            else if (type == typeof(string))
+                typeName = "string";
+            else if (type == typeof(bool))
+                typeName = "boolean";
+            else
+                continue; // Cannot read...
+            if (p.CanRead && p.CanWrite)
+                yield return $"{p.Name}: {typeName}";
         }
     }
 }

@@ -6,13 +6,63 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Components\Component.cs" />
+    <Compile Remove="Circuits\**" />
+    <Compile Remove="Components\Analog\**" />
+    <EmbeddedResource Remove="Circuits\**" />
+    <EmbeddedResource Remove="Components\Analog\**" />
+    <None Remove="Circuits\**" />
+    <None Remove="Components\Analog\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Components\IPinDescription.cs" />
     <Compile Remove="Components\PinDescription.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Compile Include="Circuits\GraphicalCircuit.cs" />
+    <Compile Include="Circuits\CircuitContext.cs" />
+    <Compile Include="Circuits\ICircuitPresence.cs" />
+    <Compile Include="Circuits\ILocatedPresence.cs" />
+    <Compile Include="Circuits\NodeContext.cs" />
+    <Compile Include="Components\Analog\Amplifier.cs" />
+    <Compile Include="Components\Analog\AnalogToDigital.cs" />
+    <Compile Include="Components\Analog\Battery.cs" />
+    <Compile Include="Components\Analog\BipolarNpnTransistor.cs" />
+    <Compile Include="Components\Analog\BipolarPnpTransistor.cs" />
+    <Compile Include="Components\Analog\Capacitor.cs" />
+    <Compile Include="Components\Analog\CurrentSource.cs" />
+    <Compile Include="Components\Analog\Diode.cs" />
+    <Compile Include="Components\Analog\Impedance.cs" />
+    <Compile Include="Components\Analog\Inductor.cs" />
+    <Compile Include="Components\Analog\Nmos.cs" />
+    <Compile Include="Components\Analog\Opamp.cs" />
+    <Compile Include="Components\Analog\OperationalTransconductanceAmplifier.cs" />
+    <Compile Include="Components\Analog\Pmos.cs" />
+    <Compile Include="Components\Analog\Resistor.cs" />
+    <Compile Include="Components\Analog\Switch.cs" />
+    <Compile Include="Components\Analog\SwitchSinglePoleDoubleThrow.cs" />
+    <Compile Include="Components\Analog\TransmissionLine.cs" />
+    <Compile Include="Components\Analog\VoltageSource.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SpiceSharp" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

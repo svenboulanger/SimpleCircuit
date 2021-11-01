@@ -27,10 +27,12 @@
         <div class="clearfix">
             <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
             <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showHelp = !_showHelp)">@(_showHelp ? "Hide components" : "Show components")</a>
+            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showOptions = !_showOptions)">@(_showOptions ? "Hide global options" : "Show global options")</a>
             <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showDemo = !_showDemo)">@(_showDemo ? "Hide demo's" : "Show demo's")</a>
         </div>
-        <ComponentHelp Show="_showHelp" />
+        <GlobalOptionList Show="_showOptions" Editor="_scriptEditor" />
         <DemoList Show="_showDemo" DemoSelected="@(x => { _scriptEditor.SetValue(x); })" />
+        <ComponentHelp Show="_showHelp" />
     </div>
 </div>
 
@@ -39,7 +41,7 @@
     private string _svg, _errors, _warnings;
     private Timer _timer;
     private Task _task = null;
-    private bool _showHelp = false, _showDemo = false;
+    private bool _showHelp = false, _showDemo = false, _showOptions = false;
     private int _loading;
     private MonacoEditor _scriptEditor, _styleEditor;
 
@@ -76,26 +78,34 @@
 
         // Set the default values
         await _scriptEditor.SetValue(Demo.Demos[0].Code);
-        await _styleEditor.SetValue(Circuit.DefaultStyle);
+        await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle);
         await Render();
     }
 
     public async Task DownloadSvg()
     {
+        GlobalOptions.Reset();
+        var logger = new Logger();
+
         // Parse it again
         var code = await _scriptEditor.GetValue();
         var context = new SimpleCircuit.Parser.ParsingContext();
+        context.Diagnostics = logger;
         var lexer = new SimpleCircuit.Parser.Lexer(code);
         SimpleCircuit.Parser.Parser.Parse(lexer, context);
         var ckt = context.Circuit;
         ckt.Style = await _styleEditor.GetValue();
-        var doc = ckt.Render();
+        var doc = ckt.Render(logger);
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
             doc.WriteTo(xml);
 
+        _errors = logger.Error.ToString();
+        _warnings = logger.Warning.ToString();
+
         byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
         await Runtime.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+        GlobalOptions.Reset();
     }
 
     private void OnTimerElapsed(object sender, ElapsedEventArgs e)
@@ -121,18 +131,20 @@
     {
         _errors = null;
         _warnings = null;
+        var logger = new Logger();
+        GlobalOptions.Reset();
         try
         {
             var code = await _scriptEditor.GetValue();
             var context = new SimpleCircuit.Parser.ParsingContext();
+            context.Diagnostics = logger;
             var lexer = new SimpleCircuit.Parser.Lexer(code);
             SimpleCircuit.Parser.Parser.Parse(lexer, context);
             var ckt = context.Circuit;
             ckt.Style = await _styleEditor.GetValue();
-            if (ckt.ComponentCount > 0 || ckt.WireCount > 0)
+            if (ckt.Count > 0)
             {
-                ckt.Warning += (sender, args) => _warnings += Environment.NewLine + args.Message;
-                var doc = ckt.Render();
+                var doc = ckt.Render(logger);
 
                 using var sw = new StringWriter();
                 using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
@@ -144,8 +156,11 @@
         }
         catch (Exception ex)
         {
-            _errors = ex.Message;
-            _svg = null;
+            logger.Post(new SimpleCircuit.Diagnostics.DiagnosticMessage(SimpleCircuit.Diagnostics.SeverityLevel.Error,
+                "?", ex.Message));
         }
+        _errors = logger.Error.ToString();
+        _warnings = logger.Warning.ToString();
+        GlobalOptions.Reset();
     }
 }

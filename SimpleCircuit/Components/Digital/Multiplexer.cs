@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Digital
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
-    /// An Operational Transconductance Amplifier (OTA)
+    /// An Operational Transconductance Amplifier (OTA).
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("MUX", "Multiplexer", Category = "Digital")]
-    public class Multiplexer : TransformingComponent, ILabeled
+    [SimpleKey("MUX", "A 2-input multiplexer.", Category = "Digital")]
+    public class Multiplexer : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,9 +18,9 @@
         public Multiplexer(string name)
             : base(name)
         {
-            Pins.Add(new[] { "zero", "a" }, "The '0' input.", new Vector2(-5, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "one", "b" }, "The '1' input.", new Vector2(-5, 4), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("a", "The '0' input.", this, new(-5, -4), new(-1, 0)), "a", "0");
+            Pins.Add(new FixedOrientedPin("b", "The '1' input.", this, new(-5, 4), new(-1, 0)), "b", "1");
+            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
         }
 
         /// <inheritdoc/>
@@ -45,6 +45,6 @@
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"OTA {Name}";
+        public override string ToString() => $"MUX {Name}";
     }
 }

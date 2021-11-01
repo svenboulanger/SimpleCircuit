@@ -3,23 +3,23 @@
     <div style="width: 100%; padding: 3px;">
         @if (_errors != null && _errors.Count > 0)
         {
-            @foreach (var error in _errors)
-            {
             <div class="alert alert-danger" role="alert">
                 <h4 class="alert-heading">Error</h4>
+            @foreach (var error in _errors)
+            {
                 <p>@error</p>
-            </div>
             }
+            </div>
         }
         @if (_warnings != null && _warnings.Count > 0)
         {
-            @foreach (var warning in _warnings)
-            {
             <div class="alert alert-warning">
                 <h4 class="alert-heading">Warning</h4>
+            @foreach (var warning in _warnings)
+            {
                 <p>@warning</p>
-            </div>
             }
+            </div>
         }
     </div>
 }

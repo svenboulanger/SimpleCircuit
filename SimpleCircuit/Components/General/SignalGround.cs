@@ -1,13 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An earth terminal.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    /// <seealso cref="ITranslating" />
-    /// <seealso cref="IRotating" />
-    [SimpleKey("SGND", "Signal ground")]
-    public class SignalGround : RotatingComponent
+    [SimpleKey("SGND", "Signal ground symbol.", Category = "General")]
+    public class SignalGround : ScaledOrientedDrawable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Earth"/> class.
@@ -16,7 +15,7 @@
         public SignalGround(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, 1));
+            Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, -1)), "a");
         }
 
         /// <inheritdoc/>
@@ -35,6 +34,6 @@
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"Earth {Name}";
+        public override string ToString() => $"Signal ground {Name}";
     }
 }

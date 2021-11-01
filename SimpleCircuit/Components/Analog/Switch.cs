@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A switch.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("S", "Voltage switch", Category = "Analog")]
-    public class Switch : TransformingComponent, ILabeled
+    [SimpleKey("S", "A (voltage-controlled) switch. The controlling pin is optional.", Category = "Analog")]
+    public class Switch : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -14,10 +14,9 @@
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Switch"/> is closed.
         /// </summary>
-        /// <value>
-        ///   <c>true</c> if closed; otherwise, <c>false</c>.
-        /// </value>
-        public double Closed { get; set; }
+        public bool Closed { get; set; }
+
+        public bool Opened { get => !Closed; set => Closed = !value; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Switch"/> class.
@@ -26,9 +25,9 @@
         public Switch(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 6), new Vector2(0, 1));
-            Pins.Add(new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "a");
+            Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, 6), new(0, 1)), "c", "ctrl");
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "b");
         }
 
         /// <inheritdoc />
@@ -42,14 +41,14 @@
             drawing.Circle(new Vector2(-5, 0), 1);
             drawing.Circle(new Vector2(5, 0), 1);
 
-            if (!Closed.IsZero())
+            if (Closed)
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 0));
             else
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 4));
 
-            if (Pins.IsUsed("c"))
+            if (Pins["c"].Connections > 0)
             {
-                if (!Closed.IsZero())
+                if (Closed)
                     drawing.Line(new Vector2(0, 0), new Vector2(0, 6));
                 else
                     drawing.Line(new Vector2(0, 2), new Vector2(0, 6));

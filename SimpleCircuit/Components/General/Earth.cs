@@ -1,13 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// An earth terminal.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    /// <seealso cref="ITranslating" />
-    /// <seealso cref="IRotating" />
-    [SimpleKey("EARTH", "Earth")]
-    public class Earth : RotatingComponent
+    [SimpleKey("EARTH", "Represents an earth connection.", Category = "General")]
+    public class Earth : ScaledOrientedDrawable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Earth"/> class.
@@ -16,7 +15,7 @@
         public Earth(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
+            Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, -1)), "a");
         }
 
         /// <inheritdoc/>

@@ -1,11 +1,13 @@
-﻿namespace SimpleCircuit.Components.General
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.General
 {
     /// <summary>
     /// A direction that is like a regular point, but can be oriented.
     /// This is useful for example when combined with subcircuits to give an orientation.
     /// </summary>
-    [SimpleKey("DIR", "Direction")]
-    public class Direction : RotatingComponent
+    [SimpleKey("DIR", "Directional point, useful for subcircuit definitions.", Category = "General")]
+    public class Direction : OrientedDrawable
     {
         /// <summary>
         /// Initializers a new instance of the <see cref="Direction"/> class.
@@ -14,8 +16,8 @@
         public Direction(string name)
             : base(name)
         {
-            Pins.Add(new[] { "in" }, "The entry point.", new Vector2(), new Vector2(-1, 0));
-            Pins.Add(new[] { "out" }, "The output.", new Vector2(), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("input", "The input.", this, new(), new(-1, 0)), "i", "a", "in", "input");
+            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(), new(1, 0)), "o", "b", "out", "output");
         }
 
         /// <inheritdoc/>

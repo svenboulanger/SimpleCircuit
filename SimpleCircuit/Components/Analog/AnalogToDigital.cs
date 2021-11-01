@@ -1,17 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// ADC.
     /// </summary>
-    [SimpleKey("ADC", "Analog-to-digital converter", Category = "Digital")]
-    public class AnalogToDigital : TransformingComponent, ILabeled
+    [SimpleKey("ADC", "An Analog-to-digital converter.", Category = "Digital")]
+    public class AnalogToDigital : ScaledOrientedDrawable, ILabeled
     {
+        private double _width = 18, _height = 12;
+        private bool _differentialOutput = false;
+        private bool _differentialInput = false;
+
+        /// <summary>
+        /// Gets or sets the width of the ADC.
+        /// </summary>
+        public double Width
+        {
+            get => _width;
+            set
+            {
+                _width = value;
+                UpdatePins();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the height of the ADC.
+        /// </summary>
+        public double Height
+        {
+            get => _height;
+            set
+            {
+                _height = value;
+                UpdatePins();
+            }
+        }
+
         /// <inheritdoc/>
         public string Label { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether a differential input is made.
+        /// </summary>
+        public bool DifferentialInput
+        {
+            get => _differentialInput;
+            set
+            {
+                _differentialInput = value;
+                UpdatePins();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether a differential output is used.
+        /// </summary>
+        public bool DifferentialOutput
+        {
+            get => _differentialOutput;
+            set
+            {
+                _differentialOutput = value;
+                UpdatePins();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnalogToDigital"/>
@@ -20,8 +74,10 @@ namespace SimpleCircuit.Components.Analog
         public AnalogToDigital(string name)
             : base(name)
         {
-            Pins.Add(new[] { "in" }, "Input", new Vector2(-9, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "out" }, "Output", new Vector2(9, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, new(-9, 0), new(-1, 0)), "input", "in", "pi", "inp");
+            Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
+            Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(9, 0), new(1, 0)), "outn", "no");
+            Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, new(9, 0), new(1, 0)), "output", "out", "po", "outp");
         }
 
         /// <inheritdoc/>
@@ -29,14 +85,52 @@ namespace SimpleCircuit.Components.Analog
         {
             drawing.Polygon(new[]
             {
-                new Vector2(-9, 6), new Vector2(3, 6),
-                new Vector2(9, 0), new Vector2(3, -6),
-                new Vector2(-9, -6)
+                new Vector2(-_width / 2, _height / 2), new Vector2(_width / 2 - _height / 2, _height / 2),
+                new Vector2(_width / 2, 0), new Vector2(_width / 2 - _height / 2, -_height / 2),
+                new Vector2(-_width / 2, -_height / 2)
             });
+
+            if (_differentialOutput)
+            {
+                drawing.Segments(new[]
+                {
+                    new Vector2(_width / 2 - _height / 4, _height / 4), new Vector2(_width / 2, _height / 4),
+                    new Vector2(_width / 2 - _height / 4, -_height / 4), new Vector2(_width / 2, -_height / 4)
+                });
+            }
 
             if (!string.IsNullOrWhiteSpace(Label))
             {
-                drawing.Text(Label, new Vector2(-8, 0), new Vector2(1, 0));
+                drawing.Text(Label, new Vector2(-_height / 4, 0), new Vector2(0, 0));
+            }
+        }
+
+        private void UpdatePins()
+        {
+            var pin1 = (FixedOrientedPin)Pins[0];
+            var pin2 = (FixedOrientedPin)Pins[1];
+            if (_differentialInput)
+            {
+                pin1.Offset = new(-_width / 2, -_height / 4);
+                pin2.Offset = new(-_width / 2, _height / 4);
+            }
+            else
+            {
+                pin1.Offset = new(-_width / 2, 0);
+                pin2.Offset = new(-_width / 2, 0);
+            }
+
+            pin1 = (FixedOrientedPin)Pins[2];
+            pin2 = (FixedOrientedPin)Pins[3];
+            if (_differentialOutput)
+            {
+                pin1.Offset = new(_width / 2 - _height / 4, _height / 4);
+                pin2.Offset = new(_width / 2 - _height / 4, -_height / 4);
+            }
+            else
+            {
+                pin1.Offset = new(_width / 2, 0);
+                pin2.Offset = new(_width / 2, 0);
             }
         }
 

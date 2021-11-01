@@ -1,29 +1,24 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Pins
 {
-    public interface IPin : ITranslating
+    /// <summary>
+    /// Describes a pin of a component. This always at least
+    /// has a location.
+    /// </summary>
+    public interface IPin : ILocatedPresence
     {
-        /// <summary>
-        /// Gets the name of the pin.
-        /// </summary>
-        /// <value>
-        /// The name of the pin.
-        /// </value>
-        string Name { get; }
-
         /// <summary>
         /// Gets the pin description.
         /// </summary>
-        /// <value>
-        /// The pin description.
-        /// </value>
-        string Description { get; }
+        public string Description { get; }
+
+        /// <summary>
+        /// Gets or sets the number of items connected to the pin.
+        /// </summary>
+        public int Connections { get; set; }
 
         /// <summary>
         /// Gets the owner of the pin.
         /// </summary>
-        /// <value>
-        /// The pin owner.
-        /// </value>
-        IComponent Owner { get; }
+        public ILocatedDrawable Owner { get; }
     }
 }

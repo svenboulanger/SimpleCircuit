@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,98 +8,50 @@ namespace SimpleCircuit.Components
 {
     public partial class BlackBox
     {
+        /// <summary>
+        /// A pin-collection that makes pins as they are requested.
+        /// </summary>
         private class PinCollection : IPinCollection
         {
             private readonly BlackBox _parent;
-            private readonly Dictionary<string, Pin> _pins = new Dictionary<string, Pin>();
+            private readonly Dictionary<string, IPin> _pinsByName = new();
+            private readonly List<IPin> _pinsByIndex = new();
+            private readonly List<IPin> _pinsNorth = new(), _pinsWest = new(), _pinsEast = new(), _pinsSouth = new();
 
-            /// <summary>
-            /// Gets the last pin on the north side.
-            /// </summary>
-            public Pin North { get; private set; }
+            public string Right { get; }
 
-            /// <summary>
-            /// Gets the last pin on the south side.
-            /// </summary>
-            public Pin South { get; private set; }
-
-            /// <summary>
-            /// Gets the last pin on the west side.
-            /// </summary>
-            public Pin West { get; private set; }
-
-            /// <summary>
-            /// Gets the last pin on the east side.
-            /// </summary>
-            public Pin East { get; private set; }
+            public string Bottom { get; }
 
             /// <inheritdoc/>
             public IPin this[string name]
             {
                 get
                 {
-                    if (_pins.TryGetValue(name, out var pin))
+                    if (_pinsByName.TryGetValue(name, out var pin))
                         return pin;
-
-                    // It doesn't exist yet, so let's create it!
-                    Pin newPin;
-                    switch (name[0])
+                    List<IPin> list = char.ToLower(name[0]) switch
                     {
-                        case 'N':
-                        case 'n':
-                            newPin = new Pin(name.Substring(1), _parent, new Vector2(0, -1))
-                            {
-                                Previous = North
-                            };
-                            newPin.X = (North != null ? North.X : _parent.X) + newPin.Length;
-                            newPin.Y = _parent.Y;
-                            North = newPin;
-                            break;
+                        'n' => _pinsNorth,
+                        'e' => _pinsEast,
+                        's' => _pinsSouth,
+                        _ => _pinsWest,
+                    };
+                    ;
 
-                        case 'S':
-                        case 's':
-                            newPin = new Pin(name.Substring(1), _parent, new Vector2(0, 1))
-                            {
-                                Previous = South
-                            };
-                            newPin.X = (South != null ? South.X : _parent.X) + newPin.Length;
-                            newPin.Y = _parent.Y + _parent.Height;
-                            South = newPin;
-                            break;
-
-                        case 'E':
-                        case 'e':
-                            newPin = new Pin(name.Substring(1), _parent, new Vector2(1, 0))
-                            {
-                                Previous = East
-                            };
-                            newPin.X = _parent.X + _parent.Width;
-                            newPin.Y = (East != null ? East.Y : _parent.Y) + newPin.Length;
-                            East = newPin;
-                            break;
-
-                        case 'W':
-                        case 'w':
-                        default:
-                            newPin = new Pin(name.Substring(1), _parent, new Vector2(-1, 0))
-                            {
-                                Previous = West
-                            };
-                            newPin.X = _parent.X;
-                            newPin.Y = (West != null ? West.Y : _parent.Y) + newPin.Length;
-                            West = newPin;
-                            break;
-                    }
-                    _pins.Add(name, newPin);
-                    return newPin;
+                    // If the pin is the first in the list, we use a fixed pin at the origin.
+                    pin = new LoosePin(name, name, _parent);
+                    list.Add(pin);
+                    _pinsByName.Add(name, pin);
+                    _pinsByIndex.Add(pin);
+                    return list[list.Count - 1];
                 }
             }
 
             /// <inheritdoc/>
-            public IPin this[int index] => _pins.Values.ElementAt(index);
+            public IPin this[int index] => _pinsByIndex[index];
 
             /// <inheritdoc/>
-            public int Count => _pins.Count;
+            public int Count => _pinsByIndex.Count;
 
             /// <summary>
             /// Creates a new <see cref="PinCollection"/>.
@@ -106,10 +60,13 @@ namespace SimpleCircuit.Components
             public PinCollection(BlackBox parent)
             {
                 _parent = parent;
-            }
+                Right = $"{parent.Name}.right";
+                Bottom = $"{parent.Name}.bottom";
 
-            /// <inheritdoc/>
-            public IEnumerator<IPin> GetEnumerator() => _pins.Values.GetEnumerator();
+                // This pin is not used, but only serves to avoid wires and stuff to work...
+                var pin = new FixedPin("x", "x", _parent, new());
+                _pinsByIndex.Add(pin);
+            }
 
             /// <inheritdoc/>
             public IEnumerable<string> NamesOf(IPin pin)
@@ -118,8 +75,56 @@ namespace SimpleCircuit.Components
                     yield return p.Name;
             }
 
-            /// <inheritdoc/>
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public void Render(SvgDrawing drawing)
+            {
+                foreach (var pin in _pinsNorth)
+                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(0, 2), new(0, 1));
+                foreach (var pin in _pinsSouth)
+                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(0, -2), new(0, -1));
+                foreach (var pin in _pinsEast)
+                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(-2, 0), new(-1, 0));
+                foreach (var pin in _pinsWest)
+                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(2, 0), new(1, 0));
+            }
+
+            public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+            {
+                var ckt = context.Circuit;
+                var map = context.Nodes.Shorts;
+                void Apply(string name, string start, List<IPin> list, string end, Func<IPin, string> sel, double spacing)
+                {
+                    string lastNode = start;
+                    int index = 0;
+                    if (list.Count > 0)
+                    {
+                        foreach (var pin in list)
+                            MinimumConstraint.AddMinimum(ckt, $"{name}.{index++}", lastNode, lastNode = map[sel(pin)], index == 1 ? spacing / 2 : spacing, 1);
+                        MinimumConstraint.AddMinimum(ckt, $"{name}.{index}", lastNode, end, spacing / 2, 1);
+                    }
+                    else
+                    {
+                        MinimumConstraint.AddMinimum(ckt, $"{name}.{index}", lastNode, end, spacing, 1);
+                    }
+                }
+
+                Apply($"{_parent.Name}.n", map[_parent.X], _pinsNorth, map[Right], p => p.X, GlobalOptions.HorizontalPinSpacing);
+                Apply($"{_parent.Name}.s", map[_parent.X], _pinsSouth, map[Right], p => p.X, GlobalOptions.HorizontalPinSpacing);
+                Apply($"{_parent.Name}.e", map[_parent.Y], _pinsEast, map[Bottom], p => p.Y, GlobalOptions.VerticalPinSpacing);
+                Apply($"{_parent.Name}.w", map[_parent.Y], _pinsWest, map[Bottom], p => p.Y, GlobalOptions.VerticalPinSpacing);
+            }
+
+            public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            {
+                // We will group the X-coordinates and Y-coordinates of each side
+                foreach (var pin in _pinsNorth)
+                    context.Shorts.Group(_parent.Y, pin.Y);
+                foreach (var pin in _pinsSouth)
+                    context.Shorts.Group(Bottom, pin.Y);
+                foreach (var pin in _pinsEast)
+                    context.Shorts.Group(Right, pin.X);
+                foreach (var pin in _pinsWest)
+                    context.Shorts.Group(_parent.X, pin.X);
+            }
         }
     }
 }

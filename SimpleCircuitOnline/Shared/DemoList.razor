@@ -9,7 +9,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var demo in Demo.Demos.OrderBy(demo => demo.Title))
+            @foreach (var demo in Demo.Demos)
             {
                 <tr>
                     <td><a href="javascript:void(0);" @onclick="@(x => Update(demo.Code))">@demo.Title</a></td>

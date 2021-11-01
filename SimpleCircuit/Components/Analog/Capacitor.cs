@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A capacitor.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("C", "Capacitor", Category = "Analog")]
-    public class Capacitor : TransformingComponent, ILabeled
+    [SimpleKey("C", "A capacitor.", Category = "Analog")]
+    public class Capacitor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,8 +18,8 @@
         public Capacitor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The positive pin.", new Vector2(-5, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "b" }, "The negative pin.", new Vector2(5, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-5, 0), new(-1, 0)), "p", "pos", "a");
+            Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(5, 0), new(1, 0)), "n", "neg", "b");
         }
 
         /// <inheritdoc />

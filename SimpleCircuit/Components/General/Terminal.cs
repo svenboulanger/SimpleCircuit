@@ -1,14 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A terminal (input or output).
     /// </summary>
-    /// <seealso cref="IComponent" />
-    /// <seealso cref="ITranslating" />
-    /// <seealso cref="IRotating" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("T", "Terminal"), SimpleKey("P", "Pin")]
-    public class Terminal : RotatingComponent, ILabeled
+    [SimpleKey("T", "A common terminal symbol.", Category = "General")]
+    public class Terminal : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -20,7 +18,7 @@
         public Terminal(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a", "o", "i" }, "The pin.", new Vector2(), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("p", "The pin.", this, new Vector2(), new Vector2(1, 0)), "p", "a", "o", "i");
         }
 
         /// <inheritdoc/>

@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A diode.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("D", "Diode", Category = "Analog")]
-    public class Diode : TransformingComponent, ILabeled
+    [SimpleKey("D", "A diode", Category = "Analog")]
+    public class Diode : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,8 +18,8 @@
         public Diode(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The anode.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "b", "c" }, "The cathode.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-6, 0), new(-1, 0)), "p", "a", "anode");
+            Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(6, 0), new(1, 0)), "n", "c", "cathode");
         }
 
         /// <inheritdoc />

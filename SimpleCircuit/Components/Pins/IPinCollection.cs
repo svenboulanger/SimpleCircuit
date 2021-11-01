@@ -1,36 +1,36 @@
 ﻿using System.Collections.Generic;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Components.Pins
 {
     /// <summary>
-    /// Describes a collection of pins.
+    /// A pin collection.
     /// </summary>
-    public interface IPinCollection : IEnumerable<IPin>
+    public interface IPinCollection
     {
         /// <summary>
-        /// Gets the number of pins.
+        /// Gets the number of pins in the collection.
         /// </summary>
-        int Count { get; }
+        public int Count { get; }
 
         /// <summary>
-        /// Gets a pin by name.
+        /// Gets the pin by name.
         /// </summary>
-        /// <param name="name">The name of the pin.</param>
+        /// <param name="name">The name.</param>
         /// <returns>The pin.</returns>
-        IPin this[string name] { get; }
+        public IPin this[string name] { get; }
 
         /// <summary>
-        /// Gets a pin by index.
+        /// Gets the pin by its index.
         /// </summary>
-        /// <param name="index">The index of the pin.</param>
-        /// <returns>The pin.</returns>
-        IPin this[int index] { get; }
+        /// <param name="index">The index.</param>
+        /// <returns>The pin index.</returns>
+        public IPin this[int index] { get; }
 
         /// <summary>
-        /// Enumerates the names of the specified name.
+        /// Gets the names of the pin.
         /// </summary>
         /// <param name="pin">The pin.</param>
-        /// <returns>The names of the pin.</returns>
-        IEnumerable<string> NamesOf(IPin pin);
+        /// <returns>The names.</returns>
+        public IEnumerable<string> NamesOf(IPin pin);
     }
 }

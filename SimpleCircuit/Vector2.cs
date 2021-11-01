@@ -7,6 +7,9 @@ namespace SimpleCircuit
     /// </summary>
     public struct Vector2 : IEquatable<Vector2>
     {
+        private const int _precision = 9;
+        private const double _dblPrecision = 1e-9;
+
         /// <summary>
         /// Gets the x-coordinate.
         /// </summary>
@@ -29,7 +32,7 @@ namespace SimpleCircuit
         /// <value>
         /// The perpendicular vector.
         /// </value>
-        public Vector2 Perpendicular => new Vector2(-Y, X);
+        public Vector2 Perpendicular => new(-Y, X);
 
         /// <summary>
         /// Gets the length of the vector.
@@ -58,7 +61,9 @@ namespace SimpleCircuit
         /// </returns>
         public override int GetHashCode()
         {
-            return (X.GetHashCode() * 13) ^ Y.GetHashCode();
+            int hash = Math.Round(X, _precision).GetHashCode();
+            hash = (hash * 13) ^ Math.Round(Y, _precision).GetHashCode();
+            return hash;
         }
 
         /// <summary>
@@ -84,12 +89,19 @@ namespace SimpleCircuit
         /// </returns>
         public bool Equals(Vector2 other)
         {
-            if (Math.Abs(other.X - X) > 1e-9)
+            if (Math.Abs(other.X - X) > _dblPrecision)
                 return false;
-            if (Math.Abs(other.Y - Y) > 1e-9)
+            if (Math.Abs(other.Y - Y) > _dblPrecision)
                 return false;
             return true;
         }
+
+        /// <summary>
+        /// Computes the dot-product with another vector.
+        /// </summary>
+        /// <param name="other">The other vector.</param>
+        /// <returns>The dot product.</returns>
+        public double Dot(Vector2 other) => X * other.X + Y * other.Y;
 
         /// <summary>
         /// Rotates the vector.
@@ -98,8 +110,8 @@ namespace SimpleCircuit
         /// <returns>The rotated vector.</returns>
         public Vector2 Rotate(double angle)
         {
-            var c = Math.Cos(angle);
-            var s = Math.Sin(angle);
+            double c = Math.Cos(angle);
+            double s = Math.Sin(angle);
             return new Vector2(X * c - Y * s, X * s + Y * c);
         }
 
@@ -119,7 +131,41 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="angle">The angle.</param>
         /// <returns>The normal.</returns>
-        public static Vector2 Normal(double angle) => new Vector2(Math.Cos(angle), Math.Sin(angle));
+        public static Vector2 Normal(double angle) => new(Math.Cos(angle), Math.Sin(angle));
+
+        /// <summary>
+        /// Orders nodes according to the direction of the vector. The returned vector is
+        /// the vector pointing into the first quadrant. The arguments are ordered approprately.
+        /// </summary>
+        /// <param name="lowestX">The lowest node X.</param>
+        /// <param name="highestX">The highest node X.</param>
+        /// <param name="lowestY">The lowest node Y.</param>
+        /// <param name="highestY">The highest node Y.</param>
+        /// <returns>The vector in the first quadrant.</returns>
+        public Vector2 Order<T>(ref T lowestX, ref T highestX, ref T lowestY, ref T highestY)
+        {
+            T tmp;
+            double rx, ry;
+            if (X < 0)
+            {
+                tmp = lowestX;
+                lowestX = highestX;
+                highestX = tmp;
+                rx = -X;
+            }
+            else
+                rx = X;
+            if (Y < 0)
+            {
+                tmp = lowestY;
+                lowestY = highestY;
+                highestY = tmp;
+                ry = -Y;
+            }
+            else
+                ry = Y;
+            return new(rx, ry);
+        }
 
         /// <summary>
         /// Converts to string.
@@ -139,17 +185,17 @@ namespace SimpleCircuit
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static Vector2 operator -(Vector2 a) => new Vector2(-a.X, -a.Y);
+        public static Vector2 operator -(Vector2 a) => new(-a.X, -a.Y);
 
         /// <summary>
         /// Implements the operator +.
         /// </summary>
         /// <param name="a">The first argument.</param>
-        /// <param name="b">The b.</param>
+        /// <param name="b">The second argument.</param>
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
+        public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X, a.Y + b.Y);
 
         /// <summary>
         /// Implements the operator -.
@@ -159,7 +205,7 @@ namespace SimpleCircuit
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static Vector2 operator -(Vector2 a, Vector2 b) => new Vector2(a.X - b.X, a.Y - b.Y);
+        public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.X - b.X, a.Y - b.Y);
 
         /// <summary>
         /// Implements the operator *.
@@ -169,7 +215,7 @@ namespace SimpleCircuit
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static Vector2 operator *(Vector2 a, double f) => new Vector2(a.X * f, a.Y * f);
+        public static Vector2 operator *(Vector2 a, double f) => new(a.X * f, a.Y * f);
 
         /// <summary>
         /// Implements the operator *.
@@ -189,7 +235,7 @@ namespace SimpleCircuit
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static Vector2 operator /(Vector2 a, double f) => new Vector2(a.X / f, a.Y / f);
+        public static Vector2 operator /(Vector2 a, double f) => new(a.X / f, a.Y / f);
 
         /// <summary>
         /// Implements the operator *.

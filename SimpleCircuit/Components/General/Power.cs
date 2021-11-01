@@ -1,14 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A supply voltage.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    /// <seealso cref="ITranslating" />
-    /// <seealso cref="IRotating" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("POW", "Power plane")]
-    public class Power : RotatingComponent, ILabeled
+    [SimpleKey("POW", "Power plan e (change the name with the Label property).", Category = "General")]
+    public class Power : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; } = "VDD";
@@ -19,7 +17,7 @@
         public Power(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, 1));
+            Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
         }
 
         /// <inheritdoc/>

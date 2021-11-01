@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Diagnostics;
 
 namespace SimpleCircuit.Parser
 {
@@ -8,9 +9,24 @@ namespace SimpleCircuit.Parser
     public class ParsingContext
     {
         /// <summary>
+        /// Gets or sets the number of wires.
+        /// </summary>
+        public int WireCount { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the number of virtual coordinates.
+        /// </summary>
+        public int VirtualCoordinateCount { get; set; } = 0;
+
+        /// <summary>
         /// Gets the factory for components.
         /// </summary>
         public ComponentFactory Factory { get; } = new ComponentFactory();
+
+        /// <summary>
+        /// Gets or sets the diagnostics handler.
+        /// </summary>
+        public IDiagnosticHandler Diagnostics { get; set; }
 
         /// <summary>
         /// Gets the subcircuit definitions.
@@ -20,16 +36,16 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the circuit.
         /// </summary>
-        public Circuit Circuit { get; } = new Circuit();
+        public GraphicalCircuit Circuit { get; } = new GraphicalCircuit();
 
         /// <summary>
         /// Gets or creates a component.
         /// </summary>
         /// <param name="name">The name of the component.</param>
         /// <returns>The component.</returns>
-        public IComponent GetOrCreate(string name)
+        public IDrawable GetOrCreate(string name)
         {
-            IComponent component;
+            IDrawable result;
 
             // First try to find a subcircuit
             var exact = Definitions.Search(name, out var definition);
@@ -43,13 +59,13 @@ namespace SimpleCircuit.Parser
                         newName = $"{name}:{++index}";
                     name = newName;
                 }
-                else if (Circuit.TryGetValue(name, out component))
-                    return component;
+                else if (Circuit.TryGetValue(name, out var presence) && presence is IDrawable drawable)
+                    return drawable;
 
                 // We didn't find it, so let's create it!
-                component = new Subcircuit(name, definition.Definition, definition.Ports);
-                Circuit.Add(component);
-                return component;
+                result = new Subcircuit(name, definition.Definition, definition.Ports);
+                Circuit.Add(result);
+                return result;
             }
 
             // We didn't find a subcircuit definition, so check regular components
@@ -61,13 +77,13 @@ namespace SimpleCircuit.Parser
                     newName = $"{name}:{++index}";
                 name = newName;
             }
-            else if (Circuit.TryGetValue(name, out component))
-                return component;
+            else if (Circuit.TryGetValue(name, out var presence) && presence is IDrawable drawable)
+                return drawable;
 
             // Didn't find the component, let's create it!
-            component = Factory.Create(name);
-            Circuit.Add(component);
-            return component;
+            result = Factory.Create(name);
+            Circuit.Add(result);
+            return result;
         }
     }
 }

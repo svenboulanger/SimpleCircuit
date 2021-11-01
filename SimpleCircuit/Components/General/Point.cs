@@ -1,45 +1,29 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A point that can serve as an inflection point or a node for multiple wires.
+    /// A point.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    [SimpleKey("X", "Point")]
-    public class Point : TranslatingComponent
+    [SimpleKey("X", "A point that can connect to multiple wires.", Category = "General")]
+    public class Point : LocatedDrawable
     {
         /// <summary>
-        /// Gets or sets the number of wires that are connected to this point.
-        /// </summary>
-        /// <value>
-        /// The wires.
-        /// </value>
-        public int Wires { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Point"/> class.
+        /// Creates a point.
         /// </summary>
         /// <param name="name">The name.</param>
         public Point(string name)
             : base(name)
         {
-            Pins.Add(new[] { "x", "p" }, "The entry point.", new Vector2());
-            Wires = 0;
+            Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
-            // If there are more than 2 wires, then let's draw a point
-            if (Wires > 2)
+            int connections = Pins[0].Connections;
+            if (connections == 0 || connections > 2)
                 drawing.Circle(new Vector2(), 1);
         }
-
-        /// <summary>
-        /// Converts to string.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public override string ToString() => $"Point {Name}";
     }
 }

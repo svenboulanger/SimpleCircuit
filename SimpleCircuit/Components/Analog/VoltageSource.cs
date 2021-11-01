@@ -1,14 +1,21 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+using System;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A voltage source.
     /// </summary>
-    /// <seealso cref="IComponent" />
-    [SimpleKey("V", "Voltage source", Category = "Analog")]
-    public class VoltageSource : TransformingComponent, ILabeled
+    [SimpleKey("V", "A voltage source.", Category = "Analog")]
+    public class VoltageSource : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the squiggly line needs to be drawn.
+        /// </summary>
+        public bool AC { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VoltageSource"/> class.
@@ -17,8 +24,8 @@
         public VoltageSource(string name)
             : base(name)
         {
-            Pins.Add(new[] { "n", "neg" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "p", "pos" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");
         }
 
         /// <inheritdoc/>
@@ -28,11 +35,27 @@
             drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
-                new Vector2(-3, -1), new Vector2(-3, 1),
-                new Vector2(3, -1), new Vector2(3, 1),
-                new Vector2(2, 0), new Vector2(4, 0),
-                new Vector2(6, 0), new Vector2(8, 0)
+                new Vector2(6, 0), new Vector2(8, 0),
             });
+
+            if (AC)
+            {
+                double handle = 1.7 / Math.Sqrt(2); // Slighly exaggerated
+                drawing.OpenBezier(new Vector2[]
+                {
+                        new(0, -3),
+                        new(handle, -3 + handle), new(handle, -handle), new(),
+                        new(-handle, handle), new(-handle, 3 - handle), new(0, 3)
+                });
+            }
+            else
+            {
+                drawing.Segments(new Vector2[] {
+                        new(-3, -1), new(-3, 1),
+                        new(3, -1), new(3, 1),
+                        new(2, 0), new(4, 0),
+                    });
+            }
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))

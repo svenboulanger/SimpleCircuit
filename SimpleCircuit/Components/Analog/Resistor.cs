@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A resistor.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("R", "Resistor", Category = "Analog")]
-    public class Resistor : TransformingComponent, ILabeled
+    [SimpleKey("R", "A resistor", Category = "Analog")]
+    public class Resistor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,9 +18,9 @@
         public Resistor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "pos", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "c", "ctrl" }, "The controlling pin.", new Vector2(0, 8), new Vector2(0, 1));
-            Pins.Add(new[] { "n", "neg", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
+            Pins.Add(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 8), new(0, 1)), "c", "ctrl");
+            Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
         }
 
         /// <inheritdoc/>
@@ -40,7 +40,7 @@
                     new Vector2(8, 0)
                 });
 
-            if (Pins.IsUsed("c"))
+            if (Pins["c"].Connections > 0)
             {
                 drawing.Line(new Vector2(0, 4), new Vector2(0, 8));
                 drawing.Polygon(new[]

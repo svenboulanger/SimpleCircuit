@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Digital
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// An amplifier.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("INV", "Inverter", Category = "Digital")]
-    public class Inverter : TransformingComponent, ILabeled
+    [SimpleKey("INV", "A digital inverter.", Category = "Digital")]
+    public class Inverter : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,8 +18,8 @@
         public Inverter(string name)
             : base(name)
         {
-            Pins.Add(new[] { "in" }, "The input.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "out" }, "The output.", new Vector2(9, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("input", "The input pin.", this, new(-6, 0), new(-1, 0)), "in", "input");
+            Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
         }
 
         /// <inheritdoc/>

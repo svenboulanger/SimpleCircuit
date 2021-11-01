@@ -1,12 +1,13 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A PMOS transistor.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("MP", "PMOS transistor", Category = "Analog"), SimpleKey("PMOS", "PMOS transistor", Category = "Analog")]
-    public class Pmos : TransformingComponent, ILabeled
+    [SimpleKey("MP", "A PMOS transistor. The bulk connection is optional.", Category = "Analog")]
+    [SimpleKey("PMOS", "A PMOS transistor. The bulk connection is optional.", Category = "Analog")]
+    public class Pmos : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -14,7 +15,7 @@
         /// <summary>
         /// Gets or sets a value that enables the display of the PMOS as packaged.
         /// </summary>
-        public double Packaged { get; set; }
+        public bool Packaged { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pmos"/> class.
@@ -23,17 +24,17 @@
         public Pmos(string name)
             : base(name)
         {
-            Packaged = GlobalOptions.Packaged;
-            Pins.Add(new[] { "d", "drain" }, "The drain.", new Vector2(8, 0), new Vector2(1, 0));
-            Pins.Add(new[] { "g", "gate" }, "The gate.", new Vector2(0, 11), new Vector2(0, 1));
-            Pins.Add(new[] { "b", "bulk" }, "The bulk.", new Vector2(0, 0), new Vector2(0, -1));
-            Pins.Add(new[] { "s", "source" }, "The source.", new Vector2(-8, 0), new Vector2(-1, 0));
+            Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(8, 0), new Vector2(1, 0)), "d", "drain");
+            Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 11), new Vector2(0, 1)), "g", "gate");
+            Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
+            Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-8, 0), new Vector2(-1, 0)), "s", "source");
+            Packaged = GlobalOptions.PackagedTransistors;
         }
 
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            if (Packaged.IsZero())
+            if (!Packaged)
             {
                 drawing.Segments(new[]
                 {
@@ -46,7 +47,7 @@
                 drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4) });
                 drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4) });
 
-                if (Pins.IsUsed("b"))
+                if (Pins["b"].Connections > 0)
                 {
                     drawing.Line(new Vector2(0, 4), new Vector2(0, 0));
                     if (!string.IsNullOrEmpty(Label))

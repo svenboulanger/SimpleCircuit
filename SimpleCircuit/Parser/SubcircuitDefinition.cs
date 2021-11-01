@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +14,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the circuit definition.
         /// </summary>
-        public Circuit Definition { get; }
+        public GraphicalCircuit Definition { get; }
 
         /// <summary>
         /// Gets the ports of the circuit.
@@ -24,9 +25,9 @@ namespace SimpleCircuit.Parser
         /// Initializes a new instance of the <see cref="SubcircuitDefinition"/> class.
         /// </summary>
         /// <param name="ckt"></param>
-        public SubcircuitDefinition(Circuit ckt = null)
+        public SubcircuitDefinition(GraphicalCircuit ckt = null)
         {
-            Definition = ckt ?? new Circuit();
+            Definition = ckt ?? new GraphicalCircuit();
         }
     }
 }

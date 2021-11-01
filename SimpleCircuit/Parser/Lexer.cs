@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser
+﻿using SimpleCircuit.Diagnostics;
+
+namespace SimpleCircuit.Parser
 {
     /// <summary>
     /// The lexer used for SimpleCircuit scripts.
@@ -12,6 +14,11 @@
         /// Gets the current character.
         /// </summary>
         private char Char => _index >= _input.Length ? '\0' : _input[_index];
+
+        /// <summary>
+        /// Gets whether the end of the content has been reached.
+        /// </summary>
+        public bool EndOfContent => Type == TokenType.EndOfContent;
         
         /// <summary>
         /// Gets the line number.
@@ -56,6 +63,25 @@
 
             // Read the first token
             Next();
+        }
+
+        public bool Check(TokenType flags) => (Type & flags) != 0;
+
+        public bool Expect(TokenType flags, string expected, string code, IDiagnosticHandler diagnostics)
+        {
+            if (Check(flags))
+                return true;
+            if (expected != null)
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, code,
+                    $"Expected '{expected}' at line {Line}, column {Column}."));
+            }
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, code,
+                    $"Expected {flags} at line {Line}, column {Column}."));
+            }
+            return false;
         }
 
         /// <summary>
@@ -232,6 +258,16 @@
                     Continue();
                     break;
             }
+        }
+
+        public bool Branch(TokenType flag)
+        {
+            if ((Type & flag) != 0)
+            {
+                Next();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

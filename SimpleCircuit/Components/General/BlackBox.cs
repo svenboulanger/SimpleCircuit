@@ -1,37 +1,38 @@
-﻿using SimpleCircuit.Functions;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
+using SpiceSharp.Simulations;
+using System;
 
 namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A generic black box.
     /// </summary>
-    [SimpleKey("BB", "Black box")]
-    public partial class BlackBox : IComponent, ITranslating, ISizeable, ILabeled
+    [SimpleKey("BB", "A black box. Pins are created on the fly, where the first character (n, s, e, w) indicate the side.", Category = "General")]
+    public partial class BlackBox : ILocatedDrawable, ILabeled
     {
-        private readonly PinCollection _pins;
+        private PinCollection _pins { get; }
 
         /// <inheritdoc/>
         public string Label { get; set; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        IPinCollection IDrawable.Pins => _pins;
+
+        /// <inheritdoc />
+        public string X { get; }
+
+        /// <inheritdoc />
+        public string Y { get; }
+
+        /// <inheritdoc />
+        public Vector2 Location { get; protected set; }
+
+        /// <inheritdoc />
+        public Vector2 EndLocation { get; protected set; }
+
+        /// <inheritdoc />
         public string Name { get; }
-
-        /// <inheritdoc/>
-        IPinCollection IComponent.Pins => _pins;
-
-        private Unknown _northSpace, _southSpace, _eastSpace, _westSpace, _width, _height, _x, _y;
-
-        /// <inheritdoc/>
-        public Function X => _x;
-
-        /// <inheritdoc/>
-        public Function Y => _y;
-
-        /// <inheritdoc/>
-        public Function Width => _width;
-
-        /// <inheritdoc/>
-        public Function Height => _height;
 
         /// <summary>
         /// Creates a new black box.
@@ -39,96 +40,83 @@ namespace SimpleCircuit.Components
         /// <param name="name">The name.</param>
         public BlackBox(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
             Name = name;
-            _pins = new PinCollection(this);
-            _northSpace = new Unknown($"{name}.northspace", UnknownTypes.Length);
-            _southSpace = new Unknown($"{name}.southspace", UnknownTypes.Length);
-            _eastSpace = new Unknown($"{name}.eastspace", UnknownTypes.Length);
-            _westSpace = new Unknown($"{name}.westspace", UnknownTypes.Length);
-            _x = new Unknown($"{name}.x", UnknownTypes.X);
-            _y = new Unknown($"{name}.y", UnknownTypes.Y);
-            _width = new Unknown($"{name}.width", UnknownTypes.Width)
-            {
-                Value = 10.0
-            };
-            _height = new Unknown($"{name}.height", UnknownTypes.Height)
-            {
-                Value = 10.0
-            };
+            _pins = new(this);
+            X = $"{Name}.x";
+            Y = $"{Name}.y";
+            EndLocation = new(20, 20);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void Render(SvgDrawing drawing)
         {
-            double width = Width.Value;
-            double height = Height.Value;
+            drawing.StartGroup(Name, GetType().Name.ToLower());
             drawing.Polygon(new[]
             {
-                new Vector2(0, 0),
-                new Vector2(width, 0),
-                new Vector2(width, height),
-                new Vector2(0, height),
-                new Vector2(0, 0)
+                Location, new Vector2(EndLocation.X, Location.Y),
+                EndLocation, new Vector2(Location.X, EndLocation.Y)
             });
 
-            if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new Vector2(width / 2, height / 2), new Vector2(0, 0));
-
-            var elt = _pins.North;
-            while (elt != null)
-            {
-                drawing.Text(elt.Name, new Vector2(elt.X.Value, elt.Y.Value + 2), new Vector2(0, 1));
-                elt = elt.Previous;
-            }
-            elt = _pins.East;
-            while (elt != null)
-            {
-                drawing.Text(elt.Name, new Vector2(elt.X.Value - 2, elt.Y.Value), new Vector2(-1, 0));
-                elt = elt.Previous;
-            }
-            elt = _pins.South;
-            while (elt != null)
-            {
-                drawing.Text(elt.Name, new Vector2(elt.X.Value, elt.Y.Value - 2), new Vector2(0, -1));
-                elt = elt.Previous;
-            }
-            elt = _pins.West;
-            while (elt != null)
-            {
-                drawing.Text(elt.Name, new Vector2(elt.X.Value + 2, elt.Y.Value), new Vector2(1, 0));
-                elt = elt.Previous;
-            }
+            // Draw the port names
+            _pins.Render(drawing);
+            drawing.EndGroup();
         }
 
-        /// <inheritdoc/>
-        public void Apply(Minimizer minimizer)
+        /// <inheritdoc />
+        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            minimizer.Minimize += new Squared(X * 1e-3) + new Squared(Y * 1e-3);
+            _pins.DiscoverNodeRelationships(context, diagnostics);
+        }
 
-            // We basically treat this as a lot of "wires" with minimum length...
-            void ApplySide(Function total, Unknown space, Pin elt)
+        /// <inheritdoc />
+        public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        {
+            _pins.Register(context, diagnostics);
+        }
+
+        /// <inheritdoc />
+        public void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        {
+            var map = context.Nodes.Shorts;
+            double x, y;
+            if (state.TryGetValue(map[X], out var value))
+                x = value.Value;
+            else
             {
-                var sum = total - space;
-                var x = space - 1.0;
-                minimizer.Minimize += 1e-3 * x + new Squared(1e-6 * x) + new Exp(-x);
-                space.Value = 1.0;
-                minimizer.AddMinimum(space, 0);
-                while (elt != null)
-                {
-                    minimizer.AddMinimum(elt.Length, 0.0);
-                    sum -= elt.Length;
-                    x = elt.Length - 1.0;
-                    minimizer.Minimize += 1e-3 * x + new Squared(1e-6 * x) + new Exp(-x);
-                    elt.Length.Value = 1.0;
-                    elt = elt.Previous;
-                }
-                minimizer.AddConstraint(sum);
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
+                x = 0.0;
             }
+            if (state.TryGetValue(map[Y], out value))
+                y = value.Value;
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
+                y = 0.0;
+            }
+            Location = new(x, y);
 
-            ApplySide(Width, _northSpace, _pins.North);
-            ApplySide(Width, _southSpace, _pins.South);
-            ApplySide(Height, _eastSpace, _pins.East);
-            ApplySide(Height, _westSpace, _pins.West);
+            if (state.TryGetValue(map[_pins.Right], out value))
+                x = value.Value;
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
+                x = 0.0;
+            }
+            if (state.TryGetValue(map[_pins.Bottom], out value))
+                y = value.Value;
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
+                y = 0.0;
+            }
+            EndLocation = new(x, y);
+
+            // Update all pin locations as well
+            // We ignore pin 0, because that is a dummy pin
+            for (int i = 1; i < _pins.Count; i++)
+                _pins[i].Update(state, context, diagnostics);
         }
     }
 }

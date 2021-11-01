@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -9,7 +8,7 @@ namespace SimpleCircuit.Components
     public struct Transform
     {
         private readonly Vector2 _origin;
-        private readonly double _a11, _a12, _a21, _a22;
+        private readonly Matrix2 _orientation;
 
         /// <summary>
         /// Gets the identity transform.
@@ -17,22 +16,12 @@ namespace SimpleCircuit.Components
         /// <value>
         /// The identity.
         /// </value>
-        public static Transform Identity => new Transform(0.0, 0.0, new Vector2(1, 0), new Vector2(0, 1));
+        public static Transform Identity => new Transform(new(), Matrix2.Identity);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Transform"/> struct.
-        /// </summary>
-        /// <param name="x">The x-coordinate.</param>
-        /// <param name="y">The y-coordinate.</param>
-        /// <param name="nx">The nx.</param>
-        /// <param name="ny">The ny.</param>
-        public Transform(double x, double y, Vector2 nx, Vector2 ny)
+        public Transform(Vector2 origin, Matrix2 orientation)
         {
-            _origin = new Vector2(x, y);
-            _a11 = nx.X;
-            _a21 = nx.Y;
-            _a12 = ny.X;
-            _a22 = ny.Y;
+            _origin = origin;
+            _orientation = orientation;
         }
 
         /// <summary>
@@ -41,12 +30,7 @@ namespace SimpleCircuit.Components
         /// <param name="input">The input.</param>
         /// <returns>The transformed vector.</returns>
         public Vector2 Apply(Vector2 input)
-        {
-            return new Vector2(
-                _origin.X + _a11 * input.X + _a12 * input.Y,
-                _origin.Y + _a21 * input.X + _a22 * input.Y
-                );
-        }
+            => _origin + _orientation * input;
 
         /// <summary>
         /// Applies a transform to another transform, resulting in the combined transform.
@@ -55,13 +39,9 @@ namespace SimpleCircuit.Components
         /// <returns>The combined transform.</returns>
         public Transform Apply(Transform tf)
         {
-            // Transform the normal directions
-            var nx = tf.ApplyDirection(new Vector2(_a11, _a21));
-            var ny = tf.ApplyDirection(new Vector2(_a12, _a22));
-
-            // Transform the position
-            var pos = tf.Apply(new Vector2(_origin.X, _origin.Y));
-            return new Transform(pos.X, pos.Y, nx, ny);
+            var b = tf._orientation * _orientation;
+            var o = tf.Apply(_origin);
+            return new(o, b);
         }
 
         /// <summary>
@@ -70,11 +50,7 @@ namespace SimpleCircuit.Components
         /// <param name="input">The input direction.</param>
         /// <returns>The transformed direction.</returns>
         public Vector2 ApplyDirection(Vector2 input)
-        {
-            return new Vector2(
-                _a11 * input.X + _a12 * input.Y,
-                _a21 * input.X + _a22 * input.Y);
-        }
+            => _orientation * input;
 
         /// <summary>
         /// Applies the transform to the specified inputs.

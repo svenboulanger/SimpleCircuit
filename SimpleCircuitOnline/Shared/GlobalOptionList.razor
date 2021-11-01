@@ -1,0 +1,77 @@
+﻿@using System.Reflection;
+
+@if (_show && _options != null && _options.Count > 0)
+{
+<div class="list-group">
+    @foreach (var (name, typeName, description) in _options)
+    {
+        <a @onclick="x => Insert(name)" class="list-group-item">
+            <h5 class="mb-1">@name <small>(@typeName, @GetOptionValue(name))</small></h5>
+            <p class="mb-1">@description</p>
+        </a>
+    }
+</div>
+}
+
+@code {
+    [Parameter]
+    public bool Show
+    {
+        get => _show;
+        set
+        {
+            if (_show != value)
+            {
+                _show = value;
+                StateHasChanged();
+            }
+        }
+    }
+    private bool _show = false;
+    private List<(string, string, string)> _options = new();
+
+    private string GetOptionValue(string name)
+        => typeof(GlobalOptions).GetProperty(name, BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase)?.GetValue(null)?.ToString() ?? "?";
+
+    [Parameter]
+    public MonacoEditor Editor { get; set; }
+
+    protected async Task Insert(string name)
+    {
+        if (Editor == null)
+            return;
+        var selection = await Editor.GetSelection();
+        selection.StartColumn = 0;
+        selection.EndColumn = 0;
+        List<IdentifiedSingleEditOperation> ops = new();
+        List<Selection> ends = new();
+
+        ops.Add(new()
+        {
+            Range = selection,
+            Text = $".options {name} = {GetOptionValue(name)}" + Environment.NewLine,
+            ForceMoveMarkers = true,
+        });
+        ends.Add(selection);
+        await Editor.ExecuteEdits("code", ops, ends);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Find the categories
+        foreach (var property in typeof(GlobalOptions).GetProperties(BindingFlags.Static | BindingFlags.Public))
+        {
+            var attribute = property.GetCustomAttribute<DescriptionAttribute>(true);
+            string typeName = "?";
+            if (property.PropertyType == typeof(double))
+                typeName = "number";
+            else if (property.PropertyType == typeof(bool))
+                typeName = "boolean";
+            else if (property.PropertyType == typeof(string))
+                typeName = "string";
+            _options.Add((property.Name, typeName, attribute.Description));
+        }
+    }
+}

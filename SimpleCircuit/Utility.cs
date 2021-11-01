@@ -76,13 +76,5 @@ namespace SimpleCircuit
                     yield return new ComponentDescription(attribute.Key, attribute.Name, attribute.Category, t);
             }
         }
-
-        public static void Error(string msg)
-        {
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(msg);
-            Console.ForegroundColor = color;
-        }
     }
 }

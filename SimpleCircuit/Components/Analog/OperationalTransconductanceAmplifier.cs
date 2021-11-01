@@ -1,12 +1,14 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+using System.Linq;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
-    /// An Operational Transconductance Amplifier (OTA)
+    /// An Operational Transconductance Amplifier (OTA).
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("OTA", "Operational transconductance amplifier", Category = "Analog")]
-    public class OperationalTransconductanceAmplifier : TransformingComponent, ILabeled
+    [SimpleKey("OTA", "A transconductance amplifier.", Category = "Analog")]
+    [SimpleKey("TA", "A transconductance amplifier.", Category = "Analog")]
+    public class OperationalTransconductanceAmplifier : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,9 +20,9 @@
         public OperationalTransconductanceAmplifier(string name)
             : base(name)
         {
-            Pins.Add(new[] { "n" }, "The negative input.", new Vector2(-5, -4), new Vector2(-1, 0));
-            Pins.Add(new[] { "p" }, "The positive input.", new Vector2(-5, 4), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "The output.", new Vector2(5, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "neg");
+            Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "pos");
+            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
         }
 
         /// <inheritdoc/>
@@ -32,12 +34,11 @@
                 new Vector2(5, 4),
                 new Vector2(-5, 8)
             });
-            drawing.Segments(new[]
-            {
-                new Vector2(-3, -4), new Vector2(-1, -4),
-                new Vector2(-2, 5), new Vector2(-2, 3),
-                new Vector2(-3, 4), new Vector2(-1, 4)
-            });
+            drawing.Line(new(-3, -4), new(-1, -4), "minus");
+            drawing.Segments(new Vector2[] {
+                new(-2, 5), new(-2, 3),
+                new(-3, 4), new(-1, 4)
+            }, "plus");
 
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(5, 5), new Vector2(1, 1));

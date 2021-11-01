@@ -6,9 +6,9 @@
     public struct WireInfo
     {
         /// <summary>
-        /// Gets the direction of the wire.
+        /// Gets the angle of the wire.
         /// </summary>
-        public char Direction { get; }
+        public Vector2 Orientation { get; }
 
         /// <summary>
         /// Gets the length of the wire.
@@ -16,31 +16,15 @@
         public double Length { get; }
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the wire is a bus.
+        /// Gets the minimum length of the wire.
         /// </summary>
-        public bool IsBus { get; }
+        public double MinimumLength { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WireInfo"/> struct.
-        /// </summary>
-        /// <param name="direction">The direction of the wire.</param>
-        public WireInfo(char direction, bool isBus = false)
+        public WireInfo(Vector2 orientation, double length, double minimum)
         {
-            Direction = direction;
-            Length = -1.0;
-            IsBus = isBus;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WireInfo"/> struct.
-        /// </summary>
-        /// <param name="direction">The direction of the wire.</param>
-        /// <param name="length">The length of the wire.</param>
-        public WireInfo(char direction, double length, bool isBus = false)
-        {
-            Direction = direction;
+            Orientation = orientation;
             Length = length;
-            IsBus = isBus;
+            MinimumLength = minimum;
         }
     }
 }

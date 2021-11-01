@@ -36,7 +36,17 @@ namespace SimpleCircuit
         /// <value>
         /// The style.
         /// </value>
-        public string Style { get; set; }
+        public string Style { get; set; } = 
+@"path, polyline, line, circle, polygon {
+    stroke: black;
+    stroke-width: 0.5pt;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.point circle { fill: black; }
+.plane { stroke-width: 1pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
         /// <summary>
         /// Gets the height of a line of text.
@@ -130,6 +140,8 @@ namespace SimpleCircuit
         /// <param name="style">The style.</param>
         public void Circle(Vector2 position, double radius, string classes = null, string id = null)
         {
+            // Let's see if there is some scaling involved
+            radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
 
             // Expand the bounds

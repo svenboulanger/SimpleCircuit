@@ -34,19 +34,19 @@ namespace SimpleCircuit.Parser
             var current = _root;
             for (var i = 0; i < key.Length; i++)
             {
-                var c = char.ToLower(key[i]);
-                if (c < 'a' || c > 'z')
+                var c = char.ToUpper(key[i]);
+                if (c < 'A' || c > 'Z')
                     throw new ArgumentException($"Cannot add {key} to the search tree because it doesn't use only normal letters.");
                 if (current.Next == null)
                     current.Next = new Node[26];
-                if (current.Next[c - 'a'] == null)
+                if (current.Next[c - 'A'] == null)
                 {
                     var n = new Node();
-                    current.Next[c - 'a'] = n;
+                    current.Next[c - 'A'] = n;
                     current = n;
                 }
                 else
-                    current = current.Next[c - 'a'];
+                    current = current.Next[c - 'A'];
             }
             if (current.Result != null)
                 throw new ArgumentException($"There is already a value for {key}");
@@ -67,12 +67,12 @@ namespace SimpleCircuit.Parser
             var current = _root;
             for (var i = 0; i < key.Length; i++)
             {
-                var c = char.ToLower(key[i]);
-                if (c < 'a' || c > 'z')
+                var c = key[i];
+                if (c < 'A' || c > 'Z')
                     return false;
-                if (current.Next != null && current.Next[c - 'a'] != null)
+                if (current.Next != null && current.Next[c - 'A'] != null)
                 {
-                    current = current.Next[c - 'a'];
+                    current = current.Next[c - 'A'];
                     value = current.IsSet ? current.Result : value;
                 }
                 else

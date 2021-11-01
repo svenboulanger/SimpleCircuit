@@ -1,11 +1,12 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// A ground terminal.
     /// </summary>
-    /// <seealso cref="Component" />
-    [SimpleKey("GND", "Ground")]
-    public class Ground : RotatingComponent
+    [SimpleKey("GND", "A common ground symbol.", Category = "General")]
+    public class Ground : ScaledOrientedDrawable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
@@ -14,7 +15,7 @@
         public Ground(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a" }, "The pin.", new Vector2(), new Vector2(0, -1));
+            Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
         }
 
         /// <inheritdoc/>

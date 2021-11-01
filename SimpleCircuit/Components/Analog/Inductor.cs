@@ -1,12 +1,12 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// An inductor.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("L", "Inductor", Category = "Analog")]
-    public class Inductor : TransformingComponent, ILabeled
+    [SimpleKey("L", "An inductor.", Category = "Analog")]
+    public class Inductor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,8 +18,8 @@
         public Inductor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "a");
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "b");
         }
 
         /// <inheritdoc />

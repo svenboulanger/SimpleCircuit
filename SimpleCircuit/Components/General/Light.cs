@@ -1,16 +1,15 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Pins;
+using System;
 
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A light.
+    /// A light symbol.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("LIGHT", "Light", Category = "Analog")]
-    public class Light : TransformingComponent, ILabeled
+    [SimpleKey("LIGHT", "A light point.", Category = "Analog")]
+    public class Light : ScaledOrientedDrawable, ILabeled
     {
-        private static double Sqrt2 = Math.Sqrt(2) * 2;
+        private static readonly double _sqrt2 = Math.Sqrt(2) * 2;
 
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -22,8 +21,8 @@ namespace SimpleCircuit.Components
         public Light(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a", "p" }, "The positive pin.", new Vector2(-6, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "b", "n" }, "The negative pin.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
         }
 
         /// <inheritdoc/>
@@ -33,8 +32,8 @@ namespace SimpleCircuit.Components
             {
                 new Vector2(-6, 0), new Vector2(-4, 0),
                 new Vector2(4, 0), new Vector2(6, 0),
-                new Vector2(-Sqrt2, -Sqrt2), new Vector2(Sqrt2, Sqrt2),
-                new Vector2(Sqrt2, -Sqrt2), new Vector2(-Sqrt2, Sqrt2)
+                new Vector2(-_sqrt2, -_sqrt2), new Vector2(_sqrt2, _sqrt2),
+                new Vector2(_sqrt2, -_sqrt2), new Vector2(-_sqrt2, _sqrt2)
             });
             drawing.Circle(new Vector2(), 4);
 

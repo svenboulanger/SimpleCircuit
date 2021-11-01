@@ -1,11 +1,12 @@
-﻿namespace SimpleCircuit.Components.Digital
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// And gate.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    [SimpleKey("XOR", "Xor gate.", Category = "Digital")]
-    public class Xor : TransformingComponent
+    [SimpleKey("XOR", "A 2-input XOR gate.", Category = "Digital")]
+    public class Xor : ScaledOrientedDrawable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Or"/> class.
@@ -14,9 +15,9 @@
         public Xor(string name)
             : base(name)
         {
-            Pins.Add(new[] { "a", "in1" }, "First input.", new Vector2(-5.31, 2), new Vector2(-1, 0));
-            Pins.Add(new[] { "b", "in2" }, "Second input.", new Vector2(-5.31, -2), new Vector2(-1, 0));
-            Pins.Add(new[] { "o", "out" }, "Output.", new Vector2(6, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("a", "The first input.", this, new(-5.5, -2.5), new(-1, 0)), "a");
+            Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-5.5, 2.5), new(-1, 0)), "b");
+            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(6, 0), new(1, 0)), "o", "out", "output");
         }
 
         /// <inheritdoc />
@@ -43,6 +44,6 @@
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString() => $"Or {Name}";
+        public override string ToString() => $"Xor {Name}";
     }
 }

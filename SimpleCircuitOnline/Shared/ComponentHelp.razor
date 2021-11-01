@@ -54,7 +54,7 @@
         base.OnInitialized();
 
         // Find the categories
-        foreach (var description in Utility.Components(typeof(SimpleCircuit.Parser.Parser).Assembly).OrderBy(d => d.Name))
+        foreach (var description in Utility.Components(typeof(SimpleCircuit.Parser.Parser).Assembly).OrderBy(d => d.Key))
         {
             string category = description.Category ?? "General";
             if (!_categories.TryGetValue(category, out var list))

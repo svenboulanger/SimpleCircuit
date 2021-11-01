@@ -1,12 +1,13 @@
-﻿namespace SimpleCircuit.Components.Analog
+﻿using SimpleCircuit.Components.Pins;
+
+namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// An impedance/admittance.
     /// </summary>
-    /// <seealso cref="TransformingComponent" />
-    /// <seealso cref="ILabeled" />
-    [SimpleKey("Z", "Impedance", Category = "Analog"), SimpleKey("Y", "Admittance", Category = "Analog")]
-    public class Impedance : TransformingComponent, ILabeled
+    [SimpleKey("Z", "An impedance", Category = "Analog")]
+    [SimpleKey("Y", "An admittance", Category = "Analog")]
+    public class Impedance : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
         public string Label { get; set; }
@@ -18,8 +19,8 @@
         public Impedance(string name)
             : base(name)
         {
-            Pins.Add(new[] { "p", "pos", "a" }, "The positive pin.", new Vector2(-8, 0), new Vector2(-1, 0));
-            Pins.Add(new[] { "n", "neg", "b" }, "The negative pin.", new Vector2(8, 0), new Vector2(1, 0));
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
         }
 
         /// <inheritdoc/>
