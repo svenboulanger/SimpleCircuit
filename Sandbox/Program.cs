@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Parser;
+﻿using SimpleCircuit;
+using SimpleCircuit.Parser;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -9,21 +10,19 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
+            var script = @"
+GND1
+NMOS
+";
             var logger = new Logger();
-            var lexer = new Lexer(@"
-T <r> Xia <r> NAND1 <r> Xoa <r> T
-T <r> Xib <r> NAND2 <r> Xob <r> T
-NAND1[b] <l d se d> Xob
-Xoa <d sw d r> [b]NAND2
-(X NAND1[o] <0> [o]NAND2)
-");
+            var lexer = new Lexer(script);
             var context = new ParsingContext();
             context.Diagnostics = logger;
             Parser.Parse(lexer, context);
+            context.Circuit.Metadata.Add("script", script);
 
             // Draw the component
             var doc = context.Circuit.Render(logger);
-
             using var sw = new StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                 doc.WriteTo(xml);

@@ -49,7 +49,7 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case TokenType.Dash:
-                        ParseAssignment(lexer, context);
+                        ParseAssignments(lexer, context);
                         break;
 
                     case TokenType.Whitespace:
@@ -667,7 +667,7 @@ namespace SimpleCircuit.Parser
             }
         }
 
-        private static void ParseAssignment(Lexer lexer, ParsingContext context)
+        private static void ParseAssignments(Lexer lexer, ParsingContext context)
         {
             if (!lexer.Expect(TokenType.Dash, "-", "PE001", context.Diagnostics))
             {
@@ -676,67 +676,70 @@ namespace SimpleCircuit.Parser
             }
             lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
-            // Parse the component
-            var component = ParseComponent(lexer, context);
-            if (component == null)
+            while (lexer.Check(~TokenType.Newline))
             {
-                lexer.SkipWhile(~TokenType.Newline);
-                return;
-            }
-            
-            // Property
-            if (!lexer.Expect(TokenType.Dot, ".", "PE001", context.Diagnostics))
-            {
-                lexer.SkipWhile(~TokenType.Newline);
-                return;
-            }
-            lexer.Next();
-            if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
-            {
-                lexer.SkipWhile(~TokenType.Newline);
-                return;
-            }
-            string property = lexer.Content;
-            lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
-
-            // Find the property on the component
-            var member = component.GetType().GetProperty(property);
-            if (member == null || !member.CanWrite)
-            {
-                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
-                    $"Cannot find property '{property}' for {component.Name}."));
-                lexer.SkipWhile(~TokenType.Newline);
-                return;
-            }
-
-            // Equal sign
-            if (lexer.Branch(TokenType.Equals))
-                lexer.SkipWhile(TokenType.Whitespace);
-
-            if (member.PropertyType == typeof(bool))
-                member.SetValue(component, ParseBoolean(lexer, context));
-            else if (member.PropertyType == typeof(double))
-            {
-                double result = ParseDouble(lexer, context);
-                if (double.IsNaN(result))
+                // Parse the component
+                var component = ParseComponent(lexer, context);
+                if (component == null)
+                {
+                    lexer.SkipWhile(~TokenType.Newline);
                     return;
-                member.SetValue(component, result);
-            }
-            else if (member.PropertyType == typeof(int))
-            {
-                double result = ParseDouble(lexer, context);
-                if (double.IsNaN(result))
+                }
+
+                // Property
+                if (!lexer.Expect(TokenType.Dot, ".", "PE001", context.Diagnostics))
+                {
+                    lexer.SkipWhile(~TokenType.Newline);
                     return;
-                member.SetValue(component, (int)Math.Round(result, MidpointRounding.AwayFromZero));
-            }
-            else if (member.PropertyType == typeof(string))
-            {
-                member.SetValue(component, ParseString(lexer, context));
-            }
-            else
-            {
-                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    $"Cannot recognize property type {member.PropertyType.Name} at line {lexer.Line}, column {lexer.Column}."));
+                }
+                lexer.Next();
+                if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
+                {
+                    lexer.SkipWhile(~TokenType.Newline);
+                    return;
+                }
+                string property = lexer.Content;
+                lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+
+                // Find the property on the component
+                var member = component.GetType().GetProperty(property);
+                if (member == null || !member.CanWrite)
+                {
+                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
+                        $"Cannot find property '{property}' for {component.Name}."));
+                    lexer.SkipWhile(~TokenType.Newline);
+                    return;
+                }
+
+                // Equal sign
+                if (lexer.Branch(TokenType.Equals))
+                    lexer.SkipWhile(TokenType.Whitespace);
+
+                if (member.PropertyType == typeof(bool))
+                    member.SetValue(component, ParseBoolean(lexer, context));
+                else if (member.PropertyType == typeof(double))
+                {
+                    double result = ParseDouble(lexer, context);
+                    if (double.IsNaN(result))
+                        return;
+                    member.SetValue(component, result);
+                }
+                else if (member.PropertyType == typeof(int))
+                {
+                    double result = ParseDouble(lexer, context);
+                    if (double.IsNaN(result))
+                        return;
+                    member.SetValue(component, (int)Math.Round(result, MidpointRounding.AwayFromZero));
+                }
+                else if (member.PropertyType == typeof(string))
+                {
+                    member.SetValue(component, ParseString(lexer, context));
+                }
+                else
+                {
+                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                        $"Cannot recognize property type {member.PropertyType.Name} at line {lexer.Line}, column {lexer.Column}."));
+                }
             }
         }
         private static bool ParseBoolean(Lexer lexer, ParsingContext context)

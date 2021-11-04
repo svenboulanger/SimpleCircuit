@@ -117,36 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Complete" xml:space="preserve">
-    <value>{0} file(s) converted.</value>
-  </data>
-  <data name="Error" xml:space="preserve">
-    <value>Error: {0}: {1}</value>
-  </data>
-  <data name="FilenameNotFound" xml:space="preserve">
-    <value>Could not find file '{0}'.</value>
-  </data>
-  <data name="Help" xml:space="preserve">
-    <value>Allows scripting of circuits.
-simplecircuit filename [-o export_filename] [-default_css] [-css filename]
-
-Arguments:
-filename          The filename that serves as an input.
--o                      Flag used to specify an output filename.
--defaultcss       If other stylesheets are used, the default css is included.
--css                   Includes a stylesheet in the SVG file. If multiple stylesheets are specified, they are all combined.
--nocss              Avoids the default stylesheet information in the SVG file.</value>
-  </data>
-  <data name="Info" xml:space="preserve">
-    <value>Info: {0}: {1}</value>
-  </data>
-  <data name="NoInput" xml:space="preserve">
-    <value>No input given before option '{0}'.</value>
-  </data>
-  <data name="NoJobs" xml:space="preserve">
-    <value>Nothing to convert.</value>
-  </data>
-  <data name="Warning" xml:space="preserve">
-    <value>Warning: {0}: {1}</value>
-  </data>
 </root>

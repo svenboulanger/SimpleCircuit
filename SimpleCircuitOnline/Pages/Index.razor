@@ -66,12 +66,17 @@
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
+
         _timer = new Timer(750);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
 
         // Register our own language
-        await Runtime.InvokeVoidAsync("registerLanguage");
+        // Find all the keys
+        List<string> keys = new();
+        foreach (var component in Utility.Components(typeof(Utility).Assembly))
+            keys.Add(component.Key);
+        await Runtime.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
         var model = await _scriptEditor.GetModel();
         await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
         await MonacoEditorBase.SetTheme("simpleCircuitTheme");
@@ -94,7 +99,12 @@
         var lexer = new SimpleCircuit.Parser.Lexer(code);
         SimpleCircuit.Parser.Parser.Parse(lexer, context);
         var ckt = context.Circuit;
+
+        // Let's include the original script and the style
+        ckt.Metadata.Add("script", code);
         ckt.Style = await _styleEditor.GetValue();
+
+        // render to SVG and write it to a string that we can then download as a file
         var doc = ckt.Render(logger);
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
@@ -102,9 +112,10 @@
 
         _errors = logger.Error.ToString();
         _warnings = logger.Warning.ToString();
-
         byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
         await Runtime.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+
+        // We don't want our potentially changed global options to propagate to other parts
         GlobalOptions.Reset();
     }
 

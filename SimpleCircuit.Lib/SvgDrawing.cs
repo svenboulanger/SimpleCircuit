@@ -15,6 +15,7 @@ namespace SimpleCircuit
         /// The namespace for SVG nodes.
         /// </summary>
         public const string Namespace = "http://www.w3.org/2000/svg";
+        public const string SimpleCircuitNamespace = "https://github.com/svenboulanger/SimpleCircuit";
 
         private XmlElement _current;
         private readonly Stack<XmlElement> _group = new Stack<XmlElement>();
@@ -693,6 +694,28 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             }
 
             return _document;
+        }
+
+        /// <summary>
+        /// Adds SVG metadata to an existing XML document.
+        /// </summary>
+        /// <param name="doc">The XML document.</param>
+        /// <param name="tag"></param>
+        /// <param name="content"></param>
+        public void AddMetadata(string tag, string content)
+        {
+            _document.DocumentElement.SetAttribute("xmlns:sc", SimpleCircuitNamespace);
+
+            // Find the metadata tag
+            var metadata = _document.DocumentElement.SelectSingleNode("metadata");
+            if (metadata == null)
+                metadata = _document.DocumentElement.PrependChild(_document.CreateElement("metadata", Namespace));
+
+            // Create the content
+            content = content.Replace("]]>", "]]]]><![CDATA["); // Should not happen, but just to be sure
+            var elt = _document.CreateElement($"sc:{tag}", SimpleCircuitNamespace);
+            elt.InnerText = $"<![CDATA[{content}]]>";
+            metadata.AppendChild(elt);
         }
 
         /// <summary>

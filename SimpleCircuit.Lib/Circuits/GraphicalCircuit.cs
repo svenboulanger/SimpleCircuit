@@ -79,6 +79,11 @@ namespace SimpleCircuit
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
         /// <summary>
+        /// Gets a dictionary of metadata key-value pairs that are optional.
+        /// </summary>
+        public Dictionary<string, string> Metadata { get; } = new();
+
+        /// <summary>
         /// Gets the <see cref="IDrawable"/> with the specified name.
         /// </summary>
         public ICircuitPresence this[string name] => _presences[name];
@@ -184,7 +189,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             if (context.Circuit.Count == 0)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "SOL001",
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001",
                     $"No elements to solve for."));
                 return;
             }
@@ -205,7 +210,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                     // Let's fix floating nodes
                     var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
                     if (violation != null)
-                        context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1e12));
+                        context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1e-3));
                     else
                         throw ex;
                 }
@@ -252,6 +257,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             // Draw
             Render(drawing);
+
+            // Add metadata
+            foreach (var pair in Metadata)
+                drawing.AddMetadata(pair.Key, pair.Value);
 
             // Return the XML document
             return drawing.GetDocument();

@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleCircuit\SimpleCircuit.csproj" />
+    <ProjectReference Include="..\SimpleCircuit.Lib\SimpleCircuit.Lib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -61,11 +61,82 @@ namespace SimpleCircuit.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to General.
+        ///   Looks up a localized string similar to {0} file(s) converted..
         /// </summary>
-        internal static string GeneralCategory {
+        internal static string Complete {
             get {
-                return ResourceManager.GetString("GeneralCategory", resourceCulture);
+                return ResourceManager.GetString("Complete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: {0}: {1}.
+        /// </summary>
+        internal static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find file &apos;{0}&apos;..
+        /// </summary>
+        internal static string FilenameNotFound {
+            get {
+                return ResourceManager.GetString("FilenameNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allows scripting of circuits.
+        ///simplecircuit filename [-o export_filename] [-default_css] [-css filename]
+        ///
+        ///Arguments:
+        ///filename          The filename that serves as an input.
+        ///-o                      Flag used to specify an output filename.
+        ///-defaultcss       If other stylesheets are used, the default css is included.
+        ///-css                   Includes a stylesheet in the SVG file. If multiple stylesheets are specified, they are all combined.
+        ///-nocss              Avoids the default stylesheet information in [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Help {
+            get {
+                return ResourceManager.GetString("Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Info: {0}: {1}.
+        /// </summary>
+        internal static string Info {
+            get {
+                return ResourceManager.GetString("Info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No input given before option &apos;{0}&apos;..
+        /// </summary>
+        internal static string NoInput {
+            get {
+                return ResourceManager.GetString("NoInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing to convert..
+        /// </summary>
+        internal static string NoJobs {
+            get {
+                return ResourceManager.GetString("NoJobs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning: {0}: {1}.
+        /// </summary>
+        internal static string Warning {
+            get {
+                return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
     }
