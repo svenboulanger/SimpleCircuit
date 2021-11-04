@@ -95,59 +95,62 @@
         });
     </script>
     <script>
-        function registerLanguage() {
+        function registerLanguage(keywords) {
+
             // Register a new language
             monaco.languages.register({ id: 'simpleCircuit' });
 
             // Register a tokens provider for the language
             monaco.languages.setMonarchTokensProvider('simpleCircuit', {
+                defaultToken: 'invalid',
                 tokenizer: {
                     root: [
-                        [/\d+(\.\d+)?/, 'number'],
-                        [/^\/\/.*/, 'comment'],
-                        [/\w+/, 'word'],
-                        [/\</, { token: 'bracketWire', next: '@wire_block' }],
-                        [/\[/, { token: 'bracketPin', next: '@pin_block' }],
-                        [/\(/, { token: 'bracket', next: '@label_block' }],
-                        [/-/, { token: 'dash', next: '@constraint_block' }]
+                        [/^\/\/.*$/, 'comment'],
+                        [/^-/, { token: 'dash', next: '@assignment' }],
+                        [/^\(/, { token: 'bracket', bracket: '@open', next: '@virtual_chain' }],
+                        { include: '@component_chain' },
                     ],
-                    wire_block: [
-                        [/\>/, { token: 'bracketWire', next: '@pop' }],
-                        [/\d+(\.\d+)?/, 'number'],
-                        [/\w+/, 'pindirection'],
+                    component_chain: [
+                        { include: '@whitespace' },
+                        [/\w+/, { token: 'word' }],
+                        [/\</, { token: 'bracketWire', bracket: '@open', next: '@wire_chain' }],
+                        [/\[/, { token: 'bracketPin', bracket: '@open', next: '@pin_block' }],
+                        [/\(/, { token: 'bracket', bracket: '@open', next: '@label_block' }]
+                    ],
+                    virtual_chain: [
+                        { include: '@component_chain' },
+                        [/\)/, { token: 'bracket', bracket: '@close', next: '@pop' }]
+                    ],
+                    assignment: [
+                        { include: '@whitespace' },
+                        { include: '@number' },
+                        [/"([^"]|\\.)+"/, 'string'],
+                        [/\=/, 'equals.assignment'],
+                        [/\w+/, 'word.assignment'],
+                        [/\./, 'dot.assignment']
+                    ],
+                    wire_chain: [
+                        { include: '@whitespace' },
+                        { include: '@number' },
+                        [/\+/, 'operator'],
+                        [/([lurdneswa]|ne|nw|se|sw)/, { token: 'pindirection' }],
+                        [/\>/, { token: 'bracketWire', bracket: '@close', next: '@pop' }]
                     ],
                     pin_block: [
-                        [/\]/, { token: 'bracketPin', next: '@pop' }],
-                        [/\w+/, 'wordPin'],
+                        { include: '@whitespace' },
+                        [/\w+/, { token: 'pin' }],
+                        [/\]/, { token: 'bracket', bracket: '@close', next: '@pop' }]
                     ],
                     label_block: [
-                        [/\)/, { token: 'bracket', next: '@pop' }],
-                        [/\"([^\\\"]|\\.)*\"/, 'string'],
+                        { include: '@whitespace' },
+                        [/\"([^\"]|\\.)*\"/, 'string'],
+                        [/\)/, { token: 'bracket', bracket: '@close', next: '@pop' }]
                     ],
-                    constraint_block: [
-                        [/\d+(\.\d+)?/, {
-                            cases: {
-                                '@eos': { token: 'number', next: '@pop' },
-                                '@default': 'number'
-                            }
-                        }],
-                        [/\=/, 'equals'],
-                        [/\w+/, {
-                            cases: {
-                                '@eos': { token: 'word', next: '@pop' },
-                                '@default': 'word'
-                            }
-                        }],
-                        [/\"([^\\\"]|\\.)*\"/, 'string'],
-                        [/\./, 'dot'],
-                        [/[\+\-\*\/]/, 'operator'],
-                        [/\[/, { token: 'bracketPin', next: '@pin_block' }],
-                        [/\(|\)/, {
-                            cases: {
-                                '@eos': { token: 'bracket', next: '@pop' },
-                                '@default': 'bracket'
-                            }
-                        }]
+                    whitespace: [
+                        [/[ \t\r\n]+/, 'white']
+                    ],
+                    number: [
+                        [/d+(\.d+)?/, 'number']
                     ]
                 }
             });
@@ -169,8 +172,27 @@
                     { token: 'operator', foreground: '660000' },
                     { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
                     { token: 'dot', foreground: 'cc0000' },
-                    { token: 'dash', foreground: '0000cc', fontStyle: 'bold' }
+                    { token: 'dash', foreground: '0000cc', fontStyle: 'bold' },
+                    { token: 'word.assignment', foreground: 'bbbbbb', fontStyle: 'bold' },
+                    { token: 'dot.assignment', foreground: '666666' },
+                    { token: 'equals.assignment', foreground: '666666' }
                 ]
+            });
+
+            suggestions = [];
+            for (var i = 0; i < keywords.length; i++) {
+                suggestions[i] = {
+                    label: keywords[i],
+                    insertText: keywords[i]
+                };
+            }
+            console.log(suggestions)
+            monaco.languages.registerCompletionItemProvider('simpleCircuit', {
+                provideCompletionItems: () => {
+                    return {
+                        suggestions: suggestions
+                    }
+                }
             });
         }
     </script>
