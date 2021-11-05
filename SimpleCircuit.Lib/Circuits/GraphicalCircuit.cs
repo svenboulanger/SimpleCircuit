@@ -73,7 +73,7 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.point circle { fill: black; }
+.dot { fill: black; }
 .plane { stroke-width: 1pt; }
 .battery line.negative { stroke-width: 0.75pt; }
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";

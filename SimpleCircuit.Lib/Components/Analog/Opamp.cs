@@ -16,11 +16,13 @@ namespace SimpleCircuit.Components.Analog
         };
 
         /// <inheritdoc/>
+        [Description("The label next to the amplifier.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets whether the inputs need to be swapped.
         /// </summary>
+        [Description("Swaps the positive and negative inputs.")]
         public bool SwapInputs
         {
             get => _swapInputs;
@@ -35,8 +37,9 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="Opamp"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Opamp(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Opamp(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, _pinOffsets[0], new(-1, 0)), "n", "neg");
             Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, _pinOffsets[1], new(-1, 0)), "p", "pos");

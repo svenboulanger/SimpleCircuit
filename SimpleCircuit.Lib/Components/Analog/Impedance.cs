@@ -10,14 +10,16 @@ namespace SimpleCircuit.Components.Analog
     public class Impedance : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the element.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Impedance"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Impedance(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Impedance(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");

@@ -9,14 +9,22 @@ namespace SimpleCircuit.Components.Analog
     public class Inductor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the inductor.")]
         public string Label { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether a dot has to be added.
+        /// </summary>
+        [Description("Displays a dot to indicate the polarity.")]
+        public bool Dot { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Inductor"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Inductor(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Inductor(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "a");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "b");
@@ -41,6 +49,9 @@ namespace SimpleCircuit.Components.Analog
                 new Vector2(2, 4), new Vector2(2, 0),
                 new Vector2(6, -4), new Vector2(6, 0)
             });
+
+            if (Dot)
+                drawing.Circle(new(-8, 3.5), 1, "dot");
 
             drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
         }

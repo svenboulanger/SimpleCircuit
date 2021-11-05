@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components
     public class Terminal : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the terminal.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Terminal"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Terminal(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Terminal(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("p", "The pin.", this, new Vector2(), new Vector2(1, 0)), "p", "a", "o", "i");
         }

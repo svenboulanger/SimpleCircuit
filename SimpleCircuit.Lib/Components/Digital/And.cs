@@ -12,8 +12,9 @@ namespace SimpleCircuit.Components.Digital
         /// Initializes a new instance of the <see cref="And"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public And(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public And(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("a", "The first input.", this, new(-6, -2.5), new(-1, 0)), "a");
             Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-6, 2.5), new(-1, 0)), "b");

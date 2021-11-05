@@ -12,14 +12,16 @@ namespace SimpleCircuit.Components
         private static readonly double _sqrt2 = Math.Sqrt(2) * 2;
 
         /// <inheritdoc/>
+        [Description("The label next to the light.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Light"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Light(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Light(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");

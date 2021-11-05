@@ -9,21 +9,28 @@ namespace SimpleCircuit.Components.Analog
     public class Switch : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the switch.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Switch"/> is closed.
         /// </summary>
+        [Description("Closes the switch.")]
         public bool Closed { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Switch"/> is opened.
+        /// </summary>
+        [Description("Opens the switch.")]
         public bool Opened { get => !Closed; set => Closed = !value; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Switch"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Switch(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Switch(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "a");
             Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, 6), new(0, 1)), "c", "ctrl");

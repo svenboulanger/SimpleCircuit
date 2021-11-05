@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using System;
 
 namespace SimpleCircuit.Components
 {
@@ -8,12 +9,28 @@ namespace SimpleCircuit.Components
     public abstract class OrientedDrawable : LocatedDrawable, IOrientedDrawable
     {
         private int _dof = 2;
+        private bool _flipped = false;
         private Vector2 _p, _b;
+
+        /// <summary>
+        /// Gets or sets a flag that flips the drawable if the item is not fully constrained.
+        /// </summary>
+        [Description("Flips the element if possible.")]
+        public bool Flipped
+        {
+            get => _flipped;
+            set
+            {
+                _flipped = value;
+                UpdateTransform();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrientedDrawable"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="flipAxis">The relevant coordinates for flipping.</param>
         protected OrientedDrawable(string name)
             : base(name)
         {
@@ -31,12 +48,8 @@ namespace SimpleCircuit.Components
                     // Nothing is known yet, so we can just use this!
                     _p = p;
                     _b = b;
-
-                    // We can already find a transform at this point. We just "invent"
-                    // the second vector as a perpendicular item.
-                    var a = new Matrix2(p.X, p.Y, p.Y, -p.X).Inverse * b;
-                    Transform = new(a.X, a.Y, -a.Y, a.X);
                     _dof = 1;
+                    UpdateTransform();
                     break;
 
                 case 1:
@@ -74,6 +87,30 @@ namespace SimpleCircuit.Components
                     return (Transform * p - b).Equals(new Vector2());
             }
             return true;
+        }
+
+        /// <summary>
+        /// Updates the transform if possible with new information.
+        /// </summary>
+        private void UpdateTransform()
+        {
+            switch (_dof)
+            {
+                case 0:
+                    // Just whatever
+                    Transform = _flipped ? (new(-1, 0, 0, -1)) : Matrix2.Identity;
+                    break;
+
+                case 1:
+                    // We already have one axis, we want to flip around that instead
+                    var a = new Matrix2(_p.X, _p.Y, _p.Y, -_p.X).Inverse * _b;
+                    Transform = _flipped ? new(a.X, -a.Y, -a.Y, -a.X) : new(a.X, a.Y, -a.Y, a.X);
+                    break;
+
+                case 2:
+                    // Fully constrained, don't do anything
+                    break;
+            }
         }
 
         /// <inheritdoc />

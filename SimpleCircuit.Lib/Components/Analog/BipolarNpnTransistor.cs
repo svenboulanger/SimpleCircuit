@@ -12,11 +12,13 @@ namespace SimpleCircuit.Components.Analog
         private bool _packaged;
 
         /// <inheritdoc />
+        [Description("The label next to the transistor.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets whether the symbol represents a packaged transistor.
         /// </summary>
+        [Description("Displays a packaged transistor.")]
         public bool Packaged
         {
             get => _packaged;
@@ -34,13 +36,14 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="BipolarNpnTransistor"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public BipolarNpnTransistor(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public BipolarNpnTransistor(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-8, 0), new(-1, 0)), "e", "emitter");
             Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
             Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
-            Packaged = GlobalOptions.PackagedTransistors;
+            Packaged = options?.PackagedTransistors ?? false;
         }
 
         /// <inheritdoc />

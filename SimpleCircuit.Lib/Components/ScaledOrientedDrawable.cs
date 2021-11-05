@@ -13,6 +13,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets or sets the scale of the drawable.
         /// </summary>
+        [Description("Scales the component by a scaling factor.")]
         public double Scale
         {
             get => _scale;
@@ -22,11 +23,12 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Creates a new scaled, oriented drawable.
         /// </summary>
-        /// <param name="name"></param>
-        protected ScaledOrientedDrawable(string name)
+        /// <param name="name">The name of the drawable.</param>
+        /// <param name="options">The options.</param>
+        protected ScaledOrientedDrawable(string name, Options options)
             : base(name)
         {
-            _scale = GlobalOptions.Scale;
+            _scale = options?.Scale ?? 1.0;
         }
 
         /// <inheritdoc />

@@ -9,6 +9,11 @@ namespace SimpleCircuit.Parser
     public class ParsingContext
     {
         /// <summary>
+        /// Gets the options.
+        /// </summary>
+        public Options Options { get; } = new();
+
+        /// <summary>
         /// Gets or sets the number of wires.
         /// </summary>
         public int WireCount { get; set; } = 0;
@@ -42,8 +47,9 @@ namespace SimpleCircuit.Parser
         /// Gets or creates a component.
         /// </summary>
         /// <param name="name">The name of the component.</param>
+        /// <param name="options">Options that can be used for the component.</param>
         /// <returns>The component.</returns>
-        public IDrawable GetOrCreate(string name)
+        public IDrawable GetOrCreate(string name, Options options)
         {
             IDrawable result;
 
@@ -63,7 +69,7 @@ namespace SimpleCircuit.Parser
                     return drawable;
 
                 // We didn't find it, so let's create it!
-                result = new Subcircuit(name, definition.Definition, definition.Ports);
+                result = new Subcircuit(name, definition.Definition, options, definition.Ports);
                 Circuit.Add(result);
                 return result;
             }
@@ -81,7 +87,7 @@ namespace SimpleCircuit.Parser
                 return drawable;
 
             // Didn't find the component, let's create it!
-            result = Factory.Create(name);
+            result = Factory.Create(name, options);
             Circuit.Add(result);
             return result;
         }

@@ -15,6 +15,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Gets or sets the width of the ADC.
         /// </summary>
+        [Description("The width of the ADC.")]
         public double Width
         {
             get => _width;
@@ -28,6 +29,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Gets or sets the height of the ADC.
         /// </summary>
+        [Description("The height of the ADC.")]
         public double Height
         {
             get => _height;
@@ -39,6 +41,7 @@ namespace SimpleCircuit.Components.Analog
         }
 
         /// <inheritdoc/>
+        [Description("The label inside the ADC.")]
         public string Label { get; set; }
 
         /// <summary>
@@ -70,9 +73,10 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Initializes a new instance of the <see cref="AnalogToDigital"/>
         /// </summary>
-        /// <param name="name"></param>
-        public AnalogToDigital(string name)
-            : base(name)
+        /// <param name="name">The name of the ADC.</param>
+        /// <param name="options">Options that can be used for the component.</param>
+        public AnalogToDigital(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, new(-9, 0), new(-1, 0)), "input", "in", "pi", "inp");
             Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");

@@ -1,39 +1,60 @@
 ﻿@using SimpleCircuit;
 @using System.IO;
 @using System.Xml;
+@using System.Reflection; 
 
-<div class="card" style="width: 12.5rem; margin: 5px;">
-    <div class="card-header">@Key<span class="text-muted small">name</span></div>
-    <div class="card-img-top" style="background-color: #eeeeee; text-align: center; padding: 5px; min-height: 80px; line-height: 80px;">
-        @((MarkupString)CreateSvg(Component))
+<div class="card m-1 w-100">
+    <div @onclick="(x => _expanded = !_expanded)" class="card-header" style="cursor: pointer;">
+        <h5>
+            @Key<span class="text-muted small">name</span>
+            <span class="float-right">
+                @if (_expanded)
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                        <path style="fill: black; stroke: none;" d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
+                    </svg>
+                }
+                else
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                        <path style="fill: black; stroke: none;" d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+                    </svg>
+                }
+            </span>
+        </h5>
     </div>
-    <ul class="list-group list-group-flush">
-        <li class="list-group-item p-1">@Name</li>
-        @if (GetProperties(Component).Any())
-        {
-        <li class="list-group-item p-1">
-            <h6>Properties</h6>
-            @foreach (var name in GetProperties(Component))
-            {
-                <span class="badge badge-secondary">@name</span>
-            }
-        </li>
-        }
-    </ul>
-    @if (Component.Pins.Count > 0)
+    <div class="row no-gutters">
+        <div style="background-color: #eeeeee; text-align: center; padding: 5px; width: 150px; min-height: 80px; line-height: 80px;">
+            @((MarkupString)CreateSvg(Component))
+        </div>
+        <div class="col p-1">@Name</div>
+    </div>
+    @if (_expanded)
     {
-        <ul class="list-group list-group-flush">
-            @for (var i = 0; i < Component.Pins.Count; i++)
-            {
-                <li class="list-group-item p-1">
-                    @foreach (var name in Component.Pins.NamesOf(Component.Pins[i]))
-                    {
-                        <span class="badge badge-dark">@name</span>
-                    }
-                    <p class="m-0">@Component.Pins[i].Description</p>
-                </li>
-            }
-        </ul>
+    <div class="p-3">
+        @if (Component.Pins.Count > 0)
+        {
+            <h4>Pins</h4>
+            <dl class="row">
+                @foreach (var pin in Component.Pins)
+                {
+                <dt class="col-sm-3">@string.Join(", ", Component.Pins.NamesOf(pin))</dt>
+                <dd class="col-sm-9">@pin.Description</dd>
+                }
+            </dl>
+        }
+        @if (GetProperties().Any())
+                {
+            <h4>Properties</h4>
+            <dl class="row">
+                @foreach (var (property, description) in GetProperties())
+                {
+                <dt class="col-sm-3">@property.Name</dt>
+                <dd class="col-sm-9">@description</dd>
+                }
+            </dl>
+        }
+    </div>
     }
 </div>
 
@@ -46,6 +67,8 @@
 
     [Parameter]
     public SimpleCircuit.Components.IDrawable Component { get; set; }
+
+    private bool _expanded = false;
 
     private string CreateSvg(SimpleCircuit.Components.IDrawable component)
     {
@@ -63,24 +86,36 @@
         return sw.ToString();
     }
 
-    private IEnumerable<string> GetProperties(SimpleCircuit.Components.IDrawable component)
+    private IEnumerable<(PropertyInfo, string)> GetProperties()
     {
-        if (component == null)
+        if (Component == null)
             yield break;
-        foreach (var p in component.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+        foreach (var p in Component.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
         {
-            var type = p.PropertyType;
-            string typeName;
-            if (type == typeof(double) || type == typeof(int))
-                typeName = "number";
-            else if (type == typeof(string))
-                typeName = "string";
-            else if (type == typeof(bool))
-                typeName = "boolean";
-            else
-                continue; // Cannot read...
-            if (p.CanRead && p.CanWrite)
-                yield return $"{p.Name}: {typeName}";
+            if (!p.CanRead || !p.CanWrite)
+                continue;
+            if (p.PropertyType != typeof(double)
+                && p.PropertyType != typeof(bool)
+                && p.PropertyType != typeof(string)
+                && p.PropertyType != typeof(int))
+                continue;
+            string description = p.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "";
+            yield return (p, description);
         }
+    }
+
+    private string GetTypeName(PropertyInfo property)
+    {
+        var type = property.PropertyType;
+        string typeName;
+        if (type == typeof(double) || type == typeof(int))
+            typeName = "number";
+        else if (type == typeof(string))
+            typeName = "string";
+        else if (type == typeof(bool))
+            typeName = "boolean";
+        else
+            typeName = "?";
+        return typeName;
     }
 }

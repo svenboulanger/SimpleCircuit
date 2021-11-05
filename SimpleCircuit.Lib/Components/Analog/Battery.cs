@@ -12,11 +12,13 @@ namespace SimpleCircuit.Components.Analog
         private double Length => _cells * 4 + 8;
 
         /// <inheritdoc />
+        [Description("The label next to the battery.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets whether the symbol is that of a DC source.
         /// </summary>
+        [Description("The number of cells.")]
         public int Cells
         {
             get => _cells;
@@ -33,8 +35,9 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="VoltageSource"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Battery(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Battery(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
             Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");

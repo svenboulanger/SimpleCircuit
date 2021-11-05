@@ -89,7 +89,6 @@
 
     public async Task DownloadSvg()
     {
-        GlobalOptions.Reset();
         var logger = new Logger();
 
         // Parse it again
@@ -114,9 +113,6 @@
         _warnings = logger.Warning.ToString();
         byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
         await Runtime.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
-
-        // We don't want our potentially changed global options to propagate to other parts
-        GlobalOptions.Reset();
     }
 
     private void OnTimerElapsed(object sender, ElapsedEventArgs e)
@@ -143,7 +139,6 @@
         _errors = null;
         _warnings = null;
         var logger = new Logger();
-        GlobalOptions.Reset();
         try
         {
             var code = await _scriptEditor.GetValue();
@@ -172,6 +167,5 @@
         }
         _errors = logger.Error.ToString();
         _warnings = logger.Warning.ToString();
-        GlobalOptions.Reset();
     }
 }

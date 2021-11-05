@@ -35,11 +35,13 @@ namespace SimpleCircuit.Components.Analog
         private double _length = 8;
 
         /// <inheritdoc/>
+        [Description("The label in the transmission line.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets the length of the transmission line.
         /// </summary>
+        [Description("The length of the transmission line.")]
         public double Length
         {
             get => _length;
@@ -60,8 +62,9 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="TransmissionLine"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        public TransmissionLine(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public TransmissionLine(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("left", "The left signal.", this, new(-_inner, 0), new(-1, 0)), "a", "l");
             Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");

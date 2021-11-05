@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
-using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -13,16 +11,19 @@ namespace SimpleCircuit.Components.Analog
         private bool _swapThrows;
 
         /// <inheritdoc/>
+        [Description("The label next to the switch.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets the throwing position.
         /// </summary>
+        [Description("Sets the position of the switch. -1, 0 or 1.")]
         public double Throw { get; set; } = 1.0;
 
         /// <summary>
         /// If <c>true</c>, the throw pins are swapped.
         /// </summary>
+        [Description("Swaps the two throws.")]
         public bool SwapThrows
         {
             get => _swapThrows;
@@ -46,8 +47,9 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="SwitchSinglePoleDoubleThrow"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public SwitchSinglePoleDoubleThrow(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public SwitchSinglePoleDoubleThrow(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("pole", "The pole pin.", this, new(-8, 0), new(-1, 0)), "p", "pole");
             Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, 6), new(0, 1)), "c", "ctrl");

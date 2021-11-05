@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Analog
     public class Capacitor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the transistor.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Capacitor"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Capacitor(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Capacitor(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-5, 0), new(-1, 0)), "p", "pos", "a");
             Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(5, 0), new(1, 0)), "n", "neg", "b");

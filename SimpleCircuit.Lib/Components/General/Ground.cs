@@ -12,8 +12,9 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="Ground"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Ground(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Ground(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
         }

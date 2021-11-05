@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Digital
     public class Multiplexer : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the MUX.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OperationalTransconductanceAmplifier"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Multiplexer(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Multiplexer(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("a", "The '0' input.", this, new(-5, -4), new(-1, 0)), "a", "0");
             Pins.Add(new FixedOrientedPin("b", "The '1' input.", this, new(-5, 4), new(-1, 0)), "b", "1");

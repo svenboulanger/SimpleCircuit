@@ -6,17 +6,20 @@ namespace SimpleCircuit.Components.Digital
     /// An amplifier.
     /// </summary>
     [SimpleKey("INV", "A digital inverter.", Category = "Digital")]
+    [SimpleKey("NOT", "An inverter.", Category = "Digital")]
     public class Inverter : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the inverter.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Amplifier"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Inverter(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Inverter(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("input", "The input pin.", this, new(-6, 0), new(-1, 0)), "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");

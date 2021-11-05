@@ -159,7 +159,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
                  return null;
-            var component = context.GetOrCreate(lexer.Content);
+            var component = context.GetOrCreate(lexer.Content, context.Options);
             if (component == null)
             {
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
@@ -257,12 +257,12 @@ namespace SimpleCircuit.Parser
                 else if (lexer.Check(TokenType.Number))
                 {
                     double length = double.Parse(lexer.Content);
-                    wires.Add(new WireInfo(orientation, length, GlobalOptions.MinimumWireLength));
+                    wires.Add(new WireInfo(orientation, length, context.Options.MinimumWireLength));
                     lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
                 }
                 else
                 {
-                    wires.Add(new WireInfo(orientation, double.NaN, GlobalOptions.MinimumWireLength));
+                    wires.Add(new WireInfo(orientation, double.NaN, context.Options.MinimumWireLength));
                 }
             }
 
@@ -292,7 +292,7 @@ namespace SimpleCircuit.Parser
                     return;
                 }
 
-                var wire = new Wire($"W{++context.WireCount}", wires[i].MinimumLength);
+                var wire = new Wire($"W{++context.WireCount}", wires[i].MinimumLength, context.Options);
                 context.Circuit.Add(wire);
 
                 // Alias the starting point of this wire to the last wire end
@@ -383,7 +383,7 @@ namespace SimpleCircuit.Parser
                 case "option":
                 case "options":
                     lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
-                    ParseGlobalOptions(lexer, context);
+                    ParseOptions(lexer, context);
                     return false;
 
                 default:
@@ -433,7 +433,7 @@ namespace SimpleCircuit.Parser
                     lexer.SkipWhile(~TokenType.Newline);
                     return;
                 }
-                var component = localContext.GetOrCreate(lexer.Content);
+                var component = localContext.GetOrCreate(lexer.Content, context.Options);
                 if (component == null)
                 {
                     context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
@@ -479,7 +479,7 @@ namespace SimpleCircuit.Parser
             definition.Definition.Solve(context.Diagnostics);
         }
 
-        private static void ParseGlobalOptions(Lexer lexer, ParsingContext context)
+        private static void ParseOptions(Lexer lexer, ParsingContext context)
         {
             while (lexer.Check(TokenType.Word))
             {
@@ -487,7 +487,7 @@ namespace SimpleCircuit.Parser
                 lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
                 // Find the property on the global options
-                var member = typeof(GlobalOptions).GetProperty(property, BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase);
+                var member = typeof(Options).GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
                 if (member == null || !member.CanWrite)
                 {
                     context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
@@ -501,17 +501,17 @@ namespace SimpleCircuit.Parser
 
                 // Parse depending on the type
                 if (member.PropertyType == typeof(bool))
-                    member.SetValue(null, ParseBoolean(lexer, context));
+                    member.SetValue(context.Options, ParseBoolean(lexer, context));
                 else if (member.PropertyType == typeof(double))
                 {
                     double result = ParseDouble(lexer, context);
                     if (double.IsNaN(result))
                         return;
-                    member.SetValue(null, result);
+                    member.SetValue(context.Options, result);
                 }
                 else if (member.PropertyType == typeof(string))
                 {
-                    member.SetValue(null, ParseString(lexer, context));
+                    member.SetValue(context.Options, ParseString(lexer, context));
                 }
                 else
                 {
@@ -702,7 +702,7 @@ namespace SimpleCircuit.Parser
                 lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
                 // Find the property on the component
-                var member = component.GetType().GetProperty(property);
+                var member = component.GetType().GetProperty(property, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (member == null || !member.CanWrite)
                 {
                     context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",

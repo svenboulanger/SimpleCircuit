@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Analog
     public class Diode : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the diode.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Diode"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Diode(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Diode(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-6, 0), new(-1, 0)), "p", "a", "anode");
             Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(6, 0), new(1, 0)), "n", "c", "cathode");

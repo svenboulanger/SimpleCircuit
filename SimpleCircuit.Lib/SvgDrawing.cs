@@ -699,9 +699,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <summary>
         /// Adds SVG metadata to an existing XML document.
         /// </summary>
-        /// <param name="doc">The XML document.</param>
-        /// <param name="tag"></param>
-        /// <param name="content"></param>
+        /// <param name="tag">The tag name. The actual tag name will be preceded with 'sc:'</param>
+        /// <param name="content">The contents of the tag. This is taken literal, possibly needing CDATA formatting.</param>
         public void AddMetadata(string tag, string content)
         {
             _document.DocumentElement.SetAttribute("xmlns:sc", SimpleCircuitNamespace);
@@ -714,7 +713,16 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             // Create the content
             content = content.Replace("]]>", "]]]]><![CDATA["); // Should not happen, but just to be sure
             var elt = _document.CreateElement($"sc:{tag}", SimpleCircuitNamespace);
-            elt.InnerText = $"<![CDATA[{content}]]>";
+
+            // If the text contains data that is multiline, add a newline before and after content for easier reading
+            if (content.IndexOfAny(new[] { '\r', '\n' }) >= 0)
+                content = Environment.NewLine + content + Environment.NewLine;
+
+            // If contents can be mistaken for XML, we want to encapsulate the contents with a CDATA
+            if (content.IndexOfAny(new[] { '"', '\'', '<', '>', '&' }) >= 0)
+                elt.InnerText = $"<![CDATA[{content}]]>";
+            else
+                elt.InnerText = content;
             metadata.AppendChild(elt);
         }
 

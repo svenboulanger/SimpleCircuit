@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Analog
     public class CurrentSource : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the source.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CurrentSource"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public CurrentSource(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public CurrentSource(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positive", "The current end point.", this, new(-8, 0), new(-1, 0)), "p", "b");
             Pins.Add(new FixedOrientedPin("negative", "The current starting point.", this, new(8, 0), new(1, 0)), "n", "a");

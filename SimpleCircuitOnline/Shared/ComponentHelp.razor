@@ -10,12 +10,12 @@
         </li>
     }
 </ul>
-<div class="d-flex flex-wrap" style="width: 100%">
+<div class="" style="width: 100%">
     @if (_categories != null && _categories.TryGetValue(_current, out var list))
     {
         @foreach (var d in list)
         {
-            <ComponentCard Component="@Context.Factory.Create(d.Key)" Name="@d.Name" Key="@d.Key" />
+            <ComponentCard Component="@Context.Factory.Create(d.Key, null)" Name="@d.Name" Key="@d.Key" />
         }
     }
 </div>

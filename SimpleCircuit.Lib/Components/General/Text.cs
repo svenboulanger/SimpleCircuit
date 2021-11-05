@@ -9,6 +9,7 @@ namespace SimpleCircuit.Components.General
     public class Text : OrientedDrawable, ILabeled
     {
         /// <inheritdoc />
+        [Description("The text.")]
         public string Label { get; set; } = "Text";
 
         public Text(string name)

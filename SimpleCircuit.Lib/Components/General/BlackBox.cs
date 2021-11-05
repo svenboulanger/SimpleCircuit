@@ -14,6 +14,7 @@ namespace SimpleCircuit.Components
         private PinCollection _pins { get; }
 
         /// <inheritdoc/>
+        [Description("The label next to the element.")]
         public string Label { get; set; }
 
         /// <inheritdoc />
@@ -38,12 +39,17 @@ namespace SimpleCircuit.Components
         /// Creates a new black box.
         /// </summary>
         /// <param name="name">The name.</param>
-        public BlackBox(string name)
+        public BlackBox(string name, Options options)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Name = name;
             _pins = new(this);
+            if (options != null)
+            {
+                _pins.MinimumHorizontalSpacing = options.HorizontalPinSpacing;
+                _pins.MinimumVerticalSpacing = options.VerticalPinSpacing;
+            }
             X = $"{Name}.x";
             Y = $"{Name}.y";
             EndLocation = new(20, 20);

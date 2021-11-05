@@ -12,8 +12,9 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="Earth"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Earth(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Earth(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, -1)), "a");
         }

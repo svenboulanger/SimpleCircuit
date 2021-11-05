@@ -10,25 +10,28 @@ namespace SimpleCircuit.Components.Analog
     public class Pmos : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the transistor.")]
         public string Label { get; set; }
 
         /// <summary>
-        /// Gets or sets a value that enables the display of the PMOS as packaged.
+        /// Gets or sets whether the symbol represents a packaged transistor.
         /// </summary>
+        [Description("Displays a packaged transistor.")]
         public bool Packaged { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pmos"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Pmos(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Pmos(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(8, 0), new Vector2(1, 0)), "d", "drain");
             Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 11), new Vector2(0, 1)), "g", "gate");
             Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
             Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-8, 0), new Vector2(-1, 0)), "s", "source");
-            Packaged = GlobalOptions.PackagedTransistors;
+            Packaged = options?.PackagedTransistors ?? false;
         }
 
         /// <inheritdoc/>

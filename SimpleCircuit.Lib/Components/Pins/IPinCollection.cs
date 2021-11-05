@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Pins
     /// <summary>
     /// A pin collection.
     /// </summary>
-    public interface IPinCollection
+    public interface IPinCollection : IEnumerable<IPin>
     {
         /// <summary>
         /// Gets the number of pins in the collection.

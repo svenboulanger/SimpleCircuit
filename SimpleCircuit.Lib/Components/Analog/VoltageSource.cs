@@ -10,19 +10,22 @@ namespace SimpleCircuit.Components.Analog
     public class VoltageSource : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the source.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets whether the squiggly line needs to be drawn.
         /// </summary>
+        [Description("Uses an AC symbol instead.")]
         public bool AC { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VoltageSource"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public VoltageSource(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public VoltageSource(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
             Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");

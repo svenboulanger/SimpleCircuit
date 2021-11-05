@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Analog
     public class Resistor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the resistor.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Resistor"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Resistor(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Resistor(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
             Pins.Add(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 8), new(0, 1)), "c", "ctrl");

@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An amplifier.
     /// </summary>
-    [SimpleKey("A", "A generic amplifier. Use the Programmable property to turn it into a programmable gain amplifier.", Category = "Analog")]
+    [SimpleKey("A", "A generic amplifier.", Category = "Analog")]
     public class Amplifier : ScaledOrientedDrawable, ILabeled
     {
         private bool _differentialOutput = false, _differentialInput = false, _swapInputs = false, _swapOutputs = false;
@@ -16,17 +16,20 @@ namespace SimpleCircuit.Components.Analog
         };
 
         /// <inheritdoc/>
+        [Description("The label in the amplifier.")]
         public string Label { get; set; }
 
         /// <summary>
         /// If <c>true</c>, the amplifier is displayed with a
         /// programmable gain (diagonal arrow).
         /// </summary>
+        [Description("Displays a diagonal arrow.")]
         public bool Programmable { get; set; }
 
         /// <summary>
         /// Gets or sets whether a differential input is made.
         /// </summary>
+        [Description("Splits the input pins into a differential input.")]
         public bool DifferentialInput
         {
             get => _differentialInput;
@@ -40,6 +43,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Gets or sets whether a differential output is used.
         /// </summary>
+        [Description("Splits the output pins into a differential output.")]
         public bool DifferentialOutput
         {
             get => _differentialOutput;
@@ -53,6 +57,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Gets or sets whether the inputs need to be swapped.
         /// </summary>
+        [Description("Swaps positive and negative inputs.")]
         public bool SwapInputs
         {
             get => _swapInputs;
@@ -66,6 +71,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Gets or sets whether the outputs need to be swapped.
         /// </summary>
+        [Description("Swaps positive and negative outputs.")]
         public bool SwapOutputs
         {
             get => _swapOutputs;
@@ -80,8 +86,9 @@ namespace SimpleCircuit.Components.Analog
         /// Initializes a new instance of the <see cref="Amplifier"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public Amplifier(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Amplifier(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _pinOffsets[0], new(-1, 0)), "i", "in", "inp", "pi", "p");
             Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _pinOffsets[1], new(-1, 0)), "inn", "ni", "n");

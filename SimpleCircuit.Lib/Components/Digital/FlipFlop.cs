@@ -9,14 +9,16 @@ namespace SimpleCircuit.Components.Digital
     public class FlipFlop : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the transistor.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FlipFlop"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public FlipFlop(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public FlipFlop(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("data", "The data pin.", this, new(-8, -6), new(-1, 0)), "d", "data");
             Pins.Add(new FixedOrientedPin("clock", "The clock pin.", this, new(-8, 6), new(-1, 0)), "c", "clock");

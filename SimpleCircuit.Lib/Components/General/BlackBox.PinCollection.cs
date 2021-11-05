@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,6 +18,16 @@ namespace SimpleCircuit.Components
             private readonly Dictionary<string, IPin> _pinsByName = new();
             private readonly List<IPin> _pinsByIndex = new();
             private readonly List<IPin> _pinsNorth = new(), _pinsWest = new(), _pinsEast = new(), _pinsSouth = new();
+
+            /// <summary>
+            /// Gets or sets the minimum horizontal spacing.
+            /// </summary>
+            public double MinimumHorizontalSpacing { get; set; } = 30.0;
+
+            /// <summary>
+            /// Gets or sets the minimum vertical spacing.
+            /// </summary>
+            public double MinimumVerticalSpacing { get; set; } = 20.0;
 
             public string Right { get; }
 
@@ -36,7 +47,6 @@ namespace SimpleCircuit.Components
                         's' => _pinsSouth,
                         _ => _pinsWest,
                     };
-                    ;
 
                     // If the pin is the first in the list, we use a fixed pin at the origin.
                     pin = new LoosePin(name, name, _parent);
@@ -107,10 +117,10 @@ namespace SimpleCircuit.Components
                     }
                 }
 
-                Apply($"{_parent.Name}.n", map[_parent.X], _pinsNorth, map[Right], p => p.X, GlobalOptions.HorizontalPinSpacing);
-                Apply($"{_parent.Name}.s", map[_parent.X], _pinsSouth, map[Right], p => p.X, GlobalOptions.HorizontalPinSpacing);
-                Apply($"{_parent.Name}.e", map[_parent.Y], _pinsEast, map[Bottom], p => p.Y, GlobalOptions.VerticalPinSpacing);
-                Apply($"{_parent.Name}.w", map[_parent.Y], _pinsWest, map[Bottom], p => p.Y, GlobalOptions.VerticalPinSpacing);
+                Apply($"{_parent.Name}.n", map[_parent.X], _pinsNorth, map[Right], p => p.X, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.s", map[_parent.X], _pinsSouth, map[Right], p => p.X, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.e", map[_parent.Y], _pinsEast, map[Bottom], p => p.Y, MinimumVerticalSpacing);
+                Apply($"{_parent.Name}.w", map[_parent.Y], _pinsWest, map[Bottom], p => p.Y, MinimumVerticalSpacing);
             }
 
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
@@ -125,6 +135,10 @@ namespace SimpleCircuit.Components
                 foreach (var pin in _pinsWest)
                     context.Shorts.Group(_parent.X, pin.X);
             }
+
+            public IEnumerator<IPin> GetEnumerator() => _pinsByIndex.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

@@ -5,17 +5,19 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A supply voltage.
     /// </summary>
-    [SimpleKey("POW", "Power plan e (change the name with the Label property).", Category = "General")]
+    [SimpleKey("POW", "Power plane.", Category = "General")]
     public class Power : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The power plane name.")]
         public string Label { get; set; } = "VDD";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ground"/> class.
         /// </summary>
-        public Power(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public Power(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
         }

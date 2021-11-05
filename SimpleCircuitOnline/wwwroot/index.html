@@ -103,54 +103,59 @@
             // Register a tokens provider for the language
             monaco.languages.setMonarchTokensProvider('simpleCircuit', {
                 defaultToken: 'invalid',
+                includeLF: true,
                 tokenizer: {
                     root: [
-                        [/^\/\/.*$/, 'comment'],
+                        [/^\/\/.*\n$/, 'comment'],
                         [/^-/, { token: 'dash', next: '@assignment' }],
-                        [/^\(/, { token: 'bracket', bracket: '@open', next: '@virtual_chain' }],
+                        [/^\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual_chain' }],
                         { include: '@component_chain' },
                     ],
                     component_chain: [
                         { include: '@whitespace' },
                         [/\w+/, { token: 'word' }],
-                        [/\</, { token: 'bracketWire', bracket: '@open', next: '@wire_chain' }],
-                        [/\[/, { token: 'bracketPin', bracket: '@open', next: '@pin_block' }],
-                        [/\(/, { token: 'bracket', bracket: '@open', next: '@label_block' }]
+                        [/\</, { token: 'bracket.wire', bracket: '@open', next: '@wire_chain' }],
+                        [/\[/, { token: 'bracket.pin', bracket: '@open', next: '@pin_block' }],
+                        [/\(/, { token: 'bracket.label', bracket: '@open', next: '@label_block' }],
                     ],
                     virtual_chain: [
                         { include: '@component_chain' },
-                        [/\)/, { token: 'bracket', bracket: '@close', next: '@pop' }]
+                        [/\)/, { token: 'bracket.virtual', bracket: '@close', next: '@pop' }],
                     ],
                     assignment: [
+                        [/\n/, { token: 'newline', next: '@pop' }],
                         { include: '@whitespace' },
                         { include: '@number' },
-                        [/"([^"]|\\.)+"/, 'string'],
-                        [/\=/, 'equals.assignment'],
-                        [/\w+/, 'word.assignment'],
-                        [/\./, 'dot.assignment']
+                        { include: '@string' },
+                        [/\=/, 'equals.assignment' ],
+                        [/\w+/, 'word.assignment' ],
+                        [/\./, 'dot.assignment' ],
                     ],
                     wire_chain: [
                         { include: '@whitespace' },
+                        [/(?<!\w)([lurdneswa]|ne|nw|se|sw)(?=!\w)/, { token: 'pindirection' }],
+                        [/\>/, { token: 'bracket.wire', bracket: '@close', next: '@pop' }],
                         { include: '@number' },
                         [/\+/, 'operator'],
-                        [/([lurdneswa]|ne|nw|se|sw)/, { token: 'pindirection' }],
-                        [/\>/, { token: 'bracketWire', bracket: '@close', next: '@pop' }]
                     ],
                     pin_block: [
                         { include: '@whitespace' },
-                        [/\w+/, { token: 'pin' }],
-                        [/\]/, { token: 'bracket', bracket: '@close', next: '@pop' }]
+                        [/\w+/, { token: 'word.pin' }],
+                        [/\]/, { token: 'bracket.pin', bracket: '@close', next: '@pop' }],
                     ],
                     label_block: [
                         { include: '@whitespace' },
-                        [/\"([^\"]|\\.)*\"/, 'string'],
-                        [/\)/, { token: 'bracket', bracket: '@close', next: '@pop' }]
+                        [/\)/, { token: 'bracket.label', bracket: '@close', next: '@pop' }],
+                        { include: '@string' },
+                    ],
+                    string: [
+                        [/"([^"]|\\.)+"/, 'string']
                     ],
                     whitespace: [
-                        [/[ \t\r\n]+/, 'white']
+                        [/[ \t]+/, 'white']
                     ],
                     number: [
-                        [/d+(\.d+)?/, 'number']
+                        [/[-]?\d+(\.d+)?/, 'number']
                     ]
                 }
             });
@@ -161,10 +166,10 @@
                 inherit: true,
                 rules: [
                     { token: 'word', foreground: '0000ff', fontStyle: 'bold' },
-                    { token: 'wordPin', foreground: '7a92cf' },
+                    { token: 'word.pin', foreground: '7a92cf' },
                     { token: 'bracket', foreground: 'ff0000' },
-                    { token: 'bracketWire', foreground: 'cc0000' },
-                    { token: 'bracketPin', foreground: '7a92cf' },
+                    { token: 'bracket.wire', foreground: 'cc0000' },
+                    { token: 'bracket.pin', foreground: '7a92cf' },
                     { token: 'number', foreground: 'a0a0a0' },
                     { token: 'comment', foreground: '00a000' },
                     { token: 'pindirection', foreground: 'cc0000' },
@@ -186,7 +191,6 @@
                     insertText: keywords[i]
                 };
             }
-            console.log(suggestions)
             monaco.languages.registerCompletionItemProvider('simpleCircuit', {
                 provideCompletionItems: () => {
                     return {

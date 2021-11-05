@@ -34,6 +34,20 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
+        public void Add(IPin pin, IEnumerable<string> names)
+        {
+            _pinsByIndex.Add(pin ?? throw new ArgumentNullException(nameof(pin)));
+            foreach (string name in names)
+            {
+                _pinsByName.Add(name, pin);
+            }
+        }
+
+        /// <inheritdoc />
         public IEnumerable<string> NamesOf(IPin pin) => _pinsByName.Where(p => ReferenceEquals(p.Value, pin)).Select(p => p.Key);
+
+        public IEnumerator<IPin> GetEnumerator() => _pinsByIndex.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -11,14 +11,16 @@ namespace SimpleCircuit.Components.Analog
     public class OperationalTransconductanceAmplifier : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
+        [Description("The label next to the OTA.")]
         public string Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OperationalTransconductanceAmplifier"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public OperationalTransconductanceAmplifier(string name)
-            : base(name)
+        /// <param name="options">Options that can be used for the component.</param>
+        public OperationalTransconductanceAmplifier(string name, Options options)
+            : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "neg");
             Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "pos");
