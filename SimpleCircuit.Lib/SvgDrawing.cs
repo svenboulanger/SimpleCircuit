@@ -717,10 +717,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             // If the text contains data that is multiline, add a newline before and after content for easier reading
             if (content.IndexOfAny(new[] { '\r', '\n' }) >= 0)
                 content = Environment.NewLine + content + Environment.NewLine;
-
-            // If contents can be mistaken for XML, we want to encapsulate the contents with a CDATA
             if (content.IndexOfAny(new[] { '"', '\'', '<', '>', '&' }) >= 0)
-                elt.InnerText = $"<![CDATA[{content}]]>";
+                elt.AppendChild(_document.CreateCDataSection(content));
             else
                 elt.InnerText = content;
             metadata.AppendChild(elt);
