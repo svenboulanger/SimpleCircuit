@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Drawing;
+using System;
 
 namespace SimpleCircuit.Components
 {

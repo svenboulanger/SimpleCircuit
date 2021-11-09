@@ -249,10 +249,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             // Create our drawing
             var drawing = new SvgDrawing
             {
-                Style = Style,
-                LineHeight = LineHeight,
-                UpperCharacterWidth = UpperCharacterWidth,
-                LowerCharacterWidth = LowerCharacterWidth
+                Style = Style
             };
 
             // Draw

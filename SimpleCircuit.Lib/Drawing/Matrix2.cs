@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimpleCircuit
+namespace SimpleCircuit.Drawing
 {
     /// <summary>
     /// a 2D matrix.
@@ -100,18 +100,18 @@ namespace SimpleCircuit
         public override int GetHashCode()
         {
             int hash = Math.Round(A11, _precision).GetHashCode();
-            hash = (hash * 13) ^ Math.Round(A12, _precision).GetHashCode();
-            hash = (hash * 13) ^ Math.Round(A21, _precision).GetHashCode();
-            hash = (hash * 13) ^ Math.Round(A22, _precision).GetHashCode();
+            hash = hash * 13 ^ Math.Round(A12, _precision).GetHashCode();
+            hash = hash * 13 ^ Math.Round(A21, _precision).GetHashCode();
+            hash = hash * 13 ^ Math.Round(A22, _precision).GetHashCode();
             return hash;
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// Determines whether the specified <see cref="object" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -194,7 +194,7 @@ namespace SimpleCircuit
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString()
         {

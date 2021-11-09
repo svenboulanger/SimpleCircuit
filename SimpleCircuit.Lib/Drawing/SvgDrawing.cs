@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +19,7 @@ namespace SimpleCircuit
 
         private XmlElement _current;
         private readonly Stack<XmlElement> _group = new Stack<XmlElement>();
-        private readonly Bounds _bounds;
+        private readonly ExpandableBounds _bounds;
         private readonly XmlDocument _document;
         private readonly Stack<Transform> _tf = new Stack<Transform>();
 
@@ -50,28 +50,9 @@ namespace SimpleCircuit
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
         /// <summary>
-        /// Gets the height of a line of text.
+        /// Gets or sets the text formatter.
         /// </summary>
-        /// <value>
-        /// The height of a line of text.
-        /// </value>
-        public double LineHeight { get; set; } = 5.0;
-
-        /// <summary>
-        /// Gets or sets the width of a lowercase character.
-        /// </summary>
-        /// <value>
-        /// The width of a lowercase character.
-        /// </value>
-        public double LowerCharacterWidth { get; set; } = 3.0;
-
-        /// <summary>
-        /// Gets or sets the width of an uppercase character.
-        /// </summary>
-        /// <value>
-        /// The width of an uppercase character.
-        /// </value>
-        public double UpperCharacterWidth { get; set; } = 4.0;
+        public ITextFormatter TextFormatter { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgDrawing"/> class.
@@ -81,7 +62,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
             _document.AppendChild(_current);
-            _bounds = new Bounds();
+            _bounds = new ExpandableBounds();
             _tf.Push(Transform.Identity);
         }
 
@@ -425,21 +406,24 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="classes">The classes.</param>
         public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, string classes = null, string id = null)
         {
+            if (TextFormatter == null)
+                TextFormatter = new TextFormatter();
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
 
             if (string.IsNullOrWhiteSpace(value))
                 return;
             var lines = value.Split(new char[] { '\r', '\n', '\\' });
-            var width = 0.0;
-            foreach (var l in lines)
+            List<FormattedText> formattedLines = new();
+            double width = 0, height = 0;
+            for (int i = 0; i < lines.Length; i++)
             {
-                var w = 0.0;
-                foreach (var c in l)
-                    w += char.IsLower(c) ? LowerCharacterWidth : UpperCharacterWidth;
-                width = Math.Max(width, w);
+                var t = TextFormatter.Format(lines[i], fontSize);
+                lines[i] = t.Content;
+                width = Math.Max(t.Bounds.Width, width);
+                height += t.Bounds.Height;
+                formattedLines.Add(t);
             }
-            var height = lines.Length * LineHeight;
 
             // Create the text element
             var text = _document.CreateElement("text", Namespace);
@@ -465,174 +449,39 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             }
 
             // Draw the text with multiple lines
+            double y = 0.0;
             if (expand.Y.IsZero())
             {
-                _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length / 2));
-                _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length / 2));
-
-                // Center everything
-                var dy = -(height - LineHeight) * 0.5;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize * midLineFactor));
-                    tspan.SetAttribute("x", Convert(location.X));
-                    text.AppendChild(tspan);
-                    dy += LineHeight;
-                }
-
+                _bounds.Expand(location - new Vector2(0, height / 2));
+                _bounds.Expand(location + new Vector2(0, height / 2));
+                y = -height / 2;
             }
             else if (expand.Y > 0)
             {
                 _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(0, LineHeight * lines.Length));
-
-                // Make sure everything is below
-                double dy = 0;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy + fontSize));
-                    tspan.SetAttribute("x", Convert(location.X));
-                    text.AppendChild(tspan);
-                    dy += LineHeight;
-                }
+                _bounds.Expand(location + new Vector2(0, height));
+                y = 0.0;
             }
             else
             {
-                _bounds.Expand(location - new Vector2(0, LineHeight * lines.Length));
+                _bounds.Expand(location - new Vector2(0, height));
                 _bounds.Expand(location);
-
-                // Make sure everything is above
-                double dy = -height + LineHeight;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("y", Convert(location.Y + dy));
-                    tspan.SetAttribute("x", Convert(location.X));
-                    text.AppendChild(tspan);
-                    dy += LineHeight;
-                }
+                y = -height;
             }
 
-            text.SetAttribute("x", Convert(location.X));
-            text.SetAttribute("y", Convert(location.Y));
-            text.SetAttribute("font-size", $"{Convert(fontSize)}pt");
-
-            if (!string.IsNullOrWhiteSpace(classes))
-                text.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                text.SetAttribute("id", id);
-            _current.AppendChild(text);
-        }
-
-        /// <summary>
-        /// Draws text.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="location">The location.</param>
-        /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
-        /// <param name="fontSize">The font size.</param>
-        /// <param name="id">The Identifier.</param>
-        /// <param name="midLineFactor">The mid line factor for centering text.</param>
-        /// <param name="classes">The classes.</param>
-        public void VerticalText(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.5, string classes = null, string id = null)
-        {
-            location = CurrentTransform.Apply(location);
-            expand = CurrentTransform.ApplyDirection(expand);
-
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-            var lines = value.Split(new char[] { '\r', '\n', '\\' });
-            var width = 0.0;
-            foreach (var l in lines)
+            // Make sure everything is above
+            foreach (var l in formattedLines)
             {
-                var w = 0.0;
-                foreach (var c in l)
-                    w += char.IsLower(c) ? LowerCharacterWidth : UpperCharacterWidth;
-                width = Math.Max(width, w);
-            }
-            var height = lines.Length * LineHeight;
+                // Go to baseline of text
+                y -= l.Bounds.Top;
+                var tspan = _document.CreateElement("tspan", Namespace);
+                tspan.InnerXml = l.Content;
+                tspan.SetAttribute("y", Convert(location.Y + y));
+                tspan.SetAttribute("x", Convert(location.X));
+                text.AppendChild(tspan);
 
-            // Create the text element
-            var text = _document.CreateElement("text", Namespace);
-            text.SetAttribute("style", "writing-mode: vertical-lr;");
-
-            // Expand the Y-direction
-            if (expand.Y.IsZero())
-            {
-                text.SetAttribute("text-anchor", "middle");
-                _bounds.Expand(location - new Vector2(0, width / 2));
-                _bounds.Expand(location + new Vector2(0, width / 2));
-            }
-            else if (expand.Y > 0)
-            {
-                text.SetAttribute("text-anchor", "start");
-                _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(0, width));
-            }
-            else
-            {
-                text.SetAttribute("text-anchor", "end");
-                _bounds.Expand(location - new Vector2(0, width));
-                _bounds.Expand(location);
-            }
-
-            // Draw the text with multiple lines
-            if (expand.X.IsZero())
-            {
-                _bounds.Expand(location - new Vector2(height / 2, 0));
-                _bounds.Expand(location + new Vector2(height / 2, 0));
-
-                // Center everything
-                var dy = height/2 - fontSize * midLineFactor;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("x", Convert(location.X + dy));
-                    tspan.SetAttribute("y", Convert(location.Y));
-                    text.AppendChild(tspan);
-                    dy -= LineHeight;
-                }
-
-            }
-            else if (expand.X > 0)
-            {
-                _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(height, 0));
-
-                // Make sure everything is below
-                double dy = height - LineHeight + fontSize;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("x", Convert(location.X + dy));
-                    tspan.SetAttribute("y", Convert(location.Y));
-                    text.AppendChild(tspan);
-                    dy -= LineHeight;
-                }
-            }
-            else
-            {
-                _bounds.Expand(location - new Vector2(height, 0));
-                _bounds.Expand(location);
-
-                // Make sure everything is above
-                double dy = -fontSize;
-                foreach (var l in lines)
-                {
-                    var tspan = _document.CreateElement("tspan", Namespace);
-                    tspan.InnerText = l;
-                    tspan.SetAttribute("x", Convert(location.X + dy));
-                    tspan.SetAttribute("y", Convert(location.Y));
-                    text.AppendChild(tspan);
-                    dy -= LineHeight;
-                }
+                // Space below text
+                y += l.Bounds.Bottom;
             }
 
             text.SetAttribute("x", Convert(location.X));

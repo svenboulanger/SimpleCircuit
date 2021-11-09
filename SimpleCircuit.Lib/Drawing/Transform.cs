@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Drawing
 {
     /// <summary>
-    /// A transformation for vectors.
+    /// A transformation for vectors. The transform assumes
+    /// a local reorientation followed by a translation.
     /// </summary>
     public struct Transform
     {
@@ -18,6 +19,11 @@ namespace SimpleCircuit.Components
         /// </value>
         public static Transform Identity => new Transform(new(), Matrix2.Identity);
 
+        /// <summary>
+        /// Creates a new transform.
+        /// </summary>
+        /// <param name="origin">The vector describing the translation.</param>
+        /// <param name="orientation">The matrix describing the orientation transformation.</param>
         public Transform(Vector2 origin, Matrix2 orientation)
         {
             _origin = origin;

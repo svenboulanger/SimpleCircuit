@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
 
 namespace SimpleCircuit.Components

@@ -10,9 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"
-GND1
-NMOS
+            var script = @"GND1<u> V1(""1V"") <u r> R <r d> C1 <d> GND2
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);

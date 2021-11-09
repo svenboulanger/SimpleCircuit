@@ -1,8 +1,11 @@
 ﻿using System;
 
-namespace SimpleCircuit
+namespace SimpleCircuit.Drawing
 {
-    public class Bounds
+    /// <summary>
+    /// Bounds that can be expanded.
+    /// </summary>
+    public class ExpandableBounds
     {
         /// <summary>
         /// Gets the left coordinate.
