@@ -16,5 +16,8 @@
 
         [Description("The default scale for any amplifier created.")]
         public double Scale { get; set; } = 1.0;
+
+        [Description("Uses polarized capacitors by default.")]
+        public bool PolarCapacitors { get; set; } = false;
     }
 }

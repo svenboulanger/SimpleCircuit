@@ -30,18 +30,22 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
+            // The triangle
             drawing.Polygon(new[] {
                 new Vector2(-5, -8),
                 new Vector2(5, -4),
                 new Vector2(5, 4),
                 new Vector2(-5, 8)
             });
-            drawing.Line(new(-3, -4), new(-1, -4), "minus");
+
+            // Signs
+            drawing.Line(new(-3, -4), new(-1, -4), new("minus"));
             drawing.Segments(new Vector2[] {
                 new(-2, 5), new(-2, 3),
                 new(-3, 4), new(-1, 4)
-            }, "plus");
+            }, new("plus"));
 
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(5, 5), new Vector2(1, 1));
         }
@@ -50,7 +54,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"OTA {Name}";
     }

@@ -33,14 +33,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
-        {
-            drawing.StartGroup(Name, GetType().Name.ToLower());
-            drawing.BeginTransform(new(Location, Transform * Matrix2.Scale(_scale, _scale)));
-            Draw(drawing);
-            drawing.EndTransform();
-            drawing.EndGroup();
-        }
+        protected override Transform CreateTransform() => new(Location, Transform * Matrix2.Scale(_scale, _scale));
 
         /// <inheritdoc />
         public override Vector2 TransformOffset(Vector2 local) => base.TransformOffset(local) * _scale;

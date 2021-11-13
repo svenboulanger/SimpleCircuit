@@ -18,10 +18,10 @@ namespace SimpleCircuit
         public const string SimpleCircuitNamespace = "https://github.com/svenboulanger/SimpleCircuit";
 
         private XmlElement _current;
-        private readonly Stack<XmlElement> _group = new Stack<XmlElement>();
+        private readonly Stack<XmlElement> _group = new();
         private readonly ExpandableBounds _bounds;
         private readonly XmlDocument _document;
-        private readonly Stack<Transform> _tf = new Stack<Transform>();
+        private readonly Stack<Transform> _tf = new();
 
         /// <summary>
         /// Gets the current transform.
@@ -91,8 +91,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="start">The start.</param>
         /// <param name="end">The end.</param>
-        /// <param name="style">The style.</param>
-        public void Line(Vector2 start, Vector2 end, string classes = null, string id = null)
+        /// <param name="options">Optional options.</param>
+        public void Line(Vector2 start, Vector2 end, PathOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -106,11 +106,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             line.SetAttribute("y1", Convert(start.Y));
             line.SetAttribute("x2", Convert(end.X));
             line.SetAttribute("y2", Convert(end.Y));
-            if (!string.IsNullOrWhiteSpace(classes))
-                line.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                line.SetAttribute("id", id);
-
+            options?.Apply(line);
             _current.AppendChild(line);
         }
 
@@ -119,8 +115,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="radius">The radius.</param>
-        /// <param name="style">The style.</param>
-        public void Circle(Vector2 position, double radius, string classes = null, string id = null)
+        /// <param name="options">The options.</param>
+        public void Circle(Vector2 position, double radius, GraphicOptions options = null)
         {
             // Let's see if there is some scaling involved
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
@@ -134,11 +130,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             circle.SetAttribute("cx", Convert(position.X));
             circle.SetAttribute("cy", Convert(position.Y));
             circle.SetAttribute("r", Convert(radius));
-            if (!string.IsNullOrWhiteSpace(classes))
-                circle.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                circle.SetAttribute("id", id);
-
+            options?.Apply(circle);
             _current.AppendChild(circle);
         }
 
@@ -147,7 +139,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void Polyline(IEnumerable<Vector2> points, string classes = null, string id = null)
+        public void Polyline(IEnumerable<Vector2> points, PathOptions options = null)
         {
             var sb = new StringBuilder(32);
             bool isFirst = true;
@@ -164,11 +156,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var poly = _document.CreateElement("polyline", Namespace);
             poly.SetAttribute("points", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                poly.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                poly.SetAttribute("id", id);
-
+            options?.Apply(poly);
             _current.AppendChild(poly);
         }
 
@@ -176,8 +164,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// Draws a polygon (a closed shape of straight lines).
         /// </summary>
         /// <param name="points">The points.</param>
-        /// <param name="classes">The classes.</param>
-        public void Polygon(IEnumerable<Vector2> points, string classes = null, string id = null)
+        /// <param name="options">The options.</param>
+        public void Polygon(IEnumerable<Vector2> points, PathOptions options = null)
         {
             var sb = new StringBuilder(32);
             bool isFirst = true;
@@ -194,11 +182,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var poly = _document.CreateElement("polygon", Namespace);
             poly.SetAttribute("points", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                poly.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                poly.SetAttribute("id", id);
-
+            options?.Apply(poly);
             _current.AppendChild(poly);
         }
 
@@ -206,8 +190,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// Draws multiple lines. Every two points define a separate line.
         /// </summary>
         /// <param name="points">The points.</param>
-        /// <param name="style">The style.</param>
-        public void Segments(IEnumerable<Vector2> points, string classes = null)
+        /// <param name="options">The options.</param>
+        public void Segments(IEnumerable<Vector2> points, PathOptions options = null)
         {
             var sb = new StringBuilder(128);
             var it = points.GetEnumerator();
@@ -229,8 +213,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                path.SetAttribute("class", classes);
+            options?.Apply(path);
             _current.AppendChild(path);
         }
 
@@ -239,7 +222,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void SmoothBezier(IEnumerable<Vector2> points, string classes = null, string id = null)
+        public void SmoothBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
             var sb = new StringBuilder(128);
             var it = points.GetEnumerator();
@@ -294,10 +277,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                path.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                path.SetAttribute("id", id);
+            options?.Apply(path);
             _current.AppendChild(path);
         }
 
@@ -305,9 +285,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// Closed bezier curve.
         /// </summary>
         /// <param name="pointsAndHandles">The points and handles.</param>
-        /// <param name="classes">The classes.</param>
-        /// <param name="id">The identifier.</param>
-        public void ClosedBezier(IEnumerable<Vector2> pointsAndHandles, string classes = null, string id = null)
+        /// <param name="options">The options.</param>
+        public void ClosedBezier(IEnumerable<Vector2> pointsAndHandles, PathOptions options = null)
         {
             var sb = new StringBuilder(128);
             var it = pointsAndHandles.GetEnumerator();
@@ -342,10 +321,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                path.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                path.SetAttribute("id", id);
+            options?.Apply(path);
             _current.AppendChild(path);
         }
 
@@ -353,9 +329,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// Open bezier curve.
         /// </summary>
         /// <param name="pointsAndHandles">The points and handles.</param>
-        /// <param name="classes">The classes.</param>
-        /// <param name="id">The identifier.</param>
-        public void OpenBezier(IEnumerable<Vector2> pointsAndHandles, string classes = null, string id = null)
+        /// <param name="options">The options.</param>
+        public void OpenBezier(IEnumerable<Vector2> pointsAndHandles, PathOptions options = null)
         {
             var sb = new StringBuilder(128);
             var it = pointsAndHandles.GetEnumerator();
@@ -387,10 +362,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
             var path = _document.CreateElement("path", Namespace);
             path.SetAttribute("d", sb.ToString());
-            if (!string.IsNullOrWhiteSpace(classes))
-                path.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                path.SetAttribute("id", id);
+            options?.Apply(path);
             _current.AppendChild(path);
         }
 
@@ -401,10 +373,9 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="fontSize">The font size.</param>
-        /// <param name="id">The Identifier.</param>
         /// <param name="midLineFactor">The mid line factor for centering text.</param>
-        /// <param name="classes">The classes.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, string classes = null, string id = null)
+        /// <param name="options">The options.</param>
+        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, GraphicOptions options = null)
         {
             if (TextFormatter == null)
                 TextFormatter = new TextFormatter();
@@ -487,26 +458,18 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             text.SetAttribute("x", Convert(location.X));
             text.SetAttribute("y", Convert(location.Y));
             text.SetAttribute("font-size", $"{Convert(fontSize)}pt");
-
-            if (!string.IsNullOrWhiteSpace(classes))
-                text.SetAttribute("class", classes);
-            if (!string.IsNullOrWhiteSpace(id))
-                text.SetAttribute("id", id);
+            options?.Apply(text);
             _current.AppendChild(text);
         }
 
         /// <summary>
         /// Starts a group.
         /// </summary>
-        /// <param name="id">The identifier of the group.</param>
-        /// <param name="classes">The classes.</param>
-        public void StartGroup(string id, string classes = null)
+        /// <param name="options">The options.</param>
+        public void StartGroup(GraphicOptions options = null)
         {
             var elt = _document.CreateElement("g", Namespace);
-            if (!string.IsNullOrEmpty(id))
-                elt.SetAttribute("id", id);
-            if (!string.IsNullOrWhiteSpace(classes))
-                elt.SetAttribute("class", classes);
+            options?.Apply(elt);
             _group.Push(_current);
             _current = elt;
         }

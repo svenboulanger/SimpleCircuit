@@ -27,26 +27,27 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Circle(new Vector2(0, 0), 6);
-            drawing.Segments(new[]
+            // Wires
+            drawing.Segments(new Vector2[]
             {
-                new Vector2(-8, 0), new Vector2(-6, 0),
-                new Vector2(-3, 0), new Vector2(3, 0),
-                new Vector2(3, 0), new Vector2(1, 2),
-                new Vector2(3, 0), new Vector2(1, -2),
-                new Vector2(6, 0), new Vector2(8, 0)
-            });
+                new(-8, 0), new(-6, 0),
+                new(6, 0), new(8, 0)
+            }, new("wire"));
+
+            // The circle with the arrow
+            drawing.Circle(new(0, 0), 6);
+            drawing.Line(new(-3, 0), new(3, 0), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Text(Label, new(0, -8), new(0, -1));
         }
 
         /// <summary>
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Current source {Name}";
     }

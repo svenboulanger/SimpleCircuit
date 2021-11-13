@@ -14,6 +14,12 @@ namespace SimpleCircuit.Components.Analog
         public string Label { get; set; }
 
         /// <summary>
+        /// Determines whether the impedance is programmable.
+        /// </summary>
+        [Description("Displays a diagonal arrow.")]
+        public bool Programmable { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Impedance"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -28,12 +34,19 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
+            // Wires
             drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            });
-            drawing.Polygon(new[] { new Vector2(-6, 3), new Vector2(6, 3), new Vector2(6, -3), new Vector2(-6, -3) });
+            }, new("wire"));
+
+            // The rectangle
+            drawing.Polygon(new Vector2[] { new(-6, 3), new(6, 3), new(6, -3), new(-6, -3) });
+
+            // Programmable
+            if (Programmable)
+                drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))
@@ -44,7 +57,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Impedance {Name}";
 

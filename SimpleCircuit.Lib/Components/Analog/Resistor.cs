@@ -12,6 +12,9 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label next to the resistor.")]
         public string Label { get; set; }
 
+        [Description("Makes the resistor programmable.")]
+        public bool Programmable { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Resistor"/> class.
         /// </summary>
@@ -28,30 +31,35 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Polyline(new Vector2[]
-                {
-                    new Vector2(-8, 0),
-                    new Vector2(-6, 0),
-                    new Vector2(-5, -4),
-                    new Vector2(-3, 4),
-                    new Vector2(-1, -4),
-                    new Vector2(1, 4),
-                    new Vector2(3, -4),
-                    new Vector2(5, 4),
-                    new Vector2(6, 0),
-                    new Vector2(8, 0)
-                });
-
-            if (Pins["c"].Connections > 0)
+            // Wires
+            drawing.Segments(new Vector2[]
             {
-                drawing.Line(new Vector2(0, 4), new Vector2(0, 8));
-                drawing.Polygon(new[]
-                {
-                    new Vector2(0, 4), new Vector2(-1, 7), new Vector2(1, 7)
-                });
-            }
+                new(-8, 0), new(-6, 0),
+                new(6, 0), new(8, 0)
+            }, new("wire"));
 
-            // Depending on the orientation, let's anchor the text differently
+            // The resistor
+            drawing.Polyline(new Vector2[]
+            {
+                new Vector2(-6, 0),
+                new Vector2(-5, -4),
+                new Vector2(-3, 4),
+                new Vector2(-1, -4),
+                new Vector2(1, 4),
+                new Vector2(3, -4),
+                new Vector2(5, 4),
+                new Vector2(6, 0)
+            });
+
+            // Controlled resistor
+            if (Pins["c"].Connections > 0)
+                drawing.Line(new Vector2(0, 8), new Vector2(0, 4), new("wire") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+            // Programmable
+            if (Programmable)
+                drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
         }
@@ -60,7 +68,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Resistor {Name}";
 

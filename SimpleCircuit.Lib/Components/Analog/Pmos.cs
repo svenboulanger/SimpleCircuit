@@ -13,9 +13,6 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label next to the transistor.")]
         public string Label { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the symbol represents a packaged transistor.
-        /// </summary>
         [Description("Displays a packaged transistor.")]
         public bool Packaged { get; set; }
 
@@ -61,21 +58,35 @@ namespace SimpleCircuit.Components.Analog
             }
             else
             {
-                drawing.Segments(new[]
+                // Wires
+                drawing.Segments(new Vector2[]
                 {
-                    new Vector2(0, 11), new Vector2(0, 6),
-                    new Vector2(-6, 6), new Vector2(6, 6),
-                    new Vector2(-7, 4), new Vector2(-4, 4),
-                    new Vector2(-2, 4), new Vector2(2, 4),
-                    new Vector2(4, 4), new Vector2(7, 4),
-                    new Vector2(0, 0), new Vector2(-1, 2),
-                    new Vector2(0, 0), new Vector2(1, 2)
-                });
-                drawing.Circle(new Vector2(0, 3), 8.0);
+                    new(-8, 0), new(-5, 0),
+                    new(8, 0), new(5, 0),
+                    new(0, 11), new(0, 6)
+                }, new("wire"));
 
-                drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-5, 0), new Vector2(-5, 4) });
-                drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(5, 0), new Vector2(5, 4) });
-                drawing.Polyline(new[] { new Vector2(-5, 0), new Vector2(0, 0), new Vector2(0, 4) });
+                // Gate
+                drawing.Segments(new Vector2[]
+                {
+                    new(-6, 6), new(6, 6),
+                    new(-7, 4), new(-4, 4),
+                    new(-2, 4), new(2, 4),
+                    new(4, 4), new(7, 4),
+                });
+
+                // Drain, source and gate
+                drawing.Line(new(-5, 0), new(-5, 4), new("source"));
+                drawing.Line(new(5, 0), new(5, 4), new("drain"));
+                drawing.Line(new(0, 4), new(0, 0), new("bulk") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                drawing.Line(new(0, 0), new(-5, 0), new("bulk"));
+
+                // Packaged
+                drawing.Circle(new(0, 3), 8.0);
+
+                // Label
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(3, -10), new(1, 1));
             }
         }
 
@@ -83,7 +94,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"PMOS {Name}";
     }

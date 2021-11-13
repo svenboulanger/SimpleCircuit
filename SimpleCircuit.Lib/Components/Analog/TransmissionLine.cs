@@ -38,9 +38,6 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label in the transmission line.")]
         public string Label { get; set; }
 
-        /// <summary>
-        /// Gets or sets the length of the transmission line.
-        /// </summary>
         [Description("The length of the transmission line.")]
         public double Length
         {
@@ -76,7 +73,11 @@ namespace SimpleCircuit.Components.Analog
         protected override void Draw(SvgDrawing drawing)
         {
             double offset = 0.5 * (_length - _width);
-            drawing.Line(new Vector2(-_width - offset, 0), new Vector2(-_inner - offset, 0));
+            
+            // Wire
+            drawing.Line(new(-_width - offset, 0), new(-_inner - offset, 0), new("wire"));
+
+            // Transmission line
             drawing.OpenBezier(_shape.Select(v =>
             {
                 if (v.X < 0)
@@ -85,10 +86,9 @@ namespace SimpleCircuit.Components.Analog
                     return new Vector2(v.X + offset, v.Y);
             }));
 
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
-            {
                 drawing.Text(Label, new Vector2(), new Vector2());
-            }
         }
 
         /// <summary>

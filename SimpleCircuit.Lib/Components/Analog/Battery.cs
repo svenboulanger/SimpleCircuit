@@ -46,18 +46,21 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
+            // Wires
             double offset = Length / 2, cellOffset = _cells * 2 - 1; ;
             drawing.Segments(new Vector2[]
             {
                 new(-offset, 0), new(-cellOffset, 0),
                 new(cellOffset, 0), new(offset, 0)
-            });
+            }, new("wire"));
+
+            // The cells
             double x = -_cells * 2 + 1;
             for (int i = 0; i < _cells; i++)
             {
-                drawing.Line(new(x, -2), new(x, 2), "negative");
+                drawing.Line(new(x, -2), new(x, 2), new("negative"));
                 x += 2.0;
-                drawing.Line(new(x, -6), new(x, 6), "positive");
+                drawing.Line(new(x, -6), new(x, 6), new("positive"));
                 x += 2.0;
             }
 
@@ -66,8 +69,8 @@ namespace SimpleCircuit.Components.Analog
             {
                 new(offset - 2, 2), new(offset - 2, 4),
                 new(offset - 1, 3), new(offset - 3, 3)
-            }, "plus");
-            drawing.Line(new(-offset + 2, 2), new(-offset + 2, 4), "minus");
+            }, new("plus"));
+            drawing.Line(new(-offset + 2, 2), new(-offset + 2, 4), new("minus"));
 
             // Depending on the orientation, let's anchor the text differently
             if (!string.IsNullOrWhiteSpace(Label))

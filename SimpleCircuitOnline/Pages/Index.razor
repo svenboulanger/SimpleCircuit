@@ -2,6 +2,8 @@
 @using System.IO;
 @using System.Xml;
 @using System.Timers;
+@using System.Text.Json
+@using SimpleCircuitOnline.Shared
 @inject IJSRuntime Runtime 
 
 <div class="split-screen">
@@ -44,6 +46,7 @@
     private bool _showHelp = false, _showDemo = false, _showOptions = false;
     private int _loading;
     private MonacoEditor _scriptEditor, _styleEditor;
+    private TextFormatter _jsTextFormatter;
 
     private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
     {
@@ -67,6 +70,17 @@
     {
         base.OnInitialized();
 
+        // This text formatter will invoke a JavaScript method that uses getBBox() to measure a text size
+        _jsTextFormatter = new TextFormatter((text, size) =>
+        {
+            JsonElement obj = ((IJSInProcessRuntime)Runtime).Invoke<JsonElement>("calculateBounds", text, size);
+            double x = obj.GetProperty("x").GetDouble();
+            double y = obj.GetProperty("y").GetDouble();
+            double width = obj.GetProperty("width").GetDouble();
+            double height = obj.GetProperty("height").GetDouble();
+            return new(x, y, x + width, y + height);
+        });
+
         _timer = new Timer(750);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = false;
@@ -84,33 +98,15 @@
         // Set the default values
         await _scriptEditor.SetValue(Demo.Demos[0].Code);
         await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle);
-        await Render();
+        await RenderPreview();
     }
 
     public async Task DownloadSvg()
     {
-        var logger = new Logger();
-
-        // Parse it again
-        var code = await _scriptEditor.GetValue();
-        var context = new SimpleCircuit.Parser.ParsingContext();
-        context.Diagnostics = logger;
-        var lexer = new SimpleCircuit.Parser.Lexer(code);
-        SimpleCircuit.Parser.Parser.Parse(lexer, context);
-        var ckt = context.Circuit;
-
-        // Let's include the original script and the style
-        ckt.Metadata.Add("script", code);
-        ckt.Style = await _styleEditor.GetValue();
-
-        // render to SVG and write it to a string that we can then download as a file
-        var doc = ckt.Render(logger);
+        var doc = await ComputeXml(includeScript: true);
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
             doc.WriteTo(xml);
-
-        _errors = logger.Error.ToString();
-        _warnings = logger.Warning.ToString();
         byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
         await Runtime.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
     }
@@ -129,12 +125,26 @@
             StateHasChanged();
             _timer.Stop();
             _task =
-                Task.Run(Render)
+                Task.Run(RenderPreview)
                 .ContinueWith(task => { _loading = 0; StateHasChanged(); });
         }
     }
 
-    private async Task Render()
+    private async Task RenderPreview()
+    {
+        var doc = await ComputeXml(includeScript: false);
+        if (doc != null)
+        {
+            using var sw = new StringWriter();
+            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+                doc.WriteTo(xml);
+            _svg = sw.ToString();
+        }
+        else
+            _svg = null;
+    }
+
+    private async Task<XmlDocument> ComputeXml(bool includeScript)
     {
         _errors = null;
         _warnings = null;
@@ -144,21 +154,28 @@
             var code = await _scriptEditor.GetValue();
             var context = new SimpleCircuit.Parser.ParsingContext();
             context.Diagnostics = logger;
+
+            // Parse the script
             var lexer = new SimpleCircuit.Parser.Lexer(code);
             SimpleCircuit.Parser.Parser.Parse(lexer, context);
             var ckt = context.Circuit;
+
+            // Include XML data
+            if (includeScript)
+                ckt.Metadata.Add("script", code);
             ckt.Style = await _styleEditor.GetValue();
+
+            // This makes sure that the text formatter (that will compute text sizes),
+            // uses the right style
+            await Runtime.InvokeVoidAsync("updateStyle", ckt.Style);
+
             if (ckt.Count > 0)
             {
-                var doc = ckt.Render(logger);
-
-                using var sw = new StringWriter();
-                using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
-                    doc.WriteTo(xml);
-                _svg = sw.ToString();
+                var doc = ckt.Render(logger, _jsTextFormatter);
+                return doc;
             }
             else
-                _svg = null;
+                return null;
         }
         catch (Exception ex)
         {
@@ -167,5 +184,6 @@
         }
         _errors = logger.Error.ToString();
         _warnings = logger.Warning.ToString();
+        return null;
     }
 }

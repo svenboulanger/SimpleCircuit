@@ -13,6 +13,9 @@ namespace SimpleCircuit.Components
     {
         private PinCollection _pins { get; }
 
+        /// <inheritdoc />
+        public int Order => 0;
+
         /// <inheritdoc/>
         [Description("The label next to the element.")]
         public string Label { get; set; }
@@ -58,7 +61,7 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void Render(SvgDrawing drawing)
         {
-            drawing.StartGroup(Name, GetType().Name.ToLower());
+            drawing.StartGroup(new(GetType().Name.ToLower()) { Id = Name });
             drawing.Polygon(new[]
             {
                 Location, new Vector2(EndLocation.X, Location.Y),

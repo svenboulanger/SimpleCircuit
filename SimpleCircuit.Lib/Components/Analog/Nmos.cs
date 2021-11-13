@@ -39,41 +39,65 @@ namespace SimpleCircuit.Components.Analog
         {
             if (!Packaged)
             {
-                drawing.Segments(new[]
+                // Wires
+                drawing.Segments(new Vector2[]
                 {
-                    new Vector2(0, 8), new Vector2(0, 6),
-                    new Vector2(-6, 6), new Vector2(6, 6),
-                    new Vector2(-6, 4), new Vector2(6, 4)
-                });
-                drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4) });
-                drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4) });
-
+                    new(0, 8), new(0, 6),
+                    new(-8, 0), new(-4, 0),
+                    new(8, 0), new(4, 0)
+                }, new("wire"));
                 if (Pins["b"].Connections > 0)
+                    drawing.Line(new Vector2(0, 4), new Vector2(0, 0), new("wire"));
+
+                // Gate
+                drawing.Segments(new Vector2[] {
+                    new(-6, 4), new(6, 4),
+                    new(-6, 6), new(6, 6)
+                }, new("gate"));
+
+                // Source and drain
+                drawing.Line(new(-4, 0), new(-4, 4), new("source"));
+                drawing.Line(new(4, 0), new(4, 4), new("drain"));
+
+                // Label
+                if (!string.IsNullOrWhiteSpace(Label))
                 {
-                    drawing.Line(new Vector2(0, 4), new Vector2(0, 0));
-                    if (!string.IsNullOrEmpty(Label))
-                        drawing.Text(Label, new Vector2(-3, -3), new Vector2(-1, -1));
+                    if (Pins["b"].Connections > 0)
+                        drawing.Text(Label, new(-3, -3), new(-1, -1));
+                    else
+                        drawing.Text(Label, new(0, -3), new(0, -1));
                 }
-                else if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
             else
             {
-                drawing.Segments(new[]
+                // Wires
+                drawing.Segments(new Vector2[]
                 {
-                    new Vector2(0, 11), new Vector2(0, 6),
-                    new Vector2(-6, 6), new Vector2(6, 6),
-                    new Vector2(-7, 4), new Vector2(-4, 4),
-                    new Vector2(-2, 4), new Vector2(2, 4),
-                    new Vector2(4, 4), new Vector2(7, 4),
-                    new Vector2(0, 4), new Vector2(-1, 2),
-                    new Vector2(0, 4), new Vector2(1, 2)
-                });
-                drawing.Circle(new Vector2(0, 3), 8.0);
+                    new(-8, 0), new(-5, 0),
+                    new(8, 0), new(5, 0),
+                    new(0, 11), new(0, 6)
+                }, new("wire"));
 
-                drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-5, 0), new Vector2(-5, 4) });
-                drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(5, 0), new Vector2(5, 4) });
-                drawing.Polyline(new[] { new Vector2(-5, 0), new Vector2(0, 0), new Vector2(0, 4) });
+                // Gate
+                drawing.Segments(new Vector2[]
+                {
+                    new(-6, 6), new(6, 6),
+                    new(-7, 4), new(-4, 4),
+                    new(-2, 4), new(2, 4),
+                    new(4, 4), new(7, 4),
+                });
+
+                // Drain, source and gate
+                drawing.Line(new(-5, 0), new(-5, 4), new("source"));
+                drawing.Line(new(5, 0), new(5, 4), new("drain"));
+                drawing.Polyline(new Vector2[] { new(-5, 0), new(0, 0), new(0, 4) }, new("bulk") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+                // Packaged
+                drawing.Circle(new(0, 3), 8.0);
+
+                // Label
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(3, -10), new(1, 1));
             }
         }
 
@@ -81,7 +105,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"NMOS {Name}";
     }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
 using SpiceSharp.Validation;
 
@@ -73,8 +74,8 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.dot { fill: black; }
-.plane { stroke-width: 1pt; }
+.dot, .arrowhead { fill: black; }
+.plane, .polar.pos { stroke-width: 1pt; }
 .battery line.negative { stroke-width: 0.75pt; }
 text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
 
@@ -232,7 +233,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 throw new ArgumentNullException(nameof(drawing));
 
             // Draw all components
-            foreach (var c in _presences.Values.OfType<IDrawable>())
+            foreach (var c in _presences.Values.OfType<IDrawable>().OrderBy(d => d.Order))
                 c.Render(drawing);
         }
 
@@ -241,7 +242,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
         {
             if (!Solved)
                 Solve(diagnostics);
@@ -249,7 +250,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             // Create our drawing
             var drawing = new SvgDrawing
             {
-                Style = Style
+                Style = Style,
+                TextFormatter = formatter
             };
 
             // Draw

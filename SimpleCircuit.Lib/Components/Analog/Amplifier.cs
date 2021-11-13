@@ -1,5 +1,7 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
@@ -82,6 +84,20 @@ namespace SimpleCircuit.Components.Analog
             }
         }
 
+        /// <inheritdoc />
+        protected override IEnumerable<string> GroupClasses
+        {
+            get
+            {
+                if (DifferentialInput)
+                    yield return "diffin";
+                if (DifferentialOutput)
+                    yield return "diffout";
+                if (Programmable)
+                    yield return "prog";
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Amplifier"/> class.
         /// </summary>
@@ -114,10 +130,10 @@ namespace SimpleCircuit.Components.Analog
                 {
                     new(-6, -4), new(-4, -4),
                     new(-5, 5), new(-5, 3),
-                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), "plus");
+                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("plus"));
                 drawing.Segments(new Vector2[] {
                     new(-6, 4), new(-4, 4)
-                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), "minus");
+                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("minus"));
             }
 
             if (_differentialOutput)
@@ -126,26 +142,22 @@ namespace SimpleCircuit.Components.Analog
 {
                     new(6, -6), new(4, -6),
                     new(5, 7), new(5, 5),
-                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), "plus");
+                }.Select(v => _swapInputs ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("plus"));
                 drawing.Segments(new Vector2[] {
                     new(6, 6), new(4, 6)
-                }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), "minus");
+                }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
 
                 drawing.Segments(new Vector2[]
                 {
                     new(0, 4), new(8, 4),
                     new(0, -4), new(8, -4)
-                });
+                }, new("wire"));
             }
 
             if (Programmable)
             {
-                // Programmable gain amplifier
-                drawing.Polyline(new Vector2[] {
-                    new(-7, 10), new(4, -8.5),
-                    new(4, -8.5), new(4, -6.5),
-                    new(4, -8.5), new(2.25, -7.5)
-                });
+                var options = new PathOptions() { EndMarker = PathOptions.MarkerTypes.Arrow };
+                drawing.Polyline(new Vector2[] { new(-7, 10), new(4, -8.5) }, options);
             }
 
             if (!string.IsNullOrEmpty(Label))
@@ -205,7 +217,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Amplifier {Name}";
     }

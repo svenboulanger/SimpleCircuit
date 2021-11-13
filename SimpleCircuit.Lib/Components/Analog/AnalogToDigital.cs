@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -70,6 +71,18 @@ namespace SimpleCircuit.Components.Analog
             }
         }
 
+        /// <inheritdoc />
+        protected override IEnumerable<string> GroupClasses
+        {
+            get
+            {
+                if (DifferentialInput)
+                    yield return "diffin";
+                if (DifferentialOutput)
+                    yield return "diffout";
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AnalogToDigital"/>
         /// </summary>
@@ -100,7 +113,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     new Vector2(_width / 2 - _height / 4, _height / 4), new Vector2(_width / 2, _height / 4),
                     new Vector2(_width / 2 - _height / 4, -_height / 4), new Vector2(_width / 2, -_height / 4)
-                });
+                }, new("wire"));
             }
 
             if (!string.IsNullOrWhiteSpace(Label))

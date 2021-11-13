@@ -12,11 +12,11 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label next to the inductor.")]
         public string Label { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether a dot has to be added.
-        /// </summary>
         [Description("Displays a dot to indicate the polarity.")]
         public bool Dot { get; set; }
+
+        [Description("Displays a programmable inductor.")]
+        public bool Programmable { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Inductor"/> class.
@@ -33,11 +33,14 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
+            // Wires
             drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            });
+            }, new("wire"));
+
+            // The coils
             drawing.SmoothBezier(new[]
             {
                 new Vector2(-6, 0),
@@ -50,17 +53,24 @@ namespace SimpleCircuit.Components.Analog
                 new Vector2(6, -4), new Vector2(6, 0)
             });
 
+            // A polarity dot
             if (Dot)
-                drawing.Circle(new(-8, 3.5), 1, "dot");
+                drawing.Circle(new(-8, 3.5), 1, new("dot"));
 
-            drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+            // Programmable
+            if (Programmable)
+                drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+            // The label
+            if (!string.IsNullOrWhiteSpace(Label))
+                drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
         }
 
         /// <summary>
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Inductor {Name}";
     }

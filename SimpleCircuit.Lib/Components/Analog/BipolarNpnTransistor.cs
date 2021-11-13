@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -32,6 +33,16 @@ namespace SimpleCircuit.Components.Analog
             }
         }
 
+        /// <inheritdoc />
+        protected override IEnumerable<string> GroupClasses
+        {
+            get
+            {
+                if (Packaged)
+                    yield return "packaged";
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BipolarNpnTransistor"/> class.
         /// </summary>
@@ -49,17 +60,28 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Segments(new[]
+            // Connection wires
+            drawing.Segments(new Vector2[]
             {
-                new Vector2(0, _packaged ? 8.0 : 6.0), new Vector2(0, 4),
-                new Vector2(-6, 4), new Vector2(6, 4) 
-            });
-            drawing.Polyline(new[] { new Vector2(-3, 4), new Vector2(-6, 0), new Vector2(-8, 0) });
-            drawing.Polyline(new[] { new Vector2(3, 4), new Vector2(6, 0), new Vector2(8, 0) });
-            drawing.Polygon(new[] { new Vector2(-6, 0), new Vector2(-3.7, 1.4), new Vector2(-5.3, 2.6) });
+                new(-6, 0), new(-8, 0),
+                new(6, 0), new(8, 0),
+                new(0, _packaged ? 8 : 6), new(0, 4)
+            }, new("wire"));
 
+            // Emitter
+            drawing.Line(new(-3, 4), new(-6, 0), new("emitter") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+            // Collector
+            drawing.Line(new(3, 4), new(6, 0), new("collector"));
+
+            // Base
+            drawing.Line(new(-6, 4), new(6, 4), new("base"));
+
+            // Packaged transistor (circle around the transistor)
             if (Packaged)
                 drawing.Circle(new(), 8.0);
+
+            // The label
             if (!string.IsNullOrEmpty(Label))
                 drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
         }
@@ -68,7 +90,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"NPN {Name}";
     }

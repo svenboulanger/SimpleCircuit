@@ -13,10 +13,7 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label next to the source.")]
         public string Label { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the squiggly line needs to be drawn.
-        /// </summary>
-        [Description("Uses an AC symbol instead.")]
+        [Description("Makes the voltage-source an AC source.")]
         public bool AC { get; set; }
 
         /// <summary>
@@ -34,33 +31,37 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Circle(new Vector2(0, 0), 6);
+            // Wires
             drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0),
-            });
+            }, new("wire"));
 
+            // Circle
+            drawing.Circle(new Vector2(0, 0), 6);
             if (AC)
             {
-                double handle = 1.7 / Math.Sqrt(2); // Slighly exaggerated
+                double handle = 1.7 / Math.Sqrt(2); // Slighly exaggerated curves
                 drawing.OpenBezier(new Vector2[]
                 {
-                        new(0, -3),
-                        new(handle, -3 + handle), new(handle, -handle), new(),
-                        new(-handle, handle), new(-handle, 3 - handle), new(0, 3)
+                    new(0, -3),
+                    new(handle, -3 + handle), new(handle, -handle), new(),
+                    new(-handle, handle), new(-handle, 3 - handle), new(0, 3)
                 });
             }
             else
             {
-                drawing.Segments(new Vector2[] {
-                        new(-3, -1), new(-3, 1),
-                        new(3, -1), new(3, 1),
-                        new(2, 0), new(4, 0),
-                    });
+                // Plus and minus
+                drawing.Line(new(-3, -1), new(-3, 1), new("minus"));
+                drawing.Segments(new Vector2[]
+                {
+                    new(3, -1), new(3, 1),
+                    new(2, 0), new(4, 0)
+                }, new("plus"));
             }
 
-            // Depending on the orientation, let's anchor the text differently
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
         }
@@ -69,7 +70,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Voltage source {Name}";
     }

@@ -14,6 +14,12 @@ namespace SimpleCircuit.Components
         public IPinCollection Pins { get; }
 
         /// <summary>
+        /// Gives the drawable an order in which it can be drawn. This can be used
+        /// to force some components to be drawn over others.
+        /// </summary>
+        public int Order { get; }
+
+        /// <summary>
         /// Renders the component in the specified drawing.
         /// </summary>
         /// <param name="minimizer">The minimizer.</param>

@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using System;
 
 namespace SimpleCircuit.Components
 {
@@ -36,6 +35,9 @@ namespace SimpleCircuit.Components
             : base(name)
         {
         }
+
+        /// <inheritdoc />
+        protected override Transform CreateTransform() => new(Location, Transform);
 
         /// <inheritdoc />
         public Matrix2 Transform { get; set; } = Matrix2.Identity;
@@ -112,16 +114,6 @@ namespace SimpleCircuit.Components
                     // Fully constrained, don't do anything
                     break;
             }
-        }
-
-        /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
-        {
-            drawing.StartGroup(Name, GetType().Name.ToLower());
-            drawing.BeginTransform(new(Location, Transform));
-            Draw(drawing);
-            drawing.EndTransform();
-            drawing.EndGroup();
         }
 
         /// <inheritdoc />

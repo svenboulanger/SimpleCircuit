@@ -61,11 +61,11 @@ namespace SimpleCircuit.Components.Analog
             drawing.Segments(new Vector2[]
             {
                 new(-6, -4), new(-4, -4),
-            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), "minus");
+            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
             drawing.Segments(new Vector2[] {
                 new(-5, 5), new(-5, 3),
                 new(-6, 4), new(-4, 4)
-            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), "plus");
+            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
 
             if (Pins["vn"].Connections > 0)
                 drawing.Line(new(0, -4), new(0, -6));
@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Opamp {Name}";
     }

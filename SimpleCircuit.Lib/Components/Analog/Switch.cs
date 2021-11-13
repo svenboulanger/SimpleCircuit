@@ -12,15 +12,9 @@ namespace SimpleCircuit.Components.Analog
         [Description("The label next to the switch.")]
         public string Label { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Switch"/> is closed.
-        /// </summary>
         [Description("Closes the switch.")]
         public bool Closed { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Switch"/> is opened.
-        /// </summary>
         [Description("Opens the switch.")]
         public bool Opened { get => !Closed; set => Closed = !value; }
 
@@ -40,19 +34,24 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
+            // Wires
             drawing.Segments(new[]
             {
                 new Vector2(-8, 0), new Vector2(-6, 0),
                 new Vector2(6, 0), new Vector2(8, 0)
-            });
+            }, new("wire"));
+
+            // Switch terminals
             drawing.Circle(new Vector2(-5, 0), 1);
             drawing.Circle(new Vector2(5, 0), 1);
 
+            // Switch position
             if (Closed)
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 0));
             else
                 drawing.Line(new Vector2(-4, 0), new Vector2(4, 4));
 
+            // Controlling pin (optional)
             if (Pins["c"].Connections > 0)
             {
                 if (Closed)
@@ -61,6 +60,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new Vector2(0, 2), new Vector2(0, 6));
             }
 
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
         }
@@ -69,7 +69,7 @@ namespace SimpleCircuit.Components.Analog
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Switch {Name}";
     }

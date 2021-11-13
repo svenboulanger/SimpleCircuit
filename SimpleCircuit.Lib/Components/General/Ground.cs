@@ -22,12 +22,15 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Segments(new[]
+            // Wire
+            drawing.Line(new(0, 0), new(0, 3), new("wire"));
+
+            // Ground
+            drawing.Segments(new Vector2[]
             {
-                new Vector2(0, 0), new Vector2(0, 3),
-                new Vector2(-5, 3), new Vector2(5, 3),
-                new Vector2(-3, 5), new Vector2(3, 5),
-                new Vector2(-1, 7), new Vector2(1, 7)
+                new(-5, 3), new(5, 3),
+                new(-3, 5), new(3, 5),
+                new(-1, 7), new(1, 7)
             });
         }
 
@@ -35,7 +38,7 @@ namespace SimpleCircuit.Components
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Ground {Name}";
     }

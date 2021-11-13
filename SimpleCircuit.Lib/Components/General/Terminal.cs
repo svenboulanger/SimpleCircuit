@@ -26,8 +26,13 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Line(new Vector2(), new Vector2(-4, 0));
-            drawing.Circle(new Vector2(-5.5, 0), 1.5, "terminal");
+            // Wire
+            drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));
+
+            // Terminal
+            drawing.Circle(new Vector2(-5.5, 0), 1.5, new("terminal"));
+
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(-10, 0), new Vector2(-1, 0));
         }
@@ -36,7 +41,7 @@ namespace SimpleCircuit.Components
         /// Converts to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"Terminal {Name}";
     }

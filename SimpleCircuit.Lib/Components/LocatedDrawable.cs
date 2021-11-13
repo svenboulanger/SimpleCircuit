@@ -18,6 +18,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public Vector2 Location { get; private set; }
 
+        /// <inheritdoc />
+        protected override Transform CreateTransform() => new(Location, Matrix2.Identity);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LocatedDrawable"/> class.
         /// </summary>
@@ -62,16 +65,6 @@ namespace SimpleCircuit.Components
         {
             for (int i = 0; i < Pins.Count; i++)
                 Pins[i].Register(context, diagnostics);
-        }
-
-        /// <inheritdoc />
-        public override void Render(SvgDrawing drawing)
-        {
-            drawing.StartGroup(Name, GetType().Name.ToLower());
-            drawing.BeginTransform(new(Location, Matrix2.Identity));
-            Draw(drawing);
-            drawing.EndTransform();
-            drawing.EndGroup();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"GND1<u> V1(""1V"") <u r> R <r d> C1 <d> GND2
+            var script = @"R1[c] <r> X
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);
@@ -22,7 +22,7 @@ namespace Sandbox
             // Draw the component
             var doc = context.Circuit.Render(logger);
             using var sw = new StringWriter();
-            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true, ConformanceLevel = ConformanceLevel.Fragment }))
                 doc.WriteTo(xml);
 
             if (File.Exists("tmp.html"))

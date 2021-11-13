@@ -30,15 +30,22 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         protected override void Draw(SvgDrawing drawing)
         {
-            drawing.Segments(new[]
+            // Wires
+            drawing.Segments(new Vector2[]
             {
                 new Vector2(-6, 0), new Vector2(-4, 0),
                 new Vector2(4, 0), new Vector2(6, 0),
+            }, new("wire"));
+
+            // The light
+            drawing.Segments(new[]
+            {
                 new Vector2(-_sqrt2, -_sqrt2), new Vector2(_sqrt2, _sqrt2),
                 new Vector2(_sqrt2, -_sqrt2), new Vector2(-_sqrt2, _sqrt2)
             });
             drawing.Circle(new Vector2(), 4);
 
+            // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
         }
