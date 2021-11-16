@@ -75,9 +75,9 @@ namespace SimpleCircuit
     stroke-linejoin: round;
 }
 .dot, .arrowhead { fill: black; }
-.plane, .polar.pos { stroke-width: 1pt; }
-.battery line.negative { stroke-width: 0.75pt; }
-text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
+.plane, .apolar line, .polar .pos { stroke-width: 1pt; }
+.battery .neg { stroke-width: 0.75pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }";
 
         /// <summary>
         /// Gets a dictionary of metadata key-value pairs that are optional.
@@ -232,6 +232,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             if (drawing == null)
                 throw new ArgumentNullException(nameof(drawing));
 
+            drawing.Style = Style;
+
             // Draw all components
             foreach (var c in _presences.Values.OfType<IDrawable>().OrderBy(d => d.Order))
                 c.Render(drawing);
@@ -242,7 +244,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
         {
             if (!Solved)
                 Solve(diagnostics);
@@ -251,7 +253,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
             var drawing = new SvgDrawing
             {
                 Style = Style,
-                TextFormatter = formatter
+                ElementFormatter = formatter
             };
 
             // Draw

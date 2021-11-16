@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -15,12 +16,15 @@ namespace SimpleCircuit
         /// The namespace for SVG nodes.
         /// </summary>
         public const string Namespace = "http://www.w3.org/2000/svg";
+
+        /// <summary>
+        /// The namespace for SimpleCircuit nodes.
+        /// </summary>
         public const string SimpleCircuitNamespace = "https://github.com/svenboulanger/SimpleCircuit";
 
-        private XmlElement _current;
-        private readonly Stack<XmlElement> _group = new();
-        private readonly ExpandableBounds _bounds;
         private readonly XmlDocument _document;
+        private XmlNode _current;
+        private readonly ExpandableBounds _bounds;
         private readonly Stack<Transform> _tf = new();
 
         /// <summary>
@@ -52,7 +56,12 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <summary>
         /// Gets or sets the text formatter.
         /// </summary>
-        public ITextFormatter TextFormatter { get; set; }
+        public IElementFormatter ElementFormatter { get; set; }
+
+        /// <summary>
+        /// Gets or sets the margin used along the border to make sure everything is included.
+        /// </summary>
+        public double Margin { get; set; } = 1.0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SvgDrawing"/> class.
@@ -72,7 +81,6 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="tf">The transform.</param>
         public void BeginTransform(Transform tf)
         {
-            // _tf.Push(tf.Apply(TF));
             _tf.Push(tf.Apply(CurrentTransform));
         }
 
@@ -96,11 +104,9 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
+            _bounds.Expand(new[] { start, end });
 
-            // Expand the bounds
-            _bounds.Expand(start.X, start.Y);
-            _bounds.Expand(end.X, end.Y);
-
+            // Create the line
             var line = _document.CreateElement("line", Namespace);
             line.SetAttribute("x1", Convert(start.X));
             line.SetAttribute("y1", Convert(start.Y));
@@ -118,14 +124,11 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="options">The options.</param>
         public void Circle(Vector2 position, double radius, GraphicOptions options = null)
         {
-            // Let's see if there is some scaling involved
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
+            _bounds.Expand(new[] { position - new Vector2(radius, radius), position + new Vector2(radius, radius) });
 
-            // Expand the bounds
-            _bounds.Expand(position.X - radius, position.Y - radius);
-            _bounds.Expand(position.X + radius, position.Y + radius);
-
+            // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
             circle.SetAttribute("cx", Convert(position.X));
             circle.SetAttribute("cy", Convert(position.Y));
@@ -141,23 +144,14 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="classes">The classes.</param>
         public void Polyline(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(32);
-            bool isFirst = true;
-            foreach (var point in points)
-            {
-                if (isFirst)
-                    isFirst = false;
-                else
-                    sb.Append(" ");
-                var pt = CurrentTransform.Apply(point);
-                _bounds.Expand(pt.X, pt.Y);
-                sb.Append($"{Convert(pt.X)},{Convert(pt.Y)}");
-            }
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
 
+            // Creates the poly
             var poly = _document.CreateElement("polyline", Namespace);
-            poly.SetAttribute("points", sb.ToString());
             options?.Apply(poly);
             _current.AppendChild(poly);
+            poly.SetAttribute("points", string.Join(" ", points.Select(p => $"{Convert(p.X)},{Convert(p.Y)}")));
         }
 
         /// <summary>
@@ -167,23 +161,14 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="options">The options.</param>
         public void Polygon(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(32);
-            bool isFirst = true;
-            foreach (var point in points)
-            {
-                if (isFirst)
-                    isFirst = false;
-                else
-                    sb.Append(" ");
-                var pt = CurrentTransform.Apply(point);
-                _bounds.Expand(pt.X, pt.Y);
-                sb.Append($"{Convert(pt.X)},{Convert(pt.Y)}");
-            }
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
 
+            // Create the element
             var poly = _document.CreateElement("polygon", Namespace);
-            poly.SetAttribute("points", sb.ToString());
             options?.Apply(poly);
             _current.AppendChild(poly);
+            poly.SetAttribute("points", string.Join(" ", points.Select(p => $"{Convert(p.X)},{Convert(p.Y)}")));
         }
 
         /// <summary>
@@ -193,28 +178,21 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="options">The options.</param>
         public void Segments(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(128);
-            var it = points.GetEnumerator();
-            while (it.MoveNext())
-            {
-                var first = it.Current;
-                if (!it.MoveNext())
-                    return;
-                var second = it.Current;
-
-                first = CurrentTransform.Apply(first);
-                second = CurrentTransform.Apply(second);
-                _bounds.Expand(first);
-                _bounds.Expand(second);
-                if (sb.Length > 0)
-                    sb.Append(" ");
-                sb.Append($"M {Convert(first.X)} {Convert(first.Y)} L {Convert(second.X)} {Convert(second.Y)}");
-            }
-
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
+            
+            // Create the path
             var path = _document.CreateElement("path", Namespace);
-            path.SetAttribute("d", sb.ToString());
             options?.Apply(path);
             _current.AppendChild(path);
+
+            int index = 0;
+            var d = points.GroupBy(p => (index++) / 2).Select(g =>
+            {
+                var v = g.ToArray();
+                return $"M {Convert(v[0].X)} {Convert(v[0].Y)} L {Convert(v[1].X)} {Convert(v[1].Y)}";
+            });
+            path.SetAttribute("d", string.Join(" ", d));
         }
 
         /// <summary>
@@ -224,146 +202,82 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="classes">The classes.</param>
         public void SmoothBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(128);
-            var it = points.GetEnumerator();
-            bool isFirst = true;
-            Vector2 end;
-            while (it.MoveNext())
-            {
-                if (isFirst)
-                {
-                    Vector2 first = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        return;
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
 
-                    // Get the handles
-                    var handle1 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        return;
-                    var handle2 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        return;
-                    end = CurrentTransform.Apply(it.Current);
-
-                    // Expand bounds
-                    _bounds.Expand(first);
-                    _bounds.Expand(handle1);
-                    _bounds.Expand(handle2);
-                    _bounds.Expand(end);
-
-                    // Add the data
-                    sb.Append($"M{Convert(first.X)} {Convert(first.Y)} ");
-                    sb.Append($"C{Convert(handle1.X)} {Convert(handle1.Y)}, ");
-                    sb.Append($"{Convert(handle2.X)} {Convert(handle2.Y)}, ");
-                    sb.Append($"{Convert(end.X)} {Convert(end.Y)}");
-
-                    isFirst = false;
-                }
-                else
-                {
-                    var handle = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        return;
-                    end = CurrentTransform.Apply(it.Current);
-
-                    _bounds.Expand(handle);
-                    _bounds.Expand(end);
-
-                    // Add the data
-                    sb.Append($" S{Convert(handle.X)} {Convert(handle.Y)} ");
-                    sb.Append($"{Convert(end.X)} {Convert(end.Y)}");
-                }
-            }
-
+            // Create the path element
             var path = _document.CreateElement("path", Namespace);
-            path.SetAttribute("d", sb.ToString());
             options?.Apply(path);
             _current.AppendChild(path);
+
+            int index = -1;
+            var d = points.GroupBy(p => { index++; return index < 1 ? 0 : (index < 4) ? 1 : 1 + index / 4; }).Select(g =>
+            {
+                var v = g.ToArray();
+                return v.Length switch
+                {
+                    1 => $"M{Convert(v[0])}",
+                    3 => $"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}",
+                    _ => $"S{Convert(v[0])} {Convert(v[1])} {Convert(v[2])} {Convert(v[3])}",
+                };
+            });
+            path.SetAttribute("d", string.Join(" ", d));
         }
 
         /// <summary>
         /// Closed bezier curve.
         /// </summary>
-        /// <param name="pointsAndHandles">The points and handles.</param>
+        /// <param name="points">The points and handles.</param>
         /// <param name="options">The options.</param>
-        public void ClosedBezier(IEnumerable<Vector2> pointsAndHandles, PathOptions options = null)
+        public void ClosedBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(128);
-            var it = pointsAndHandles.GetEnumerator();
-            bool isFirst = true;
-            while (it.MoveNext())
-            {
-                if (isFirst)
-                {
-                    var m = CurrentTransform.Apply(it.Current);
-                    sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
-                    _bounds.Expand(m);
-                    isFirst = false;
-                }
-                else
-                {
-                    var h1 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        break;
-                    var h2 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        break;
-                    var end = CurrentTransform.Apply(it.Current);
-                    sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
-                    _bounds.Expand(h1);
-                    _bounds.Expand(h2);
-                    _bounds.Expand(end);
-                }
-            }
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
 
-            // Close the path
-            sb.Append("Z");
-
+            // Create the path element
             var path = _document.CreateElement("path", Namespace);
-            path.SetAttribute("d", sb.ToString());
             options?.Apply(path);
             _current.AppendChild(path);
+
+            int index = 2;
+            var d = points.GroupBy(p => (index++) / 3).Select(g =>
+            {
+                var v = g.ToArray();
+                return v.Length switch
+                {
+                    1 => $"M{Convert(v[0])}",
+                    _ => $"C{Convert(v[0])}, {Convert(v[1])}, {Convert(v[2])}"
+                };
+            });
+            path.SetAttribute("d", string.Join(" ", d) + "Z");
         }
 
         /// <summary>
         /// Open bezier curve.
         /// </summary>
-        /// <param name="pointsAndHandles">The points and handles.</param>
+        /// <param name="points">The points and handles.</param>
         /// <param name="options">The options.</param>
-        public void OpenBezier(IEnumerable<Vector2> pointsAndHandles, PathOptions options = null)
+        public void OpenBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
-            var sb = new StringBuilder(128);
-            var it = pointsAndHandles.GetEnumerator();
-            bool isFirst = true;
-            while (it.MoveNext())
-            {
-                if (isFirst)
-                {
-                    var m = CurrentTransform.Apply(it.Current);
-                    sb.Append($"M{Convert(m.X)} {Convert(m.Y)} ");
-                    _bounds.Expand(m);
-                    isFirst = false;
-                }
-                else
-                {
-                    var h1 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        break;
-                    var h2 = CurrentTransform.Apply(it.Current);
-                    if (!it.MoveNext())
-                        break;
-                    var end = CurrentTransform.Apply(it.Current);
-                    sb.Append($"C{Convert(h1.X)} {Convert(h1.Y)}, {Convert(h2.X)} {Convert(h2.Y)}, {Convert(end.X)} {Convert(end.Y)} ");
-                    _bounds.Expand(h1);
-                    _bounds.Expand(h2);
-                    _bounds.Expand(end);
-                }
-            }
+            points = CurrentTransform.Apply(points);
+            _bounds.Expand(points);
 
+            // Create the path element
             var path = _document.CreateElement("path", Namespace);
-            path.SetAttribute("d", sb.ToString());
             options?.Apply(path);
             _current.AppendChild(path);
+
+            int index = 2;
+            var d = points.GroupBy(p => (index++) / 3).Select(g =>
+            {
+                var v = g.ToArray();
+                return v.Length switch
+                {
+                    1 => $"M{Convert(v[0])}",
+                    _ => $"C{Convert(v[0])}, {Convert(v[1])}, {Convert(v[2])}"
+                };
+            });
+            path.SetAttribute("d", string.Join(" ", d));
         }
 
         /// <summary>
@@ -372,55 +286,62 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <param name="value">The value.</param>
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
-        /// <param name="fontSize">The font size.</param>
-        /// <param name="midLineFactor">The mid line factor for centering text.</param>
         /// <param name="options">The options.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, double fontSize = 4, double midLineFactor = 0.33, GraphicOptions options = null)
+        public void Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
-            if (TextFormatter == null)
-                TextFormatter = new TextFormatter();
+            var formatter = ElementFormatter ?? new ElementFormatter();
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
 
             if (string.IsNullOrWhiteSpace(value))
                 return;
-            var lines = value.Split(new char[] { '\r', '\n', '\\' });
-            List<FormattedText> formattedLines = new();
+            
+            // Create the DOM elements and a span element for each 
+            var txt = _document.CreateElement("text", Namespace);
+            options?.Apply(txt);
+
+            _current.AppendChild(txt);
+            List<XmlElement> elements = new();
+            foreach (var line in value.Split(new char[] { '\r', '\n', '\\' }))
+            {
+                var tspan = _document.CreateElement("tspan", Namespace);
+                tspan.InnerText = line;
+                txt.AppendChild(tspan);
+                elements.Add(tspan);
+            }
+
+            // Determine the bounds of the lines, which will then determine their position
+            var formattedLines = new Bounds[elements.Count];
             double width = 0, height = 0;
-            for (int i = 0; i < lines.Length; i++)
+            for (int i = 0; i < elements.Count; i++)
             {
-                var t = TextFormatter.Format(lines[i], fontSize);
-                lines[i] = t.Content;
-                width = Math.Max(t.Bounds.Width, width);
-                height += t.Bounds.Height;
-                formattedLines.Add(t);
+                formattedLines[i] = formatter.Format(this, elements[i]);
+                width = Math.Max(formattedLines[i].Width, width);
+                height += formattedLines[i].Height;
+
+                // Expand the X-direction
+                if (expand.X.IsZero())
+                {
+                    elements[i].SetAttribute("text-anchor", "middle");
+                    _bounds.Expand(location - new Vector2(width / 2, 0));
+                    _bounds.Expand(location + new Vector2(width / 2, 0));
+                }
+                else if (expand.X > 0)
+                {
+                    elements[i].SetAttribute("text-anchor", "start");
+                    _bounds.Expand(location);
+                    _bounds.Expand(location + new Vector2(width, 0));
+                }
+                else
+                {
+                    elements[i].SetAttribute("text-anchor", "end");
+                    _bounds.Expand(location - new Vector2(width, 0));
+                    _bounds.Expand(location);
+                }
             }
 
-            // Create the text element
-            var text = _document.CreateElement("text", Namespace);
-
-            // Expand the X-direction
-            if (expand.X.IsZero())
-            {
-                text.SetAttribute("text-anchor", "middle");
-                _bounds.Expand(location - new Vector2(width / 2, 0));
-                _bounds.Expand(location + new Vector2(width / 2, 0));
-            }
-            else if (expand.X > 0)
-            {
-                text.SetAttribute("text-anchor", "start");
-                _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(width, 0));
-            }
-            else
-            {
-                text.SetAttribute("text-anchor", "end");
-                _bounds.Expand(location - new Vector2(width, 0));
-                _bounds.Expand(location);
-            }
-
-            // Draw the text with multiple lines
-            double y = 0.0;
+            // Draw the text lines with multiple lines
+            double y;
             if (expand.Y.IsZero())
             {
                 _bounds.Expand(location - new Vector2(0, height / 2));
@@ -440,26 +361,16 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
                 y = -height;
             }
 
-            // Make sure everything is above
-            foreach (var l in formattedLines)
+            for (int i = 0; i < elements.Count; i++)
             {
-                // Go to baseline of text
-                y -= l.Bounds.Top;
-                var tspan = _document.CreateElement("tspan", Namespace);
-                tspan.InnerXml = l.Content;
-                tspan.SetAttribute("y", Convert(location.Y + y));
-                tspan.SetAttribute("x", Convert(location.X));
-                text.AppendChild(tspan);
-
-                // Space below text
-                y += l.Bounds.Bottom;
+                y -= formattedLines[i].Top;
+                elements[i].SetAttribute("x", Convert(location.X));
+                elements[i].SetAttribute("y", Convert(location.Y + y));
+                y += formattedLines[i].Bottom;
             }
 
-            text.SetAttribute("x", Convert(location.X));
-            text.SetAttribute("y", Convert(location.Y));
-            text.SetAttribute("font-size", $"{Convert(fontSize)}pt");
-            options?.Apply(text);
-            _current.AppendChild(text);
+            txt.SetAttribute("x", Convert(location.X));
+            txt.SetAttribute("y", Convert(location.Y));
         }
 
         /// <summary>
@@ -470,7 +381,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         {
             var elt = _document.CreateElement("g", Namespace);
             options?.Apply(elt);
-            _group.Push(_current);
+            _current.AppendChild(elt);
             _current = elt;
         }
 
@@ -479,12 +390,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         public void EndGroup()
         {
-            if (_group.Count > 0)
-            {
-                var parent = _group.Pop();
-                parent.AppendChild(_current);
-                _current = parent;
-            }
+            if (_current.ParentNode != null)
+                _current = _current.ParentNode;
         }
 
         /// <summary>
@@ -493,16 +400,23 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// <returns>The document.</returns>
         public XmlDocument GetDocument()
         {
-            _current.SetAttribute("width", ((int)(_bounds.Width * 5)).ToString());
-            _current.SetAttribute("height", ((int)(_bounds.Height * 5)).ToString());
-            _current.SetAttribute("viewBox", $"{Convert(_bounds.Left)} {Convert(_bounds.Top)} {Convert(_bounds.Width)} {Convert(_bounds.Height)}");
+            var svg = _document.DocumentElement;
+
+            // Try to get the bounds of this
+            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Bounds;
+
+            // Apply a margin along the edges
+            bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);
+            svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());
+            svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
+            svg.SetAttribute("viewBox", $"{Convert(bounds.Left)} {Convert(bounds.Top)} {Convert(bounds.Width + 2 * Margin)} {Convert(bounds.Height + 2 * Margin)}");
 
             // Add stylesheet info if necessary
             if (!string.IsNullOrWhiteSpace(Style))
             {
                 var style = _document.CreateElement("style", Namespace);
                 style.InnerText = Style;
-                _current.PrependChild(style);
+                svg.PrependChild(style);
             }
 
             return _document;
@@ -541,9 +455,17 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The formatted value.</returns>
-        private string Convert(double value)
+        private static string Convert(double value)
         {
             return Math.Round(value, 5).ToString("G4", System.Globalization.CultureInfo.InvariantCulture);
         }
+
+        /// <summary>
+        /// Converts a vector to a string for our svg document.
+        /// </summary>
+        /// <param name="v">The vector.</param>
+        /// <returns>The formatted value.</returns>
+        private static string Convert(Vector2 v)
+            => $"{Convert(v.X)} {Convert(v.Y)}";
     }
 }

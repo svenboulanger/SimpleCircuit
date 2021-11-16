@@ -1,15 +1,12 @@
-﻿namespace SimpleCircuit.Drawing
+﻿using System.Xml;
+
+namespace SimpleCircuit.Drawing
 {
     /// <summary>
     /// A simple text formatter.
     /// </summary>
-    public class TextFormatter : ITextFormatter
+    public class ElementFormatter : IElementFormatter
     {
-        /// <summary>
-        /// Represents a line height relative to the font size.
-        /// </summary>
-        public double LineHeight { get; set; } = 5.0 / 3.0;
-
         /// <summary>
         /// Represents a width for a lowercase character relative to the font size.
         /// </summary>
@@ -25,13 +22,18 @@
         /// </summary>
         public double MidLineFactor { get; set; } = 0.125;
 
+        /// <summary>
+        /// Gets the font size.
+        /// </summary>
+        public double Size { get; set; } = 4.0;
+
         /// <inheritdoc />
-        public FormattedText Format(string text, double size)
+        public Bounds Format(SvgDrawing drawing, XmlElement element)
         {
             double w = 0;
-            foreach (var c in text)
+            foreach (var c in element.InnerText)
                 w += char.IsLower(c) ? LowerCharacterWidth : UpperCharacterWidth;
-            return new(text, new(0, -size * (1 - MidLineFactor), w * size, size * MidLineFactor));
+            return new(0, -Size * (1 - MidLineFactor), w * Size, Size * MidLineFactor);
         }
     }
 }

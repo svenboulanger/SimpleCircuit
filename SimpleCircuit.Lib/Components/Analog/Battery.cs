@@ -58,9 +58,9 @@ namespace SimpleCircuit.Components.Analog
             double x = -_cells * 2 + 1;
             for (int i = 0; i < _cells; i++)
             {
-                drawing.Line(new(x, -2), new(x, 2), new("negative"));
+                drawing.Line(new(x, -2), new(x, 2), new("neg"));
                 x += 2.0;
-                drawing.Line(new(x, -6), new(x, 6), new("positive"));
+                drawing.Line(new(x, -6), new(x, 6), new("pos"));
                 x += 2.0;
             }
 

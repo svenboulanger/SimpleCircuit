@@ -161,7 +161,7 @@ namespace SimpleCircuit.Components.Analog
             }
 
             if (!string.IsNullOrEmpty(Label))
-                drawing.Text(Label, new(-2.5, 0), new(), 3, 0.5);
+                drawing.Text(Label, new(-2.5, 0), new());
         }
 
         private void UpdatePins()

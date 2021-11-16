@@ -71,15 +71,7 @@
         base.OnInitialized();
 
         // This text formatter will invoke a JavaScript method that uses getBBox() to measure a text size
-        _jsTextFormatter = new TextFormatter((text, size) =>
-        {
-            JsonElement obj = ((IJSInProcessRuntime)Runtime).Invoke<JsonElement>("calculateBounds", text, size);
-            double x = obj.GetProperty("x").GetDouble();
-            double y = obj.GetProperty("y").GetDouble();
-            double width = obj.GetProperty("width").GetDouble();
-            double height = obj.GetProperty("height").GetDouble();
-            return new(x, y, x + width, y + height);
-        });
+        _jsTextFormatter = new TextFormatter(Runtime);
 
         _timer = new Timer(750);
         _timer.Elapsed += OnTimerElapsed;
@@ -149,6 +141,7 @@
         _errors = null;
         _warnings = null;
         var logger = new Logger();
+        XmlDocument doc = null;
         try
         {
             var code = await _scriptEditor.GetValue();
@@ -165,17 +158,8 @@
                 ckt.Metadata.Add("script", code);
             ckt.Style = await _styleEditor.GetValue();
 
-            // This makes sure that the text formatter (that will compute text sizes),
-            // uses the right style
-            await Runtime.InvokeVoidAsync("updateStyle", ckt.Style);
-
             if (ckt.Count > 0)
-            {
-                var doc = ckt.Render(logger, _jsTextFormatter);
-                return doc;
-            }
-            else
-                return null;
+                doc = ckt.Render(logger, _jsTextFormatter);
         }
         catch (Exception ex)
         {
@@ -184,6 +168,6 @@
         }
         _errors = logger.Error.ToString();
         _warnings = logger.Warning.ToString();
-        return null;
+        return doc;
     }
 }

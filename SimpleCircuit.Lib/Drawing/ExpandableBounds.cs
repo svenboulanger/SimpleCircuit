@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Drawing
 {
@@ -7,74 +8,54 @@ namespace SimpleCircuit.Drawing
     /// </summary>
     public class ExpandableBounds
     {
+        private double _l = 0, _r = 0, _t = 0, _b = 0;
+        
         /// <summary>
-        /// Gets the left coordinate.
+        /// Gets the bounds.
         /// </summary>
-        /// <value>
-        /// The left coordinate.
-        /// </value>
-        public double Left { get; private set; }
-
-        /// <summary>
-        /// Gets the right coordinate.
-        /// </summary>
-        /// <value>
-        /// The right coordinate.
-        /// </value>
-        public double Right { get; private set; }
-
-        /// <summary>
-        /// Gets the top coordinate.
-        /// </summary>
-        /// <value>
-        /// The top coordinate.
-        /// </value>
-        public double Top { get; private set; }
-
-        /// <summary>
-        /// Gets the bottom coordinate.
-        /// </summary>
-        /// <value>
-        /// The bottom coordinate.
-        /// </value>
-        public double Bottom { get; private set; }
-
-        /// <summary>
-        /// Gets the width.
-        /// </summary>
-        /// <value>
-        /// The width.
-        /// </value>
-        public double Width => Math.Abs(Right - Left);
-
-        /// <summary>
-        /// Gets the height.
-        /// </summary>
-        /// <value>
-        /// The height.
-        /// </value>
-        public double Height => Math.Abs(Bottom - Top);
+        public Bounds Bounds
+        {
+            get
+            {
+                return new(_l, _t, _r, _b);
+            }
+        }
 
         /// <summary>
         /// Expands the bounds looking at the specified point.
         /// </summary>
         /// <param name="x">The x-coordinate.</param>
         /// <param name="y">The y-coordinate.</param>
-        /// <param name="extra">The extra space that needs to be reserved.</param>
-        public void Expand(double x, double y, double extra = 1)
+        public void Expand(double x, double y)
         {
-            Left = Math.Min(x - extra, Left);
-            Right = Math.Max(x + extra, Right);
-            Bottom = Math.Max(y + extra, Bottom);
-            Top = Math.Min(y - extra, Top);
+            _l = Math.Min(x, _l);
+            _r = Math.Max(x, _r);
+            _b = Math.Max(y, _b);
+            _t = Math.Min(y, _t);
         }
 
         /// <summary>
         /// Expands the bounds looking at the specified point.
         /// </summary>
         /// <param name="vector">The vector.</param>
-        /// <param name="extra">The extra space that needs to be reserved.</param>
-        public void Expand(Vector2 vector, double extra = 1)
-            => Expand(vector.X, vector.Y, extra);
+        public void Expand(Vector2 vector)
+            => Expand(vector.X, vector.Y);
+
+        /// <summary>
+        /// Expands the bounds looking at the specified points.
+        /// </summary>
+        /// <param name="vectors">The vector.</param>
+        public void Expand(IEnumerable<Vector2> vectors)
+        {
+            foreach (var v in vectors)
+                Expand(v);
+        }
+
+        /// <summary>
+        /// Converts the bounds to a string.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+            => Bounds.ToString();
     }
 }
