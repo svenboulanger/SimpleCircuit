@@ -20,11 +20,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <div style="position:absolute;left:-9999cm;top:-9999cm;">
-        <svg id="svg_measure" xmlns="http://www.w3.org/2000/svg">
-            <style type="text/css">
-            </style>
-        </svg>
+    <div style="position:absolute;left:-9999cm;top:-9999cm;" id="div_measure">
     </div>
 
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
@@ -180,20 +176,17 @@
             });
         }
 
-        function updateStyle(css) {
-            var svg1 = document.getElementById('svg_measure');
-            var styleTag = svg1.getElementsByTagName('style')[0];
-            styleTag.innerHTML = css;
-        }
-        function calculateBounds(text, size) {
-            var svg1 = document.getElementById('svg_measure');
-            e = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-            e.style.display = "inline";
-            e.style.fontSize = size + 'pt';
-            e.innerHTML = text;
-            svg1.appendChild(e);
+        function calculateBounds(element) {
+            // Element should be a piece of SVG code
+            // Parse the element to compute the bounds of
+            var parser = new DOMParser();
+            var e = parser.parseFromString(element, "image/svg+xml").documentElement;
+
+            // Compute the bounding box
+            var div_measure = document.getElementById('div_measure');
+            div_measure.appendChild(e);
             var b = e.getBBox();
-            svg1.removeChild(e);
+            div_measure.removeChild(e);
             return {
                 x: b.x,
                 y: b.y,

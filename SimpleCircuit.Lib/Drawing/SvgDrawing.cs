@@ -41,17 +41,7 @@ namespace SimpleCircuit
         /// <value>
         /// The style.
         /// </value>
-        public string Style { get; set; } = 
-@"path, polyline, line, circle, polygon {
-    stroke: black;
-    stroke-width: 0.5pt;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-.point circle { fill: black; }
-.plane { stroke-width: 1pt; }
-text { font-family: Tahoma, Verdana, Segoe, sans-serif; }";
+        public string Style { get; set; }
 
         /// <summary>
         /// Gets or sets the text formatter.
