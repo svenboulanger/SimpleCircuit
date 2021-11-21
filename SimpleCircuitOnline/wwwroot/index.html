@@ -8,11 +8,16 @@
     <!-- <base href="/SimpleCircuit/" /> -->
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
+    <link href="SimpleCircuitOnline.styles.css" rel="stylesheet" />
     <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css" rel="stylesheet" />
 </head>
 
 <body>
-    <app>Loading...</app>
+    <app>
+        <div class="spinner-border loading-icon text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </app>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -177,13 +182,11 @@
         }
 
         function calculateBounds(element) {
-            // Element should be a piece of SVG code
-            // Parse the element to compute the bounds of
+            var div_measure = document.getElementById('div_measure');
+
+            // We simply parse the XML and return the bounds
             var parser = new DOMParser();
             var e = parser.parseFromString(element, "image/svg+xml").documentElement;
-
-            // Compute the bounding box
-            var div_measure = document.getElementById('div_measure');
             div_measure.appendChild(e);
             var b = e.getBBox();
             div_measure.removeChild(e);

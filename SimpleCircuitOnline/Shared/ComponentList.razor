@@ -1,0 +1,72 @@
+﻿@using SimpleCircuit;
+@using System.Text.RegularExpressions;
+@using System.Timers;
+
+@* Make a search function as well *@
+<EditForm Model="this" class="form-inline my-2 mx-3" OnSubmit="UpdateFilter">
+    <InputText @bind-Value="_filterString" class="form-control w-100" placeholder="Search" aria-label="Search" />
+</EditForm>
+
+@foreach (var category in _categories)
+{
+    <Expandable Title="@category.Key" Class="mt-2 mx-3" Expanded="_expandAll">
+        @foreach (var description in category.Value.Where(IsFiltered))
+        {
+            <ComponentHelp Description="description" />
+        }
+    </Expandable>
+}
+
+@code
+{
+    private static SimpleCircuit.Parser.ParsingContext Context { get; } = new SimpleCircuit.Parser.ParsingContext();
+    private string _filterString = string.Empty;
+    private bool _expandAll = false;
+    private readonly HashSet<string> _searchTerms = new();
+    private Dictionary<string, List<Utility.ComponentDescription>> _categories = new Dictionary<string, List<Utility.ComponentDescription>>();
+
+    private bool IsFiltered(Utility.ComponentDescription description)
+    {
+        int count = 0;
+        foreach (var term in _searchTerms)
+        {
+            if (description.Name.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
+                description.Key.Contains(term, StringComparison.CurrentCultureIgnoreCase))
+                count++;
+        }
+        return count == _searchTerms.Count;
+    }
+
+    private void UpdateFilter(EditContext context)
+    {
+        _searchTerms.Clear();
+        if (string.IsNullOrWhiteSpace(_filterString))
+        {
+            _expandAll = false;
+        }
+        else
+        {
+            foreach (string term in _filterString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                _searchTerms.Add(term);
+            _expandAll = true;
+        }
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Find the categories
+        foreach (var description in Utility.Components(typeof(SimpleCircuit.Parser.Parser).Assembly).OrderBy(d => d.Key))
+        {
+            string category = description.Category ?? "General";
+            if (!_categories.TryGetValue(category, out var list))
+            {
+                list = new List<Utility.ComponentDescription>();
+                _categories.Add(category, list);
+            }
+            list.Add(description);
+        }
+    }
+}

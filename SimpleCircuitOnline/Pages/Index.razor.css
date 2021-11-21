@@ -1,0 +1,8 @@
+﻿.split-screen {
+    display: grid;
+    grid-template-columns: 10px minmax(400px, 35%) 10px 1fr 10px;
+    grid-template-rows: 10px 1fr 10px;
+    grid-template-areas: ". . . . ." ". sidebar . output ." ". . . . .";
+}
+.sidebar { grid-area: sidebar; }
+.output { grid-area: output; }

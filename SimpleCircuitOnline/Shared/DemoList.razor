@@ -1,41 +1,16 @@
 ﻿
-@if (Show && Demo.Demos != null)
+@if (Demo.Demos != null)
 {
-    <table class="table table-hover">
-        <thead class="thead-light">
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var demo in Demo.Demos)
-            {
-                <tr>
-                    <td><a href="javascript:void(0);" @onclick="@(x => Update(demo.Code))">@demo.Title</a></td>
-                    <td>@demo.Description</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    @foreach (var demo in Demo.Demos)
+    {
+        <a @onclick="x => Update(demo.Code)" class="bd-callout d-block" role="button">
+            <h5 class="mb-1">@demo.Title</h5>
+            <p class="mb-0 text-muted">@demo.Description</p>
+        </a>
+    }
 }
 
 @code {
-    [Parameter]
-    public bool Show
-    {
-        get => _show;
-        set
-        {
-            if (_show != value)
-            {
-                _show = value;
-                StateHasChanged();
-            }
-        }
-    }
-    private bool _show = false;
-
     [Parameter]
     public EventCallback<string> DemoSelected { get; set; }
 

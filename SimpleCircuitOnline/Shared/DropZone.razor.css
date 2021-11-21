@@ -1,0 +1,10 @@
+﻿.dropzone {
+    width: 100%;
+}
+.dropzone label:hover {
+    cursor: pointer;
+}
+.dropzone.hover {
+    border: 1px dashed #0087F7;
+    border-radius: 0.375rem;
+}

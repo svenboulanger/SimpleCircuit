@@ -1,68 +1,180 @@
 ﻿@using SimpleCircuit;
+@using System.IO;
+@using System.Xml;
+@using System.Reflection; 
+@using SimpleCircuit.Components;
 
-@if (Show)
-{
-<ul class="nav nav-tabs">
-    @foreach (var category in _categories.Keys)
-    {
-        <li class="nav-item">
-            <a class="nav-link@(string.CompareOrdinal(category, _current) == 0 ? " active" : "")" style="cursor: pointer" @onclick="x => Select(category)">@category</a>
-        </li>
-    }
-</ul>
-<div class="" style="width: 100%">
-    @if (_categories != null && _categories.TryGetValue(_current, out var list))
-    {
-        @foreach (var d in list)
+<div class="@TopLevelClasses">
+    <div class="mh-100 p-2 d-flex flex-column justify-content-center" style="background-color: #eee;">
+        <div class="p-0 m-0 text-center" style="min-width: @(MaxPreviewWidth)px;">
+            @((MarkupString)CreateSvg())
+        </div>
+    </div>
+    <div class="flex-fill p-2">
+        <h5>@(Description.Key)<small class="text-muted">name</small></h5>
+        <p>@(Description.Name)</p>
+        <p>
+            <a href="javascript:void(0);" @onclick="x => { _showPins = !_showPins; StateHasChanged(); }" class="btn btn-sm @(_showPins ? "btn-outline-info" : "btn-info")">Pins <span class="badge badge-pill @(_showPins ? "badge-info" : "badge-light")">@(Component.Pins.Count)</span></a>
+            <a href="javascript:void(0);" @onclick="x => { _showProperties = !_showProperties; StateHasChanged(); }" class="btn btn-sm @(_showProperties ? "btn-outline-info" : "btn-info")">Properties <span class="badge badge-pill @(_showProperties ? "badge-info" : "badge-light")">@(Properties.Count)</span></a>
+        </p>
+        @if (_showPins)
         {
-            <ComponentCard Component="@Context.Factory.Create(d.Key, null)" Name="@d.Name" Key="@d.Key" />
+            <dl class="row">
+            @foreach (var pin in Component.Pins)
+            {
+                <dt class="col-sm-4 small"><strong>@(string.Join(", ", Component.Pins.NamesOf(pin)))</strong></dt>
+                <dd class="col-sm-8 small">@(pin.Description)</dd>
+            }
+            </dl>
+        }
+        @if (_showProperties)
+        {
+            <dl class="row">
+            @foreach (var property in Properties)
+            {
+                <dt class="col-sm-4 small"><strong>@(property.Item1.Name)</strong></dt>
+                <dd class="col-sm-8 small">@(property.Item2)</dd>
+            }
+            </dl>
+        }
+    </div>
+</div>
+
+@code {
+    private const double MaxPreviewWidth = 90;
+    private Utility.ComponentDescription _description;
+    private IDrawable _component;
+    private bool _showPins = false, _showProperties = false;
+    private List<(PropertyInfo, string)> _properties;
+
+    [Parameter]
+    public string Class { get; set; }
+
+    protected string TopLevelClasses
+    {
+        get
+        {
+            var set = new HashSet<string>()
+            {
+                "bd-callout",
+                "p-0",
+                "d-flex",
+                "flex-row"
+            };
+            if (!string.IsNullOrWhiteSpace(Class))
+            {
+                foreach (var nc in Class.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    set.Add(nc);
+            }
+            return string.Join(' ', set);
         }
     }
-</div>
-}
 
-@code
-{
     [Parameter]
-    public bool Show
+    public Utility.ComponentDescription Description
     {
-        get => _show;
+        get => _description;
         set
         {
-            if (_show != value)
-            {
-                _show = value;
-                StateHasChanged();
-            }
+            _description = value;
+            _properties = null;
+            _component = null;
+            _showPins = false;
+            _showProperties = false;
         }
     }
 
-    private static SimpleCircuit.Parser.ParsingContext Context { get; } = new SimpleCircuit.Parser.ParsingContext();
 
-    private bool _show = false;
-    private string _current = "General";
-    private Dictionary<string, List<Utility.ComponentDescription>> _categories = new Dictionary<string, List<Utility.ComponentDescription>>();
-
-    private void Select(string category)
+    /// <summary>
+    /// Gets the properties of the component.
+    /// </summary>
+    protected List<(PropertyInfo, string)> Properties
     {
-        _current = category;
-        StateHasChanged();
-    }
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        // Find the categories
-        foreach (var description in Utility.Components(typeof(SimpleCircuit.Parser.Parser).Assembly).OrderBy(d => d.Key))
+        get
         {
-            string category = description.Category ?? "General";
-            if (!_categories.TryGetValue(category, out var list))
+            if (_properties == null && Description != null)
             {
-                list = new List<Utility.ComponentDescription>();
-                _categories.Add(category, list);
+                _properties = new();
+                foreach (var p in Description.Type.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+                {
+                    if (!p.CanRead || !p.CanWrite)
+                        continue;
+                    if (p.PropertyType != typeof(double)
+                        && p.PropertyType != typeof(bool)
+                        && p.PropertyType != typeof(string)
+                        && p.PropertyType != typeof(int))
+                        continue;
+                    string description = p.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "";
+                    _properties.Add((p, description));
+                }
             }
-            list.Add(description);
+            return _properties;
+        } 
+    }
+    
+    /// <summary>
+    /// Gets the component for the specified description.
+    /// </summary>
+    protected IDrawable Component
+    {
+        get
+        {
+            if (_component == null)
+            {
+                var options = new Options();
+                var ctor = Description.Type.GetConstructors().First();
+                var ps = ctor.GetParameters();
+                if (ps.Length == 2)
+                    _component = (IDrawable)ctor.Invoke(new object[] { Description.Name, options });
+                else
+                    _component = (IDrawable)ctor.Invoke(new object[] { Description.Name });
+            }
+            return _component;
         }
+    }
+    
+
+    private string CreateSvg()
+    {
+        if (Description == null)
+            return "";
+
+        var drawing = new SvgDrawing();
+        Component.Render(drawing);
+        drawing.Style = GraphicalCircuit.DefaultStyle;
+        var doc = drawing.GetDocument();
+
+        // Try to resize the component
+        if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
+            w = 16.0;
+        if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
+            h = 16.0;
+        if (w > MaxPreviewWidth)
+        {
+            h = h / w * MaxPreviewWidth;
+            w = MaxPreviewWidth;
+        }
+        doc.DocumentElement.SetAttribute("width", $"{w:F0}px");
+        doc.DocumentElement.SetAttribute("height", $"{h:F0}px");
+
+        using var sw = new StringWriter();
+        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            doc.WriteTo(xml);
+        return sw.ToString();
+    }
+
+    private string GetTypeName(PropertyInfo property)
+    {
+        var type = property.PropertyType;
+        string typeName;
+        if (type == typeof(double) || type == typeof(int))
+            typeName = "number";
+        else if (type == typeof(string))
+            typeName = "string";
+        else if (type == typeof(bool))
+            typeName = "boolean";
+        else
+            typeName = "?";
+        return typeName;
     }
 }

@@ -1,0 +1,63 @@
+﻿<div class="@DivClasses">
+    <a href="javascript:void(0);" @onclick="x => { _expanded = !_expanded; StateHasChanged(); }">
+        @if (_expanded)
+        {
+            <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="currentColor" class="bi bi-chevron-down m-1" viewBox="0 0 16 16">
+              <path style="fill: black; stroke: none;" fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        }
+        else
+        {
+            <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="currentColor" class="bi bi-chevron-right m-1" viewBox="0 0 16 16">
+              <path style="fill: black; stroke: none;" fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        }
+        @Title
+    </a>
+    <div class="@(_expanded ? "" : "collapse")">
+        @ChildContent
+    </div>
+</div>
+
+
+@code {
+    private bool _expanded = false;
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public bool Expanded
+    {
+        get => _expanded;
+        set
+        {
+            if (_expanded != value)
+            {
+                _expanded = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    protected string DivClasses
+    {
+        get
+        {
+            HashSet<string> cl = new();
+            if (!string.IsNullOrWhiteSpace(Class))
+            {
+                foreach (string nc in Class.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    cl.Add(nc);
+            }
+            cl.Add("accordion");
+            return string.Join(' ', cl);
+        }
+    }
+}

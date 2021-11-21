@@ -1,0 +1,26 @@
+﻿<li class="nav-item">
+    <a href="javascript:void(0);" @onclick="Select" class="nav-link @(Menu.Selected == this ? "active" : "")">@Title</a>
+</li>
+
+@code {
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter]
+    public TabMenu Menu { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    protected void Select()
+    {
+        Menu.Select(this);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Menu.AddTab(this);
+    }
+}

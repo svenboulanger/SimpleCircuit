@@ -1,0 +1,43 @@
+﻿
+<CascadingValue Value="this">
+<ul class="nav nav-tabs">
+    @ChildContent
+</ul>
+
+@foreach (var tab in _tabs)
+{
+<div class="h-100 p-2 border border-top-0 rounded-bottom overflow-hidden@(Selected == tab ? "" : " d-none")">
+    @tab.ChildContent
+</div>
+}
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    public Tab Selected { get; private set; }
+
+    private readonly List<Tab> _tabs = new();
+
+    public void AddTab(Tab tab)
+    {
+        if (Selected == null)
+            Select(tab);
+        _tabs.Add(tab);
+    }
+
+    /// <summary>
+    /// Selects a new tab.
+    /// </summary>
+    /// <param name="index">The tab index.</param>
+    /// <returns></returns>
+    public void Select(Tab tab)
+    {
+        if (Selected != tab)
+        {
+            Selected = tab;
+            StateHasChanged();
+        }
+    }
+}

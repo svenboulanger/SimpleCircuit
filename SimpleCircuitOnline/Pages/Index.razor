@@ -6,35 +6,39 @@
 @using SimpleCircuitOnline.Shared
 @inject IJSRuntime Runtime 
 
-<div class="split-screen">
-    <div class="input-script card">
-        <div class="card-header">
-            Circuit
-        </div>
-        <div class="card-body">
-            <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height border" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
-        </div>
+<div class="split-screen w-100 h-100 overflow-hidden">
+    <div class="sidebar d-flex flex-column justify-content-start overflow-hidden">
+        <TabMenu>
+            <Tab Title="Script">
+                <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="h-100 overflow-hidden" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
+            </Tab>
+            <Tab Title="Style">
+                <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="h-100 overflow-hidden" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
+            </Tab>
+            <Tab Title="Help">
+                <div class="w-100 h-100 overflow-auto">
+                    <Expandable Title="Documentation" Class="mt-2">
+                        <a href="https://github.com/svenboulanger/SimpleCircuit" target="_blank" class="bd-callout d-block">Project website</a>
+                        <a href="https://github.com/svenboulanger/SimpleCircuit/wiki" target="_blank" class="bd-callout d-block">Wiki</a>
+                    </Expandable>
+                    <Expandable Title="Demo's" Class="mt-2">
+                        <DemoList DemoSelected="@(x => SetCurrentScript(x))" />
+                    </Expandable>
+                    <Expandable Title="Global options" Class="mt-2">
+                        <GlobalOptionList Editor="_scriptEditor" />
+                    </Expandable>
+                    <Expandable Title="Components" Class="mt-2">
+                        <ComponentList />
+                    </Expandable>
+                </div>
+            </Tab>
+        </TabMenu>
     </div>
-    <div class="input-style card">
-        <div class="card-header">
-            Style (CSS)
-        </div>
-        <div class="card-body">
-            <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height border" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
-        </div>
-    </div>
-    <div class="svg-output">
-        <SvgOutput Svg="@_svg" Loading="_loading" />
+    <div class="output overflow-auto">
+        <DropZone Upload="@UploadFile" Download="@DownloadFile">
+            <SvgOutput Svg="@_svg" Loading="_loading" />
+        </DropZone>
         <Errors Error="@_errors" Warning="@_warnings" />
-        <div class="clearfix">
-            <a href="javascript:void(0);" class="btn btn-primary float-right m-1" @onclick="DownloadSvg">Download SVG</a>
-            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showHelp = !_showHelp)">@(_showHelp ? "Hide components" : "Show components")</a>
-            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showOptions = !_showOptions)">@(_showOptions ? "Hide global options" : "Show global options")</a>
-            <a href="javascript:void(0);" class="btn btn-secondary float-right m-1" @onclick="@(x => _showDemo = !_showDemo)">@(_showDemo ? "Hide demo's" : "Show demo's")</a>
-        </div>
-        <GlobalOptionList Show="_showOptions" Editor="_scriptEditor" />
-        <DemoList Show="_showDemo" DemoSelected="@(x => { _scriptEditor.SetValue(x); })" />
-        <ComponentHelp Show="_showHelp" />
     </div>
 </div>
 
@@ -43,10 +47,33 @@
     private string _svg, _errors, _warnings;
     private Timer _timer;
     private Task _task = null;
-    private bool _showHelp = false, _showDemo = false, _showOptions = false;
     private int _loading;
     private MonacoEditor _scriptEditor, _styleEditor;
     private TextFormatter _jsTextFormatter;
+    private bool _updateDynamic = false, _useDOMSvg = true;
+
+    private async Task SetCurrentScript(string script, string style = null)
+    {
+        // Temporarily suspend any dynamic updates
+        _updateDynamic = false;
+        Update(null);
+
+        // Update the script
+        if (!string.IsNullOrWhiteSpace(script))
+        {
+            await _scriptEditor.SetValue(script);
+            if (!string.IsNullOrWhiteSpace(style))
+                await _styleEditor.SetValue(style);
+
+            // Update the preview
+            await RenderPreview();
+            _loading = 0;
+            StateHasChanged();
+        }
+
+        // Enable dynamic updates again
+        _updateDynamic = true;
+    }
 
     private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
     {
@@ -54,47 +81,70 @@
         {
             AutomaticLayout = true,
             Language = "text/css",
-            WordWrap = "on"
+            WordWrap = "on",
         };
     }
 
     private void Update(ModelContentChangedEvent e)
     {
-        _timer.Stop();
-        _timer.Start();
-        if (_loading == 0)
-            _loading = 1;
+        if (_updateDynamic)
+        {
+            _timer.Stop();
+            _timer.Start();
+            if (_loading == 0)
+                _loading = 1;
+        }
+        else
+        {
+            // Just stop
+            _loading = 0;
+            _timer.Stop();
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
         // This text formatter will invoke a JavaScript method that uses getBBox() to measure a text size
         _jsTextFormatter = new TextFormatter(Runtime);
-
-        _timer = new Timer(750);
-        _timer.Elapsed += OnTimerElapsed;
-        _timer.AutoReset = false;
-
-        // Register our own language
-        // Find all the keys
-        List<string> keys = new();
-        foreach (var component in Utility.Components(typeof(Utility).Assembly))
-            keys.Add(component.Key);
-        await Runtime.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
-        var model = await _scriptEditor.GetModel();
-        await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
-        await MonacoEditorBase.SetTheme("simpleCircuitTheme");
-
-        // Set the default values
-        await _scriptEditor.SetValue(Demo.Demos[0].Code);
-        await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle);
-        await RenderPreview();
     }
 
-    public async Task DownloadSvg()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            // Create a timer that will determine how quickly the preview updates after changes
+            _timer = new Timer(750);
+            _timer.Elapsed += OnTimerElapsed;
+            _timer.AutoReset = false;
+
+            // Register our own language keywords
+            List<string> keys = new();
+            foreach (var component in Utility.Components(typeof(Utility).Assembly))
+                keys.Add(component.Key);
+            await Runtime.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
+            var model = await _scriptEditor.GetModel();
+            await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
+            await MonacoEditorBase.SetTheme("simpleCircuitTheme");
+
+            // Give the user an initial demo
+            await SetCurrentScript(Demo.Demos[0].Code, GraphicalCircuit.DefaultStyle);
+        }
+    }
+
+    protected async Task UploadFile(DropZone.UploadEventArgs args)
+    {
+        _errors = args.Errors;
+        _warnings = args.Warnings;
+        await SetCurrentScript(args.Script, args.Style);
+    }
+
+    public async Task DownloadFile()
+    {
+        _errors = null;
+        _warnings = null;
         var doc = await ComputeXml(includeScript: true);
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
@@ -114,6 +164,8 @@
         else
         {
             _loading = 2;
+            _errors = null;
+            _warnings = null;
             StateHasChanged();
             _timer.Stop();
             _task =
@@ -128,9 +180,17 @@
         if (doc != null)
         {
             using var sw = new StringWriter();
-            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = _useDOMSvg }))
                 doc.WriteTo(xml);
-            _svg = sw.ToString();
+            if (_useDOMSvg)
+            {
+                _svg = sw.ToString();
+            }
+            else
+            {
+                string base64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
+                _svg = $"<img src=\"data:image/svg+xml;base64,{base64}\" />";
+            }
         }
         else
             _svg = null;
@@ -159,15 +219,23 @@
             ckt.Style = await _styleEditor.GetValue();
 
             if (ckt.Count > 0)
+            {
                 doc = ckt.Render(logger, _jsTextFormatter);
+            }
         }
         catch (Exception ex)
         {
             logger.Post(new SimpleCircuit.Diagnostics.DiagnosticMessage(SimpleCircuit.Diagnostics.SeverityLevel.Error,
                 "?", ex.Message));
         }
-        _errors = logger.Error.ToString();
-        _warnings = logger.Warning.ToString();
+
+        // Add our errors and warnings
+        string errors = logger.Error.ToString();
+        if (!string.IsNullOrWhiteSpace(errors))
+            _errors = (_errors == null) ? errors : _errors + Environment.NewLine + errors;
+        string warnings = logger.Warning.ToString();
+        if (!string.IsNullOrWhiteSpace(warnings))
+            _warnings = (_warnings == null) ? warnings : _warnings + Environment.NewLine + warnings;
         return doc;
     }
 }

@@ -392,15 +392,6 @@ namespace SimpleCircuit
         {
             var svg = _document.DocumentElement;
 
-            // Try to get the bounds of this
-            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Bounds;
-
-            // Apply a margin along the edges
-            bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);
-            svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());
-            svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
-            svg.SetAttribute("viewBox", $"{Convert(bounds.Left)} {Convert(bounds.Top)} {Convert(bounds.Width + 2 * Margin)} {Convert(bounds.Height + 2 * Margin)}");
-
             // Add stylesheet info if necessary
             if (!string.IsNullOrWhiteSpace(Style))
             {
@@ -408,6 +399,15 @@ namespace SimpleCircuit
                 style.InnerText = Style;
                 svg.PrependChild(style);
             }
+
+            // Try to get the bounds of this
+            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Bounds;
+
+            // Apply a margin along the edges
+            bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);
+            svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());
+            svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
+            svg.SetAttribute("viewBox", $"{Convert(bounds.Left)} {Convert(bounds.Top)} {Convert(bounds.Width)} {Convert(bounds.Height)}");
 
             return _document;
         }
