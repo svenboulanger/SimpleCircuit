@@ -5,8 +5,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An impedance/admittance.
     /// </summary>
-    [SimpleKey("Z", "An impedance", Category = "Analog")]
-    [SimpleKey("Y", "An admittance", Category = "Analog")]
+    [SimpleKey("Z", "An impedance.", Category = "Analog")]
+    [SimpleKey("Y", "An admittance.", Category = "Analog")]
     public class Impedance : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>

@@ -32,14 +32,14 @@ namespace SimpleCircuit.Components.Analog
         protected override void Draw(SvgDrawing drawing)
         {
             // Wires
-            drawing.Segments(new[]
+            drawing.Segments(new Vector2[]
             {
-                new Vector2(-8, 0), new Vector2(-6, 0),
-                new Vector2(6, 0), new Vector2(8, 0),
+                new(-8, 0), new(-6, 0),
+                new(6, 0), new(8, 0),
             }, new("wire"));
 
             // Circle
-            drawing.Circle(new Vector2(0, 0), 6);
+            drawing.Circle(new(0, 0), 6);
             if (AC)
             {
                 double handle = 1.7 / Math.Sqrt(2); // Slighly exaggerated curves

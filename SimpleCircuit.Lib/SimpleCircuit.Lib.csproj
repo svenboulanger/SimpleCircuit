@@ -32,6 +32,8 @@
     <Compile Include="Components\Analog\BipolarNpnTransistor.cs" />
     <Compile Include="Components\Analog\BipolarPnpTransistor.cs" />
     <Compile Include="Components\Analog\Capacitor.cs" />
+    <Compile Include="Components\Analog\ControlledCurrentSource.cs" />
+    <Compile Include="Components\Analog\ControlledVoltageSource.cs" />
     <Compile Include="Components\Analog\CurrentSource.cs" />
     <Compile Include="Components\Analog\Diode.cs" />
     <Compile Include="Components\Analog\Impedance.cs" />

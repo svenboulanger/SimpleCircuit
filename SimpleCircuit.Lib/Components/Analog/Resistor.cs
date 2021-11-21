@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A resistor.
     /// </summary>
-    [SimpleKey("R", "A resistor", Category = "Analog")]
+    [SimpleKey("R", "A resistor. Potentially programmable.", Category = "Analog")]
     public class Resistor : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>

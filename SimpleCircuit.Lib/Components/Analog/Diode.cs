@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A diode.
     /// </summary>
-    [SimpleKey("D", "A diode", Category = "Analog")]
+    [SimpleKey("D", "A diode.", Category = "Analog")]
     public class Diode : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>
