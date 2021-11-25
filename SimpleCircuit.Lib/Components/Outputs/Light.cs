@@ -1,12 +1,12 @@
 ﻿using SimpleCircuit.Components.Pins;
 using System;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Components.Outputs
 {
     /// <summary>
     /// A light symbol.
     /// </summary>
-    [SimpleKey("LIGHT", "A light point.", Category = "Analog")]
+    [SimpleKey("LIGHT", "A light point.", Category = "Outputs")]
     public class Light : ScaledOrientedDrawable, ILabeled
     {
         private static readonly double _sqrt2 = Math.Sqrt(2) * 2;

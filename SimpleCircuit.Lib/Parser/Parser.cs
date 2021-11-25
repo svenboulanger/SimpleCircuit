@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -174,21 +175,45 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.OpenParenthesis))
             {
                 lexer.SkipWhile(TokenType.Whitespace);
-                if (!lexer.Expect(TokenType.String, null, "PE001", context.Diagnostics))
-                    lexer.SkipWhile(~TokenType.CloseParenthesis & ~TokenType.Newline);
-                string label = lexer.Content.Substring(1, lexer.Content.Length - 2);
-                lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                do
+                {
+                    lexer.Branch(TokenType.Comma);
+                    lexer.SkipWhile(TokenType.Whitespace);
 
+                    // Parse
+                    switch (lexer.Type)
+                    {
+                        case TokenType.String:
+                            string txt = lexer.Content.Substring(1, lexer.Content.Length - 2);
+                            if (component is ILabeled lbl)
+                            {
+                                if (string.IsNullOrWhiteSpace(lbl.Label))
+                                    lbl.Label = txt;
+                                else
+                                    lbl.Label += Environment.NewLine + txt;
+                            }
+                            else
+                            {
+                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
+                                    $"Labeling is not possible for '{component.Name}'"));
+                            }
+                            break;
+
+                        case TokenType.Word:
+                            component.Variants.Add(lexer.Content);
+                            break;
+
+                        default:
+                            lexer.Next();
+                            context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                                $"Could not recognize variant or label for '{component.Name}'"));
+                            break;
+                    }
+                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                }
+                while (lexer.Type == TokenType.Comma);
                 if (lexer.Expect(TokenType.CloseParenthesis, ")", "PE001", context.Diagnostics))
                     lexer.Next();
-
-                if (component is ILabeled lbl)
-                    lbl.Label = label;
-                else
-                {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
-                        $"Labeling is not possible for '{component.Name}'"));
-                }
             }
             return component;
         }
@@ -228,13 +253,8 @@ namespace SimpleCircuit.Parser
                     case "0": orientation = new Vector2(); break;
                     case "a":
                         lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
-                        bool inverted = false;
-                        if (lexer.Branch(TokenType.Dash))
-                            inverted = true;
-                        if (!lexer.Expect(TokenType.Number, null, "PE001", context.Diagnostics))
-                            return null;
-                        double angle = double.Parse(lexer.Content);
-                        orientation = Vector2.Normal((inverted ? angle : -angle) / 180.0 * Math.PI);
+                        double angle = ParseDouble(lexer, context);
+                        orientation = Vector2.Normal(angle / 180.0 * Math.PI);
                         break;
 
                     default:
@@ -770,7 +790,7 @@ namespace SimpleCircuit.Parser
                 lexer.SkipWhile(~TokenType.Newline);
                 return double.NaN;
             }
-            double result = double.Parse(lexer.Content);
+            double result = double.Parse(lexer.Content, System.Globalization.CultureInfo.InvariantCulture);
             if (inverted)
                 result = -result;
             lexer.Next();

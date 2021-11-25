@@ -2,6 +2,7 @@
 using SimpleCircuit.Diagnostics;
 using SpiceSharp.Simulations;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -19,6 +20,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc/>
         [Description("The label next to the element.")]
         public string Label { get; set; }
+
+        /// <inheritdoc />
+        public ISet<string> Variants { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <inheritdoc />
         IPinCollection IDrawable.Pins => _pins;

@@ -1,5 +1,4 @@
-﻿using SimpleCircuit;
-using SimpleCircuit.Parser;
+﻿using SimpleCircuit.Parser;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -10,7 +9,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"L1
+            var script = @"X1 <r> S(open)
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);

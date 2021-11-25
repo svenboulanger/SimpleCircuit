@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
 
         /// <summary>
-        /// Registers the pin's presence in the 
+        /// Registers the pin's presence in the circuit that will solve all coordinates.
         /// </summary>
         /// <param name="context">The context for simulation the graphical elements of the circuit.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>

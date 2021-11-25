@@ -207,6 +207,11 @@ namespace SimpleCircuit.Parser
                     Continue();
                     break;
 
+                case ',':
+                    Type = TokenType.Comma;
+                    Continue();
+                    break;
+
                 case char digit when char.IsDigit(digit):
                     Type = TokenType.Number;
                     Continue();

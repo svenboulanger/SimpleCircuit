@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Remove="Components\IPinDescription.cs" />
+    <Compile Remove="Components\Outputs\Appliance.cs" />
     <Compile Remove="Components\PinDescription.cs" />
   </ItemGroup>
 
@@ -28,13 +29,9 @@
     <Compile Include="Circuits\NodeContext.cs" />
     <Compile Include="Components\Analog\Amplifier.cs" />
     <Compile Include="Components\Analog\AnalogToDigital.cs" />
-    <Compile Include="Components\Analog\Battery.cs" />
     <Compile Include="Components\Analog\BipolarNpnTransistor.cs" />
     <Compile Include="Components\Analog\BipolarPnpTransistor.cs" />
     <Compile Include="Components\Analog\Capacitor.cs" />
-    <Compile Include="Components\Analog\ControlledCurrentSource.cs" />
-    <Compile Include="Components\Analog\ControlledVoltageSource.cs" />
-    <Compile Include="Components\Analog\CurrentSource.cs" />
     <Compile Include="Components\Analog\Diode.cs" />
     <Compile Include="Components\Analog\Impedance.cs" />
     <Compile Include="Components\Analog\Inductor.cs" />
@@ -46,7 +43,6 @@
     <Compile Include="Components\Analog\Switch.cs" />
     <Compile Include="Components\Analog\SwitchSinglePoleDoubleThrow.cs" />
     <Compile Include="Components\Analog\TransmissionLine.cs" />
-    <Compile Include="Components\Analog\VoltageSource.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +62,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Variants\" />
   </ItemGroup>
 
 </Project>

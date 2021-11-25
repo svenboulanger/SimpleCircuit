@@ -111,7 +111,7 @@
             return _properties;
         } 
     }
-    
+
     /// <summary>
     /// Gets the component for the specified description.
     /// </summary>
@@ -132,7 +132,7 @@
             return _component;
         }
     }
-    
+
 
     private string CreateSvg()
     {
@@ -140,8 +140,8 @@
             return "";
 
         var drawing = new SvgDrawing();
-        Component.Render(drawing);
         drawing.Style = GraphicalCircuit.DefaultStyle;
+        Component.Render(drawing);
         var doc = drawing.GetDocument();
 
         // Try to resize the component
@@ -160,7 +160,9 @@
         using var sw = new StringWriter();
         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
             doc.WriteTo(xml);
-        return sw.ToString();
+
+        // Converting to Base 64 allows us to not interfere with any styling going on outside
+        return $"<img src=\"data:image/svg+xml;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()))}\" />";
     }
 
     private string GetTypeName(PropertyInfo property)

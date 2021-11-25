@@ -1,11 +1,11 @@
 ﻿using SimpleCircuit.Components.Pins;
 
-namespace SimpleCircuit.Components.Analog
+namespace SimpleCircuit.Components.Sources
 {
     /// <summary>
     /// A controlled voltage source.
     /// </summary>
-    [SimpleKey("E", "A controlled voltage source.", Category = "Analog")]
+    [SimpleKey("E", "A controlled voltage source.", Category = "Sources")]
     public class ControlledVoltageSource : ScaledOrientedDrawable, ILabeled
     {
         /// <inheritdoc/>

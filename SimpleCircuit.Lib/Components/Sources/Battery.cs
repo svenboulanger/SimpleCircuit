@@ -1,11 +1,11 @@
 ﻿using SimpleCircuit.Components.Pins;
 
-namespace SimpleCircuit.Components.Analog
+namespace SimpleCircuit.Components.Sources
 {
     /// <summary>
     /// A battery.
     /// </summary>
-    [SimpleKey("BAT", "A battery.", Category = "Analog")]
+    [SimpleKey("BAT", "A battery.", Category = "Sources")]
     public class Battery : ScaledOrientedDrawable, ILabeled
     {
         private int _cells = 1;

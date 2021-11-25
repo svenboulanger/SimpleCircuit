@@ -12,6 +12,8 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class Drawable : IDrawable
     {
+        private readonly HashSet<string> _variants = new(StringComparer.OrdinalIgnoreCase);
+
         /// <inheritdoc />
         public string Name { get; }
 
@@ -22,6 +24,9 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         IPinCollection IDrawable.Pins => Pins;
+
+        /// <inheritdoc />
+        public ISet<string> Variants => _variants;
 
         /// <inheritdoc />
         public virtual int Order => 0;
@@ -62,6 +67,8 @@ namespace SimpleCircuit.Components
             go.Classes.Add(GetType().Name.ToLower());
             if (GroupClasses != null)
             {
+                foreach (string name in Variants)
+                    go.Classes.Add(name.ToLower());
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
             }  

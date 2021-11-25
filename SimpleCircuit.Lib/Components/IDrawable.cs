@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -12,6 +13,11 @@ namespace SimpleCircuit.Components
         /// Gets the pins.
         /// </summary>
         public IPinCollection Pins { get; }
+
+        /// <summary>
+        /// Gets the set of variants for this drawable.
+        /// </summary>
+        public ISet<string> Variants { get; }
 
         /// <summary>
         /// Gives the drawable an order in which it can be drawn. This can be used

@@ -109,9 +109,14 @@ namespace SimpleCircuit.Parser
         Question = 0x40000,
 
         /// <summary>
+        /// A comma.
+        /// </summary>
+        Comma = 0x80000,
+
+        /// <summary>
         /// An unknown character.
         /// </summary>
-        Unknown = 0x80000,
+        Unknown = 0x100000,
 
         /// <summary>
         /// All characters

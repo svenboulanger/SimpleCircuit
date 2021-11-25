@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Components.Wires
 {
     /// <summary>
     /// A wire that can have a variable length.

@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
+using SimpleCircuit.Diagnostics;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -9,79 +9,21 @@ namespace SimpleCircuit.Components.Analog
     [SimpleKey("ADC", "An Analog-to-digital converter.", Category = "Digital")]
     public class AnalogToDigital : ScaledOrientedDrawable, ILabeled
     {
-        private double _width = 18, _height = 12;
-        private bool _differentialOutput = false;
-        private bool _differentialInput = false;
-
         /// <summary>
         /// Gets or sets the width of the ADC.
         /// </summary>
         [Description("The width of the ADC.")]
-        public double Width
-        {
-            get => _width;
-            set
-            {
-                _width = value;
-                UpdatePins();
-            }
-        }
+        public double Width { get; set; } = 18;
 
         /// <summary>
         /// Gets or sets the height of the ADC.
         /// </summary>
         [Description("The height of the ADC.")]
-        public double Height
-        {
-            get => _height;
-            set
-            {
-                _height = value;
-                UpdatePins();
-            }
-        }
+        public double Height { get; set; } = 12;
 
         /// <inheritdoc/>
         [Description("The label inside the ADC.")]
         public string Label { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether a differential input is made.
-        /// </summary>
-        public bool DifferentialInput
-        {
-            get => _differentialInput;
-            set
-            {
-                _differentialInput = value;
-                UpdatePins();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether a differential output is used.
-        /// </summary>
-        public bool DifferentialOutput
-        {
-            get => _differentialOutput;
-            set
-            {
-                _differentialOutput = value;
-                UpdatePins();
-            }
-        }
-
-        /// <inheritdoc />
-        protected override IEnumerable<string> GroupClasses
-        {
-            get
-            {
-                if (DifferentialInput)
-                    yield return "diffin";
-                if (DifferentialOutput)
-                    yield return "diffout";
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnalogToDigital"/>
@@ -102,53 +44,47 @@ namespace SimpleCircuit.Components.Analog
         {
             drawing.Polygon(new[]
             {
-                new Vector2(-_width / 2, _height / 2), new Vector2(_width / 2 - _height / 2, _height / 2),
-                new Vector2(_width / 2, 0), new Vector2(_width / 2 - _height / 2, -_height / 2),
-                new Vector2(-_width / 2, -_height / 2)
+                new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
+                new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
+                new Vector2(-Width / 2, -Height / 2)
             });
-
-            if (_differentialOutput)
-            {
-                drawing.Segments(new[]
-                {
-                    new Vector2(_width / 2 - _height / 4, _height / 4), new Vector2(_width / 2, _height / 4),
-                    new Vector2(_width / 2 - _height / 4, -_height / 4), new Vector2(_width / 2, -_height / 4)
-                }, new("wire"));
-            }
 
             if (!string.IsNullOrWhiteSpace(Label))
             {
-                drawing.Text(Label, new Vector2(-_height / 4, 0), new Vector2(0, 0));
+                drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
             }
         }
 
-        private void UpdatePins()
+        /// <inheritdoc />
+        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             var pin1 = (FixedOrientedPin)Pins[0];
             var pin2 = (FixedOrientedPin)Pins[1];
-            if (_differentialInput)
+            if (Variants.Contains("diffin"))
             {
-                pin1.Offset = new(-_width / 2, -_height / 4);
-                pin2.Offset = new(-_width / 2, _height / 4);
+                pin1.Offset = new(-Width / 2, -Height / 4);
+                pin2.Offset = new(-Width / 2, Height / 4);
             }
             else
             {
-                pin1.Offset = new(-_width / 2, 0);
-                pin2.Offset = new(-_width / 2, 0);
+                pin1.Offset = new(-Width / 2, 0);
+                pin2.Offset = new(-Width / 2, 0);
             }
 
             pin1 = (FixedOrientedPin)Pins[2];
             pin2 = (FixedOrientedPin)Pins[3];
-            if (_differentialOutput)
+            if (Variants.Contains("diffout"))
             {
-                pin1.Offset = new(_width / 2 - _height / 4, _height / 4);
-                pin2.Offset = new(_width / 2 - _height / 4, -_height / 4);
+                pin1.Offset = new(Width / 2 - Height / 4, Height / 4);
+                pin2.Offset = new(Width / 2 - Height / 4, -Height / 4);
             }
             else
             {
-                pin1.Offset = new(_width / 2, 0);
-                pin2.Offset = new(_width / 2, 0);
+                pin1.Offset = new(Width / 2, 0);
+                pin2.Offset = new(Width / 2, 0);
             }
+
+            base.DiscoverNodeRelationships(context, diagnostics);
         }
 
         /// <summary>
