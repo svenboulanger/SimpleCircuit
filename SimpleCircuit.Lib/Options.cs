@@ -28,5 +28,8 @@
 
         [Description("Use symbols for electrical installation diagrams.")]
         public bool ElectricalInstallation { get; set; }
+
+        [Description("Use small-signal model related symbols.")]
+        public bool SmallSignal { get; set; }
     }
 }

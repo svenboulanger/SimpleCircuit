@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -19,15 +18,6 @@ namespace SimpleCircuit.Components
         [Description("The label next to the point.")]
         public string Label { get; set; }
 
-        protected override IEnumerable<string> GroupClasses
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(Label))
-                    yield return "labeled";
-            }
-        }
-
         /// <summary>
         /// Creates a point.
         /// </summary>
@@ -36,10 +26,12 @@ namespace SimpleCircuit.Components
             : base(name)
         {
             Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
+
+            DrawingVariants = Variant.Do(DrawPoint);
         }
 
         /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawPoint(SvgDrawing drawing)
         {
             int connections = Pins[0].Connections;
             if (connections == 0 || connections > 2)
@@ -47,7 +39,7 @@ namespace SimpleCircuit.Components
 
             if (!string.IsNullOrWhiteSpace(Label))
             {
-                var n = Vector2.Normal(Angle / 180.0 * Math.PI);
+                var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
                 drawing.Text(Label, n * Distance, n);
             }
         }

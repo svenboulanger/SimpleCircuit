@@ -22,10 +22,12 @@ namespace SimpleCircuit.Components.Sources
         {
             Pins.Add(new FixedOrientedPin("positive", "The current end point.", this, new(-8, 0), new(-1, 0)), "p", "b");
             Pins.Add(new FixedOrientedPin("negative", "The current starting point.", this, new(8, 0), new(1, 0)), "n", "a");
+
+            DrawingVariants = Variant.Do(DrawSource);
         }
 
         /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawSource(SvgDrawing drawing)
         {
             // Wires
             drawing.Segments(new Vector2[]

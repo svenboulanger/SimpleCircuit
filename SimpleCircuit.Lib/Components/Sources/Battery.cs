@@ -27,7 +27,6 @@ namespace SimpleCircuit.Components.Sources
                 _cells = value;
                 if (_cells < 1)
                     _cells = 1;
-                UpdatePins();
             }
         }
 
@@ -41,10 +40,13 @@ namespace SimpleCircuit.Components.Sources
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
             Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");
+
+            DrawingVariants = Variant.Do(DrawBattery);
+            PinUpdate = Variant.Do(UpdatePins);
         }
 
         /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawBattery(SvgDrawing drawing)
         {
             // Wires
             double offset = Length / 2, cellOffset = _cells * 2 - 1; ;

@@ -25,10 +25,17 @@ namespace SimpleCircuit.Components.Outputs
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
+
+            if (options?.ElectricalInstallation ?? false)
+                AddVariant("eic");
+            DrawingVariants = Variant.All(
+                Variant.Do(DrawLamp),
+                Variant.IfNot("eic").Do(DrawCasing));
+            PinUpdate = Variant.Map("eic", UpdatePins);
         }
 
         /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawLamp(SvgDrawing drawing)
         {
             // Wires
             drawing.Segments(new Vector2[]
@@ -43,11 +50,25 @@ namespace SimpleCircuit.Components.Outputs
                 new Vector2(-_sqrt2, -_sqrt2), new Vector2(_sqrt2, _sqrt2),
                 new Vector2(_sqrt2, -_sqrt2), new Vector2(-_sqrt2, _sqrt2)
             });
-            drawing.Circle(new Vector2(), 4);
 
             // Label
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
+        }
+        private void DrawCasing(SvgDrawing drawing)
+            => drawing.Circle(new Vector2(), 4);
+        private void UpdatePins(bool eic)
+        {
+            if (eic)
+            {
+                ((FixedOrientedPin)Pins[0]).Offset = new();
+                ((FixedOrientedPin)Pins[1]).Offset = new();
+            }
+            else
+            {
+                ((FixedOrientedPin)Pins[0]).Offset = new(-6, 0);
+                ((FixedOrientedPin)Pins[1]).Offset = new(6, 0);
+            }
         }
     }
 }

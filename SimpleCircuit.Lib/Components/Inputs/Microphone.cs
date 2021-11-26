@@ -1,7 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Components.Inputs
 {
@@ -21,9 +18,11 @@ namespace SimpleCircuit.Components.Inputs
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, -4), new(0, -1)), "p", "pos", "a");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(0, 4), new(0, 1)), "n", "neg", "b");
+
+            DrawingVariants = Variant.Do(DrawMic);
         }
 
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawMic(SvgDrawing drawing)
         {
             drawing.Circle(new(), 4);
             drawing.Line(new(4, -4), new(4, 4), new("plane"));

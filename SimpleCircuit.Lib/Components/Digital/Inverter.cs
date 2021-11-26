@@ -23,10 +23,12 @@ namespace SimpleCircuit.Components.Digital
         {
             Pins.Add(new FixedOrientedPin("input", "The input pin.", this, new(-6, 0), new(-1, 0)), "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
+
+            DrawingVariants = Variant.Do(DrawInverter);
         }
 
         /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawInverter(SvgDrawing drawing)
         {
             drawing.Polygon(new[]
             {

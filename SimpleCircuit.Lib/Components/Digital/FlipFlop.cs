@@ -26,10 +26,12 @@ namespace SimpleCircuit.Components.Digital
             Pins.Add(new FixedOrientedPin("set", "The set pin.", this, new(0, -11), new(0, -1)), "s", "set");
             Pins.Add(new FixedOrientedPin("nq", "The inverted output pin.", this, new(8, 6), new(1, 0)), "nq", "qn");
             Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(8, -6), new(1, 0)), "q");
+
+            DrawingVariants = Variant.Do(DrawFlipFlop);
         }
 
         /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawFlipFlop(SvgDrawing drawing)
         {
             drawing.Polygon(new[]
             {

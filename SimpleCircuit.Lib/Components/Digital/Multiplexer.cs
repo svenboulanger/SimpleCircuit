@@ -22,11 +22,14 @@ namespace SimpleCircuit.Components.Digital
         {
             Pins.Add(new FixedOrientedPin("a", "The '0' input.", this, new(-5, -4), new(-1, 0)), "a", "0");
             Pins.Add(new FixedOrientedPin("b", "The '1' input.", this, new(-5, 4), new(-1, 0)), "b", "1");
+            Pins.Add(new FixedOrientedPin("c", "The controlling input.", this, new(0, -6), new(0, -1)), "c");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
+
+            DrawingVariants = Variant.Do(DrawMultiplexer);
         }
 
         /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawMultiplexer(SvgDrawing drawing)
         {
             drawing.Polygon(new[] {
                 new Vector2(-5, -8),

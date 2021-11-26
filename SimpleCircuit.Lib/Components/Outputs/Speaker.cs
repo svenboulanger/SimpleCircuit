@@ -1,7 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Components.Outputs
 {
@@ -24,9 +21,13 @@ namespace SimpleCircuit.Components.Outputs
         {
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, -4), new(0, -1)), "p", "pos", "a");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(0, 4), new(0, 1)), "n", "neg", "b");
+
+            DrawingVariants = Variant.All(
+                Variant.Do(DrawSpeaker),
+                Variant.IfNot("off").Do(DrawOn));
         }
 
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawSpeaker(SvgDrawing drawing)
         {
             drawing.Polygon(new Vector2[]
             {
@@ -39,15 +40,15 @@ namespace SimpleCircuit.Components.Outputs
                 new(6, 9), new(2, 4)
             });
 
-            // Some nice sound waves
-            DrawSoundWave(drawing, 8, 0, 3);
-            DrawSoundWave(drawing, 10, 0, 5);
-            DrawSoundWave(drawing, 12, 0, 7);
-
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new(8, 10), new(1, 1));
         }
-
+        private void DrawOn(SvgDrawing drawing)
+        {
+            DrawSoundWave(drawing, 8, 0, 3);
+            DrawSoundWave(drawing, 10, 0, 5);
+            DrawSoundWave(drawing, 12, 0, 7);
+        }
         private void DrawSoundWave(SvgDrawing drawing, double x, double y, double s)
         {
             drawing.OpenBezier(new Vector2[]

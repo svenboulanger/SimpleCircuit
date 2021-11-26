@@ -9,7 +9,17 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"X1 <r> S(open)
+            var script = @"// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed
+// by the pins.
+.subckt ABC R1[p] R2[n]
+R1 <r> R2
+.ends
+
+// Now we can instantiate this subcircuit definition multiple times.
+ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
+
+// They can even be angled because our pins also have a direction!
+Xs <a -45> ABC <a -45> Xe
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);

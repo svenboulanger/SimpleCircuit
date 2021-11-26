@@ -1,8 +1,5 @@
-﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Pins;
-using System;
+﻿using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Parser
 {

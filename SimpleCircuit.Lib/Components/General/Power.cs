@@ -20,10 +20,12 @@ namespace SimpleCircuit.Components
             : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
+
+            DrawingVariants = Variant.Do(DrawPower);
         }
 
         /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawPower(SvgDrawing drawing)
         {
             // Wire
             drawing.Line(new Vector2(0, 0), new Vector2(0, -3), new("wire"));

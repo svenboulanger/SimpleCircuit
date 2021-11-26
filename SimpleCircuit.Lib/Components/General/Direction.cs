@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.General
 {
@@ -19,11 +18,6 @@ namespace SimpleCircuit.Components.General
         {
             Pins.Add(new FixedOrientedPin("input", "The input.", this, new(), new(-1, 0)), "i", "a", "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(), new(1, 0)), "o", "b", "out", "output");
-        }
-
-        /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
-        {
         }
 
         /// <summary>

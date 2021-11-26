@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
 using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
@@ -10,7 +9,6 @@ namespace SimpleCircuit.Components.Analog
     [SimpleKey("OA", "An operational amplifier.", Category = "Analog")]
     public class Opamp : ScaledOrientedDrawable, ILabeled
     {
-        private bool _swapInputs = false;
         private static readonly Vector2[] _pinOffsets = new Vector2[] {
             new(-8, -4), new(-8, 4), new(0, -6), new(0, 6), new(8, 0)
         };
@@ -18,20 +16,6 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc/>
         [Description("The label next to the amplifier.")]
         public string Label { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the inputs need to be swapped.
-        /// </summary>
-        [Description("Swaps the positive and negative inputs.")]
-        public bool SwapInputs
-        {
-            get => _swapInputs;
-            set
-            {
-                _swapInputs = value;
-                UpdatePins();
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Opamp"/> class.
@@ -46,11 +30,12 @@ namespace SimpleCircuit.Components.Analog
             Pins.Add(new FixedOrientedPin("negativesupply", "The negative supply.", this, _pinOffsets[2], new(0, 1)), "vn");
             Pins.Add(new FixedOrientedPin("positivesupply", "The positive supply.", this, _pinOffsets[3], new(0, -1)), "vp");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, _pinOffsets[4], new(1, 0)), "o", "out", "output");
-            UpdatePins();
+
+            PinUpdate = Variant.Map("swap", UpdatePins);
+            DrawingVariants = Variant.Map("swap", DrawOpamp);
         }
 
-        /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawOpamp(SvgDrawing drawing, bool swapInputs)
         {
             drawing.Polygon(new[] {
                 new Vector2(-8, -8),
@@ -61,11 +46,11 @@ namespace SimpleCircuit.Components.Analog
             drawing.Segments(new Vector2[]
             {
                 new(-6, -4), new(-4, -4),
-            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
+            }.Select(v => swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
             drawing.Segments(new Vector2[] {
                 new(-5, 5), new(-5, 3),
                 new(-6, 4), new(-4, 4)
-            }.Select(v => _swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
+            }.Select(v => swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
 
             if (Pins["vn"].Connections > 0)
                 drawing.Line(new(0, -4), new(0, -6));
@@ -75,12 +60,11 @@ namespace SimpleCircuit.Components.Analog
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new(5, 5), new(1, 1));
         }
-
-        protected void UpdatePins()
+        private void UpdatePins(bool swapInputs)
         {
             var pin1 = (FixedOrientedPin)Pins[0];
             var pin2 = (FixedOrientedPin)Pins[1];
-            if (_swapInputs)
+            if (swapInputs)
             {
                 pin1.Offset = _pinOffsets[1];
                 pin2.Offset = _pinOffsets[0];

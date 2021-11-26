@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -25,10 +24,11 @@ namespace SimpleCircuit.Components.Analog
             Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "neg");
             Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "pos");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
+
+            DrawingVariants = Variant.Do(DrawOTA);
         }
 
-        /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawOTA(SvgDrawing drawing)
         {
             // The triangle
             drawing.Polygon(new[] {

@@ -64,8 +64,4 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Variants\" />
-  </ItemGroup>
-
 </Project>

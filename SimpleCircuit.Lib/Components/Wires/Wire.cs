@@ -7,9 +7,6 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class Wire : OrientedDrawable
     {
-        [Description("Makes the wire a bus.")]
-        public bool Bus { get; set; }
-
         /// <inheritdoc />
         public override int Order => -1;
 
@@ -25,6 +22,8 @@ namespace SimpleCircuit.Components.Wires
                 minimum = options.MinimumWireLength;
             Pins.Add(new FixedOrientedPin("start", "The starting point of the wire.", this, new(0, 0), new(-1, 0)), "start");
             Pins.Add(new MinimumOffsetPin("end", "The end point of the wire.", this, new(1, 0), minimum), "end");
+
+            DrawingVariants = Variant.If("bus").DoElse(DrawBus, DrawWire);
         }
 
         /// <summary>
@@ -38,27 +37,21 @@ namespace SimpleCircuit.Components.Wires
             p.MinimumOffset = length;
         }
 
-        /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawWire(SvgDrawing drawing)
+            => drawing.Line(Pins[0].Location, Pins[1].Location, new("wire") { Id = Name });
+        private void DrawBus(SvgDrawing drawing)
         {
-            if (Bus)
-            {
-                drawing.Polyline(new Vector2[] {
+            drawing.Polyline(new Vector2[] {
                     Pins[0].Location,
                     (Pins[0].Location + Pins[1].Location) / 2,
                     Pins[1].Location
-                }, new("wire") { MiddleMarker = Drawing.PathOptions.MarkerTypes.Slash, Id = Name });
-            }
-            else
-            {
-                drawing.Line(Pins[0].Location, Pins[1].Location, new("wire") { Id = Name });
-            }
+                }, new("wire", "bus") { MiddleMarker = Drawing.PathOptions.MarkerTypes.Slash, Id = Name });
         }
 
         /// <inheritdoc />
         public override void Render(SvgDrawing drawing)
         {
-            Draw(drawing);
+            DrawWire(drawing);
         }
     }
 }

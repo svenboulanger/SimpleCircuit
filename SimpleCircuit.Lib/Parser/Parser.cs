@@ -197,10 +197,27 @@ namespace SimpleCircuit.Parser
                                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
                                     $"Labeling is not possible for '{component.Name}'"));
                             }
+                            lexer.Next();
+                            break;
+
+                        case TokenType.Dash:
+                            lexer.Next();
+                            if (!lexer.Check(TokenType.Word))
+                            {
+                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                                    $"Expected a variant at line {lexer.Line}, column {lexer.Column}."));
+                                lexer.SkipWhile(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
+                            }
+                            else
+                            {
+                                component.RemoveVariant(lexer.Content);
+                                lexer.Next();
+                            }
                             break;
 
                         case TokenType.Word:
-                            component.Variants.Add(lexer.Content);
+                            component.AddVariant(lexer.Content);
+                            lexer.Next();
                             break;
 
                         default:
@@ -209,7 +226,7 @@ namespace SimpleCircuit.Parser
                                 $"Could not recognize variant or label for '{component.Name}'"));
                             break;
                     }
-                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                    lexer.SkipWhile(TokenType.Whitespace);
                 }
                 while (lexer.Type == TokenType.Comma);
                 if (lexer.Expect(TokenType.CloseParenthesis, ")", "PE001", context.Diagnostics))
@@ -239,22 +256,22 @@ namespace SimpleCircuit.Parser
                 switch (lexer.Content)
                 {
                     case "n":
-                    case "u": orientation = new(0, -1); break;
+                    case "u": orientation = new(0, -1); lexer.Next(); break;
                     case "s":
-                    case "d": orientation = new(0, 1); break;
+                    case "d": orientation = new(0, 1); lexer.Next(); break;
                     case "e":
-                    case "l": orientation = new(-1, 0); break;
+                    case "l": orientation = new(-1, 0); lexer.Next(); break;
                     case "w":
-                    case "r": orientation = new(1, 0); break;
-                    case "ne": orientation = Vector2.Normal(-Math.PI * 0.25); break;
-                    case "nw": orientation = Vector2.Normal(-Math.PI * 0.75); break;
-                    case "se": orientation = Vector2.Normal(Math.PI * 0.25); break;
-                    case "sw": orientation = Vector2.Normal(Math.PI * 0.75); break;
-                    case "0": orientation = new Vector2(); break;
+                    case "r": orientation = new(1, 0); lexer.Next(); break;
+                    case "ne": orientation = Vector2.Normal(-Math.PI * 0.25); lexer.Next(); break;
+                    case "nw": orientation = Vector2.Normal(-Math.PI * 0.75); lexer.Next();  break;
+                    case "se": orientation = Vector2.Normal(Math.PI * 0.25); lexer.Next(); break;
+                    case "sw": orientation = Vector2.Normal(Math.PI * 0.75); lexer.Next(); break;
+                    case "0": orientation = new Vector2(); lexer.Next(); break;
                     case "a":
                         lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
                         double angle = ParseDouble(lexer, context);
-                        orientation = Vector2.Normal(angle / 180.0 * Math.PI);
+                        orientation = Vector2.Normal(-angle / 180.0 * Math.PI);
                         break;
 
                     default:
@@ -263,7 +280,7 @@ namespace SimpleCircuit.Parser
                         lexer.SkipWhile(~TokenType.Newline);
                         return null;
                 }
-                lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                lexer.SkipWhile(TokenType.Whitespace);
 
                 if (lexer.Branch(TokenType.Plus))
                 {

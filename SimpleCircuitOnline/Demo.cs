@@ -65,6 +65,9 @@ namespace SimpleCircuitOnline
             // Inverting amplifier
             new Demo("2. Inverting amplifier", "An inverting amplifier using an opamp.", string.Join(Environment.NewLine, new[]
             {
+                "// Display signal grounds",
+                ".options smallsignal = true",
+                "",
                 "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
                 "// Wires can be given a fixed length by adding a number after the direction.",
                 "GND1 <u> V1(\"Vin\") <u r> R1(\"R1\") <r> Xfb <r> OA1 <r> Xout <u l> [n]R(\"Rfb\")[p] <l d 20> Xfb",
@@ -154,12 +157,8 @@ namespace SimpleCircuitOnline
             new Demo("Demo: Two-way light switch", "A circuit for switching a light using two switches.", string.Join(Environment.NewLine, new[]
             {
                 "// Make the main circuit",
-                "GND1 <u> V(\"AC\") <u r> SPDT1[t1] <r> X1 <r> [t1]SPDT2[p] <r d> LIGHT1 <d> GND2",
-                "SPDT1[t2] <r> X2 <r> [t2]SPDT2",
-                "",
-                "// These switches can be put in positions 0, 1 or -1",
-                "- SPDT1.Throw = 1",
-                "- SPDT2.Throw = -1",
+                "GND1 <u> V(\"AC\", ac) <u r> SPDT1[t1] <r> X1 <r> [t1]SPDT2[p] <r d> LIGHT1 <d> GND2",
+                "SPDT1(t1)[t2] <r> X2 <r> [t2]SPDT2(t2)",
                 "",
                 "SPDT1[c] <u> T(\"A\")",
                 "SPDT2[c] <u> T(\"B\")",
@@ -212,12 +211,11 @@ namespace SimpleCircuitOnline
                 "// Define a single pixel",
                 ".subckt PIXEL DIRleft DIRtop DIRbottom DIRright",
                 "// Reset",
-                "GND <u> D1 <u> Xd <u> MNrst <u> POW",
+                "GND <u> D(photodiode) <u> Xd <u> MNrst <u> POW",
                 "MNrst[g] <l 0> T(\"RST\")",
                 "Xd <r> [g]MNsf[d] <u> POW",
                 "MNsf[s] <d r> MNsel <r> Xcol",
                 "MNsel[g] <u 60> Xrow",
-                "- D1.photodiode = true",
                 "",
                 "// Make column and row lines (DIR is used as direction for pins)",
                 "Xcol <u 70> DIRtop",
@@ -275,13 +273,11 @@ namespace SimpleCircuitOnline
             new Demo("Demo: Transformers", "A demo of some improvised transformers.", string.Join(Environment.NewLine, new[]
             {
                 ".subckt M DIRpa[i] DIRpb[o] DIRsa[i] DIRsb[o]",
-                "DIRpa <d 0> L1 <d 0> DIRpb",
-                "DIRsa <d 0> L2 <d 0> DIRsb",
+                "DIRpa <d 0> L1(dot) <d 0> DIRpb",
+                "DIRsa <d 0> L2(dot) <d 0> DIRsb",
                 "(X L1 <r 10> L2)",
                 "(Y L1[p] <0> L2)",
                 "- L2.Flipped = true",
-                "- L1.Dot = true",
-                "- L2.Dot = true",
                 ".ends",
                 "",
                 "// Primary side",

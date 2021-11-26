@@ -56,6 +56,7 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
+            base.DiscoverNodeRelationships(context, diagnostics);
             for (int i = 0; i < Pins.Count; i++)
                 Pins[i].DiscoverNodeRelationships(context, diagnostics);
         }

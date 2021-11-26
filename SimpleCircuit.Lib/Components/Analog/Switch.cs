@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,26 +57,19 @@ namespace SimpleCircuit.Components.Analog
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
             Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, -6), new(0, -1)), "c", "ctrl");
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
-            if (options.ElectricalInstallation)
-                Variants.Add("eic");
-        }
 
-        protected override void Draw(SvgDrawing drawing)
-        {
-            if (Variants.Contains("eic"))
-            {
-                if (Variants.Contains("push"))
-                    DrawOneWirePushSwitch(drawing, Variants.Contains("lamp"), Variants.Contains("window"));
-                else
-                    DrawOneWireSwitch(drawing, Variants.Contains("toggle"), Variants.Contains("double"), Variants.Contains("lamp"));
-            }
-            else
-            {
-                if (Variants.Contains("push"))
-                    DrawPushSwitch(drawing, Variants.Contains("closed"));
-                else
-                    DrawRegularSwitch(drawing, Variants.Contains("closed"));
-            }
+            if (options?.ElectricalInstallation ?? false)
+                AddVariant("eic");
+
+            PinUpdate = Variant.Map("eic", "push", UpdatePins);
+            DrawingVariants = Variant.If("eic").DoElse(
+                Variant.If("push").DoElse(
+                    Variant.Map("lamp", "window", DrawOneWirePushSwitch),
+                    Variant.Map("toggle", "double", "lamp", DrawOneWireSwitch)
+                ),
+                Variant.If("push").DoElse(
+                    Variant.Map("closed", DrawPushSwitch),
+                    Variant.Map("closed", DrawRegularSwitch)));
         }
 
         private void DrawRegularSwitch(SvgDrawing drawing, bool closed)
@@ -208,25 +200,28 @@ namespace SimpleCircuit.Components.Analog
             }
         }
 
-        /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        private void SetPinOffset(int index, Vector2 offset)
+            => ((FixedOrientedPin)Pins[index]).Offset = offset;
+        private void UpdatePins(bool eic, bool push)
         {
-            if (!Variants.Contains("eic"))
+            if (eic)
             {
-                ((FixedOrientedPin)Pins[0]).Offset = new(-6, 0);
-                ((FixedOrientedPin)Pins[2]).Offset = new(6, 0);
-            }
-            else if (Variants.Contains("push"))
-            {
-                ((FixedOrientedPin)Pins[0]).Offset = new(-4, 0);
-                ((FixedOrientedPin)Pins[2]).Offset = new(4, 0);
+                if (push)
+                {
+                    SetPinOffset(0, new(-4, 0));
+                    SetPinOffset(2, new(4, 0));
+                }
+                else
+                {
+                    SetPinOffset(0, new(-2, 0));
+                    SetPinOffset(2, new(2, 0));
+                }
             }
             else
             {
-                ((FixedOrientedPin)Pins[0]).Offset = new(-2, 0);
-                ((FixedOrientedPin)Pins[2]).Offset = new(2, 0);
+                SetPinOffset(0, new(-6, 0));
+                SetPinOffset(2, new(6, 0));
             }
-            base.DiscoverNodeRelationships(context, diagnostics);
         }
 
         /// <summary>

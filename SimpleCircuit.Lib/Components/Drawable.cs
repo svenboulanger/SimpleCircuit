@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
@@ -25,8 +26,15 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         IPinCollection IDrawable.Pins => Pins;
 
-        /// <inheritdoc />
-        public ISet<string> Variants => _variants;
+        /// <summary>
+        /// Resolves how pins are updated before solving.
+        /// </summary>
+        protected IVariantResolver PinUpdate { get; set; }
+
+        /// <summary>
+        /// Resolves how the drawable is drawn.
+        /// </summary>
+        protected IVariantResolver DrawingVariants { get; set; }
 
         /// <inheritdoc />
         public virtual int Order => 0;
@@ -47,11 +55,13 @@ namespace SimpleCircuit.Components
             Name = name;
         }
 
-        /// <summary>
-        /// Draw the component.
-        /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        protected abstract void Draw(SvgDrawing drawing);
+        /// <inheritdoc />
+        public virtual void AddVariant(string variant)
+            => _variants.Add(variant);
+
+        /// <inheritdoc />
+        public virtual void RemoveVariant(string variant)
+            => _variants.Remove(variant);
 
         /// <summary>
         /// Creates a transform.
@@ -67,7 +77,7 @@ namespace SimpleCircuit.Components
             go.Classes.Add(GetType().Name.ToLower());
             if (GroupClasses != null)
             {
-                foreach (string name in Variants)
+                foreach (string name in _variants)
                     go.Classes.Add(name.ToLower());
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
@@ -76,7 +86,11 @@ namespace SimpleCircuit.Components
 
             // Transform all the elements inside the drawing method
             drawing.BeginTransform(CreateTransform());
-            Draw(drawing);
+            if (DrawingVariants != null)
+            {
+                var context = new VariantResolverContext<SvgDrawing>(_variants, drawing);
+                DrawingVariants.Resolve(context);
+            }
             drawing.EndTransform();
 
             // Stop grouping elements
@@ -84,7 +98,11 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public abstract void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
+        public virtual void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        {
+            var c = new VariantResolverContext(_variants);
+            PinUpdate?.Resolve(c);
+        }
 
         /// <inheritdoc />
         public abstract void Register(CircuitContext context, IDiagnosticHandler diagnostics);

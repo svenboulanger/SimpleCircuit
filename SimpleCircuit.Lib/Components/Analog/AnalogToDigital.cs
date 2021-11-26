@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -37,10 +36,14 @@ namespace SimpleCircuit.Components.Analog
             Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
             Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(9, 0), new(1, 0)), "outn", "no");
             Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, new(9, 0), new(1, 0)), "output", "out", "po", "outp");
+
+            PinUpdate = Variant.All(
+                Variant.Map("diffin", RedefineInputPins),
+                Variant.Map("diffout", RedefineOutputPins));
+            DrawingVariants = Variant.Do<SvgDrawing>(DrawADC);
         }
 
-        /// <inheritdoc/>
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawADC(SvgDrawing drawing)
         {
             drawing.Polygon(new[]
             {
@@ -50,41 +53,20 @@ namespace SimpleCircuit.Components.Analog
             });
 
             if (!string.IsNullOrWhiteSpace(Label))
-            {
                 drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
-            }
         }
 
-        /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        private void SetPinOffset(int index, Vector2 offset)
+            => ((FixedOrientedPin)Pins[index]).Offset = offset;
+        private void RedefineInputPins(bool differential)
         {
-            var pin1 = (FixedOrientedPin)Pins[0];
-            var pin2 = (FixedOrientedPin)Pins[1];
-            if (Variants.Contains("diffin"))
-            {
-                pin1.Offset = new(-Width / 2, -Height / 4);
-                pin2.Offset = new(-Width / 2, Height / 4);
-            }
-            else
-            {
-                pin1.Offset = new(-Width / 2, 0);
-                pin2.Offset = new(-Width / 2, 0);
-            }
-
-            pin1 = (FixedOrientedPin)Pins[2];
-            pin2 = (FixedOrientedPin)Pins[3];
-            if (Variants.Contains("diffout"))
-            {
-                pin1.Offset = new(Width / 2 - Height / 4, Height / 4);
-                pin2.Offset = new(Width / 2 - Height / 4, -Height / 4);
-            }
-            else
-            {
-                pin1.Offset = new(Width / 2, 0);
-                pin2.Offset = new(Width / 2, 0);
-            }
-
-            base.DiscoverNodeRelationships(context, diagnostics);
+            SetPinOffset(0, differential ? new(-Width / 2, -Height / 4) : new(-Width / 2, 0));
+            SetPinOffset(1, differential ? new(-Width / 2, Height / 4) : new(-Width / 2, 0));
+        }
+        private void RedefineOutputPins(bool differential)
+        {
+            SetPinOffset(2, differential ? new(Width / 2 - Height / 4, Height / 4) : new(Width / 2, 0));
+            SetPinOffset(3, differential ? new(Width / 2 - Height / 4, -Height / 4) : new(Width / 2, 0));
         }
 
         /// <summary>

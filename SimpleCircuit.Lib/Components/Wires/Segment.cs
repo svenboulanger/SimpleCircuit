@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -10,15 +8,6 @@ namespace SimpleCircuit.Components.Wires
     [SimpleKey("SEG", "A wire segment.", Category = "Wires")]
     public class Segment : ScaledOrientedDrawable
     {
-        private readonly Dictionary<string, Action<SvgDrawing>> _drawingVariants = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "underground", DrawUnderground },
-            { "air", DrawAir },
-            { "tube", DrawTube },
-            { "inwall", DrawInWall },
-            { "onwall", DrawOnWall }
-        };
-
         /// <summary>
         /// Creates a new wire segment.
         /// </summary>
@@ -29,19 +18,19 @@ namespace SimpleCircuit.Components.Wires
         {
             Pins.Add(new FixedOrientedPin("input", "The input.", this, new(-4, 0), new(-1, 0)), "i", "a", "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(4, 0), new(1, 0)), "o", "b", "out", "output");
+
+            DrawingVariants = Variant.All(
+                Variant.Do(DrawWire),
+                Variant.If("underground").Do(DrawUnderground),
+                Variant.If("air").Do(DrawAir),
+                Variant.If("tube").Do(DrawTube),
+                Variant.If("inwall").Do(DrawInWall),
+                Variant.If("onwall").Do(DrawOnWall)
+                );
         }
 
-        /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
-        {
+        private void DrawWire(SvgDrawing drawing) =>
             drawing.Line(new(-4, 0), new(4, 0), new("wire"));
-            foreach (string name in Variants)
-            {
-                if (_drawingVariants.TryGetValue(name, out var variant))
-                    variant(drawing);
-            }
-        }
-
         private static void DrawUnderground(SvgDrawing drawing)
         {
             drawing.Segments(new Vector2[]

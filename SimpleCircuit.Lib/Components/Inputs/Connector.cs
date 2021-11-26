@@ -13,14 +13,21 @@ namespace SimpleCircuit.Components.Inputs
         [Description("Adds a label next to the connector.")]
         public string Label { get; set; }
 
+        /// <summary>
+        /// Creates a new connector.
+        /// </summary>
+        /// <param name="name">The name of the connector.</param>
+        /// <param name="options">The options.</param>
         public Connector(string name, Options options)
             : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(-6, 0), new(-1, 0)), "n", "neg", "b");
             Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(6, 0), new(1, 0)), "p", "pos", "a");
+
+            DrawingVariants = Variant.Do(DrawConnector);
         }
 
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawConnector(SvgDrawing drawing)
         {
             drawing.Segments(new Vector2[]
             {
