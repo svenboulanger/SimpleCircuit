@@ -3,6 +3,25 @@
     grid-template-columns: 10px minmax(400px, 35%) 10px 1fr 10px;
     grid-template-rows: 10px 1fr 10px;
     grid-template-areas: ". . . . ." ". sidebar . output ." ". . . . .";
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
-.sidebar { grid-area: sidebar; }
-.output { grid-area: output; }
+.sidebar
+{
+    grid-area: sidebar;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+.output
+{
+    grid-area: output;
+    overflow: auto;
+}
+.help {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}

@@ -6,15 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SimpleCircuitOnline</title>
     <!-- <base href="/SimpleCircuit/" /> -->
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <!-- <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" /> -->
     <link href="css/app.css" rel="stylesheet" />
     <link href="SimpleCircuitOnline.styles.css" rel="stylesheet" />
     <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css" rel="stylesheet" />
+    <style id="svg-style"></style>
 </head>
 
 <body>
     <app>
-        <div class="spinner-border loading-icon text-primary" role="status">
+        <div class="loading-spinner" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </app>
@@ -196,6 +197,10 @@
                 width: b.width,
                 height: b.height
             };
+        }
+
+        function updateStyle(style) {
+            document.getElementById("svg-style").innerHTML = style;
         }
     </script>
 </body>

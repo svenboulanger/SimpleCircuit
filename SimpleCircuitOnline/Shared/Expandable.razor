@@ -1,4 +1,4 @@
-﻿<div class="@DivClasses">
+﻿<div class="expandable">
     <a href="javascript:void(0);" @onclick="x => { _expanded = !_expanded; StateHasChanged(); }">
         @if (_expanded)
         {
@@ -14,7 +14,7 @@
         }
         @Title
     </a>
-    <div class="@(_expanded ? "" : "collapse")">
+    <div class="content @(_expanded ? "" : " collapse")">
         @ChildContent
     </div>
 </div>

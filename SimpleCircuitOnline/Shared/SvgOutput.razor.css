@@ -1,0 +1,17 @@
+﻿div.output {
+    min-height: 75px;
+    position: relative;
+    text-align: center;
+    padding: 0.5rem;
+    width: 100%;
+    border-radius: 0.25rem;
+    border: 1px solid #dee2e6;
+}
+h2 {
+    color: #6c757d;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-top: 0;
+}

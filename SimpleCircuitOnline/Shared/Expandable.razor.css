@@ -1,0 +1,14 @@
+﻿div.expandable {
+    margin-top: 0.5rem;
+}
+div.content {
+    margin-left: 0.5rem;
+}
+.collapse {
+    display: none;
+}
+svg {
+    margin: 0.25rem;
+    overflow: hidden;
+    vertical-align: middle;
+}

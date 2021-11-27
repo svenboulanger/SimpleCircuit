@@ -1,12 +1,11 @@
-﻿
-<CascadingValue Value="this">
+﻿<CascadingValue Value="this">
 <ul class="nav nav-tabs">
     @ChildContent
 </ul>
 
 @foreach (var tab in _tabs)
 {
-<div class="h-100 p-2 border border-top-0 rounded-bottom overflow-hidden@(Selected == tab ? "" : " d-none")">
+<div class="@(Selected == tab ? "" : "hidden")">
     @tab.ChildContent
 </div>
 }

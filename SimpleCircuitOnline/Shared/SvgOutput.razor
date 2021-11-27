@@ -1,7 +1,9 @@
-﻿<div class="border rounded w-100 text-center p-2" style="min-height: 75px; position: relative;">
+﻿@inject IJSRuntime _js
+
+<div class="output">
     @if (_loading > 0)
     {
-        <div class="spinner-border loading-icon @((_loading > 1 ? "text-danger" : "text-primary"))" role="status">
+        <div class="loading-spinner" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     }
@@ -14,33 +16,3 @@
         <h2 class="text-muted">Preview</h2>
     }
 </div>
-
-@code {
-    [Parameter]
-    public string Svg
-    {
-        get => _svg;
-        set
-        {
-            _svg = value;
-            StateHasChanged();
-        }
-    }
-
-    [Parameter]
-    public int Loading
-    {
-        get => _loading;
-        set
-        {
-            if (value != _loading)
-            {
-                _loading = value;
-                StateHasChanged();
-            }
-        }
-    }
-
-    private string _svg;
-    private int _loading;
-}

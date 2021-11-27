@@ -41,7 +41,7 @@ namespace SimpleCircuitOnline
                     if (elt.Name == "svg")
                         break;
                 }
-                text = $"<svg xmlns=\"http://www.w3.org/2000/svg\"><style>{drawing.Style}</style>{text}</svg>";
+                text = $"<svg class=\"simplecircuit\" xmlns=\"http://www.w3.org/2000/svg\">{text}</svg>";
             }
 
             JsonElement obj = ((IJSInProcessRuntime)_runtime).Invoke<JsonElement>("calculateBounds", text);

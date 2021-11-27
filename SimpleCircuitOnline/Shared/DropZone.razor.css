@@ -8,3 +8,10 @@
     border: 1px dashed #0087F7;
     border-radius: 0.375rem;
 }
+a, label {
+    margin: 0.25rem;
+}
+a {
+    float: right;
+}
+.hidden { display: none; }

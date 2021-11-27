@@ -1,5 +1,5 @@
-﻿<li class="nav-item">
-    <a href="javascript:void(0);" @onclick="Select" class="nav-link @(Menu.Selected == this ? "active" : "")">@Title</a>
+﻿<li>
+    <a href="javascript:void(0);" @onclick="Select" class="@(Menu.Selected == this ? "active" : "")">@Title</a>
 </li>
 
 @code {

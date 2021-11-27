@@ -1,11 +1,10 @@
-﻿
-@if (Demo.Demos != null)
+﻿@if (Demo.Demos != null)
 {
     @foreach (var demo in Demo.Demos)
     {
-        <a @onclick="x => Update(demo.Code)" class="bd-callout d-block" role="button">
-            <h5 class="mb-1">@demo.Title</h5>
-            <p class="mb-0 text-muted">@demo.Description</p>
+        <a @onclick="x => Update(demo.Code)" class="bd-callout" role="button">
+            <h5>@demo.Title</h5>
+            <p>@demo.Description</p>
         </a>
     }
 }

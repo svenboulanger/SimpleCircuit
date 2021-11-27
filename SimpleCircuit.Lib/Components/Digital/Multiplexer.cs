@@ -38,8 +38,8 @@ namespace SimpleCircuit.Components.Digital
                 new Vector2(-5, 8)
             });
 
-            drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0));
-            drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0));
+            drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
+            drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
             if (!string.IsNullOrWhiteSpace(Label))
                 drawing.Text(Label, new Vector2(5, 5), new Vector2(1, 1));
         }
