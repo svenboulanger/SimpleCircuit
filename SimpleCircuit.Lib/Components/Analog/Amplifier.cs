@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components.Analog
     public class Amplifier : ScaledOrientedDrawable, ILabeled
     {
         private static readonly Vector2[] _pinOffsets = new Vector2[] {
-            new(-8, -4), new(-8, 4), new(8, -4), new(8, 4)
+            new(-8, -4), new(-8, 4), new(8, 4), new(8, -4)
         };
 
         /// <inheritdoc/>
@@ -39,32 +39,31 @@ namespace SimpleCircuit.Components.Analog
             DrawingVariants = Variant.All(
                 Variant.If("diffin").Do(Variant.Map("swapin", DrawDifferentialInput)),
                 Variant.If("diffout").Do(Variant.Map("swapout", DrawDifferentialOutput)),
-                Variant.Do(DrawADC),
+                Variant.Do(DrawAmplifier),
                 Variant.If("programmable").Do(DrawProgrammable));
         }
-
         private void DrawDifferentialInput(SvgDrawing drawing, bool swapped)
         {
             drawing.Segments(new Vector2[] {
                 new(-6, -4), new(-4, -4),
-                new(-5, 5), new(-5, 3),
-            }.Select(v => swapped ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("plus"));
+                new(-5, -5), new(-5, -3),
+            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
             drawing.Segments(new Vector2[] {
                 new(-6, 4), new(-4, 4)
-            }.Select(v => swapped ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("minus"));
+            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
         }
         private void DrawDifferentialOutput(SvgDrawing drawing, bool swapped)
         {
             drawing.Segments(new Vector2[] {
-                    new(0, 4), new(8, 4),
-                    new(0, -4), new(8, -4)
+                new(0, 4), new(8, 4),
+                new(0, -4), new(8, -4)
             }, new("wire"));
             drawing.Segments(new Vector2[] {
-                new(6, -6), new(4, -6),
-                new(5, 7), new(5, 5),
-            }.Select(v => swapped ? new Vector2(v.X, v.Y) : new Vector2(v.X, -v.Y)), new("plus"));
+                new(4, -6), new(6, -6),
+                new(5, -7), new(5, -5),
+            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
             drawing.Segments(new Vector2[] {
-                new(6, 6), new(4, 6)
+                new(4, 6), new(6, 6)
             }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
         }
         private void DrawProgrammable(SvgDrawing drawing)
@@ -72,7 +71,7 @@ namespace SimpleCircuit.Components.Analog
             var options = new PathOptions() { EndMarker = PathOptions.MarkerTypes.Arrow };
             drawing.Polyline(new Vector2[] { new(-7, 10), new(4, -8.5) }, options);
         }
-        private void DrawADC(SvgDrawing drawing)
+        private void DrawAmplifier(SvgDrawing drawing)
         {
             drawing.Polygon(new Vector2[]
             {

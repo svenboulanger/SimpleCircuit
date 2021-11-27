@@ -8,13 +8,13 @@
 <div @ref="dropZoneElement" class="@ContainerClasses">
     @ChildContent
     <div class="clearfix">
-        <label for="file-upload" class="btn btn-secondary">
+        <label for="file-upload" class="btn upload">
             <div class="hidden">
                 <InputFile OnChange="@OnChange" @ref="inputFile" accept=".svg" id="file-upload" class="d-none" />
             </div>
             Upload
         </label>
-        <a href="javascript:void(0);" class="btn btn-primary" @onclick="DownloadSVG">Download SVG</a>
+        <a href="javascript:void(0);" class="btn download" @onclick="DownloadSVG">Download SVG</a>
     </div>
 </div>
 

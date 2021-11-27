@@ -15,31 +15,11 @@ namespace SimpleCircuitOnline.Shared
         private const double MaxPreviewWidth = 90;
         private Utility.ComponentDescription _description;
         private IDrawable _component;
-        private bool _showPins = false, _showProperties = false;
         private List<(PropertyInfo, string)> _properties;
+        private Dictionary<string, bool> _variants;
 
         [Parameter]
         public string Class { get; set; }
-
-        protected string TopLevelClasses
-        {
-            get
-            {
-                var set = new HashSet<string>()
-            {
-                "bd-callout",
-                "p-0",
-                "d-flex",
-                "flex-row"
-            };
-                if (!string.IsNullOrWhiteSpace(Class))
-                {
-                    foreach (var nc in Class.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                        set.Add(nc);
-                }
-                return string.Join(' ', set);
-            }
-        }
 
         [Parameter]
         public Utility.ComponentDescription Description
@@ -50,11 +30,8 @@ namespace SimpleCircuitOnline.Shared
                 _description = value;
                 _properties = null;
                 _component = null;
-                _showPins = false;
-                _showProperties = false;
             }
         }
-
 
         /// <summary>
         /// Gets the properties of the component.
@@ -66,7 +43,7 @@ namespace SimpleCircuitOnline.Shared
                 if (_properties == null && Description != null)
                 {
                     _properties = new();
-                    foreach (var p in Description.Type.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+                    foreach (var p in Description.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         if (!p.CanRead || !p.CanWrite)
                             continue;
@@ -80,6 +57,22 @@ namespace SimpleCircuitOnline.Shared
                     }
                 }
                 return _properties;
+            }
+        }
+
+        protected Dictionary<string, bool> Variants
+        {
+            get
+            {
+                if (_variants == null)
+                {
+                    var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    Component.CollectPossibleVariants(set);
+                    _variants = new(StringComparer.OrdinalIgnoreCase);
+                    foreach (string name in set)
+                        _variants.Add(name, false);
+                }
+                return _variants;
             }
         }
 
@@ -104,11 +97,22 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-
         private string CreateSvg()
         {
             if (Description == null)
                 return "";
+
+            // We can update the variants
+            if (_variants != null)
+            {
+                foreach (var variant in _variants)
+                {
+                    if (variant.Value)
+                        Component.AddVariant(variant.Key);
+                    else
+                        Component.RemoveVariant(variant.Key);
+                }
+            }
 
             var drawing = new SvgDrawing();
             drawing.Style = GraphicalCircuit.DefaultStyle;
@@ -134,6 +138,12 @@ namespace SimpleCircuitOnline.Shared
 
             // Converting to Base 64 allows us to not interfere with any styling going on outside
             return $"<img src=\"data:image/svg+xml;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()))}\" />";
+        }
+
+        private void ToggleVariant(string name)
+        {
+            _variants[name] = !_variants[name];
+            StateHasChanged();
         }
 
         private string GetTypeName(PropertyInfo property)

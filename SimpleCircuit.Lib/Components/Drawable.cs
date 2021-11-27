@@ -63,6 +63,13 @@ namespace SimpleCircuit.Components
         public virtual void RemoveVariant(string variant)
             => _variants.Remove(variant);
 
+        /// <inheritdoc />
+        public virtual void CollectPossibleVariants(ISet<string> variants)
+        {
+            PinUpdate?.CollectPossibleVariants(variants);
+            DrawingVariants?.CollectPossibleVariants(variants);
+        }
+
         /// <summary>
         /// Creates a transform.
         /// </summary>
@@ -75,13 +82,13 @@ namespace SimpleCircuit.Components
             // Group all elements
             var go = new GraphicOptions() { Id = Name };
             go.Classes.Add(GetType().Name.ToLower());
+            foreach (string name in _variants)
+                go.Classes.Add(name.ToLower());
             if (GroupClasses != null)
             {
-                foreach (string name in _variants)
-                    go.Classes.Add(name.ToLower());
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
-            }  
+            }
             drawing.StartGroup(go);
 
             // Transform all the elements inside the drawing method

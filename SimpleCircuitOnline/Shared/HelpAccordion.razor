@@ -1,0 +1,33 @@
+﻿<CascadingValue Value="this">
+@ChildContent
+
+@foreach (var tab in _tabs)
+{
+    @if (tab.Shown)
+    {
+        @tab.ChildContent
+    }
+}
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private readonly List<HelpAccordionItem> _tabs = new();
+
+    public void AddTab(HelpAccordionItem tab)
+    {
+        _tabs.Add(tab);
+    }
+
+    /// <summary>
+    /// Selects a new tab.
+    /// </summary>
+    /// <param name="index">The tab index.</param>
+    /// <returns></returns>
+    public void Update()
+    {
+        StateHasChanged();
+    }
+}

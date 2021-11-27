@@ -27,12 +27,12 @@ namespace SimpleCircuit.Components.Wires
             Pins.Add(new FixedOrientedPin("input", "The input.", this, new(-2, 0), new(-1, 0)), "i", "a", "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(2, 0), new(1, 0)), "o", "b", "out", "output");
 
-            DrawingVariants = Variant.Map("slanted", Draw);
+            DrawingVariants = Variant.Map("straight", Draw);
             PinUpdate = Variant.Do(UpdatePins);
         }
 
         /// <inheritdoc />
-        private void Draw(SvgDrawing drawing, bool slanted)
+        private void Draw(SvgDrawing drawing, bool straight)
         {
             drawing.Line(new(-Crossings - 2, 0), new(Crossings + 2, 0), new("wire"));
             if (Crossings > 0)
@@ -41,9 +41,9 @@ namespace SimpleCircuit.Components.Wires
                 for (int i = 0; i < Crossings; i++)
                 {
                     double x = i * 2 - Crossings + 1;
-                    points.AddRange(slanted ?
-                        new Vector2[] { new(x - 1.5, 3), new(x + 1.5, -3) } :
-                        new Vector2[] { new(x, 3), new(x, -3) });
+                    points.AddRange(straight ?
+                        new Vector2[] { new(x, 3), new(x, -3) } :
+                        new Vector2[] { new(x - 1.5, 3), new(x + 1.5, -3) });
                 }
                 drawing.Segments(points);
             }

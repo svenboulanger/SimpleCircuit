@@ -39,6 +39,23 @@ namespace SimpleCircuit.Components.Variants
         }
 
         /// <inheritdoc />
+        public void CollectPossibleVariants(ISet<string> variants)
+        {
+            if (_include != null)
+            {
+                foreach (string variant in _include)
+                    variants.Add(variant);
+            }
+            if (_exclude != null)
+            {
+                foreach (string variant in _exclude)
+                    variants.Add(variant);
+            }
+            _ifTrue?.CollectPossibleVariants(variants);
+            _ifFalse?.CollectPossibleVariants(variants);
+        }
+
+        /// <inheritdoc />
         public bool Resolve(IVariantResolverContext context)
         {
             if (_include != null && !_include.IsSubsetOf(context.Variants))

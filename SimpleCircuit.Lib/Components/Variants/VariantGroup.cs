@@ -13,6 +13,13 @@ namespace SimpleCircuit.Components.Variants
         /// </summary>
         public List<IVariantResolver> Children { get; } = new();
 
+        /// <inheritdoc />
+        public void CollectPossibleVariants(ISet<string> variants)
+        {
+            foreach (var child in Children)
+                child.CollectPossibleVariants(variants);
+        }
+
         /// <summary>
         /// Includes a variant in the group.
         /// </summary>

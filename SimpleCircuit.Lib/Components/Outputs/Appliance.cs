@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Variants;
-using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +9,8 @@ namespace SimpleCircuit.Components.Outputs
     /// A fixed household appliance.
     /// </summary>
     [SimpleKey("APP", "A fixed household appliance.", Category = "Outputs")]
-    public class Appliance : ScaledOrientedDrawable, IVariants, ILabeled
+    public class Appliance : ScaledOrientedDrawable, ILabeled
     {
-        private readonly VariantFlags<Variants> _variant = new();
         private const double _k = 0.5522847498;
 
         /// <summary>
@@ -62,21 +59,8 @@ namespace SimpleCircuit.Components.Outputs
             Accumulator = 0x20
         }
 
-        /// <inheritdoc />
-        public Variant Variant => _variant;
-
         [Description("Adds a label next to the appliance.")]
         public string Label { get; set; }
-
-        /// <inheritdoc />
-        protected override IEnumerable<string> GroupClasses
-        {
-            get
-            {
-                foreach (string name in _variant.Value.ToString().Split(','))
-                    yield return name.Trim().ToLower();
-            }
-        }
 
         /// <summary>
         /// Creates a new appliance.
@@ -87,104 +71,115 @@ namespace SimpleCircuit.Components.Outputs
             : base(name, options)
         {
             Pins.Add(new FixedOrientedPin("p", "The connection.", this, new(), new(-1, 0)), "p", "a");
+
+            DrawingVariants = Variant.All(
+                Variant.FirstOf(
+                    Variant.If("ventilator").Do(DrawVentilator),
+                    Variant.If("heater").Do(Variant.Map("ventilator", "accu", DrawHeater)),
+                    Variant.If("boiler").Do(Variant.Map("accu", DrawBoiler)),
+                    Variant.If("cooking").Do(DrawCooking),
+                    Variant.If("microwave").Do(DrawMicroWave),
+                    Variant.If("oven").Do(DrawOven),
+                    Variant.If("washer").Do(DrawWasher),
+                    Variant.If("dryer").Do(DrawDryer),
+                    Variant.If("dishwasher").Do(DrawDishwasher),
+                    Variant.If("refrigerator").Do(DrawRefrigerator),
+                    Variant.If("fridge").Do(DrawRefrigerator),
+                    Variant.If("freezer").Do(DrawFreezer),
+                    Variant.Do(DrawDefault)
+                    ),
+                Variant.Do(DrawLabel));
         }
 
-        /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        private void DrawVentilator(SvgDrawing drawing)
         {
-            var variants = (Variants)((int)_variant.Value & 0x0F);
-            switch (variants)
+            DrawBox(drawing, 8, 0, 16, 16);
+            DrawVentilator(drawing, 8, 0);
+        }
+        private void DrawHeater(SvgDrawing drawing, bool ventilator, bool accumulator)
+        {
+            if (ventilator)
             {
-                case Variants.Ventilator:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    DrawVentilator(drawing, 8, 0);
-                    break;
-
-                case Variants.Heater:
-                    if (_variant.Is(Variants.Ventilator))
-                    {
-                        DrawVentilator(drawing, 17, 0, 3);
-                        DrawHeater(drawing, 7, 0, 10, 10);
-                        DrawBox(drawing, 11, 0, 22, 16);
-                    }
-                    else
-                    {
-                        if (_variant.Is(Variants.Accumulator))
-                        {
-                            DrawBox(drawing, 11, 0, 22, 16);
-                            DrawHeater(drawing, 11, 0, 16, 12);
-                        }
-                        else
-                            DrawHeater(drawing, 11, 0, 22, 16);
-                    }
-                    break;
-
-                case Variants.Boiler:
-                    if (_variant.Is(Variants.Accumulator))
-                    {
-                        drawing.Circle(new(8, 0), 8);
-                        DrawBoiler(drawing, 8, 0, 6);
-                    }
-                    else
-                        DrawBoiler(drawing, 8, 0, 8);
-                    break;
-
-                case Variants.Cooking:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    drawing.Circle(new(4, -4), 2, new("dot"));
-                    drawing.Circle(new(12, -4), 2, new("dot"));
-                    drawing.Circle(new(12, 4), 2, new("dot"));
-                    break;
-
-                case Variants.Microwave:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    DrawMicrowave(drawing, 8, 0);
-                    break;
-
-                case Variants.Oven:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    drawing.Line(new(0, -5), new(16, -5));
-                    drawing.Circle(new(8, 1.5), 2, new("dot"));
-                    break;
-
-                case Variants.Washer:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    drawing.Circle(new(8, 0), 6);
-                    drawing.Circle(new(8, 0), 1.5, new("dot"));
-                    break;
-
-                case Variants.Dryer:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    DrawVentilator(drawing, 8, -3);
-                    drawing.Circle(new(8, 3), 1.5, new("dot"));
-                    break;
-
-                case Variants.DishWasher:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    DrawDishWasher(drawing, 8, 0);
-                    break;
-
-                case Variants.Refrigerator:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    DrawIce(drawing, 8, 0);
-                    break;
-
-                case Variants.Freezer:
-                    DrawBox(drawing, 14, 0, 28, 16);
-                    DrawIce(drawing, 5, 0, 3.5);
-                    DrawIce(drawing, 14, 0, 3.5);
-                    DrawIce(drawing, 23, 0, 3.5);
-                    break;
-
-                default:
-                    DrawBox(drawing, 8, 0, 16, 16);
-                    if (_variant.Value == Variants.Ventilator)
-                        DrawVentilator(drawing, 8, 0);
-                    break;
+                DrawVentilator(drawing, 17, 0, 3);
+                DrawHeater(drawing, 7, 0, 10, 10);
+                DrawBox(drawing, 11, 0, 22, 16);
             }
-
+            else
+            {
+                if (accumulator)
+                {
+                    DrawBox(drawing, 11, 0, 22, 16);
+                    DrawHeater(drawing, 11, 0, 16, 12);
+                }
+                else
+                    DrawHeater(drawing, 11, 0, 22, 16);
+            }
+        }
+        private void DrawBoiler(SvgDrawing drawing, bool accumulator)
+        {
+            if (accumulator)
+            {
+                drawing.Circle(new(8, 0), 8);
+                DrawBoiler(drawing, 8, 0, 6);
+            }
+            else
+                DrawBoiler(drawing, 8, 0, 8);
+        }
+        private void DrawCooking(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            drawing.Circle(new(4, -4), 2, new("dot"));
+            drawing.Circle(new(12, -4), 2, new("dot"));
+            drawing.Circle(new(12, 4), 2, new("dot"));
+        }
+        private void DrawMicroWave(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            DrawMicrowave(drawing, 8, 0);
+        }
+        private void DrawOven(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            drawing.Line(new(0, -5), new(16, -5));
+            drawing.Circle(new(8, 1.5), 2, new("dot"));
+        }
+        private void DrawWasher(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            drawing.Circle(new(8, 0), 6);
+            drawing.Circle(new(8, 0), 1.5, new("dot"));
+        }
+        private void DrawDryer(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            DrawVentilator(drawing, 8, -3);
+            drawing.Circle(new(8, 3), 1.5, new("dot"));
+        }
+        private void DrawDishwasher(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            DrawDishWasher(drawing, 8, 0);
+        }
+        private void DrawRefrigerator(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+            DrawIce(drawing, 8, 0);
+        }
+        private void DrawFreezer(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 14, 0, 28, 16);
+            DrawIce(drawing, 5, 0, 3.5);
+            DrawIce(drawing, 14, 0, 3.5);
+            DrawIce(drawing, 23, 0, 3.5);
+        }
+        private void DrawDefault(SvgDrawing drawing)
+        {
+            DrawBox(drawing, 8, 0, 16, 16);
+        }
+        private void DrawLabel(SvgDrawing drawing)
+        {
             if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new(0, 10), new(0, 1));
+                drawing.Text(Label, new(0, -10), new(1, -1));
         }
 
         private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

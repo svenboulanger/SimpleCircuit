@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using SimpleCircuit.Components.Variants;
 
 namespace SimpleCircuit.Components
@@ -47,10 +48,17 @@ namespace SimpleCircuit.Components
         /// <returns>The variant selector.</returns>
         public static VariantGroup All(params IVariantResolver[] resolvers)
         {
-            var result = new VariantGroup();
+            // If one of the variants is already a variant group, just add the rest to that item
+            var parent = resolvers.OfType<VariantGroup>().FirstOrDefault() ?? new VariantGroup();
+            int index = 0;
             foreach (var item in resolvers)
-                result.Children.Add(item);
-            return result;
+            {
+                if (ReferenceEquals(parent, item))
+                    index = parent.Children.Count;
+                else
+                    parent.Children.Insert(index++, item);
+            }
+            return parent;
         }
 
         /// <summary>
@@ -62,7 +70,7 @@ namespace SimpleCircuit.Components
         {
             var result = new VariantSelector();
             foreach (var item in resolvers)
-                result.Variants.Add(item);
+                result.Children.Add(item);
             return result;
         }
 
@@ -105,7 +113,8 @@ namespace SimpleCircuit.Components
             {
                 if (context is IVariantResolverContext<SvgDrawing> c)
                     method(c.Argument, context.Variants.Contains(variant));
-            });
+            })
+            { Dependencies = { variant } };
         }
 
         /// <summary>
@@ -120,7 +129,10 @@ namespace SimpleCircuit.Components
             return new(context => method(
                 context.Variants.Contains(variant1),
                 context.Variants.Contains(variant2)
-                ));
+                ))
+            {
+                Dependencies = { variant1, variant2 }
+            };
         }
 
         /// <summary>
@@ -140,7 +152,10 @@ namespace SimpleCircuit.Components
                         context.Variants.Contains(variant1),
                         context.Variants.Contains(variant2));
                 }
-            });
+            })
+            {
+                Dependencies = { variant1, variant2 }
+            };
         }
 
         /// <summary>
@@ -158,7 +173,10 @@ namespace SimpleCircuit.Components
                 context.Variants.Contains(variant1),
                 context.Variants.Contains(variant2),
                 context.Variants.Contains(variant3)
-                ));
+                ))
+            {
+                Dependencies = { variant1, variant2, variant3 }
+            };
         }
 
         /// <summary>
@@ -180,7 +198,10 @@ namespace SimpleCircuit.Components
                         context.Variants.Contains(variant2),
                         context.Variants.Contains(variant3));
                 }
-            });
+            })
+            {
+                Dependencies = { variant1, variant2, variant3 }
+            };
         }
     }
 }

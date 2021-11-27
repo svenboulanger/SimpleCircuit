@@ -10,12 +10,19 @@ namespace SimpleCircuit.Components.Variants
         /// <summary>
         /// Gets the variants that need to be selected.
         /// </summary>
-        public List<IVariantResolver> Variants { get; } = new();
+        public List<IVariantResolver> Children { get; } = new();
+
+        /// <inheritdoc />
+        public void CollectPossibleVariants(ISet<string> variants)
+        {
+            foreach (var variant in Children)
+                variant.CollectPossibleVariants(variants);
+        }
 
         /// <inheritdoc />
         public bool Resolve(IVariantResolverContext context)
         {
-            foreach (var variant in Variants)
+            foreach (var variant in Children)
             {
                 if (variant.Resolve(context))
                     return true;

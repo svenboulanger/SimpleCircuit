@@ -2,6 +2,7 @@
 using SimpleCircuit.Diagnostics;
 using SpiceSharp.Simulations;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -80,6 +81,11 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public void RemoveVariant(string variant)
+        {
+        }
+
+        /// <inheritdoc />
+        public void CollectPossibleVariants(ISet<string> variants)
         {
         }
 

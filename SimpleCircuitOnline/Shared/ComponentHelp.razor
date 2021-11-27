@@ -7,29 +7,33 @@
     <div class="content">
         <h5>@(Description.Key)<small class="text-muted">name</small></h5>
         <p>@(Description.Name)</p>
-        <p>
-            <a href="javascript:void(0);" @onclick="x => { _showPins = !_showPins; StateHasChanged(); }" class="btn btn-sm @(_showPins ? "btn-outline-info" : "btn-info")">Pins <span class="badge badge-pill @(_showPins ? "badge-info" : "badge-light")">@(Component.Pins.Count)</span></a>
-            <a href="javascript:void(0);" @onclick="x => { _showProperties = !_showProperties; StateHasChanged(); }" class="btn btn-sm @(_showProperties ? "btn-outline-info" : "btn-info")">Properties <span class="badge badge-pill @(_showProperties ? "badge-info" : "badge-light")">@(Properties.Count)</span></a>
-        </p>
-        @if (_showPins)
-        {
-            <dl class="row">
-            @foreach (var pin in Component.Pins)
-            {
-                <dt class="col-sm-4 small"><strong>@(string.Join(", ", Component.Pins.NamesOf(pin)))</strong></dt>
-                <dd class="col-sm-8 small">@(pin.Description)</dd>
-            }
-            </dl>
-        }
-        @if (_showProperties)
-        {
-            <dl class="row">
-            @foreach (var property in Properties)
-            {
-                <dt class="col-sm-4 small"><strong>@(property.Item1.Name)</strong></dt>
-                <dd class="col-sm-8 small">@(property.Item2)</dd>
-            }
-            </dl>
-        }
+        <HelpAccordion>
+            <HelpAccordionItem Title="Pins" Count="Component.Pins.Count">
+                <dl>
+                @foreach (var pin in Component.Pins)
+                {
+                    <dt><strong>@(string.Join(", ", Component.Pins.NamesOf(pin)))</strong></dt>
+                    <dd>@(pin.Description)</dd>
+                }
+                </dl>
+            </HelpAccordionItem>
+            <HelpAccordionItem Title="Properties" Count="Properties.Count">
+                <dl>
+                @foreach (var property in Properties)
+                {
+                    <dt><strong>@(property.Item1.Name)</strong></dt>
+                    <dd>@(property.Item2)</dd>
+                }
+                </dl>
+            </HelpAccordionItem>
+            <HelpAccordionItem Title="Variants" Count="Variants.Count">
+                <p>
+                @foreach (var variant in Variants.OrderBy(n => n.Key))
+                {
+                    <a href="javascript:void(0);" class="btn @(variant.Value ? "shown" : "")" @onclick="x => ToggleVariant(variant.Key)">@variant.Key</a>
+                }
+                </p>
+            </HelpAccordionItem>
+        </HelpAccordion>
     </div>
 </div>

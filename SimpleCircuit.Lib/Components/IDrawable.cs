@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -18,6 +19,12 @@ namespace SimpleCircuit.Components
         /// to force some components to be drawn over others.
         /// </summary>
         public int Order { get; }
+
+        /// <summary>
+        /// Collects all possible variants that the drawable might use.
+        /// </summary>
+        /// <param name="result">The set that will contain all variants.</param>
+        public void CollectPossibleVariants(ISet<string> result);
 
         /// <summary>
         /// Adds a variant for the drawable.

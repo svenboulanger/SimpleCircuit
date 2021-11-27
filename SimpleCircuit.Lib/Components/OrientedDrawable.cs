@@ -1,5 +1,7 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -34,6 +36,29 @@ namespace SimpleCircuit.Components
         protected OrientedDrawable(string name)
             : base(name)
         {
+        }
+
+        /// <inheritdoc />
+        public override void AddVariant(string variant)
+        {
+            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
+                Flipped = true;
+            base.AddVariant(variant);
+        }
+
+        /// <inheritdoc />
+        public override void RemoveVariant(string variant)
+        {
+            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
+                Flipped = false;
+            base.RemoveVariant(variant);
+        }
+
+        /// <inheritdoc />
+        public override void CollectPossibleVariants(ISet<string> variants)
+        {
+            base.CollectPossibleVariants(variants);
+            variants.Add("flip");
         }
 
         /// <inheritdoc />

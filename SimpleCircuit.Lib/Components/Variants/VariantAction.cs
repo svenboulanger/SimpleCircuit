@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Variants
 {
@@ -9,6 +10,8 @@ namespace SimpleCircuit.Components.Variants
     {
         private readonly Action<IVariantResolverContext> _action;
 
+        public HashSet<string> Dependencies { get; } = new(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// Creates a new variant.
         /// </summary>
@@ -17,6 +20,13 @@ namespace SimpleCircuit.Components.Variants
         public VariantAction(Action<IVariantResolverContext> action)
         {
             _action = action ?? throw new ArgumentNullException(nameof(action));
+        }
+
+        /// <inheritdoc />
+        public void CollectPossibleVariants(ISet<string> variants)
+        {
+            foreach (string name in Dependencies)
+                variants.Add(name);
         }
 
         /// <inheritdoc />

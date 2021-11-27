@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Compile Remove="Components\IPinDescription.cs" />
-    <Compile Remove="Components\Outputs\Appliance.cs" />
     <Compile Remove="Components\PinDescription.cs" />
   </ItemGroup>
 

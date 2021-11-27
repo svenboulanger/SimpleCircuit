@@ -1,10 +1,18 @@
-﻿namespace SimpleCircuit.Components.Variants
+﻿using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Variants
 {
     /// <summary>
     /// Represents a variant resolver.
     /// </summary>
     public interface IVariantResolver
     {
+        /// <summary>
+        /// Collects all potentially used variants.
+        /// </summary>
+        /// <param name="variants">The variants.</param>
+        public void CollectPossibleVariants(ISet<string> variants);
+
         /// <summary>
         /// Tries to resolve the variant.
         /// </summary>

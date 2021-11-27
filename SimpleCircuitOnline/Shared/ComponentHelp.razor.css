@@ -35,3 +35,26 @@ p {
     margin-top: 0;
     margin-bottom: 1rem;
 }
+
+a {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    line-height: 1.5;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    padding: 0.2rem 0.2rem;
+    font-size: 0.875rem;
+    border-radius: 0.4rem;
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #545b62;
+    margin: 0.2rem;
+}
+a.shown {
+    background-color: #e2e6ea;
+    color: #212529;
+    border-color: #dae0e5;
+}

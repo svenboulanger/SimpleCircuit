@@ -23,8 +23,8 @@ namespace SimpleCircuit.Components.Outputs
         public Light(string name, Options options)
             : base(name, options)
         {
-            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
-            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
+            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4, 0), new(-1, 0)), "a", "p", "pos");
+            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
 
             if (options?.ElectricalInstallation ?? false)
                 AddVariant("eic");
@@ -37,13 +37,6 @@ namespace SimpleCircuit.Components.Outputs
         /// <inheritdoc/>
         private void DrawLamp(SvgDrawing drawing)
         {
-            // Wires
-            drawing.Segments(new Vector2[]
-            {
-                new Vector2(-6, 0), new Vector2(-4, 0),
-                new Vector2(4, 0), new Vector2(6, 0),
-            }, new("wire"));
-
             // The light
             drawing.Segments(new[]
             {
@@ -56,7 +49,9 @@ namespace SimpleCircuit.Components.Outputs
                 drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
         }
         private void DrawCasing(SvgDrawing drawing)
-            => drawing.Circle(new Vector2(), 4);
+        {
+            drawing.Circle(new Vector2(), 4);
+        }
         private void UpdatePins(bool eic)
         {
             if (eic)
@@ -66,8 +61,8 @@ namespace SimpleCircuit.Components.Outputs
             }
             else
             {
-                ((FixedOrientedPin)Pins[0]).Offset = new(-6, 0);
-                ((FixedOrientedPin)Pins[1]).Offset = new(6, 0);
+                ((FixedOrientedPin)Pins[0]).Offset = new(-4, 0);
+                ((FixedOrientedPin)Pins[1]).Offset = new(4, 0);
             }
         }
     }

@@ -171,6 +171,7 @@ namespace SimpleCircuit.Parser
             lexer.Next();
 
             // Labels
+            HashSet<string> possibleVariants = null;
             lexer.SkipWhile(TokenType.Whitespace);
             if (lexer.Branch(TokenType.OpenParenthesis))
             {
@@ -195,7 +196,7 @@ namespace SimpleCircuit.Parser
                             else
                             {
                                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
-                                    $"Labeling is not possible for '{component.Name}'"));
+                                    $"Labeling is not possible for '{component.Name}' at line {lexer.Line}, column {lexer.Column}."));
                             }
                             lexer.Next();
                             break;
@@ -216,6 +217,16 @@ namespace SimpleCircuit.Parser
                             break;
 
                         case TokenType.Word:
+                            if (possibleVariants == null)
+                            {
+                                possibleVariants = new(StringComparer.OrdinalIgnoreCase);
+                                component.CollectPossibleVariants(possibleVariants);
+                            }
+                            if (!possibleVariants.Contains(lexer.Content))
+                            {
+                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
+                                    $"Could not recognize variant '{lexer.Content}' for '{component.Name}' at line {lexer.Line}, column {lexer.Column}."));
+                            }
                             component.AddVariant(lexer.Content);
                             lexer.Next();
                             break;
@@ -223,7 +234,7 @@ namespace SimpleCircuit.Parser
                         default:
                             lexer.Next();
                             context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                                $"Could not recognize variant or label for '{component.Name}'"));
+                                $"Expected label or variant for '{component.Name}' at line {lexer.Line}, column {lexer.Column}."));
                             break;
                     }
                     lexer.SkipWhile(TokenType.Whitespace);
@@ -742,9 +753,20 @@ namespace SimpleCircuit.Parser
                 var member = component.GetType().GetProperty(property, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (member == null || !member.CanWrite)
                 {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
-                        $"Cannot find property '{property}' for {component.Name}."));
-                    lexer.SkipWhile(~TokenType.Newline);
+                    // Check if we can maybe resolve to a variant
+                    var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    component.CollectPossibleVariants(set);
+                    if (!set.Contains(property))
+                    {
+                        context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
+                            $"Cannot find property or variant '{property}' for {component.Name}."));
+                    }
+
+                    // Treat it as a boolean
+                    if (lexer.Branch(TokenType.Equals))
+                        lexer.SkipWhile(TokenType.Whitespace);
+                    if (ParseBoolean(lexer, context))
+                        component.AddVariant(property);
                     return;
                 }
 
