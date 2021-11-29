@@ -64,7 +64,7 @@
         if (firstRender)
         {
             // Load the JS file
-            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dropZone.js");
+            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dropzone.js");
 
             // Initialize the drop zone
             _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", dropZoneElement, inputFile.Element);
