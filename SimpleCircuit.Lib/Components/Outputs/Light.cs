@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Components.Outputs
@@ -9,6 +10,7 @@ namespace SimpleCircuit.Components.Outputs
     [SimpleKey("LIGHT", "A light point.", Category = "Outputs")]
     public class Light : ScaledOrientedDrawable, ILabeled
     {
+        private const double _k = 0.5522847498;
         private static readonly double _sqrt2 = Math.Sqrt(2) * 2;
 
         /// <inheritdoc/>
@@ -27,14 +29,16 @@ namespace SimpleCircuit.Components.Outputs
             Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
 
             if (options?.ElectricalInstallation ?? false)
-                AddVariant("eic");
+                AddVariant("ei");
             DrawingVariants = Variant.All(
                 Variant.Do(DrawLamp),
-                Variant.IfNot("eic").Do(DrawCasing));
-            PinUpdate = Variant.Map("eic", UpdatePins);
+                Variant.IfNot("ei").Do(DrawCasing),
+                Variant.If("projector").Do(DrawProjector),
+                Variant.If("direction").Do(Variant.Map("diverging", DrawDirectional)),
+                Variant.If("emergency").Do(DrawEmergency));
+            PinUpdate = Variant.Map("ei", UpdatePins);
         }
 
-        /// <inheritdoc/>
         private void DrawLamp(SvgDrawing drawing)
         {
             // The light
@@ -51,6 +55,28 @@ namespace SimpleCircuit.Components.Outputs
         private void DrawCasing(SvgDrawing drawing)
         {
             drawing.Circle(new Vector2(), 4);
+        }
+        private void DrawProjector(SvgDrawing drawing)
+        {
+            drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
+        }
+        private void DrawDirectional(SvgDrawing drawing, bool diverging)
+        {
+            var options = new PathOptions("direction") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow };
+            if (diverging)
+            {
+                drawing.Line(new(-2, 6), new(-6, 12), options);
+                drawing.Line(new(2, 6), new(6, 12), options);
+            }
+            else
+            {
+                drawing.Line(new(-2, 6), new(-2, 12), options);
+                drawing.Line(new(2, 6), new(2, 12), options);
+            }
+        }
+        private void DrawEmergency(SvgDrawing drawing)
+        {
+            drawing.Circle(new(), 1.5, new("dot"));
         }
         private void UpdatePins(bool eic)
         {

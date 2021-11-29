@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit
@@ -25,6 +27,7 @@ namespace SimpleCircuit
         private XmlNode _current;
         private readonly ExpandableBounds _bounds;
         private readonly Stack<Transform> _tf = new();
+        private static Regex _superSubscriptRegex = new(@"[\^_](\{(?<content>[^""\}]+)\}|(?<content>\w+))", RegexOptions.Compiled);
 
         /// <summary>
         /// Gets the current transform.
@@ -270,6 +273,59 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Draw an arc clockwise from the starting point to the ending point with a given radius.
+        /// </summary>
+        /// <param name="center">The center point of the arc.</param>
+        /// <param name="startAngle">The starting angle of the arc.</param>
+        /// <param name="endAngle">The end angle of the arc.</param>
+        /// <param name="radius">The radius of the arc.</param>
+        /// <param name="options">The path options.</param>
+        /// <param name="intermediatePoints">The number of intermediate points.</param>
+        public void Arc(Vector2 center, double startAngle, double endAngle, double radius, PathOptions options = null, int intermediatePoints = 0)
+        {
+            if (endAngle < startAngle)
+                endAngle += 2 * Math.PI;
+
+            var da = (endAngle - startAngle) / (intermediatePoints + 1);
+            var hl = 4.0 / 3.0 * Math.Tan(da * 0.25) * radius;
+
+            var pts = new List<Vector2>((intermediatePoints + 1) * 4);
+            Vector2 p = Vector2.Normal(startAngle) * radius + center;
+            pts.Add(p);
+            double alpha = startAngle;
+            for (int i = 0; i <= intermediatePoints; i++)
+            {
+                pts.Add(p + Vector2.Normal(alpha + Math.PI / 2) * hl);
+                alpha += da;
+                p = center + Vector2.Normal(alpha) * radius;
+                pts.Add(p - Vector2.Normal(alpha + Math.PI / 2) * hl);
+                pts.Add(p);
+            }
+            OpenBezier(pts, options);
+        }
+
+        /// <summary>
+        /// Draws an ellipse.
+        /// </summary>
+        /// <param name="center">The center of the ellipse.</param>
+        /// <param name="rx">The radius along the horizontal axis.</param>
+        /// <param name="ry">The radius along the vertical axis.</param>
+        /// <param name="options">The options.</param>
+        public void Ellipse(Vector2 center, double rx, double ry, PathOptions options = null)
+        {
+            double kx = rx * 0.552284749831;
+            double ky = ry * 0.552284749831;
+            ClosedBezier(new Vector2[]
+            {
+                new(-rx, 0),
+                new(-rx, -ky), new(-kx, -ry), new(0, -ry),
+                new(kx, -ry), new(rx, -ky), new(rx, 0),
+                new(rx, ky), new(kx, ry), new(0, ry),
+                new(-kx, ry), new(0, ky), new(-rx, 0)
+            }.Select(v => v + center), options);
+        }
+
+        /// <summary>
         /// Draws text.
         /// </summary>
         /// <param name="value">The value.</param>
@@ -288,13 +344,15 @@ namespace SimpleCircuit
             // Create the DOM elements and a span element for each 
             var txt = _document.CreateElement("text", Namespace);
             options?.Apply(txt);
-
             _current.AppendChild(txt);
+
+            // Apply text
+            value = TransformText(value);
             List<XmlElement> elements = new();
             foreach (var line in value.Split(new char[] { '\r', '\n', '\\' }))
             {
                 var tspan = _document.CreateElement("tspan", Namespace);
-                tspan.InnerText = line;
+                PopulateText(tspan, line);
                 txt.AppendChild(tspan);
                 elements.Add(tspan);
             }
@@ -360,6 +418,28 @@ namespace SimpleCircuit
 
             txt.SetAttribute("x", Convert(location.X));
             txt.SetAttribute("y", Convert(location.Y));
+        }
+
+        private string TransformText(string value)
+        {
+            value = value.Replace("\\\"", "\"");
+            value = _superSubscriptRegex.Replace(value, match =>
+            {
+                if (match.Value[0] == '^')
+                    return $"<tspan class=\"super\" baseline-shift=\"super\">{match.Groups["content"].Value}</tspan>";
+                else
+                    return $"<tspan class=\"sub\" baseline-shift=\"sub\">{match.Groups["content"].Value}</tspan>";
+            });
+            return value;
+        }
+        private void PopulateText(XmlNode element, string line)
+        {
+            var fragment = _document.CreateDocumentFragment();
+            fragment.InnerXml = $"<root xmlns=\"{Namespace}\">{line}</root>";
+
+            var nodes = fragment.ChildNodes[0].ChildNodes;
+            while (nodes.Count > 0)
+                element.AppendChild(nodes[0]);
         }
 
         /// <summary>

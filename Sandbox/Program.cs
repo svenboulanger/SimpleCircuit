@@ -12,13 +12,11 @@ namespace Sandbox
             var script = @"// A component chain is a series of components seperated by <wires>.
 // The type of component is defined by the first letter(s), which have to be capital letters.
 // Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.
-GND1 <u> V1(""1V"") <u r> R1(""1k"") <r d> C1(""1uF"") <d> GND2
+GND1 <u> V1(""1V"") <u r> R(""R_1"") <r d> C1(""1uF"") <d> GND2
 
-// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.
-// These are between brackets, and first indicate along which axis you wish to align.
-(Y GND1 < 0 > GND2)
-
-- R1.programmable = true
+        // In a lot of cases, we wish to align pins or components. This can be done using virtual chains.
+        // These are between brackets, and first indicate along which axis you wish to align.
+        (Y GND1 < 0 > GND2)
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);

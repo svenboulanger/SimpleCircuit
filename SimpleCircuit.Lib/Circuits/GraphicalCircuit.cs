@@ -74,6 +74,7 @@ namespace SimpleCircuit
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+.super, .sub { font-size: 0.75em; }
 .dot, .arrowhead { fill: black; }
 .plane, .apolar line, .polar .pos { stroke-width: 1pt; }
 .battery .neg { stroke-width: 0.75pt; }

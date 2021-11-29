@@ -44,6 +44,7 @@ namespace SimpleCircuitOnline
                 text = $"<svg class=\"simplecircuit\" xmlns=\"http://www.w3.org/2000/svg\">{text}</svg>";
             }
 
+            Console.WriteLine(text);
             JsonElement obj = ((IJSInProcessRuntime)_runtime).Invoke<JsonElement>("calculateBounds", text);
             double x = obj.GetProperty("x").GetDouble();
             double y = obj.GetProperty("y").GetDouble();

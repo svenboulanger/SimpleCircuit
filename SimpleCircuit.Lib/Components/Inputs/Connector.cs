@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 using System.Linq;
 
 namespace SimpleCircuit.Components.Inputs
@@ -6,10 +7,6 @@ namespace SimpleCircuit.Components.Inputs
     [SimpleKey("CONN", "A connector or fastener.", Category = "Inputs")]
     public class Connector : ScaledOrientedDrawable, ILabeled
     {
-        private const double _invsq2 = 0.70710678118;
-        private const double _khalf = 0.2652164898395;
-        private const double _k = 0.552284749831;
-
         [Description("Adds a label next to the connector.")]
         public string Label { get; set; }
 
@@ -36,14 +33,7 @@ namespace SimpleCircuit.Components.Inputs
             }, new("wire"));
 
             drawing.Circle(new(), 1.5);
-            drawing.OpenBezier(new Vector2[]
-            {
-                new(_invsq2, -_invsq2),
-                new(_invsq2 - _khalf, -_invsq2 - _khalf), new(_khalf, -1), new(0, -1),
-                new(-_k, -1), new(-1, -_k), new(-1, 0),
-                new(-1, _k), new(-_k, 1), new(0, 1),
-                new(_khalf, 1), new(_invsq2 - _khalf, _invsq2 + _khalf), new(_invsq2, _invsq2)
-            }.Select(v => v * 4));
+            drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
         }
     }
 }
