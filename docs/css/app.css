@@ -4,20 +4,13 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0px;
     height: 100%;
-}
-
-textarea.full-height, div.full-height, form.full-height {
-    height: 100%;
-}
-
-a, .btn-link {
-    color: #0366d6;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    overflow: hidden;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+    font-weight: 400;
 }
 
 app {
@@ -25,105 +18,56 @@ app {
     display: flex;
     flex-direction: column;
     height: 100%;
-}
-
-.top-row {
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.main {
-    flex: 1;
-}
-
-    .main .top-row {
-        background-color: #f7f7f7;
-        border-bottom: 1px solid #d6d5d5;
-        justify-content: flex-end;
-    }
-
-        .main .top-row > a, .main .top-row .btn-link {
-            white-space: nowrap;
-            margin-left: 1.5rem;
-        }
-
-.main .top-row a:first-child {
+    max-height: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
-
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+@-webkit-keyframes spinner-border {
+    to {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
 }
-
-    .sidebar .top-row {
-        background-color: rgba(0,0,0,0.4);
+@keyframes spinner-border {
+    to {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
     }
-
-    .sidebar .navbar-brand {
-        font-size: 1.1rem;
-    }
-
-    .sidebar .oi {
-        width: 2rem;
-        font-size: 1.1rem;
-        vertical-align: text-top;
-        top: -2px;
-    }
-
-    .sidebar .nav-item {
-        font-size: 0.9rem;
-        padding-bottom: 0.5rem;
-    }
-
-        .sidebar .nav-item:first-of-type {
-            padding-top: 1rem;
-        }
-
-        .sidebar .nav-item:last-of-type {
-            padding-bottom: 1rem;
-        }
-
-        .sidebar .nav-item a {
-            color: #d7d7d7;
-            border-radius: 4px;
-            height: 3rem;
-            display: flex;
-            align-items: center;
-            line-height: 3rem;
-        }
-
-            .sidebar .nav-item a.active {
-                background-color: rgba(255,255,255,0.25);
-                color: white;
-            }
-
-            .sidebar .nav-item a:hover {
-                background-color: rgba(255,255,255,0.1);
-                color: white;
-            }
-
-.content {
-    padding-top: 1.1rem;
 }
-
-.navbar-toggler {
-    background-color: rgba(255, 255, 255, 0.1);
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0 -50% -50% 0;
+    color: #007bff;
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    border: .25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite
 }
-
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0
+}
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
-
 .invalid {
     outline: 1px solid red;
 }
-
 .validation-message {
     color: red;
 }
-
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -135,83 +79,56 @@ app {
     width: 100%;
     z-index: 1000;
 }
-
 #blazor-error-ui .dismiss {
     cursor: pointer;
     position: absolute;
     right: 0.75rem;
     top: 0.5rem;
 }
-
-.loading-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: 0 -50% -50% 0;
+a {
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
 }
-
-@media (max-width: 767.98px) {
-    .main .top-row:not(.auth) {
-        display: none;
-    }
-
-    .main .top-row.auth {
-        justify-content: space-between;
-    }
-
-    .main .top-row a, .main .top-row .btn-link {
-        margin-left: 0;
-    }
+.bd-callout {
+    display: block;
+    padding: .5rem 1rem;
+    margin-top: .25rem;
+    margin-bottom: .25rem;
+    border: 1px solid #eee;
+    border-left-width: .25rem;
+    border-radius: .25rem;
+    border-left-color: #5bc0de;
 }
-
-@media (min-width: 768px) {
-    app {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-    .main .top-row {
-        position: sticky;
-        top: 0;
-    }
-
-    .main > div {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
-
-    .navbar-toggler {
-        display: none;
-    }
-
-    .sidebar .collapse {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-    }
+a.bd-callout:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
 }
+[role=button] { cursor: pointer; }
 
-.split-screen {
-    display: grid;
-    grid-template-columns: 10px [script-start style-start] minmax(400px, 30%) [script-end style-end] 10px [output-start] 1fr [output-end] 10px;
-    grid-template-rows: 10px [script-start output-start] minmax(400px, 60%) [script-end] 10px [style-start] 1fr [style-end output-end] 10px;
+.form-inline {
+    margin: 0.5rem 1rem;
+}
+.form-control {
+    display: block;
     width: 100%;
-    height: 100%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    overflow: visible;
+    margin: 0;
+    font-family: inherit;
 }
-
-.input-script {
-    grid-area: script;
+*, ::after, ::before {
+    box-sizing: border-box;
 }
-
-.input-style {
-    grid-area: style;
-}
-
-.svg-output {
-    grid-area: output;
-}
+.full-height { height: 100%; overflow: hidden; }
