@@ -10,10 +10,10 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
     border-radius: 0.2rem;
-
     color: #fff;
     background-color: #17a2b8;
     border-color: #17a2b8;
+    margin: .1em;
 }
 span {
     display: inline-block;

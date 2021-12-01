@@ -388,10 +388,7 @@ namespace SimpleCircuit.Parser
 
             // Pin name
             lexer.SkipWhile(TokenType.Whitespace);
-            if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
-                return null;
-            string name = lexer.Content;
-            lexer.Next();
+            string name = lexer.ReadWhile(~TokenType.Newline & ~TokenType.CloseIndex & ~TokenType.Whitespace);
 
             // Closing indexer
             lexer.SkipWhile(TokenType.Whitespace);
@@ -593,25 +590,21 @@ namespace SimpleCircuit.Parser
                 lexer.SkipWhile(~TokenType.Newline);
                 return;
             }
-            Vector2 direction;
+            bool x = false, y = false;
             switch (lexer.Content.ToLower())
             {
-                case "x": direction = new(1, 0); break;
-                case "y": direction = new(0, 1); break;
+                case "x": x = true; break;
+                case "y": y = true; break;
+                case "xy":
+                case "yx": x = true; y = true; break;
                 default:
                     context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
                         $"Could not recognize virtual chain direction."));
-                    direction = new();
-                    break;
+                    lexer.SkipWhile(~TokenType.Newline);
+                    return;
             }
             lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
-            if (direction.Equals(new Vector2()))
-            {
-                lexer.SkipWhile(~TokenType.CloseParenthesis);
-            }
-            else
-            {
                 // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
                 var component = ParseComponent(lexer, context);
                 IPin pinToWire = component.Pins[component.Pins.Count - 1];
@@ -619,59 +612,61 @@ namespace SimpleCircuit.Parser
 
                 // Parse wires
                 lexer.SkipWhile(TokenType.Whitespace);
-                while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
+            while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
+            {
+                // Read a pin
+                if (lexer.Check(TokenType.OpenIndex))
                 {
-                    // Read a pin
-                    if (lexer.Check(TokenType.OpenIndex))
-                    {
-                        pinName = ParsePin(lexer, context);
-                        if (pinName == null)
-                        {
-                            lexer.SkipWhile(~TokenType.Newline);
-                            return;
-                        }
-                        pinToWire = component.Pins[pinName];
-                    }
-
-                    // Parse the wire itself
-                    var wire = ParseWire(lexer, context);
-                    if (wire == null)
+                    pinName = ParsePin(lexer, context);
+                    if (pinName == null)
                     {
                         lexer.SkipWhile(~TokenType.Newline);
                         return;
                     }
-
-                    // Parse an optional pin
-                    lexer.SkipWhile(TokenType.Whitespace);
-                    pinName = null;
-                    if (lexer.Check(TokenType.OpenIndex))
-                    {
-                        pinName = ParsePin(lexer, context);
-                        if (pinName == null)
-                        {
-                            lexer.SkipWhile(~TokenType.Newline);
-                            return;
-                        }
-                    }
-
-                    // Parse the next component
-                    var nextComponent = ParseComponent(lexer, context);
-                    if (nextComponent == null)
-                    {
-                        lexer.SkipWhile(~TokenType.Newline);
-                        return;
-                    }
-
-                    // Extract the previous pin
-                    IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
-
-                    // String the pins together using wire segments
-                    StringVirtualWiresTogether(direction, pinToWire, wire, wireToPin, context);
-
-                    // To next component
-                    component = nextComponent;
-                    pinToWire = component.Pins[component.Pins.Count - 1];
+                    pinToWire = component.Pins[pinName];
                 }
+
+                // Parse the wire itself
+                var wire = ParseWire(lexer, context);
+                if (wire == null)
+                {
+                    lexer.SkipWhile(~TokenType.Newline);
+                    return;
+                }
+
+                // Parse an optional pin
+                lexer.SkipWhile(TokenType.Whitespace);
+                pinName = null;
+                if (lexer.Check(TokenType.OpenIndex))
+                {
+                    pinName = ParsePin(lexer, context);
+                    if (pinName == null)
+                    {
+                        lexer.SkipWhile(~TokenType.Newline);
+                        return;
+                    }
+                }
+
+                // Parse the next component
+                var nextComponent = ParseComponent(lexer, context);
+                if (nextComponent == null)
+                {
+                    lexer.SkipWhile(~TokenType.Newline);
+                    return;
+                }
+
+                // Extract the previous pin
+                IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
+
+                // String the pins together using wire segments
+                if (x)
+                    StringVirtualWiresTogether(pin => pin.X, new(1, 0), pinToWire, wire, wireToPin, context);
+                if (y)
+                    StringVirtualWiresTogether(pin => pin.Y, new(0, 1), pinToWire, wire, wireToPin, context);
+
+                // To next component
+                component = nextComponent;
+                pinToWire = component.Pins[component.Pins.Count - 1];
             }
 
             if (lexer.Expect(TokenType.CloseParenthesis, ")", "PE001", context.Diagnostics))
@@ -682,20 +677,20 @@ namespace SimpleCircuit.Parser
             else
                 lexer.SkipWhile(~TokenType.Newline);
         }
-        private static void StringVirtualWiresTogether(Vector2 direction, IPin pinToWire, List<WireInfo> wires, IPin wireToPin, ParsingContext context)
+        private static void StringVirtualWiresTogether(Func<IPin, string> variableFunc, Vector2 normal, IPin pinToWire, List<WireInfo> wires, IPin wireToPin, ParsingContext context)
         {
             // We will go through each wire and only consider those that have an effect on the wires
-            string lastNode = direction.X > 0 ? pinToWire.X : pinToWire.Y;
+            string lastNode = variableFunc(pinToWire);
             for (int i = 0; i < wires.Count; i++)
             {
-                double dot = wires[i].Orientation.Dot(direction);
+                double dot = wires[i].Orientation.Dot(normal);
 
                 // Create an intermediary point
                 string node;
                 if (i < wires.Count - 1)
                     node = $"virtual.{++context.VirtualCoordinateCount}";
                 else
-                    node = direction.X > 0 ? wireToPin.X : wireToPin.Y;
+                    node = variableFunc(wireToPin);
 
                 // Constrain these
                 if (double.IsNaN(wires[i].Length) && !dot.IsZero())
@@ -710,7 +705,6 @@ namespace SimpleCircuit.Parser
                     double length = dot.IsZero() ? 0.0 : dot * wires[i].Length;
                     context.Circuit.Add(new OffsetConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, length));
                 }
-
                 lastNode = node;
             }
         }

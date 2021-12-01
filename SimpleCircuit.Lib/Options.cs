@@ -31,5 +31,11 @@
 
         [Description("Use small-signal model related symbols.")]
         public bool SmallSignal { get; set; }
+
+        [Description("The margin along the border of the drawing.")]
+        public double Margin { get; set; } = 1.0;
+
+        [Description("Removes SVG groups that are empty.")]
+        public bool RemoveEmptyGroups { get; set; } = true;
     }
 }

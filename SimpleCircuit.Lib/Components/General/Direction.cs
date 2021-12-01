@@ -7,8 +7,12 @@ namespace SimpleCircuit.Components.General
     /// This is useful for example when combined with subcircuits to give an orientation.
     /// </summary>
     [SimpleKey("DIR", "Directional point, useful for subcircuit definitions or indicating busses (using crossings).", Category = "General")]
-    public class Direction : OrientedDrawable
+    public class Direction : OrientedDrawable, ILabeled
     {
+        /// <inheritdoc />
+        [Description("The label placed next to the wire.")]
+        public string Label { get; set; }
+
         /// <summary>
         /// Initializers a new instance of the <see cref="Direction"/> class.
         /// </summary>
@@ -18,6 +22,14 @@ namespace SimpleCircuit.Components.General
         {
             Pins.Add(new FixedOrientedPin("input", "The input.", this, new(), new(-1, 0)), "i", "a", "in", "input");
             Pins.Add(new FixedOrientedPin("output", "The output.", this, new(), new(1, 0)), "o", "b", "out", "output");
+
+            DrawingVariants = Variant.Do(DrawLabel);
+        }
+
+        private void DrawLabel(SvgDrawing drawing)
+        {
+            if (!string.IsNullOrWhiteSpace(Label))
+                drawing.Text(Label, new(0, 4), new(0, 1));
         }
 
         /// <summary>

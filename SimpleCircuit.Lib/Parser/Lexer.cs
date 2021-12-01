@@ -65,8 +65,21 @@ namespace SimpleCircuit.Parser
             Next();
         }
 
+        /// <summary>
+        /// Checks whether the current token matches one or more token types.
+        /// </summary>
+        /// <param name="flags">The flag.</param>
+        /// <returns>Returns <c>true</c> if one of the flags describes the current token type; otherwise, <c>false</c>.</returns>
         public bool Check(TokenType flags) => (Type & flags) != 0;
 
+        /// <summary>
+        /// Returns an error message if the current token is not as expected.
+        /// </summary>
+        /// <param name="flags">The flag to check.</param>
+        /// <param name="expected">A descriptive word describing what is expected.</param>
+        /// <param name="code">The error code.</param>
+        /// <param name="diagnostics">A diagnostics handler.</param>
+        /// <returns>Returns <c>true</c> if the token matches what is expected; otherwise, <c>false</c>.</returns>
         public bool Expect(TokenType flags, string expected, string code, IDiagnosticHandler diagnostics)
         {
             if (Check(flags))
@@ -265,6 +278,12 @@ namespace SimpleCircuit.Parser
             }
         }
 
+        /// <summary>
+        /// Allows branching if certain tokens are encountered. If the token matches the flag
+        /// specified, the token is consumed.
+        /// </summary>
+        /// <param name="flag">The type of tokens to check.</param>
+        /// <returns>Returns <c>true</c> if the current token matches; otherwise, <c>false</c>.</returns>
         public bool Branch(TokenType flag)
         {
             if ((Type & flag) != 0)
@@ -283,6 +302,14 @@ namespace SimpleCircuit.Parser
         {
             while ((Type & flags) != 0)
                 Next();
+        }
+
+        public string ReadWhile(TokenType flags)
+        {
+            int start = _index - _length;
+            while (Check(flags))
+                Next();
+            return _input.Substring(start, _index - _length - start);
         }
 
         private void Continue()

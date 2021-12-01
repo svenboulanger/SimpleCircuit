@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -56,7 +55,12 @@ namespace SimpleCircuit
         public double Margin { get; set; } = 1.0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SvgDrawing"/> class.
+        /// Removes empty groups.
+        /// </summary>
+        public bool RemoveEmptyGroups { get; set; } = true;
+
+        /// <summary>
+        /// Creates a new SVG drawing instance.
         /// </summary>
         public SvgDrawing()
         {
@@ -65,6 +69,20 @@ namespace SimpleCircuit
             _document.AppendChild(_current);
             _bounds = new ExpandableBounds();
             _tf.Push(Transform.Identity);
+        }
+
+        /// <summary>
+        /// Creates a new SVG drawing instance.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        public SvgDrawing(Options options)
+            : this()
+        {
+            if (options != null)
+            {
+                Margin = options.Margin;
+                RemoveEmptyGroups = options.RemoveEmptyGroups;
+            }
         }
 
         /// <summary>
@@ -426,9 +444,9 @@ namespace SimpleCircuit
             value = _superSubscriptRegex.Replace(value, match =>
             {
                 if (match.Value[0] == '^')
-                    return $"<tspan class=\"super\" baseline-shift=\"super\">{match.Groups["content"].Value}</tspan>";
+                    return $"<tspan class=\"super\" dy=\"-0.5em\">{match.Groups["content"].Value}</tspan>";
                 else
-                    return $"<tspan class=\"sub\" baseline-shift=\"sub\">{match.Groups["content"].Value}</tspan>";
+                    return $"<tspan class=\"sub\" dy=\"0.5em\">{match.Groups["content"].Value}</tspan>";
             });
             return value;
         }
@@ -459,8 +477,14 @@ namespace SimpleCircuit
         /// </summary>
         public void EndGroup()
         {
-            if (_current.ParentNode != null)
-                _current = _current.ParentNode;
+            var group = _current;
+            var parent = _current.ParentNode;
+
+            if (RemoveEmptyGroups && group.ChildNodes.Count == 0)
+                parent.RemoveChild(group);
+
+            if (parent != null)
+                _current = parent;
         }
 
         /// <summary>

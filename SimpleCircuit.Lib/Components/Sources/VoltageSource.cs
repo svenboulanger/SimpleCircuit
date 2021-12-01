@@ -60,12 +60,13 @@ namespace SimpleCircuit.Components.Sources
         }
         private void DrawAC(SvgDrawing drawing)
         {
-            double handle = 1.7 / Math.Sqrt(2); // Slighly exaggerated curves
+            double hy = 1 / Math.Sqrt(2);
+            double hx = hy * 2; // Slighly exaggerated curves
             drawing.OpenBezier(new Vector2[]
             {
                     new(0, -3),
-                    new(handle, -3 + handle), new(handle, -handle), new(),
-                    new(-handle, handle), new(-handle, 3 - handle), new(0, 3)
+                    new(hx, -3 + hy), new(hx, -hy), new(),
+                    new(-hx, hy), new(-hx, 3 - hy), new(0, 3)
             });
         }
 

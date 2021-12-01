@@ -25,7 +25,6 @@ namespace SimpleCircuit.Components
             DrawingVariants = Variant.Do(DrawTerminal);
         }
 
-        /// <inheritdoc/>
         private void DrawTerminal(SvgDrawing drawing)
         {
             drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));

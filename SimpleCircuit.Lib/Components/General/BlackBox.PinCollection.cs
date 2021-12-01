@@ -87,13 +87,38 @@ namespace SimpleCircuit.Components
             public void Render(SvgDrawing drawing)
             {
                 foreach (var pin in _pinsNorth)
-                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(0, 2), new(0, 1));
+                {
+                    string name = Transform(pin.Name);
+                    if (!string.IsNullOrWhiteSpace(name))
+                        drawing.Text(name, pin.Location + new Vector2(0, 2), new(0, 1));
+                }
                 foreach (var pin in _pinsSouth)
-                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(0, -2), new(0, -1));
+                {
+
+                    string name = Transform(pin.Name);
+                    if (!string.IsNullOrWhiteSpace(name))
+                        drawing.Text(name, pin.Location + new Vector2(0, -2), new(0, -1));
+                }
                 foreach (var pin in _pinsEast)
-                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(-2, 0), new(-1, 0));
+                {
+                    string name = Transform(pin.Name);
+                    if (!string.IsNullOrWhiteSpace(name))
+                        drawing.Text(name, pin.Location + new Vector2(-2, 0), new(-1, 0));
+                }
                 foreach (var pin in _pinsWest)
-                    drawing.Text(pin.Name.Substring(1), pin.Location + new Vector2(2, 0), new(1, 0));
+                {
+                    string name = Transform(pin.Name);
+                    if (!string.IsNullOrWhiteSpace(name))
+                        drawing.Text(name, pin.Location + new Vector2(2, 0), new(1, 0));
+                }
+            }
+
+            private string Transform(string value)
+            {
+                string name = value.Substring(1);
+                if (name[0] == '(' && name[name.Length - 1] == ')')
+                    return null;
+                return name.Replace("\\(", "(").Replace("\\)", ")");
             }
 
             public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
