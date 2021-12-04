@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using SimpleCircuit;
+using SimpleCircuit.Components;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +13,15 @@ namespace SimpleCircuitOnline.Shared
         private string _filterString = string.Empty;
         private bool _expandAll = false;
         private readonly HashSet<string> _searchTerms = new();
-        private Dictionary<string, List<Utility.ComponentDescription>> _categories = new Dictionary<string, List<Utility.ComponentDescription>>();
+        private Dictionary<string, List<(DrawableMetadata, IDrawable)>> _categories = new();
 
-        private bool IsFiltered(Utility.ComponentDescription description)
+        private bool IsFiltered((DrawableMetadata Metadata, IDrawable Drawable) argument)
         {
             int count = 0;
             foreach (var term in _searchTerms)
             {
-                if (description.Name.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-                    description.Key.Contains(term, StringComparison.CurrentCultureIgnoreCase))
+                if (argument.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
+                    argument.Metadata.Keys.Any(key => key.Contains(term, StringComparison.CurrentCultureIgnoreCase)))
                     count++;
             }
             return count == _searchTerms.Count;
@@ -45,16 +47,25 @@ namespace SimpleCircuitOnline.Shared
         {
             base.OnInitialized();
 
-            // Find the categories
-            foreach (var description in Utility.Components(typeof(SimpleCircuit.Parser.Parser).Assembly).OrderBy(d => d.Key))
+            // Find all the different components
+            var context = new ParsingContext();
+            foreach (var factory in context.Factory.Factories)
             {
-                string category = description.Category ?? "General";
-                if (!_categories.TryGetValue(category, out var list))
+                foreach (var metadata in factory.Metadata)
                 {
-                    list = new List<Utility.ComponentDescription>();
-                    _categories.Add(category, list);
+                    // Let's add the metdata and a component of it for each category
+                    foreach (string category in metadata.Categories)
+                    {
+                        if (!_categories.TryGetValue(category, out var list))
+                        {
+                            list = new();
+                            _categories.Add(category, list);
+                        }
+
+                        // Add our description
+                        list.Add((metadata, factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options)));
+                    }
                 }
-                list.Add(description);
             }
         }
     }

@@ -6,7 +6,6 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// Describes a component with a graphical representation, and pins that can be interconnected.
     /// </summary>
-    /// <seealso cref="IItem" />
     public interface IDrawable : ICircuitPresence
     {
         /// <summary>

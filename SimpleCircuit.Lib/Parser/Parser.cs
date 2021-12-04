@@ -455,18 +455,9 @@ namespace SimpleCircuit.Parser
             string subcktName = lexer.Content;
             lexer.Next();
 
-            // Check if the subcircuit doesn't already exist
-            if (context.Definitions.Search(subcktName, out _))
-            {
-                lexer.SkipWhile(TokenType.All);
-                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    $"The subcircuit definition '{subcktName}' already exists."));
-                return;
-            }
-
             // Create a new parsing context to separate our circuit
             var localContext = new ParsingContext() { Diagnostics = context.Diagnostics };
-            var definition = new SubcircuitDefinition(localContext.Circuit);
+            List<IPin> ports = new();
 
             // Parse the pins
             lexer.SkipWhile(TokenType.Whitespace);
@@ -500,7 +491,7 @@ namespace SimpleCircuit.Parser
                     }
                 }
                 pin ??= component.Pins[component.Pins.Count - 1];
-                definition.Ports.Add(pin);
+                ports.Add(pin);
 
                 lexer.SkipWhile(TokenType.Whitespace);
             }
@@ -520,8 +511,10 @@ namespace SimpleCircuit.Parser
                 lexer.SkipWhile(~TokenType.Whitespace);
                 return;
             }
-            context.Definitions.Add(subcktName, definition);
-            definition.Definition.Solve(context.Diagnostics);
+
+            // Add a subcircuit definition to the context drawable factory
+            var subckt = new Subcircuit(subcktName, localContext.Circuit, ports, context.Diagnostics);
+            context.Factory.Register(subckt);
         }
 
         private static void ParseOptions(Lexer lexer, ParsingContext context)

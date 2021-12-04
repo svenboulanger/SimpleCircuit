@@ -1,71 +1,110 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A subcircuit.
+    /// A subcircuit definition.
     /// </summary>
-    public class Subcircuit : ScaledOrientedDrawable
+    public class Subcircuit : IDrawableFactory
     {
-        private readonly GraphicalCircuit _ckt;
+        private readonly string _key;
+        private readonly GraphicalCircuit _circuit;
+        private readonly IEnumerable<IPin> _pins;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subcircuit"/> class.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        public Subcircuit(string name, GraphicalCircuit definition, Options options, IEnumerable<IPin> pins)
-            : base(name, options)
+        /// <inheritdoc />
+        public IEnumerable<DrawableMetadata> Metadata
         {
-            _ckt = definition ?? throw new ArgumentNullException(nameof(definition));
-
-            // Find the pins in the subcircuit
-            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<string> possibleNames = new();
-            foreach (var pin in pins)
+            get
             {
-                possibleNames.Clear();
-
-                // A pin can have multiple names, and we we want to have the easiest solution!
-                string shortName = pin.Owner.Name;
-                string key = pin.Owner.GetType().GetCustomAttributes(true).OfType<SimpleKeyAttribute>().FirstOrDefault()?.Key;
-                if (shortName.StartsWith(key))
-                    shortName = shortName.Substring(key.Length);
-                if (!set.Contains(shortName))
-                    possibleNames.Add(shortName);
-                foreach (string pn in pin.Owner.Pins.NamesOf(pin))
-                {
-                    string n = $"{shortName}_{pn}";
-                    if (!set.Contains(n))
-                    {
-                        set.Add(n);
-                        possibleNames.Add(n);
-                    }
-                    possibleNames.Add($"{pin.Owner.Name}_{pn}");
-                    set.Add($"{pin.Owner.Name}_{pn}");
-                }
-
-                if (pin is IOrientedPin op)
-                {
-                    Pins.Add(new FixedOrientedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location, op.Orientation),
-                        possibleNames);
-                }
-                else
-                {
-                    Pins.Add(new FixedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location),
-                        possibleNames);
-                }
+                yield return new(new[] { _key }, "A subcircuit of type '{_key}'", new[] { "Subcircuit" });
             }
-
-            DrawingVariants = Variant.Do(DrawSubcircuit);
         }
 
-        /// <inheritdoc/>
-        private void DrawSubcircuit(SvgDrawing drawing)
+        /// <summary>
+        /// Creates a new subcircuit factory.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="definition">The definition.</param>
+        /// <param name="pins">The pins.</param>
+        /// <param name="diagnostics">The diagnostic handler.</param>
+        /// <exception cref="ArgumentNullException">Thrown if an argument is <c>null</c>.</exception>
+        public Subcircuit(string key, GraphicalCircuit definition, IEnumerable<IPin> pins, IDiagnosticHandler diagnostics)
         {
-            _ckt.Render(drawing);
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+            _key = key;
+            _circuit = definition ?? throw new ArgumentNullException(nameof(definition));
+            _pins = pins ?? throw new ArgumentNullException(nameof(pins));
+            if (!_circuit.Solved)
+                _circuit.Solve(diagnostics);
+        }
+
+        /// <inheritdoc />
+        public IDrawable Create(string key, string name, Options options)
+            => new Instance(name, _circuit, options, _pins);
+
+        private class Instance : ScaledOrientedDrawable
+        {
+            private readonly GraphicalCircuit _ckt;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Subcircuit"/> class.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name, GraphicalCircuit definition, Options options, IEnumerable<IPin> pins)
+                : base(name, options)
+            {
+                _ckt = definition;
+
+                // Find the pins in the subcircuit
+                var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                List<string> possibleNames = new();
+                foreach (var pin in pins)
+                {
+                    possibleNames.Clear();
+
+                    // Check with the name of the pin owner
+                    string ownerName = pin.Owner.Name;
+                    if (!set.Contains(ownerName))
+                    {
+                        possibleNames.Add(ownerName);
+                        set.Add(ownerName);
+                    }
+
+                    // A pin can have multiple names, and we we want to have the easiest solutions!
+                    foreach (string pn in pin.Owner.Pins.NamesOf(pin))
+                    {
+                        if (!set.Contains(pn))
+                        {
+                            possibleNames.Add(pn);
+                            set.Add(pn);
+                        }
+                        possibleNames.Add($"{pin.Owner.Name}_{pn}");
+                        set.Add($"{pin.Owner.Name}_{pn}");
+                    }
+
+                    if (pin is IOrientedPin op)
+                    {
+                        Pins.Add(new FixedOrientedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location, op.Orientation),
+                            possibleNames);
+                    }
+                    else
+                    {
+                        Pins.Add(new FixedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location),
+                            possibleNames);
+                    }
+                }
+                DrawingVariants = Variant.Do(DrawSubcircuit);
+            }
+
+            /// <inheritdoc/>
+            private void DrawSubcircuit(SvgDrawing drawing)
+            {
+                _ckt.Render(drawing);
+            }
         }
     }
 }

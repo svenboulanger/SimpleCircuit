@@ -1,7 +1,10 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -22,6 +25,8 @@ namespace SimpleCircuit
         /// </summary>
         public const string SimpleCircuitNamespace = "https://github.com/svenboulanger/SimpleCircuit";
 
+
+        private readonly static CultureInfo _culture = CultureInfo.InvariantCulture;
         private readonly XmlDocument _document;
         private XmlNode _current;
         private readonly ExpandableBounds _bounds;
@@ -39,9 +44,6 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the style of the drawing.
         /// </summary>
-        /// <value>
-        /// The style.
-        /// </value>
         public string Style { get; set; }
 
         /// <summary>
@@ -102,6 +104,337 @@ namespace SimpleCircuit
             _tf.Pop();
             if (_tf.Count == 0)
                 _tf.Push(Transform.Identity);
+        }
+
+        /// <inheritdoc />
+        public void DrawXml(XmlNode description, IDiagnosticHandler diagnostics)
+        {
+            foreach (XmlNode node in description.ChildNodes)
+            {
+                // Depending on the node type, let's draw something!
+                switch (node.Name)
+                {
+                    case "line": DrawXmlLine(node, diagnostics); break;
+                    case "circle": DrawXmlCircle(node, diagnostics); break;
+                    case "path": DrawXmlPath(node, diagnostics); break;
+                    case "polygon": DrawXmlPolygon(node, diagnostics); break;
+                    case "polyline": DrawXmlPolyline(node, diagnostics); break;
+                    case "text": DrawXmlText(node, diagnostics); break;
+                    default:
+                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001",
+                            $"Could not recognize drawing node '{node.Name}'"));
+                        break;
+                }
+            }
+        }
+        private void DrawXmlLine(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            if (node.Attributes == null)
+                return;
+
+            bool success = true;
+            success &= ParseVector(node, "x1", "y1", diagnostics, out var start);
+            success &= ParseVector(node, "x2", "y2", diagnostics, out var end);
+            if (!success)
+                return;
+            var options = ParsePathOptions(node);
+
+            // Draw the line
+            Line(start, end, options);
+        }
+        private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            if (node.ChildNodes.Count == 0)
+                return;
+
+            List<Vector2> points = new(node.ChildNodes.Count);
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.Name == "p")
+                {
+                    if (!ParseVector(child, "x", "y", diagnostics, out var result))
+                        continue;
+                    points.Add(result);
+                }
+            }
+            var options = ParsePathOptions(node);
+
+            // Draw the polygon
+            Polygon(points, options);
+        }
+        private void DrawXmlPolyline(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            if (node.ChildNodes.Count == 0)
+                return;
+
+            List<Vector2> points = new(node.ChildNodes.Count);
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.Name == "p")
+                {
+                    if (!ParseVector(child, "x", "y", diagnostics, out var result))
+                        continue;
+                    points.Add(result);
+                }
+            }
+            var options = ParsePathOptions(node);
+
+            // Draw the polyline
+            Polyline(points, options);
+        }
+        private void DrawXmlCircle(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            if (node.Attributes == null)
+                return;
+
+            // Get the coordinates
+            bool success = true;
+            success &= ParseVector(node, "cx", "cy", diagnostics, out Vector2 center);
+            success &= ParseCoordinate(node, "r", diagnostics, out double r);
+            if (!success)
+                return;
+            var options = ParsePathOptions(node);
+
+            // Draw the circle
+            Circle(center, r, options);
+        }
+        private void DrawXmlPath(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            var options = ParsePathOptions(node);
+
+            // Add the path
+            var path = _document.CreateElement("path", Namespace);
+            options?.Apply(path);
+            _current.AppendChild(path);
+
+            // Create the data
+            StringBuilder sb = new();
+            Vector2 pathStart = new(); // Keeps track of the start of a path
+            Vector2 current = new(); // Keeps track of the current location
+            Vector2 h1 = new(), h2 = new(), p = new(); // Keeps track of handles and end points
+            bool success;
+            foreach (XmlNode cmd in node.ChildNodes)
+            {
+                success = true;
+                string action = cmd.Name;
+                switch (action)
+                {
+                    // Move absolute value
+                    case "M":
+                        if (!ParseVector(cmd, "x", "y", diagnostics, out p))
+                            continue;
+                        p = CurrentTransform.Apply(p);
+                        sb.Append($" M{Convert(p.X)} {Convert(p.Y)}");
+                        h1 = h2 = pathStart = current = p;
+                        _bounds.Expand(current);
+                        break;
+
+                    // Move relative distance
+                    case "m":
+                        if (!ParseVector(cmd, "x", "y", diagnostics, out p))
+                            continue;
+                        p = CurrentTransform.Apply(p);
+                        sb.Append($" m{Convert(p.X)} {Convert(p.Y)}");
+                        current += p;
+                        h1 = h2 = pathStart = current;
+                        _bounds.Expand(current);
+                        break;
+
+                    // Line to absolute position
+                    case "L":
+                        if (!ParseVector(cmd, "x", "y", diagnostics, out p))
+                            continue;
+                        p = CurrentTransform.Apply(p);
+                        sb.Append($" L{Convert(p.X)} {Convert(p.Y)}");
+                        h1 = h2 = current = p;
+                        _bounds.Expand(current);
+                        break;
+
+                    // Line to relative position
+                    case "l":
+                        if (!ParseVector(cmd, "x", "y", diagnostics, out p))
+                            continue;
+                        p = CurrentTransform.ApplyDirection(p);
+                        sb.Append($" l{Convert(p.X)} {Convert(p.Y)}");
+                        current += p;
+                        h1 = h2 = current;
+                        _bounds.Expand(current);
+                        break;
+
+                    case "C":
+                        success &= ParseVector(cmd, "x1", "y1", diagnostics, out h1);
+                        success &= ParseVector(cmd, "x2", "y2", diagnostics, out h2);
+                        success &= ParseVector(cmd, "x", "y", diagnostics, out p);
+                        if (!success)
+                            continue;
+                        h1 = CurrentTransform.Apply(h1);
+                        h2 = CurrentTransform.Apply(h2);
+                        p = CurrentTransform.Apply(p);
+                        _bounds.Expand(new[] { h1, h2, p });
+                        sb.Append($" C{Convert(h1.X)} {Convert(h1.Y)} {Convert(h2.X)} {Convert(h2.Y)} {Convert(p.X)} {Convert(p.Y)}");
+                        current = p;
+                        break;
+
+                    case "c":
+                        success &= ParseVector(cmd, "dx1", "dy1", diagnostics, out h1);
+                        success &= ParseVector(cmd, "dx2", "dy2", diagnostics, out h2);
+                        success &= ParseVector(cmd, "dx", "dy", diagnostics, out p);
+                        if (!success)
+                            continue;
+                        h1 = CurrentTransform.ApplyDirection(h1);
+                        h2 = CurrentTransform.ApplyDirection(h2);
+                        p = CurrentTransform.ApplyDirection(p);
+                        _bounds.Expand(new[] { h1, h2, p }.Select(v => v + p));
+                        sb.Append($" c{Convert(h1.X)} {Convert(h1.Y)} {Convert(h2.X)} {Convert(h2.Y)} {Convert(p.X)} {Convert(p.Y)}");
+                        current += p;
+                        break;
+
+                    case "S":
+                        h1 = h2; // We should use the last handle position
+                        success &= ParseVector(cmd, "x2", "y2", diagnostics, out h2);
+                        success &= ParseVector(cmd, "x", "y", diagnostics, out p);
+                        if (!success)
+                            continue;
+                        h2 = CurrentTransform.Apply(h2);
+                        p = CurrentTransform.Apply(p);
+                        _bounds.Expand(new[] { 2 * current - h1, h2, p });
+                        sb.Append($" S{Convert(h2.X)} {Convert(h2.Y)} {Convert(p.X)} {Convert(p.Y)}");
+                        current = p;
+                        break;
+
+                    case "s":
+                        h1 = h2;
+                        success &= ParseVector(cmd, "dx2", "dy2", diagnostics, out h2);
+                        success &= ParseVector(cmd, "dx", "dy", diagnostics, out p);
+                        if (!success)
+                            continue;
+                        h2 = CurrentTransform.ApplyDirection(h2);
+                        p = CurrentTransform.ApplyDirection(p);
+                        _bounds.Expand(new[] { 2 * current - h1, h2 + current, p + current });
+                        sb.Append($" s{Convert(h2.X)} {Convert(h2.Y)} {Convert(p.X)} {Convert(p.Y)}");
+                        current += p;
+                        break;
+
+                    case "z":
+                    case "Z":
+                        sb.Append(" Z");
+                        current = pathStart;
+                        break;
+                }
+            }
+            path.SetAttribute("d", sb.ToString());
+        }
+        private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            var options = ParsePathOptions(node);
+            string label = node.Attributes["value"]?.Value;
+            if (string.IsNullOrWhiteSpace(label))
+                return;
+
+            // Get the coordinates
+            if (!ParseVector(node, "x", "y", diagnostics, out Vector2 location))
+                return;
+            TryParseVector(node, "nx", "ny", diagnostics, new(), out Vector2 expand);
+            Text(label, location, expand, options);
+        }
+        private bool ParseCoordinate(XmlNode node, string attributeName, IDiagnosticHandler diagnostics, out double result)
+        {
+            string value = node.Attributes?[attributeName]?.Value;
+            if (value == null)
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected attribute '{attributeName}' on {node.Name}."));
+                result = 0.0;
+                return false;
+            }
+            if (!double.TryParse(value, NumberStyles.Float, _culture, out result))
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate for '{attributeName}' on {node.Name}, but was '{value}'."));
+                result = 0.0;
+                return false;
+            }
+            return true;
+        }
+        private bool ParseVector(XmlNode node, string xAttribute, string yAttribute, IDiagnosticHandler diagnostics, out Vector2 result)
+        {
+            bool success = true;
+            success &= ParseCoordinate(node, xAttribute, diagnostics, out double x);
+            success &= ParseCoordinate(node, yAttribute, diagnostics, out double y);
+            result = new(x, y);
+            return success;
+        }
+        private bool TryParseCoordinate(XmlNode node, string attributeName, IDiagnosticHandler diagnostics, double defaultValue, out double result)
+        {
+            string value = node.Attributes?[attributeName]?.Value;
+            if (value == null)
+            {
+                result = defaultValue;
+                return false;
+            }
+            if (!double.TryParse(value, NumberStyles.Float, _culture, out result))
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate for '{attributeName}' on {node.Name}, but was '{value}'."));
+                result = defaultValue;
+                return false;
+            }
+            return true;
+        }
+        private bool TryParseVector(XmlNode node, string xAttribute, string yAttribute, IDiagnosticHandler diagnostics, Vector2 defaultValue, out Vector2 result)
+        {
+            bool success = true;
+            success &= TryParseCoordinate(node, xAttribute, diagnostics, defaultValue.X, out double x);
+            success &= TryParseCoordinate(node, yAttribute, diagnostics, defaultValue.Y, out double y);
+            result = new(x, y);
+            return success;
+        }
+        private PathOptions ParsePathOptions(XmlNode parent)
+        {
+            if (parent == null)
+                return null;
+            if (parent.Attributes == null)
+                return null;
+
+            var options = new PathOptions();
+
+            // Read the class
+            var attribute = parent.Attributes?["class"];
+            if (attribute != null)
+            {
+                foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                    options.Classes.Add(name);
+            }
+
+            // Read a marker
+            attribute = parent.Attributes?["end"];
+            if (attribute != null)
+            {
+                switch (attribute.Value.ToLower())
+                {
+                    case "arrow": options.EndMarker = PathOptions.MarkerTypes.Arrow; break;
+                    case "slash": options.EndMarker = PathOptions.MarkerTypes.Slash; break;
+                    case "dot": options.EndMarker = PathOptions.MarkerTypes.Dot; break;
+                }
+            }
+            attribute = parent.Attributes?["middle"];
+            if (attribute != null)
+            {
+                switch (attribute.Value.ToLower())
+                {
+                    case "arrow": options.MiddleMarker = PathOptions.MarkerTypes.Arrow; break;
+                    case "slash": options.MiddleMarker = PathOptions.MarkerTypes.Slash; break;
+                    case "dot": options.MiddleMarker = PathOptions.MarkerTypes.Dot; break;
+                }
+            }
+            attribute = parent.Attributes?["start"];
+            if (attribute != null)
+            {
+                switch (attribute.Value.ToLower())
+                {
+                    case "arrow": options.StartMarker = PathOptions.MarkerTypes.Arrow; break;
+                    case "slash": options.StartMarker = PathOptions.MarkerTypes.Slash; break;
+                    case "dot": options.StartMarker = PathOptions.MarkerTypes.Dot; break;
+                }
+            }
+            return options;
         }
 
         /// <summary>

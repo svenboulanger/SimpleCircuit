@@ -6,9 +6,9 @@
 @foreach (var category in _categories)
 {
     <Expandable Title="@category.Key" Class="mt-2 mx-3" Expanded="_expandAll">
-        @foreach (var description in category.Value.Where(IsFiltered))
+        @foreach (var (metadata, drawable) in category.Value.Where(IsFiltered))
         {
-            <ComponentHelp Description="description" />
+            <ComponentHelp Metadata="metadata" Drawable="drawable" />
         }
     </Expandable>
 }

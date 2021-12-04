@@ -116,5 +116,11 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public abstract void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics);
+
+        /// <summary>
+        /// Converts the drawable to a string.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString() => Name;
     }
 }

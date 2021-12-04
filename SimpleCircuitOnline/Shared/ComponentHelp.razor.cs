@@ -4,7 +4,6 @@ using SimpleCircuit.Components;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Xml;
 
@@ -13,8 +12,7 @@ namespace SimpleCircuitOnline.Shared
     public partial class ComponentHelp
     {
         private const double MaxPreviewWidth = 90;
-        private Utility.ComponentDescription _description;
-        private IDrawable _component;
+        private IDrawable _drawable;
         private List<(PropertyInfo, string)> _properties;
         private Dictionary<string, bool> _variants;
 
@@ -22,14 +20,17 @@ namespace SimpleCircuitOnline.Shared
         public string Class { get; set; }
 
         [Parameter]
-        public Utility.ComponentDescription Description
+        public DrawableMetadata Metadata { get; set; }
+
+        [Parameter]
+        public IDrawable Drawable
         {
-            get => _description;
+            get => _drawable;
             set
             {
-                _description = value;
                 _properties = null;
-                _component = null;
+                _variants = null;
+                _drawable = value;
             }
         }
 
@@ -40,10 +41,10 @@ namespace SimpleCircuitOnline.Shared
         {
             get
             {
-                if (_properties == null && Description != null)
+                if (_properties == null && _drawable != null)
                 {
                     _properties = new();
-                    foreach (var p in Description.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                    foreach (var p in _drawable.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         if (!p.CanRead || !p.CanWrite)
                             continue;
@@ -64,10 +65,10 @@ namespace SimpleCircuitOnline.Shared
         {
             get
             {
-                if (_variants == null)
+                if (_variants == null && _drawable != null)
                 {
                     var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    Component.CollectPossibleVariants(set);
+                    _drawable.CollectPossibleVariants(set);
                     _variants = new(StringComparer.OrdinalIgnoreCase);
                     foreach (string name in set)
                         _variants.Add(name, false);
@@ -76,30 +77,9 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-        /// <summary>
-        /// Gets the component for the specified description.
-        /// </summary>
-        protected IDrawable Component
-        {
-            get
-            {
-                if (_component == null)
-                {
-                    var options = new Options();
-                    var ctor = Description.Type.GetConstructors().First();
-                    var ps = ctor.GetParameters();
-                    if (ps.Length == 2)
-                        _component = (IDrawable)ctor.Invoke(new object[] { Description.Name, options });
-                    else
-                        _component = (IDrawable)ctor.Invoke(new object[] { Description.Name });
-                }
-                return _component;
-            }
-        }
-
         private string CreateSvg()
         {
-            if (Description == null)
+            if (Metadata == null || _drawable == null)
                 return "";
 
             // We can update the variants
@@ -108,15 +88,17 @@ namespace SimpleCircuitOnline.Shared
                 foreach (var variant in _variants)
                 {
                     if (variant.Value)
-                        Component.AddVariant(variant.Key);
+                        _drawable.AddVariant(variant.Key);
                     else
-                        Component.RemoveVariant(variant.Key);
+                        _drawable.RemoveVariant(variant.Key);
                 }
             }
 
-            var drawing = new SvgDrawing();
-            drawing.Style = GraphicalCircuit.DefaultStyle;
-            Component.Render(drawing);
+            var drawing = new SvgDrawing
+            {
+                Style = GraphicalCircuit.DefaultStyle
+            };
+            _drawable.Render(drawing);
             var doc = drawing.GetDocument();
 
             // Try to resize the component

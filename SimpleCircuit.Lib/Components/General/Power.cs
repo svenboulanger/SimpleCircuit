@@ -3,45 +3,35 @@
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A supply voltage.
+    /// A factory for power planes.
     /// </summary>
-    [SimpleKey("POW", "Power plane.", Category = "General")]
-    public class Power : ScaledOrientedDrawable, ILabeled
+    [Drawable("POW", "A power plane.", "General")]
+    public class PowerFactory : DrawableFactory
     {
-        /// <inheritdoc/>
-        [Description("The power plane name.")]
-        public string Label { get; set; } = "VDD";
+        /// <inheritdoc />
+        public override IDrawable Create(string key, string name, Options options)
+            => new Instance(name, options);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Ground"/> class.
-        /// </summary>
-        /// <param name="options">Options that can be used for the component.</param>
-        public Power(string name, Options options)
-            : base(name, options)
+        private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
+            [Description("The power plane name.")]
+            public string Label { get; set; } = "VDD";
+            public Instance(string name, Options options)
+                : base(name, options)
+            {
+                Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
+                DrawingVariants = Variant.Do(DrawPower);
+            }
+            private void DrawPower(SvgDrawing drawing)
+            {
+                // Wire
+                drawing.Line(new Vector2(0, 0), new Vector2(0, -3), new("wire"));
 
-            DrawingVariants = Variant.Do(DrawPower);
+                // Power
+                drawing.Line(new Vector2(-5, -3), new Vector2(5, -3), new("plane"));
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+            }
         }
-
-        /// <inheritdoc/>
-        private void DrawPower(SvgDrawing drawing)
-        {
-            // Wire
-            drawing.Line(new Vector2(0, 0), new Vector2(0, -3), new("wire"));
-
-            // Power
-            drawing.Line(new Vector2(-5, -3), new Vector2(5, -3), new("plane"));
-            if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
-        }
-
-        /// <summary>
-        /// Converts to string.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="string" /> that represents this instance.
-        /// </returns>
-        public override string ToString() => $"Power {Name}";
     }
 }

@@ -28,19 +28,17 @@
     <Compile Include="Circuits\NodeContext.cs" />
     <Compile Include="Components\Analog\Amplifier.cs" />
     <Compile Include="Components\Analog\AnalogToDigital.cs" />
-    <Compile Include="Components\Analog\BipolarNpnTransistor.cs" />
-    <Compile Include="Components\Analog\BipolarPnpTransistor.cs" />
+    <Compile Include="Components\Analog\BipolarTransistor.cs" />
     <Compile Include="Components\Analog\Capacitor.cs" />
     <Compile Include="Components\Analog\Diode.cs" />
     <Compile Include="Components\Analog\Impedance.cs" />
     <Compile Include="Components\Analog\Inductor.cs" />
-    <Compile Include="Components\Analog\Nmos.cs" />
+    <Compile Include="Components\Analog\Mofset.cs" />
     <Compile Include="Components\Analog\Opamp.cs" />
     <Compile Include="Components\Analog\OperationalTransconductanceAmplifier.cs" />
-    <Compile Include="Components\Analog\Pmos.cs" />
     <Compile Include="Components\Analog\Resistor.cs" />
     <Compile Include="Components\Analog\Switch.cs" />
-    <Compile Include="Components\Analog\SwitchSinglePoleDoubleThrow.cs" />
+    <Compile Include="Components\Analog\SinglePoleDoubleThrow.cs" />
     <Compile Include="Components\Analog\TransmissionLine.cs" />
   </ItemGroup>
 

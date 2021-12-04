@@ -5,14 +5,25 @@
         </div>
     </div>
     <div class="content">
-        <h5>@(Description.Key)<small class="text-muted">name</small></h5>
-        <p>@(Description.Name)</p>
-        <HelpAccordion>
-            <HelpAccordionItem Title="Pins" Count="Component.Pins.Count">
-                <dl>
-                @foreach (var pin in Component.Pins)
+        @if (Metadata != null)
+        {
+            <h5>@{
+                for(int i = 0; i < Metadata.Keys.Length; i++)
                 {
-                    <dt><strong>@(string.Join(", ", Component.Pins.NamesOf(pin)))</strong></dt>
+                    if (i > 0)
+                        @(", ")
+                    @Metadata.Keys[i]<small class="text-muted">name</small>
+                }
+                }
+            </h5>
+            <p>@(Metadata.Description)</p>
+        }
+        <HelpAccordion>
+            <HelpAccordionItem Title="Pins" Count="_drawable.Pins.Count">
+                <dl>
+                @foreach (var pin in _drawable.Pins)
+                {
+                    <dt><strong>@(string.Join(", ", _drawable.Pins.NamesOf(pin)))</strong></dt>
                     <dd>@(pin.Description)</dd>
                 }
                 </dl>

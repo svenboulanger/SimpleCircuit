@@ -3,42 +3,31 @@
 namespace SimpleCircuit.Components
 {
     /// <summary>
-    /// A terminal (input or output).
+    /// A factory for a terminal.
     /// </summary>
-    [SimpleKey("T", "A common terminal symbol.", Category = "General")]
-    public class Terminal : ScaledOrientedDrawable, ILabeled
+    [Drawable("T", "A common terminal symbol.", "General")]
+    public class TerminalFactory : DrawableFactory
     {
-        /// <inheritdoc/>
-        [Description("The label next to the terminal.")]
-        public string Label { get; set; }
+        /// <inheritdoc />
+        public override IDrawable Create(string key, string name, Options options)
+            => new Instance(name, options);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Terminal"/> class.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="options">Options that can be used for the component.</param>
-        public Terminal(string name, Options options)
-            : base(name, options)
+        private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            Pins.Add(new FixedOrientedPin("p", "The pin.", this, new Vector2(), new Vector2(1, 0)), "p", "a", "o", "i");
-
-            DrawingVariants = Variant.Do(DrawTerminal);
+            public string Label { get; set; }
+            public Instance(string name, Options options)
+                : base(name, options)
+            {
+                Pins.Add(new FixedOrientedPin("p", "The pin.", this, new Vector2(), new Vector2(1, 0)), "p", "a", "o", "i");
+                DrawingVariants = Variant.Do(DrawTerminal);
+            }
+            private void DrawTerminal(SvgDrawing drawing)
+            {
+                drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));
+                drawing.Circle(new Vector2(-5.5, 0), 1.5, new("terminal"));
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new Vector2(-10, 0), new Vector2(-1, 0));
+            }
         }
-
-        private void DrawTerminal(SvgDrawing drawing)
-        {
-            drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));
-            drawing.Circle(new Vector2(-5.5, 0), 1.5, new("terminal"));
-            if (!string.IsNullOrWhiteSpace(Label))
-                drawing.Text(Label, new Vector2(-10, 0), new Vector2(-1, 0));
-        }
-
-        /// <summary>
-        /// Converts to string.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="string" /> that represents this instance.
-        /// </returns>
-        public override string ToString() => $"Terminal {Name}";
     }
 }

@@ -11,9 +11,9 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// A pin-collection that makes pins as they are requested.
         /// </summary>
-        private class PinCollection : IPinCollection
+        protected class PinCollection : IPinCollection
         {
-            private readonly BlackBox _parent;
+            private readonly Instance _parent;
             private readonly Dictionary<string, IPin> _pinsByName = new();
             private readonly List<IPin> _pinsByIndex = new();
             private readonly List<IPin> _pinsNorth = new(), _pinsWest = new(), _pinsEast = new(), _pinsSouth = new();
@@ -66,7 +66,7 @@ namespace SimpleCircuit.Components
             /// Creates a new <see cref="PinCollection"/>.
             /// </summary>
             /// <param name="parent">the parent component.</param>
-            public PinCollection(BlackBox parent)
+            public PinCollection(Instance parent)
             {
                 _parent = parent;
                 Right = $"{parent.Name}.right";
