@@ -1,7 +1,4 @@
-﻿using SimpleCircuit;
-using SimpleCircuit.Components.Analog;
-using SimpleCircuit.Components.General;
-using SimpleCircuit.Parser;
+﻿using SimpleCircuit.Parser;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -12,21 +9,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            // Create a drawable from XML
-            var xmlDrawable = @"
-<symbol>
-    <pin name=""a"" x=""-4"" y=""0"" nx=""-1"" ny=""0"" />
-    <pin name=""b"" x=""4"" y=""0"" nx=""1"" ny=""0"" />
-    <drawing>
-        <circle cx=""0"" cy=""0"" r=""4"" />
-        <text x=""0"" y=""0"" value=""M"" />
-    </drawing>
-</symbol>";
-            var xmlDrawableDoc = new XmlDocument();
-            xmlDrawableDoc.LoadXml(xmlDrawable);
-
-            var script = @"GND1 <u> V <u a -30> TL <a -30 d> C(""C"") <d> GND2
-(XY GND1 <r> GND2)
+            var script = @"L
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);

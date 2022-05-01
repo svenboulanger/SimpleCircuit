@@ -42,42 +42,30 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawDifferentialInput(SvgDrawing drawing, bool swapped)
             {
-                drawing.Segments(new Vector2[] {
-                new(-6, -4), new(-4, -4),
-                new(-5, -5), new(-5, -3),
-            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
-                drawing.Segments(new Vector2[] {
-                new(-6, 4), new(-4, 4)
-            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
+                var modifier = (Vector2 v) => swapped ? new Vector2(v.X, -v.Y) : v;
+                drawing.Path(b => b.WithModifier(modifier).MoveTo(-6, -4).Line(2, 0).MoveTo(-5, -5).Line(0, 2), new("plus"));
+                drawing.Line(modifier(new(-6, 4)), modifier(new(-4, 4)), new("minus"));
             }
             private void DrawDifferentialOutput(SvgDrawing drawing, bool swapped)
             {
-                drawing.Segments(new Vector2[] {
-                new(0, 4), new(8, 4),
-                new(0, -4), new(8, -4)
-            }, new("wire"));
-                drawing.Segments(new Vector2[] {
-                new(4, -6), new(6, -6),
-                new(5, -7), new(5, -5),
-            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
-                drawing.Segments(new Vector2[] {
-                new(4, 6), new(6, 6)
-            }.Select(v => swapped ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
+                var modifier = (Vector2 v) => swapped ? new Vector2(v.X, -v.Y) : v;
+                drawing.Path(b => b.MoveTo(0, 4).Line(8, 0).MoveTo(0, -4).Line(8, 0), new("wire"));
+                drawing.Path(b => b.WithModifier(modifier).MoveTo(4, -6).Line(2, 0).MoveTo(5, -7).Line(0, 2), new("plus"));
+                drawing.Line(modifier(new(4, 6)), modifier(new(6, 6)), new("minus"));
             }
             private void DrawProgrammable(SvgDrawing drawing)
             {
                 var options = new PathOptions() { EndMarker = PathOptions.MarkerTypes.Arrow };
-                drawing.Polyline(new Vector2[] { new(-7, 10), new(4, -8.5) }, options);
+                drawing.Line(new(-7, 10), new(4, -8.5), options);
             }
             private void DrawAmplifier(SvgDrawing drawing)
             {
                 drawing.Polygon(new Vector2[]
                 {
-                new(-8, -8),
-                new(8, 0),
-                new(-8, 8)
+                    new(-8, -8),
+                    new(8, 0),
+                    new(-8, 8)
                 });
-
                 if (!string.IsNullOrEmpty(Label))
                     drawing.Text(Label, new(-2.5, 0), new());
             }

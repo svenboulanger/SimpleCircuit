@@ -31,27 +31,18 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             private void DrawInductor(SvgDrawing drawing)
             {
-                // Wires
-                drawing.Segments(new[]
-                {
-                new Vector2(-8, 0), new Vector2(-6, 0),
-                new Vector2(6, 0), new Vector2(8, 0)
-            }, new("wire"));
-
-                // The coils
-                drawing.SmoothBezier(new[]
-                {
-                new Vector2(-6, 0),
-                new Vector2(-6, -4), new Vector2(-2, -4), new Vector2(-2, 0),
-                new Vector2(-4, 4), new Vector2(-4, 0),
-                new Vector2(1, -4), new Vector2(1, 0),
-                new Vector2(-1, 4), new Vector2(-1, 0),
-                new Vector2(4, -4), new Vector2(4, 0),
-                new Vector2(2, 4), new Vector2(2, 0),
-                new Vector2(6, -4), new Vector2(6, 0)
-            });
-
-                // The label
+                drawing.Path(b => b
+                    .MoveTo(-8, 0).LineTo(-6, 0)
+                    .MoveTo(6, 0).LineTo(8, 0), new("wire"));
+                drawing.Path(b => b
+                    .MoveTo(-6, 0)
+                    .CurveTo(new(-6, -4), new(-2, -4), new(-2, 0))
+                    .SmoothTo(new(-4, 4), new(-4, 0))
+                    .SmoothTo(new(1, -4), new(1, 0))
+                    .SmoothTo(new(-1, 4), new(-1, 0))
+                    .SmoothTo(new(4, -4), new(4, 0))
+                    .SmoothTo(new(2, 4), new(2, 0))
+                    .SmoothTo(new(6, -4), new(6, 0)));
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
             }

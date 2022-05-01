@@ -32,24 +32,13 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             private void DrawDiode(SvgDrawing drawing)
             {
-                // Wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-6, 0), new(-4, 0),
-                new(4, 0), new(6, 0)
-                }, new("wire"));
-
-                // Diode
+                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-4, 0).MoveTo(4, 0).LineTo(6, 0), new("wire"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
-                drawing.Polygon(new[] {
-                new Vector2(-4, -4),
-                new Vector2(4, 0),
-                new Vector2(-4, 4),
-                new Vector2(-4, 4)
-            }, new("anode"));
-
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4), new(-4, 4)
+                }, new("anode"));
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+                    drawing.Text(Label, new(0, -6), new(0, -1));
             }
             private void DrawPhotodiode(SvgDrawing drawing)
             {

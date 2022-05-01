@@ -39,12 +39,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawLamp(SvgDrawing drawing)
             {
-                // The light
-                drawing.Segments(new[]
-                {
-                new Vector2(-_sqrt2, -_sqrt2), new Vector2(_sqrt2, _sqrt2),
-                new Vector2(_sqrt2, -_sqrt2), new Vector2(-_sqrt2, _sqrt2)
-            });
+                drawing.Path(b => b.MoveTo(-_sqrt2, -_sqrt2).LineTo(_sqrt2, _sqrt2).MoveTo(_sqrt2, -_sqrt2).LineTo(-_sqrt2, _sqrt2));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))

@@ -214,27 +214,27 @@ namespace SimpleCircuit.Components.Outputs
                 DrawBox(drawing, cx, cy, width, height);
                 width /= 2.0;
                 height /= 2.0;
-                List<Vector2> points = new(14);
-                for (int i = 1; i <= 7; i++)
+                drawing.Path(b =>
                 {
-                    double xi = cx + (i - 4) / 4.0 * width;
-                    points.Add(new(xi, cy - height));
-                    points.Add(new(xi, cy + height));
-                }
-                drawing.Segments(points, new("heater"));
+                    for (int i = 1; i <= 7; i++)
+                    {
+                        double xi = cx + (i - 4) / 4.0 * width;
+                        b.MoveTo(xi, cy - height).LineTo(xi, cy + height);
+                    }
+                }, new("heater"));
             }
             private void DrawBoiler(SvgDrawing drawing, double cx, double cy, double r = 8)
             {
                 drawing.Circle(new(cx, cy), r);
-                List<Vector2> points = new(14);
-                for (int i = 1; i <= 7; i++)
+                drawing.Path(b =>
                 {
-                    double xi = (i - 4) / 4.0 * r;
-                    double yi = Math.Sqrt(r * r - xi * xi);
-                    points.Add(new(cx + xi, cy + yi));
-                    points.Add(new(cx + xi, cy - yi));
-                }
-                drawing.Segments(points, new("boiler"));
+                    for (int i = 1; i <= 7; i++)
+                    {
+                        double xi = (i - 4) / 4.0 * r;
+                        double yi = Math.Sqrt(r * r - xi * xi);
+                        b.MoveTo(cx + xi, cy + yi).LineTo(cx + xi, cy - yi);
+                    }
+                }, new("boiler"));
             }
             private void DrawMicrowave(SvgDrawing drawing, double cx, double cy)
             {
@@ -253,13 +253,11 @@ namespace SimpleCircuit.Components.Outputs
             {
                 s /= 2.0;
                 double f = 3.0 / Math.Sqrt(2.0);
-                drawing.Segments(new Vector2[]
-                {
-                new(-s, -s), new(-f, -f),
-                new(s, -s), new(f, -f),
-                new(s, s), new(f, f),
-                new(-s, s), new(-f, f)
-                }.Select(v => v + new Vector2(cx, cy)));
+                var mod = (Vector2 v) => v + new Vector2(cx, cy);
+                drawing.Path(b => b.WithAbsoluteModifier(mod).MoveTo(-s, -s).LineTo(-f, -f)
+                    .MoveTo(s, -s).LineTo(f, -f)
+                    .MoveTo(s, s).LineTo(f, f)
+                    .MoveTo(-s, s).LineTo(-f, f));
                 drawing.Circle(new(cx, cy), 3);
             }
             private void DrawIce(SvgDrawing drawing, double cx, double cy, double scale = 6.0)
@@ -268,15 +266,25 @@ namespace SimpleCircuit.Components.Outputs
                 double fy = Math.Sin(Math.PI / 3.0);
                 var pts = IceFractal(new Vector2[]
                 {
-                new(), new(1, 0),
-                new(), new(fx, fy),
-                new(), new(-fx, fy),
-                new(), new(-1, 0),
-                new(), new(-fx, -fy),
-                new(), new(fx, -fy)
+                    new(), new(1, 0),
+                    new(), new(fx, fy),
+                    new(), new(-fx, fy),
+                    new(), new(-1, 0),
+                    new(), new(-fx, -fy),
+                    new(), new(fx, -fy)
                 }, Math.PI / 6.0);
 
-                drawing.Segments(pts.Select(v => v * scale + new Vector2(cx, cy)));
+                drawing.Path(b =>
+                {
+                    b.WithAbsoluteModifier(v => v * scale + new Vector2(cx, cy));
+                    // b.WithRelativeModifier(v => v * scale);
+                    int index = 0;
+                    foreach (var g in pts.GroupBy(p => (index++) / 2))
+                    {
+                        var p = g.ToArray();
+                        b.MoveTo(p[0]).LineTo(p[1]);
+                    }
+                }, new("ice"));
             }
             private IEnumerable<Vector2> IceFractal(IEnumerable<Vector2> points, double angle)
             {

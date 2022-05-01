@@ -40,12 +40,8 @@ namespace SimpleCircuit.Components.Sources
             private void DrawBattery(SvgDrawing drawing)
             {
                 // Wires
-                double offset = Length / 2, cellOffset = _cells * 2 - 1; ;
-                drawing.Segments(new Vector2[]
-                {
-                new(-offset, 0), new(-cellOffset, 0),
-                new(cellOffset, 0), new(offset, 0)
-                }, new("wire"));
+                double offset = Length / 2, cellOffset = _cells * 2 - 1;
+                drawing.Path(b => b.MoveTo(-offset, 0).LineTo(-cellOffset, 0).MoveTo(cellOffset, 0).LineTo(offset, 0), new("wire"));
 
                 // The cells
                 double x = -_cells * 2 + 1;
@@ -58,11 +54,7 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Add a little plus and minus next to the terminals!
-                drawing.Segments(new Vector2[]
-                {
-                new(offset - 2, 2), new(offset - 2, 4),
-                new(offset - 1, 3), new(offset - 3, 3)
-                }, new("plus"));
+                drawing.Path(b => b.MoveTo(offset - 2, 2).Line(0, 2).MoveTo(offset - 1, 3).Line(2, 0), new("plus"));
                 drawing.Line(new(-offset + 2, 2), new(-offset + 2, 4), new("minus"));
 
                 // Depending on the orientation, let's anchor the text differently

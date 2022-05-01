@@ -95,18 +95,14 @@ namespace SimpleCircuit.Components.Analog
                 if (lamp)
                 {
                     double x = 2 / Math.Sqrt(2);
-                    drawing.Segments(new Vector2[]
-                    {
-                    new(-x, -x), new(x, x),
-                    new(-x, x), new(x, -x)
-                    }, new("lamp"));
+                    drawing.Path(b => b.MoveTo(-x, -x).LineTo(x, x).MoveTo(-x, x).LineTo(x, -x), new("lamp"));
                 }
 
                 if (window)
                 {
                     drawing.Polyline(new Vector2[]
                     {
-                    new(-6.5, 2.5), new(-4.5, 2.5), new(-4.5, 6), new(4.5, 6), new(4.5, 2.5), new(6.5, 2.5)
+                        new(-6.5, 2.5), new(-4.5, 2.5), new(-4.5, 6), new(4.5, 6), new(4.5, 2.5), new(6.5, 2.5)
                     }, new("window"));
                 }
 
@@ -138,35 +134,33 @@ namespace SimpleCircuit.Components.Analog
                 if (lamp)
                 {
                     double x = 2.0 / Math.Sqrt(2.0);
-                    drawing.Segments(new Vector2[]
-                    {
-                            new(-x, -x), new(x, x),
-                            new(-x, x), new(x, -x)
-                    });
+                    drawing.Path(b => b.MoveTo(-x, -x).LineTo(x, x).MoveTo(-x, x).LineTo(x, -x), new("lamp"));
                 }
 
                 // Draw the poles
                 if (Poles > 0)
                 {
                     var p = n.Perpendicular;
-                    var pts = new List<Vector2>(Poles * 2);
-                    for (int i = 0; i < Poles; i++)
+                    drawing.Path(b =>
                     {
-                        // Draw from out to in
-                        var r = n * length;
-                        pts.Add(r);
-                        pts.Add(r + p * 3);
-                        length -= 2.0;
-                    }
-                    drawing.Segments(pts);
-                    if (toggling)
-                        drawing.Segments(pts.Select(v => -v));
-                    if (doublePole)
-                    {
-                        drawing.Segments(pts.Select(v => new Vector2(-v.X, v.Y)));
-                        if (toggling)
-                            drawing.Segments(pts.Select(v => new Vector2(v.X, -v.Y)));
-                    }
+                        var pts = new List<Vector2>(Poles * 2);
+                        for (int i = 0; i < Poles; i++)
+                        {
+                            // Draw from out to in
+                            var r = n * length;
+                            var end = r + p * 3;
+                            b.MoveTo(r).LineTo(end);
+                            if (toggling)
+                                b.MoveTo(-r).LineTo(-end);
+                            if (doublePole)
+                            {
+                                b.MoveTo(-r.X, r.Y).LineTo(-end.X, end.Y);
+                                if (toggling)
+                                    b.MoveTo(r.X, -r.Y).LineTo(end.X, -end.Y);
+                            }
+                            length -= 2.0;
+                        }
+                    });
                 }
             }
 

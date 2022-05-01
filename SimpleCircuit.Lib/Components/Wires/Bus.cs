@@ -33,15 +33,17 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Line(new(-Crossings - 2, 0), new(Crossings + 2, 0), new("wire"));
                 if (Crossings > 0)
                 {
-                    List<Vector2> points = new(Crossings * 2);
-                    for (int i = 0; i < Crossings; i++)
+                    drawing.Path(b =>
                     {
-                        double x = i * 2 - Crossings + 1;
-                        points.AddRange(straight ?
-                            new Vector2[] { new(x, 3), new(x, -3) } :
-                            new Vector2[] { new(x - 1.5, 3), new(x + 1.5, -3) });
-                    }
-                    drawing.Segments(points);
+                        for (int i = 0; i < Crossings; i++)
+                        {
+                            double x = i * 2 - Crossings + 1;
+                            if (straight)
+                                b.MoveTo(x, 3).Line(0, -6);
+                            else
+                                b.MoveTo(x - 1.5, 3).Line(3, -6);
+                        }
+                    });
                 }
 
                 // The label

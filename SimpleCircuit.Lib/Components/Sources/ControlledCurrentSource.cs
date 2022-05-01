@@ -28,16 +28,12 @@ namespace SimpleCircuit.Components.Sources
             private void DrawSource(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-8, 0), new(-6, 0),
-                new(6, 0), new(8, 0)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
 
                 // Diamond
                 drawing.Polygon(new Vector2[]
                 {
-                new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
+                    new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
                 });
 
                 // The circle with the arrow

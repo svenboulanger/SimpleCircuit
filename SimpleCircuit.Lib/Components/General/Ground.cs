@@ -47,12 +47,7 @@ namespace SimpleCircuit.Components
                 drawing.Line(new(0, 0), new(0, 3), new("wire"));
 
                 // Ground
-                drawing.Segments(new Vector2[]
-                {
-                new(-5, 3), new(5, 3),
-                new(-3, 5), new(3, 5),
-                new(-1, 7), new(1, 7)
-                });
+                drawing.Path(b => b.MoveTo(-5, 3).LineTo(5, 3).MoveTo(-3, 5).LineTo(3, 5).MoveTo(-1, 7).LineTo(1, 7));
             }
             private void DrawEarth(SvgDrawing drawing)
             {
@@ -60,13 +55,10 @@ namespace SimpleCircuit.Components
                 drawing.Line(new(0, 0), new(0, 3), new("wire"));
 
                 // Ground segments
-                drawing.Segments(new Vector2[]
-                {
-                new(-5, 3), new(5, 3),
-                new(-5, 3), new(-7, 7),
-                new(0, 3), new(-2, 7),
-                new(5, 3), new(3, 7)
-                });
+                drawing.Path(b => b.MoveTo(-5, 3).LineTo(5, 3)
+                    .MoveTo(-5, 3).Line(-2, 4)
+                    .MoveTo(0, 3).Line(-2, 4)
+                    .MoveTo(5, 3).Line(-2, 4));
             }
             private void DrawSignalGround(SvgDrawing drawing)
             {

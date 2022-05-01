@@ -46,20 +46,14 @@ namespace SimpleCircuit.Components.Analog
             private void DrawRegular(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                    new(0, 8), new(0, 6),
-                    new(-8, 0), new(-4, 0),
-                    new(8, 0), new(4, 0)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(0, 8).LineTo(0, 6)
+                    .MoveTo(-8, 0).LineTo(-4, 0)
+                    .MoveTo(8, 0).LineTo(4, 0), new("wire"));
                 if (Pins["b"].Connections > 0)
                     drawing.Line(new Vector2(0, 4), new Vector2(0, 0), new("wire"));
 
                 // Gate
-                drawing.Segments(new Vector2[] {
-                    new(-6, 4), new(6, 4),
-                    new(-6, 6), new(6, 6)
-                }, new("gate"));
+                drawing.Path(b => b.MoveTo(-6, 4).LineTo(6, 4).MoveTo(-6, 6).LineTo(6, 6), new("gate"));
 
                 // Source and drain
                 drawing.Line(new(-4, 0), new(-4, 4), new("source"));
@@ -77,21 +71,15 @@ namespace SimpleCircuit.Components.Analog
             private void DrawPackaged(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                    new(-8, 0), new(-5, 0),
-                    new(8, 0), new(5, 0),
-                    new(0, 11), new(0, 6)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-5, 0)
+                    .MoveTo(8, 0).LineTo(5, 0)
+                    .MoveTo(0, 11).LineTo(0, 6), new("wire"));
 
                 // Gate
-                drawing.Segments(new Vector2[]
-                {
-                    new(-6, 6), new(6, 6),
-                    new(-7, 4), new(-4, 4),
-                    new(-2, 4), new(2, 4),
-                    new(4, 4), new(7, 4),
-                });
+                drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
+                    .MoveTo(-7, 4).LineTo(-4, 4)
+                    .MoveTo(-2, 4).LineTo(2, 4)
+                    .MoveTo(4, 4).LineTo(7, 4), new("gate"));
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
@@ -124,12 +112,9 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(SvgDrawing drawing)
             {
-                drawing.Segments(new[]
-                {
-                    new Vector2(0, 11), new Vector2(0, 9),
-                    new Vector2(-6, 6), new Vector2(6, 6),
-                    new Vector2(-6, 4), new Vector2(6, 4)
-                });
+                drawing.Path(b => b.MoveTo(0, 11).LineTo(0, 9)
+                    .MoveTo(-6, 6).LineTo(6, 6)
+                    .MoveTo(-6, 4).LineTo(6, 4), new("gate"));
                 drawing.Circle(new Vector2(0, 7.5), 1.5);
 
                 drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4) });
@@ -147,21 +132,15 @@ namespace SimpleCircuit.Components.Analog
             private void DrawPackaged(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                    new(-8, 0), new(-5, 0),
-                    new(8, 0), new(5, 0),
-                    new(0, 11), new(0, 6)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-5, 0)
+                    .MoveTo(8, 0).LineTo(5, 0)
+                    .MoveTo(0, 11).LineTo(0, 6), new("wire"));
 
                 // Gate
-                drawing.Segments(new Vector2[]
-                {
-                    new(-6, 6), new(6, 6),
-                    new(-7, 4), new(-4, 4),
-                    new(-2, 4), new(2, 4),
-                    new(4, 4), new(7, 4),
-                });
+                drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
+                    .MoveTo(-7, 4).LineTo(-4, 4)
+                    .MoveTo(-2, 4).LineTo(2, 4)
+                    .MoveTo(4, 4).LineTo(7, 4), new("gate"));
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));

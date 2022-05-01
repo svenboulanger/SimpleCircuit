@@ -42,14 +42,9 @@ namespace SimpleCircuit.Components.Analog
                     new Vector2(-8, 8)
                 });
 
-                drawing.Segments(new Vector2[]
-                {
-                    new(-6, -4), new(-4, -4),
-                }.Select(v => swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("minus"));
-                drawing.Segments(new Vector2[] {
-                    new(-5, 5), new(-5, 3),
-                    new(-6, 4), new(-4, 4)
-                }.Select(v => swapInputs ? new Vector2(v.X, -v.Y) : new Vector2(v.X, v.Y)), new("plus"));
+                var modifier = (Vector2 v) => swapInputs ? new Vector2(v.X, -v.Y) : v;
+                drawing.Line(modifier(new(-6, -4)), modifier(new(-4, -4)), new("minus"));
+                drawing.Path(b => b.WithModifier(modifier).MoveTo(-5, 5).LineTo(-5, 3).MoveTo(-6, 4).LineTo(-4, 4), new("plus"));
 
                 if (Pins["vn"].Connections > 0)
                     drawing.Line(new(0, -4), new(0, -6));

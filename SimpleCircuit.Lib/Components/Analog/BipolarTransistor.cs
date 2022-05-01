@@ -44,12 +44,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void Draw(SvgDrawing drawing, bool packaged)
             {
-                drawing.Segments(new Vector2[]
-                {
-                new(-6, 0), new(-8, 0),
-                new(6, 0), new(8, 0),
-                new(0, packaged ? 8 : 6), new(0, 4)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-8, 0).MoveTo(6, 0).LineTo(8, 0).MoveTo(0, packaged ? 8 : 6).LineTo(0, 4), new("wire"));
                 drawing.Line(new(-3, 4), new(-6, 0), new("emitter") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
                 drawing.Line(new(3, 4), new(6, 0), new("collector"));
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
@@ -83,28 +78,12 @@ namespace SimpleCircuit.Components.Analog
 
             private void Draw(SvgDrawing drawing, bool packaged)
             {
-                // Connection wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-6, 0), new(-8, 0),
-                new(6, 0), new(8, 0),
-                new(0, packaged ? 8 : 6), new(0, 4)
-                }, new("wire"));
-
-                // Emitter
+                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-8, 0).MoveTo(6, 0).LineTo(8, 0).MoveTo(0, packaged ? 8 : 6).LineTo(0, 4), new("wire"));
                 drawing.Line(new(6, 0), new(3, 4), new("emitter") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
-
-                // Collector
                 drawing.Line(new(-3, 4), new(-6, 0), new("collector"));
-
-                // Base
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
-
-                // Packaged transistor (circle around the transistor)
                 if (packaged)
                     drawing.Circle(new(), 8.0);
-
-                // The label
                 if (!string.IsNullOrEmpty(Label))
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }

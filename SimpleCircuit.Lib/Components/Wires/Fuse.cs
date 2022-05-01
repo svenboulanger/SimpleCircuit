@@ -51,11 +51,7 @@ namespace SimpleCircuit.Components.Wires
                 new(-6, -3), new(6, -3),
                 new(6, 3), new(-6, 3)
                 });
-                drawing.Segments(new Vector2[]
-                {
-                new(-3.5, -3), new(-3.5, 3),
-                new(3.5, -3), new(3.5, 3)
-                });
+                drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
             }
             private void DrawANSI(SvgDrawing drawing)
             {

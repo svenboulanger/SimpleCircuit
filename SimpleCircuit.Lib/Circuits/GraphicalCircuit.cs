@@ -76,9 +76,10 @@ namespace SimpleCircuit
 }
 .super, .sub { font-size: 0.75em; }
 .dot, .arrowhead { fill: black; }
-.plane, .apolar line, .polar .pos { stroke-width: 1pt; }
+.plane { stroke-width: 1pt; }
 .battery .neg { stroke-width: 0.75pt; }
-text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }";
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
+.small tspan { font-size: 0.8em; }";
 
         /// <summary>
         /// Gets a dictionary of metadata key-value pairs that are optional.

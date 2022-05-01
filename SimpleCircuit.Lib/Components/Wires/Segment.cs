@@ -35,12 +35,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Line(new(-4, 0), new(4, 0), new("wire"));
             private static void DrawUnderground(SvgDrawing drawing)
             {
-                drawing.Segments(new Vector2[]
-                {
-                new(-4, -5), new(4, -5),
-                new(-2.5, -3.5), new(2.5, -3.5),
-                new(-1, -2), new(1, -2)
-                });
+                drawing.Path(b => b.MoveTo(-4, -5).Line(8, 0).MoveTo(-2.5, -3.5).Line(5, 0).MoveTo(-1, -2).Line(2, 0));
             }
             private static void DrawAir(SvgDrawing drawing) => drawing.Circle(new(), 2);
             private static void DrawTube(SvgDrawing drawing) => drawing.Circle(new(0, -3.5), 1.5);

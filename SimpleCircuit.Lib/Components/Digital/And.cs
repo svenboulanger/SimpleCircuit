@@ -24,14 +24,12 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawAnd(SvgDrawing drawing)
             {
-                drawing.ClosedBezier(new[]
-                {
-                    new Vector2(-6, 5),
-                    new Vector2(-6, 5), new Vector2(1, 5), new Vector2(1, 5),
-                    new Vector2(4, 5), new Vector2(6, 2), new Vector2(6, 0),
-                    new Vector2(6, -2), new Vector2(4, -5), new Vector2(1, -5),
-                    new Vector2(1, -5), new Vector2(-6, -5), new Vector2(-6, -5)
-                });
+                drawing.Path(builder => builder
+                    .Move(new(-6, 5)).Line(new(7, 0))
+                    .Curve(new(3, 0), new(5, -3), new(5, -5))
+                    .Smooth(new(-2, -5), new(-5, -5))
+                    .Line(new(-7, 0)).Close()
+                );
             }
         }
     }

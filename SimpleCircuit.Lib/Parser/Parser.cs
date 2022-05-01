@@ -1,10 +1,13 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
+using System.Xml;
 
 namespace SimpleCircuit.Parser
 {
@@ -22,7 +25,7 @@ namespace SimpleCircuit.Parser
         {
             while (!lexer.EndOfContent)
                 ParseCode(lexer, context);
-            
+
         }
 
         /// <summary>
@@ -88,7 +91,7 @@ namespace SimpleCircuit.Parser
             }
             IPin pinToWire = component.Pins[Math.Max(0, component.Pins.Count - 1)];
             string pinName;
-            
+
             // Parse wires
             lexer.SkipWhile(TokenType.Whitespace);
             while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
@@ -159,7 +162,7 @@ namespace SimpleCircuit.Parser
         private static IDrawable ParseComponent(Lexer lexer, ParsingContext context)
         {
             if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
-                 return null;
+                return null;
             var component = context.GetOrCreate(lexer.Content, context.Options);
             if (component == null)
             {
@@ -188,10 +191,7 @@ namespace SimpleCircuit.Parser
                             string txt = lexer.Content.Substring(1, lexer.Content.Length - 2);
                             if (component is ILabeled lbl)
                             {
-                                if (string.IsNullOrWhiteSpace(lbl.Label))
-                                    lbl.Label = txt;
-                                else
-                                    lbl.Label += Environment.NewLine + txt;
+                                lbl.Label = txt;
                             }
                             else
                             {
@@ -214,6 +214,18 @@ namespace SimpleCircuit.Parser
                                 component.RemoveVariant(lexer.Content);
                                 lexer.Next();
                             }
+                            break;
+
+                        case TokenType.Plus:
+                            lexer.Next();
+                            if (!lexer.Check(TokenType.Word))
+                            {
+                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                                    $"Expected a variant at line {lexer.Line}, column {lexer.Column}."));
+                                lexer.SkipWhile(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
+                            }
+                            else
+                                goto case TokenType.Word;
                             break;
 
                         case TokenType.Word:
@@ -275,7 +287,7 @@ namespace SimpleCircuit.Parser
                     case "w":
                     case "r": orientation = new(1, 0); lexer.Next(); break;
                     case "ne": orientation = Vector2.Normal(-Math.PI * 0.25); lexer.Next(); break;
-                    case "nw": orientation = Vector2.Normal(-Math.PI * 0.75); lexer.Next();  break;
+                    case "nw": orientation = Vector2.Normal(-Math.PI * 0.75); lexer.Next(); break;
                     case "se": orientation = Vector2.Normal(Math.PI * 0.25); lexer.Next(); break;
                     case "sw": orientation = Vector2.Normal(Math.PI * 0.75); lexer.Next(); break;
                     case "0": orientation = new Vector2(); lexer.Next(); break;
@@ -421,6 +433,11 @@ namespace SimpleCircuit.Parser
                     ParseSubcircuitDefinition(lexer, context);
                     return false;
 
+                case "symbol":
+                    lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
+                    ParseSymbolDefinition(lexer, context);
+                    return false;
+
                 case "ends":
                     lexer.Next(); lexer.SkipWhile(~TokenType.Newline);
                     return true;
@@ -439,11 +456,6 @@ namespace SimpleCircuit.Parser
             }
         }
 
-        /// <summary>
-        /// Parses a subcircuit definition.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="context">The parsing context.</param>
         private static void ParseSubcircuitDefinition(Lexer lexer, ParsingContext context)
         {
             // Read the name of the subcircuit
@@ -452,7 +464,7 @@ namespace SimpleCircuit.Parser
                 lexer.SkipWhile(~TokenType.Newline);
                 return;
             }
-            string subcktName = lexer.Content;
+            string subcktKey = lexer.Content;
             lexer.Next();
 
             // Create a new parsing context to separate our circuit
@@ -507,16 +519,69 @@ namespace SimpleCircuit.Parser
             if (!ParseCode(lexer, localContext))
             {
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    $"No .ends detected for subcircuit '{subcktName}'."));
+                    $"No .ends detected for subcircuit '{subcktKey}'."));
                 lexer.SkipWhile(~TokenType.Whitespace);
                 return;
             }
 
             // Add a subcircuit definition to the context drawable factory
-            var subckt = new Subcircuit(subcktName, localContext.Circuit, ports, context.Diagnostics);
+            var subckt = new Subcircuit(subcktKey, localContext.Circuit, ports, context.Diagnostics);
             context.Factory.Register(subckt);
         }
+        private static void ParseSymbolDefinition(Lexer lexer, ParsingContext context)
+        {
+            // Read the name of the subcircuit
+            if (!lexer.Expect(TokenType.Word, null, "PE001", context.Diagnostics))
+            {
+                lexer.SkipWhile(~TokenType.Newline);
+                return;
+            }
+            string symbolKey = lexer.Content;
+            int line = lexer.Line;
+            lexer.Next();
+            lexer.SkipWhile(~TokenType.Newline);
+            lexer.Next();
 
+            // Read until a .ENDS and treat the contents as XML to be read
+            StringBuilder xml = new();
+            while (true)
+            {
+                if (lexer.Type == TokenType.Dot)
+                {
+                    lexer.Next();
+                    if (lexer.Type == TokenType.Word && lexer.Content.ToLower() == "ends")
+                    {
+                        lexer.Next(); lexer.SkipWhile(~TokenType.Newline);
+                        break;
+                    }
+                    else
+                    {
+                        xml.Append('.');
+                        xml.AppendLine(lexer.ReadWhile(~TokenType.Newline));
+                    }
+                }
+                else
+                    xml.AppendLine(lexer.ReadWhile(~TokenType.Newline));
+                lexer.Next();
+            }
+
+            // Parse the XML
+            var doc = new XmlDocument();
+            try
+            {
+                doc.LoadXml($"<symbol>{Environment.NewLine}{xml}{Environment.NewLine}</symbol>");
+            }
+            catch (XmlException ex)
+            {
+                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, $"XML",
+                    $"{ex.Message} at line {line + ex.LineNumber - 1}, column {line + ex.LinePosition}."));
+                return;
+            }
+
+            // Build the XML symbol
+            var symbol = new XmlDrawable(symbolKey, doc.DocumentElement, context.Diagnostics);
+            context.Factory.Register(symbol);
+        }
         private static void ParseOptions(Lexer lexer, ParsingContext context)
         {
             while (lexer.Check(TokenType.Word))
@@ -598,13 +663,13 @@ namespace SimpleCircuit.Parser
             }
             lexer.Next(); lexer.SkipWhile(TokenType.Whitespace);
 
-                // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
-                var component = ParseComponent(lexer, context);
-                IPin pinToWire = component.Pins[component.Pins.Count - 1];
-                string pinName;
+            // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
+            var component = ParseComponent(lexer, context);
+            IPin pinToWire = component.Pins[component.Pins.Count - 1];
+            string pinName;
 
-                // Parse wires
-                lexer.SkipWhile(TokenType.Whitespace);
+            // Parse wires
+            lexer.SkipWhile(TokenType.Whitespace);
             while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
             {
                 // Read a pin

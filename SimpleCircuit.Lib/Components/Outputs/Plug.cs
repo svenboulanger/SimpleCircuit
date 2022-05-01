@@ -40,11 +40,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawChildProtection(SvgDrawing drawing)
             {
-                drawing.Segments(new Vector2[]
-                {
-                new(4, -6), new(4, -4),
-                new(4, 4), new(4, 6)
-                }, new("child"));
+                drawing.Path(b => b.MoveTo(4, -6).LineTo(4, -4).MoveTo(4, 4).LineTo(4, 6), new("child"));
             }
             private void DrawSealed(SvgDrawing drawing)
             {

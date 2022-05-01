@@ -26,11 +26,7 @@ namespace SimpleCircuit.Components.Sources
             private void DrawSource(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-8, 0), new(-6, 0),
-                new(6, 0), new(8, 0)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
 
                 // The circle with the arrow
                 drawing.Circle(new(0, 0), 6);

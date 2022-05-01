@@ -31,12 +31,9 @@ namespace SimpleCircuit.Components.Analog
             private void DrawSwitch(SvgDrawing drawing, bool t1, bool t2, bool swapped)
             {
                 // Wires
-                drawing.Segments(new[]
-                {
-                new Vector2(-8, 0), new Vector2(-6, 0),
-                new Vector2(6, 4), new Vector2(8, 4),
-                new Vector2(6, -4), new Vector2(8, -4)
-            }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0)
+                    .MoveTo(6, 4).LineTo(8, 4)
+                    .MoveTo(6, -4).LineTo(8, -4), new("wire"));
 
                 // Terminals
                 drawing.Circle(new(-5, 0), 1);

@@ -37,15 +37,8 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawSigns(SvgDrawing drawing)
             {
-                drawing.Segments(new Vector2[]
-                {
-                new(-7, -4), new(-5, -4),
-                new(-6, -3), new(-6, -5)
-                }, new("plus"));
-                drawing.Segments(new Vector2[]
-                {
-                new(5, -4), new(7, -4)
-                }, new("minus"));
+                drawing.Path(b => b.MoveTo(-7, -4).LineTo(-5, -4).MoveTo(-6, -3).LineTo(-6, -5), new("plus"));
+                drawing.Line(new(5, -4), new(7, -4), new("minus"));
             }
         }
     }

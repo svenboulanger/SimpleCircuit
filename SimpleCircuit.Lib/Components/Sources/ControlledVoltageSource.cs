@@ -27,11 +27,7 @@ namespace SimpleCircuit.Components.Sources
             private void DrawSource(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-8, 0), new(-6, 0),
-                new(6, 0), new(8, 0)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
 
                 // Diamond
                 drawing.Polygon(new Vector2[]
@@ -41,11 +37,7 @@ namespace SimpleCircuit.Components.Sources
 
                 // Plus and minus
                 drawing.Line(new(-3, -1), new(-3, 1), new("minus"));
-                drawing.Segments(new Vector2[]
-                {
-                new(3, -1), new(3, 1),
-                new(2, 0), new(4, 0)
-                }, new("plus"));
+                drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))

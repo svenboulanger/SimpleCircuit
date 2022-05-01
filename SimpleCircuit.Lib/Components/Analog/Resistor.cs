@@ -38,23 +38,15 @@ namespace SimpleCircuit.Components.Analog
             private void DrawResistor(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Segments(new Vector2[]
-                {
-                new(-8, 0), new(-6, 0),
-                new(6, 0), new(8, 0)
-                }, new("wire"));
+                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
 
                 // The resistor
                 drawing.Polyline(new Vector2[]
                 {
-                new Vector2(-6, 0),
-                new Vector2(-5, -4),
-                new Vector2(-3, 4),
-                new Vector2(-1, -4),
-                new Vector2(1, 4),
-                new Vector2(3, -4),
-                new Vector2(5, 4),
-                new Vector2(6, 0)
+                    new(-6, 0), new(-5, -4),
+                    new(-3, 4), new(-1, -4),
+                    new(1, 4), new(3, -4),
+                    new(5, 4), new(6, 0)
                 });
 
                 // Controlled resistor

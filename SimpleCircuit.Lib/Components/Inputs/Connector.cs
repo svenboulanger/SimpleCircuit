@@ -26,12 +26,7 @@ namespace SimpleCircuit.Components.Inputs
             }
             private void DrawConnector(SvgDrawing drawing)
             {
-                drawing.Segments(new Vector2[]
-                {
-                new(-6, 0), new(-4, 0),
-                new(2, 0), new(6, 0)
-                }, new("wire"));
-
+                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-4, 0).MoveTo(2, 0).LineTo(6, 0), new("wire"));
                 drawing.Circle(new(), 1.5);
                 drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
             }

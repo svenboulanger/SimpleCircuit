@@ -29,19 +29,16 @@ namespace SimpleCircuit.Components.Analog
             private void DrawOTA(SvgDrawing drawing)
             {
                 // The triangle
-                drawing.Polygon(new[] {
-                new Vector2(-5, -8),
-                new Vector2(5, -4),
-                new Vector2(5, 4),
-                new Vector2(-5, 8)
-            });
+                drawing.Polygon(new Vector2[] {
+                    new(-5, -8),
+                    new(5, -4),
+                    new(5, 4),
+                    new(-5, 8)
+                });
 
                 // Signs
                 drawing.Line(new(-3, -4), new(-1, -4), new("minus"));
-                drawing.Segments(new Vector2[] {
-                new(-2, 5), new(-2, 3),
-                new(-3, 4), new(-1, 4)
-            }, new("plus"));
+                drawing.Path(b => b.MoveTo(-2, 5).LineTo(-2, 3).MoveTo(-3, 4).LineTo(-1, 4), new("plus"));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))

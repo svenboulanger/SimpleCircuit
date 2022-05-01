@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 using System.Linq;
 
@@ -23,18 +24,15 @@ namespace SimpleCircuit.Components.Analog
             private const double _kx = 0.5522847498 * _rx;
             private const double _ky = 0.5522847498 * _ry;
             private const double _inner = _width - _rx;
-            private readonly static Vector2[] _shape = new[]
-            {
-                new Vector2(-_inner, _height),
-                new Vector2(-_inner, _height), new Vector2(_inner, _height), new Vector2(_inner, _height),
-                new Vector2(_inner + _kx, _height), new Vector2(_width, _ky), new Vector2(_width, 0),
-                new Vector2(_width, -_ky), new Vector2(_inner + _kx, -_height), new Vector2(_inner, -_height),
-                new Vector2(_inner, -_height), new Vector2(-_inner, -_height), new Vector2(-_inner, -_height),
-                new Vector2(-_inner - _kx, -_height), new Vector2(-_width, -_ky), new Vector2(-_width, 0),
-                new Vector2(-_width, _ky), new Vector2(-_inner - _kx, _height), new Vector2(-_inner, _height),
-                new Vector2(-_inner + _kx, _height), new Vector2(-_inner + _rx, _ky), new Vector2(-_inner + _rx, 0),
-                new Vector2(-_inner + _rx, -_ky), new Vector2(-_inner + _kx, -_height), new Vector2(-_inner, -_height)
-            };
+            private readonly static Action<PathBuilder> _shape = builder => builder
+                .MoveTo(new(-_inner, _height)).LineTo(new(_inner, _height))
+                .CurveTo(new(_inner + _kx, _height), new(_width, _ky), new(_width, 0))
+                .SmoothTo(new(_inner + _kx, -_height), new(_inner, -_height))
+                .LineTo(new(-_inner, -_height))
+                .CurveTo(new(-_inner - _kx, -_height), new(-_width, -_ky), new(-_width, 0))
+                .SmoothTo(new(-_inner - _kx, _height), new(-_inner, _height))
+                .SmoothTo(new(-_inner + _rx, _ky), new(-_inner + _rx, 0))
+                .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
 
             [Description("The label in the transmission line.")]
             public string Label { get; set; }
@@ -59,13 +57,21 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-_width - offset, 0), new(-_inner - offset, 0), new("wire"));
 
                 // Transmission line
-                drawing.OpenBezier(_shape.Select(v =>
+                /*drawing.OpenBezier(_shape.Select(v =>
                 {
                     if (v.X < 0)
                         return new Vector2(v.X - offset, v.Y);
                     else
                         return new Vector2(v.X + offset, v.Y);
                 }));
+                */
+                drawing.Path(builder => _shape(builder.WithAbsoluteModifier(v =>
+                {
+                    if (v.X < 0)
+                        return new(v.X - offset, v.Y);
+                    else
+                        return new(v.X + offset, v.Y);
+                })));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
