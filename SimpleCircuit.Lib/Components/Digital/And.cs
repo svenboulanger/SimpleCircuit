@@ -25,7 +25,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawAnd(SvgDrawing drawing)
             {
                 drawing.Path(builder => builder
-                    .Move(new(-6, 5)).Line(new(7, 0))
+                    .MoveTo(new(-6, 5)).Line(new(7, 0))
                     .Curve(new(3, 0), new(5, -3), new(5, -5))
                     .Smooth(new(-2, -5), new(-5, -5))
                     .Line(new(-7, 0)).Close()
