@@ -177,7 +177,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"C{Convert(h1)} {Convert(h2)} {Convert(end)}");
+            Append($"C{Convert(h1)} {Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -219,7 +219,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"S{Convert(h.X)} {Convert(h.Y)} {Convert(end.X)} {Convert(end.Y)}");
+            Append($"S{Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -240,7 +240,7 @@ namespace SimpleCircuit.Drawing
             _current += dend;
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"s{Convert(dh.X)} {Convert(dh.Y)} {Convert(dend.X)} {Convert(dend.Y)}");
+            Append($"s{Convert(dh)} {Convert(dend)}");
             return this;
         }
 

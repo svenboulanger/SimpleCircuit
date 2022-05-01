@@ -9,33 +9,25 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Inputs
-Ta(""A"") <r> Xa <r> [a]XOR1
-Tb(""B"") < r > Xb<r>[b]XOR1
-Tc(""Cin"") < r > Xc<r>[b]XOR2
+            var script = @".subckt M DIRpa[i] DIRpb[o] DIRsa[i] DIRsb[o]
+DIRpa <d 0> L1(dot) <d 0> DIRpb
+DIRsa <d 0> L2(dot) <d 0> DIRsb
+(X L1 <r 10> L2)
+(Y L1[p] <0> L2)
+- L2.Flipped = true
+.ends
 
-// First XOR
-XOR1[o] < r se r> Xab<r>[a]XOR2
-Xab < d r > [a]AND1
+// Primary side
+V1 <u r d> [DIRpa]M1[DIRpb] <d l u> V1
 
-  // XOR gate and two AND gates
-  XOR2[o] < r > Ts(""S"")
-Xc < d r > [b]AND1
-Xa < d r > [a]AND2
-Xb < d r > [b]AND2
+// Secondary side to second transformer
+M1[DIRsa] <u r d> [DIRpa]M2[DIRpb] <d l u> [DIRsb]M1
 
-  // Last OR gate for carry out
-  AND1[o] < r se r> [a]OR1
-   AND2[o] < r ne r> [b]OR1
-    OR1[o] < r > Tco(""Cout"")
+// Load
+M2[DIRsa] <u r d> RL <d l u> [DIRsb]M2
 
-    // Alignment
-    (X Ta < 0 > Tb < 0 > Tc)
-    (X Xb < r + 5 > Xa)
-    (X Xc < r + 5 > Xab)
-    (X XOR2[a] < 0 > [a]AND1[a] < 0 > [a]AND2)
-    (X Ts < 0 > Tco)
-    (Y XOR2 < d + 15 > AND1 < d + 15 > AND2)
+// Alignment
+(X V1 <r +25> M1 <r +25> M2 <r +25> RL)
 ";
             var logger = new Logger();
             var lexer = new Lexer(script);
