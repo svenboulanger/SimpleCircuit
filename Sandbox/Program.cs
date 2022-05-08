@@ -9,28 +9,20 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".subckt M DIRpa[i] DIRpb[o] DIRsa[i] DIRsb[o]
-DIRpa <d 0> L1(dot) <d 0> DIRpb
-DIRsa <d 0> L2(dot) <d 0> DIRsb
-(X L1 <r 10> L2)
-(Y L1[p] <0> L2)
-- L2.Flipped = true
+            var script = @"// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed
+// by the pins.
+.subckt ABC R1[p] R2[n]
+R1 <r> R2
 .ends
 
-// Primary side
-V1 <u r d> [DIRpa]M1[DIRpb] <d l u> V1
+// Now we can instantiate this subcircuit definition multiple times.
+ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
 
-// Secondary side to second transformer
-M1[DIRsa] <u r d> [DIRpa]M2[DIRpb] <d l u> [DIRsb]M1
-
-// Load
-M2[DIRsa] <u r d> RL <d l u> [DIRsb]M2
-
-// Alignment
-(X V1 <r +25> M1 <r +25> M2 <r +25> RL)
+// They can even be angled because our pins also have a direction!
+Xs <a -45> ABC <a -45> Xe
 ";
             var logger = new Logger();
-            var lexer = new Lexer(script);
+            var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext();
             context.Diagnostics = logger;
             Parser.Parse(lexer, context);

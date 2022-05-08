@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Diagnostics
+﻿using SimpleCircuit.Parser;
+
+namespace SimpleCircuit.Diagnostics
 {
     /// <summary>
     /// Default implementation for diagnostic message.
@@ -14,11 +16,38 @@
         /// <inheritdoc />
         public string Message { get; }
 
+        /// <summary>
+        /// Creates a new diagnostics message.
+        /// </summary>
+        /// <param name="level">The severity.</param>
+        /// <param name="code">The code.</param>
+        /// <param name="message">The message.</param>
         public DiagnosticMessage(SeverityLevel level, string code, string message)
         {
             Severity = level;
             Code = code;
             Message = message;
         }
+
+        /// <summary>
+        /// Creates a new diagnostics message.
+        /// </summary>
+        /// <param name="level">The severity.</param>
+        /// <param name="code">The code.</param>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="message">The message.</param>
+        public DiagnosticMessage(SeverityLevel level, string code, ILexer lexer, string message)
+        {
+            Severity = level;
+            Code = code;
+            Message = $"{message} at line {lexer.Line}, column {lexer.Column}";
+        }
+
+        /// <summary>
+        /// Converts the message to a string.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString()
+            => $"{Severity}: {Code}: {Message}";
     }
 }

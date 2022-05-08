@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser
 {
@@ -37,6 +38,12 @@ namespace SimpleCircuit.Parser
         /// Gets the circuit.
         /// </summary>
         public GraphicalCircuit Circuit { get; } = new GraphicalCircuit();
+
+        /// <summary>
+        /// Gets the stack of blocks. This can be used to separate parts of the circuit
+        /// from each other.
+        /// </summary>
+        public Stack<string> Block { get; }
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.

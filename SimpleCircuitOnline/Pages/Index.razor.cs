@@ -165,7 +165,7 @@ namespace SimpleCircuitOnline.Pages
                 context.Diagnostics = logger;
 
                 // Parse the script
-                var lexer = new SimpleCircuit.Parser.Lexer(code);
+                var lexer = SimpleCircuit.Parser.SimpleCircuitLexer.FromString(code);
                 SimpleCircuit.Parser.Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
 
