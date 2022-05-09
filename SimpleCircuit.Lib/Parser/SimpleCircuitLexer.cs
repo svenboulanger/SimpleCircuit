@@ -197,6 +197,7 @@
             {
                 // Fraction
                 ContinueToken();
+                c = Char;
                 while (char.IsDigit(c))
                 {
                     ContinueToken();

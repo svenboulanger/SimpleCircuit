@@ -9,33 +9,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Define a single pixel
-.subckt PIXEL DIRleft DIRtop DIRbottom DIRright
-// Reset
-GND <u> D(photodiode) <u> Xd <u> MNrst <u> POW
-MNrst[g] <l 0> T(""RST"")
-Xd<r>[g]MNsf[d] < u > POW
-MNsf[s] < d r > MNsel < r > Xcol
-MNsel[g] < u 60 > Xrow
-
-// Make column and row lines (DIR is used as direction for pins)
-            Xcol < u 70 > DIRtop
-Xcol < d 15 > DIRbottom
-Xrow < l 60 > DIRleft
-Xrow < r 20 > DIRright
- .ends
-
-// We have chosen the subcircuit names such that they are unique,
-// allowing us to use the short names
-            PIXEL1<r> PIXEL2
-PIXEL1[DIRbottom] < d > [DIRtop]PIXEL3
-PIXEL3<r> PIXEL4[DIRtop] < u > [DIRbottom]PIXEL2
-
- // Add some terminals
- PIXEL1[DIRtop] < u 0 > T(""COL_{OUT} k"")
-PIXEL2[DIRtop] < u 0 > T(""COL OUT k+1"")
-PIXEL2[DIRright] < r 0 > T(""ROW SEL i"")
-PIXEL4[DIRright] < r 0 > T(""ROW SEL i+1"")
+            var script = @".options Scale = 0.5
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);

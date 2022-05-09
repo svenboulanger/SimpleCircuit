@@ -109,6 +109,7 @@
                         { include: '@whitespace' },
                         { include: '@number' },
                         { include: '@string' },
+                        { include: '@boolean' },
                         [/\=/, 'equals.assignment' ],
                         [/\w+/, 'word.assignment' ],
                         [/\./, 'dot.assignment' ],
@@ -131,13 +132,17 @@
                         { include: '@string' },
                     ],
                     string: [
-                        [/"([^"]|\\.)+"/, 'string']
+                        [/"([^"]|\\.)+"/, 'string'],
+                        [/'([^']|\\.)+'/, 'string']
                     ],
                     whitespace: [
                         [/[ \t]+/, 'white']
                     ],
                     number: [
                         [/[-]?\d+(\.d+)?/, 'number']
+                    ],
+                    boolean: [
+                        [/true|false/, 'boolean']
                     ]
                 }
             });
@@ -160,9 +165,10 @@
                     { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
                     { token: 'dot', foreground: 'cc0000' },
                     { token: 'dash', foreground: '0000cc', fontStyle: 'bold' },
-                    { token: 'word.assignment', foreground: 'bbbbbb', fontStyle: 'bold' },
+                    { token: 'word.assignment', foreground: '990000', fontStyle: 'bold' },
                     { token: 'dot.assignment', foreground: '666666' },
-                    { token: 'equals.assignment', foreground: '666666' }
+                    { token: 'equals.assignment', foreground: '666666' },
+                    { token: 'boolean', foreground: 'a0a0a0' }
                 ]
             });
 
