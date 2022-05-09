@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-16"?><svg xmlns:sc="https://github.com/svenboulanger/SimpleCircuit" width="730" height="245" viewBox="-7 -41 146 49" xmlns="http://www.w3.org/2000/svg"><style>path, polyline, line, circle, polygon {
+    stroke: #c9d1d9;
+    stroke-width: 0.5pt;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.super, .sub { font-size: 0.75em; }
+.dot, .arrowhead { fill: #c9d1d9; }
+.plane { stroke-width: 1pt; }
+.battery .neg { stroke-width: 0.75pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
+.small tspan { font-size: 0.8em; }</style><metadata><sc:script><![CDATA[
+.subckt LPF R1[p] DIRoutput[out]
+R1 <r> Xo <d> C1 <d> GND2
+Xo <r> DIRoutput
+.ends
+
+GND <u> V <u r> LPF1 <r> LPF2 <r> LPF3
+]]></sc:script></metadata><line x1="0" y1="0" x2="0" y2="-10" class="wire" id="W1" /><line x1="0" y1="-26" x2="0" y2="-36" class="wire" id="W2" /><line x1="0" y1="-36" x2="10" y2="-36" class="wire" id="W3" /><line x1="46" y1="-36" x2="56" y2="-36" class="wire" id="W4" /><line x1="92" y1="-36" x2="102" y2="-36" class="wire" id="W5" /><g class="instance" id="GND:1"><line x1="0" y1="0" x2="0" y2="3" class="wire" /><path d="M-5 3 L5 3 M-3 5 L3 5 M-1 7 L1 7" /></g><g class="instance" id="V:2"><line x1="-1" y1="-15" x2="1" y2="-15" class="minus" /><path class="plus" d="M-1 -21 l2 0 M0 -20 l0 -2" /><path class="wire" d="M0 -10 L0 -12 M0 -24 L0 -26" /><circle cx="0" cy="-18" r="6" /></g><g class="instance" id="LPF1"><line x1="26" y1="-36" x2="36" y2="-36" class="wire" id="W1" /><line x1="36" y1="-36" x2="36" y2="-26" class="wire" id="W2" /><line x1="36" y1="-16" x2="36" y2="-6" class="wire" id="W3" /><line x1="36" y1="-36" x2="46" y2="-36" class="wire" id="W4" /><g class="instance" id="R1"><path class="wire" d="M10 -36 L12 -36 M24 -36 L26 -36" /><polyline points="12,-36 13,-40 15,-32 17,-40 19,-32 21,-40 23,-32 24,-36" /></g><g class="instance" id="Xo"><circle cx="36" cy="-36" r="1" class="dot" /></g><g class="instance" id="C1"><path class="wire" d="M36 -26 L36 -22.5 M36 -19.5 L36 -16" /><line x1="40" y1="-22.5" x2="32" y2="-22.5" class="pos plane" /><line x1="40" y1="-19.5" x2="32" y2="-19.5" class="neg plane" /></g><g class="instance" id="GND2"><line x1="36" y1="-6" x2="36" y2="-3" class="wire" /><path d="M31 -3 L41 -3 M33 -1 L39 -1 M35 1 L37 1" /></g></g><g class="instance" id="LPF2"><line x1="72" y1="-36" x2="82" y2="-36" class="wire" id="W1" /><line x1="82" y1="-36" x2="82" y2="-26" class="wire" id="W2" /><line x1="82" y1="-16" x2="82" y2="-6" class="wire" id="W3" /><line x1="82" y1="-36" x2="92" y2="-36" class="wire" id="W4" /><g class="instance" id="R1"><path class="wire" d="M56 -36 L58 -36 M70 -36 L72 -36" /><polyline points="58,-36 59,-40 61,-32 63,-40 65,-32 67,-40 69,-32 70,-36" /></g><g class="instance" id="Xo"><circle cx="82" cy="-36" r="1" class="dot" /></g><g class="instance" id="C1"><path class="wire" d="M82 -26 L82 -22.5 M82 -19.5 L82 -16" /><line x1="86" y1="-22.5" x2="78" y2="-22.5" class="pos plane" /><line x1="86" y1="-19.5" x2="78" y2="-19.5" class="neg plane" /></g><g class="instance" id="GND2"><line x1="82" y1="-6" x2="82" y2="-3" class="wire" /><path d="M77 -3 L87 -3 M79 -1 L85 -1 M81 1 L83 1" /></g></g><g class="instance" id="LPF3"><line x1="118" y1="-36" x2="128" y2="-36" class="wire" id="W1" /><line x1="128" y1="-36" x2="128" y2="-26" class="wire" id="W2" /><line x1="128" y1="-16" x2="128" y2="-6" class="wire" id="W3" /><line x1="128" y1="-36" x2="138" y2="-36" class="wire" id="W4" /><g class="instance" id="R1"><path class="wire" d="M102 -36 L104 -36 M116 -36 L118 -36" /><polyline points="104,-36 105,-40 107,-32 109,-40 111,-32 113,-40 115,-32 116,-36" /></g><g class="instance" id="Xo"><circle cx="128" cy="-36" r="1" class="dot" /></g><g class="instance" id="C1"><path class="wire" d="M128 -26 L128 -22.5 M128 -19.5 L128 -16" /><line x1="132" y1="-22.5" x2="124" y2="-22.5" class="pos plane" /><line x1="132" y1="-19.5" x2="124" y2="-19.5" class="neg plane" /></g><g class="instance" id="GND2"><line x1="128" y1="-6" x2="128" y2="-3" class="wire" /><path d="M123 -3 L133 -3 M125 -1 L131 -1 M127 1 L129 1" /></g></g></svg>
