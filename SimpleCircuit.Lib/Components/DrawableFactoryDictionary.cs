@@ -96,12 +96,30 @@ namespace SimpleCircuit.Components
             }
         }
 
+        /// <summary>
+        /// Gets the name from a full name (which can have a path).
+        /// </summary>
+        /// <param name="fullname">The full name.</param>
+        /// <returns>The name without path.</returns>
         public static string GetName(string fullname)
         {
             int index = fullname.LastIndexOf(Separator);
             if (index < 0)
                 return fullname;
-            return fullname.Substring(index + 1);
+            return fullname.Substring(index + Separator.Length);
+        }
+
+        /// <summary>
+        /// Gets the path from a full name (without the local name).
+        /// </summary>
+        /// <param name="fullname">The full name.</param>
+        /// <returns>The path with trailing separator.</returns>
+        public static string GetPath(string fullname)
+        {
+            int index = fullname.LastIndexOf(Separator);
+            if (index < 0)
+                return "";
+            return fullname.Substring(0, index + Separator.Length);
         }
 
         /// <summary>
@@ -140,8 +158,8 @@ namespace SimpleCircuit.Components
             if (isAnonymous)
             {
                 var args = new AnonymousFoundEventArgs(name);
-                name = args.NewName ?? $"{name}:{++_anonymousIndex}";
-                return factory.Create(name[..(end + 1)], fullname, options);
+                fullname = args.NewName != null ? GetPath(fullname) + args.NewName : $"{fullname}:{++_anonymousIndex}";
+                return factory.Create(name, fullname, options);
             }
             else
             {
