@@ -600,7 +600,7 @@ namespace SimpleCircuit
             // Apply text
             value = TransformText(value);
             List<XmlElement> elements = new();
-            foreach (var line in value.Split(new char[] { '\r', '\n', '\\' }))
+            foreach (var line in Regex.Split(value, @"(\r\n|\r|\n|\<\s*br\s*\>|\<\s*br\s*\>)"))
             {
                 var tspan = _document.CreateElement("tspan", Namespace);
                 PopulateText(tspan, line);
@@ -697,11 +697,11 @@ namespace SimpleCircuit
             value = _superSubscriptRegex.Replace(value, match =>
             {
                 if (match.Value[0] == '^')
-                    return $"<tspan class=\"super\" dy=\"-0.5em\">{match.Groups["content"].Value}</tspan>";
+                    return $"</tspan><tspan dy=\"-0.5em\" style=\"font-size: 0.75em\">{match.Groups["content"].Value}</tspan><tspan dy=\"-0.375em\">";
                 else
-                    return $"<tspan class=\"sub\" dy=\"0.5em\">{match.Groups["content"].Value}</tspan>";
+                    return $"</tspan><tspan dy=\"0.5em\" style=\"font-size: 0.75em\">{match.Groups["content"].Value}</tspan><tspan dy=\"-0.375em\">";
             });
-            return value;
+            return $"<tspan>{value}</tspan>";
         }
         private void PopulateText(XmlNode element, string line)
         {

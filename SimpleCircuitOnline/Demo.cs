@@ -70,24 +70,24 @@ namespace SimpleCircuitOnline
                 "",
                 "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
                 "// Wires can be given a fixed length by adding a number after the direction.",
-                "GND1 <u> V1(\"Vin\") <u r> R1(\"R1\") <r> Xfb <r> OA1 <r> Xout <u l> [n]R(\"Rfb\")[p] <l d 20> Xfb",
+                "GND1 <u> V1(\"V_in\") <u r> R1(\"R_1\") <r> Xfb <r> OA1 <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
                 "OA1[p] <l d> GND2",
-                "Xout <r 5> T(\"Vout\")",
+                "Xout <r 5> T(\"V_out\")",
                 "",
-                "(Y GND1 <0> GND2)"
+                "(y GND1 <0> GND2)"
             })),
 
             // Non-inverting amplifier
             new Demo("3. Non-inverting amplifier", "The circuit on EEVblog's \"I only give negative feedback\" shirt.", string.Join(Environment.NewLine, new[]
             {
                 "// Make sure you specify the pin on the right side of the component name! This should not be OA1[p].",
-                "T(\"Vin\") <r> [p]OA1",
+                "T(\"V_in\") <r> [p]OA1",
                 "",
                 "// Resistive voltage divider:",
-                "OA1[out] <r> Xout <d l> Rfb(\"RF\") <l> Xfb <d> R1(\"RG\") <d> GND2",
+                "OA1[out] <r> Xout <d l> Rfb(\"R_F\") <l> Xfb <d> R1(\"R_G\") <d> GND2",
                 "Xfb <u 10 r> [n]OA1",
                 "",
-                "Xout <r 5> T(\"Vout\")",
+                "Xout <r 5> T(\"V_out\")",
                 "",
                 "// Many components have properties that can be set by starting a line with '-'.",
                 "// You can find a list of properties in the list of components on the right.",
@@ -100,7 +100,7 @@ namespace SimpleCircuitOnline
                 "// Other possible wire directions are n, s, e and w for north, south, east and west.",
                 "// Non horizontal/vertical wires are also possible (ne, nw, se, sw). Generally, you can",
                 "// specify any angle using <a #> with # the angle in degrees (e.g. <u> is the same as <a 90>).",
-                "X1 <l u> V1(\"Vs\") <u r> X2",
+                "X1 <l u> V1(\"V_s\") <u r> X2",
                 "X1 <ne> R1 <ne> Xright <nw> R2 <nw> X2",
                 "X1 <nw> R3 <nw> Xleft <ne> R4 <ne> X2",
                 "",
@@ -231,10 +231,10 @@ namespace SimpleCircuitOnline
                 "PIXEL3 <r> PIXEL4[DIRtop] <u> [DIRbottom]PIXEL2",
                 "",
                 "// Add some terminals",
-                "PIXEL1[DIRtop] <u 0> T(\"COL OUT k\")",
-                "PIXEL2[DIRtop] <u 0> T(\"COL OUT k+1\")",
-                "PIXEL2[DIRright] <r 0> T(\"ROW SEL i\")",
-                "PIXEL4[DIRright] <r 0> T(\"ROW SEL i+1\")",
+                "PIXEL1[DIRtop] <u 0> T(\"COL_{OUT,k}\")",
+                "PIXEL2[DIRtop] <u 0> T(\"COL_{OUT,k+1}\")",
+                "PIXEL2[DIRright] <r 0> T(\"ROW_{SEL,i}\")",
+                "PIXEL4[DIRright] <r 0> T(\"ROW_{SEL,i+1}\")",
             })),
 
             // Full adder logic - showing off digital logic cells
@@ -261,12 +261,11 @@ namespace SimpleCircuitOnline
                 "OR1[o] <r> Tco(\"Cout\")",
                 "",
                 "// Alignment",
-                "(X Ta <0> Tb <0> Tc)",
-                "(X Xb <r +5> Xa)",
-                "(X Xc <r +5> Xab)",
-                "(X XOR2[a] <0> [a]AND1[a] <0> [a]AND2)",
-                "(X Ts <0> Tco)",
-                "(Y XOR2 <d +15> AND1 <d +15> AND2)",
+                "(x Ta <0> Tb <0> Tc)",
+                "(x Xb <r +5> Xa)",
+                "(x Xc <r +5> Xab)",
+                "(x Ts <0> Tco)",
+                "(xy XOR2[o] <d +15> [o]AND1[o] <d +15> [o]AND2)",
             })),
 
             // Some transformers
@@ -308,6 +307,42 @@ namespace SimpleCircuitOnline
                 "// Finally flip the bottom one",
                 "- NAND2.Flipped = true",
             })),
+
+            // A charge transimpedance amplifier
+            new Demo("Demo: CTIA and sections", "A Charge Transimpedance Amplifier also using sections.", string.Join(Environment.NewLine, new[]
+            {
+                @"// Input section",
+                @".section Input",
+                @"    X1 <l d> I(""I_in"") <d> GND1",
+                @"    X1 <d> C(""C_in"") <d> GND2",
+                @"    (xy GND1 <r +25> GND2)",
+                @".endsection",
+                @"",
+                @"// Link to the next section",
+                @"Input/X1 <r> CTIA/Xin",
+                @"",
+                @"// Charge Transimpedance Amplifier",
+                @".section CTIA",
+                @"    Xin <r> A1(""-A"") <r> Xout",
+                @"    Xin <u r> C1(""C_fb"") <r d> Xout",
+                @"    (y A1 <u +20> C1)",
+                @".endsection",
+                @"",
+                @"// Link CTIA to output circuit",
+                @"CTIA/Xout <r> Output/Xout",
+                @"",
+                @"// Output circuit",
+                @".section Output",
+                @"    Xout <d> C1(""C_L"") <d> GND1",
+                @"    Xout <r> Xout2 <d> R1(""R_L"") <d> GND2",
+                @"    Xout2 <r> T(""V_out"")",
+                @"    (xy GND1 <r +20> GND2)",
+                @".endsection",
+                @"",
+                @"// We can still enforce alignment between elements",
+                @"// This would not be possible with subcircuits",
+                @"(y Input/GND1 <0> Output/GND1)"
+            }))
         };
     }
 }

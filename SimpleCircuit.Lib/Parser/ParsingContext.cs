@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Parser
 {
@@ -40,10 +41,10 @@ namespace SimpleCircuit.Parser
         public GraphicalCircuit Circuit { get; } = new GraphicalCircuit();
 
         /// <summary>
-        /// Gets the stack of blocks. This can be used to separate parts of the circuit
+        /// Gets the stack of current sections. This can be used to separate parts of the circuit
         /// from each other.
         /// </summary>
-        public Stack<string> Block { get; }
+        public Stack<string> Section { get; } = new Stack<string>();
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
@@ -56,15 +57,16 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets or creates a component.
         /// </summary>
+        /// <param name="path">The path of the component.</param>
         /// <param name="name">The name of the component.</param>
         /// <param name="options">Options that can be used for the component.</param>
         /// <returns>The component.</returns>
-        public IDrawable GetOrCreate(string name, Options options)
+        public IDrawable GetOrCreate(string fullname, Options options)
         {
             IDrawable result;
-            if (Circuit.TryGetValue(name, out var presence) && presence is IDrawable drawable)
+            if (Circuit.TryGetValue(fullname, out var presence) && presence is IDrawable drawable)
                 return drawable;
-            result = Factory.Create(name, options);
+            result = Factory.Create(fullname, options);
             Circuit.Add(result);
             return result;
         }

@@ -88,9 +88,9 @@
                 includeLF: true,
                 tokenizer: {
                     root: [
-                        [/^\/\/.*\n$/, 'comment'],
-                        [/^-/, { token: 'dash', next: '@assignment' }],
-                        [/^\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual_chain' }],
+                        [/^[\s\t]*\/\/.*\n$/, 'comment'],
+                        [/^[\s\t]*-/, { token: 'dash', next: '@assignment' }],
+                        [/^[\s\t]*\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual_chain' }],
                         { include: '@component_chain' },
                     ],
                     component_chain: [

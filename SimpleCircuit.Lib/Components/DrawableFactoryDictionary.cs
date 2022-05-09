@@ -11,6 +11,11 @@ namespace SimpleCircuit.Components
     /// </summary>
     public class DrawableFactoryDictionary
     {
+        /// <summary>
+        /// Gets or sets the separator for paths.
+        /// </summary>
+        public static string Separator { get; set; } = "/";
+
         private class KeyNode
         {
             public IDrawableFactory Factory { get; set; }
@@ -91,18 +96,27 @@ namespace SimpleCircuit.Components
             }
         }
 
+        public static string GetName(string fullname)
+        {
+            int index = fullname.LastIndexOf(Separator);
+            if (index < 0)
+                return fullname;
+            return fullname.Substring(index + 1);
+        }
+
         /// <summary>
         /// Creates a new drawable for the specified name.
         /// </summary>
-        /// <param name="name">The name.</param>
+        /// <param name="fullname">The full name of the component.</param>
         /// <param name="options">The options.</param>
         /// <returns>The created variable.</returns>
-        public IDrawable Create(string name, Options options)
+        public IDrawable Create(string fullname, Options options)
         {
             var elt = _root;
             var factory = _root.Factory;
             bool isAnonymous = false;
             int end = 0;
+            string name = GetName(fullname);
             for (int i = 0; i < name.Length; i++)
             {
                 if (!elt.Continuations.TryGetValue(name[i], out var nelt))
@@ -127,10 +141,12 @@ namespace SimpleCircuit.Components
             {
                 var args = new AnonymousFoundEventArgs(name);
                 name = args.NewName ?? $"{name}:{++_anonymousIndex}";
-                return factory.Create(name.Substring(0, end + 1), name, options);
+                return factory.Create(name[..(end + 1)], fullname, options);
             }
             else
-                return factory.Create(name.Substring(0, end + 1), name, options);
+            {
+                return factory.Create(name[..(end + 1)], fullname, options);
+            }
         }
 
         /// <summary>

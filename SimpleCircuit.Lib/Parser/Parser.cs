@@ -5,6 +5,7 @@ using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -139,13 +140,17 @@ namespace SimpleCircuit.Parser
         /// <returns>The component.</returns>
         private static IDrawable ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            if (!lexer.Branch(TokenType.Word, out var name))
+            if (!lexer.Check(TokenType.Word))
             {
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    lexer, "Expected a component pin"));
+                    lexer, "Expected a component name"));
                 return null;
             }
-            var component = context.GetOrCreate(name.ToString(), context.Options);
+
+            // Get the full name of the component
+            var name = lexer.ReadWhile(TokenType.Word | TokenType.Divide, shouldNotIncludeTrivia: true).ToString();
+            string fullname = string.Join(DrawableFactoryDictionary.Separator, context.Section.Reverse().Union(new[] { name }));
+            var component = context.GetOrCreate(fullname, context.Options);
             if (component == null)
             {
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
@@ -416,6 +421,9 @@ namespace SimpleCircuit.Parser
                 case "symbol":
                     return ParseSymbolDefinition(lexer, context);
 
+                case "section":
+                    return ParseSectionDefinition(lexer, context);
+
                 case "option":
                 case "options":
                     return ParseOptions(lexer, context);
@@ -445,25 +453,15 @@ namespace SimpleCircuit.Parser
             while (lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
             {
                 // Parse the component
-                if (!lexer.Branch(TokenType.Word, out var componentToken))
-                {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                        lexer, "Expected component name"));
-                    return false;
-                }
-                var component = localContext.GetOrCreate(componentToken.ToString(), context.Options);
+                var component = ParseComponent(lexer, localContext);
                 if (component == null)
-                {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                        lexer, $"Could not get a component for the name '{componentToken}'"));
                     return false;
-                }
 
                 // Find the pin
                 IPin pin = null;
                 if (lexer.Type == TokenType.OpenIndex)
                 {
-                    var pinName = ParsePin(lexer, context);
+                    var pinName = ParsePin(lexer, localContext);
                     if (pinName == null)
                         return false;
                     pin = component.Pins[pinName];
@@ -486,8 +484,11 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.Branch(TokenType.Dot))
                 {
-                    if (lexer.Branch(TokenType.Word, "ends"))
+                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsubckt"))
+                    {
+                        lexer.Skip(~TokenType.Newline);
                         stillSubcircuit = false;
+                    }
                     else
                         ParseControlStatement(lexer, localContext);
                 }
@@ -530,12 +531,11 @@ namespace SimpleCircuit.Parser
             StringBuilder xml = new();
             while (true)
             {
-                if (lexer.Type == TokenType.Dot)
+                if (lexer.Branch(TokenType.Dot))
                 {
-                    lexer.Next();
-                    if (lexer.Type == TokenType.Word && lexer.Token.ToString().ToLower() == "ends")
+                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsymbol"))
                     {
-                        lexer.Next(); lexer.Skip(~TokenType.Newline);
+                        lexer.Skip(~TokenType.Newline);
                         break;
                     }
                     else
@@ -565,6 +565,39 @@ namespace SimpleCircuit.Parser
             // Build the XML symbol
             var symbol = new XmlDrawable(symbolKey, doc.DocumentElement, context.Diagnostics);
             context.Factory.Register(symbol);
+            return true;
+        }
+        private static bool ParseSectionDefinition(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            // Read the name of the section
+            if (!lexer.Branch(TokenType.Word, out var nameToken))
+            {
+                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                    lexer, "Section name expected"));
+                return false;
+            }
+            lexer.Skip(~TokenType.Newline);
+
+            // Parse section contents
+            context.Section.Push(nameToken.ToString());
+            bool stillSubcircuit = true;
+            while (stillSubcircuit && lexer.Type != TokenType.EndOfContent)
+            {
+                if (lexer.Branch(TokenType.Dot))
+                {
+                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsection"))
+                    {
+                        lexer.Skip(~TokenType.Newline);
+                        stillSubcircuit = false;
+                    }
+                    else
+                        ParseControlStatement(lexer, context);
+                }
+                else
+                    ParseStatement(lexer, context);
+            }
+            lexer.Skip(~TokenType.Newline);
+            context.Section.Pop();
             return true;
         }
         private static bool ParseOptions(SimpleCircuitLexer lexer, ParsingContext context)

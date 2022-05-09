@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components
         {
             get
             {
-                yield return new(new[] { _key }, "A subcircuit of type '{_key}'", new[] { "Subcircuit" });
+                yield return new(new[] { _key }, $"A subcircuit of type '{_key}'", new[] { "Subcircuit" });
             }
         }
 
@@ -60,30 +60,23 @@ namespace SimpleCircuit.Components
                 _ckt = definition;
 
                 // Find the pins in the subcircuit
-                var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 List<string> possibleNames = new();
                 foreach (var pin in pins)
                 {
                     possibleNames.Clear();
 
                     // Check with the name of the pin owner
-                    string ownerName = pin.Owner.Name;
-                    if (!set.Contains(ownerName))
-                    {
-                        possibleNames.Add(ownerName);
-                        set.Add(ownerName);
-                    }
+                    string pinName = pin.Owner.Name;
+                    if (taken.Add(pinName))
+                        possibleNames.Add(pinName);
 
                     // A pin can have multiple names, and we we want to have the easiest solutions!
                     foreach (string pn in pin.Owner.Pins.NamesOf(pin))
                     {
-                        if (!set.Contains(pn))
-                        {
-                            possibleNames.Add(pn);
-                            set.Add(pn);
-                        }
-                        possibleNames.Add($"{pin.Owner.Name}_{pn}");
-                        set.Add($"{pin.Owner.Name}_{pn}");
+                        pinName = $"{pin.Owner.Name}_{pn}";
+                        if (taken.Add(pinName))
+                            possibleNames.Add(pinName);
                     }
 
                     if (pin is IOrientedPin op)

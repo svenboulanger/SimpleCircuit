@@ -9,17 +9,33 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed
-// by the pins.
-.subckt ABC R1[p] R2[n]
-R1 <r> R2
-.ends
+            var script = @"// Define a single pixel
+.subckt PIXEL DIRleft DIRtop DIRbottom DIRright
+// Reset
+GND <u> D(photodiode) <u> Xd <u> MNrst <u> POW
+MNrst[g] <l 0> T(""RST"")
+Xd<r>[g]MNsf[d] < u > POW
+MNsf[s] < d r > MNsel < r > Xcol
+MNsel[g] < u 60 > Xrow
 
-// Now we can instantiate this subcircuit definition multiple times.
-ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
+// Make column and row lines (DIR is used as direction for pins)
+            Xcol < u 70 > DIRtop
+Xcol < d 15 > DIRbottom
+Xrow < l 60 > DIRleft
+Xrow < r 20 > DIRright
+ .ends
 
-// They can even be angled because our pins also have a direction!
-Xs <a -45> ABC <a -45> Xe
+// We have chosen the subcircuit names such that they are unique,
+// allowing us to use the short names
+            PIXEL1<r> PIXEL2
+PIXEL1[DIRbottom] < d > [DIRtop]PIXEL3
+PIXEL3<r> PIXEL4[DIRtop] < u > [DIRbottom]PIXEL2
+
+ // Add some terminals
+ PIXEL1[DIRtop] < u 0 > T(""COL_{OUT} k"")
+PIXEL2[DIRtop] < u 0 > T(""COL OUT k+1"")
+PIXEL2[DIRright] < r 0 > T(""ROW SEL i"")
+PIXEL4[DIRright] < r 0 > T(""ROW SEL i+1"")
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
