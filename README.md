@@ -15,7 +15,12 @@ GND <u> R
 The program fills in the length for you, by minimizing the wire length of all wires in a circuit (the default minimum wire length is 10pt).
 The result looks like this:
 
-![Example circuit](https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit.svg)
+<a href="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit.svg#gh-light-mode-only">
+  <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit.svg#gh-light-mode-only">
+</a>
+<a href="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit.svg#gh-dark-mode-only">
+  <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_dark.svg#gh-dark-mode-only">
+</a>
 
 The output is immediately shown in the browser, and the SVG file can be downloaded using the download button. More advanced circuits require more complex alignments. For example, an inverting opamp circuit might be scripted like this:
 
@@ -26,7 +31,12 @@ OA1[p] <l d> GND
 Xout <r> T("out")
 ```
 
-![Example circuit 2](https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2.svg)
+<a href="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2.svg#gh-light-mode-only">
+  <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2.svg#gh-light-mode-only">
+</a>
+<a href="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2.svg#gh-dark-mode-only">
+  <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2_dark.svg#gh-dark-mode-only">
+</a>
 
 This circuit has a **terminal** (`T`) that we give a label "in". We then go on to the right to an anonymous resistor `R`. Then we continue to **point** (`X`) Xminus, which is the point at the negative input of opamp (`OA`) OA1, and so on.
 
