@@ -23,6 +23,7 @@ namespace SimpleCircuitOnline.Pages
         private MonacoEditor _scriptEditor, _styleEditor;
         private TextFormatter _jsTextFormatter;
         private bool _updateDynamic = false;
+        private SvgOutput _mainOutput;
 
         private async Task SetCurrentScript(string script, string style = null)
         {
@@ -121,8 +122,13 @@ namespace SimpleCircuitOnline.Pages
             using var sw = new StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
                 doc.WriteTo(xml);
-            byte[] file = System.Text.Encoding.UTF8.GetBytes(sw.ToString());
+            byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
             await _js.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+        }
+
+        public void ChangeShrinkToSize(DropZone.ShrinkToSizeEventArgs e)
+        {
+            _mainOutput.SetShrinkToSize(e.ShrinkToWidth, e.ShrinkToHeight);
         }
 
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)

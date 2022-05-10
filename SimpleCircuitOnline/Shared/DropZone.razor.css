@@ -1,6 +1,13 @@
 ﻿.dropzone {
     width: 100%;
+    height: 95%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas: "output" "menu";
 }
+.dropzone .output { grid-area: output; overflow: hidden; }
+.dropzone .menu { grid-area: menu; overflow: hidden; }
 .dropzone label:hover {
     cursor: pointer;
 }
@@ -29,6 +36,7 @@ a {
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 .upload {
+    float: right;
     color: #fff;
     background-color: #5a6268;
     border: 1px solid #545b62;
@@ -41,3 +49,14 @@ a {
     background-color: #007bff;
     border: 1px solid #0062cc;
 }
+.toggle-shrink {
+    float: left;
+    color: #fff;
+    background-color: #5a6268;
+    border: 1px solid #545b62;
+}
+    .toggle-shrink.active {
+        color: #fff;
+        background-color: #007bff;
+        border: 1px solid #0062cc;
+    }

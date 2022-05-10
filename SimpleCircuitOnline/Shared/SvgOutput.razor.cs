@@ -13,7 +13,7 @@ namespace SimpleCircuitOnline.Shared
         private XmlDocument _doc;
         private string _svg;
         private int _loading;
-        private bool _useDom = true;
+        private bool _useDom = true, _shrinkToWidth = true, _shrinkToHeight = true;
 
         [Parameter]
         public bool UseDOM
@@ -35,42 +35,47 @@ namespace SimpleCircuitOnline.Shared
             get => _doc;
             set
             {
-                // No need to do this again
+                // No need to compute again
                 if (ReferenceEquals(_doc, value))
                     return;
 
                 _doc = value;
-                if (_doc == null)
-                    _svg = null;
-                else if (_useDom)
-                {
-                    // Remove any styling from the document, as it is defined elsewhere in the document
-                    var doc = (XmlDocument)_doc.Clone();
-                    using StringWriter style = new();
-                    var tags = new List<XmlNode>();
-                    foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
-                        tags.Add(node);
-                    foreach (var tag in tags)
-                        tag.ParentNode.RemoveChild(tag);
-                    doc.DocumentElement.SetAttribute("class", "simplecircuit");
-
-                    // Write out the stripped document XML
-                    using var sw = new StringWriter();
-                    using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
-                        doc.WriteTo(xml);
-                    _svg = sw.ToString();
-                }
-                else
-                {
-                    using var sw = new StringWriter();
-                    using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
-                        _doc.WriteTo(xml);
-                    var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
-                    _svg = $"<img src=\"data:image/svg+xml;base64,{data}\" />";
-                }
+                UpdateSvg();
 
                 // Update
                 StateHasChanged();
+            }
+        }
+
+        private void UpdateSvg()
+        {
+            if (_doc == null)
+                _svg = null;
+            else if (_useDom)
+            {
+                // Remove any styling from the document, as it is defined elsewhere in the document
+                var doc = (XmlDocument)_doc.Clone();
+                using StringWriter style = new();
+                var tags = new List<XmlNode>();
+                foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
+                    tags.Add(node);
+                foreach (var tag in tags)
+                    tag.ParentNode.RemoveChild(tag);
+                doc.DocumentElement.SetAttribute("class", $"simplecircuit{(_shrinkToWidth ? " max-width" : "")}{(_shrinkToHeight ? " max-height" : "")}");
+
+                // Write out the stripped document XML
+                using var sw = new StringWriter();
+                using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+                    doc.WriteTo(xml);
+                _svg = sw.ToString();
+            }
+            else
+            {
+                using var sw = new StringWriter();
+                using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                    _doc.WriteTo(xml);
+                var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
+                _svg = $"<img src=\"data:image/svg+xml;base64,{data}\" />";
             }
         }
 
@@ -88,5 +93,12 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
+        public void SetShrinkToSize(bool shrinkToWidth, bool shrinkToHeight)
+        {
+            _shrinkToWidth = shrinkToWidth;
+            _shrinkToHeight = shrinkToHeight;
+            UpdateSvg();
+            StateHasChanged();
+        }
     }
 }
