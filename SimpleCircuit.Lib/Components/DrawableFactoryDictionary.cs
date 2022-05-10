@@ -155,6 +155,10 @@ namespace SimpleCircuit.Components
                     isAnonymous = false;
             }
 
+            // We didn't find a factory for this...
+            if (factory == null)
+                return null;
+
             if (isAnonymous)
             {
                 var args = new AnonymousFoundEventArgs(name);

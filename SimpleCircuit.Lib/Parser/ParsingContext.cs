@@ -67,7 +67,8 @@ namespace SimpleCircuit.Parser
             if (Circuit.TryGetValue(fullname, out var presence) && presence is IDrawable drawable)
                 return drawable;
             result = Factory.Create(fullname, options);
-            Circuit.Add(result);
+            if (result != null)
+                Circuit.Add(result);
             return result;
         }
     }

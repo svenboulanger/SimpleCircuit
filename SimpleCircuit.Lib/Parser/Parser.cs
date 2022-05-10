@@ -26,7 +26,10 @@ namespace SimpleCircuit.Parser
         {
             // Read until the end
             while (lexer.Type != TokenType.EndOfContent)
-                ParseStatement(lexer, context);
+            {
+                if (!ParseStatement(lexer, context))
+                    lexer.Skip(~TokenType.Newline);
+            }
         }
 
         /// <summary>
@@ -57,7 +60,7 @@ namespace SimpleCircuit.Parser
                     return true;
 
                 case TokenType.EndOfContent:
-                    return false;
+                    return true;
 
                 default:
                     context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
@@ -154,7 +157,7 @@ namespace SimpleCircuit.Parser
             if (component == null)
             {
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    lexer, $"Could not recognize and create a component for '{lexer.Token}'"));
+                    lexer, $"Could not recognize and create a component for '{name}'"));
                 return null;
             }
 
@@ -489,11 +492,11 @@ namespace SimpleCircuit.Parser
                         lexer.Skip(~TokenType.Newline);
                         stillSubcircuit = false;
                     }
-                    else
-                        ParseControlStatement(lexer, localContext);
+                    else if (!ParseControlStatement(lexer, localContext))
+                        lexer.Skip(~TokenType.Newline);
                 }
-                else
-                    ParseStatement(lexer, localContext);
+                else if (!ParseStatement(lexer, localContext))
+                    lexer.Skip(~TokenType.Newline);
             }
 
             // Add a subcircuit definition to the context drawable factory
@@ -590,11 +593,11 @@ namespace SimpleCircuit.Parser
                         lexer.Skip(~TokenType.Newline);
                         stillSubcircuit = false;
                     }
-                    else
-                        ParseControlStatement(lexer, context);
+                    else if (!ParseControlStatement(lexer, context))
+                        lexer.Skip(~TokenType.Newline);
                 }
-                else
-                    ParseStatement(lexer, context);
+                else if (!ParseStatement(lexer, context))
+                    lexer.Skip(~TokenType.Newline);
             }
             lexer.Skip(~TokenType.Newline);
             context.Section.Pop();

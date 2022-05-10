@@ -9,7 +9,11 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".options Scale = 0.5
+            var script = @".section input
+    POW(""V_bias"") <u> Dpd(photodiode) <u> Xin
+    Xin<u> MNrst<u> POW(""V_{CC,reset}"")
+    NMrst[g] < l 0 > T(""reset 1"")
+ .endsection
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
@@ -21,7 +25,7 @@ namespace Sandbox
             // Draw the component
             var doc = context.Circuit.Render(logger);
             using var sw = new StringWriter();
-            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true }))
+            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                 doc.WriteTo(xml);
 
             if (File.Exists("tmp.html"))
