@@ -17,7 +17,7 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private static readonly Vector2[] _pinOffsets = new Vector2[] {
-                new(-8, -4), new(-8, 4), new(8, 4), new(8, -4)
+                new(-8, -4), new(-8, 4), new(-2, -5), new(-2, 5), new(8, 4), new(8, -4)
             };
 
             public string Label { get; set; }
@@ -26,13 +26,15 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _pinOffsets[0], new(-1, 0)), "i", "in", "inp", "pi", "p");
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _pinOffsets[1], new(-1, 0)), "inn", "ni", "n");
-                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _pinOffsets[2], new(1, 0)), "outn", "no");
-                Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _pinOffsets[3], new(1, 0)), "o", "out", "outp", "po");
+                Pins.Add(new FixedOrientedPin("positivepower", "The positive power supply.", this, _pinOffsets[2], new(0, -1)), "vpos", "vp");
+                Pins.Add(new FixedOrientedPin("negativepower", "The negative power supply.", this, _pinOffsets[3], new(0, 1)), "vneg", "vn");
+                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _pinOffsets[4], new(1, 0)), "outn", "no");
+                Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _pinOffsets[5], new(1, 0)), "o", "out", "outp", "po");
 
                 // Resolving pins
                 PinUpdate = Variant.All(
                     Variant.Map("diffin", "swapin", (b1, b2) => RedefinePins(0, b1, b2)),
-                    Variant.Map("diffout", "swapout", (b1, b2) => RedefinePins(2, b1, b2))
+                    Variant.Map("diffout", "swapout", (b1, b2) => RedefinePins(4, b1, b2))
                 );
                 DrawingVariants = Variant.All(
                     Variant.If("diffin").Do(Variant.Map("swapin", DrawDifferentialInput)),

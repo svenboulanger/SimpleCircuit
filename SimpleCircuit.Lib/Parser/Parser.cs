@@ -103,34 +103,36 @@ namespace SimpleCircuit.Parser
                 {
                     wire = ParseWire(lexer, context);
                     if (wire == null)
-                        return false;
+                        lexer.Skip(~TokenType.CloseBeak | ~TokenType.Newline); // Skip the wire
+                    else
+                    {
+                        // Parse an optional pin
+                        pinName = null;
+                        if (lexer.Check(TokenType.OpenIndex))
+                        {
+                            pinName = ParsePin(lexer, context);
+                            if (pinName == null)
+                                return false;
+                        }
+
+                        // Parse the next component
+                        var nextComponent = ParseComponent(lexer, context);
+                        if (nextComponent == null)
+                            return false;
+
+                        // Extract the previous pin
+                        IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
+
+                        // String the pins together using wire segments
+                        StringWiresTogether(pinToWire, wire, wireToPin, context);
+                        component = nextComponent;
+
+                        // To next component
+                        pinToWire = component.Pins[Math.Max(0, component.Pins.Count - 1)];
+                    }
                 }
                 else
                     break;
-
-                // Parse an optional pin
-                pinName = null;
-                if (lexer.Check(TokenType.OpenIndex))
-                {
-                    pinName = ParsePin(lexer, context);
-                    if (pinName == null)
-                        return false;
-                }
-
-                // Parse the next component
-                var nextComponent = ParseComponent(lexer, context);
-                if (nextComponent == null)
-                    return false;
-
-                // Extract the previous pin
-                IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
-
-                // String the pins together using wire segments
-                StringWiresTogether(pinToWire, wire, wireToPin, context);
-
-                // To next component
-                component = nextComponent;
-                pinToWire = component.Pins[Math.Max(0, component.Pins.Count - 1)];
             }
             return true;
         }
@@ -188,9 +190,7 @@ namespace SimpleCircuit.Parser
                         case TokenType.Dash:
                             lexer.Next();
                             if (lexer.Branch(TokenType.Word))
-                            {
                                 component.RemoveVariant(lexer.Token.ToString());
-                            }
                             else
                             {
                                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",

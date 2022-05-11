@@ -213,7 +213,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
                     // Let's fix floating nodes
                     var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
                     if (violation != null)
-                        context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1e-3));
+                        context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
                     else
                         throw ex;
                 }

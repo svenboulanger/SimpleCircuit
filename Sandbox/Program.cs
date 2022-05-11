@@ -9,11 +9,8 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".section input
-    POW(""V_bias"") <u> Dpd(photodiode) <u> Xin
-    Xin<u> MNrst<u> POW(""V_{CC,reset}"")
-    NMrst[g] < l 0 > T(""reset 1"")
- .endsection
+            var script = @"A1(diffin, diffout)[vp] <u> T(""Vp"")
+A1[vn] <d> T(""Vn"")
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
