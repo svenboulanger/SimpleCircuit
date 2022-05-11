@@ -38,11 +38,11 @@ namespace SimpleCircuit.Components.Analog
                         Variant.Map("toggle", "double", "lamp", DrawOneWireSwitch)
                     ),
                     Variant.If("push").DoElse(
-                        Variant.Map("closed", DrawPushSwitch),
-                        Variant.Map("closed", DrawRegularSwitch)));
+                        Variant.Map("closed", "inv", DrawPushSwitch),
+                        Variant.Map("closed", "inv", DrawRegularSwitch)));
             }
 
-            private void DrawRegularSwitch(SvgDrawing drawing, bool closed)
+            private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
@@ -51,22 +51,40 @@ namespace SimpleCircuit.Components.Analog
                 // Controlling pin (optional)
                 if (Pins["c"].Connections > 0)
                 {
-                    if (closed)
-                        drawing.Line(new(), new(0, -6));
+                    if (inverted)
+                    {
+                        if (closed)
+                            drawing.Line(new(0, -2), new(0, -6));
+                        else
+                            drawing.Line(new(0, -4.25), new(0, -6));
+                    }
                     else
-                        drawing.Line(new(0, -2), new(0, -6));
+                    {
+                        if (closed)
+                            drawing.Line(new(), new(0, -6));
+                        else
+                            drawing.Line(new(0, -2), new(0, -6));
+                    }
                 }
 
                 if (closed)
-                    drawing.Line(new(-4, 0), new(4, 0));
+                {
+                    if (inverted)
+                        drawing.Circle(new(0, -1), 1);
+                    drawing.Line(new(-4, 0), new(4, 0), new("wire"));
+                }
                 else
-                    drawing.Line(new(-4, 0), new(4, -4));
+                {
+                    if (inverted)
+                        drawing.Circle(new(0, -3.25), 1);
+                    drawing.Line(new(-4, 0), new(4, -4), new("wire"));
+                }
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
             }
-            private void DrawPushSwitch(SvgDrawing drawing, bool closed)
+            private void DrawPushSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
@@ -74,13 +92,24 @@ namespace SimpleCircuit.Components.Analog
 
                 if (closed)
                 {
-                    drawing.Line(new(0, 0), new(0, -6), new("wire"));
                     drawing.Line(new(-4, 0), new(4, 0));
+                    if (inverted)
+                    {
+                        drawing.Circle(new(0, -1), 1);
+                        drawing.Line(new(0, -2), new(0, -6), new("wire"));
+                    }
+                    else
+                        drawing.Line(new(0, 0), new(0, -6), new("wire"));
                 }
                 else
                 {
-                    drawing.Line(new(0, -4), new(0, -6), new("wire"));
                     drawing.Line(new(-5, -4), new(5, -4));
+                    if (inverted)
+                    {
+                        drawing.Circle(new(0, -5), 1);
+                    }
+                    else
+                        drawing.Line(new(0, -4), new(0, -6), new("wire"));
                 }
 
                 // Label

@@ -92,7 +92,7 @@ namespace SimpleCircuit
                     Diagnostics = logger
                 };
                 using var sr = new StreamReader(job.Input);
-                var lexer = new Lexer(sr.ReadToEnd());
+                var lexer = SimpleCircuitLexer.FromString(sr.ReadToEnd());
                 Parser.Parser.Parse(lexer, context);
 
                 // Render the document
