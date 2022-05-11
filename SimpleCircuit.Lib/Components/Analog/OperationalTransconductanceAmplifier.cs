@@ -21,6 +21,8 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "neg");
                 Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "pos");
+                Pins.Add(new FixedOrientedPin("negativepower", "The negative power.", this, new(0, -6), new(0, -1)), "vneg", "vn");
+                Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 6), new(0, 1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
 
                 DrawingVariants = Variant.Do(DrawOTA);

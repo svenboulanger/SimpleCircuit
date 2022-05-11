@@ -54,7 +54,7 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Add a little plus and minus next to the terminals!
-                drawing.Path(b => b.MoveTo(offset - 2, 2).Line(0, 2).MoveTo(offset - 1, 3).Line(2, 0), new("plus"));
+                drawing.Path(b => b.MoveTo(offset - 2, 2).Line(0, 2).MoveTo(offset - 3, 3).Line(2, 0), new("plus"));
                 drawing.Line(new(-offset + 2, 2), new(-offset + 2, 4), new("minus"));
 
                 // Depending on the orientation, let's anchor the text differently
