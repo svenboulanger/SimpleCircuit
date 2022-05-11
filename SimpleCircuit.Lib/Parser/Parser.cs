@@ -98,11 +98,10 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Parse the wire itself
-                List<WireInfo> wire;
                 if (lexer.Check(TokenType.OpenBeak))
                 {
-                    wire = ParseWire(lexer, context);
-                    if (wire == null)
+                    var wireInfo = ParseWire(lexer, context);
+                    if (wireInfo == null)
                         lexer.Skip(~TokenType.CloseBeak | ~TokenType.Newline); // Skip the wire
                     else
                     {
@@ -124,7 +123,7 @@ namespace SimpleCircuit.Parser
                         IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
 
                         // String the pins together using wire segments
-                        StringWiresTogether(pinToWire, wire, wireToPin, context);
+                        StringWiresTogether(pinToWire, wireInfo, wireToPin, context);
                         component = nextComponent;
 
                         // To next component
@@ -249,7 +248,7 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="lexer">The lexer.</param>
         /// <returns>The wire information.</returns>
-        private static List<WireInfo> ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
+        private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.OpenBeak))
             {
@@ -258,11 +257,12 @@ namespace SimpleCircuit.Parser
             }
 
             // Read the direction of the wire
-            List<WireInfo> wires = new();
+            var wireInfo = new WireInfo();
             while (lexer.Type != TokenType.CloseBeak)
             {
                 // Get the direction
-                Vector2 orientation;
+                bool isSegment = true;
+                Vector2 orientation = new();
                 switch (lexer.Token.ToString())
                 {
                     case "n":
@@ -277,11 +277,62 @@ namespace SimpleCircuit.Parser
                     case "nw": orientation = Vector2.Normal(-Math.PI * 0.75); lexer.Next(); break;
                     case "se": orientation = Vector2.Normal(Math.PI * 0.25); lexer.Next(); break;
                     case "sw": orientation = Vector2.Normal(Math.PI * 0.75); lexer.Next(); break;
-                    case "0": orientation = new Vector2(); lexer.Next(); break;
+                    case "0": lexer.Next(); break;
                     case "a":
                         lexer.Next();
                         double angle = ParseDouble(lexer, context);
                         orientation = Vector2.Normal(-angle / 180.0 * Math.PI);
+                        break;
+
+                    case "dotted":
+                        lexer.Next();
+                        wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted;
+                        isSegment = false;
+                        break;
+
+                    case "dashed":
+                        lexer.Next();
+                        wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dashed;
+                        isSegment = false;
+                        break;
+
+                    case "arrow":
+                        lexer.Next();
+                        if (wireInfo.Segments.Count == 0)
+                            wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                        else
+                        {
+                            wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                            if (!lexer.Check(TokenType.CloseBeak))
+                                context.Diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "PW001", "Arrows can only appear at the start or end of a wire"));
+                        }
+                        isSegment = false;
+                        break;
+
+                    case "dot":
+                        lexer.Next();
+                        if (wireInfo.Segments.Count == 0)
+                            wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                        else
+                        {
+                            wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                            if (!lexer.Check(TokenType.CloseBeak))
+                                context.Diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "PW002", "Dots can only appear at the start or end of a wire"));
+                        }
+                        isSegment = false;
+                        break;
+
+                    case "/":
+                        lexer.Next();
+                        if (wireInfo.Segments.Count == 0)
+                            wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Slash;
+                        else
+                        {
+                            wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
+                            if (!lexer.Check(TokenType.CloseBeak))
+                                context.Diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "PW001", "Slashes can only appear at the start or end of a wire"));
+                        }
+                        isSegment = false;
                         break;
 
                     default:
@@ -291,25 +342,16 @@ namespace SimpleCircuit.Parser
                         return null;
                 }
 
-                if (lexer.Branch(TokenType.Plus))
+                if (isSegment)
                 {
-                    if (!lexer.Branch(TokenType.Number, out var lengthToken))
+                    if (lexer.Branch(TokenType.Plus) || lexer.Check(TokenType.Number))
                     {
-                        context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                            lexer, "Length expected"));
-                        return null;
+                        double length = ParseDouble(lexer, context);
+                        wireInfo.Segments.Add(new WireSegment(orientation, false, length));
                     }
-                    double length = double.Parse(lengthToken.ToString(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture);
-                    wires.Add(new WireInfo(orientation, double.NaN, length));
-                }
-                else if (lexer.Branch(TokenType.Number, out var lengthToken))
-                {
-                    double length = double.Parse(lengthToken.ToString(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture);
-                    wires.Add(new WireInfo(orientation, length, context.Options.MinimumWireLength));
-                }
-                else
-                {
-                    wires.Add(new WireInfo(orientation, double.NaN, context.Options.MinimumWireLength));
+                    else
+                        // Default wire segment with a minimum wire length defined by the options
+                        wireInfo.Segments.Add(new WireSegment(orientation, false, context.Options.MinimumWireLength));
                 }
             }
 
@@ -319,61 +361,38 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
                     lexer, "Bracket mismatch, '>' expected"));
             }
-            return wires;
+            return wireInfo;
         }
 
         /// <summary>
         /// Strings two pins together using wires.
         /// </summary>
         /// <param name="pinToWire">The first pin.</param>
-        /// <param name="wires">The pin coming before the wire.</param>
+        /// <param name="wireInfo">The wire information.</param>
         /// <param name="wireToPin">The pin coming after the wire.</param>
         /// <param name="context">The parsing context.</param>
-        private static void StringWiresTogether(IPin pinToWire, List<WireInfo> wires, IPin wireToPin, ParsingContext context)
+        private static void StringWiresTogether(IPin pinToWire, WireInfo wireInfo, IPin wireToPin, ParsingContext context)
         {
-            IPin last = pinToWire;
-            var orientation = new Vector2(1, 0);
-            for (int i = 0; i < wires.Count; i++)
-            {
-                if (wires[i].Orientation.Equals(new Vector2()))
-                {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                        $"Cannot use short-hand notation '0' in non-virtual chains."));
-                    return;
-                }
+            // Create the wire
+            string name = $"W:{++context.WireCount}";
+            var wire = new Wire(name, wireInfo);
+            context.Circuit.Add(wire);
 
-                var wire = new Wire($"W{++context.WireCount}", wires[i].MinimumLength, context.Options);
-                context.Circuit.Add(wire);
+            // Resolve the orientation for the pin to the wire
+            if (pinToWire is IOrientedPin pin1)
+                pin1.ResolveOrientation(wireInfo.Segments[0].Orientation, context.Diagnostics);
+            if (wireToPin is IOrientedPin pin2)
+                pin2.ResolveOrientation(-wireInfo.Segments[^1].Orientation, context.Diagnostics);
 
-                // Alias the starting point of this wire to the last wire end
-                last.Connections++;
-                wire.Pins[0].Connections++;
-                context.Circuit.Add(
-                    new OffsetConstraint($"{wire.Name}.sc.x", last.X, wire.Pins[0].X),
-                    new OffsetConstraint($"{wire.Name}.sc.y", last.Y, wire.Pins[0].Y));
-
-                // Apply a direction for this wire
-                orientation = wires[i].Orientation;
-                ((IOrientedPin)wire.Pins[0]).ResolveOrientation(-orientation, context.Diagnostics);
-                if (last is IOrientedPin op1)
-                    op1.ResolveOrientation(orientation, context.Diagnostics);
-
-                // If the wire has fixed length, fix it!
-                if (!double.IsNaN(wires[i].Length))
-                    wire.Fix(wires[i].Length);
-
-                // Update the pin
-                last = wire.Pins[1];
-            }
-
-            // Do the last pin
-            last.Connections++;
-            wireToPin.Connections++;
+            // Make sure the start and end are tied together
             context.Circuit.Add(
-                new OffsetConstraint($"{last.Owner.Name}.ec.x", last.X, wireToPin.X),
-                new OffsetConstraint($"{last.Owner.Name}.ec.y", last.Y, wireToPin.Y));
-            if (wireToPin is IOrientedPin op)
-                op.ResolveOrientation(-orientation, context.Diagnostics);
+                new OffsetConstraint($"{name}.start.x", pinToWire.X, wire.StartX),
+                new OffsetConstraint($"{name}.start.y", pinToWire.Y, wire.StartY),
+                new OffsetConstraint($"{name}.end.x", wireToPin.X, wire.EndX),
+                new OffsetConstraint($"{name}.end.y", wireToPin.Y, wire.EndY));
+
+            pinToWire.Connections++;
+            wireToPin.Connections++;
         }
 
         /// <summary>
@@ -703,8 +722,8 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Parse the wire itself
-                var wire = ParseWire(lexer, context);
-                if (wire == null)
+                var wireInfo = ParseWire(lexer, context);
+                if (wireInfo == null)
                     return false;
 
                 // Parse an optional pin
@@ -726,9 +745,9 @@ namespace SimpleCircuit.Parser
 
                 // String the pins together using wire segments
                 if (x)
-                    StringVirtualWiresTogether(pin => pin.X, new(1, 0), pinToWire, wire, wireToPin, context);
+                    StringVirtualWiresTogether(pin => pin.X, new(1, 0), pinToWire, wireInfo, wireToPin, context);
                 if (y)
-                    StringVirtualWiresTogether(pin => pin.Y, new(0, 1), pinToWire, wire, wireToPin, context);
+                    StringVirtualWiresTogether(pin => pin.Y, new(0, 1), pinToWire, wireInfo, wireToPin, context);
 
                 // To next component
                 component = nextComponent;
@@ -742,32 +761,33 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static void StringVirtualWiresTogether(Func<IPin, string> variableFunc, Vector2 normal, IPin pinToWire, List<WireInfo> wires, IPin wireToPin, ParsingContext context)
+        private static void StringVirtualWiresTogether(Func<IPin, string> variableFunc, Vector2 normal, IPin pinToWire, WireInfo wireInfo, IPin wireToPin, ParsingContext context)
         {
             // We will go through each wire and only consider those that have an effect on the wires
+            var segments = wireInfo.Segments;
             string lastNode = variableFunc(pinToWire);
-            for (int i = 0; i < wires.Count; i++)
+            for (int i = 0; i < segments.Count; i++)
             {
-                double dot = wires[i].Orientation.Dot(normal);
+                double dot = segments[i].Orientation.Dot(normal);
 
                 // Create an intermediary point
                 string node;
-                if (i < wires.Count - 1)
+                if (i < segments.Count - 1)
                     node = $"virtual.{++context.VirtualCoordinateCount}";
                 else
                     node = variableFunc(wireToPin);
 
                 // Constrain these
-                if (double.IsNaN(wires[i].Length) && !dot.IsZero())
+                if (!segments[i].IsFixed && !dot.IsZero())
                 {
                     if (dot > 0)
-                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, Math.Abs(dot) * wires[i].MinimumLength));
+                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, Math.Abs(dot) * segments[i].Length));
                     else
-                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", node, lastNode, Math.Abs(dot) * wires[i].MinimumLength));
+                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", node, lastNode, Math.Abs(dot) * segments[i].Length));
                 }
                 else
                 {
-                    double length = dot.IsZero() ? 0.0 : dot * wires[i].Length;
+                    double length = dot.IsZero() ? 0.0 : dot * segments[i].Length;
                     context.Circuit.Add(new OffsetConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, length));
                 }
                 lastNode = node;

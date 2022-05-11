@@ -34,6 +34,27 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Possible line types.
+        /// </summary>
+        public enum LineTypes
+        {
+            /// <summary>
+            /// Just a straight line.
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// A dashed line
+            /// </summary>
+            Dashed,
+
+            /// <summary>
+            /// A dotted line
+            /// </summary>
+            Dotted,
+        }
+
+        /// <summary>
         /// Gets or sets an end point marker.
         /// </summary>
         public MarkerTypes EndMarker { get; set; }
@@ -47,6 +68,11 @@ namespace SimpleCircuit.Drawing
         /// Gets or sets a start point marker.
         /// </summary>
         public MarkerTypes StartMarker { get; set; }
+
+        /// <summary>
+        /// Gets or sets the line type.
+        /// </summary>
+        public LineTypes LineType { get; set; }
 
         /// <summary>
         /// Creates new path options.
@@ -64,6 +90,7 @@ namespace SimpleCircuit.Drawing
                 return;
             base.Apply(element);
             ApplyMarkers(element);
+            ApplyLineTypes(element);
         }
 
         private string GetDefinition(XmlDocument document, MarkerTypes marker)
@@ -163,5 +190,22 @@ namespace SimpleCircuit.Drawing
                 element.SetAttribute("marker-start", url);
         }
 
+        private void ApplyLineTypes(XmlElement element)
+        {
+            // Simply give the line type a class that will modify the line type
+            switch (LineType)
+            {
+                case LineTypes.None:
+                    return;
+
+                case LineTypes.Dashed:
+                    element.SetAttribute("stroke-dasharray", "2 2");
+                    return;
+
+                case LineTypes.Dotted:
+                    element.SetAttribute("stroke-dasharray", "0.5 2");
+                    return;
+            }
+        }
     }
 }
