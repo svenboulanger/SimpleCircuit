@@ -15,6 +15,9 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "segment";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

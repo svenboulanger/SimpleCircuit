@@ -19,6 +19,11 @@ namespace SimpleCircuit.Components
         public string Name { get; }
 
         /// <summary>
+        /// Gets the type name of the instance.
+        /// </summary>
+        public virtual string Type => "Drawable";
+
+        /// <summary>
         /// Gets the pins of the component.
         /// </summary>
         public PinCollection Pins { get; } = new();
@@ -81,7 +86,8 @@ namespace SimpleCircuit.Components
         {
             // Group all elements
             var go = new GraphicOptions() { Id = Name };
-            go.Classes.Add(GetType().Name.ToLower());
+            if (!string.IsNullOrWhiteSpace(Type))
+                go.Classes.Add(Type.ToLower());
             foreach (string name in _variants)
                 go.Classes.Add(name.ToLower());
             if (GroupClasses != null)

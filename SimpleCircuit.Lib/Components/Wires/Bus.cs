@@ -19,6 +19,10 @@ namespace SimpleCircuit.Components.Wires
             public int Crossings { get; set; } = 1;
             [Description("The label next to the direction.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "bus";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

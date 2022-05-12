@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Outputs
         {
             [Description("The label of the motor.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "motor";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

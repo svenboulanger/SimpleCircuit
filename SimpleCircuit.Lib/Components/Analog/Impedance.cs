@@ -11,15 +11,20 @@ namespace SimpleCircuit.Components.Analog
     {
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+            => new Instance(key == "Y" ? "admittance" : "impedance", name, options);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             [Description("The label next to the element.")]
             public string Label { get; set; }
-            public Instance(string name, Options options)
+
+            /// <inheritdoc />
+            public override string Type { get; }
+
+            public Instance(string type, string name, Options options)
                 : base(name, options)
             {
+                Type = type;
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
                 DrawingVariants = Variant.All(

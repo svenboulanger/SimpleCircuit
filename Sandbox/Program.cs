@@ -10,17 +10,17 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = string.Join(Environment.NewLine, new[]
-            {
-                "// A component chain is a series of components seperated by <wires>.",
-                "// The type of component is defined by the first letter(s), which have to be capital letters.",
-                "// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.",
-                "GND1 <u +5> V1(\"1V\") </ u +5 r /> R(\"1k\") <r d +5> C1(\"1uF\") <d +5> GND2",
-                "",
-                "// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.",
-                "// These are between brackets, and first indicate along which axis you wish to align.",
-                "(Y GND1 <0> GND2)"
-            });
+            var script = @"// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed
+// by the pins.
+.subckt ABC R1[p] R2[n]
+R1 <r> R2
+.ends
+
+// Now we can instantiate this subcircuit definition multiple times.
+ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
+
+// They can even be angled because our pins also have a direction!
+Xs <a -45> ABC <a -45> Xe";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext

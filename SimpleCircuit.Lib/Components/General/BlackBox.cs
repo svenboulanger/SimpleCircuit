@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
 using System;
 using System.Collections.Generic;
@@ -68,12 +69,14 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(SvgDrawing drawing)
             {
-                drawing.StartGroup(new(GetType().Name.ToLower()) { Id = Name });
+                var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
+                go.Classes.Add("blackbox");
+                drawing.StartGroup(go);
                 drawing.Polygon(new[]
                 {
-                Location, new Vector2(EndLocation.X, Location.Y),
-                EndLocation, new Vector2(Location.X, EndLocation.Y)
-            });
+                    Location, new Vector2(EndLocation.X, Location.Y),
+                    EndLocation, new Vector2(Location.X, EndLocation.Y)
+                });
 
                 // Draw the port names
                 _pins.Render(drawing);

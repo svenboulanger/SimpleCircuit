@@ -14,6 +14,9 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "xor";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

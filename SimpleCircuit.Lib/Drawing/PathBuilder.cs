@@ -156,9 +156,82 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="dx">The step along the x-axis.</param>
         /// <param name="dy">The step along the y-axis.</param>
-        /// <returns></returns>
+        /// <returns>The path builder.</returns>
         public PathBuilder Line(double dx, double dy)
             => Line(new(dx, dy));
+
+        /// <summary>
+        /// Draws a horizontal line using absolute coordinates.
+        /// </summary>
+        /// <param name="x">The x-coordinate.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder HorizontalTo(double x)
+        {
+            Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
+            vo = _transform.Apply(vo);
+            Vector2 vnx = _relativeModifier?.Invoke(new(1, 0)) ?? new(1, 0);
+            vnx = _transform.ApplyDirection(vnx);
+
+            double k = x - (_current - vo).Dot(vnx);
+            _current = _current + k * vnx;
+            _bounds.Expand(_current);
+            Append($"L{Convert(_current)}");
+            return this;
+        }
+
+        /// <summary>
+        /// Draws a horizontal line using relative coordinates.
+        /// </summary>
+        /// <param name="dx">The step.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder Horizontal(double dx)
+        {
+            Vector2 delta = new(dx, 0);
+            delta = _relativeModifier?.Invoke(delta) ?? delta;
+            delta = _transform.ApplyDirection(delta);
+            _current += delta;
+            _lastHandle = _current;
+
+            _bounds.Expand(_current);
+            Append($"l{Convert(delta)}");
+            return this;
+        }
+        /// <summary>
+        /// Draws a vertical line using absolute coordinates.
+        /// </summary>
+        /// <param name="x">The x-coordinate.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder VerticalTo(double x)
+        {
+            Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
+            vo = _transform.Apply(vo);
+            Vector2 vny = _relativeModifier?.Invoke(new(0, 1)) ?? new(0, 1);
+            vny = _transform.ApplyDirection(vny);
+
+            double k = x - (_current - vo).Dot(vny);
+            _current = _current + k * vny;
+            _bounds.Expand(_current);
+            Append($"L{Convert(_current)}");
+            return this;
+        }
+
+        /// <summary>
+        /// Draws a horizontal line using relative coordinates.
+        /// </summary>
+        /// <param name="dx">The step.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder Vertical(double dy)
+        {
+            Vector2 delta = new(0, dy);
+            delta = _relativeModifier?.Invoke(delta) ?? delta;
+            delta = _transform.ApplyDirection(delta);
+            _current += delta;
+            _lastHandle = _current;
+
+            _bounds.Expand(_current);
+            Append($"l{Convert(delta)}");
+            return this;
+        }
 
         /// <summary>
         /// Draws a bezier curve using absolute coordinates.

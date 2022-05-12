@@ -18,6 +18,9 @@ namespace SimpleCircuit.Components.Wires
             [Description("The label next to the fuse.")]
             public string Label { get; set; }
 
+            /// <inheritdoc />
+            public override string Type => "fuse";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The label next to the switch.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "spdt";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

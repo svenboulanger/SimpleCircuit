@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Inputs
         {
             [Description("Adds a label next to the microphone.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "mic";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

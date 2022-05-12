@@ -18,6 +18,9 @@ namespace SimpleCircuit.Components.Analog
             [Description("The label next to the resistor.")]
             public string Label { get; set; }
 
+            /// <inheritdoc />
+            public override string Type => "resistor";
+
             /// <summary>
             /// Initializes a new instance of the <see cref="Instance"/> class.
             /// </summary>

@@ -16,8 +16,10 @@ namespace SimpleCircuit.Components.Sources
         {
             private int _cells = 1;
             private double Length => _cells * 4 + 8;
+            
             [Description("The label next to the battery.")]
             public string Label { get; set; }
+
             [Description("The number of cells.")]
             public int Cells
             {
@@ -29,6 +31,10 @@ namespace SimpleCircuit.Components.Sources
                         _cells = 1;
                 }
             }
+
+            /// <inheritdoc />
+            public override string Type => "battery";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

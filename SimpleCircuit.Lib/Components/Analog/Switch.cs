@@ -21,6 +21,10 @@ namespace SimpleCircuit.Components.Analog
             public string Label { get; set; }
             [Description("The number of poles on the switch.")]
             public int Poles { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "switch";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

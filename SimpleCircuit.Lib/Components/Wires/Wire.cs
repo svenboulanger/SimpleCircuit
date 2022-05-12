@@ -18,6 +18,9 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override int Order => -1;
 
+        /// <inheritdoc />
+        public override string Type => "wire";
+
         /// <summary>
         /// Gets the X-coordinate name of the first point of the wire.
         /// </summary>

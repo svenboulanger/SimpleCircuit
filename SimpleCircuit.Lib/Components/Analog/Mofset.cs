@@ -30,6 +30,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The label next to the transistor.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "nmos";
+
             public Nmos(string name, Options options)
                 : base(name, options)
             {
@@ -98,6 +102,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The label next to the transistor.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "pmos";
+
             public Pmos(string name, Options options)
                 : base(name, options)
             {

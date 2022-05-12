@@ -20,7 +20,12 @@ namespace SimpleCircuit.Components.Analog
                 new(-8, -4), new(-8, 4), new(-2, -5), new(-2, 5), new(8, 4), new(8, -4)
             };
 
+            /// <inheritdoc />
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "amplifier";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

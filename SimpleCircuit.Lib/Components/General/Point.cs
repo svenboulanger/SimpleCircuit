@@ -21,6 +21,10 @@ namespace SimpleCircuit.Components
             public double Distance { get; set; } = 4.0;
             [Description("The label next to the point.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "point";
+
             public Instance(string name)
                 : base(name)
             {

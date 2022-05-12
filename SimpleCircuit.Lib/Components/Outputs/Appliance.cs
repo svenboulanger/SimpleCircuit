@@ -68,6 +68,9 @@ namespace SimpleCircuit.Components.Outputs
             [Description("Adds a label next to the appliance.")]
             public string Label { get; set; }
 
+            /// <inheritdoc />
+            public override string Type => "appliance";
+
             /// <summary>
             /// Creates a new appliance.
             /// </summary>

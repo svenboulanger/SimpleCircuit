@@ -525,14 +525,6 @@ namespace SimpleCircuit.Parser
         }
         private static bool ParseSymbolDefinition(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            // read the symbol definition
-            if (!lexer.Branch(TokenType.Word, "symbol"))
-            {
-                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                    lexer, "Expected symbol definition"));
-                return false;
-            }
-
             // Read the name of the subcircuit
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {

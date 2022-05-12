@@ -17,6 +17,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The label next to the capacitor.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "capacitor";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

@@ -44,19 +44,23 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options)
-            => new Instance(name, _circuit, options, _pins);
+            => new Instance(key, name, _circuit, options, _pins);
 
         private class Instance : ScaledOrientedDrawable
         {
             private readonly GraphicalCircuit _ckt;
 
+            /// <inheritdoc />
+            public override string Type { get; }
+
             /// <summary>
             /// Initializes a new instance of the <see cref="Subcircuit"/> class.
             /// </summary>
             /// <param name="name">The name.</param>
-            public Instance(string name, GraphicalCircuit definition, Options options, IEnumerable<IPin> pins)
+            public Instance(string type, string name, GraphicalCircuit definition, Options options, IEnumerable<IPin> pins)
                 : base(name, options)
             {
+                Type = type;
                 _ckt = definition;
 
                 // Find the pins in the subcircuit

@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Digital
         {
             [Description("The label next to the MUX.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "mux";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

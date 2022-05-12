@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -68,6 +69,32 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Tries to parse an optional coordinate.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the coordinate was parsed; otherwise, <c>false</c>.</returns>
+        public static bool ParseCoordinate(this SvgPathDataLexer lexer, IDiagnosticHandler diagnostics, out double result)
+        {
+            if (lexer.Branch(TokenType.Number, out var value))
+            {
+                if (!double.TryParse(value.ToString(), NumberStyles.Float, Culture, out result))
+                {
+                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                    return false;
+                }
+                return true;
+            }
+            else
+            {
+                result = 0.0;
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Parse a vector attribute on an XML node.
         /// </summary>
         /// <param name="node">The XML node.</param>
@@ -81,6 +108,23 @@ namespace SimpleCircuit
             bool success = true;
             success &= ParseCoordinate(node, xAttribute, diagnostics, out double x);
             success &= ParseCoordinate(node, yAttribute, diagnostics, out double y);
+            result = new(x, y);
+            return success;
+        }
+
+
+        /// <summary>
+        /// Parse a vector attribute on an XML node.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the coordinate was parsed; otherwise, <c>false</c>.</returns>
+        public static bool ParseVector(this SvgPathDataLexer lexer, IDiagnosticHandler diagnostics, out Vector2 result)
+        {
+            bool success = true;
+            success &= ParseCoordinate(lexer, diagnostics, out double x);
+            success &= ParseCoordinate(lexer, diagnostics, out double y);
             result = new(x, y);
             return success;
         }
@@ -111,6 +155,32 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Tries to parse an optional coordinate.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the coordinate was parsed; otherwise, <c>false</c>.</returns>
+        public static bool TryParseCoordinate(this SvgPathDataLexer lexer, IDiagnosticHandler diagnostics, double defaultValue, out double result)
+        {
+            if (lexer.Branch(TokenType.Number, out var value))
+            {
+                if (!double.TryParse(value.ToString(), NumberStyles.Float, Culture, out result))
+                {
+                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                    return false;
+                }
+                return true;
+            }
+            else
+            {
+                result = defaultValue;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Tries to parse a vector attribute on an XML node.
         /// </summary>
         /// <param name="node">The XML node.</param>
@@ -124,6 +194,22 @@ namespace SimpleCircuit
             bool success = true;
             success &= TryParseCoordinate(node, xAttribute, diagnostics, defaultValue.X, out double x);
             success &= TryParseCoordinate(node, yAttribute, diagnostics, defaultValue.Y, out double y);
+            result = new(x, y);
+            return success;
+        }
+
+        /// <summary>
+        /// Tries to parse a vector attribute on an XML node.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the coordinate was parsed; otherwise, <c>false</c>.</returns>
+        public static bool TryParseVector(this SvgPathDataLexer lexer, IDiagnosticHandler diagnostics, Vector2 defaultValue, out Vector2 result)
+        {
+            bool success = true;
+            success &= TryParseCoordinate(lexer, diagnostics, defaultValue.X, out double x);
+            success &= TryParseCoordinate(lexer, diagnostics, defaultValue.Y, out double y);
             result = new(x, y);
             return success;
         }

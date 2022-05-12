@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Sources
         {
             [Description("The label next to the source.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "cvs";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

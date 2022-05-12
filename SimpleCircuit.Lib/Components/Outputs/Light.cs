@@ -20,6 +20,10 @@ namespace SimpleCircuit.Components.Outputs
 
             [Description("The label next to the light.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "light";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

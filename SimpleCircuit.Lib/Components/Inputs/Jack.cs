@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Inputs
         {
             [Description("Adds a label next to the jack.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "connector";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

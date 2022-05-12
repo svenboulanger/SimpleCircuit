@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components
         {
             [Description("The power plane name.")]
             public string Label { get; set; } = "VDD";
+
+            /// <inheritdoc />
+            public override string Type => "power";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

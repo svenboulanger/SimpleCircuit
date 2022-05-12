@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Outputs
         {
             [Description("Adds a label next to the speaker.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "speaker";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

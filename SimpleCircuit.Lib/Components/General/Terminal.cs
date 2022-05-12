@@ -15,6 +15,10 @@ namespace SimpleCircuit.Components
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "terminal";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

@@ -14,6 +14,9 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "nand";
+
             /// <summary>
             /// Initializes a new instance of the <see cref="Or"/> class.
             /// </summary>

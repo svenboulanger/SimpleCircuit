@@ -16,6 +16,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The label next to the inductor.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "inductor";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

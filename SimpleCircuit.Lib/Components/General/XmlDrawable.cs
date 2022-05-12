@@ -65,7 +65,7 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options, _drawing, _pins);
+            => new Instance(key, name, options, _drawing, _pins);
 
         private class PinDescription
         {
@@ -76,9 +76,13 @@ namespace SimpleCircuit.Components.General
         }
         private class Instance : ScaledOrientedDrawable
         {
-            public Instance(string name, Options options, XmlNode drawing, IEnumerable<PinDescription> pins)
+            /// <inheritdoc />
+            public override string Type { get; }
+
+            public Instance(string type, string name, Options options, XmlNode drawing, IEnumerable<PinDescription> pins)
                 : base(name, options)
             {
+                Type = type;
                 foreach (var pin in pins)
                 {
                     if (pin.Direction.Equals(new Vector2()))

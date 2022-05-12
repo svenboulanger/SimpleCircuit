@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -142,40 +143,78 @@ namespace SimpleCircuit
         }
         private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            if (node.ChildNodes.Count == 0)
-                return;
-
-            List<Vector2> points = new(node.ChildNodes.Count);
-            foreach (XmlNode child in node.ChildNodes)
+            var options = ParsePathOptions(node);
+            List<Vector2> points;
+            string pointdata = node.Attributes["points"]?.Value;
+            if (pointdata != null)
             {
-                if (child.Name == "p")
+                points = new();
+                var lexer = new SvgPathDataLexer(pointdata);
+                while (lexer.Type != TokenType.EndOfContent)
                 {
-                    if (!child.ParseVector("x", "y", diagnostics, out var result))
-                        continue;
-                    points.Add(result);
+                    // Keep parsing vectors
+                    lexer.ParseVector(diagnostics, out var p);
+                    points.Add(p);
                 }
             }
-            var options = ParsePathOptions(node);
+            else if (node.HasChildNodes)
+            {
+                points = new(node.ChildNodes.Count);
+                foreach (XmlNode child in node.ChildNodes)
+                {
+                    if (child.Name == "p")
+                    {
+                        if (!child.ParseVector("x", "y", diagnostics, out var result))
+                            continue;
+                        points.Add(result);
+                    }
+                }
+            }
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW002",
+                    "No polygon data given"));
+                return;
+            }
 
             // Draw the polygon
             Polygon(points, options);
         }
         private void DrawXmlPolyline(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            if (node.ChildNodes.Count == 0)
-                return;
-
-            List<Vector2> points = new(node.ChildNodes.Count);
-            foreach (XmlNode child in node.ChildNodes)
+            var options = ParsePathOptions(node);
+            string pointdata = node.Attributes["points"]?.Value;
+            List<Vector2> points;
+            if (pointdata != null)
             {
-                if (child.Name == "p")
+                points = new();
+                var lexer = new SvgPathDataLexer(pointdata);
+                while (lexer.Type != TokenType.EndOfContent)
                 {
-                    if (!child.ParseVector("x", "y", diagnostics, out var result))
-                        continue;
-                    points.Add(result);
+                    // Keep parsing vectors
+                    lexer.ParseVector(diagnostics, out var p);
+                    points.Add(p);
                 }
             }
-            var options = ParsePathOptions(node);
+            else if (node.HasChildNodes)
+            {
+                points = new(node.ChildNodes.Count);
+                foreach (XmlNode child in node.ChildNodes)
+                {
+                    if (child.Name == "p" || child.Name == "point")
+                    {
+                        if (!child.ParseVector("x", "y", diagnostics, out var result))
+                            continue;
+                        points.Add(result);
+                    }
+                }
+            }
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW002",
+                    "No polyline data given"));
+                return;
+            }
 
             // Draw the polyline
             Polyline(points, options);
@@ -199,103 +238,346 @@ namespace SimpleCircuit
         private void DrawXmlPath(XmlNode node, IDiagnosticHandler diagnostics)
         {
             var options = ParsePathOptions(node);
-            Path(b =>
+            string d = node.Attributes["d"]?.Value;
+            if (!string.IsNullOrWhiteSpace(d))
             {
-                foreach (XmlNode cmd in node.ChildNodes)
+                Path(b =>
                 {
-                    string action = cmd.Name;
-                    bool result = true;
-                    Vector2 h1, h2, p;
-                    switch (action)
+                    var lexer = new SvgPathDataLexer(d);
+                    while (lexer.Type != TokenType.EndOfContent)
                     {
-                        case "M":
-                            if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                continue;
-                            b.MoveTo(p);
+                        Vector2 h1, h2, p;
+                        double d;
+                        bool result = true;
+                        if (!lexer.Branch(TokenType.Command, out var cmd))
+                        {
+                            diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DW001",
+                                $"Could not recognize the SVG path command '{cmd}'"));
                             break;
-                        case "m":
-                            if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
-                                !cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                continue;
-                            b.Move(p);
-                            break;
-                        case "L":
-                            if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                continue;
-                            b.LineTo(p);
-                            break;
-                        case "l":
-                            if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
-                                !cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                continue;
-                            b.Line(p);
-                            break;
-                        case "C":
-                            result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
-                            result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
-                            result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.CurveTo(h1, h2, p);
-                            break;
-                        case "c":
-                            result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
-                            result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
-                            result &= cmd.ParseVector("dx", "dy", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.Curve(h1, h2, p);
-                            break;
-                        case "S":
-                            result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
-                            result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.SmoothTo(h2, p);
-                            break;
-                        case "s":
-                            result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
-                            result &= cmd.ParseVector("x2", "y2", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.Smooth(h2, p);
-                            break;
-                        case "Q":
-                            result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
-                            result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.QuadCurveTo(h1, p);
-                            break;
-                        case "q":
-                            result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
-                            result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                            if (!result)
-                                continue;
-                            b.QuadCurve(h1, p);
-                            break;
-                        case "T":
-                            if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                continue;
-                            b.SmoothQuadTo(p);
-                            break;
-                        case "t":
-                            if (!cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                continue;
-                            b.SmoothQuad(p);
-                            break;
-                        case "z":
-                        case "Z":
-                            b.Close();
-                            break;
+                        }
+                        switch (cmd.Span[0])
+                        {
+                            case 'M':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.MoveTo(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.LineTo(p);
+                                break;
+                            case 'm':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Move(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.Line(p);
+                                break;
+                            case 'L':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.LineTo(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.LineTo(p);
+                                break;
+                            case 'l':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Line(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.Line(p);
+                                break;
+                            case 'H':
+                                if (!lexer.ParseCoordinate(diagnostics, out d))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.HorizontalTo(d);
+                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
+                                    b.HorizontalTo(d);
+                                break;
+                            case 'h':
+                                if (!lexer.ParseCoordinate(diagnostics, out d))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Horizontal(d);
+                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
+                                    b.Horizontal(d);
+                                break;
+                            case 'V':
+                                if (!lexer.ParseCoordinate(diagnostics, out d))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.VerticalTo(d);
+                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
+                                    b.VerticalTo(d);
+                                break;
+                            case 'v':
+                                if (!lexer.ParseCoordinate(diagnostics, out d))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Vertical(d);
+                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
+                                    b.Vertical(d);
+                                break;
+                            case 'C':
+                                result &= lexer.ParseVector(diagnostics, out h1);
+                                result &= lexer.ParseVector(diagnostics, out h2);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.CurveTo(h1, h2, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
+                                    lexer.ParseVector(diagnostics, out h2) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.CurveTo(h1, h2, p);
+                                break;
+                            case 'c':
+                                result &= lexer.ParseVector(diagnostics, out h1);
+                                result &= lexer.ParseVector(diagnostics, out h2);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Curve(h1, h2, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
+                                    lexer.ParseVector(diagnostics, out h2) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.Curve(h1, h2, p);
+                                break;
+                            case 'S':
+                                result &= lexer.ParseVector(diagnostics, out h2);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.SmoothTo(h2, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h2) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.SmoothTo(h2, p);
+                                break;
+                            case 's':
+                                result &= lexer.ParseVector(diagnostics, out h2);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.Smooth(h2, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h2) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.Smooth(h2, p);
+                                break;
+                            case 'Q':
+                                result &= lexer.ParseVector(diagnostics, out h1);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.QuadCurveTo(h1, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.QuadCurveTo(h1, p);
+                                break;
+                            case 'q':
+                                result &= lexer.ParseVector(diagnostics, out h1);
+                                result &= lexer.ParseVector(diagnostics, out p);
+                                if (!result)
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.QuadCurve(h1, p);
+                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
+                                    lexer.ParseVector(diagnostics, out p))
+                                    b.QuadCurve(h1, p);
+                                break;
+                            case 'T':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.SmoothQuadTo(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.SmoothQuadTo(p);
+                                break;
+                            case 't':
+                                if (!lexer.ParseVector(diagnostics, out p))
+                                {
+                                    lexer.Skip(~TokenType.Command);
+                                    continue;
+                                }
+                                b.SmoothQuad(p);
+                                while (lexer.TryParseVector(diagnostics, new(), out p))
+                                    b.SmoothQuad(p);
+                                break;
+                            case 'z':
+                            case 'Z':
+                                b.Close();
+                                break;
 
-                        default:
-                            diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
-                                $"Could not recognize path command '{cmd}'."));
-                            break;
+                            default:
+                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
+                                    $"Could not recognize path command '{cmd}'."));
+                                break;
+                        }
                     }
-                }
-            }, options);
+                }, options);
+            }
+            else if (node.HasChildNodes)
+            {
+                Path(b =>
+                {
+                    foreach (XmlNode cmd in node.ChildNodes)
+                    {
+                        string action = cmd.Name;
+                        bool result = true;
+                        Vector2 h1, h2, p;
+                        double d;
+                        switch (action)
+                        {
+                            case "M":
+                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
+                                    continue;
+                                b.MoveTo(p);
+                                break;
+                            case "m":
+                                if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
+                                    !cmd.ParseVector("dx", "dy", diagnostics, out p))
+                                    continue;
+                                b.Move(p);
+                                break;
+                            case "L":
+                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
+                                    continue;
+                                b.LineTo(p);
+                                break;
+                            case "l":
+                                if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
+                                    !cmd.ParseVector("dx", "dy", diagnostics, out p))
+                                    continue;
+                                b.Line(p);
+                                break;
+                            case "H":
+                                if (!cmd.ParseCoordinate("x", diagnostics, out d))
+                                    continue;
+                                b.HorizontalTo(d);
+                                break;
+                            case "h":
+                                if (!cmd.ParseCoordinate("dx", diagnostics, out d))
+                                    continue;
+                                b.Horizontal(d);
+                                break;
+                            case "V":
+                                if (!cmd.ParseCoordinate("y", diagnostics, out d))
+                                    continue;
+                                b.VerticalTo(d);
+                                break;
+                            case "v":
+                                if (!cmd.ParseCoordinate("dy", diagnostics, out d))
+                                    continue;
+                                b.Vertical(d);
+                                break;
+                            case "C":
+                                result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
+                                result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
+                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.CurveTo(h1, h2, p);
+                                break;
+                            case "c":
+                                result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
+                                result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
+                                result &= cmd.ParseVector("dx", "dy", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.Curve(h1, h2, p);
+                                break;
+                            case "S":
+                                result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
+                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.SmoothTo(h2, p);
+                                break;
+                            case "s":
+                                result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
+                                result &= cmd.ParseVector("x2", "y2", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.Smooth(h2, p);
+                                break;
+                            case "Q":
+                                result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
+                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.QuadCurveTo(h1, p);
+                                break;
+                            case "q":
+                                result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
+                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
+                                if (!result)
+                                    continue;
+                                b.QuadCurve(h1, p);
+                                break;
+                            case "T":
+                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
+                                    continue;
+                                b.SmoothQuadTo(p);
+                                break;
+                            case "t":
+                                if (!cmd.ParseVector("dx", "dy", diagnostics, out p))
+                                    continue;
+                                b.SmoothQuad(p);
+                                break;
+                            case "z":
+                            case "Z":
+                                b.Close();
+                                break;
+
+                            default:
+                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
+                                    $"Could not recognize path command '{cmd}'."));
+                                break;
+                        }
+                    }
+                }, options);
+            }
+            else
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DW001",
+                    "Could not find path data"));
+            }
         }
         private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
         {
@@ -408,7 +690,7 @@ namespace SimpleCircuit
         /// Draws a polyline (connected lines).
         /// </summary>
         /// <param name="points">The points.</param>
-        /// <param name="classes">The classes.</param>
+        /// <param name="options">The path options.</param>
         public void Polyline(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);

@@ -17,6 +17,10 @@ namespace SimpleCircuit.Components.Outputs
         {
             [Description("The label of the wall plug.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "plug";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

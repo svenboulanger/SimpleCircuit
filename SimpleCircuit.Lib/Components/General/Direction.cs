@@ -17,6 +17,9 @@ namespace SimpleCircuit.Components.General
             [Description("The label placed next to the wire.")]
             public string Label { get; set; }
 
+            /// <inheritdoc />
+            public override string Type => "direction";
+
             public Instance(string name)
                 : base(name)
             {

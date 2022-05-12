@@ -38,6 +38,10 @@ namespace SimpleCircuit.Components.Analog
             public string Label { get; set; }
             [Description("The length of the transmission line.")]
             public double Length { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "transmissionline";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

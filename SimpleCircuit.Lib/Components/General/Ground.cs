@@ -28,6 +28,9 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "ground";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

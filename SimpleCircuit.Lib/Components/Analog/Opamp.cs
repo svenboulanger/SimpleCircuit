@@ -21,6 +21,10 @@ namespace SimpleCircuit.Components.Analog
 
             [Description("The label next to the amplifier.")]
             public string Label { get; set; }
+
+            /// <inheritdoc />
+            public override string Type => "opamp";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {

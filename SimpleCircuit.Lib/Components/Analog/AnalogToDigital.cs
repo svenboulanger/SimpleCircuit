@@ -20,6 +20,9 @@ namespace SimpleCircuit.Components.Analog
             [Description("The label inside the ADC.")]
             public string Label { get; set; }
 
+            /// <inheritdoc />
+            public override string Type => "adc";
+
             public Instance(string name, Options options)
                 : base(name, options)
             {
