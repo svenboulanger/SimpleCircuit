@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleCircuit.Lib", "SimpleCircuit.Lib\SimpleCircuit.Lib.csproj", "{8165ED57-89B6-4B21-92BE-BFB698796B6B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleCircuit", "SimpleCircuit\SimpleCircuit.csproj", "{89ED0956-8FE2-4B54-8D75-FECBF96BC851}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{89ED0956-8FE2-4B54-8D75-FECBF96BC851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89ED0956-8FE2-4B54-8D75-FECBF96BC851}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89ED0956-8FE2-4B54-8D75-FECBF96BC851}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89ED0956-8FE2-4B54-8D75-FECBF96BC851}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
