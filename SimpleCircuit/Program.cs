@@ -49,22 +49,14 @@ namespace SimpleCircuit
             if (jobs == null || jobs.Length == 0)
                 return;
 
-            Cef.EnableWaitForBrowsersToClose();
-            var settings = new CefSettings()
-            {
-                CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache"),
-            };
-            CefSharpSettings.ShutdownOnExit = true;
-            Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
+            var textFormatter = new ChromiumTextFormatter();
 
             // Start the jobs
-            var tasks = new Task[jobs.Length];
             for (int i = 0; i < jobs.Length; i++)
             {
-                var task = jobs[i].Execute(diagnostics);
-                tasks[i] = task;
+                var task = jobs[i].Execute(textFormatter, diagnostics);
+                task.Wait();
             }
-            Task.WaitAll(tasks);
         }
     }
 }

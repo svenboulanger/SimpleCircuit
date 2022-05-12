@@ -4,25 +4,103 @@ using SimpleCircuit.Drawing;
 using CefSharp;
 using CefSharp.OffScreen;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SimpleCircuit
 {
     /// <summary>
     /// A text formatter based on a Chromium browser.
     /// </summary>
-    public class ChromiumTextFormatter : IElementFormatter
+    public class ChromiumTextFormatter : IElementFormatter, IDisposable
     {
+        static ChromiumTextFormatter()
+        {
+            Cef.EnableWaitForBrowsersToClose();
+            var settings = new CefSettings()
+            {
+                CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache"),
+            };
+            CefSharpSettings.ShutdownOnExit = true;
+            Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
+        }
+
+        private const string _browserHtml = @"
+<html>
+    <head>
+        <style id=""svg-style""></style>
+    </head>
+    <body>
+        <div id=""div_measure"">
+        </div>
+        <script>
+            function calculateBounds(element) {
+                var div_measure = document.getElementById('div_measure');
+
+                // We simply parse the XML and return the bounds
+                var parser = new DOMParser();
+                var e = parser.parseFromString(element, ""image/svg+xml"").documentElement;
+                div_measure.appendChild(e);
+                var b = e.getBBox();
+                div_measure.removeChild(e);
+                return {
+                    x: b.x,
+                    y: b.y,
+                    width: b.width,
+                    height: b.height
+                };
+            }
+
+            function updateStyle(style)
+            {
+                document.getElementById(""svg-style"").innerHTML = style;
+            }
+        </script>
+    </body>
+</html>";
         private readonly ChromiumWebBrowser _browser;
+        private readonly RequestContext _requestContext;
 
         /// <summary>
         /// Creates a new <see cref="ChromiumTextFormatter"/>.
         /// </summary>
         /// <param name="browser">The browser that will be used to format the text.</param>
-        public ChromiumTextFormatter(ChromiumWebBrowser browser)
+        public ChromiumTextFormatter()
         {
-            _browser = browser ?? throw new ArgumentNullException(nameof(browser));
+            // Start a browser that will be measuring all our text
+            var browserSettings = new BrowserSettings()
+            {
+                WindowlessFrameRate = 1,
+                Javascript = CefState.Enabled
+            };
+            var requestContextSettings = new RequestContextSettings()
+            {
+                CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache"),
+            };
+            _requestContext = new RequestContext(requestContextSettings);
+            _browser = new ChromiumWebBrowser("http://simplecircuit/", browserSettings, _requestContext, true);
+            _browser.LoadHtml(_browserHtml, "http://simplecircuit/");
+
+            var task = _browser.WaitForInitialLoadAsync();
+            task.Wait();
         }
 
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _browser.Dispose();
+            _requestContext.Dispose();
+        }
+
+        /// <summary>
+        /// Updates the style.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        public async Task UpdateStyle(string style)
+        {
+            await _browser.EvaluateScriptAsync("updateStyle", style);
+        }
+
+        /// <inheritdoc />
         public Bounds Format(SvgDrawing drawing, XmlElement element)
         {
             string text = null;

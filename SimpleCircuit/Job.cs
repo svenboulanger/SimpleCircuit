@@ -15,40 +15,6 @@ namespace SimpleCircuit
     /// </summary>
     public class Job
     {
-        private const string _browserHtml = @"
-<html>
-    <head>
-        <style id=""svg-style""></style>
-    </head>
-    <body>
-        <div id=""div_measure"">
-        </div>
-        <script>
-            function calculateBounds(element) {
-                var div_measure = document.getElementById('div_measure');
-
-                // We simply parse the XML and return the bounds
-                var parser = new DOMParser();
-                var e = parser.parseFromString(element, ""image/svg+xml"").documentElement;
-                div_measure.appendChild(e);
-                var b = e.getBBox();
-                div_measure.removeChild(e);
-                return {
-                    x: b.x,
-                    y: b.y,
-                    width: b.width,
-                    height: b.height
-                };
-            }
-
-            function updateStyle(style)
-            {
-                document.getElementById(""svg-style"").innerHTML = style;
-            }
-        </script>
-    </body>
-</html>";
-
         /// <summary>
         /// Gets or sets the filename containing the SimpleCircuit script.
         /// </summary>
@@ -67,7 +33,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Executes the job.
         /// </summary>
-        public async Task Execute(IDiagnosticHandler diagnostics)
+        public async Task Execute(ChromiumTextFormatter textFormatter, IDiagnosticHandler diagnostics)
         {
             // Load the input file
             if (string.IsNullOrWhiteSpace(Filename))
@@ -106,44 +72,23 @@ namespace SimpleCircuit
             if (string.IsNullOrWhiteSpace(outputFilename))
                 outputFilename = Path.GetFileNameWithoutExtension(Filename) + ".svg";
 
-            // Start a browser that will be measuring all our text
-            var browserSettings = new BrowserSettings()
+            // Now we can start parsing the input file
+            var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript);
+            var context = new ParsingContext() { Diagnostics = diagnostics };
+            Parser.Parser.Parse(lexer, context);
+
+            var ckt = context.Circuit;
+            if (ckt.Count > 0)
             {
-                WindowlessFrameRate = 1,
-                Javascript = CefState.Enabled
-            };
-            var requestContextSettings = new RequestContextSettings()
-            {
-                CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache"),
-            };
-            using (var requestContext = new RequestContext(requestContextSettings))
-            using (var browser = new ChromiumWebBrowser("http://simplecircuit/", browserSettings, requestContext, true))
-            {
-                browser.LoadHtml(_browserHtml, "http://simplecircuit/");
+                await textFormatter.UpdateStyle(cssScript);
+                var doc = ckt.Render(diagnostics, textFormatter);
 
-                // Wait for the browser to finish loading
-                await browser.WaitForInitialLoadAsync();
-
-                // Make sure the script knows what style we are using here!
-                await browser.EvaluateScriptAsync("updateStyle", cssScript);
-
-                // Now we can start parsing the input file
-                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript);
-                var context = new ParsingContext() { Diagnostics = diagnostics };
-                Parser.Parser.Parse(lexer, context);
-
-                var ckt = context.Circuit;
-                if (ckt.Count > 0)
+                // Finally write the resulting document to svg
+                using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
                 {
-                    var doc = ckt.Render(diagnostics, new ChromiumTextFormatter(browser));
-
-                    // Finally write the resulting document to svg
-                    using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
-                    {
-                        doc.WriteTo(writer);
-                    }
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}', output at '{outputFilename}'."));
+                    doc.WriteTo(writer);
                 }
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}', output at '{outputFilename}'."));
             }
         }
     }
