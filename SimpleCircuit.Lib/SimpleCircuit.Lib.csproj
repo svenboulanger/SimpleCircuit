@@ -30,6 +30,7 @@
     <Compile Include="Components\Analog\AnalogToDigital.cs" />
     <Compile Include="Components\Analog\BipolarTransistor.cs" />
     <Compile Include="Components\Analog\Capacitor.cs" />
+    <Compile Include="Components\Analog\Crystal.cs" />
     <Compile Include="Components\Analog\Diode.cs" />
     <Compile Include="Components\Analog\Impedance.cs" />
     <Compile Include="Components\Analog\Inductor.cs" />
