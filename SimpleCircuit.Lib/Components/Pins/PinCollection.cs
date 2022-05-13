@@ -45,8 +45,13 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public IEnumerable<string> NamesOf(IPin pin) => _pinsByName.Where(p => ReferenceEquals(p.Value, pin)).Select(p => p.Key);
 
+        /// <inheritdoc />
         public IEnumerator<IPin> GetEnumerator() => _pinsByIndex.GetEnumerator();
 
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc />
+        public bool TryGetValue(string name, out IPin pin) => _pinsByName.TryGetValue(name, out pin);
     }
 }

@@ -108,6 +108,23 @@ namespace SimpleCircuit
         /// <inheritdoc />
         public void DrawXml(XmlNode description, IDiagnosticHandler diagnostics)
         {
+            // Apply some scale if necessary
+            var scale = description.Attributes?["scale"];
+            var offset = description.Attributes?["offset"];
+            var rotate = description.Attributes?["rotate"];
+            if (scale != null || offset != null || rotate != null)
+            {
+                double s = scale != null ? double.Parse(scale.Value, NumberStyles.Float, CultureInfo.InvariantCulture) : 1.0;
+                Vector2 o = new();
+                if (offset != null)
+                {
+                    var lexer = new SvgPathDataLexer(offset.Value);
+                    lexer.ParseVector(diagnostics, out o);
+                }
+                double a = rotate != null ? -double.Parse(rotate.Value, NumberStyles.Float, CultureInfo.InvariantCulture) * Math.PI / 180.0 : 0.0;
+                BeginTransform(new Transform(o, Matrix2.Rotate(a) * s));
+            }
+
             foreach (XmlNode node in description.ChildNodes)
             {
                 // Depending on the node type, let's draw something!
@@ -125,6 +142,9 @@ namespace SimpleCircuit
                         break;
                 }
             }
+
+            if (scale != null || offset != null || rotate != null)
+                EndTransform();
         }
         private void DrawXmlLine(XmlNode node, IDiagnosticHandler diagnostics)
         {
@@ -598,11 +618,15 @@ namespace SimpleCircuit
                 return null;
             if (parent.Attributes == null)
                 return null;
-
             var options = new PathOptions();
 
+            // Read some styling
+            var attribute = parent.Attributes?["style"];
+            if (attribute != null)
+                options.Style = attribute.Value;
+
             // Read the class
-            var attribute = parent.Attributes?["class"];
+            attribute = parent.Attributes?["class"];
             if (attribute != null)
             {
                 foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))

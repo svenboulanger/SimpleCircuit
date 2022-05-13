@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.General
                     if (pin.Direction.Equals(new Vector2()))
                         Pins.Add(new FixedPin(pin.Name, pin.Description, this, pin.Location));
                     else
-                        Pins.Add(new FixedOrientedPin(pin.Name, pin.Description, this, pin.Location, pin.Direction));
+                        Pins.Add(new FixedOrientedPin(pin.Name, pin.Description, this, pin.Location, pin.Direction), pin.Name);
                 }
                 if (drawing != null)
                     DrawingVariants = Variant.Do((SvgDrawing svg) => svg.DrawXml(drawing, null));

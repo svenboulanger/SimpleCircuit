@@ -94,7 +94,12 @@ namespace SimpleCircuit.Parser
                     pinName = ParsePin(lexer, context);
                     if (pinName == null)
                         return false;
-                    pinToWire = component.Pins[pinName];
+                    if (!component.Pins.TryGetValue(pinName, out pinToWire))
+                    {
+                        context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                            $"Cannot find pin '{pinName}' for the component {component.Name}"));
+                        return false;
+                    }
                 }
 
                 // Parse the wire itself
@@ -119,8 +124,25 @@ namespace SimpleCircuit.Parser
                         if (nextComponent == null)
                             return false;
 
-                        // Extract the previous pin
-                        IPin wireToPin = pinName != null ? nextComponent.Pins[pinName] : nextComponent.Pins[0];
+                        // Extract the pin for the next component
+                        IPin wireToPin;
+                        if (pinName != null)
+                        {
+                            if (!nextComponent.Pins.TryGetValue(pinName, out wireToPin))
+                            {
+                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                                    $"Cannot find pin '{pinName}' for the component {nextComponent.Name}"));
+                                return false;
+                            }
+                        }
+                        else if (nextComponent.Pins.Count == 0)
+                        {
+                            context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                                $"The component {nextComponent.Name} does not have pins"));
+                            return false;
+                        }
+                        else
+                            wireToPin = nextComponent.Pins[0];
 
                         // String the pins together using wire segments
                         StringWiresTogether(pinToWire, wireInfo, wireToPin, context);

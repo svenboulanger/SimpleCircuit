@@ -32,5 +32,13 @@ namespace SimpleCircuit.Components.Pins
         /// <param name="pin">The pin.</param>
         /// <returns>The names.</returns>
         public IEnumerable<string> NamesOf(IPin pin);
+
+        /// <summary>
+        /// Tries to get a pin.
+        /// </summary>
+        /// <param name="name">The name of the pin.</param>
+        /// <param name="pin">The pin.</param>
+        /// <returns>Returns <c>true</c> if the pin was found; otherwise, <c>false</c>.</returns>
+        public bool TryGetValue(string name, out IPin pin);
     }
 }

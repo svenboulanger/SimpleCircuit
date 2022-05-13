@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components
                     list.Add(pin);
                     _pinsByName.Add(name, pin);
                     _pinsByIndex.Add(pin);
-                    return list[list.Count - 1];
+                    return list[^1];
                 }
             }
 
@@ -84,6 +84,7 @@ namespace SimpleCircuit.Components
                     yield return p.Name;
             }
 
+            /// <inheritdoc />
             public void Render(SvgDrawing drawing)
             {
                 foreach (var pin in _pinsNorth)
@@ -121,6 +122,7 @@ namespace SimpleCircuit.Components
                 return name.Replace("\\(", "(").Replace("\\)", ")");
             }
 
+            /// <inheritdoc />
             public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
             {
                 var ckt = context.Circuit;
@@ -147,6 +149,7 @@ namespace SimpleCircuit.Components
                 Apply($"{_parent.Name}.w", map[_parent.Y], _pinsWest, map[Bottom], p => p.Y, MinimumVerticalSpacing);
             }
 
+            /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
                 // We will group the X-coordinates and Y-coordinates of each side
@@ -160,9 +163,14 @@ namespace SimpleCircuit.Components
                     context.Shorts.Group(_parent.X, pin.X);
             }
 
+            /// <inheritdoc />
             public IEnumerator<IPin> GetEnumerator() => _pinsByIndex.GetEnumerator();
 
+            /// <inheritdoc />
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            /// <inheritdoc />
+            public bool TryGetValue(string name, out IPin pin) => _pinsByName.TryGetValue(name, out pin);
         }
     }
 }

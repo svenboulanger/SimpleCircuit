@@ -169,11 +169,24 @@ namespace SimpleCircuit.Drawing
         {
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
-            Vector2 vnx = _relativeModifier?.Invoke(new(1, 0)) ?? new(1, 0);
-            vnx = _transform.ApplyDirection(vnx);
+            Vector2 vnx;
+            if (x.IsZero())
+            {
+                vnx = _relativeModifier?.Invoke(new(1, 0)) ?? new(1, 0);
+                vnx = _transform.ApplyDirection(vnx);
+                vnx /= vnx.Length;
+            }
+            else
+            {
+                Vector2 vx = _absoluteModifier?.Invoke(new(x, 0)) ?? new(x, 0);
+                vx = _transform.Apply(vx);
+                vnx = vx - vo;
+                x = vnx.Length;
+                vnx /= x;
+            }
 
             double k = x - (_current - vo).Dot(vnx);
-            _current = _current + k * vnx;
+            _current += k * vnx;
             _bounds.Expand(_current);
             Append($"L{Convert(_current)}");
             return this;
@@ -196,20 +209,33 @@ namespace SimpleCircuit.Drawing
             Append($"l{Convert(delta)}");
             return this;
         }
+
         /// <summary>
         /// Draws a vertical line using absolute coordinates.
         /// </summary>
-        /// <param name="x">The x-coordinate.</param>
+        /// <param name="y">The x-coordinate.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder VerticalTo(double x)
+        public PathBuilder VerticalTo(double y)
         {
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
-            Vector2 vny = _relativeModifier?.Invoke(new(0, 1)) ?? new(0, 1);
-            vny = _transform.ApplyDirection(vny);
-
-            double k = x - (_current - vo).Dot(vny);
-            _current = _current + k * vny;
+            Vector2 vny;
+            if (y.IsZero())
+            {
+                vny = _relativeModifier?.Invoke(new(0, 1)) ?? new(0, 1);
+                vny = _transform.ApplyDirection(vny);
+                vny /= vny.Length;
+            }
+            else
+            {
+                Vector2 vy = _absoluteModifier?.Invoke(new(0, y)) ?? new(0, y);
+                vy = _transform.Apply(vy);
+                vny = vy - vo;
+                y = vny.Length;
+                vny /= y;
+            }
+            double k = y - (_current - vo).Dot(vny);
+            _current += k * vny;
             _bounds.Expand(_current);
             Append($"L{Convert(_current)}");
             return this;

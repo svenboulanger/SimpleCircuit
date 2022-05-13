@@ -10,17 +10,23 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed
-// by the pins.
-.subckt ABC R1[p] R2[n]
-R1 <r> R2
-.ends
+            var script = @"
+.symbol TG
+    <pin x=""33"" y=""-1.8"" nx=""0"" ny=""-1"" name=""g"" />
+    <pin x=""38.5"" y=""0"" nx=""0"" ny=""-1"" name=""fd"" />
+    <drawing scale=""2"">
+        <path d = ""M 0,0 H 21.41547 V 8.4099703 H 0 Z"" style = ""fill:#ffe9a6; stroke:none;"" />
+        <path d = ""M 0,0 V 3.6855632 H 13.211597 c 1.282568,0 2.315104,-1.0325367 2.315104,-2.3151042 V 0 Z"" style = ""fill:#b49ddf;stroke:none;"" />
+        <path d = ""M 0,0 H 15.077854 V 0.51971721 H 0 Z"" style = ""fill:#ffc107;stroke:none;"" />
+        <path d = ""M 0,7.8902531 H 21.415472 V 8.4099703 H 0 Z"" style = ""fill:#ffc107;stroke:none;"" />
+        <path d = ""m 18.00751,0 v 0.73483891 c 0,0.48121869 0.387464,0.86868079 0.86868,0.86868079 h 0.918808 c 0.481219,0 0.86868,-0.3874621 0.86868,-0.86868079 V 0 Z"" style = ""fill:#b49ddf;stroke:none;"" />
+        <path d = ""m 15.2757,-0.90203458 h 2.832035 V 0 H 15.2757 Z"" style = ""fill:#dc3545;stroke:none;"" />
+    </drawing>
+.endsymbol
 
-// Now we can instantiate this subcircuit definition multiple times.
-ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
-
-// They can even be angled because our pins also have a direction!
-Xs <a -45> ABC <a -45> Xe";
+TG1[fd] <u> T(""fd"")
+TG1[g] <u> T(""tg"")
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
