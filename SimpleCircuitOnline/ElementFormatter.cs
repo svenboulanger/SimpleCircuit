@@ -8,11 +8,18 @@ using System.Xml;
 
 namespace SimpleCircuitOnline
 {
-    public class TextFormatter : IElementFormatter
+    /// <summary>
+    /// An element formatter that uses javascript to talk to the methods in the index page.
+    /// </summary>
+    public class ElementFormatter : IElementFormatter
     {
         private readonly IJSRuntime _runtime;
 
-        public TextFormatter(IJSRuntime runtime)
+        /// <summary>
+        /// Creates a new <see cref="ElementFormatter"/>.
+        /// </summary>
+        /// <param name="runtime">The JavaScript runtime.</param>
+        public ElementFormatter(IJSRuntime runtime)
         {
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
         }
@@ -52,7 +59,7 @@ namespace SimpleCircuitOnline
             return new Bounds(x, y, x + width, y + height);
         }
 
-        private string Enclose(XmlNode enclose, string xml)
+        private static string Enclose(XmlNode enclose, string xml)
         {
             using var sw = new StringWriter();
             sw.Write('<');

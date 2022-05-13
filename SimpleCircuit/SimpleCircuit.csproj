@@ -63,7 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChromiumTextFormatter.cs" />
+    <Compile Include="ChromiumElementFormatter.cs" />
     <Compile Include="ConsoleDiagnosticLogger.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="JobDiagnosticLogger.cs" />

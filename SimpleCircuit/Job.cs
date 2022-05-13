@@ -1,12 +1,9 @@
-﻿using CefSharp;
-using CefSharp.OffScreen;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -54,7 +51,7 @@ namespace SimpleCircuit
             }
             if (!File.Exists(Filename))
             {
-                _logger?.Post(new DiagnosticMessage(SeverityLevel.Error, "SC001", $"Could not find file '{Filename}'"));
+                _logger?.Post(new DiagnosticMessage(SeverityLevel.Error, "SC001", $"Could not find file"));
                 return;
             }
             string simpleCircuitScript = File.ReadAllText(Filename);
@@ -109,7 +106,7 @@ namespace SimpleCircuit
             if (diagnostics != null)
             {
                 foreach (var message in _logger.Messages)
-                    diagnostics.Post(new DiagnosticMessage(message.Severity, message.Code, $"{message.Message} in {Filename}"));
+                    diagnostics.Post(new DiagnosticMessage(message.Severity, message.Code, $"{message.Message} for {Filename}"));
             }
         }
 
@@ -118,7 +115,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="textFormatter">The test formatter.</param>
         /// <param name="diagnostics">The diagnostic message handler.</param>
-        public async Task Render(ChromiumTextFormatter textFormatter, IDiagnosticHandler diagnostics)
+        public async Task Render(ChromiumElementFormatter textFormatter, IDiagnosticHandler diagnostics)
         {
             // Determine the output file
             string outputFilename = OutputFilename;

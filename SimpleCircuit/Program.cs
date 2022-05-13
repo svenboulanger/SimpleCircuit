@@ -1,7 +1,9 @@
 ﻿using SimpleCircuit.Diagnostics;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SimpleCircuit
 {
@@ -45,8 +47,8 @@ namespace SimpleCircuit
                 return;
 
             // Let's try to do as much as possible in parallel here
-            ChromiumTextFormatter formatter = null;
-            var formatterTask = Task.Run(() => formatter = new ChromiumTextFormatter());
+            ChromiumElementFormatter formatter = null;
+            var formatterTask = Task.Run(() => formatter = new ChromiumElementFormatter());
             try
             {
                 var tasks = new Task[jobs.Count];
@@ -78,14 +80,21 @@ namespace SimpleCircuit
         /// <param name="diagnostics">The diagnostics message handler.</param>
         public static void InteractiveMode(IDiagnosticHandler diagnostics)
         {
+            var regex = new Regex(@"""(?<value>[^""]+)""|(?<value>[^\s]+)");
+
             bool keepGoing = true;
             while (keepGoing)
             {
                 Console.Write("> ");
                 string arguments = Console.ReadLine();
-                string[] args = arguments.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (args.Length == 1 && StringComparer.OrdinalIgnoreCase.Equals(args[0], "quit"))
+                string[] args = regex.Matches(arguments).Cast<Match>().Select(m => m.Groups["value"].Value).ToArray();
+                if (args.Length == 0 ||
+                    args.Length == 1 && (
+                        StringComparer.OrdinalIgnoreCase.Equals(args[0], "quit") ||
+                        StringComparer.OrdinalIgnoreCase.Equals(args[0], "exit")))
+                {
                     keepGoing = false;
+                }
                 else
                 {
                     var jobs = ReadJobs(args, out _);

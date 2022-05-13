@@ -21,7 +21,7 @@ namespace SimpleCircuitOnline.Pages
         private Task _task = null;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
-        private TextFormatter _jsTextFormatter;
+        private ElementFormatter _jsTextFormatter;
         private bool _updateDynamic = false;
         private SvgOutput _mainOutput;
 
@@ -80,7 +80,7 @@ namespace SimpleCircuitOnline.Pages
             await base.OnInitializedAsync();
 
             // This text formatter will invoke a JavaScript method that uses getBBox() to measure a text size
-            _jsTextFormatter = new TextFormatter(_js);
+            _jsTextFormatter = new ElementFormatter(_js);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
