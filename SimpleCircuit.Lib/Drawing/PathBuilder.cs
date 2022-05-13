@@ -61,6 +61,26 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Most commands require starting from the origin (0,0), but since we apply
+        /// transformations, we cannot assume that the origin should start at (0,0)!
+        /// </summary>
+        private void ValidateOrigin()
+        {
+            if (_sb.Length == 0)
+            {
+                _current = _absoluteModifier?.Invoke(new()) ?? new();
+                _current = _transform.Apply(_current);
+
+                // If this is not the origin, then we need to move there first
+                if (_current.X.IsZero() && _current.Y.IsZero())
+                    return; // We're safe
+
+                // We're not safe, we need to move to our origin first!
+                Append($"M{Convert(_current)}");
+            }
+        }
+
+        /// <summary>
         /// Moves the current point using absolute coordinates.
         /// </summary>
         /// <param name="location">The location.</param>
@@ -91,6 +111,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Move(Vector2 delta)
         {
+            ValidateOrigin();
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
             _current += delta;
@@ -117,6 +138,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder LineTo(Vector2 location)
         {
+            ValidateOrigin();
             location = _absoluteModifier?.Invoke(location) ?? location;
             _lastHandle = _current = _transform.Apply(location);
 
@@ -141,6 +163,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Line(Vector2 delta)
         {
+            ValidateOrigin();
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
             _current += delta;
@@ -167,6 +190,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder HorizontalTo(double x)
         {
+            ValidateOrigin();
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
             Vector2 vnx;
@@ -199,6 +223,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Horizontal(double dx)
         {
+            ValidateOrigin();
             Vector2 delta = new(dx, 0);
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
@@ -217,6 +242,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder VerticalTo(double y)
         {
+            ValidateOrigin();
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
             Vector2 vny;
@@ -248,6 +274,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Vertical(double dy)
         {
+            ValidateOrigin();
             Vector2 delta = new(0, dy);
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
@@ -268,6 +295,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder CurveTo(Vector2 h1, Vector2 h2, Vector2 end)
         {
+            ValidateOrigin();
             h1 = _absoluteModifier?.Invoke(h1) ?? h1;
             h2 = _absoluteModifier?.Invoke(h2) ?? h2;
             end = _absoluteModifier?.Invoke(end) ?? end;
@@ -289,6 +317,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Curve(Vector2 dh1, Vector2 dh2, Vector2 dend)
         {
+            ValidateOrigin();
             dh1 = _relativeModifier?.Invoke(dh1) ?? dh1;
             dh2 = _relativeModifier?.Invoke(dh2) ?? dh2;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
@@ -311,6 +340,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothTo(Vector2 h, Vector2 end)
         {
+            ValidateOrigin();
             h = _absoluteModifier?.Invoke(h) ?? h;
             end = _absoluteModifier?.Invoke(end) ?? end;
             var h1 = 2 * _current - _lastHandle;
@@ -330,6 +360,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Smooth(Vector2 dh, Vector2 dend)
         {
+            ValidateOrigin();
             dh = _relativeModifier?.Invoke(dh) ?? dh;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
             var h1 = 2 * _current - _lastHandle;
@@ -351,6 +382,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurveTo(Vector2 h, Vector2 end)
         {
+            ValidateOrigin();
             h = _absoluteModifier?.Invoke(h) ?? h;
             end = _absoluteModifier?.Invoke(end) ?? end;
             _lastHandle = _transform.Apply(h);
@@ -369,6 +401,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurve(Vector2 dh, Vector2 dend)
         {
+            ValidateOrigin();
             dh = _relativeModifier?.Invoke(dh) ?? dh;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
             dh = _transform.ApplyDirection(dh);
@@ -388,6 +421,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuadTo(Vector2 end)
         {
+            ValidateOrigin();
             end = _absoluteModifier?.Invoke(end) ?? end;
             _lastHandle = 2 * _current - _lastHandle;
             _current = _transform.Apply(end);
@@ -404,6 +438,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuad(Vector2 dend)
         {
+            ValidateOrigin();
             dend = _relativeModifier?.Invoke(dend) ?? dend;
             _lastHandle = 2 * _current - _lastHandle;
             dend = _transform.ApplyDirection(dend);

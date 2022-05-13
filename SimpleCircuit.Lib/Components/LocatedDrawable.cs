@@ -40,12 +40,8 @@ namespace SimpleCircuit.Components
             // Let's first deal with our own problems
             if (state.TryGetValue(context.Nodes.Shorts[X], out var solX))
                 x = solX.Value;
-            else
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find X-coordinate of {Name} in solver."));
             if (state.TryGetValue(context.Nodes.Shorts[Y], out var solY))
                 y = solY.Value;
-            else
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW002", $"Could not find Y-coordinate of {Name} in solver."));
             Location = new Vector2(x, y);
 
             // Give the pins a chance to update as well

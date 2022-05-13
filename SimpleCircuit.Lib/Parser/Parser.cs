@@ -82,12 +82,13 @@ namespace SimpleCircuit.Parser
             var component = ParseComponent(lexer, context);
             if (component == null)
                 return false;
-            IPin pinToWire = component.Pins[Math.Max(0, component.Pins.Count - 1)];
             string pinName;
 
             // Parse wires
             while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
             {
+                IPin pinToWire;
+
                 // Read a pin
                 if (lexer.Check(TokenType.OpenIndex))
                 {
@@ -100,6 +101,17 @@ namespace SimpleCircuit.Parser
                             $"Cannot find pin '{pinName}' for the component {component.Name}"));
                         return false;
                     }
+                }
+                else if (component.Pins.Count == 0)
+                {
+                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
+                        $"The component {component.Name} does not have pins"));
+                    return false;
+                }
+                else
+                {
+                    // Select the last pin
+                    pinToWire = component.Pins[^1];
                 }
 
                 // Parse the wire itself
