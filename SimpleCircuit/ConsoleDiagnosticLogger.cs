@@ -36,6 +36,7 @@ namespace SimpleCircuit
                 case SeverityLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Error.WriteLine($"Error: {message.Code}: {message.Message}");
+                    Console.ResetColor();
                     break;
             }
         }

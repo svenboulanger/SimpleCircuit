@@ -66,6 +66,7 @@
     <Compile Include="ChromiumTextFormatter.cs" />
     <Compile Include="ConsoleDiagnosticLogger.cs" />
     <Compile Include="Job.cs" />
+    <Compile Include="JobDiagnosticLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

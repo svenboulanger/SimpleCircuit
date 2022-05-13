@@ -19,8 +19,12 @@ namespace SimpleCircuit
             var settings = new CefSettings()
             {
                 CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache"),
+                IgnoreCertificateErrors = true,
+                CookieableSchemesExcludeDefaults = true,
             };
             CefSharpSettings.ShutdownOnExit = true;
+            settings.CefCommandLineArgs.Add("no-proxy-server", "1");
+            settings.CefCommandLineArgs.Add("disable-extensions", "1");
             Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
         }
 
@@ -70,7 +74,7 @@ namespace SimpleCircuit
             var browserSettings = new BrowserSettings()
             {
                 WindowlessFrameRate = 1,
-                Javascript = CefState.Enabled
+                Javascript = CefState.Enabled,
             };
             var requestContextSettings = new RequestContextSettings()
             {
