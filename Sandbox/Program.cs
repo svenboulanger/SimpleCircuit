@@ -10,38 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"
-.symbol PIX
-    <drawing offset=""1 1"">
-        <path
-       d=""M 0,0 H 21.41547 V 8.4099703 H 0 Z""
-       style = ""fill:#ffe9a6;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect19"" />
-    <path
-       d = ""m 0,0 v 3.6855632 h 13.211597 c 1.282568,0 2.315104,-1.0325367 2.315104,-2.3151042 V 0 Z""
-       style = ""fill:#b49ddf;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect10"" />
-    <path
-       d = ""M 0,0 H 15.077854 V 0.51971721 H 0 Z""
-       style = ""fill:#ffc107;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect17"" />
-    <path
-       d = ""M 0,7.8902531 H 21.415472 V 8.4099703 H 0 Z""
-       style = ""fill:#ffc107;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect21"" />
-    <path
-       d = ""m 18.00751,0 v 0.73483891 c 0,0.48121869 0.387464,0.86868079 0.86868,0.86868079 h 0.918808 c 0.481219,0 0.86868,-0.3874621 0.86868,-0.86868079 V 0 Z""
-       style = ""fill:#b49ddf;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect25"" />
-    <path
-       d = ""m 15.2757,-0.90203458 h 2.832035 V 0 H 15.2757 Z""
-       style = ""fill:#dc3545;stroke:none;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000""
-       id = ""rect32"" />
-    </drawing >
-.endsymbol
-
-PIX
-";
+            var script = @"";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext

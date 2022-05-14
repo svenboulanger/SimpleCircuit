@@ -105,8 +105,9 @@ namespace SimpleCircuit.Parser
         protected Lexer(string netlist, int line = 1)
         {
             if (string.IsNullOrEmpty(netlist))
-                throw new ArgumentNullException(nameof(netlist));
-            _contents = netlist;
+                _contents = "";
+            else
+                _contents = netlist;
             _line = line;
             Next();
         }
