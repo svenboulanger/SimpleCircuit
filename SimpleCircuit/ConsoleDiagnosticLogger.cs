@@ -24,18 +24,18 @@ namespace SimpleCircuit
             switch (message.Severity)
             {
                 case SeverityLevel.Info:
-                    Console.WriteLine($"{message.Code}: {message.Message}");
+                    Console.WriteLine(message);
                     break;
 
                 case SeverityLevel.Warning:
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Warning: {message.Code}: {message.Message}");
+                    Console.WriteLine(message);
                     Console.ResetColor();
                     break;
 
                 case SeverityLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine($"Error: {message.Code}: {message.Message}");
+                    Console.Error.WriteLine(message);
                     Console.ResetColor();
                     break;
             }

@@ -117,9 +117,11 @@ namespace SimpleCircuit.Components
             private string Transform(string value)
             {
                 string name = value.Substring(1);
+
+                // If the name is between brackets, don't show the pin name
                 if (name[0] == '(' && name[name.Length - 1] == ')')
                     return null;
-                return name.Replace("\\(", "(").Replace("\\)", ")");
+                return name;
             }
 
             /// <inheritdoc />
@@ -170,7 +172,11 @@ namespace SimpleCircuit.Components
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             /// <inheritdoc />
-            public bool TryGetValue(string name, out IPin pin) => _pinsByName.TryGetValue(name, out pin);
+            public bool TryGetValue(string name, out IPin pin)
+            {
+                pin = this[name];
+                return true;
+            }
         }
     }
 }

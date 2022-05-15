@@ -7,24 +7,14 @@ namespace Sandbox
     {
         public void Post(IDiagnosticMessage message)
         {
-            switch (message.Severity)
+            Console.ForegroundColor = message.Severity switch
             {
-                case SeverityLevel.Info:
-                    Console.WriteLine(message.Message);
-                    break;
-
-                case SeverityLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Warning: {message.Code}: {message.Message}");
-                    Console.ResetColor();
-                    break;
-
-                case SeverityLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Error: {message.Code}: {message.Message}");
-                    Console.ResetColor();
-                    break;
-            }
+                SeverityLevel.Warning => ConsoleColor.Yellow,
+                SeverityLevel.Error => ConsoleColor.Red,
+                _ => ConsoleColor.White
+            };
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
     }
 }

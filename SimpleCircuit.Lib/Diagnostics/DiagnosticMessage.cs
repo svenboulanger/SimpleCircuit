@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Parser;
-
-namespace SimpleCircuit.Diagnostics
+﻿namespace SimpleCircuit.Diagnostics
 {
     /// <summary>
     /// Default implementation for diagnostic message.
@@ -27,20 +25,6 @@ namespace SimpleCircuit.Diagnostics
             Severity = level;
             Code = code;
             Message = message;
-        }
-
-        /// <summary>
-        /// Creates a new diagnostics message.
-        /// </summary>
-        /// <param name="level">The severity.</param>
-        /// <param name="code">The code.</param>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="message">The message.</param>
-        public DiagnosticMessage(SeverityLevel level, string code, ILexer lexer, string message)
-        {
-            Severity = level;
-            Code = code;
-            Message = $"{message} at line {lexer.Line}, column {lexer.Column}";
         }
 
         /// <summary>

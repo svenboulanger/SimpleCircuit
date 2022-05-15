@@ -8,6 +8,11 @@ namespace SimpleCircuit.Parser
     public interface ILexer
     {
         /// <summary>
+        /// Gets the source of the lexer.
+        /// </summary>
+        public string Source { get; }
+
+        /// <summary>
         /// Gets the current line.
         /// </summary>
         public ReadOnlyMemory<char> CurrentLine { get; }
@@ -20,7 +25,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the current token's content.
         /// </summary>
-        public ReadOnlyMemory<char> Token { get; }
+        public ReadOnlyMemory<char> Content { get; }
 
         /// <summary>
         /// Gets the current token's trivia.
@@ -30,7 +35,17 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the trivia before this token's content.
         /// </summary>
-        public ReadOnlyMemory<char> TokenWithTrivia { get; }
+        public ReadOnlyMemory<char> ContentWithTrivia { get; }
+
+        /// <summary>
+        /// Gets the current token.
+        /// </summary>
+        public Token Token { get; }
+
+        /// <summary>
+        /// Gets a token representing the start of the current token.
+        /// </summary>
+        public Token StartToken { get; }
 
         /// <summary>
         /// Gets the current token's line number.

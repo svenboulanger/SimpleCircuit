@@ -10,16 +10,16 @@
         /// </summary>
         /// <param name="netlist">The netlist.</param>
         /// <returns>The lexer.</returns>
-        public static SimpleCircuitLexer FromString(string netlist)
-            => new(netlist);
+        public static SimpleCircuitLexer FromString(string netlist, string source = null)
+            => new(netlist, source);
 
         /// <summary>
         /// Creates a new <see cref="SimpleCircuitLexer"/>.
         /// </summary>
-        /// <param name="source">The source.</param>
+        /// <param name="code">The source.</param>
         /// <param name="line">The starting line number.</param>
-        private SimpleCircuitLexer(string source, int line = 1)
-            : base(source, line)
+        private SimpleCircuitLexer(string code, string source, int line = 1)
+            : base(code, source, line)
         {
         }
 

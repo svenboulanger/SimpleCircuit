@@ -13,7 +13,7 @@ namespace SimpleCircuit
         /// <param name="lexer">The lexer.</param>
         /// <param name="expected">The expected 'thing'.</param>
         public UnexpectedTokenException(ILexer lexer, string expected)
-            : base(lexer, string.Format("Encountered '{0}' while {1} was expected", lexer?.Token, expected))
+            : base(lexer, string.Format("Encountered '{0}' while {1} was expected", lexer?.Content, expected))
         {
         }
 

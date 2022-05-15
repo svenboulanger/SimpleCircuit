@@ -12,6 +12,9 @@ namespace SimpleCircuit.Parser
         private readonly string _contents;
         private int _lastLineIndex = 0, _line, _trivia = 0;
 
+        /// <inheritdoc />
+        public string Source { get; }
+
         /// <inheritdoc/>
         public ReadOnlyMemory<char> CurrentLine => _contents.AsMemory(_lastLineIndex, Index - _lastLineIndex);
 
@@ -19,13 +22,35 @@ namespace SimpleCircuit.Parser
         public ReadOnlyMemory<char> LastLine { get; private set; }
 
         /// <inheritdoc/>
-        public ReadOnlyMemory<char> Token => _contents.AsMemory(Index - Length, Length);
+        public ReadOnlyMemory<char> Content => _contents.AsMemory(Index - Length, Length);
 
         /// <inheritdoc/>
         public ReadOnlyMemory<char> Trivia => _contents.AsMemory(Index - Length - _trivia, _trivia);
 
         /// <inheritdoc/>
-        public ReadOnlyMemory<char> TokenWithTrivia => _contents.AsMemory(Index - Length - _trivia, Length + _trivia);
+        public ReadOnlyMemory<char> ContentWithTrivia => _contents.AsMemory(Index - Length - _trivia, Length + _trivia);
+
+        /// <inheritdoc />
+        public Token Token
+        {
+            get
+            {
+                return new Token(Source, new TextRange(
+                    new TextLocation(Line, Column - Length),
+                    new TextLocation(Line, Column)),
+                    Content);
+            }
+        }
+
+        /// <inheritdoc />
+        public Token StartToken
+        {
+            get
+            {
+                var loc = new TextLocation(Line, Column - Length);
+                return new Token(Source, new TextRange(loc, loc), Content.Slice(0, 1));
+            }
+        }
 
         /// <summary>
         /// Gets the current token type.
@@ -85,9 +110,11 @@ namespace SimpleCircuit.Parser
         /// Creates a new <see cref="Lexer{T}"/>.
         /// </summary>
         /// <param name="reader">The text reader.</param>
+        /// <param name="source">The source.</param>
         /// <param name="line">The initial line number.</param>
-        protected Lexer(TextReader reader, int line = 1)
+        protected Lexer(TextReader reader, string source, int line = 1)
         {
+            Source = source;
             using (reader)
             {
                 _contents = reader.ReadToEnd();
@@ -101,9 +128,11 @@ namespace SimpleCircuit.Parser
         /// Creates a new <see cref="Lexer{T}"/>.
         /// </summary>
         /// <param name="netlist">The source.</param>
+        /// <param name="source">The source.</param>
         /// <param name="line">The initial line number.</param>
-        protected Lexer(string netlist, int line = 1)
+        protected Lexer(string netlist, string source = null, int line = 1)
         {
+            Source = source;
             if (string.IsNullOrEmpty(netlist))
                 _contents = "";
             else
@@ -146,7 +175,7 @@ namespace SimpleCircuit.Parser
         /// </returns>
         public virtual bool Check(T flags, string content, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            if (Check(flags) && Token.Span.Equals(content.AsSpan(), comparison))
+            if (Check(flags) && Content.Span.Equals(content.AsSpan(), comparison))
                 return true;
             return false;
         }
@@ -179,7 +208,7 @@ namespace SimpleCircuit.Parser
         /// </returns>
         public bool Branch(T flag, char first)
         {
-            if (Check(flag) && Token.Span[0] == first)
+            if (Check(flag) && Content.Span[0] == first)
             {
                 Next();
                 return true;
@@ -216,16 +245,16 @@ namespace SimpleCircuit.Parser
         /// <returns>
         ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
         /// </returns>
-        public bool Branch(T flag, out ReadOnlyMemory<char> content)
+        public bool Branch(T flag, out Token token)
         {
             if (Check(flag))
             {
-                content = Token;
+                token = Token;
                 Next();
                 return true;
             }
 
-            content = new();
+            token = default;
             return false;
         }
 
@@ -291,13 +320,13 @@ namespace SimpleCircuit.Parser
         /// <param name="content">The content of the matched token.</param>
         /// <param name="shouldNotContainTrivia">If <c>false</c>, the method also throws an exception if the token contains trivia.</param>
         /// <exception cref="UnexpectedTokenException">Thrown if the current token does not match the flag.</exception>
-        public Lexer<T> Expect(T flag, out ReadOnlyMemory<char> content, bool shouldNotContainTrivia = false)
+        public Lexer<T> Expect(T flag, out Token token, bool shouldNotContainTrivia = false)
         {
             if (shouldNotContainTrivia && HasTrivia)
                 throw new UnexpectedTokenException(this, flag.ToString());
             if (Check(flag))
             {
-                content = Token;
+                token = Token;
                 Next();
                 return this;
             }
@@ -310,10 +339,11 @@ namespace SimpleCircuit.Parser
         /// <param name="flags">The flags to check.</param>
         /// <param name="shouldNotIncludeTrivia">If <c>false</c>, trivia is read along with the tokens.</param>
         /// <returns>The contents.</returns>
-        public ReadOnlyMemory<char> ReadWhile(T flags, bool shouldNotIncludeTrivia = false)
+        public Token ReadWhile(T flags, bool shouldNotIncludeTrivia = false)
         {
             // We include the current token
             int start = Index - Length;
+            TextLocation startLocation = new(Line, Column - Length);
 
             // Consume the first one
             ReadOnlyMemory<char> result;
@@ -339,7 +369,9 @@ namespace SimpleCircuit.Parser
             }
 
             // The current token should not be considered
-            return result;
+            return new Token(Source,
+                new TextRange(startLocation, new TextLocation(Line, Column - Length)),
+                result);
         }
 
         /// <summary>

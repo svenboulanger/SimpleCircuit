@@ -51,7 +51,7 @@ namespace SimpleCircuit
             {
                 Line = lexer.Line;
                 Column = lexer.Column;
-                Content = lexer.Token;
+                Content = lexer.Content;
             }
         }
 

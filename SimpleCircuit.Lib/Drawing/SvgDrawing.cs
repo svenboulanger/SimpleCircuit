@@ -271,11 +271,11 @@ namespace SimpleCircuit
                         bool result = true;
                         if (!lexer.Branch(TokenType.Command, out var cmd))
                         {
-                            diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DW001",
-                                $"Could not recognize the SVG path command '{cmd}'"));
+                            diagnostics?.Post(new TokenDiagnosticMessage(cmd, SeverityLevel.Error, "DW001",
+                                $"Could not recognize the SVG path command '{cmd.Content}'"));
                             break;
                         }
-                        switch (cmd.Span[0])
+                        switch (cmd.Content.Span[0])
                         {
                             case 'M':
                                 if (!lexer.ParseVector(diagnostics, out p))
