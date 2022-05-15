@@ -9,7 +9,9 @@
     }
     @if (_svg != null)
     {
-        @((MarkupString)_svg)
+        <div class="@(_invalid ? " greyed" : "")">
+            @((MarkupString)_svg)
+        </div>
     }
     else
     {

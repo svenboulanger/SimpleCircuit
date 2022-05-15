@@ -10,29 +10,14 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Black boxes are boxes that can have custom pins.
-// When accessing pins on a black box, the order is important, as they will appear
-// from top to bottom or from left to right.
-// Additionally, the first letter of the pin indicates n(orth), s(outh), e(ast) or w(est).
-// These statements only serve to instantiate the pins in the correct order:
-BB1[nVDD]
-BB1[wInput1]
-BB1[wInput2]
-BB1[sVSS]
-BB1[eOutput1]
-BB1[eOutput2]
+            var script = @"// A component chain is a series of components seperated by <wires>.
+// The type of component is defined by the first letter(s), which have to be capital letters.
+// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.
+GND1 <u> V1(""1V"") <u r> R(""1k) <r d> C1(""1uF"") <d> GND2
 
-// The order of the pins is fixed now, so we can connect whatever we want.
-BB1[nVDD] <u> POW
-BB1[sVSS] <d> GND
-
-// The pins are ordered, but their spacing can still depend on other elements
-BB1[eOutput1] <r d> R <d l> [eOutput2]BB1
-
-// We can also align the pins and resize the black box using them
-(Y BB1[wInput2] <0> [eOutput2]BB1)
-(Y BB1[wInput1] <0> [eOutput1]BB1)
-(X BB1[wInput1] <r +60> [eOutput1]BB1)";
+// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.
+// These are between brackets, and first indicate along which axis you wish to align.
+(Y GND1 <0> GND2";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
@@ -43,24 +28,27 @@ BB1[eOutput1] <r d> R <d l> [eOutput2]BB1
             context.Circuit.Metadata.Add("script", script);
 
             // Draw the component
-            var doc = context.Circuit.Render(logger);
-            using var sw = new StringWriter();
-            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
-                doc.WriteTo(xml);
-
-            if (File.Exists("tmp.html"))
-                File.Delete("tmp.html");
-            using (var fw = new StreamWriter(File.OpenWrite("tmp.html")))
+            if (context.Circuit.Count > 0 && logger.ErrorCount == 0)
             {
-                fw.WriteLine("<html>");
-                fw.WriteLine("<head>");
-                fw.WriteLine("</head>");
-                fw.WriteLine("<body>");
-                fw.WriteLine(sw.ToString());
-                fw.WriteLine("</body>");
-                fw.WriteLine("</html>");
+                var doc = context.Circuit.Render(logger);
+                using var sw = new StringWriter();
+                using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
+                    doc.WriteTo(xml);
+
+                if (File.Exists("tmp.html"))
+                    File.Delete("tmp.html");
+                using (var fw = new StreamWriter(File.OpenWrite("tmp.html")))
+                {
+                    fw.WriteLine("<html>");
+                    fw.WriteLine("<head>");
+                    fw.WriteLine("</head>");
+                    fw.WriteLine("<body>");
+                    fw.WriteLine(sw.ToString());
+                    fw.WriteLine("</body>");
+                    fw.WriteLine("</html>");
+                }
+                Process.Start(@"""C:\Program Files (x86)\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
             }
-            Process.Start(@"""C:\Program Files (x86)\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
         }
     }
 }

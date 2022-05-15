@@ -1,10 +1,17 @@
-﻿namespace SimpleCircuit.Parser
+﻿using SimpleCircuit.Diagnostics;
+
+namespace SimpleCircuit.Parser
 {
     /// <summary>
     /// A lexer for SimpleCircuit code.
     /// </summary>
     public class SimpleCircuitLexer : Lexer<TokenType>
     {
+        /// <summary>
+        /// Gets or sets the diagnostic message handler.
+        /// </summary>
+        public IDiagnosticHandler Diagnostics { get; set; }
+
         /// <summary>
         /// Creates a new lexer for a string.
         /// </summary>
@@ -29,7 +36,6 @@
         /// <inheritdoc />
         protected override void ReadToken()
         {
-
             // White spaces are trivia
             char c = Char;
             while (c == ' ' || c == '\t')
@@ -238,7 +244,10 @@
                 c = Char;
             }
             if (c != end)
-                throw new ParserException(this, "Quote mismatch");
+            {
+                var loc = new TextLocation(Line, Column);
+                Diagnostics?.Post(new Token(Source, new(loc, loc), Content), ErrorCodes.QuoteMismatch);
+            }
             ContinueToken();
         }
     }

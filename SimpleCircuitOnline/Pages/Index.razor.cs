@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
@@ -18,7 +17,7 @@ namespace SimpleCircuitOnline.Pages
         private string _errors, _warnings;
         private XmlDocument _svg;
         private Timer _timer;
-        private Task _task = null;
+        private Task _task;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
         private ElementFormatter _jsTextFormatter;
@@ -183,7 +182,7 @@ namespace SimpleCircuitOnline.Pages
                 // Share it with the rest
                 ((IJSInProcessRuntime)_js).InvokeVoid("updateStyle", ModifyCSS(ckt.Style));
 
-                if (ckt.Count > 0)
+                if (ckt.Count > 0 && logger.ErrorCount == 0)
                 {
                     doc = ckt.Render(logger, _jsTextFormatter);
                 }
@@ -191,7 +190,7 @@ namespace SimpleCircuitOnline.Pages
             catch (Exception ex)
             {
                 logger.Post(new SimpleCircuit.Diagnostics.DiagnosticMessage(SimpleCircuit.Diagnostics.SeverityLevel.Error,
-                    "?", ex.Message));
+                    "Exception", ex.Message));
             }
 
             // Add our errors and warnings

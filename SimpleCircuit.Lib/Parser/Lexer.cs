@@ -48,7 +48,9 @@ namespace SimpleCircuit.Parser
             get
             {
                 var loc = new TextLocation(Line, Column - Length);
-                return new Token(Source, new TextRange(loc, loc), Content.Slice(0, 1));
+                if (Content.Length > 0)
+                    return new Token(Source, new TextRange(loc, loc), Content.Slice(0, 1));
+                return new Token(Source, new TextRange(loc, loc), Content);
             }
         }
 
@@ -256,81 +258,6 @@ namespace SimpleCircuit.Parser
 
             token = default;
             return false;
-        }
-
-        /// <summary>
-        /// Checks whether the current token matches the flag, and consumes the token if it matches.
-        /// If not, an exception is thrown.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="shouldNotContainTrivia">If <c>false</c>, the method also throws an exception if the token contains trivia.</param>
-        /// <returns>The lexer itself, which can be used for chaining together multiple methods.</returns>
-        /// <exception cref="UnexpectedTokenException">Thrown if the current token does not match the flag.</exception>
-        public Lexer<T> Expect(T flag, bool shouldNotContainTrivia = false)
-        {
-            if (shouldNotContainTrivia && HasTrivia)
-                throw new UnexpectedTokenException(this, flag.ToString());
-            if (Branch(flag))
-                return this;
-            throw new UnexpectedTokenException(this, flag.ToString());
-        }
-
-        /// <summary>
-        /// Checks whether the current token matches the flag and first character, and consumes the token if
-        /// it matches. If not, an exception is thrown.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="first">The first character.</param>
-        /// <param name="shouldNotContainTrivia">If <c>false</c>, the method also throws an exception if the token contains trivia.</param>
-        /// <returns>The lexer itself, which can be used for chaining together multiple methods.</returns>
-        /// <exception cref="UnexpectedTokenException">Thrown if the current token does not match the flag or first character.</exception>
-        public Lexer<T> Expect(T flag, char first, bool shouldNotContainTrivia = false)
-        {
-            if (shouldNotContainTrivia && HasTrivia)
-                throw new UnexpectedTokenException(this, first.ToString());
-            if (Branch(flag, first))
-                return this;
-            throw new UnexpectedTokenException(this, first.ToString());
-        }
-
-        /// <summary>
-        /// Checks whether the current token matches the flag and content, and consumes the token if it matches.
-        /// If not, an exception is thrown.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="content">The content.</param>
-        /// <param name="shouldNotContainTrivia">If <c>false</c>, the method also throws an exception if the token contains trivia.</param>
-        /// <param name="comparison">The type of comparison for the content.</param>
-        /// <returns>The lexer itself, which can be used for chaining together multiple methods.</returns>
-        /// <exception cref="UnexpectedTokenException">Thrown if the current token does not match the flag and content.</exception>
-        public Lexer<T> Expect(T flag, string content, bool shouldNotContainTrivia = false, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
-        {
-            if (shouldNotContainTrivia && HasTrivia)
-                throw new UnexpectedTokenException(this, content);
-            if (Branch(flag, content, comparison))
-                return this;
-            throw new UnexpectedTokenException(this, content);
-        }
-
-        /// <summary>
-        /// Checks whether the current token matches the flag, and consumes the token if it matches.
-        /// If not, an exception is thrown.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="content">The content of the matched token.</param>
-        /// <param name="shouldNotContainTrivia">If <c>false</c>, the method also throws an exception if the token contains trivia.</param>
-        /// <exception cref="UnexpectedTokenException">Thrown if the current token does not match the flag.</exception>
-        public Lexer<T> Expect(T flag, out Token token, bool shouldNotContainTrivia = false)
-        {
-            if (shouldNotContainTrivia && HasTrivia)
-                throw new UnexpectedTokenException(this, flag.ToString());
-            if (Check(flag))
-            {
-                token = Token;
-                Next();
-                return this;
-            }
-            throw new UnexpectedTokenException(this, flag.ToString());
         }
 
         /// <summary>

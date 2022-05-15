@@ -13,7 +13,7 @@ namespace SimpleCircuitOnline.Shared
         private XmlDocument _doc;
         private string _svg;
         private int _loading;
-        private bool _useDom = true, _shrinkToWidth = true, _shrinkToHeight = true;
+        private bool _useDom = true, _shrinkToWidth = true, _shrinkToHeight = true, _invalid;
 
         [Parameter]
         public bool UseDOM
@@ -24,6 +24,20 @@ namespace SimpleCircuitOnline.Shared
                 if (value != _useDom)
                 {
                     _useDom = value;
+                    StateHasChanged();
+                }
+            }
+        }
+
+        [Parameter]
+        public bool Invalid
+        {
+            get => _invalid;
+            set
+            {
+                if (_invalid != value)
+                {
+                    _invalid = value;
                     StateHasChanged();
                 }
             }
@@ -49,10 +63,15 @@ namespace SimpleCircuitOnline.Shared
 
         private void UpdateSvg()
         {
+            _invalid = false;
             if (_doc == null)
-                _svg = null;
+            {
+                _invalid = true;
+                return;
+            }
             else if (_useDom)
             {
+
                 // Remove any styling from the document, as it is defined elsewhere in the document
                 var doc = (XmlDocument)_doc.Clone();
                 using StringWriter style = new();
@@ -61,7 +80,7 @@ namespace SimpleCircuitOnline.Shared
                     tags.Add(node);
                 foreach (var tag in tags)
                     tag.ParentNode.RemoveChild(tag);
-                doc.DocumentElement.SetAttribute("class", $"simplecircuit{(_shrinkToWidth ? " max-width" : "")}{(_shrinkToHeight ? " max-height" : "")}");
+                doc.DocumentElement.SetAttribute("class", $"simplecircuit{(_shrinkToWidth ? " max-width" : "")}{(_shrinkToHeight ? " max-height" : "")}{(_invalid ? " greyed" : "")}");
 
                 // Write out the stripped document XML
                 using var sw = new StringWriter();

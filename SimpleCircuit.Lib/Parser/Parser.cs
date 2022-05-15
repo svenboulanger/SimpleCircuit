@@ -87,7 +87,7 @@ namespace SimpleCircuit.Parser
             // Parse wires
             while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
             {
-                IPin pinToWire;
+                IPin pinToWire = null;
 
                 // Read a pin
                 if (lexer.Check(TokenType.OpenIndex))
@@ -97,16 +97,14 @@ namespace SimpleCircuit.Parser
                         return false;
                     if (!component.Pins.TryGetValue(pinName.Content.ToString().Trim(), out pinToWire))
                     {
-                        context.Diagnostics?.Post(new TokenDiagnosticMessage(pinName, SeverityLevel.Error, "PE001",
-                            $"Cannot find pin '{pinName.Content}' for the component {component.Name}"));
-                        return false;
+                        if (context.Diagnostics?.Post(pinName, ErrorCodes.CannotFindPin, pinName.Content.ToString(), component.Name) == SeverityLevel.Error)
+                            return false;
                     }
                 }
                 else if (component.Pins.Count == 0)
                 {
-                    context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "PE001",
-                        $"The component {component.Name} does not have pins"));
-                    return false;
+                    if (context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.DoesNotHavePins, component.Name) == SeverityLevel.Error)
+                        return false;
                 }
                 else
                 {
@@ -137,27 +135,26 @@ namespace SimpleCircuit.Parser
                             return false;
 
                         // Extract the pin for the next component
-                        IPin wireToPin;
+                        IPin wireToPin = null;
                         if (pinName.Content.Length > 0)
                         {
                             if (!nextComponent.Pins.TryGetValue(pinName.Content.ToString().Trim(), out wireToPin))
                             {
-                                context.Diagnostics?.Post(new TokenDiagnosticMessage(pinName, SeverityLevel.Error, "PE001",
-                                    $"Cannot find pin '{pinName.Content}' for the component {nextComponent.Name}"));
-                                return false;
+                                if (context.Diagnostics?.Post(pinName, ErrorCodes.CannotFindPin, pinName.Content.ToString(), nextComponent.Name) == SeverityLevel.Error)
+                                    return false;
                             }
                         }
                         else if (nextComponent.Pins.Count == 0)
                         {
-                            context.Diagnostics?.Post(new TokenDiagnosticMessage(pinName, SeverityLevel.Error, "PE001",
-                                $"The component {nextComponent.Name} does not have pins"));
-                            return false;
+                            if (context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.DoesNotHavePins, nextComponent.Name) == SeverityLevel.Error)
+                                return false;
                         }
                         else
                             wireToPin = nextComponent.Pins[0];
 
                         // String the pins together using wire segments
-                        stringTogether?.Invoke(pinToWire, wireInfo, wireToPin);
+                        if (pinToWire != null && wireToPin != null)
+                            stringTogether?.Invoke(pinToWire, wireInfo, wireToPin);
                         component = nextComponent;
                     }
                 }
@@ -177,8 +174,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Check(TokenType.Word))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001",
-                    "Expected a component name"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
                 return null;
             }
 
@@ -188,8 +184,7 @@ namespace SimpleCircuit.Parser
             var component = context.GetOrCreate(fullname, context.Options);
             if (component == null)
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(nameToken, SeverityLevel.Error, "PE001",
-                    $"Could not recognize and create a component for '{nameToken}'"));
+                context.Diagnostics?.Post(nameToken, ErrorCodes.CouldNotRecognizeOrCreateComponent, nameToken.Content.ToString());
                 return null;
             }
 
@@ -209,8 +204,7 @@ namespace SimpleCircuit.Parser
                                 lbl.Label = txt;
                             else
                             {
-                                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "PE001",
-                                    $"Labeling is not possible for '{component.Name}' at line {lexer.Line}, column {lexer.Column}."));
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.LabelingNotPossible, component.Name);
                             }
                             lexer.Next();
                             break;
@@ -221,7 +215,7 @@ namespace SimpleCircuit.Parser
                                 component.RemoveVariant(token.Content.ToString());
                             else
                             {
-                                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected a variant"));
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
                                 lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
                             }
                             break;
@@ -232,7 +226,7 @@ namespace SimpleCircuit.Parser
                                 goto case TokenType.Word;
                             else
                             {
-                                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected a variant"));
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
                                 lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
                             }
                             break;
@@ -245,8 +239,8 @@ namespace SimpleCircuit.Parser
                             }
                             if (!possibleVariants.Contains(lexer.Content.ToString()))
                             {
-                                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Warning, "PE001",
-                                    $"Could not recognize variant '{lexer.Content}' for '{component.Name}'"));
+                                if (context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeVariant, lexer.Content.ToString(), component.Name) == SeverityLevel.Error)
+                                    return null;
                             }
                             component.AddVariant(lexer.Content.ToString());
                             lexer.Next();
@@ -256,8 +250,7 @@ namespace SimpleCircuit.Parser
                             break;
 
                         default:
-                            context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001",
-                                $"Expected label or variant for '{component.Name}'"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedLabelOrVariant, component.Name);
                             lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
                             break;
                     }
@@ -265,10 +258,7 @@ namespace SimpleCircuit.Parser
                 while (lexer.Branch(TokenType.Comma));
 
                 if (!lexer.Branch(TokenType.CloseParenthesis))
-                {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001",
-                        "Parenthesis mismatch, ')' expected"));
-                }
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ")");
             }
             return component;
         }
@@ -282,7 +272,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.OpenBeak))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "A '<' is expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedWire);
                 return null;
             }
 
@@ -366,8 +356,8 @@ namespace SimpleCircuit.Parser
                         break;
 
                     default:
-                        context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Valid direction expected"));
-                        lexer.Skip(~TokenType.Newline);
+                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.CouldNotRecognizeDirection);
+                        lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
                         return null;
                 }
 
@@ -386,9 +376,7 @@ namespace SimpleCircuit.Parser
 
             // Closing beak
             if (!lexer.Branch(TokenType.CloseBeak))
-            {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Bracket mismatch, '>' expected"));
-            }
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
             return wireInfo;
         }
 
@@ -432,7 +420,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.OpenIndex))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Pin expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedPin);
                 return default;
             }
 
@@ -440,9 +428,7 @@ namespace SimpleCircuit.Parser
             var token = lexer.ReadWhile(~TokenType.Newline & ~TokenType.CloseIndex & ~TokenType.Whitespace);
 
             if (!lexer.Branch(TokenType.CloseIndex))
-            {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Bracket mismatch, ']' expected"));
-            }
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, "]");
             return token;
         }
 
@@ -476,7 +462,7 @@ namespace SimpleCircuit.Parser
                     return ParseOptions(lexer, context);
 
                 default:
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(typeToken, SeverityLevel.Error, "PE001", $"Could not recognize option '{typeToken.Content}'"));
+                    context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
                     return false;
             }
         }
@@ -486,7 +472,7 @@ namespace SimpleCircuit.Parser
             // Read the name of the subcircuit
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Subcircuit name expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedSubcircuit);
                 return false;
             }
 
@@ -518,7 +504,7 @@ namespace SimpleCircuit.Parser
             }
             if (lexer.Type == TokenType.EndOfContent)
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Unexpected end of code."));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
                 return false;
             }
 
@@ -555,11 +541,8 @@ namespace SimpleCircuit.Parser
             }
             string symbolKey = nameToken.Content.ToString();
             int line = lexer.Line;
-            if (!lexer.Branch(TokenType.Newline))
-            {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", $"Unexpected '{lexer.Content}'"));
-                return false;
-            }
+            int column = lexer.Column;
+            lexer.Skip(~TokenType.Newline);
 
             // Read until a .ENDS and treat the contents as XML to be read
             StringBuilder xml = new();
@@ -591,8 +574,10 @@ namespace SimpleCircuit.Parser
             }
             catch (XmlException ex)
             {
-                context.Diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, $"XML",
-                    $"{ex.Message} at line {line + ex.LineNumber - 1}, column {line + ex.LinePosition}."));
+                // Create a token for the XML problem
+                var loc = new TextLocation(line + ex.LineNumber - 1, ex.LineNumber == 1 ? column + ex.LinePosition : ex.LinePosition);
+                var token = new Token(lexer.Source, new(loc, loc), "".AsMemory());
+                context.Diagnostics?.Post(token, ErrorCodes.XMLError, ex.Message);
                 return false;
             }
 
@@ -606,7 +591,7 @@ namespace SimpleCircuit.Parser
             // Read the name of the section
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Section name expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedSectionName);
                 return false;
             }
             lexer.Skip(~TokenType.Newline);
@@ -641,14 +626,12 @@ namespace SimpleCircuit.Parser
                 var member = typeof(Options).GetProperty(nameToken.Content.ToString(), BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
                 if (member == null || !member.CanWrite)
                 {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(nameToken, SeverityLevel.Error, "PE001", $"Could not recognize global option '{nameToken.Content}'"));
+                    context.Diagnostics?.Post(nameToken, ErrorCodes.CouldNotRecognizeGlobalOption, nameToken.Content.ToString());
                     return false;
                 }
 
                 if (!lexer.Branch(TokenType.Equals))
-                {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Warning, "PE001", "Assignment '=' expected"));
-                }
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
 
                 // Parse depending on the type
                 if (member.PropertyType == typeof(bool))
@@ -665,14 +648,12 @@ namespace SimpleCircuit.Parser
                     member.SetValue(context.Options, ParseString(lexer, context));
                 }
                 else
-                {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(nameToken, SeverityLevel.Error, "PE001", $"Cannot recognize type of {member.PropertyType.Name}"));
-                }
+                    context.Diagnostics?.Post(nameToken, ErrorCodes.CouldNotRecognizeType, nameToken.Content.ToString());
             }
 
             if (lexer.Type != TokenType.EndOfContent && !lexer.Check(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", $"Unexpected {lexer.StartToken.Content}"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.UnexpectedEndOfLine);
                 return false;
             }
             return true;
@@ -687,13 +668,13 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.OpenParenthesis))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Virtual chain statement expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedVirtualChain);
                 return false;
             }
 
             if (!lexer.Branch(TokenType.Word, out var directionToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Virtual chain direction expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedVirtualChainDirection);
                 return false;
             }
 
@@ -705,7 +686,7 @@ namespace SimpleCircuit.Parser
                 case "xy":
                 case "yx": x = true; y = true; break;
                 default:
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(directionToken, SeverityLevel.Error, "PE001", $"Cannot not recognize virtual chain direction {directionToken.Content}"));
+                    context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeVirtualChainDirection, directionToken.Content.ToString());
                     return false;
             }
 
@@ -719,9 +700,7 @@ namespace SimpleCircuit.Parser
             });
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
-            {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Warning, "PE001", "Parenthesis mismatch, ')' expected"));
-            }
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ")");
             return true;
         }
         private static void StringVirtualWiresTogether(Func<IPin, string> variableFunc, Vector2 normal, IPin pinToWire, WireInfo wireInfo, IPin wireToPin, ParsingContext context)
@@ -761,7 +740,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.Dash))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Property assignment statement expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedPropertyAssignment);
                 return false;
             }
 
@@ -775,12 +754,12 @@ namespace SimpleCircuit.Parser
                 // Property
                 if (!lexer.Branch(TokenType.Dot))
                 {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Expected '.'"));
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedDot);
                     return false;
                 }
                 if (!lexer.Branch(TokenType.Word, out var propertyToken))
                 {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Property expected"));
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedProperty);
                     return false;
                 }
 
@@ -792,16 +771,11 @@ namespace SimpleCircuit.Parser
                     var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     component.CollectPossibleVariants(set);
                     if (!set.Contains(propertyToken.Content.ToString()))
-                    {
-                        context.Diagnostics?.Post(new TokenDiagnosticMessage(propertyToken, SeverityLevel.Warning, "PE001",
-                            $"Cannot find property or variant '{propertyToken.Content}' for {component.Name}."));
-                    }
+                        context.Diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, propertyToken.Content.ToString(), component.Name);
 
                     // Treat it as a boolean
                     if (!lexer.Branch(TokenType.Equals))
-                    {
-                        context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Warning, "PW001", "Assignment operator '=' expected"));
-                    }
+                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
                     var value = ParseBoolean(lexer, context);
                     if (value == null)
                         return false;
@@ -814,9 +788,7 @@ namespace SimpleCircuit.Parser
 
                 // Equal sign
                 if (!lexer.Branch(TokenType.Equals))
-                {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Warning, "PW001", "Assignment operator '=' expected"));
-                }    
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
 
                 if (member.PropertyType == typeof(bool))
                     member.SetValue(component, ParseBoolean(lexer, context));
@@ -840,7 +812,7 @@ namespace SimpleCircuit.Parser
                 }
                 else
                 {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", $"Cannot recognize property type {member.PropertyType.Name}"));
+                    context.Diagnostics?.Post(propertyToken, ErrorCodes.CouldNotRecognizeType, propertyToken.Content.ToString(), component.Name);
                     return false;
                 }
             }
@@ -852,7 +824,7 @@ namespace SimpleCircuit.Parser
             {
                 if (!lexer.Branch(TokenType.Word, "false", StringComparison.Ordinal))
                 {
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Boolean expected"));
+                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedBoolean);
                     return null;
                 }
                 else
@@ -868,7 +840,7 @@ namespace SimpleCircuit.Parser
                 inverted = true;
             if (!lexer.Branch(TokenType.Number, out var numberToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Number expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedNumber);
                 return double.NaN;
             }
             double result = double.Parse(numberToken.Content.ToString(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture);
@@ -879,13 +851,10 @@ namespace SimpleCircuit.Parser
         private static string ParseString(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (lexer.Branch(TokenType.String, out var stringToken))
-            {
                 return stringToken.Content[1..^1].ToString();
-            }
             else
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001",
-                    "String expected"));
+                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedString);
                 return null;
             }
         }
