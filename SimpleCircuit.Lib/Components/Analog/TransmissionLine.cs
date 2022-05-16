@@ -61,14 +61,6 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-_width - offset, 0), new(-_inner - offset, 0), new("wire"));
 
                 // Transmission line
-                /*drawing.OpenBezier(_shape.Select(v =>
-                {
-                    if (v.X < 0)
-                        return new Vector2(v.X - offset, v.Y);
-                    else
-                        return new Vector2(v.X + offset, v.Y);
-                }));
-                */
                 drawing.Path(builder => _shape(builder.WithAbsoluteModifier(v =>
                 {
                     if (v.X < 0)

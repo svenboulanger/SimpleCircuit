@@ -94,6 +94,9 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
+            public bool HasVariant(string variant) => false;
+
+            /// <inheritdoc />
             public void CollectPossibleVariants(ISet<string> variants)
             {
             }

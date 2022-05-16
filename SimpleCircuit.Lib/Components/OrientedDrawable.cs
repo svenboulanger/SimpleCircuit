@@ -55,6 +55,14 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
+        public override bool HasVariant(string variant)
+        {
+            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
+                return Flipped;
+            return base.HasVariant(variant);
+        }
+
+        /// <inheritdoc />
         public override void CollectPossibleVariants(ISet<string> variants)
         {
             base.CollectPossibleVariants(variants);
@@ -73,7 +81,7 @@ namespace SimpleCircuit.Components
             switch (_dof)
             {
                 case 2:
-                    // Nothing is known yet, so we can just use this!
+                    // Nothing is known yet, so we can just use use it!
                     _p = p;
                     _b = b;
                     _dof = 1;
@@ -131,8 +139,11 @@ namespace SimpleCircuit.Components
 
                 case 1:
                     // We already have one axis, we want to flip around that instead
-                    var a = new Matrix2(_p.X, _p.Y, _p.Y, -_p.X).Inverse * _b;
-                    Transform = _flipped ? new(a.X, -a.Y, -a.Y, -a.X) : new(a.X, a.Y, -a.Y, a.X);
+                    Vector2 altp = new(_p.Y, -_p.X);
+                    Vector2 altb = new(_b.Y, -_b.X);
+                    if (_flipped)
+                        altp = -altp;
+                    Transform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;
                     break;
 
                 case 2:

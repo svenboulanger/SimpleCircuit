@@ -15,8 +15,10 @@ namespace SimpleCircuit.Components.Analog
         {
             [Description("The width of the ADC.")]
             public double Width { get; set; } = 18;
+
             [Description("The height of the ADC.")]
             public double Height { get; set; } = 12;
+
             [Description("The label inside the ADC.")]
             public string Label { get; set; }
 
@@ -34,20 +36,46 @@ namespace SimpleCircuit.Components.Analog
                 PinUpdate = Variant.All(
                     Variant.Map("diffin", RedefineInputPins),
                     Variant.Map("diffout", RedefineOutputPins));
-                DrawingVariants = Variant.Do<SvgDrawing>(DrawADC);
+                DrawingVariants = Variant.All(
+                    Variant.Do(DrawADC),
+                    Variant.If("diffin").Then(DrawInputSigns),
+                    Variant.If("diffout").Then(DrawOutputSigns));
             }
 
             private void DrawADC(SvgDrawing drawing)
             {
                 drawing.Polygon(new[]
                 {
-                new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
-                new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
-                new Vector2(-Width / 2, -Height / 2)
-            });
+                    new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
+                    new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
+                    new Vector2(-Width / 2, -Height / 2)
+                });
 
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
+            }
+            private void DrawInputSigns(SvgDrawing drawing)
+            {
+                double x = -Width / 2 + 3;
+                double y = Height / 4;
+                drawing.Signs(new(x, -y), new(x, y));
+            }
+            private void DrawOutputSigns(SvgDrawing drawing)
+            {
+                if (Pins[2].Connections == 0)
+                {
+                    var loc = ((FixedOrientedPin)Pins[2]).Offset;
+                    drawing.Line(loc, loc + new Vector2(4, 0), new("wire"));
+                }
+                if (Pins[3].Connections == 0)
+                {
+                    var loc = ((FixedOrientedPin)Pins[3]).Offset;
+                    drawing.Line(loc, loc + new Vector2(4, 0), new("wire"));
+                }
+
+                double x = Width / 2 - Height / 4 + 2;
+                double y = Height / 4 + 1.5;
+                drawing.Signs(new(x, -y), new(x, y));
             }
             private void SetPinOffset(int index, Vector2 offset)
                 => ((FixedOrientedPin)Pins[index]).Offset = offset;

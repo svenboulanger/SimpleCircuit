@@ -27,23 +27,17 @@ namespace SimpleCircuit.Components.Analog
 
             private void DrawCrystal(SvgDrawing drawing)
             {
-                drawing.Path(b =>
-                {
-                    // The crystal body
-                    b.MoveTo(-2.5, -5)
-                    .LineTo(-2.5, 5)
-                    .LineTo(2.5, 5)
-                    .LineTo(2.5, -5)
-                    .Close();
-                }, new("body"));
-                drawing.Path(b =>
-                {
-                    b.MoveTo(-4.5, -3.5)
-                    .LineTo(-4.5, 3.5)
-                    .MoveTo(4.5, -3.5)
-                    .LineTo(4.5, 3.5);
-                }, new("wire"));
+                // Wires
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-4.5, 0), new(-6, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(4.5, 0), new(6, 0), new("wire"));
 
+                // The crystal
+                drawing.Rectangle(5, 10, options: new("body"));
+                drawing.Path(b => b.MoveTo(-4.5, -3.5).Line(0, 7).MoveTo(4.5, -3.5).Line(0, 7));
+
+                // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, -6), new(0, -1));
             }

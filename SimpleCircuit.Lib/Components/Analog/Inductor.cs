@@ -23,8 +23,8 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "a");
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "b");
+                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
+                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawInductor),
@@ -35,9 +35,13 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             private void DrawInductor(SvgDrawing drawing)
             {
-                drawing.Path(b => b
-                    .MoveTo(-8, 0).LineTo(-6, 0)
-                    .MoveTo(6, 0).LineTo(8, 0), new("wire"));
+                // Wires
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+
+                // Inductor
                 drawing.Path(b => b
                     .MoveTo(-6, 0)
                     .CurveTo(new(-6, -4), new(-2, -4), new(-2, 0))
@@ -47,13 +51,14 @@ namespace SimpleCircuit.Components.Analog
                     .SmoothTo(new(4, -4), new(4, 0))
                     .SmoothTo(new(2, 4), new(2, 0))
                     .SmoothTo(new(6, -4), new(6, 0)));
+
+                // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
             }
-            private void DrawDot(SvgDrawing drawing)
-                => drawing.Circle(new(-8, 3.5), 1, new("dot"));
+            private void DrawDot(SvgDrawing drawing) => drawing.Dot(new(-8, 3.5));
             private void DrawProgrammable(SvgDrawing drawing)
-                => drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                => drawing.Arrow(new(-5, 5), new(6, -7));
         }
     }
 }

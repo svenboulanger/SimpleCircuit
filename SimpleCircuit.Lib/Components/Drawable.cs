@@ -75,6 +75,10 @@ namespace SimpleCircuit.Components
             DrawingVariants?.CollectPossibleVariants(variants);
         }
 
+        /// <inheritdoc />
+        public virtual bool HasVariant(string variant)
+            => _variants.Contains(variant);
+
         /// <summary>
         /// Creates a transform.
         /// </summary>

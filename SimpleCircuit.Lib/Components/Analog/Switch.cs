@@ -35,7 +35,9 @@ namespace SimpleCircuit.Components.Analog
                 if (options?.ElectricalInstallation ?? false)
                     AddVariant("eic");
 
-                PinUpdate = Variant.Map("eic", "push", UpdatePins);
+                PinUpdate = Variant.All(
+                    Variant.Map("eic", "push", UpdatePins),
+                    Variant.IfNot("eic").Then(Variant.Map("closed", "inverted", UpdateControlPin)));
                 DrawingVariants = Variant.If("eic").Then(
                     Variant.If("push").Then(
                             Variant.Map("lamp", "window", DrawOneWirePushSwitch)
@@ -56,25 +58,6 @@ namespace SimpleCircuit.Components.Analog
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
-
-                // Controlling pin (optional)
-                if (Pins["c"].Connections > 0)
-                {
-                    if (inverted)
-                    {
-                        if (closed)
-                            drawing.Line(new(0, -2), new(0, -6));
-                        else
-                            drawing.Line(new(0, -4.25), new(0, -6));
-                    }
-                    else
-                    {
-                        if (closed)
-                            drawing.Line(new(), new(0, -6));
-                        else
-                            drawing.Line(new(0, -2), new(0, -6));
-                    }
-                }
 
                 if (closed)
                 {
@@ -204,9 +187,26 @@ namespace SimpleCircuit.Components.Analog
 
             private void SetPinOffset(int index, Vector2 offset)
                 => ((FixedOrientedPin)Pins[index]).Offset = offset;
-            private void UpdatePins(bool eic, bool push)
+            private void UpdateControlPin(bool closed, bool inverted)
             {
-                if (eic)
+                if (inverted)
+                {
+                    if (closed)
+                        SetPinOffset(1, new(0, -2));
+                    else
+                        SetPinOffset(1, new(0, -4.25));
+                }
+                else
+                {
+                    if (closed)
+                        SetPinOffset(1, new());
+                    else
+                        SetPinOffset(1, new(0, -2));
+                }
+            }
+            private void UpdatePins(bool onewire, bool push)
+            {
+                if (onewire)
                 {
                     if (push)
                     {

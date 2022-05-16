@@ -38,6 +38,13 @@ namespace SimpleCircuit.Components
         public void RemoveVariant(string variant);
 
         /// <summary>
+        /// Determines whether the drawable is using this variant.
+        /// </summary>
+        /// <param name="variant">The variant.</param>
+        /// <returns>Returns <c>true</c> if the variant is used for the component; otherwise, <c>false</c>.</returns>
+        public bool HasVariant(string variant);
+
+        /// <summary>
         /// Renders the component in the specified drawing.
         /// </summary>
         /// <param name="minimizer">The minimizer.</param>

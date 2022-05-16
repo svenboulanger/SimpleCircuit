@@ -37,24 +37,27 @@ namespace SimpleCircuit.Components.Analog
             public Nmos(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-8, 0), new Vector2(-1, 0)), "s", "source");
-                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 8), new Vector2(0, 1)), "g", "gate");
-                Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
-                Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(8, 0), new Vector2(1, 0)), "d", "drain");
+                Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
+                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 6), new Vector2(0, 1)), "g", "gate");
+                Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 4), new Vector2(0, -1)), "b", "bulk");
+                Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
+
+                PinUpdate = Variant.Map("packaged", UpdatePins);
+                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
 
                 if (options?.PackagedTransistors ?? false)
                     AddVariant("packaged");
-                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
             }
 
             private void DrawRegular(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Path(b => b.MoveTo(0, 8).LineTo(0, 6)
-                    .MoveTo(-8, 0).LineTo(-4, 0)
-                    .MoveTo(8, 0).LineTo(4, 0), new("wire"));
-                if (Pins["b"].Connections > 0)
-                    drawing.Line(new Vector2(0, 4), new Vector2(0, 0), new("wire"));
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-4, 0), new(-8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(0, 6), new(0, 8), new("wire"));
+                if (Pins[3].Connections == 0)
+                    drawing.Line(new(4, 0), new(8, 0), new("wire"));
 
                 // Gate
                 drawing.Path(b => b.MoveTo(-6, 4).LineTo(6, 4).MoveTo(-6, 6).LineTo(6, 6), new("gate"));
@@ -75,9 +78,12 @@ namespace SimpleCircuit.Components.Analog
             private void DrawPackaged(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-5, 0)
-                    .MoveTo(8, 0).LineTo(5, 0)
-                    .MoveTo(0, 11).LineTo(0, 6), new("wire"));
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-5, 0), new(-8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(0, 6), new(0, 8), new("wire"));
+                if (Pins[3].Connections == 0)
+                    drawing.Line(new(5, 0), new(8, 0), new("wire"));
 
                 // Gate
                 drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
@@ -97,6 +103,23 @@ namespace SimpleCircuit.Components.Analog
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(3, -10), new(1, 1));
             }
+            private void UpdatePins(bool packaged)
+            {
+                void SetPin(int index, Vector2 offset)
+                {
+                    ((FixedOrientedPin)Pins[index]).Offset = offset;
+                }
+                if (packaged)
+                {
+                    SetPin(0, new(-5, 0));
+                    SetPin(3, new(5, 0));
+                }    
+                else
+                {
+                    SetPin(0, new(-4, 0));
+                    SetPin(3, new(4, 0));
+                }
+            }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
         {
@@ -109,25 +132,38 @@ namespace SimpleCircuit.Components.Analog
             public Pmos(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(8, 0), new Vector2(1, 0)), "d", "drain");
-                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 11), new Vector2(0, 1)), "g", "gate");
+                Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
+                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 8), new Vector2(0, 1)), "g", "gate");
                 Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
-                Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-8, 0), new Vector2(-1, 0)), "s", "source");
+                Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
+
+                PinUpdate = Variant.Map("packaged", UpdatePins);
+                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
 
                 if (options?.PackagedTransistors ?? false)
                     AddVariant("packaged");
-                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
             }
             private void DrawRegular(SvgDrawing drawing)
             {
+                // Wires
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(4, 0), new(8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(0, 7), new(0, 9), new("wire"));
+                if (Pins[3].Connections == 0)
+                    drawing.Line(new(-4, 0), new(-8, 0), new("wire"));
+
+                // The gate
                 drawing.Path(b => b.MoveTo(0, 11).LineTo(0, 9)
                     .MoveTo(-6, 6).LineTo(6, 6)
                     .MoveTo(-6, 4).LineTo(6, 4), new("gate"));
                 drawing.Circle(new Vector2(0, 7.5), 1.5);
 
-                drawing.Polyline(new[] { new Vector2(-8, 0), new Vector2(-4, 0), new Vector2(-4, 4) });
-                drawing.Polyline(new[] { new Vector2(8, 0), new Vector2(4, 0), new Vector2(4, 4) });
+                // Source and drain
+                drawing.Line(new(-4, 0), new(-4, 4), new("source"));
+                drawing.Line(new(4, 0), new(4, 4), new("drain"));
 
+                // Label
                 if (Pins["b"].Connections > 0)
                 {
                     drawing.Line(new Vector2(0, 4), new Vector2(0, 0));
@@ -140,9 +176,12 @@ namespace SimpleCircuit.Components.Analog
             private void DrawPackaged(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-5, 0)
-                    .MoveTo(8, 0).LineTo(5, 0)
-                    .MoveTo(0, 11).LineTo(0, 6), new("wire"));
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(5, 0), new(8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(0, 6), new(0, 8), new("wire"));
+                if (Pins[3].Connections == 0)
+                    drawing.Line(new(-5, 0), new(-8, 0), new("wire"));
 
                 // Gate
                 drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
@@ -153,7 +192,7 @@ namespace SimpleCircuit.Components.Analog
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
                 drawing.Line(new(5, 0), new(5, 4), new("drain"));
-                drawing.Line(new(0, 4), new(0, 0), new("bulk") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                drawing.Arrow(new(0, 4), new(0, 0), new("bulk"));
                 drawing.Line(new(0, 0), new(-5, 0), new("bulk"));
 
                 // Packaged
@@ -162,6 +201,25 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(3, -10), new(1, 1));
+            }
+            private void UpdatePins(bool packaged)
+            {
+                void SetPin(int index, Vector2 offset)
+                {
+                    ((FixedOrientedPin)Pins[index]).Offset = offset;
+                }
+                if (packaged)
+                {
+                    SetPin(0, new(5, 0));
+                    SetPin(1, new(0, 6));
+                    SetPin(3, new(-5, 0));
+                }
+                else
+                {
+                    SetPin(0, new(4, 0));
+                    SetPin(1, new(0, 9));
+                    SetPin(3, new(-4, 0));
+                }
             }
         }
     }

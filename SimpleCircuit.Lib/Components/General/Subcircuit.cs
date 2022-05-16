@@ -75,7 +75,15 @@ namespace SimpleCircuit.Components
                     if (taken.Add(pinName))
                         possibleNames.Add(pinName);
 
-                    // A pin can have multiple names, and we we want to have the easiest solutions!
+                    // Make a shorthand notation for DIR
+                    if (pinName.StartsWith("DIR") && pinName.Length > 3)
+                    {
+                        pinName = pinName.Substring(3);
+                        if (taken.Add(pinName))
+                            possibleNames.Add(pinName);
+                    }
+
+                    // General names!
                     foreach (string pn in pin.Owner.Pins.NamesOf(pin))
                     {
                         pinName = $"{pin.Owner.Name}_{pn}";

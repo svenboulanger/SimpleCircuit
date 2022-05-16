@@ -35,7 +35,6 @@
     <Compile Include="Components\Analog\Impedance.cs" />
     <Compile Include="Components\Analog\Inductor.cs" />
     <Compile Include="Components\Analog\Mofset.cs" />
-    <Compile Include="Components\Analog\Opamp.cs" />
     <Compile Include="Components\Analog\OperationalTransconductanceAmplifier.cs" />
     <Compile Include="Components\Analog\Resistor.cs" />
     <Compile Include="Components\Analog\Switch.cs" />

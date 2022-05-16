@@ -71,7 +71,7 @@ namespace SimpleCircuitOnline.Shared
                     _drawable.CollectPossibleVariants(set);
                     _variants = new(StringComparer.OrdinalIgnoreCase);
                     foreach (string name in set)
-                        _variants.Add(name, false);
+                        _variants.Add(name, _drawable.HasVariant(name));
                 }
                 return _variants;
             }

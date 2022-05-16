@@ -24,8 +24,8 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-6, 0), new(-1, 0)), "p", "a", "anode");
-                Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(6, 0), new(1, 0)), "n", "c", "cathode");
+                Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-4, 0), new(-1, 0)), "p", "a", "anode");
+                Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(4, 0), new(1, 0)), "n", "c", "cathode");
 
                 DrawingVariants = Variant.All(
                     Variant.If("photodiode").Then(DrawPhotodiode),
@@ -36,11 +36,19 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             private void DrawDiode(SvgDrawing drawing)
             {
-                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-4, 0).MoveTo(4, 0).LineTo(6, 0), new("wire"));
+                // Wires
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-4, 0), new(-6, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(4, 0), new(6, 0), new("wire"));
+
+                // The diode
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
                 drawing.Polygon(new Vector2[] {
                     new(-4, -4), new(4, 0), new(-4, 4), new(-4, 4)
                 }, new("anode"));
+
+                // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, -6), new(0, -1));
             }
