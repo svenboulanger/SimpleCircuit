@@ -44,7 +44,7 @@ namespace SimpleCircuit.Components.Analog
 
                 if (options?.PackagedTransistors ?? false)
                     AddVariant("packaged");
-                DrawingVariants = Variant.If("packaged").DoElse(DrawPackaged, DrawRegular);
+                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
             }
 
             private void DrawRegular(SvgDrawing drawing)
@@ -116,7 +116,7 @@ namespace SimpleCircuit.Components.Analog
 
                 if (options?.PackagedTransistors ?? false)
                     AddVariant("packaged");
-                DrawingVariants = Variant.If("packaged").DoElse(DrawPackaged, DrawRegular);
+                DrawingVariants = Variant.If("packaged").Then(DrawPackaged).Else(DrawRegular);
             }
             private void DrawRegular(SvgDrawing drawing)
             {

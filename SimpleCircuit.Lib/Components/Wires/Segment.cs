@@ -26,11 +26,11 @@ namespace SimpleCircuit.Components.Wires
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawWire),
-                    Variant.If("underground").Do(DrawUnderground),
-                    Variant.If("air").Do(DrawAir),
-                    Variant.If("tube").Do(DrawTube),
-                    Variant.If("inwall").Do(DrawInWall),
-                    Variant.If("onwall").Do(DrawOnWall)
+                    Variant.If("underground").Then(DrawUnderground),
+                    Variant.If("air").Then(DrawAir),
+                    Variant.If("tube").Then(DrawTube),
+                    Variant.If("inwall").Then(DrawInWall),
+                    Variant.If("onwall").Then(DrawOnWall)
                     );
             }
 

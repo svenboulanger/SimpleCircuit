@@ -77,20 +77,26 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Creates a conditional variant resolver that matches the given variants.
         /// </summary>
-        /// <typeparam name="T">The argument type.</typeparam>
         /// <param name="include">The variants that need to be included.</param>
         /// <returns>The variant condition builder.</returns>
-        public static VariantConditionBuilder If(params string[] include)
-            => new(include, null);
+        public static VariantCondition If(params string[] include)
+        {
+            var result = new VariantCondition();
+            result.If(include);
+            return result;
+        }
 
         /// <summary>
         /// Creates a conditional variant resolver that does not match the given variants.
         /// </summary>
-        /// <typeparam name="T">The argument type.</typeparam>
         /// <param name="exclude">The variants that need to be excluded.</param>
         /// <returns>The variant condition builder.</returns>
-        public static VariantConditionBuilder IfNot(params string[] exclude)
-            => new(null, exclude);
+        public static VariantCondition IfNot(params string[] exclude)
+        {
+            var result = new VariantCondition();
+            result.IfNot(exclude);
+            return result;
+        }
 
         /// <summary>
         /// Maps the presence of a variant to a method.

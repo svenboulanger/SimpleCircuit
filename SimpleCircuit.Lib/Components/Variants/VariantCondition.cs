@@ -8,35 +8,92 @@ namespace SimpleCircuit.Components.Variants
     /// </summary>
     public class VariantCondition : IVariantResolver
     {
-        private readonly HashSet<string> _include, _exclude;
-        private readonly IVariantResolver _ifTrue, _ifFalse;
+        private HashSet<string> _include, _exclude;
+        private IVariantResolver _ifTrue, _ifFalse;
 
         /// <summary>
-        /// Creates a new conditional variant.
+        /// Makes the variant required for the condition.
         /// </summary>
-        public VariantCondition(IEnumerable<string> include, IEnumerable<string> exclude, IVariantResolver ifTrue, IVariantResolver ifFalse)
+        /// <param name="names">The name of the variant.</param>
+        public void If(params string[] names)
         {
-            if (include != null)
-            {
-                foreach (var incl in include)
-                {
-                    if (_include == null)
-                        _include = new(StringComparer.OrdinalIgnoreCase);
-                    _include.Add(incl);
-                }
-            }
-            if (exclude != null)
-            {
-                foreach (var excl in exclude)
-                {
-                    if (_exclude == null)
-                        _exclude = new(StringComparer.OrdinalIgnoreCase);
-                    _exclude.Add(excl);
-                }
-            }
-            _ifTrue = ifTrue;
-            _ifFalse = ifFalse;
+            if (names == null || names.Length == 0)
+                return;
+            if (_include == null)
+                _include = new(StringComparer.OrdinalIgnoreCase);
+            foreach (string name in names)
+                _include.Add(name);
         }
+
+        /// <summary>
+        /// Avoids the variant in the condition.
+        /// </summary>
+        /// <param name="names">The name of the variant.</param>
+        public void IfNot(params string[] names)
+        {
+            if (names == null || names.Length == 0)
+                return;
+            if (_exclude == null)
+                _exclude = new(StringComparer.OrdinalIgnoreCase);
+            foreach (string name in names)
+                _exclude.Add(name);
+        }
+
+        /// <summary>
+        /// Adds a variant resolver to be run when the condition evaluates to true.
+        /// </summary>
+        /// <param name="ifTrue">The resolver run when all variants are there.</param>
+        public VariantCondition Then(IVariantResolver ifTrue)
+        {
+            if (_ifTrue == null)
+                _ifTrue = ifTrue;
+            else
+            {
+                if (_ifTrue is VariantGroup group)
+                    group.With(ifTrue);
+                else
+                {
+                    group = new VariantGroup();
+                    group.With(ifTrue);
+                    _ifTrue = group;
+                }
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a variant resolver to be run when the condition evaluates to true.
+        /// </summary>
+        /// <param name="ifTrue">The resolver run when all variants are there.</param>
+        public VariantCondition Then(Action<SvgDrawing> ifTrue) => Then(Variant.Do(ifTrue));
+
+        /// <summary>
+        /// Adds a variant resolver to be run when the condition evaluates to false.
+        /// </summary>
+        /// <param name="ifFalse">The resolver run when any of the variants is not there.</param>
+        public VariantCondition Else(IVariantResolver ifFalse)
+        {
+            if (_ifFalse == null)
+                _ifFalse = ifFalse;
+            else
+            {
+                if (_ifFalse is VariantGroup group)
+                    group.With(ifFalse);
+                else
+                {
+                    group = new VariantGroup();
+                    group.With(ifFalse);
+                    _ifFalse = group;
+                }
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a variant resolver to be run when the condition evaluates to false.
+        /// </summary>
+        /// <param name="ifFalse">The resolver run when any of the variants is not there.</param>
+        public VariantCondition Else(Action<SvgDrawing> ifFalse) => Else(Variant.Do(ifFalse));
 
         /// <inheritdoc />
         public void CollectPossibleVariants(ISet<string> variants)

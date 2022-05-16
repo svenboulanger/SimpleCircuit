@@ -29,8 +29,8 @@ namespace SimpleCircuit.Components.Analog
                 if (options?.PolarCapacitors ?? false)
                     AddVariant("polar");
                 DrawingVariants = Variant.All(
-                    Variant.If("polar").DoElse(DrawPolar, DrawApolar),
-                    Variant.If("programmable").Do(DrawProgrammable));
+                    Variant.If("polar").Then(DrawPolar).Else(DrawApolar),
+                    Variant.If("programmable").Then(DrawProgrammable));
             }
             private void DrawPolar(SvgDrawing drawing)
             {

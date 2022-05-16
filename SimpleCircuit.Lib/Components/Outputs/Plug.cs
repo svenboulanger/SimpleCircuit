@@ -29,9 +29,9 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawPlug),
-                    Variant.If("earth").Do(DrawProtectiveConnection),
-                    Variant.If("sealed").Do(DrawSealed),
-                    Variant.If("child").Do(DrawChildProtection));
+                    Variant.If("earth").Then(DrawProtectiveConnection),
+                    Variant.If("sealed").Then(DrawSealed),
+                    Variant.If("child").Then(DrawChildProtection));
             }
 
             private void DrawPlug(SvgDrawing drawing)

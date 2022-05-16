@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawImpedance),
-                    Variant.If("programmable").Do(DrawProgrammable));
+                    Variant.If("programmable").Then(DrawProgrammable));
             }
             private void DrawImpedance(SvgDrawing drawing)
             {

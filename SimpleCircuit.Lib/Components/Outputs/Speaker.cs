@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawSpeaker),
-                    Variant.IfNot("off").Do(DrawOn));
+                    Variant.IfNot("off").Then(DrawOn));
             }
             private void DrawSpeaker(SvgDrawing drawing)
             {

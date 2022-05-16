@@ -36,14 +36,19 @@ namespace SimpleCircuit.Components.Analog
                     AddVariant("eic");
 
                 PinUpdate = Variant.Map("eic", "push", UpdatePins);
-                DrawingVariants = Variant.If("eic").DoElse(
-                    Variant.If("push").DoElse(
-                        Variant.Map("lamp", "window", DrawOneWirePushSwitch),
-                        Variant.Map("toggle", "double", "lamp", DrawOneWireSwitch)
-                    ),
-                    Variant.If("push").DoElse(
-                        Variant.Map("closed", "inv", DrawPushSwitch),
-                        Variant.Map("closed", "inv", DrawRegularSwitch)));
+                DrawingVariants = Variant.If("eic").Then(
+                    Variant.If("push").Then(
+                            Variant.Map("lamp", "window", DrawOneWirePushSwitch)
+                        ).Else(
+                            Variant.Map("toggle", "double", "lamp", DrawOneWireSwitch)
+                        )
+                    ).Else(
+                        Variant.If("push").Then(
+                            Variant.Map("closed", "inv", DrawPushSwitch)
+                        ).Else(
+                            Variant.Map("closed", "inv", DrawRegularSwitch)
+                        )
+                    );
             }
 
             private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)

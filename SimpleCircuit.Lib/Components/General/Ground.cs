@@ -40,8 +40,8 @@ namespace SimpleCircuit.Components
                     AddVariant("signal");
 
                 DrawingVariants = Variant.FirstOf(
-                    Variant.If("earth").Do(DrawEarth),
-                    Variant.If("signal").Do(DrawSignalGround),
+                    Variant.If("earth").Then(DrawEarth),
+                    Variant.If("signal").Then(DrawSignalGround),
                     Variant.Do(DrawGround));
             }
             private void DrawGround(SvgDrawing drawing)

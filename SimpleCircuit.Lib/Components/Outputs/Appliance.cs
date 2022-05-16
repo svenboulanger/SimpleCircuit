@@ -83,18 +83,18 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.FirstOf(
-                        Variant.If("ventilator").Do(DrawVentilator),
-                        Variant.If("heater").Do(Variant.Map("ventilator", "accu", DrawHeater)),
-                        Variant.If("boiler").Do(Variant.Map("accu", DrawBoiler)),
-                        Variant.If("cooking").Do(DrawCooking),
-                        Variant.If("microwave").Do(DrawMicroWave),
-                        Variant.If("oven").Do(DrawOven),
-                        Variant.If("washer").Do(DrawWasher),
-                        Variant.If("dryer").Do(DrawDryer),
-                        Variant.If("dishwasher").Do(DrawDishwasher),
-                        Variant.If("refrigerator").Do(DrawRefrigerator),
-                        Variant.If("fridge").Do(DrawRefrigerator),
-                        Variant.If("freezer").Do(DrawFreezer),
+                        Variant.If("ventilator").Then(DrawVentilator),
+                        Variant.If("heater").Then(Variant.Map("ventilator", "accu", DrawHeater)),
+                        Variant.If("boiler").Then(Variant.Map("accu", DrawBoiler)),
+                        Variant.If("cooking").Then(DrawCooking),
+                        Variant.If("microwave").Then(DrawMicroWave),
+                        Variant.If("oven").Then(DrawOven),
+                        Variant.If("washer").Then(DrawWasher),
+                        Variant.If("dryer").Then(DrawDryer),
+                        Variant.If("dishwasher").Then(DrawDishwasher),
+                        Variant.If("refrigerator").Then(DrawRefrigerator),
+                        Variant.If("fridge").Then(DrawRefrigerator),
+                        Variant.If("freezer").Then(DrawFreezer),
                         Variant.Do(DrawDefault)
                         ),
                     Variant.Do(DrawLabel));

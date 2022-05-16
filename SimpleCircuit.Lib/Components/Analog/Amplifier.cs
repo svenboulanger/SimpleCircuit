@@ -42,10 +42,10 @@ namespace SimpleCircuit.Components.Analog
                     Variant.Map("diffout", "swapout", (b1, b2) => RedefinePins(4, b1, b2))
                 );
                 DrawingVariants = Variant.All(
-                    Variant.If("diffin").Do(Variant.Map("swapin", DrawDifferentialInput)),
-                    Variant.If("diffout").Do(Variant.Map("swapout", DrawDifferentialOutput)),
+                    Variant.If("diffin").Then(Variant.Map("swapin", DrawDifferentialInput)),
+                    Variant.If("diffout").Then(Variant.Map("swapout", DrawDifferentialOutput)),
                     Variant.Do(DrawAmplifier),
-                    Variant.If("programmable").Do(DrawProgrammable));
+                    Variant.If("programmable").Then(DrawProgrammable));
             }
             private void DrawDifferentialInput(SvgDrawing drawing, bool swapped)
             {

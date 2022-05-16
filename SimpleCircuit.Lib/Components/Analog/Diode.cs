@@ -28,8 +28,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(6, 0), new(1, 0)), "n", "c", "cathode");
 
                 DrawingVariants = Variant.All(
-                    Variant.If("photodiode").Do(DrawPhotodiode),
-                    Variant.If("led").Do(DrawLed),
+                    Variant.If("photodiode").Then(DrawPhotodiode),
+                    Variant.If("led").Then(DrawLed),
                     Variant.Do(DrawDiode));
             }
 

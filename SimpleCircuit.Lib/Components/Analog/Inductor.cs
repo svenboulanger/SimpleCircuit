@@ -28,8 +28,8 @@ namespace SimpleCircuit.Components.Analog
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawInductor),
-                    Variant.If("dot").Do(DrawDot),
-                    Variant.If("programmable").Do(DrawProgrammable));
+                    Variant.If("dot").Then(DrawDot),
+                    Variant.If("programmable").Then(DrawProgrammable));
             }
 
             /// <inheritdoc />

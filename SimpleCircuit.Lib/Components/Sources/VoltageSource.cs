@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Sources
                     AddVariant("ac");
 
                 DrawingVariants = Variant.All(
-                    Variant.If("ac").DoElse(DrawAC, DrawDC),
+                    Variant.If("ac").Then(DrawAC).Else(DrawDC),
                     Variant.Do(DrawSource));
             }
             private void DrawSource(SvgDrawing drawing)

@@ -34,10 +34,10 @@ namespace SimpleCircuit.Components.Outputs
                     AddVariant("ei");
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawLamp),
-                    Variant.IfNot("ei").Do(DrawCasing),
-                    Variant.If("projector").Do(DrawProjector),
-                    Variant.If("direction").Do(Variant.Map("diverging", DrawDirectional)),
-                    Variant.If("emergency").Do(DrawEmergency));
+                    Variant.IfNot("ei").Then(DrawCasing),
+                    Variant.If("projector").Then(DrawProjector),
+                    Variant.If("direction").Then(Variant.Map("diverging", DrawDirectional)),
+                    Variant.If("emergency").Then(DrawEmergency));
                 PinUpdate = Variant.Map("ei", UpdatePins);
             }
 

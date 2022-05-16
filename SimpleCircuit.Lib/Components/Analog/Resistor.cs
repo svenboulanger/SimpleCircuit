@@ -30,13 +30,13 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
+                Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 8), new(0, 1)), "c", "ctrl");
-                Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
+                Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawANSIResistor),
-                    Variant.If("programmable").Do(DrawProgrammable));
+                    Variant.If("programmable").Then(DrawProgrammable));
             }
 
             private void DrawANSIResistor(SvgDrawing drawing)

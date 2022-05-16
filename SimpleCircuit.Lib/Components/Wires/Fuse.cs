@@ -31,19 +31,13 @@ namespace SimpleCircuit.Components.Wires
                     AddVariant("ei");
 
                 DrawingVariants = Variant.FirstOf(
-                    Variant.If("ei").Do(
-                        Variant.If("auto").DoElse(
-                            DrawAutoFuse,
-                            DrawIEC
-                        )
+                    Variant.If("ei").Then(
+                        Variant.If("auto").Then(DrawAutoFuse).Else(DrawIEC)
                     ),
-                    Variant.If("ansi").Do(
-                        Variant.If("alt").DoElse(
-                            Variant.Do(DrawANSIalt),
-                            Variant.Do(DrawANSI)
-                        )
+                    Variant.If("ansi").Then(
+                        Variant.If("alt").Then(DrawANSIalt).Else(DrawANSI)
                     ),
-                    Variant.If("auto").Do(DrawAutoFuse),
+                    Variant.If("auto").Then(DrawAutoFuse),
                     Variant.Do(DrawIEC));
             }
 

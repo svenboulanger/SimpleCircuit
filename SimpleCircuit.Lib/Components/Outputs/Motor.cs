@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawMotor),
-                    Variant.If("signs").Do(DrawSigns));
+                    Variant.If("signs").Then(DrawSigns));
             }
 
             private void DrawMotor(SvgDrawing drawing)
