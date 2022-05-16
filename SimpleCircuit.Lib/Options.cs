@@ -1,7 +1,26 @@
 ﻿namespace SimpleCircuit
 {
+    /// <summary>
+    /// Describes options for parsing SimpleCircuit.
+    /// </summary>
     public class Options
     {
+        private enum Styles
+        {
+            ANSI,
+            EIC
+        }
+        private Styles _style = Styles.ANSI;
+
+        [Description("Use ANSI style symbols.")]
+        public bool ANSI { get => _style == Styles.ANSI; set => _style = Styles.ANSI; }
+
+        [Description("Use EIC style symbols.")]
+        public bool EIC { get => _style == Styles.EIC; set => _style = Styles.EIC; }
+
+        [Description("Use symbols for electrical installation diagrams.")]
+        public bool ElectricalInstallation { get; set; }
+
         [Description("Whether to use the packaged variant of transistors. The default is false.")]
         public bool PackagedTransistors { get; set; } = false;
 
@@ -19,9 +38,6 @@
 
         [Description("Uses polarized capacitor symbols. False by default.")]
         public bool PolarCapacitors { get; set; } = false;
-
-        [Description("Use symbols for electrical installation diagrams.")]
-        public bool ElectricalInstallation { get; set; }
 
         [Description("Use small-signal model related symbols.")]
         public bool SmallSignal { get; set; }

@@ -25,23 +25,28 @@ namespace SimpleCircuit.Components.Analog
                 : base(name, options)
             {
                 Type = type;
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-8, 0), new(-1, 0)), "p", "pos", "a");
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
+                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "pos", "a");
+                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawImpedance),
                     Variant.If("programmable").Do(DrawProgrammable));
             }
             private void DrawImpedance(SvgDrawing drawing)
             {
-                drawing.Path(b => b
-                    .MoveTo(-8, 0).LineTo(-6, 0)
-                    .MoveTo(6, 0).LineTo(8, 0), new("wire"));
-                drawing.Polygon(new Vector2[] { new(-6, 3), new(6, 3), new(6, -3), new(-6, -3) });
+                // Draw some wire extensions if nothing is connected
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+
+                // The rectangle
+                CommonGraphical.Rectangle(drawing, 12, 6);
+
+                // The label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, -7), new(0, -1));
             }
-            private void DrawProgrammable(SvgDrawing drawing)
-                => drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+            private void DrawProgrammable(SvgDrawing drawing) => CommonGraphical.Arrow(drawing, new(-5, 5), new(6, -7));
         }
     }
 }

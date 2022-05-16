@@ -14,6 +14,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+
             /// <inheritdoc/>
             [Description("The label next to the resistor.")]
             public string Label { get; set; }
@@ -34,14 +35,17 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(8, 0), new(1, 0)), "n", "neg", "b");
 
                 DrawingVariants = Variant.All(
-                    Variant.Do(DrawResistor),
+                    Variant.Do(DrawANSIResistor),
                     Variant.If("programmable").Do(DrawProgrammable));
             }
 
-            private void DrawResistor(SvgDrawing drawing)
+            private void DrawANSIResistor(SvgDrawing drawing)
             {
                 // Wires
-                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
+                if (Pins[2].Connections == 0)
+                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
 
                 // The resistor
                 drawing.Polyline(new Vector2[]
@@ -53,8 +57,8 @@ namespace SimpleCircuit.Components.Analog
                 });
 
                 // Controlled resistor
-                if (Pins["c"].Connections > 0)
-                    drawing.Line(new Vector2(0, 8), new Vector2(0, 4), new("wire") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                if (Pins[1].Connections > 0)
+                    CommonGraphical.Arrow(drawing, new Vector2(0, 8), new Vector2(0, 4));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
@@ -62,6 +66,22 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawProgrammable(SvgDrawing drawing)
                 => drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+
+            private void DrawEICResistor(SvgDrawing drawing)
+            {
+                // Draw some wire extensions if nothing is connected
+                if (Pins[0].Connections == 0)
+                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
+                if (Pins[1].Connections == 0)
+                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+
+                // The rectangle
+                CommonGraphical.Rectangle(drawing, 12, 6);
+
+                // The label
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -7), new(0, -1));
+            }
         }
     }
 }

@@ -22,17 +22,23 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public IPin this[int index] => _pinsByIndex[index];
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Adds a pin to the collection.
+        /// </summary>
+        /// <param name="pin">The pin.</param>
+        /// <param name="names">The names.</param>
         public void Add(IPin pin, params string[] names)
         {
             _pinsByIndex.Add(pin ?? throw new ArgumentNullException(nameof(pin)));
             foreach (string name in names)
-            {
                 _pinsByName.Add(name, pin);
-            }    
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Adds a pin to the collection.
+        /// </summary>
+        /// <param name="pin">The pin.</param>
+        /// <param name="names">The names.</param>
         public void Add(IPin pin, IEnumerable<string> names)
         {
             _pinsByIndex.Add(pin ?? throw new ArgumentNullException(nameof(pin)));
