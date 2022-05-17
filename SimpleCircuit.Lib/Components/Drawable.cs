@@ -62,11 +62,29 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public virtual void AddVariant(string variant)
-            => _variants.Add(variant);
+        {
+            _variants.Add(variant);
+
+            // We may need to update the pin locations!
+            if (PinUpdate != null)
+            {
+                var c = new VariantResolverContext(_variants);
+                PinUpdate.Resolve(c);
+            }
+        }
 
         /// <inheritdoc />
         public virtual void RemoveVariant(string variant)
-            => _variants.Remove(variant);
+        {
+            _variants.Remove(variant);
+
+            // We may need to update our pin locations!
+            if (PinUpdate != null)
+            {
+                var c = new VariantResolverContext(_variants);
+                PinUpdate.Resolve(c);
+            }
+        }
 
         /// <inheritdoc />
         public virtual void CollectPossibleVariants(ISet<string> variants)
@@ -117,8 +135,6 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public virtual void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            var c = new VariantResolverContext(_variants);
-            PinUpdate?.Resolve(c);
         }
 
         /// <inheritdoc />

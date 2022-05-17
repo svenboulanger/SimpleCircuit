@@ -15,12 +15,14 @@ namespace SimpleCircuit.Components.Analog
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
-            return key switch
+            var result = new Instance(name, options);
+            switch (key)
             {
-                "OA" => new Instance(name, true, options),
-                "A" => new Instance(name, false, options),
-                _ => throw new ArgumentException($"Could not recognize key '{key}' for an amplifier.")
-            };
+                case "OA":
+                    result.AddVariant("diffin");
+                    break;
+            }
+            return result;
         }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
@@ -41,7 +43,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "amplifier";
 
-            public Instance(string name, bool diffin, Options options)
+            public Instance(string name, Options options)
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _inputCommon, new(-1, 0)), "i", "in", "inp", "pi", "p");
@@ -61,9 +63,6 @@ namespace SimpleCircuit.Components.Analog
                     Variant.If("diffout").Then(Variant.Map("swapout", DrawDifferentialOutput)),
                     Variant.Do(DrawAmplifier),
                     Variant.If("programmable").Then(DrawProgrammable));
-
-                if (diffin)
-                    AddVariant("diffin");
             }
             private void DrawDifferentialInput(SvgDrawing drawing, bool swapped)
             {
