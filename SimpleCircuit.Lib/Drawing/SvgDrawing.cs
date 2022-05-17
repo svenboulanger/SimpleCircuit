@@ -31,6 +31,7 @@ namespace SimpleCircuit
         private readonly ExpandableBounds _bounds;
         private readonly Stack<Transform> _tf = new();
         private static Regex _superSubscriptRegex = new(@"[\^_](\{(?<content>[^""\}]+)\}|(?<content>\w+))", RegexOptions.Compiled);
+        private static Regex _newlineRegex = new(@"\\r(?:\\n)?|\\n|\r\n?|\n|\<\s*br\s*\/?\>", RegexOptions.Compiled);
 
         /// <summary>
         /// Gets the current transform.
@@ -54,6 +55,11 @@ namespace SimpleCircuit
         /// Gets or sets the margin used along the border to make sure everything is included.
         /// </summary>
         public double Margin { get; set; } = 1.0;
+
+        /// <summary>
+        /// Gets or sets the line spacing used between text.
+        /// </summary>
+        public double LineSpacing { get; set; } = 1.0;
 
         /// <summary>
         /// Removes empty groups.
@@ -83,6 +89,7 @@ namespace SimpleCircuit
             {
                 Margin = options.Margin;
                 RemoveEmptyGroups = options.RemoveEmptyGroups;
+                LineSpacing = options.LineSpacing;
             }
         }
 
@@ -906,7 +913,7 @@ namespace SimpleCircuit
             // Apply text
             value = TransformText(value);
             List<XmlElement> elements = new();
-            foreach (var line in Regex.Split(value, @"(\r\n|\r|\n|\<\s*br\s*\>|\<\s*br\s*\>)"))
+            foreach (var line in _newlineRegex.Split(value))
             {
                 var tspan = _document.CreateElement("tspan", Namespace);
                 PopulateText(tspan, line);
@@ -921,6 +928,8 @@ namespace SimpleCircuit
             {
                 formattedLines[i] = formatter.Format(this, elements[i]);
                 width = Math.Max(formattedLines[i].Width, width);
+                if (i > 0)
+                    height += LineSpacing;
                 height += formattedLines[i].Height;
 
                 // Expand the X-direction
@@ -970,7 +979,7 @@ namespace SimpleCircuit
                 y -= formattedLines[i].Top;
                 elements[i].SetAttribute("x", Convert(location.X));
                 elements[i].SetAttribute("y", Convert(location.Y + y));
-                y += formattedLines[i].Bottom;
+                y += formattedLines[i].Bottom + LineSpacing;
             }
 
             txt.SetAttribute("x", Convert(location.X));
@@ -1007,7 +1016,11 @@ namespace SimpleCircuit
                 else
                     return $"</tspan><tspan dy=\"0.5em\" style=\"font-size: 0.75em\">{match.Groups["content"].Value}</tspan><tspan dy=\"-0.375em\">";
             });
-            return $"<tspan>{value}</tspan>";
+            value = $"<tspan>{value}</tspan>";
+
+            // Also deal with newlines
+            value = _newlineRegex.Replace(value, m => $"</tspan>{m.Value}<tspan>");
+            return value;
         }
         private void PopulateText(XmlNode element, string line)
         {

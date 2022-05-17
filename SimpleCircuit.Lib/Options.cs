@@ -15,8 +15,8 @@
         [Description("Use ANSI style symbols.")]
         public bool ANSI { get => _style == Styles.ANSI; set => _style = Styles.ANSI; }
 
-        [Description("Use EIC style symbols.")]
-        public bool EIC { get => _style == Styles.EIC; set => _style = Styles.EIC; }
+        [Description("Use IEC style symbols.")]
+        public bool IEC { get => _style == Styles.EIC; set => _style = Styles.EIC; }
 
         [Description("Use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
         public bool AREI { get; set; }
@@ -47,5 +47,8 @@
 
         [Description("Removes SVG groups that are empty.")]
         public bool RemoveEmptyGroups { get; set; } = true;
+
+        [Description("The spacing between lines of text.")]
+        public double LineSpacing { get; set; } = 1.0;
     }
 }

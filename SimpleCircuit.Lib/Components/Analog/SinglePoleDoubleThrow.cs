@@ -24,12 +24,15 @@ namespace SimpleCircuit.Components.Analog
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("pole", "The pole pin.", this, new(-8, 0), new(-1, 0)), "p", "pole");
-                Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, 6), new(0, 1)), "c", "ctrl");
+                Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, 0), new(0, 1)), "c", "ctrl");
+                Pins.Add(new FixedOrientedPin("control2", "The backside controlling pin.", this, new(0, 0), new(0, -1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("throw1", "The first throwing pin.", this, new(8, 4), new(1, 0)), "t1");
                 Pins.Add(new FixedOrientedPin("throw2", "The second throwing pin.", this, new(8, -4), new(1, 0)), "t2");
 
                 DrawingVariants = Variant.Map("t1", "t2", "swap", DrawSwitch);
-                PinUpdate = Variant.Map("swap", UpdatePins);
+                PinUpdate = Variant.All(
+                    Variant.Map("swap", UpdatePins),
+                    Variant.Map("swap", "t1", "t2", UpdateControlPin));
             }
 
             private void DrawSwitch(SvgDrawing drawing, bool t1, bool t2, bool swapped)
@@ -52,32 +55,34 @@ namespace SimpleCircuit.Components.Analog
                 else
                     drawing.Line(new(-4, 0), new(4, swapped ? 4 : -4));
 
-                // Controlling pin (optional)
-                if (Pins["c"].Connections > 0)
-                {
-                    if (!t1 && !t2)
-                        drawing.Line(new(0, 0), new(0, 6), new("wire"));
-                    else if (t1)
-                        drawing.Line(new(0, swapped ? -2 : 2), new(0, 6), new("wire"));
-                    else
-                        drawing.Line(new(0, swapped ? 2 : -2), new(0, 6), new("wire"));
-                }
-
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(-6, 6), new(-1, 1));
+            }
+            private void SetPin(int index, Vector2 offset) => ((FixedOrientedPin)Pins[index]).Offset = offset;
+            private void UpdateControlPin(bool swapped, bool t1, bool t2)
+            {
+                Vector2 loc = new();
+                if (!t1 && !t2)
+                    loc = new();
+                else if (t1)
+                    loc = new(0, swapped ? -2 : 2);
+                else
+                    loc = new(0, swapped ? 2 : -2);
+                SetPin(1, loc);
+                SetPin(2, loc);
             }
             private void UpdatePins(bool swapped)
             {
                 if (swapped)
                 {
-                    ((FixedOrientedPin)Pins[2]).Offset = new(8, -4);
-                    ((FixedOrientedPin)Pins[3]).Offset = new(8, 4);
+                    ((FixedOrientedPin)Pins[3]).Offset = new(8, -4);
+                    ((FixedOrientedPin)Pins[4]).Offset = new(8, 4);
                 }
                 else
                 {
                     ((FixedOrientedPin)Pins[3]).Offset = new(8, -4);
-                    ((FixedOrientedPin)Pins[2]).Offset = new(8, 4);
+                    ((FixedOrientedPin)Pins[4]).Offset = new(8, 4);
                 }
             }
         }

@@ -65,6 +65,23 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
+        /// Draws a cross.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="center">The center.</param>
+        /// <param name="size">The size.</param>
+        /// <param name="options">The options.</param>
+        public static void Cross(this SvgDrawing drawing, Vector2 center, double size, PathOptions options = null)
+        {
+            drawing.Path(b =>
+                b
+                .MoveTo(center - new Vector2(size, size) * 0.5)
+                .Line(size, size)
+                .MoveTo(center - new Vector2(-size, size) * 0.5)
+                .Line(-size, size), options);
+        }
+
+        /// <summary>
         /// Draws a dot.
         /// </summary>
         /// <param name="drawing">The drawing.</param>

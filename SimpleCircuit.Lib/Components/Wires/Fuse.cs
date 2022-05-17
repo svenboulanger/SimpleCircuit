@@ -27,17 +27,15 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
 
-                if (options?.AREI ?? false)
-                    AddVariant("ei");
+                if (options?.IEC ?? false)
+                    AddVariant("iec");
+                else
+                    AddVariant("ansi");
 
                 DrawingVariants = Variant.FirstOf(
-                    Variant.If("ei").Then(
-                        Variant.If("auto").Then(DrawAutoFuse).Else(DrawIEC)
-                    ),
                     Variant.If("ansi").Then(
                         Variant.If("alt").Then(DrawANSIalt).Else(DrawANSI)
                     ),
-                    Variant.If("auto").Then(DrawAutoFuse),
                     Variant.Do(DrawIEC));
             }
 
@@ -45,8 +43,8 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.Polygon(new Vector2[]
                 {
-                new(-6, -3), new(6, -3),
-                new(6, 3), new(-6, 3)
+                    new(-6, -3), new(6, -3),
+                    new(6, 3), new(-6, 3)
                 });
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
             }
@@ -70,16 +68,7 @@ namespace SimpleCircuit.Components.Wires
                 new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
             }
-            private void DrawAutoFuse(SvgDrawing drawing)
-            {
-                drawing.Line(new(-6, 0), new(-4, 0), new("wire"));
-                drawing.Line(new(-4, 0), new(4, -4));
-                drawing.Polygon(new Vector2[]
-                {
-                new(4, -4), new(3.25, -5.5),
-                new(1.25, -4.5), new(2, -3)
-                }, new("dot"));
-            }
+
         }
     }
 }

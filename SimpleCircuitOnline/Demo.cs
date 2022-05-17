@@ -70,7 +70,7 @@ namespace SimpleCircuitOnline
                 "",
                 "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
                 "// Wires can be given a fixed length by adding a number after the direction.",
-                "GND1 <u> V1(\"V_in\") <u r> R1(\"R_1\") <r> Xfb <r> OA1 <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
+                "GND1 <u> V1(\"V_in\") <u r> R1(\"R_1\") <r> Xfb <r> [n]OA1(flip) <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
                 "OA1[p] <l d> GND2",
                 "Xout <r 5> T(\"V_out\")",
                 "",
@@ -87,11 +87,7 @@ namespace SimpleCircuitOnline
                 "OA1[out] <r> Xout <d l> Rfb(\"R_F\") <l> Xfb <d> R1(\"R_G\") <d> GND2",
                 "Xfb <u 10 r> [n]OA1",
                 "",
-                "Xout <r 5> T(\"V_out\")",
-                "",
-                "// Many components have properties that can be set by starting a line with '-'.",
-                "// You can find a list of properties in the list of components on the right.",
-                "- OA1.Flipped = true",
+                "Xout <r 5> T(\"V_out\")"
             })),
 
             // Wheatstone bridge

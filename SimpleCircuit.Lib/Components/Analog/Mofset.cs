@@ -133,7 +133,7 @@ namespace SimpleCircuit.Components.Analog
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
-                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 8), new Vector2(0, 1)), "g", "gate");
+                Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 9), new Vector2(0, 1)), "g", "gate");
                 Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
                 Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
 

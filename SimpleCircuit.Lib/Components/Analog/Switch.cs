@@ -34,16 +34,9 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("backside", "The backside controlling pin. Can be used to link multiple switches.", this, new(0, -6), new(0, 1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
 
-                if (options?.AREI ?? false)
-                    AddVariant("arei");
-                else if (options?.EIC ?? false)
-                    AddVariant("eic");
-                else
-                    AddVariant("ansi");
-
                 PinUpdate = All(
                     Map("arei", "push", UpdatePins),
-                    IfNot("arei").Then(Map("closed", "inverted", UpdateControlPin)));
+                    IfNot("arei").Then(Map("closed", "invert", UpdateControlPin)));
                 DrawingVariants = If("arei")
                     .Then(
                         If("push")
@@ -52,8 +45,15 @@ namespace SimpleCircuit.Components.Analog
                     .Else(
                         If("knife").Then(Map("closed", DrawKnifeSwitch)).Else(
                         If("push")
-                        .Then(Map("closed", "inv", DrawPushSwitch))
-                        .Else(Map("closed", "inv", DrawRegularSwitch))));
+                        .Then(Map("closed", "invert", DrawPushSwitch))
+                        .Else(Map("closed", "invert", DrawRegularSwitch))));
+
+                if (options?.AREI ?? false)
+                    AddVariant("arei");
+                else if (options?.IEC ?? false)
+                    AddVariant("eic");
+                else
+                    AddVariant("ansi");
             }
 
             private void DrawKnifeSwitch(SvgDrawing drawing, bool closed)
@@ -71,6 +71,9 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(4, 0), new(6, 0), new("wire"));
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, 6), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
@@ -242,18 +245,18 @@ namespace SimpleCircuit.Components.Analog
                     if (push)
                     {
                         SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(2, new(4, 0));
+                        SetPinOffset(3, new(4, 0));
                     }
                     else
                     {
                         SetPinOffset(0, new(-2, 0));
-                        SetPinOffset(2, new(2, 0));
+                        SetPinOffset(3, new(2, 0));
                     }
                 }
                 else
                 {
                     SetPinOffset(0, new(-6, 0));
-                    SetPinOffset(2, new(6, 0));
+                    SetPinOffset(3, new(6, 0));
                 }
             }
         }
