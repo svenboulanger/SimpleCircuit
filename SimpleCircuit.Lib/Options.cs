@@ -18,8 +18,8 @@
         [Description("Use EIC style symbols.")]
         public bool EIC { get => _style == Styles.EIC; set => _style = Styles.EIC; }
 
-        [Description("Use symbols for electrical installation diagrams.")]
-        public bool ElectricalInstallation { get; set; }
+        [Description("Use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
+        public bool AREI { get; set; }
 
         [Description("Whether to use the packaged variant of transistors. The default is false.")]
         public bool PackagedTransistors { get; set; } = false;

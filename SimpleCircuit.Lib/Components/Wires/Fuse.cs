@@ -27,7 +27,7 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
 
-                if (options?.ElectricalInstallation ?? false)
+                if (options?.AREI ?? false)
                     AddVariant("ei");
 
                 DrawingVariants = Variant.FirstOf(
