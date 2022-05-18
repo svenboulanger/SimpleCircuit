@@ -33,11 +33,23 @@ namespace SimpleCircuit.Components.Analog
                 .SmoothTo(new(-_inner - _kx, _height), new(-_inner, _height))
                 .SmoothTo(new(-_inner + _rx, _ky), new(-_inner + _rx, 0))
                 .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
+            private double _length = 8.0;
 
             [Description("The label in the transmission line.")]
             public string Label { get; set; }
             [Description("The length of the transmission line.")]
-            public double Length { get; set; }
+            public double Length
+            {
+                get => _length;
+                set
+                {
+                    if (value < 8.0)
+                        _length = 8.0;
+                    else
+                        _length = value;
+                    UpdatePins();
+                }
+            }
 
             /// <inheritdoc />
             public override string Type => "transmissionline";
@@ -75,11 +87,11 @@ namespace SimpleCircuit.Components.Analog
             }
             private void UpdatePins()
             {
-                Length = Math.Max(8, Length);
-                ((FixedOrientedPin)Pins[0]).Offset = new(-_inner - (Length - _width) / 2, 0);
-                ((FixedOrientedPin)Pins[1]).Offset = new(-_inner - (Length - _width) / 2, _height);
-                ((FixedOrientedPin)Pins[2]).Offset = new(_inner + (Length - _width) / 2, _height);
-                ((FixedOrientedPin)Pins[3]).Offset = new(_width + (Length - _width) / 2, 0);
+                void SetPin(int index, Vector2 offset) => ((FixedOrientedPin)Pins[index]).Offset = offset;
+                SetPin(0, new(-_inner - (Length - _width) / 2, 0));
+                SetPin(1, new(-_inner - (Length - _width) / 2, _height));
+                SetPin(2, new(_inner + (Length - _width) / 2, _height));
+                SetPin(3, new(_width + (Length - _width) / 2, 0));
             }
         }
     }
