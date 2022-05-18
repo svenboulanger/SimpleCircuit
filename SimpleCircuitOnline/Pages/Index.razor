@@ -1,5 +1,6 @@
 ﻿@page "/"
-@inject IJSRuntime _js 
+@inject IJSRuntime _js
+@inject Blazored.LocalStorage.ILocalStorageService _localStore
 
 <div class="split-screen">
     <div class="sidebar">
@@ -8,6 +9,9 @@
                 <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
             </Tab>
             <Tab Title="Style">
+                <div class="full-width">
+                    <a href="javascript:void(0);" class="btn">Restore default style</a>
+                </div>
                 <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
             </Tab>
             <Tab Title="Help">

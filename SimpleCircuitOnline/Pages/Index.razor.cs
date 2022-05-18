@@ -101,8 +101,25 @@ namespace SimpleCircuitOnline.Pages
                 await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
                 await MonacoEditorBase.SetTheme("simpleCircuitTheme");
 
+                // Try to find the last saved script
+                bool hasScript = false;
+                if (_localStore != null)
+                {
+                    string script = await _localStore.GetItemAsStringAsync("last_script");
+                    string style = await _localStore.GetItemAsStringAsync("last_style");
+                    if (!string.IsNullOrWhiteSpace(script))
+                    {
+                        if (!string.IsNullOrWhiteSpace(style))
+                            await SetCurrentScript(script, style);
+                        else
+                            await SetCurrentScript(script, GraphicalCircuit.DefaultStyle);
+                        hasScript = true;
+                    }
+                }
+
                 // Give the user an initial demo
-                await SetCurrentScript(Demo.Demos[0].Code, GraphicalCircuit.DefaultStyle);
+                if (!hasScript)
+                    await SetCurrentScript(Demo.Demos[0].Code, GraphicalCircuit.DefaultStyle);
             }
         }
 
@@ -164,7 +181,6 @@ namespace SimpleCircuitOnline.Pages
             XmlDocument doc = null;
             try
             {
-
                 var code = await _scriptEditor.GetValue();
                 var context = new SimpleCircuit.Parser.ParsingContext();
                 context.Diagnostics = logger;
@@ -186,6 +202,10 @@ namespace SimpleCircuitOnline.Pages
                 {
                     doc = ckt.Render(logger, _jsTextFormatter);
                 }
+
+                // Store the script and style for next time
+                await _localStore.SetItemAsStringAsync("last_script", code);
+                await _localStore.SetItemAsStringAsync("last_style", ckt.Style);
             }
             catch (Exception ex)
             {
