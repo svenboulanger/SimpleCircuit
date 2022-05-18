@@ -79,7 +79,7 @@ namespace SimpleCircuit
         {
             if (lexer.Branch(TokenType.Number, out var value))
             {
-                if (!double.TryParse(value.ToString(), NumberStyles.Float, Culture, out result))
+                if (!double.TryParse(value.Content.ToString(), NumberStyles.Float, Culture, out result))
                 {
                     diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
                     return false;
@@ -166,7 +166,7 @@ namespace SimpleCircuit
         {
             if (lexer.Branch(TokenType.Number, out var value))
             {
-                if (!double.TryParse(value.ToString(), NumberStyles.Float, Culture, out result))
+                if (!double.TryParse(value.Content.ToString(), NumberStyles.Float, Culture, out result))
                 {
                     diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
                     return false;
