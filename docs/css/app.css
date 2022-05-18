@@ -138,3 +138,6 @@ svg {
     width: auto;
     height: auto;
 }
+.greyed {
+    opacity: 0.4;
+}
