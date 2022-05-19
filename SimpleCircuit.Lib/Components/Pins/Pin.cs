@@ -53,12 +53,8 @@ namespace SimpleCircuit.Components.Pins
             double x = 0, y = 0;
             if (state.TryGetValue(context.Nodes.Shorts[X], out var xValue))
                 x = xValue.Value;
-            else
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find X-coordinate of pin {Name} of {Owner.Name} in solver."));
             if (state.TryGetValue(context.Nodes.Shorts[Y], out var yValue))
                 y = yValue.Value;
-            else
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find Y-coordinate of pin {Name} of {Owner.Name} in solver."));
             Location = new(x, y);
         }
 

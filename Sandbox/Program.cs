@@ -21,10 +21,18 @@ namespace Sandbox
 
 CTIA <u> A(""1"") <u> TL <u> A1(""1"") <u> X1
 CTIA <u> A(""1"") <u> TL <u> A2(""1"") <u> X2
-X1 <r + 35> X2
+CTIA <u> A(""1"") <u> TL <u> A3(""1"") <u> X3
+X1 <r +35> X2 <r> X <r +10 dashed> Xo <r +10 dashed> X <r> X3
 
-T(""control"") <r> BUS <r> Xb1 <u r 5 arrow> [vp]A1
+T(""enable"") <r> BUS <r> Xb1 <u r 5 arrow> [vp]A1
 Xb1 <r> Xb2 <u r 5 arrow> [vp]A2
+Xb2 <r 10> X <r dashed> X <r 10> Xb3
+Xb3 <u r 5 arrow> [vp]A3
+
+T(""enable"") <r> BUS2 <r> Xbb1
+
+Xo <u> Ao(""1"") <u> T(""bondpad"")
+- Ao.scale = 1.5
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);

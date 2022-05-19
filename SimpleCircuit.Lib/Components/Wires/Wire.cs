@@ -73,21 +73,23 @@ namespace SimpleCircuit.Components.Wires
         public override void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
         {
             _vectors.Clear();
-            if (!state.TryGetValue(context.Nodes.Shorts[StartX], out var x))
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find X-coordinate of {StartX} in solver."));
-            if (!state.TryGetValue(context.Nodes.Shorts[StartY], out var y))
-                diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find X-coordinate of {StartY} in solver."));
-            if (x != null && y != null)
-                _vectors.Add(new(x.Value, y.Value));
+
+            double x = 0.0, y = 0.0;
+            if (state.TryGetValue(context.Nodes.Shorts[StartX], out var solX))
+                x = solX.Value;
+            if (state.TryGetValue(context.Nodes.Shorts[StartY], out var solY))
+                y = solY.Value;
+            _vectors.Add(new(x, y));
 
             for (int i = 0; i < _info.Segments.Count; i++)
             {
-                if (!state.TryGetValue(context.Nodes.Shorts[GetXName(i)], out x))
-                    diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW001", $"Could not find X-coordinate of {GetXName(i)} in solver."));
-                if (!state.TryGetValue(context.Nodes.Shorts[GetYName(i)], out y))
-                    diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "UW002", $"Coult not find Y-coordinate of {GetYName(i)} in solver."));
-                if (x != null && y != null)
-                    _vectors.Add(new(x.Value, y.Value));
+                x = 0.0;
+                y = 0.0;
+                if (state.TryGetValue(context.Nodes.Shorts[GetXName(i)], out solX))
+                    x = solX.Value;
+                if (state.TryGetValue(context.Nodes.Shorts[GetYName(i)], out solY))
+                    y = solY.Value;
+                _vectors.Add(new(x, y));
             }
         }
 
@@ -146,13 +148,16 @@ namespace SimpleCircuit.Components.Wires
 
         private void DrawWire(SvgDrawing drawing)
         {
-            drawing.Path(builder =>
+            if (_vectors.Count > 0)
             {
+                drawing.Path(builder =>
+                {
                 // Start the first point and build the path
-                builder.MoveTo(_vectors[0]);
-                for (int i = 1; i < _vectors.Count; i++)
-                    builder.LineTo(_vectors[i]);
-            }, _info.Options);
+                    builder.MoveTo(_vectors[0]);
+                    for (int i = 1; i < _vectors.Count; i++)
+                        builder.LineTo(_vectors[i]);
+                }, _info.Options);
+            }
         }
 
         private string GetXName(int index) => $"{Name}.{index + 1}.x";
