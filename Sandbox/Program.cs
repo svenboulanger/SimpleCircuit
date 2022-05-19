@@ -10,7 +10,22 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"V1(""V_A B"")";
+            var script = @".subckt CTIA DIRo
+    .options minimumwirelength = 5
+    .options scale = 0.75
+    A1 <r> Xo <r 0> DIRo
+    - A1.scale = 0.5
+    Xo <u l> C <l d +10> Xi <r 5> [i]A1
+    Xi <d> [n]D(photodiode, flip)[p] <d 3> POW("""")
+.ends
+
+CTIA <u> A(""1"") <u> TL <u> A1(""1"") <u> X1
+CTIA <u> A(""1"") <u> TL <u> A2(""1"") <u> X2
+X1 <r + 35> X2
+
+T(""control"") <r> BUS <r> Xb1 <u r 5 arrow> [vp]A1
+Xb1 <r> Xb2 <u r 5 arrow> [vp]A2
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext

@@ -363,10 +363,13 @@ namespace SimpleCircuit.Parser
 
                 if (isSegment)
                 {
-                    if (lexer.Branch(TokenType.Plus) || lexer.Check(TokenType.Number))
+                    bool isFixed = true;
+                    if (lexer.Branch(TokenType.Plus))
+                        isFixed = false;
+                    if (lexer.Check(TokenType.Number))
                     {
                         double length = ParseDouble(lexer, context);
-                        wireInfo.Segments.Add(new WireSegment(orientation, false, length));
+                        wireInfo.Segments.Add(new WireSegment(orientation, isFixed, length));
                     }
                     else
                         // Default wire segment with a minimum wire length defined by the options

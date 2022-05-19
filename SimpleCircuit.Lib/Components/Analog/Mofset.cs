@@ -149,7 +149,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Pins[0].Connections == 0)
                     drawing.Line(new(4, 0), new(8, 0), new("wire"));
                 if (Pins[1].Connections == 0)
-                    drawing.Line(new(0, 7), new(0, 9), new("wire"));
+                    drawing.Line(new(0, 9), new(0, 11), new("wire"));
                 if (Pins[3].Connections == 0)
                     drawing.Line(new(-4, 0), new(-8, 0), new("wire"));
 
