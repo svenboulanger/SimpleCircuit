@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Collections.Generic;
@@ -30,8 +31,6 @@ namespace SimpleCircuit
         private XmlNode _current;
         private readonly ExpandableBounds _bounds;
         private readonly Stack<Transform> _tf = new();
-        private static Regex _superSubscriptRegex = new(@"[\^_](\{(?<content>[^""\}]+)\}|(?<content>\w+))", RegexOptions.Compiled);
-        private static Regex _newlineRegex = new(@"\\r(?:\\n)?|\\n|\r\n?|\n|\<\s*br\s*\/?\>", RegexOptions.Compiled);
 
         /// <summary>
         /// Gets the current transform.
@@ -175,14 +174,8 @@ namespace SimpleCircuit
             string pointdata = node.Attributes["points"]?.Value;
             if (pointdata != null)
             {
-                points = new();
                 var lexer = new SvgPathDataLexer(pointdata);
-                while (lexer.Type != TokenType.EndOfContent)
-                {
-                    // Keep parsing vectors
-                    lexer.ParseVector(diagnostics, out var p);
-                    points.Add(p);
-                }
+                points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
             }
             else if (node.HasChildNodes)
             {
@@ -214,14 +207,8 @@ namespace SimpleCircuit
             List<Vector2> points;
             if (pointdata != null)
             {
-                points = new();
                 var lexer = new SvgPathDataLexer(pointdata);
-                while (lexer.Type != TokenType.EndOfContent)
-                {
-                    // Keep parsing vectors
-                    lexer.ParseVector(diagnostics, out var p);
-                    points.Add(p);
-                }
+                points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
             }
             else if (node.HasChildNodes)
             {
@@ -271,212 +258,7 @@ namespace SimpleCircuit
                 Path(b =>
                 {
                     var lexer = new SvgPathDataLexer(d);
-                    while (lexer.Type != TokenType.EndOfContent)
-                    {
-                        Vector2 h1, h2, p;
-                        double d;
-                        bool result = true;
-                        if (!lexer.Branch(TokenType.Command, out var cmd))
-                        {
-                            diagnostics?.Post(new TokenDiagnosticMessage(cmd, SeverityLevel.Error, "DW001",
-                                $"Could not recognize the SVG path command '{cmd.Content}'"));
-                            break;
-                        }
-                        switch (cmd.Content.Span[0])
-                        {
-                            case 'M':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.MoveTo(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.LineTo(p);
-                                break;
-                            case 'm':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Move(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.Line(p);
-                                break;
-                            case 'L':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.LineTo(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.LineTo(p);
-                                break;
-                            case 'l':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Line(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.Line(p);
-                                break;
-                            case 'H':
-                                if (!lexer.ParseCoordinate(diagnostics, out d))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.HorizontalTo(d);
-                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
-                                    b.HorizontalTo(d);
-                                break;
-                            case 'h':
-                                if (!lexer.ParseCoordinate(diagnostics, out d))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Horizontal(d);
-                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
-                                    b.Horizontal(d);
-                                break;
-                            case 'V':
-                                if (!lexer.ParseCoordinate(diagnostics, out d))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.VerticalTo(d);
-                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
-                                    b.VerticalTo(d);
-                                break;
-                            case 'v':
-                                if (!lexer.ParseCoordinate(diagnostics, out d))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Vertical(d);
-                                while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
-                                    b.Vertical(d);
-                                break;
-                            case 'C':
-                                result &= lexer.ParseVector(diagnostics, out h1);
-                                result &= lexer.ParseVector(diagnostics, out h2);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.CurveTo(h1, h2, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
-                                    lexer.ParseVector(diagnostics, out h2) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.CurveTo(h1, h2, p);
-                                break;
-                            case 'c':
-                                result &= lexer.ParseVector(diagnostics, out h1);
-                                result &= lexer.ParseVector(diagnostics, out h2);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Curve(h1, h2, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
-                                    lexer.ParseVector(diagnostics, out h2) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.Curve(h1, h2, p);
-                                break;
-                            case 'S':
-                                result &= lexer.ParseVector(diagnostics, out h2);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.SmoothTo(h2, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h2) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.SmoothTo(h2, p);
-                                break;
-                            case 's':
-                                result &= lexer.ParseVector(diagnostics, out h2);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.Smooth(h2, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h2) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.Smooth(h2, p);
-                                break;
-                            case 'Q':
-                                result &= lexer.ParseVector(diagnostics, out h1);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.QuadCurveTo(h1, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.QuadCurveTo(h1, p);
-                                break;
-                            case 'q':
-                                result &= lexer.ParseVector(diagnostics, out h1);
-                                result &= lexer.ParseVector(diagnostics, out p);
-                                if (!result)
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.QuadCurve(h1, p);
-                                while (lexer.TryParseVector(diagnostics, new(), out h1) &&
-                                    lexer.ParseVector(diagnostics, out p))
-                                    b.QuadCurve(h1, p);
-                                break;
-                            case 'T':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.SmoothQuadTo(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.SmoothQuadTo(p);
-                                break;
-                            case 't':
-                                if (!lexer.ParseVector(diagnostics, out p))
-                                {
-                                    lexer.Skip(~TokenType.Command);
-                                    continue;
-                                }
-                                b.SmoothQuad(p);
-                                while (lexer.TryParseVector(diagnostics, new(), out p))
-                                    b.SmoothQuad(p);
-                                break;
-                            case 'z':
-                            case 'Z':
-                                b.Close();
-                                break;
-
-                            default:
-                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
-                                    $"Could not recognize path command '{cmd}'."));
-                                break;
-                        }
-                    }
+                    SvgPathDataParser.Parse(lexer, b, diagnostics);
                 }, options);
             }
             else if (node.HasChildNodes)
@@ -911,9 +693,12 @@ namespace SimpleCircuit
             _current.AppendChild(txt);
 
             // Apply text
-            value = TransformText(value);
+            // value = TransformText(value);
+            var lexer = new SimpleTextLexer(value);
+            var context = new SimpleTextContext();
+            SimpleTextParser.Parse(lexer, context);
             List<XmlElement> elements = new();
-            foreach (var line in _newlineRegex.Split(value))
+            foreach (var line in context.Lines)
             {
                 var tspan = _document.CreateElement("tspan", Namespace);
                 PopulateText(tspan, line);
@@ -1006,22 +791,6 @@ namespace SimpleCircuit
 
         }
 
-        private string TransformText(string value)
-        {
-            value = value.Replace("\\\"", "\"");
-            value = _superSubscriptRegex.Replace(value, match =>
-            {
-                if (match.Value[0] == '^')
-                    return $"</tspan><tspan dy=\"-0.5em\" style=\"font-size: 0.75em\">{match.Groups["content"].Value}</tspan><tspan dy=\"-0.375em\">";
-                else
-                    return $"</tspan><tspan dy=\"0.5em\" style=\"font-size: 0.75em\">{match.Groups["content"].Value}</tspan><tspan dy=\"-0.375em\">";
-            });
-            value = $"<tspan>{value}</tspan>";
-
-            // Also deal with newlines
-            value = _newlineRegex.Replace(value, m => $"</tspan>{m.Value}<tspan>");
-            return value;
-        }
         private void PopulateText(XmlNode element, string line)
         {
             var fragment = _document.CreateDocumentFragment();

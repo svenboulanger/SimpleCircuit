@@ -182,8 +182,14 @@ namespace SimpleCircuitOnline.Pages
             try
             {
                 var code = await _scriptEditor.GetValue();
+                var style = await _styleEditor.GetValue();
                 var context = new SimpleCircuit.Parser.ParsingContext();
                 context.Diagnostics = logger;
+
+                // Store the script and style for next time
+                await _localStore.SetItemAsStringAsync("last_script", code);
+                await _localStore.SetItemAsStringAsync("last_style", style);
+                await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
                 // Parse the script
                 var lexer = SimpleCircuit.Parser.SimpleCircuitLexer.FromString(code);
@@ -191,21 +197,13 @@ namespace SimpleCircuitOnline.Pages
                 var ckt = context.Circuit;
 
                 // Include XML data
-                ckt.Style = await _styleEditor.GetValue();
+                ckt.Style = style;
                 if (includeScript)
                     ckt.Metadata.Add("script", code);
 
-                // Share it with the rest
-                ((IJSInProcessRuntime)_js).InvokeVoid("updateStyle", ModifyCSS(ckt.Style));
-
+                // We now need the last things to have executed
                 if (ckt.Count > 0 && logger.ErrorCount == 0)
-                {
                     doc = ckt.Render(logger, _jsTextFormatter);
-                }
-
-                // Store the script and style for next time
-                await _localStore.SetItemAsStringAsync("last_script", code);
-                await _localStore.SetItemAsStringAsync("last_style", ckt.Style);
             }
             catch (Exception ex)
             {

@@ -10,15 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".symbol KEY
-<drawing>
-<path
-       id=""path12""
-       d = ""M 0,0 H 17.363281 V 3.9451264 L 15.225353,6.0830541 H 1.937128 L 0,4.1459263 Z""
-       style = ""opacity:0.75;fill:#3366cc;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000"" />
-</drawing>
-.endsymbol
-KEY";
+            var script = @"V1(""V_A B"")";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
