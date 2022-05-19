@@ -94,8 +94,12 @@ namespace SimpleCircuitOnline.Pages
 
                 // Register our own language keywords
                 List<string> keys = new();
-                foreach (var component in Utility.Components(typeof(Utility).Assembly))
-                    keys.Add(component.Key);
+                var context = new SimpleCircuit.Parser.ParsingContext();
+                foreach (var factory in context.Factory.Factories)
+                {
+                    foreach (var metadata in factory.Metadata)
+                        keys.AddRange(metadata.Keys);
+                }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
                 var model = await _scriptEditor.GetModel();
                 await MonacoEditor.SetModelLanguage(model, "simpleCircuit");

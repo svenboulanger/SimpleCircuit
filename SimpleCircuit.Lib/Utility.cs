@@ -18,21 +18,6 @@ namespace SimpleCircuit
         /// </summary>
         public readonly static CultureInfo Culture = CultureInfo.InvariantCulture;
 
-        public class ComponentDescription
-        {
-            public string Key { get; }
-            public string Name { get; }
-            public string Category { get; }
-            public Type Type { get; }
-            public ComponentDescription(string key, string name, string category, Type type)
-            {
-                Key = key;
-                Name = name;
-                Category = category;
-                Type = type;
-            }
-        }
-
         /// <summary>
         /// Determines whether the specified value is zero.
         /// </summary>
@@ -212,16 +197,6 @@ namespace SimpleCircuit
             success &= TryParseCoordinate(lexer, diagnostics, defaultValue.Y, out double y);
             result = new(x, y);
             return success;
-        }
-
-        /// <summary>
-        /// Gets all the component keys and types in an assembly.
-        /// </summary>
-        /// <param name="assembly">The assembly.</param>
-        /// <returns>The components in the assembly.</returns>
-        public static IEnumerable<ComponentDescription> Components(Assembly assembly)
-        {
-            yield break;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace SimpleCircuitOnline.Shared
             {
                 foreach (var metadata in factory.Metadata)
                 {
-                    // Let's add the metdata and a component of it for each category
+                    // Let's add the metadata and a component of it for each category
                     foreach (string category in metadata.Categories)
                     {
                         if (!_categories.TryGetValue(category, out var list))
