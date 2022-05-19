@@ -26,6 +26,29 @@
     height: 100%;
     overflow: auto;
 }
+.btn[b-ec1xys281s] {
+    color: #fff;
+    background-color: #808080;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    padding: 0.25rem 0.75rem;
+    margin: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.btn:hover[b-ec1xys281s] {
+    background-color: #404040;
+}
+.full-width[b-ec1xys281s] {
+    width: 100%;
+    text-align: center;
+}
 /* /Shared/ComponentHelp.razor.rz.scp.css */
 .container[b-ts37c372oa] {
     padding: 0;
