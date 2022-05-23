@@ -30,7 +30,7 @@ namespace SimpleCircuit.Components
                 drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));
                 drawing.Circle(new Vector2(-5.5, 0), 1.5, new("terminal"));
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(-10, 0), new Vector2(-1, 0));
+                    drawing.Text(Label, new Vector2(-8, 0), new Vector2(-1, 0));
             }
         }
     }

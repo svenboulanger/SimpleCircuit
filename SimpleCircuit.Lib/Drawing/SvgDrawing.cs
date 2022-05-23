@@ -131,7 +131,14 @@ namespace SimpleCircuit
                 BeginTransform(new Transform(o, Matrix2.Rotate(a) * s));
             }
 
-            foreach (XmlNode node in description.ChildNodes)
+            DrawXmlActions(description, diagnostics);
+
+            if (scale != null || offset != null || rotate != null)
+                EndTransform();
+        }
+        private void DrawXmlActions(XmlNode parent, IDiagnosticHandler diagnostics)
+        {
+            foreach (XmlNode node in parent.ChildNodes)
             {
                 // Depending on the node type, let's draw something!
                 switch (node.Name)
@@ -141,16 +148,22 @@ namespace SimpleCircuit
                     case "path": DrawXmlPath(node, diagnostics); break;
                     case "polygon": DrawXmlPolygon(node, diagnostics); break;
                     case "polyline": DrawXmlPolyline(node, diagnostics); break;
+                    case "rect": DrawXmlRectangle(node, diagnostics); break;
                     case "text": DrawXmlText(node, diagnostics); break;
+                    case "group":
+                    case "g":
+                        // Parse options
+                        var options = ParsePathOptions(node);
+                        StartGroup(options);
+                        DrawXmlActions(node, diagnostics);
+                        EndGroup();
+                        break;
                     default:
                         diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001",
                             $"Could not recognize drawing node '{node.Name}'"));
                         break;
                 }
             }
-
-            if (scale != null || offset != null || rotate != null)
-                EndTransform();
         }
         private void DrawXmlLine(XmlNode node, IDiagnosticHandler diagnostics)
         {
@@ -387,6 +400,46 @@ namespace SimpleCircuit
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DW001",
                     "Could not find path data"));
             }
+        }
+        private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
+        {
+            var options = ParsePathOptions(node);
+            if (!node.ParseVector("x", "y", diagnostics, out var location))
+                return;
+            if (!node.ParseVector("width", "height", diagnostics, out var size))
+                return;
+            node.TryParseCoordinate("rx", diagnostics, double.NaN, out double rx);
+            node.TryParseCoordinate("ry", diagnostics, double.NaN, out double ry);
+            if (double.IsNaN(rx) && !double.IsNaN(ry))
+                rx = ry;
+            else if (double.IsNaN(ry) && !double.IsNaN(rx))
+                ry = rx;
+            else if (double.IsNaN(rx) && double.IsNaN(ry))
+            {
+                rx = 0.0;
+                ry = 0.0;
+            }
+
+            // Draw the rectangle
+            double kx = 0.55191502449351057 * rx;
+            double ky = 0.55191502449351057 * ry;
+            Path(b =>
+            {
+                b.MoveTo(location + new Vector2(rx, 0));
+                b.Horizontal(size.X - 2 * rx);
+                if (rx != 0.0)
+                    b.Curve(new(kx, 0), new(rx, ry - ky), new(rx, ry));
+                b.Vertical(size.Y - 2 * ry);
+                if (ry != 0.0)
+                    b.Curve(new(0, ky), new(-rx + kx, ry), new(-rx, ry));
+                b.Horizontal(2 * rx - size.X);
+                if (rx != 0.0)
+                    b.Curve(new(-kx, 0), new(-rx, ky - ry), new(-rx, -ry));
+                b.Vertical(2 * ry - size.Y);
+                if (ry != 0)
+                    b.Curve(new(0, -ky), new(rx - kx, -ry), new(rx, -ry));
+                b.Close();
+            }, options);
         }
         private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
         {

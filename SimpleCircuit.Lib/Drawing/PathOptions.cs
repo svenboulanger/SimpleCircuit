@@ -75,11 +75,6 @@ namespace SimpleCircuit.Drawing
         public LineTypes LineType { get; set; }
 
         /// <summary>
-        /// Gets or sets the style of the path.
-        /// </summary>
-        public string Style { get; set; }
-
-        /// <summary>
         /// Creates new path options.
         /// </summary>
         /// <param name="classNames">Class names.</param>
@@ -96,10 +91,6 @@ namespace SimpleCircuit.Drawing
             base.Apply(element);
             ApplyMarkers(element);
             ApplyLineTypes(element);
-
-            // Apply the styling
-            if (!string.IsNullOrWhiteSpace(Style))
-                element.SetAttribute("style", Style);
         }
 
         private string GetDefinition(XmlDocument document, MarkerTypes marker)

@@ -14,6 +14,7 @@ namespace SimpleCircuit.Drawing
         private readonly Transform _transform;
         private Vector2 _current, _lastHandle;
         private Func<Vector2, Vector2> _relativeModifier = null, _absoluteModifier = null;
+        private char _impliedAction = '\0';
 
         /// <summary>
         /// Creates a new path builder.
@@ -91,7 +92,7 @@ namespace SimpleCircuit.Drawing
             _lastHandle = _current = _transform.Apply(location);
 
             _bounds.Expand(_current);
-            Append($"M{Convert(_current)}");
+            Append($"{Action('M', 'L')}{Convert(_current)}");
             return this;
         }
 
@@ -118,7 +119,7 @@ namespace SimpleCircuit.Drawing
             _lastHandle = _current;
 
             _bounds.Expand(_current);
-            Append($"m{Convert(delta)}");
+            Append($"{Action('m', 'l')}{Convert(delta)}");
             return this;
         }
 
@@ -140,10 +141,16 @@ namespace SimpleCircuit.Drawing
         {
             ValidateOrigin();
             location = _absoluteModifier?.Invoke(location) ?? location;
-            _lastHandle = _current = _transform.Apply(location);
+            location = _transform.Apply(location);
+            if ((location.Y - _current.Y).IsZero())
+                Append($"{Action('H')}{Convert(location.X)}");
+            else if ((location.X - _current.X).IsZero())
+                Append($"{Action('V')}{Convert(location.Y)}");
+            else
+                Append($"{Action('L')}{Convert(location)}");
 
+            _lastHandle = _current = location;
             _bounds.Expand(_current);
-            Append($"L{Convert(_current)}");
             return this;
         }
 
@@ -166,11 +173,16 @@ namespace SimpleCircuit.Drawing
             ValidateOrigin();
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
+            if (delta.Y.IsZero())
+                Append($"{Action('h')}{Convert(delta.X)}");
+            else if (delta.X.IsZero())
+                Append($"{Action('v')}{Convert(delta.Y)}");
+            else
+                Append($"{Action('l')}{Convert(delta)}");
+
             _current += delta;
             _lastHandle = _current;
-
             _bounds.Expand(_current);
-            Append($"l{Convert(delta)}");
             return this;
         }
 
@@ -212,7 +224,7 @@ namespace SimpleCircuit.Drawing
             double k = x - (_current - vo).Dot(vnx);
             _current += k * vnx;
             _bounds.Expand(_current);
-            Append($"L{Convert(_current)}");
+            Append($"{Action('L')}{Convert(_current)}");
             return this;
         }
 
@@ -231,7 +243,7 @@ namespace SimpleCircuit.Drawing
             _lastHandle = _current;
 
             _bounds.Expand(_current);
-            Append($"l{Convert(delta)}");
+            Append($"{Action('l')}{Convert(delta)}");
             return this;
         }
 
@@ -263,7 +275,7 @@ namespace SimpleCircuit.Drawing
             double k = y - (_current - vo).Dot(vny);
             _current += k * vny;
             _bounds.Expand(_current);
-            Append($"L{Convert(_current)}");
+            Append($"{Action('L')}{Convert(_current)}");
             return this;
         }
 
@@ -282,7 +294,7 @@ namespace SimpleCircuit.Drawing
             _lastHandle = _current;
 
             _bounds.Expand(_current);
-            Append($"l{Convert(delta)}");
+            Append($"{Action('l')}{Convert(delta)}");
             return this;
         }
 
@@ -304,7 +316,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"C{Convert(h1)} {Convert(_lastHandle)} {Convert(_current)}");
+            Append($"{Action('C')}{Convert(h1)} {Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -328,7 +340,7 @@ namespace SimpleCircuit.Drawing
             _current += dend;
 
             _bounds.Expand(new[] { _current + dh1, _lastHandle, _current });
-            Append($"c{Convert(dh1)} {Convert(dh2)} {Convert(dend)}");
+            Append($"{Action('c')}{Convert(dh1)} {Convert(dh2)} {Convert(dend)}");
             return this;
         }
 
@@ -348,7 +360,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"S{Convert(_lastHandle)} {Convert(_current)}");
+            Append($"{Action('S')}{Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -370,7 +382,7 @@ namespace SimpleCircuit.Drawing
             _current += dend;
 
             _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"s{Convert(dh)} {Convert(dend)}");
+            Append($"{Action('s')}{Convert(dh)} {Convert(dend)}");
             return this;
         }
 
@@ -389,7 +401,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"Q{Convert(_lastHandle)} {Convert(_current)}");
+            Append($"{Action('Q')}{Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -410,7 +422,7 @@ namespace SimpleCircuit.Drawing
             _current += dend;
 
             _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"q{Convert(_lastHandle)} {Convert(_current)}");
+            Append($"{Action('q')}{Convert(_lastHandle)} {Convert(_current)}");
             return this;
         }
 
@@ -427,7 +439,7 @@ namespace SimpleCircuit.Drawing
             _current = _transform.Apply(end);
 
             _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"T{Convert(_current)}");
+            Append($"{Action('T')}{Convert(_current)}");
             return this;
         }
 
@@ -445,7 +457,7 @@ namespace SimpleCircuit.Drawing
             _current += dend;
 
             _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"t{Convert(dend)}");
+            Append($"{Action('t')}{Convert(dend)}");
             return this;
         }
 
@@ -455,7 +467,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Close()
         {
-            Append("Z");
+            Append(Action('Z'));
             return this;
         }
 
@@ -489,6 +501,20 @@ namespace SimpleCircuit.Drawing
         /// <returns>The formatted value.</returns>
         private static string Convert(Vector2 v)
         => $"{Convert(v.X)} {Convert(v.Y)}";
+
+        /// <summary>
+        /// Gets the optional action.
+        /// </summary>
+        /// <param name="c">The action identifier.</param>
+        /// <returns>The action result.</returns>
+        private string Action(char c, char nextImplied = '\0')
+        {
+            var current = _impliedAction;
+            _impliedAction = nextImplied == '\0' ? c : nextImplied;
+            if (c == current)
+                return "";
+            return c.ToString();
+        }
 
         /// <summary>
         /// Converts the path builder to a string.

@@ -19,6 +19,11 @@ namespace SimpleCircuit.Drawing
         public string Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the style of the path.
+        /// </summary>
+        public string Style { get; set; }
+
+        /// <summary>
         /// Creates new graphic options.
         /// </summary>
         /// <param name="classNames">The class names.</param>
@@ -40,6 +45,8 @@ namespace SimpleCircuit.Drawing
                 element.SetAttribute("class", string.Join(" ", Classes));
             if (!string.IsNullOrWhiteSpace(Id))
                 element.SetAttribute("id", Id);
+            if (!string.IsNullOrWhiteSpace(Style))
+                element.SetAttribute("style", Style);
         }
     }
 }
