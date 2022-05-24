@@ -17,5 +17,10 @@ namespace SimpleCircuit.Parser
         /// Gets the path options for the wire.
         /// </summary>
         public PathOptions Options { get; } = new PathOptions("wire");
+
+        /// <summary>
+        /// Gets or sets whether the wire is visible or hidden.
+        /// </summary>
+        public bool IsVisible { get; set; } = true;
     }
 }

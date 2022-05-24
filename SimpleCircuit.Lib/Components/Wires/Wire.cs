@@ -148,11 +148,11 @@ namespace SimpleCircuit.Components.Wires
 
         private void DrawWire(SvgDrawing drawing)
         {
-            if (_vectors.Count > 0)
+            if (_info.IsVisible && _vectors.Count > 0)
             {
                 drawing.Path(builder =>
                 {
-                // Start the first point and build the path
+                        // Start the first point and build the path
                     builder.MoveTo(_vectors[0]);
                     for (int i = 1; i < _vectors.Count; i++)
                         builder.LineTo(_vectors[i]);

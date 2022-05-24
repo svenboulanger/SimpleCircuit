@@ -304,6 +304,12 @@ namespace SimpleCircuit.Parser
                         orientation = Vector2.Normal(-angle / 180.0 * Math.PI);
                         break;
 
+                    case "hidden":
+                        lexer.Next();
+                        wireInfo.IsVisible = false;
+                        isSegment = false;
+                        break;
+
                     case "dotted":
                         lexer.Next();
                         wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted;
