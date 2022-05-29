@@ -1,4 +1,6 @@
-﻿using SpiceSharp.Entities;
+﻿using SimpleCircuit.Components.Wires;
+using SpiceSharp.Entities;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -16,6 +18,16 @@ namespace SimpleCircuit.Components
         /// Gets the context of the nodes that will belong to the circuit.
         /// </summary>
         public NodeContext Nodes { get; }
+
+        /// <summary>
+        /// Gets or sets whether the circuit should be recalculated.
+        /// </summary>
+        public bool Recalculate { get; set; }
+
+        /// <summary>
+        /// The wire segments defined until now.
+        /// </summary>
+        public List<WireSegment> WireSegments { get; } = new List<WireSegment>();
 
         /// <summary>
         /// Creates a new context for simulation of graphical items.

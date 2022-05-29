@@ -10,29 +10,17 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".subckt CTIA DIRo
-    .options minimumwirelength = 5
-    .options scale = 0.75
-    A1 <r> Xo <r 0> DIRo
-    - A1.scale = 0.5
-    Xo <u l> C <l d +10> Xi <r 5> [i]A1
-    Xi <d> [n]D(photodiode, flip)[p] <d 3> POW("""")
-.ends
+            var script = @"// Horizontal chains
+T <r> Xia <r> NAND1 <r> Xoa <r> T
+T <r> Xib <r> NAND2 <r> Xob <r> T
 
-CTIA <u> A(""1"") <u> TL <u> A1(""1"") <u> X1
-CTIA <u> A(""1"") <u> TL <u> A2(""1"") <u> X2
-CTIA <u> A(""1"") <u> TL <u> A3(""1"") <u> X3
-X1 <r +35> X2 <r> X <r +10 dashed> Xo <r +10 dashed> X <r> X3
+// The cross-coupled wires
+NAND1[b] <l d a -20 d> Xob
+Xoa <d a -160 d r> [b]NAND2
+(X NAND1[o] <0> [o]NAND2)
 
-T(""enable"") <r> BUS <r> Xb1 <u r 5 arrow> [vp]A1
-Xb1 <r> Xb2 <u r 5 arrow> [vp]A2
-Xb2 <r 10> X <r dashed> X <r 10> Xb3
-Xb3 <u r 5 arrow> [vp]A3
-
-T(""enable"") <r> BUS2 <r> Xbb1
-
-Xo <u> Ao(""1"") <u> T(""bondpad"")
-- Ao.scale = 1.5
+// Finally flip the bottom one
+- NAND2.Flipped = true
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
@@ -63,7 +51,7 @@ Xo <u> Ao(""1"") <u> T(""bondpad"")
                     fw.WriteLine("</body>");
                     fw.WriteLine("</html>");
                 }
-                Process.Start(@"""C:\Program Files (x86)\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
+                Process.Start(@"""C:\Program Files\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Drawing;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Parser
+namespace SimpleCircuit.Components.Wires
 {
     /// <summary>
     /// Wire information.
@@ -11,11 +11,16 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// The segments for the wire.
         /// </summary>
-        public List<WireSegment> Segments { get; } = new List<WireSegment>();
+        public List<WireSegmentInfo> Segments { get; } = new List<WireSegmentInfo>();
 
         /// <summary>
         /// Gets the path options for the wire.
         /// </summary>
         public PathOptions Options { get; } = new PathOptions("wire");
+
+        /// <summary>
+        /// Gets or sets whether the wire should jump over other wires.
+        /// </summary>
+        public bool JumpOverWires { get; set; } = true;
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace SimpleCircuit.Parser
+﻿namespace SimpleCircuit.Components.Wires
 {
     /// <summary>
     /// Wire information.
     /// </summary>
-    public struct WireSegment
+    public struct WireSegmentInfo
     {
         /// <summary>
         /// Gets the angle of the wire.
@@ -26,7 +26,7 @@
         /// <param name="orientation">The orientation of the wire segment.</param>
         /// <param name="isFixed">If <c>true</c>, the wire has a fixed length, otherwise <paramref name="length"/> indicates a minimum length.</param>
         /// <param name="length">The length</param>
-        public WireSegment(Vector2 orientation, bool isFixed, double length)
+        public WireSegmentInfo(Vector2 orientation, bool isFixed, double length)
         {
             Orientation = orientation;
             IsFixed = isFixed;

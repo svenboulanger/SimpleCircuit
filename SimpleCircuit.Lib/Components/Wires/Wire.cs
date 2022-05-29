@@ -1,9 +1,9 @@
 ﻿using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -12,8 +12,20 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class Wire : Drawable
     {
+        private struct WirePoint
+        {
+            public bool IsJumpOver { get; }
+            public Vector2 Location { get; }
+            public WirePoint(Vector2 location, bool isJumpOver)
+            {
+                Location = location;
+                IsJumpOver = isJumpOver;
+            }
+        }
+
         private readonly WireInfo _info;
-        private readonly List<Vector2> _vectors = new();
+        private readonly List<WirePoint> _vectors = new();
+        private const double _jumpOverRadius = 1.5;
 
         /// <inheritdoc />
         public override int Order => -1;
@@ -79,8 +91,10 @@ namespace SimpleCircuit.Components.Wires
                 x = solX.Value;
             if (state.TryGetValue(context.Nodes.Shorts[StartY], out var solY))
                 y = solY.Value;
-            _vectors.Add(new(x, y));
+            Vector2 last = new(x, y);
+            _vectors.Add(new(last, false));
 
+            int count = context.WireSegments.Count;
             for (int i = 0; i < _info.Segments.Count; i++)
             {
                 x = 0.0;
@@ -89,7 +103,57 @@ namespace SimpleCircuit.Components.Wires
                     x = solX.Value;
                 if (state.TryGetValue(context.Nodes.Shorts[GetYName(i)], out solY))
                     y = solY.Value;
-                _vectors.Add(new(x, y));
+                Vector2 next = new(x, y);
+
+                // Add jump-over points if specified
+                if (_info.JumpOverWires)
+                    AddJumpOverWires(last, next, context.WireSegments.Take(count));
+
+                _vectors.Add(new(next, false));
+                context.WireSegments.Add(new(last, next));
+                last = next;
+            }
+        }
+
+        private void AddJumpOverWires(Vector2 last, Vector2 next, IEnumerable<WireSegment> segments)
+        {
+            // Calculate overlapping vectors
+            Vector2 d = last - next;
+            SortedDictionary<double, Vector2> pts = new();
+            foreach (var segment in segments)
+            {
+                Vector2 sd = segment.Start - segment.End;
+                double denom = d.X * sd.Y - d.Y * sd.X;
+                if (denom.IsZero())
+                    continue;
+
+                double tn = (last.X - segment.Start.X) * sd.Y - (last.Y - segment.Start.Y) * sd.X;
+                double un = (last.X - segment.Start.X) * d.Y - (last.Y - segment.Start.Y) * d.X;
+                if (denom < 0)
+                {
+                    denom = -denom;
+                    tn = -tn;
+                    un = -un;
+                }
+                double tol = 1e-3 * denom;
+                if (tn <= tol || un <= tol)
+                    continue;
+                tol = denom - tol;
+                if (tn >= tol || un >= tol)
+                    continue;
+                Vector2 intersection = last - tn / denom * d;
+                sd = intersection - last;
+                pts.Add(sd.X * sd.X + sd.Y * sd.Y, intersection);
+            }
+            if (pts.Count > 0)
+            {
+                double minDist = _jumpOverRadius * _jumpOverRadius;
+                double maxDist = (d.X * d.X + d.Y * d.Y) - minDist;
+                foreach (var pair in pts)
+                {
+                    if (pair.Key >= minDist && pair.Key <= maxDist)
+                        _vectors.Add(new(pair.Value, true));
+                }
             }
         }
 
@@ -106,7 +170,7 @@ namespace SimpleCircuit.Components.Wires
             }
         }
 
-        private void RegisterWire(CircuitContext context, string x, string y, string tx, string ty, WireSegment segment)
+        private void RegisterWire(CircuitContext context, string x, string y, string tx, string ty, WireSegmentInfo segment)
         {
             var map = context.Nodes.Shorts;
             string ox = map[x];
@@ -152,10 +216,33 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.Path(builder =>
                 {
-                // Start the first point and build the path
-                    builder.MoveTo(_vectors[0]);
+                    // Start the first point and build the path
+                    builder.MoveTo(_vectors[0].Location);
+
                     for (int i = 1; i < _vectors.Count; i++)
-                        builder.LineTo(_vectors[i]);
+                    {
+                        if (_vectors[i].IsJumpOver)
+                        {
+                            // Draw a small half circle for crossing over this point
+                            Vector2 nx = _vectors[i].Location - _vectors[i - 1].Location;
+                            if (nx.X.IsZero() && nx.Y.IsZero())
+                                continue;
+                            nx /= nx.Length;
+                            Vector2 ny = new(nx.Y, -nx.X);
+                            Vector2 o = _vectors[i].Location;
+                            Vector2 s = o - nx * _jumpOverRadius;
+                            Vector2 e = o + _jumpOverRadius * nx;
+                            Vector2 m = o + ny * _jumpOverRadius;
+
+                            builder.LineTo(s);
+                            nx *= 0.55 * _jumpOverRadius;
+                            ny *= 0.55 * _jumpOverRadius;
+                            builder.CurveTo(s + ny, m - nx, m);
+                            builder.SmoothTo(e + ny, e);
+                        }
+                        else
+                            builder.LineTo(_vectors[i].Location);
+                    }
                 }, _info.Options);
             }
         }
