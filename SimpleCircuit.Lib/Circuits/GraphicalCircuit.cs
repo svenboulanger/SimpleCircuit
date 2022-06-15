@@ -174,6 +174,10 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         {
             var context = new CircuitContext();
             bool first = true;
+            void Log(object sender, SpiceSharp.WarningEventArgs e)
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
+            }
 
             // First discover any node maps
             foreach (var c in _presences.Values)
@@ -198,31 +202,44 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             }
 
             var op = new OP("op");
-            if (diagnostics != null)
-                SpiceSharp.SpiceSharpWarning.WarningGenerated += (sender, args) => diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", args.Message));
-            int fixResistors = 0, previousFixResistors;
-            do
+            SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
+            try
             {
-                previousFixResistors = fixResistors;
-                try
+                do
                 {
-                    op.Run(context.Circuit);
-                }
-                catch (ValidationFailedException ex)
-                {
-                    // Let's fix floating nodes
-                    var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
-                    if (violation != null)
-                        context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
-                    else
-                        throw ex;
-                }
-            }
-            while (fixResistors > previousFixResistors);
+                    context.Recalculate = false;
+                    int fixResistors = 0, previousFixResistors;
+                    do
+                    {
+                        previousFixResistors = fixResistors;
+                        try
+                        {
+                            op.Run(context.Circuit);
+                        }
+                        catch (ValidationFailedException ex)
+                        {
+                            // Let's fix floating nodes
+                            var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
+                            if (violation != null)
+                                context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
+                            else
+                                throw ex;
+                        }
+                    }
+                    while (fixResistors > previousFixResistors);
 
-            var state = op.GetState<IBiasingSimulationState>();
-            foreach (var c in _presences.Values)
-                c.Update(state, context, diagnostics);
+                    // Extract the information
+                    var state = op.GetState<IBiasingSimulationState>();
+                    context.WireSegments.Clear();
+                    foreach (var c in _presences.Values)
+                        c.Update(state, context, diagnostics);
+                }
+                while (context.Recalculate);
+            }
+            finally
+            {
+                SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
+            }
         }
 
         /// <summary>

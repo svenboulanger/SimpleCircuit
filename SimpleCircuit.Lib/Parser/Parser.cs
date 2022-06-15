@@ -277,7 +277,10 @@ namespace SimpleCircuit.Parser
             }
 
             // Read the direction of the wire
-            var wireInfo = new WireInfo();
+            var wireInfo = new WireInfo()
+            {
+                JumpOverWires = context.Options.JumpOverWires
+            };
             while (lexer.Type != TokenType.CloseBeak)
             {
                 // Get the direction
@@ -375,11 +378,11 @@ namespace SimpleCircuit.Parser
                     if (lexer.Check(TokenType.Number))
                     {
                         double length = ParseDouble(lexer, context);
-                        wireInfo.Segments.Add(new WireSegment(orientation, isFixed, length));
+                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, isFixed, length));
                     }
                     else
                         // Default wire segment with a minimum wire length defined by the options
-                        wireInfo.Segments.Add(new WireSegment(orientation, false, context.Options.MinimumWireLength));
+                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, false, context.Options.MinimumWireLength));
                 }
             }
 
