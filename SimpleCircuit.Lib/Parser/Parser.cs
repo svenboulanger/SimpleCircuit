@@ -313,6 +313,21 @@ namespace SimpleCircuit.Parser
                         isSegment = false;
                         break;
 
+                    case "nojump":
+                    case "nojmp":
+                    case "njmp":
+                        lexer.Next();
+                        wireInfo.JumpOverWires = false;
+                        isSegment = false;
+                        break;
+
+                    case "jump":
+                    case "jmp":
+                        lexer.Next();
+                        wireInfo.JumpOverWires = true;
+                        isSegment = false;
+                        break;
+
                     case "dotted":
                         lexer.Next();
                         wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted;

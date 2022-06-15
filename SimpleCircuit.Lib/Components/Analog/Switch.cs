@@ -216,12 +216,12 @@ namespace SimpleCircuit.Components.Analog
                     if (closed)
                     {
                         SetPinOffset(1, new(0, -2));
-                        SetPinOffset(2, new(0, -2));
+                        SetPinOffset(2, new());
                     }
                     else
                     {
                         SetPinOffset(1, new(0, -4.25));
-                        SetPinOffset(2, new(0, -4.25));
+                        SetPinOffset(2, new(0, -2));
                     }
                 }
                 else
