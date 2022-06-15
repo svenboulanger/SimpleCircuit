@@ -61,6 +61,7 @@ namespace SimpleCircuit.Components.Analog
                 DrawingVariants = Variant.All(
                     Variant.If("diffin").Then(Variant.Map("swapin", DrawDifferentialInput)),
                     Variant.If("diffout").Then(Variant.Map("swapout", DrawDifferentialOutput)),
+                    Variant.If("schmitt").Then(DrawSchmitt).Else(Variant.If("comparator").Then(DrawComparator)),
                     Variant.Do(DrawAmplifier),
                     Variant.If("programmable").Then(DrawProgrammable));
             }
@@ -91,6 +92,30 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawProgrammable(SvgDrawing drawing)
                 => drawing.Arrow(new(-7, 10), new(4, -8.5));
+            private void DrawComparator(SvgDrawing drawing)
+            {
+                drawing.Path(b =>
+                {
+                    b.MoveTo(-4, 2)
+                    .LineTo(-2, 2)
+                    .LineTo(-2, -2)
+                    .LineTo(0, -2);
+                });
+            }
+            private void DrawSchmitt(SvgDrawing drawing)
+            {
+                drawing.Path(b =>
+                {
+                    b.MoveTo(-5, 2)
+                    .LineTo(-3, 2)
+                    .LineTo(-3, -2)
+                    .LineTo(-1, -2);
+                    b.MoveTo(-3, 2)
+                    .LineTo(-1, 2)
+                    .LineTo(-1, -2)
+                    .LineTo(1, -2);
+                });
+            }
             private void DrawAmplifier(SvgDrawing drawing)
             {
                 drawing.Polygon(new Vector2[]
