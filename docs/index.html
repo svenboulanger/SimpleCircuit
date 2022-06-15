@@ -83,26 +83,31 @@
             monaco.languages.register({ id: 'simpleCircuit' });
 
             // Register a tokens provider for the language
+            keywordRegex = new RegExp('\\b(?:' + keywords.join("|") + ')[\\w\\d]*\\b(?![\\.\\/])');
+            sectionRegex = new RegExp('\\b\\w[\\w\\d]*\\b(?!/)');
             monaco.languages.setMonarchTokensProvider('simpleCircuit', {
                 defaultToken: 'invalid',
                 includeLF: true,
                 tokenizer: {
                     root: [
-                        [/^[\s\t]*\/\/.*\n$/, 'comment'],
-                        [/^[\s\t]*-/, { token: 'dash', next: '@assignment' }],
-                        [/^[\s\t]*\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual_chain' }],
+                        { include: '@comment' },
+                        [/^[\s\t]*-/, { token: 'dash.assignment', next: '@assignment' }],
+                        [/^[\s\t]*\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual' }],
+                        [/^[\s\t]*\./, { token: 'dot.command', bracket: '@open', next: '@command' }],
                         { include: '@component_chain' },
                     ],
                     component_chain: [
                         { include: '@whitespace' },
-                        [/\w+/, { token: 'word' }],
-                        [/\</, { token: 'bracket.wire', bracket: '@open', next: '@wire_chain' }],
-                        [/\[/, { token: 'bracket.pin', bracket: '@open', next: '@pin_block' }],
-                        [/\(/, { token: 'bracket.label', bracket: '@open', next: '@label_block' }],
+                        [keywordRegex, { token: 'component.$S0' }],
+                        [/\w+/, { token: 'word.$S0' }],
+                        [/\//, { token: 'separator.$S0' }],
+                        [/\</, { token: 'bracket.wire.$S0', bracket: '@open', next: '@wire.$S0' }],
+                        [/\[/, { token: 'bracket.pin.$S0', bracket: '@open', next: '@pin_block' }],
+                        [/\(/, { token: 'bracket.label.$S0', bracket: '@open', next: '@label_block' }],
                     ],
-                    virtual_chain: [
+                    virtual: [
                         { include: '@component_chain' },
-                        [/\)/, { token: 'bracket.virtual', bracket: '@close', next: '@pop' }],
+                        [/\)/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                     ],
                     assignment: [
                         [/\n/, { token: 'newline', next: '@pop' }],
@@ -114,12 +119,16 @@
                         [/\w+/, 'word.assignment' ],
                         [/\./, 'dot.assignment' ],
                     ],
-                    wire_chain: [
+                    wire: [
                         { include: '@whitespace' },
-                        [/(?<!\w)([lurdneswa]|ne|nw|se|sw)(?=!\w)/, { token: 'pindirection' }],
-                        [/\>/, { token: 'bracket.wire', bracket: '@close', next: '@pop' }],
+                        [/\b([lurdneswa]|ne|nw|se|sw)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
+                        [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                         { include: '@number' },
-                        [/\+/, 'operator'],
+                        [/\+/, { token: 'operator.$S0' }],
+                    ],
+                    command: [
+                        [/\b\w+\b/, { token: 'word' }],
+                        [/\n/, { token: 'newline', next: '@pop' }],
                     ],
                     pin_block: [
                         { include: '@whitespace' },
@@ -133,17 +142,20 @@
                     ],
                     string: [
                         [/"([^"]|\\.)+"/, 'string'],
-                        [/'([^']|\\.)+'/, 'string']
+                        [/'([^']|\\.)+'/, 'string'],
                     ],
                     whitespace: [
-                        [/[ \t]+/, 'white']
+                        [/[ \t]+/, 'white'],
                     ],
                     number: [
-                        [/[-]?\d+(\.d+)?/, 'number']
+                        [/[-]?\d+(\.d+)?/, { token: 'number.$S0' }],
                     ],
                     boolean: [
-                        [/true|false/, 'boolean']
-                    ]
+                        [/true|false/, { token: 'boolean.$S0' }],
+                    ],
+                    comment: [
+                        [/^[\s\t]*\/\/.*\n$/, 'comment'],
+                    ],
                 }
             });
 
@@ -153,22 +165,33 @@
                 inherit: true,
                 rules: [
                     { token: 'word', foreground: '0000ff', fontStyle: 'bold' },
+                    { token: 'word.virtual', foreground: '9999ff' },
                     { token: 'word.pin', foreground: '7a92cf' },
                     { token: 'bracket', foreground: 'ff0000' },
+                    { token: 'bracket.virtual', foreground: 'ff9999' },
                     { token: 'bracket.wire', foreground: 'cc0000' },
+                    { token: 'bracket.wire.virtual', foreground: 'cc9999' },
                     { token: 'bracket.pin', foreground: '7a92cf' },
                     { token: 'number', foreground: 'a0a0a0' },
+                    { token: 'number.wire', foreground: 'cc6666' },
+                    { token: 'number.wire.virtual', foreground: 'cc9999' },
                     { token: 'comment', foreground: '00a000' },
+                    { token: 'component', foreground: '9a47ff', fontStyle: 'bold' },
+                    { token: 'component.virtual', foreground: 'c799ff' },
                     { token: 'pindirection', foreground: 'cc0000' },
+                    { token: 'pindirection.wire.virtual', foreground: 'cc9999' },
                     { token: 'string', foreground: 'a633f2' },
                     { token: 'operator', foreground: '660000' },
+                    { token: 'operator.wire', foreground: 'cc0000' },
+                    { token: 'operator.wire.virtual', foreground: '996666' },
                     { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
-                    { token: 'dot', foreground: 'cc0000' },
+                    { token: 'dot', foreground: '0000cc' },
                     { token: 'dash', foreground: '0000cc', fontStyle: 'bold' },
                     { token: 'word.assignment', foreground: '990000', fontStyle: 'bold' },
                     { token: 'dot.assignment', foreground: '666666' },
                     { token: 'equals.assignment', foreground: '666666' },
-                    { token: 'boolean', foreground: 'a0a0a0' }
+                    { token: 'boolean', foreground: 'a0a0a0' },
+                    { token: 'separator', foreground: '0000ff' },
                 ]
             });
 
