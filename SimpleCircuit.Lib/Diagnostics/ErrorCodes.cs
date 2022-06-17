@@ -106,6 +106,12 @@ namespace SimpleCircuit.Diagnostics
         [Diagnostic(SeverityLevel.Error, "PE031", "XML Error: {0}")]
         XMLError,
 
+        [Diagnostic(SeverityLevel.Error, "PE032", "Component {0} does not have a location")]
+        ComponentWithoutLocation,
+
+        [Diagnostic(SeverityLevel.Error, "PE033", "Cannot find {0} for virtual chain")]
+        VirtualChainComponentNotFound,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuit.Parser
 {
@@ -10,6 +10,8 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class ParsingContext
     {
+        private readonly List<Action<ParsingContext>> _postActions = new();
+
         /// <summary>
         /// Gets the options.
         /// </summary>
@@ -70,6 +72,24 @@ namespace SimpleCircuit.Parser
             if (result != null)
                 Circuit.Add(result);
             return result;
+        }
+
+        /// <summary>
+        /// Schedules a process to be executed after all components have been created.
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        public void SchedulePostProcess(Action<ParsingContext> action)
+        {
+            _postActions.Add(action);
+        }
+
+        /// <summary>
+        /// Executes all processes that need to be executed after all components have been created.
+        /// </summary>
+        public void FlushActions()
+        {
+            for (int i = 0; i < _postActions.Count; i++)
+                _postActions[i].Invoke(this);
         }
     }
 }

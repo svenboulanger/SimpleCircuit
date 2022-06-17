@@ -122,19 +122,13 @@ namespace SimpleCircuit.Components
             return fullname.Substring(0, index + Separator.Length);
         }
 
-        /// <summary>
-        /// Creates a new drawable for the specified name.
-        /// </summary>
-        /// <param name="fullname">The full name of the component.</param>
-        /// <param name="options">The options.</param>
-        /// <returns>The created variable.</returns>
-        public IDrawable Create(string fullname, Options options)
+        private bool Extract(string fullname, out string key, out IDrawableFactory factory)
         {
             var elt = _root;
-            var factory = _root.Factory;
             bool isAnonymous = false;
-            int end = 0;
             string name = GetName(fullname);
+            int end = 0;
+            factory = null;
             for (int i = 0; i < name.Length; i++)
             {
                 if (!elt.Continuations.TryGetValue(name[i], out var nelt))
@@ -154,21 +148,41 @@ namespace SimpleCircuit.Components
                 else
                     isAnonymous = false;
             }
-
-            // We didn't find a factory for this...
-            if (factory == null)
-                return null;
-
+            
             if (isAnonymous)
             {
-                var args = new AnonymousFoundEventArgs(name);
-                fullname = args.NewName != null ? GetPath(fullname) + args.NewName : $"{fullname}:{++_anonymousIndex}";
-                return factory.Create(name, fullname, options);
+                key = name;
+                return true;
             }
             else
             {
-                return factory.Create(name[..(end + 1)], fullname, options);
+                key = name[..(end + 1)];
+                return false;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the full name represents an anonymous component.
+        /// </summary>
+        /// <param name="fullname">The full name.</param>
+        /// <returns>Returns <c>true</c> if the name represents an anonymous component; otherwise, <c>false</c>.</returns>
+        public bool IsAnonymous(string fullname) => Extract(fullname, out _, out _);
+
+        /// <summary>
+        /// Creates a new drawable for the specified name.
+        /// </summary>
+        /// <param name="fullname">The full name of the component.</param>
+        /// <param name="options">The options.</param>
+        /// <returns>The created variable.</returns>
+        public IDrawable Create(string fullname, Options options)
+        {
+            bool isAnonymous = Extract(fullname, out var key, out var factory);
+            if (isAnonymous)
+            {
+                var args = new AnonymousFoundEventArgs(fullname);
+                fullname = args.NewName != null ? GetPath(fullname) + args.NewName : $"{fullname}:{++_anonymousIndex}";
+            }
+            return factory.Create(key, fullname, options);
         }
 
         /// <summary>
