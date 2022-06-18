@@ -16,6 +16,11 @@ namespace SimpleCircuit.Components
         /// </summary>
         public static string Separator { get; set; } = "/";
 
+        /// <summary>
+        /// Gets or sets the separator for the anonymous index.
+        /// </summary>
+        public static string AnonymousSeparator { get; set; } = ":";
+
         private class KeyNode
         {
             public IDrawableFactory Factory { get; set; }
@@ -23,11 +28,6 @@ namespace SimpleCircuit.Components
         }
         private readonly KeyNode _root = new();
         private int _anonymousIndex = 0;
-
-        /// <summary>
-        /// Occurs when an anonymous name has been found.
-        /// </summary>
-        public event EventHandler<AnonymousFoundEventArgs> AnonymousFound;
 
         /// <summary>
         /// Gets all factories.
@@ -179,16 +179,9 @@ namespace SimpleCircuit.Components
             bool isAnonymous = Extract(fullname, out var key, out var factory);
             if (isAnonymous)
             {
-                var args = new AnonymousFoundEventArgs(fullname);
-                fullname = args.NewName != null ? GetPath(fullname) + args.NewName : $"{fullname}:{++_anonymousIndex}";
+                return factory?.Create(key, $"{fullname}{AnonymousSeparator}{++_anonymousIndex}", options);
             }
-            return factory.Create(key, fullname, options);
+            return factory?.Create(key, fullname, options);
         }
-
-        /// <summary>
-        /// Called when an anonymous name has been found.
-        /// </summary>
-        /// <param name="args">The event arguments.</param>
-        protected virtual void OnAnonymousFound(AnonymousFoundEventArgs args) => AnonymousFound?.Invoke(this, args);
     }
 }
