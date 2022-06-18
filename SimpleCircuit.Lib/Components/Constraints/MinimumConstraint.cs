@@ -83,6 +83,14 @@ namespace SimpleCircuit.Components
         /// </summary>
         public double Minimum { get; }
 
+        /// <summary>
+        /// Creates a new <see cref="MinimumConstraint"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="lowest">The lowest node.</param>
+        /// <param name="highest">The highest node.</param>
+        /// <param name="minimum">The minimum between the two values.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public MinimumConstraint(string name, string lowest, string highest, double minimum)
         {
             if (string.IsNullOrWhiteSpace(name))

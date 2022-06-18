@@ -30,9 +30,7 @@ BB1[sVSS] <d> GND
 BB1[eOutput1] <r d> R <d l> [eOutput2]BB1
 
 // We can also align the pins and resize the black box using them
-(Y BB1[wInput2] <0> [eOutput2]BB1)
-(Y BB1[wInput1] <0> [eOutput1]BB1)
-(X BB1[wInput1] <r +60> [eOutput1]BB1)
+(X BB1[wInput1] <r 0 l +60> [eOutput1]BB1)
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);

@@ -739,34 +739,47 @@ namespace SimpleCircuit.Parser
         }
         private static void Align(Vector2 normal, string a, WireInfo wireInfo, string b, ParsingContext context)
         {
+            double offset = 0;
+            bool extendLeft = false, extendRight = false;
+
             // We will go through each wire and only consider those that have an effect on the wires
             var segments = wireInfo.Segments;
-            string lastNode = a;
             for (int i = 0; i < segments.Count; i++)
             {
                 double dot = segments[i].Orientation.Dot(normal);
-
-                // Create an intermediary point
-                string node;
-                if (i < segments.Count - 1)
-                    node = $"virtual.{++context.VirtualCoordinateCount}";
-                else
-                    node = b;
-
-                // Constrain these
-                if (!segments[i].IsFixed && !dot.IsZero())
+                offset += dot * segments[i].Length;
+                if (!dot.IsZero() && !segments[i].IsFixed)
                 {
+                    if (dot < 0)
+                        extendLeft = true;
                     if (dot > 0)
-                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, Math.Abs(dot) * segments[i].Length));
-                    else
-                        context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", node, lastNode, Math.Abs(dot) * segments[i].Length));
+                        extendRight = true;
                 }
-                else
-                {
-                    double length = dot.IsZero() ? 0.0 : dot * segments[i].Length;
-                    context.Circuit.Add(new OffsetConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", lastNode, node, length));
-                }
-                lastNode = node;
+            }
+
+            if (extendLeft && extendRight)
+            {
+                // The virtual wire can extend in both directions at some point, so this
+                // virtual wire doesn't actually fix anything...
+                return;
+            }
+
+            if (extendLeft)
+            {
+                (a, b) = (b, a);
+                extendRight = true;
+                offset = -offset;
+            }
+
+            if (extendRight)
+            {
+                // The difference is a minimum
+                context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", a, b, offset));
+            }
+            else
+            {
+                // Fixed offset
+                context.Circuit.Add(new OffsetConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", a, b, offset));
             }
         }
 
