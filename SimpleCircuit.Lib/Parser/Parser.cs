@@ -263,7 +263,8 @@ namespace SimpleCircuit.Parser
                 // Get the direction
                 bool isSegment = true;
                 Vector2 orientation = new();
-                switch (lexer.Content.ToString())
+                var token = lexer.Token;
+                switch (token.Content.ToString())
                 {
                     case "n":
                     case "u": orientation = new(0, -1); lexer.Next(); break;
@@ -325,7 +326,20 @@ namespace SimpleCircuit.Parser
                         {
                             wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Arrow;
                             if (!lexer.Check(TokenType.CloseBeak))
-                                context.Diagnostics.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Warning, "PW001", "Arrows can only appear at the start or end of a wire"));
+                                context.Diagnostics?.Post(token, ErrorCodes.ArrowWireStartEnd);
+                        }
+                        isSegment = false;
+                        break;
+
+                    case "rarrow":
+                        lexer.Next();
+                        if (wireInfo.Segments.Count == 0)
+                            wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                        else
+                        {
+                            wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                            if (!lexer.Check(TokenType.CloseBeak))
+                                context.Diagnostics?.Post(token, ErrorCodes.ArrowWireStartEnd);
                         }
                         isSegment = false;
                         break;
@@ -338,7 +352,7 @@ namespace SimpleCircuit.Parser
                         {
                             wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
                             if (!lexer.Check(TokenType.CloseBeak))
-                                context.Diagnostics.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Warning, "PW002", "Dots can only appear at the start or end of a wire"));
+                                context.Diagnostics?.Post(token, ErrorCodes.DotWireStartEnd);
                         }
                         isSegment = false;
                         break;
@@ -351,13 +365,13 @@ namespace SimpleCircuit.Parser
                         {
                             wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
                             if (!lexer.Check(TokenType.CloseBeak))
-                                context.Diagnostics.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Warning, "PW001", "Slashes can only appear at the start or end of a wire"));
+                                context.Diagnostics?.Post(token, ErrorCodes.SlashesWireStartEnd);
                         }
                         isSegment = false;
                         break;
 
                     default:
-                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.CouldNotRecognizeDirection);
+                        context.Diagnostics?.Post(token, ErrorCodes.CouldNotRecognizeDirection);
                         lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
                         return null;
                 }

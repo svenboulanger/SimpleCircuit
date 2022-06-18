@@ -23,6 +23,11 @@ namespace SimpleCircuit.Drawing
             Arrow,
 
             /// <summary>
+            /// A reverse arrow.
+            /// </summary>
+            ReverseArrow,
+
+            /// <summary>
             /// A dot.
             /// </summary>
             Dot,
@@ -121,11 +126,30 @@ namespace SimpleCircuit.Drawing
                         elt.SetAttribute("style", "overflow:visible");
                         var pl = document.CreateElement("polygon", ns);
                         pl.SetAttribute("class", "arrowhead");
-                        pl.SetAttribute("points", "-2.5,1 0,0 -2.5,-1 -2,0");
+                        pl.SetAttribute("points", "-2.5,1 0,0 -2.5,-1");
                         elt.AppendChild(pl);
                         defs.AppendChild(elt);
                     }
                     return "url(#arrow)";
+
+                case MarkerTypes.ReverseArrow:
+                    elt = (XmlElement)defs.SelectSingleNode("markder[@id='rarrow']");
+                    if (elt == null)
+                    {
+                        elt = document.CreateElement("marker", ns);
+                        elt.SetAttribute("id", "rarrow");
+                        elt.SetAttribute("refX", "0");
+                        elt.SetAttribute("refY", "0");
+                        elt.SetAttribute("orient", "auto");
+                        elt.SetAttribute("markerUnits", "userSpaceOnUse");
+                        elt.SetAttribute("style", "overflow:visible");
+                        var pl = document.CreateElement("polygon", ns);
+                        pl.SetAttribute("class", "arrowhead");
+                        pl.SetAttribute("points", "2.5,1 0,0 2.5,-1 2,0");
+                        elt.AppendChild(pl);
+                        defs.AppendChild(elt);
+                    }
+                    return "url(#rarrow)";
 
                 case MarkerTypes.Dot:
                     elt = (XmlElement)defs.SelectSingleNode("marker[@id='dot']");

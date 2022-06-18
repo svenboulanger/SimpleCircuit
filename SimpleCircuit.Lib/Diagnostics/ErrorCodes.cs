@@ -112,6 +112,15 @@ namespace SimpleCircuit.Diagnostics
         [Diagnostic(SeverityLevel.Error, "PE033", "Cannot find {0} for virtual chain")]
         VirtualChainComponentNotFound,
 
+        [Diagnostic(SeverityLevel.Warning, "PW034", "Arrows can only appear at the start or end of a wire definition")]
+        ArrowWireStartEnd,
+
+        [Diagnostic(SeverityLevel.Warning, "PW035", "Slashes can only appear at the start or end of a wire definition")]
+        SlashesWireStartEnd,
+
+        [Diagnostic(SeverityLevel.Warning, "PW036", "Dots can only appear at the start or end of a wire definition")]
+        DotWireStartEnd,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }
