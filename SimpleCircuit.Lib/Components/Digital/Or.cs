@@ -12,10 +12,13 @@ namespace SimpleCircuit.Components.Digital
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
 
-        private class Instance : ScaledOrientedDrawable
+        private class Instance : ScaledOrientedDrawable, ILabeled
         {
             /// <inheritdoc />
             public override string Type => "or";
+
+            /// <inheritdoc />
+            public string Label { get; set; }
 
             public Instance(string name, Options options)
                 : base(name, options)
@@ -37,6 +40,9 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-4, -5), new Vector2(-3, -5), new Vector2(-5, -5),
                     new Vector2(-3, -2), new Vector2(-3, 2), new Vector2(-5, 5)
                 });
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -6), new(0, -1));
             }
         }
     }

@@ -64,7 +64,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
             }
             private static void DrawPolarSigns(SvgDrawing drawing)
                 => CommonGraphical.Signs(drawing, new(-4, 3), new(5, 3), vertical: true);

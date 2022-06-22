@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // The label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -7), new(0, -1));
+                    drawing.Text(Label, new(0, -5), new(0, -1));
             }
             private void DrawProgrammable(SvgDrawing drawing) => CommonGraphical.Arrow(drawing, new(-5, 5), new(6, -7));
         }

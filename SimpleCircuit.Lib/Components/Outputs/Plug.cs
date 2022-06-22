@@ -38,6 +38,9 @@ namespace SimpleCircuit.Components.Outputs
             {
                 drawing.ExtendPin(Pins["a"]);
                 drawing.Arc(new(4, 0), Math.PI / 2, -Math.PI / 2, 4, null, 1);
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(6, -1), new(1, -1));
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

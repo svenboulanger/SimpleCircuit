@@ -86,7 +86,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 6), new(0, 1));
+                    drawing.Text(Label, new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
+                    drawing.Text(Label, new Vector2(0, 3), new Vector2(0, 1));
             }
             private void DrawPushSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {

@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(5, 5), new Vector2(1, 1));
+                    drawing.Text(Label, new Vector2(2, 8), new Vector2(1, 1));
             }
 
             private void DrawInputSigns(SvgDrawing drawing, bool swapped)

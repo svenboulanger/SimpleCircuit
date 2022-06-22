@@ -49,6 +49,11 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public string Label { get; set; }
 
+            /// <summary>
+            /// Gets or sets the gain string.
+            /// </summary>
+            public string Gain { get; set; }
+
             /// <inheritdoc />
             public override string Type => "amplifier";
 
@@ -111,13 +116,13 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(b =>
                 {
                     b.MoveTo(-5, 2)
-                    .LineTo(-3, 2)
-                    .LineTo(-3, -2)
-                    .LineTo(-1, -2);
+                        .LineTo(-3, 2)
+                        .LineTo(-3, -2)
+                        .LineTo(-1, -2);
                     b.MoveTo(-3, 2)
-                    .LineTo(-1, 2)
-                    .LineTo(-1, -2)
-                    .LineTo(1, -2);
+                        .LineTo(-1, 2)
+                        .LineTo(-1, -2)
+                        .LineTo(1, -2);
                 });
             }
             private void DrawAmplifier(SvgDrawing drawing)
@@ -133,8 +138,10 @@ namespace SimpleCircuit.Components.Analog
                     new(8, 0),
                     new(-8, 8)
                 });
-                if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new(-2.5, 0), new());
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -4), new(1, -1));
+                if (!string.IsNullOrWhiteSpace(Gain))
+                    drawing.Text(Gain, new(-2.5, 0), new());
             }
             private void RedefineInput(bool differential, bool swapped)
             {

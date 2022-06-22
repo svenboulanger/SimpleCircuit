@@ -17,14 +17,14 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private const double _width = 8.0;
+            private const double _width = 12.0;
             private const double _height = 3.0;
             private const double _rx = _height * 0.5;
             private const double _ry = _height;
             private const double _kx = 0.5522847498 * _rx;
             private const double _ky = 0.5522847498 * _ry;
             private const double _inner = _width - _rx;
-            private double _length = 8.0;
+            private double _length = _width;
 
             /// <summary>
             /// Draws the transmission line shape.

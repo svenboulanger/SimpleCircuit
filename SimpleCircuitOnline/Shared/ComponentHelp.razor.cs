@@ -31,6 +31,10 @@ namespace SimpleCircuitOnline.Shared
                 _properties = null;
                 _variants = null;
                 _drawable = value;
+
+                // Show where the label is
+                if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Label))
+                    labeled.Label = "label";
             }
         }
 
@@ -96,7 +100,8 @@ namespace SimpleCircuitOnline.Shared
 
             var drawing = new SvgDrawing
             {
-                Style = GraphicalCircuit.DefaultStyle
+                Style = GraphicalCircuit.DefaultStyle,
+                ElementFormatter = _jsTextFormatter
             };
             _drawable.Render(drawing);
             var doc = drawing.GetDocument();

@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Outputs
                 drawing.Text("M", new(), new());
 
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 5), new(0, 1));
+                    drawing.Text(Label, new(0, 6), new(0, 1));
             }
             private void DrawSigns(SvgDrawing drawing)
             {

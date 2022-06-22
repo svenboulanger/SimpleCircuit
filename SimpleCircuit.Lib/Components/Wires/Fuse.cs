@@ -9,6 +9,10 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("FUSE", "A fuse.", "Wires")]
     public class Fuse : DrawableFactory
     {
+        private const string _iec = "iec";
+        private const string _ansi = "ansi";
+        private const string _alt = "alt";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -28,44 +32,46 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
 
                 if (options?.IEC ?? false)
-                    AddVariant("iec");
+                    AddVariant(_iec);
                 else
-                    AddVariant("ansi");
+                    AddVariant(_ansi);
 
                 DrawingVariants = Variant.FirstOf(
-                    Variant.If("ansi").Then(
-                        Variant.If("alt").Then(DrawANSIalt).Else(DrawANSI)
+                    Variant.If(_ansi).Then(
+                        Variant.If(_alt).Then(DrawANSIalt).Else(DrawANSI)
                     ),
                     Variant.Do(DrawIEC));
             }
 
             private void DrawIEC(SvgDrawing drawing)
             {
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-6, -3), new(6, -3),
-                    new(6, 3), new(-6, 3)
-                });
+                drawing.ExtendPins(Pins);
+
+                drawing.Rectangle(12, 6, new());
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -4), new(0, -1));
             }
             private void DrawANSI(SvgDrawing drawing)
             {
-                drawing.Polygon(new Vector2[]
-                {
-                new(-6, -3), new(6, -3),
-                new(6, 3), new(-6, 3)
-                });
+                drawing.ExtendPins(Pins);
+
+                drawing.Rectangle(12, 6, new());
                 drawing.Line(new(-6, 0), new(6, 0));
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -4), new(0, -1));
             }
             private void DrawANSIalt(SvgDrawing drawing)
             {
                 drawing.OpenBezier(new Vector2[]
                 {
-                new(-6, 0),
-                new(-6, -1.65685424949), new(-4.65685424949, -3), new(-3, -3),
-                new(-1.34314575051, -3), new(0, -1.65685424949), new(),
-                new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3),
-                new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
+                    new(-6, 0),
+                    new(-6, -1.65685424949), new(-4.65685424949, -3), new(-3, -3),
+                    new(-1.34314575051, -3), new(0, -1.65685424949), new(),
+                    new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3),
+                    new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
             }
 

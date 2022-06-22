@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Outputs
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
             private void DrawCasing(SvgDrawing drawing)
             {

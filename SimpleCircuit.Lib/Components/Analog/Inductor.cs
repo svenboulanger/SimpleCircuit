@@ -57,7 +57,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
             private void DrawDot(SvgDrawing drawing) => drawing.Dot(new(-8, 3.5));
             private void DrawProgrammable(SvgDrawing drawing)

@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new Vector2(7.5, 0), 1.5);
 
                 if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(-2.5, 0), new Vector2());
+                    drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
             }
         }
     }

@@ -17,10 +17,8 @@ namespace SimpleCircuitOnline.Pages
         private string _errors, _warnings;
         private XmlDocument _svg;
         private Timer _timer;
-        private Task _task;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
-        private ElementFormatter _jsTextFormatter;
         private bool _updateDynamic = false;
         private SvgOutput _mainOutput;
 
@@ -72,14 +70,6 @@ namespace SimpleCircuitOnline.Pages
                 _loading = 0;
                 _timer.Stop();
             }
-        }
-
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
-
-            // This text formatter will invoke a JavaScript method that uses getBBox() to measure a text size
-            _jsTextFormatter = new ElementFormatter(_js);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -166,8 +156,7 @@ namespace SimpleCircuitOnline.Pages
                 _warnings = null;
                 StateHasChanged();
                 _timer.Stop();
-                _task =
-                    Task.Run(RenderPreview)
+                Task.Run(RenderPreview)
                     .ContinueWith(task => { _loading = 0; StateHasChanged(); });
             }
         }

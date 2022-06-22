@@ -8,9 +8,16 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("CB", "A circuit breaker.", "Wires")]
     public class CircuitBreaker : DrawableFactory
     {
+        private const string _arei = "arei";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options?.AREI ?? false)
+                device.AddVariant(_arei);
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -27,15 +34,14 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
 
                 DrawingVariants = Variant.FirstOf(
-                    Variant.If("arei").Then(DrawAutoFuse),
+                    Variant.If(_arei).Then(DrawAutoFuse),
                     Variant.Do(DrawRegular));
-
-                if (options?.AREI ?? false)
-                    AddVariant("arei");
             }
 
             private void DrawRegular(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
+
                 drawing.OpenBezier(new Vector2[]
                 {
                     new(-4, -2),
@@ -50,6 +56,8 @@ namespace SimpleCircuit.Components.Wires
 
             private void DrawAutoFuse(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
+
                 drawing.Line(new(-6, 0), new(-4, 0), new("wire"));
                 drawing.Line(new(-4, 0), new(4, -4));
                 drawing.Polygon(new Vector2[]
