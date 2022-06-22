@@ -158,7 +158,7 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case char d when char.IsDigit(d):
-                        Type = TokenType.Number;
+                        Type = TokenType.Integer;
                         ContinueNumber();
                         break;
 
@@ -202,6 +202,7 @@ namespace SimpleCircuit.Parser
             if (c == '.')
             {
                 // Fraction
+                Type = TokenType.Number;
                 ContinueToken();
                 c = Char;
                 while (char.IsDigit(c))
@@ -213,18 +214,30 @@ namespace SimpleCircuit.Parser
 
             if (c == 'e' || c == 'E')
             {
+                // Special case: if the type is integer at this point then we can migrate to a word
+                if (Type == TokenType.Integer)
+                    Type = TokenType.Word;
+
                 // Exponential notation
                 ContinueToken();
                 c = Char;
                 if (c == '+' || c == '-')
                 {
+                    // No ambiguity anymore!
+                    Type = TokenType.Number;
                     ContinueToken();
                     c = Char;
                 }
-                while (char.IsDigit(c))
+
+                if (!char.IsDigit(c))
+                    ContinueWord();
+                else
                 {
-                    ContinueToken();
-                    c = Char;
+                    while (char.IsDigit(c))
+                    {
+                        ContinueToken();
+                        c = Char;
+                    }
                 }
             }
         }

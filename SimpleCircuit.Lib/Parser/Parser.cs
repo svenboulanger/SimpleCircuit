@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit.Parser
@@ -132,9 +133,28 @@ namespace SimpleCircuit.Parser
             => ParseChainStatement(lexer, context, ComponentChainSingle, ComponentChainWire);
 
         private static void ComponentChainSingle(PinInfo pin, ParsingContext context)
-            => pin.GetOrCreate(context, 0);
+        {
+            // Check the name of the component for wildcards
+            if (pin.Component.Fullname.Contains('*'))
+            {
+                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.NoWildcardCharacter);
+                return;
+            }
+            pin.GetOrCreate(context, 0);
+        }
         private static void ComponentChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context)
         {
+            if (pinToWireInfo.Component.Fullname.Contains('*'))
+            {
+                context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
+                return;
+            }
+            if (wireToPinInfo.Component.Fullname.ToString().Contains('*'))
+            {
+                context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
+                return;
+            }
+
             // First create or get the first component and its pin
             var pinToWire = pinToWireInfo.GetOrCreate(context, -1);
             var wireToPin = wireToPinInfo.GetOrCreate(context, 0);
@@ -169,14 +189,14 @@ namespace SimpleCircuit.Parser
         /// <returns>The component.</returns>
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            if (!lexer.Check(TokenType.Word))
+            if (!lexer.Check(TokenType.Word | TokenType.Times))
             {
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
                 return null;
             }
 
-            // Get the full name of the component
-            var nameToken = lexer.ReadWhile(TokenType.Word | TokenType.Divide, shouldNotIncludeTrivia: true);
+            // Get the full name of the component, this can include wildcards and section separators
+            var nameToken = lexer.ReadWhile(TokenType.Word | TokenType.Integer | TokenType.Divide | TokenType.Times, shouldNotIncludeTrivia: true);
             string fullname = string.Join(DrawableFactoryDictionary.Separator, context.Section.Reverse().Union(new[] { nameToken.Content.ToString() }));
             var info = new ComponentInfo(nameToken, fullname);
 
@@ -367,7 +387,7 @@ namespace SimpleCircuit.Parser
                     bool isFixed = true;
                     if (lexer.Branch(TokenType.Plus))
                         isFixed = false;
-                    if (lexer.Check(TokenType.Number))
+                    if (lexer.Check(TokenType.Number | TokenType.Integer))
                     {
                         double length = ParseDouble(lexer, context);
                         wireInfo.Segments.Add(new WireSegmentInfo(orientation, isFixed, length));
@@ -676,17 +696,28 @@ namespace SimpleCircuit.Parser
         }
         private static void VirtualChainSingle(PinInfo pin, ParsingContext context, bool x, bool y)
         {
-            if (!context.Factory.IsAnonymous(pin.Component.Fullname))
-                return; // Nothing to align if it is a specific component
+            ILocatedDrawable[] components = null;
+            if (pin.Component.Fullname.Contains('*'))
+            {
+                // Align all given pins of all named components that match the name with wildcard
+                string format = $"^{pin.Component.Fullname.Replace("*", "[\\w_]+")}$";
+                components = context.Circuit.OfType<ILocatedDrawable>().Where(p => Regex.IsMatch(p.Name, format)).ToArray();
+            }
+            else if (context.Factory.IsAnonymous(pin.Component.Fullname))
+            {
+                // Align all the given pins of all anonymous components within the same section
+                string lead = pin.Component.Fullname + DrawableFactoryDictionary.AnonymousSeparator;
+                components = context.Circuit.OfType<ILocatedDrawable>().Where(p => p.Name.StartsWith(lead)).ToArray();
+            }
+            if (components == null || components.Length == 0)
+            {
+                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.VirtualChainComponentNotFound, pin.Component.Fullname);
+                return;
+            }
 
-            // Align all the given pins of all anonymous components within the same section
+            // Align
             var zeroWire = new WireInfo();
             zeroWire.Segments.Add(new(new(), true, 0.0));
-            string lead = pin.Component.Fullname + DrawableFactoryDictionary.AnonymousSeparator;
-            var components = context.Circuit.OfType<ILocatedDrawable>().Where(p => p.Name.StartsWith(lead)).ToArray();
-            if (components.Length == 0)
-                return;
-
             if (pin.Pin.Content.Length == 0)
             {
                 // Align all the centers
@@ -929,7 +960,7 @@ namespace SimpleCircuit.Parser
             bool inverted = false;
             if (lexer.Branch(TokenType.Dash))
                 inverted = true;
-            if (!lexer.Branch(TokenType.Number, out var numberToken))
+            if (!lexer.Branch(TokenType.Number | TokenType.Integer, out var numberToken))
             {
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedNumber);
                 return double.NaN;

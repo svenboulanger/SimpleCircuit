@@ -112,6 +112,9 @@ namespace SimpleCircuit.Diagnostics
         [Diagnostic(SeverityLevel.Error, "PE033", "Cannot find {0} for virtual chain")]
         VirtualChainComponentNotFound,
 
+        [Diagnostic(SeverityLevel.Error, "PE034", "Cannot create a component with a wildcard character ('*')")]
+        NoWildcardCharacter,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }
