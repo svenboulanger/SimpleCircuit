@@ -58,8 +58,8 @@ namespace SimpleCircuitOnline
                 "GND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2",
                 "",
                 "// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.",
-                "// These are between brackets, and first indicate along which axis you wish to align.",
-                "(Y GND1 <0> GND2)"
+                "// These are between brackets, and the \"y\" tells along which axis alignment is needed.",
+                "(y GND1 <r> GND2)"
             })),
 
             // Inverting amplifier
@@ -70,11 +70,12 @@ namespace SimpleCircuitOnline
                 "",
                 "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
                 "// Wires can be given a fixed length by adding a number after the direction.",
-                "GND1 <u> V1(\"V_in\") <u r> R1(\"R_1\") <r> Xfb <r> [n]OA1(flip) <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
-                "OA1[p] <l d> GND2",
+                "GND <u> V(\"V_in\") <u r> R(\"R_1\") <r> Xfb <r> [n]OA1(flip) <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
+                "OA1[p] <l d> GND",
                 "Xout <r 5> T(\"V_out\")",
                 "",
-                "(y GND1 <0> GND2)"
+                "// Align all anonymous grounds",
+                "(y GND)"
             })),
 
             // Non-inverting amplifier
@@ -84,7 +85,7 @@ namespace SimpleCircuitOnline
                 "T(\"V_in\") <r> [p]OA1",
                 "",
                 "// Resistive voltage divider:",
-                "OA1[out] <r> Xout <d l> Rfb(\"R_F\") <l> Xfb <d> R1(\"R_G\") <d> GND2",
+                "OA1[out] <r> Xout <d l> R(\"R_F\") <l> Xfb <d> R(\"R_G\") <d> GND",
                 "Xfb <u 10 r> [n]OA1",
                 "",
                 "Xout <r 5> T(\"V_out\")"
@@ -105,7 +106,25 @@ namespace SimpleCircuitOnline
                 "",
                 "// For wires (both normal or virtual), you can also add a '+' before the length to tell",
                 "// that the distance is not exact, but a minimum.",
-                "(X V1 <r +30> Xleft)"
+                "(x V1 <r +30> Xleft)"
+            })),
+
+            // Section demo
+            new Demo("5. Sections", "An example using sections", string.Join(Environment.NewLine, new[]
+            {
+                "// Define a section",
+                ".section A",
+                "    // These components are named, but only local to this section",
+                "    GND1 <u> V <u r> Xa",
+                "    - GND1.signal = true",
+                ".endsection",
+                "",
+                "// We can reuse names, like GND1, without referring to the ground in the section",
+                "// We can use a forward slash ('/') to refer to components inside a section",
+                "A/Xa <r> L <r d> C <d> GND1",
+                "",
+                "// Align both grounds",
+                "(y A/GND1 <r> GND1)"
             })),
 
             // Subcircuit demo
@@ -144,22 +163,24 @@ namespace SimpleCircuitOnline
                 "BB1[eOutput1] <r d> R <d l> [eOutput2]BB1",
                 "",
                 "// We can also align the pins and resize the black box using them",
-                "(Y BB1[wInput2] <0> [eOutput2]BB1)",
-                "(Y BB1[wInput1] <0> [eOutput1]BB1)",
-                "(X BB1[wInput1] <r +60> [eOutput1]BB1)",
+                "(y BB1[wInput2] <0> [eOutput2]BB1)",
+                "(y BB1[wInput1] <0> [eOutput1]BB1)",
+                "(x BB1[wInput1] <r +60> [eOutput1]BB1)",
             })),
 
             // Double pole switch
             new Demo("Demo: Two-way light switch", "A circuit for switching a light using two switches.", string.Join(Environment.NewLine, new[]
             {
                 "// Make the main circuit",
-                "GND1 <u> V(\"AC\", ac) <u r> SPDT1[t1] <r> X1 <r> [t1]SPDT2[p] <r d> LIGHT1 <d> GND2",
+                "GND <u> V(\"AC\", ac) <u r> SPDT1[t1] <r> X1 <r> [t1]SPDT2[p] <r d> LIGHT1 <d> GND",
                 "SPDT1(t1)[t2] <r> X2 <r> [t2]SPDT2(t2)",
                 "",
                 "SPDT1[c] <u> T(\"A\")",
                 "SPDT2[c] <u> T(\"B\")",
                 "",
-                "(Y GND1 <u 0> GND2)",
+                "// Align all anonymous grounds and terminals",
+                "(y GND)",
+                "(y T)"
             })),
 
             // Full bridge rectifier
@@ -171,35 +192,36 @@ namespace SimpleCircuitOnline
                 "Xrb <u l> D3 <l u> Xlt",
                 "",
                 "// Space the diodes apart for at least 15pt",
-                "(Y D1 <d +15> D2 <d +15> D3 <d +15> D4)",
+                "(y D1 <d +15> D2 <d +15> D3 <d +15> D4)",
                 "",
                 "// Alignment of some wires",
-                "(X Xlt <r 5> Xlb)",
+                "(x Xlt <r 5> Xlb)",
                 "",
                 "// Align the terminals",
-                "(X Tlt <0> Tlb)",
-                "(X Trt <0> Trb)",
+                "(x Tlt <0> Tlb)",
+                "(x Trt <0> Trb)",
             })),
 
             // A simple push-pull CMOS inverter
             new Demo("Demo: CMOS inverter", "A CMOS push-pull inverter.", string.Join(Environment.NewLine, new[]
             {
                 "// Define the push-pull branch.",
-                "GND1 <u> NMOS1 <u> Xout <u> PMOS1 <u> POW",
+                "GND <u> NMOS1 <u> Xout <u> PMOS1 <u> POW",
                 "",
                 "// Define the gate structure",
                 "PMOS1[g] <l d> Xin <d r> [g]NMOS1",
                 "",
                 "// Add some input signal",
-                "GND2 <u> V1 <u r> Xin",
+                "GND <u> V1 <u r> Xin",
                 "",
                 "// Add some load",
-                "Xout <r d> CL(\"CL\") <d> GND3",
+                "Xout <r d> CL(\"CL\") <d> GND",
                 "",
                 "// Some alignment",
-                "(Y GND1 <0> GND2 <0> GND3)",
-                "(X V1 <r +20> Xin)",
-                "(X NMOS1 <r +20> CL)",
+                "(y GND)",
+                "(y Xin <r> Xout)",
+                "(x V1 <r +20> Xin)",
+                "(x NMOS1 <r +20> CL)",
             })),
 
             // Pixel array with 3-Transistor read-out
@@ -284,7 +306,7 @@ namespace SimpleCircuitOnline
                 "M2[DIRsa] <u r d> RL <d l u> [DIRsb]M2",
                 "",
                 "// Alignment",
-                "(X V1 <r +25> M1 <r +25> M2 <r +25> RL)",
+                "(x V1 <r +25> M1 <r +25> M2 <r +25> RL)",
             })),
 
             // A latch
@@ -297,46 +319,47 @@ namespace SimpleCircuitOnline
                 "// The cross-coupled wires",
                 "NAND1[b] <l d a -20 d> Xob",
                 "Xoa <d a -160 d r> [b]NAND2",
-                "(X NAND1[o] <0> [o]NAND2)",
+                "(x NAND1[o] <0> [o]NAND2)",
                 "",
                 "// Finally flip the bottom one",
                 "- NAND2.Flipped = true",
             })),
 
             // A charge transimpedance amplifier
-            new Demo("Demo: CTIA and sections", "A Charge Transimpedance Amplifier also using sections.", string.Join(Environment.NewLine, new[]
+            new Demo("Demo: CTIA", "A Charge Transimpedance Amplifier also using sections.", string.Join(Environment.NewLine, new[]
             {
-                @"// Input section",
-                @".section Input",
-                @"    X1 <l d> I(""I_in"") <d> GND1",
-                @"    X1 <d> C(""C_in"") <d> GND2",
-                @"    (xy GND1 <r +25> GND2)",
-                @".endsection",
-                @"",
-                @"// Link to the next section",
-                @"Input/X1 <r> CTIA/Xin",
-                @"",
-                @"// Charge Transimpedance Amplifier",
-                @".section CTIA",
-                @"    Xin <r> A1(""-A"") <r> Xout",
-                @"    Xin <u r> C1(""C_fb"") <r d> Xout",
-                @"    (y A1 <u +20> C1)",
-                @".endsection",
-                @"",
-                @"// Link CTIA to output circuit",
-                @"CTIA/Xout <r> Output/Xout",
-                @"",
-                @"// Output circuit",
-                @".section Output",
-                @"    Xout <d> C1(""C_L"") <d> GND1",
-                @"    Xout <r> Xout2 <d> R1(""R_L"") <d> GND2",
-                @"    Xout2 <r> T(""V_out"")",
-                @"    (xy GND1 <r +20> GND2)",
-                @".endsection",
-                @"",
-                @"// We can still enforce alignment between elements",
-                @"// This would not be possible with subcircuits",
-                @"(y Input/GND1 <0> Output/GND1)"
+                "// Input section",
+                ".section Input",
+                "    X1 <l d> I(\"I_in\") <d> GND1",
+                "    X1 <d> C(\"C_in\") <d> GND2",
+                "    (xy GND1 <r +25> GND2)",
+                ".endsection",
+                "",
+                "// Link to the next section",
+                "Input/X1 <r> CTIA/Xin",
+                "",
+                "// Charge Transimpedance Amplifier",
+                ".section CTIA",
+                "    Xin <r> A1 <r> Xout",
+                "    Xin <u r> C1(\"C_fb\") <r d> Xout",
+                "    - A1.Gain = \"-A\"",
+                "    (y A1 <u +20> C1)",
+                ".endsection",
+                "",
+                "// Link CTIA to output circuit",
+                "CTIA/Xout <r> Output/Xout",
+                "",
+                "// Output circuit",
+                ".section Output",
+                "    Xout <d> C1(\"C_L\") <d> GND1",
+                "    Xout <r> Xout2 <d> R1(\"R_L\") <d> GND2",
+                "    Xout2 <r> T(\"V_out\")",
+                "    (xy GND1 <r +20> GND2)",
+                ".endsection",
+                "",
+                "// We can still enforce alignment between elements",
+                "// This would not be possible with subcircuits",
+                "(y Input/GND1 <0> Output/GND1)"
             }))
         };
     }
