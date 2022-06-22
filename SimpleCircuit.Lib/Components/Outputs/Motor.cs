@@ -33,6 +33,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawMotor(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 drawing.Circle(new(), 5);
                 drawing.Text("M", new(), new());
 

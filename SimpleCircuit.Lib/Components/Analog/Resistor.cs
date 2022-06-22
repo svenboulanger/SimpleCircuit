@@ -8,6 +8,8 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("R", "A resistor, potentially programmable.", "Analog")]
     public class ResistorFactory : DrawableFactory
     {
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -36,16 +38,12 @@ namespace SimpleCircuit.Components.Analog
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawANSIResistor),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
 
             private void DrawANSIResistor(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[2].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // The resistor
                 drawing.Polyline(new Vector2[]
@@ -69,11 +67,7 @@ namespace SimpleCircuit.Components.Analog
 
             private void DrawEICResistor(SvgDrawing drawing)
             {
-                // Draw some wire extensions if nothing is connected
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // The rectangle
                 CommonGraphical.Rectangle(drawing, 12, 6);

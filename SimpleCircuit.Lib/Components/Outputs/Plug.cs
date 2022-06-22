@@ -36,6 +36,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawPlug(SvgDrawing drawing)
             {
+                drawing.ExtendPin(Pins["a"]);
                 drawing.Arc(new(4, 0), Math.PI / 2, -Math.PI / 2, 4, null, 1);
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)

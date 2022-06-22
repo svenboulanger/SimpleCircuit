@@ -9,9 +9,21 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("C", "A capacitor.", "Analog")]
     public class Capacitor : DrawableFactory
     {
+        private const string _polar = "polar";
+        private const string _signs = "signs";
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options?.PolarCapacitors ?? false)
+            {
+                device.AddVariant("polar");
+                device.AddVariant("signs");
+            }
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -26,29 +38,25 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-1.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(1.5, 0), new(1, 0)), "n", "neg", "b");
-                if (options?.PolarCapacitors ?? false)
-                {
-                    AddVariant("polar");
-                    AddVariant("signs");
-                }
+
                 DrawingVariants = Variant.All(
-                    Variant.If("polar").Then(
+                    Variant.If(_polar).Then(
                         Variant.All(
                             Variant.Do(DrawPolar),
-                            Variant.If("signs").Then(DrawPolarSigns)))
+                            Variant.If(_signs).Then(DrawPolarSigns)))
                     .Else(
                         Variant.All(
                             Variant.Do(DrawApolar),
-                            Variant.If("signs").Then(DrawApolarSigns))),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                            Variant.If(_signs).Then(DrawApolarSigns))),
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
             private void DrawPolar(SvgDrawing drawing)
             {
                 // Wires
                 if (Pins[0].Connections == 0)
-                    drawing.Line(new(-1.5, 0), new(-5, 0), new("wire"));
+                    drawing.ExtendPin(Pins[0], 3.5);
                 if (Pins[1].Connections == 0)
-                    drawing.Line(new(1.5, 0), new(5, 0), new("wire"));
+                    drawing.ExtendPin(Pins[1], 3.5);
 
                 // Plates
                 drawing.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));
@@ -64,9 +72,9 @@ namespace SimpleCircuit.Components.Analog
             {
                 // Wires
                 if (Pins[0].Connections == 0)
-                    drawing.Line(new(-1.5, 0), new(-5, 0), new("wire"));
+                    drawing.ExtendPin(Pins[0], 3.5);
                 if (Pins[1].Connections == 0)
-                    drawing.Line(new(1.5, 0), new(5, 0), new("wire"));
+                    drawing.ExtendPin(Pins[1], 3.5);
 
                 // Plates
                 drawing.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));

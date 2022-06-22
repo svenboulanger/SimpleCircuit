@@ -10,15 +10,21 @@ namespace SimpleCircuit.Components.Analog
     [Drawable(new[] { "QP", "PNP" }, "A PNP bipolar transistor.", new[] { "Analog" })]
     public class BipolarTransistor : DrawableFactory
     {
+        private const string _packaged = "packaged";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
-            return key switch
+            IDrawable device = key switch
             {
                 "QN" or "NPN" => new Npn(name, options),
                 "QP" or "PNP" => new Pnp(name, options),
                 _ => throw new ArgumentException($"Invalid key '{key}' for bipolar transistor."),
             };
+
+            if (options?.PackagedTransistors ?? false)
+                device.AddVariant(_packaged);
+            return device;
         }
 
         private class Npn : ScaledOrientedDrawable, ILabeled
@@ -36,10 +42,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
 
-                if (options?.PackagedTransistors ?? false)
-                    AddVariant("packaged");
-                DrawingVariants = Variant.Map("packaged", Draw);
-                PinUpdate = Variant.Map("packaged", UpdatePins);
+                DrawingVariants = Variant.Map(_packaged, Draw);
+                PinUpdate = Variant.Map(_packaged, UpdatePins);
             }
             private void Draw(SvgDrawing drawing, bool packaged)
             {
@@ -71,9 +75,7 @@ namespace SimpleCircuit.Components.Analog
 
             }
             private void UpdatePins(bool packaged)
-            {
-                ((FixedOrientedPin)Pins[1]).Offset = new(0, packaged ? 8 : 6);
-            }
+                => SetPinOffset(1, new(0, packaged ? 8 : 6));
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
         {
@@ -90,10 +92,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
 
-                if (options?.PackagedTransistors ?? false)
-                    AddVariant("packaged");
-                DrawingVariants = Variant.Map("packaged", Draw);
-                PinUpdate = Variant.Map("packaged", UpdatePins);
+                DrawingVariants = Variant.Map(_packaged, Draw);
+                PinUpdate = Variant.Map(_packaged, UpdatePins);
             }
 
             private void Draw(SvgDrawing drawing, bool packaged)
@@ -125,9 +125,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
             private void UpdatePins(bool packaged)
-            {
-                ((FixedOrientedPin)Pins[1]).Offset = new(0, packaged ? 8 : 6);
-            }
+                => SetPinOffset(1, new(0, packaged ? 8 : 6));
         }
     }
 }

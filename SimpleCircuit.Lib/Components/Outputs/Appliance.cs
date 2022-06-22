@@ -11,6 +11,20 @@ namespace SimpleCircuit.Components.Outputs
     [Drawable("APP", "A fixed household appliance.", "Outputs")]
     public class Appliance : DrawableFactory
     {
+        private const string _ventilator = "ventilator";
+        private const string _heater = "heater";
+        private const string _boiler = "boiler";
+        private const string _cooking = "cooking";
+        private const string _microwave = "microwave";
+        private const string _oven = "oven";
+        private const string _washer = "washer";
+        private const string _dryer = "dryer";
+        private const string _dishwasher = "dishwasher";
+        private const string _refrigerator = "refrigerator";
+        private const string _fridge = "fridge";
+        private const string _freezer = "freezer";
+        private const string _accu = "accu";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -83,18 +97,18 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.FirstOf(
-                        Variant.If("ventilator").Then(DrawVentilator),
-                        Variant.If("heater").Then(Variant.Map("ventilator", "accu", DrawHeater)),
-                        Variant.If("boiler").Then(Variant.Map("accu", DrawBoiler)),
-                        Variant.If("cooking").Then(DrawCooking),
-                        Variant.If("microwave").Then(DrawMicroWave),
-                        Variant.If("oven").Then(DrawOven),
-                        Variant.If("washer").Then(DrawWasher),
-                        Variant.If("dryer").Then(DrawDryer),
-                        Variant.If("dishwasher").Then(DrawDishwasher),
-                        Variant.If("refrigerator").Then(DrawRefrigerator),
-                        Variant.If("fridge").Then(DrawRefrigerator),
-                        Variant.If("freezer").Then(DrawFreezer),
+                        Variant.If(_ventilator).Then(DrawVentilator),
+                        Variant.If(_heater).Then(Variant.Map(_ventilator, _accu, DrawHeater)),
+                        Variant.If(_boiler).Then(Variant.Map(_accu, DrawBoiler)),
+                        Variant.If(_cooking).Then(DrawCooking),
+                        Variant.If(_microwave).Then(DrawMicroWave),
+                        Variant.If(_oven).Then(DrawOven),
+                        Variant.If(_washer).Then(DrawWasher),
+                        Variant.If(_dryer).Then(DrawDryer),
+                        Variant.If(_dishwasher).Then(DrawDishwasher),
+                        Variant.If(_refrigerator).Then(DrawRefrigerator),
+                        Variant.If(_fridge).Then(DrawRefrigerator),
+                        Variant.If(_freezer).Then(DrawFreezer),
                         Variant.Do(DrawDefault)
                         ),
                     Variant.Do(DrawLabel));
@@ -183,6 +197,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDefault(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 DrawBox(drawing, 8, 0, 16, 16);
             }
             private void DrawLabel(SvgDrawing drawing)

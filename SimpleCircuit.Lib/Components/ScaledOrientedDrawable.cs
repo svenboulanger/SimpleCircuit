@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Components
@@ -30,6 +31,27 @@ namespace SimpleCircuit.Components
             : base(name)
         {
             _scale = options?.Scale ?? 1.0;
+        }
+
+        /// <summary>
+        /// Sets the offset of the specified pin.
+        /// </summary>
+        /// <param name="index">The pin index.</param>
+        /// <param name="offset">The offset.</param>
+        /// <exception cref="ArgumentException">Thrown if the pin is not a valid pin.</exception>
+        protected void SetPinOffset(int index, Vector2 offset)
+        {
+            if (index < Pins.Count)
+            {
+                if (Pins[index] is FixedOrientedPin fop)
+                    fop.Offset = offset;
+                else if (Pins[index] is FixedPin fp)
+                    fp.Offset = offset;
+                else
+                    throw new ArgumentException("Wanted to set offset of an invalid pin");
+            }
+            else
+                throw new ArgumentException("Invalid pin");
         }
 
         /// <inheritdoc />

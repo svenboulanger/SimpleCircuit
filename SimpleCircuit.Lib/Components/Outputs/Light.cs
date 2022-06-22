@@ -10,6 +10,12 @@ namespace SimpleCircuit.Components.Outputs
     [Drawable("LIGHT", "A light point.", "Outputs")]
     public class Light : DrawableFactory
     {
+        private const string _arei = "arei";
+        private const string _direction = "direction";
+        private const string _diverging = "diverging";
+        private const string _projector = "projector";
+        private const string _emergency = "emergency";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -32,11 +38,11 @@ namespace SimpleCircuit.Components.Outputs
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawLamp),
-                    Variant.IfNot("arei").Then(DrawCasing),
-                    Variant.If("projector").Then(DrawProjector),
-                    Variant.If("direction").Then(Variant.Map("diverging", DrawDirectional)),
-                    Variant.If("emergency").Then(DrawEmergency));
-                PinUpdate = Variant.Map("arei", UpdatePins);
+                    Variant.IfNot(_arei).Then(DrawCasing),
+                    Variant.If(_projector).Then(DrawProjector),
+                    Variant.If(_direction).Then(Variant.Map(_diverging, DrawDirectional)),
+                    Variant.If(_emergency).Then(DrawEmergency));
+                PinUpdate = Variant.Map(_arei, UpdatePins);
 
                 if (options?.AREI ?? false)
                     AddVariant("arei");
@@ -44,7 +50,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawLamp(SvgDrawing drawing)
             {
-                // drawing.Path(b => b.MoveTo(-_sqrt2, -_sqrt2).LineTo(_sqrt2, _sqrt2).MoveTo(_sqrt2, -_sqrt2).LineTo(-_sqrt2, _sqrt2));
+                drawing.ExtendPins(Pins);
                 drawing.Cross(new(), _sqrt2);
 
                 // Label
@@ -79,16 +85,15 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void UpdatePins(bool arei)
             {
-                void SetPin(int index, Vector2 offset) => ((FixedOrientedPin)Pins[index]).Offset = offset;
                 if (arei)
                 {
-                    SetPin(0, new());
-                    SetPin(1, new());
+                    SetPinOffset(0, new());
+                    SetPinOffset(1, new());
                 }
                 else
                 {
-                    SetPin(0, new(-4, 0));
-                    SetPin(1, new(4, 0));
+                    SetPinOffset(0, new(-4, 0));
+                    SetPinOffset(1, new(4, 0));
                 }
             }
         }

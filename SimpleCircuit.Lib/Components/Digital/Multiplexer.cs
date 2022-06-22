@@ -32,6 +32,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawMultiplexer(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 drawing.Polygon(new[] {
                     new Vector2(-5, -8),
                     new Vector2(5, -4),

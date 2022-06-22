@@ -27,11 +27,7 @@ namespace SimpleCircuit.Components.Analog
 
             private void DrawCrystal(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-4.5, 0), new(-6, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(4.5, 0), new(6, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // The crystal
                 drawing.Rectangle(5, 10, options: new("body"));

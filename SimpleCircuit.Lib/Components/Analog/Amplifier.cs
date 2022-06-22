@@ -12,6 +12,14 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("OA", "An operational amplifier.", "Analog")]
     public class Amplifier : DrawableFactory
     {
+        private const string _differentialInput = "diffin";
+        private const string _swapInput = "swapin";
+        private const string _differentialOutput = "diffout";
+        private const string _swapOutput = "swapout";
+        private const string _schmitt = "schmitt";
+        private const string _comparator = "comparator";
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
@@ -19,7 +27,7 @@ namespace SimpleCircuit.Components.Analog
             switch (key)
             {
                 case "OA":
-                    result.AddVariant("diffin");
+                    result.AddVariant(_differentialInput);
                     break;
             }
             return result;
@@ -36,6 +44,7 @@ namespace SimpleCircuit.Components.Analog
                 _outputPos = new(0, 4),
                 _outputNeg = new(0, -4),
                 _outputCommon = new(8, 0);
+
 
             /// <inheritdoc />
             public string Label { get; set; }
@@ -55,18 +64,21 @@ namespace SimpleCircuit.Components.Analog
 
                 // Resolving pins
                 PinUpdate = Variant.All(
-                    Variant.Map("diffin", "swapin", (b1, b2) => RedefineInput(b1, b2)),
-                    Variant.Map("diffout", "swapout", (b1, b2) => RedefineOutput(b1, b2))
+                    Variant.Map(_differentialInput, _swapInput, (b1, b2) => RedefineInput(b1, b2)),
+                    Variant.Map(_differentialOutput, _swapOutput, (b1, b2) => RedefineOutput(b1, b2))
                 );
                 DrawingVariants = Variant.All(
-                    Variant.If("diffin").Then(Variant.Map("swapin", DrawDifferentialInput)),
-                    Variant.If("diffout").Then(Variant.Map("swapout", DrawDifferentialOutput)),
-                    Variant.If("schmitt").Then(DrawSchmitt).Else(Variant.If("comparator").Then(DrawComparator)),
+                    Variant.If(_differentialInput).Then(Variant.Map(_swapInput, DrawDifferentialInput)),
+                    Variant.If(_differentialOutput).Then(Variant.Map(_swapOutput, DrawDifferentialOutput)),
+                    Variant.If(_schmitt).Then(DrawSchmitt).Else(Variant.If(_comparator).Then(DrawComparator)),
                     Variant.Do(DrawAmplifier),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
             private void DrawDifferentialInput(SvgDrawing drawing, bool swapped)
             {
+                if (Pins[1].Connections == 0)
+                    drawing.ExtendPin(Pins[1]);
+
                 if (swapped)
                     drawing.Signs(new(-5, 4), new(-5, -4));
                 else
@@ -75,15 +87,7 @@ namespace SimpleCircuit.Components.Analog
             private void DrawDifferentialOutput(SvgDrawing drawing, bool swapped)
             {
                 if (Pins[4].Connections == 0)
-                {
-                    var loc = ((FixedOrientedPin)Pins[4]).Offset;
-                    drawing.Line(loc, loc + new Vector2(5, 0), new("wire"));
-                }
-                if (Pins[5].Connections == 0)
-                {
-                    var loc = ((FixedOrientedPin)Pins[5]).Offset;
-                    drawing.Line(loc, loc + new Vector2(5, 0), new("wire"));
-                }
+                    drawing.ExtendPin(Pins[4], 5);
 
                 if (swapped)
                     drawing.Signs(new(5, -6), new(5, 6));
@@ -118,6 +122,11 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawAmplifier(SvgDrawing drawing)
             {
+                if (Pins[0].Connections == 0)
+                    drawing.ExtendPin(Pins[0]);
+                if (Pins[5].Connections == 0)
+                    drawing.ExtendPin(Pins[5], HasVariant(_differentialOutput) ? 5 : 2);
+
                 drawing.Polygon(new Vector2[]
                 {
                     new(-8, -8),
@@ -127,8 +136,6 @@ namespace SimpleCircuit.Components.Analog
                 if (!string.IsNullOrEmpty(Label))
                     drawing.Text(Label, new(-2.5, 0), new());
             }
-            private void SetPinOffset(int index, Vector2 offset)
-                => ((FixedOrientedPin)Pins[index]).Offset = offset;
             private void RedefineInput(bool differential, bool swapped)
             {
                 if (differential)

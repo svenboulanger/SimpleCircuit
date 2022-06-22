@@ -9,6 +9,8 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("Y", "An admittance.", "Analog")]
     public class Impedance : DrawableFactory
     {
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(key == "Y" ? "admittance" : "impedance", name, options);
@@ -29,15 +31,15 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawImpedance),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
             private void DrawImpedance(SvgDrawing drawing)
             {
                 // Draw some wire extensions if nothing is connected
                 if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
+                    drawing.ExtendPin(Pins[0]);
                 if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                    drawing.ExtendPin(Pins[1]);
 
                 // The rectangle
                 CommonGraphical.Rectangle(drawing, 12, 6);

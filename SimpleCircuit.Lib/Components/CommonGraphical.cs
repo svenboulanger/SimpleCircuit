@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Components
@@ -117,6 +118,48 @@ namespace SimpleCircuit.Components
                 new(0, 3)
             }, new("ac"));
             drawing.EndTransform();
+        }
+
+        /// <summary>
+        /// Extends a wire from the given pin.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="pin">The pin.</param>
+        /// <param name="length">The length of the wire.</param>
+        public static void ExtendPin(this SvgDrawing drawing, IPin pin, double length = 2)
+        {
+            if (pin.Connections == 0)
+            {
+                if (pin is FixedOrientedPin fop)
+                    drawing.Line(fop.Offset, fop.Offset + fop.LocalOrientation * length, new("wire"));
+                else if (pin is FixedPin fp)
+                    drawing.Dot(fp.Offset, 1, new("wire"));
+            }
+        }
+
+        /// <summary>
+        /// Extends all pins.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="pins">The pins.</param>
+        /// <param name="length">The length of the pin wire.</param>
+        public static void ExtendPins(this SvgDrawing drawing, IPinCollection pins, double length = 2)
+        {
+            foreach (var pin in pins)
+                drawing.ExtendPin(pin, length);
+        }
+
+        /// <summary>
+        /// Extends the specified pins.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="pins">The pins.</param>
+        /// <param name="length">The length of the pins.</param>
+        /// <param name="names">The names of the pins to extend.</param>
+        public static void ExtendPins(this SvgDrawing drawing, IPinCollection pins, double length, params string[] names)
+        {
+            foreach (string name in names)
+                drawing.ExtendPin(pins[name], length);
         }
     }
 }

@@ -12,9 +12,29 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("S", "A switch. The controlling pin is optional.", "Analog")]
     public class Switch : DrawableFactory
     {
+        private const string _arei = "arei";
+
+        private const string _closed = "closed";
+        private const string _invert = "invert";
+        private const string _push = "push";
+        private const string _lamp = "lamp";
+        private const string _window = "window";
+        private const string _toggle = "toggle";
+        private const string _double = "double";
+        private const string _knife = "knife";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options?.AREI ?? false)
+                device.AddVariant("arei");
+            else if (options?.IEC ?? false)
+                device.AddVariant("eic");
+            else
+                device.AddVariant("ansi");
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -35,25 +55,18 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
 
                 PinUpdate = All(
-                    Map("arei", "push", UpdatePins),
-                    IfNot("arei").Then(Map("closed", "invert", UpdateControlPin)));
-                DrawingVariants = If("arei")
+                    Map(_arei, _push, UpdatePins),
+                    IfNot(_arei).Then(Map(_closed, _invert, UpdateControlPin)));
+                DrawingVariants = If(_arei)
                     .Then(
-                        If("push")
-                        .Then(Map("lamp", "window", DrawAreiPushSwitch))
-                        .Else(Map("toggle", "double", "lamp", DrawAreiSwitch)))
+                        If(_push)
+                        .Then(Map(_lamp, _window, DrawAreiPushSwitch))
+                        .Else(Map(_toggle, _double, _lamp, DrawAreiSwitch)))
                     .Else(
-                        If("knife").Then(Map("closed", DrawKnifeSwitch)).Else(
-                        If("push")
-                        .Then(Map("closed", "invert", DrawPushSwitch))
-                        .Else(Map("closed", "invert", DrawRegularSwitch))));
-
-                if (options?.AREI ?? false)
-                    AddVariant("arei");
-                else if (options?.IEC ?? false)
-                    AddVariant("eic");
-                else
-                    AddVariant("ansi");
+                        If(_knife).Then(Map(_closed, DrawKnifeSwitch)).Else(
+                        If(_push)
+                        .Then(Map(_closed, _invert, DrawPushSwitch))
+                        .Else(Map(_closed, _invert, DrawRegularSwitch))));
             }
 
             private void DrawKnifeSwitch(SvgDrawing drawing, bool closed)
@@ -77,6 +90,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
+                drawing.ExtendPins(Pins, 2, "a", "b");
+
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
@@ -132,6 +147,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawAreiPushSwitch(SvgDrawing drawing, bool lamp, bool window)
             {
+                drawing.ExtendPin(Pins["a"]);
                 drawing.Circle(new(), 4);
                 drawing.Circle(new(), 2);
 
@@ -207,8 +223,6 @@ namespace SimpleCircuit.Components.Analog
                 }
             }
 
-            private void SetPinOffset(int index, Vector2 offset)
-                => ((FixedOrientedPin)Pins[index]).Offset = offset;
             private void UpdateControlPin(bool closed, bool inverted)
             {
                 if (inverted)

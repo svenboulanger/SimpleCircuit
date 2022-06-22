@@ -34,6 +34,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             private void DrawNand(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 drawing.ClosedBezier(new[]
                 {
                     new Vector2(-6, 5),

@@ -23,14 +23,13 @@ namespace SimpleCircuit.Components.Sources
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("positive", "The current end point.", this, new(-8, 0), new(-1, 0)), "p", "b");
-                Pins.Add(new FixedOrientedPin("negative", "The current starting point.", this, new(8, 0), new(1, 0)), "n", "a");
+                Pins.Add(new FixedOrientedPin("positive", "The current end point.", this, new(-6, 0), new(-1, 0)), "p", "b");
+                Pins.Add(new FixedOrientedPin("negative", "The current starting point.", this, new(6, 0), new(1, 0)), "n", "a");
                 DrawingVariants = Variant.Do(DrawSource);
             }
             private void DrawSource(SvgDrawing drawing)
             {
-                // Wires
-                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // The circle with the arrow
                 drawing.Circle(new(0, 0), 6);

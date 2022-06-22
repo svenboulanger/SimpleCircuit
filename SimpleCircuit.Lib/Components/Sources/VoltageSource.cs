@@ -36,11 +36,7 @@ namespace SimpleCircuit.Components.Sources
             }
             private void DrawSource(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // Circle
                 drawing.Circle(new(0, 0), 6);

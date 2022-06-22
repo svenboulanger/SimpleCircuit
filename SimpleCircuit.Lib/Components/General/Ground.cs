@@ -46,33 +46,30 @@ namespace SimpleCircuit.Components
             }
             private void DrawGround(SvgDrawing drawing)
             {
-                // Wire
-                drawing.Line(new(0, 0), new(0, 3), new("wire"));
+                drawing.ExtendPins(Pins, 3);
 
                 // Ground
-                drawing.Path(b => b.MoveTo(-5, 3).LineTo(5, 3).MoveTo(-3, 5).LineTo(3, 5).MoveTo(-1, 7).LineTo(1, 7));
+                drawing.Path(b => b.MoveTo(-5, 0).LineTo(5, 0).MoveTo(-3, 2).LineTo(3, 2).MoveTo(-1, 4).LineTo(1, 4));
             }
             private void DrawEarth(SvgDrawing drawing)
             {
-                // Wire
-                drawing.Line(new(0, 0), new(0, 3), new("wire"));
+                drawing.ExtendPins(Pins, 3);
 
                 // Ground segments
-                drawing.Path(b => b.MoveTo(-5, 3).LineTo(5, 3)
-                    .MoveTo(-5, 3).Line(-2, 4)
-                    .MoveTo(0, 3).Line(-2, 4)
-                    .MoveTo(5, 3).Line(-2, 4));
+                drawing.Path(b => b.MoveTo(-5, 0).LineTo(5, 0)
+                    .MoveTo(-5, 0).Line(-2, 4)
+                    .MoveTo(0, 0).Line(-2, 4)
+                    .MoveTo(5, 0).Line(-2, 4));
             }
             private void DrawSignalGround(SvgDrawing drawing)
             {
-                // Wires
-                drawing.Line(new Vector2(0, 0), new Vector2(0, 3), new("wire"));
+                drawing.ExtendPins(Pins, 3);
 
                 // Ground
                 drawing.Polygon(new[]
                 {
-                new Vector2(-5, 3), new Vector2(5, 3), new Vector2(0, 7)
-            });
+                    new Vector2(-5, 0), new Vector2(5, 0), new Vector2(0, 4)
+                });
             }
         }
     }

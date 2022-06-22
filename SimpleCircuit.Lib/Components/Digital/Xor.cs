@@ -27,6 +27,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawXor(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 drawing.ClosedBezier(new[]
                 {
                     new Vector2(-5, 5),

@@ -8,6 +8,12 @@ namespace SimpleCircuit.Components.Analog
     [Drawable(new[] { "OTA", "TA" }, "A transconductance amplifier.", new[] { "Analog" })]
     public class OperationalTransconductanceAmplifier : DrawableFactory
     {
+        private const string _differentialInput = "diffin";
+        private const string _swapInput = "swapin";
+        private const string _differentialOutput = "diffout";
+        private const string _swapOutput = "swapout";
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
@@ -37,17 +43,20 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
 
                 PinUpdate = Variant.All(
-                    Variant.Map("diffin", "swapin", RedefineInput),
-                    Variant.Map("diffout", "swapout", RedefineOutput));
+                    Variant.Map(_differentialInput, _swapInput, RedefineInput),
+                    Variant.Map(_differentialOutput, _swapOutput, RedefineOutput));
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawOTA),
-                    Variant.If("diffin").Then(Variant.Map("swapin", DrawInputSigns)),
-                    Variant.If("diffout").Then(Variant.Map("swapout", DrawOutputSigns)),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                    Variant.If(_differentialInput).Then(Variant.Map(_swapInput, DrawInputSigns)),
+                    Variant.If(_differentialOutput).Then(Variant.Map(_swapOutput, DrawOutputSigns)),
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
 
             private void DrawOTA(SvgDrawing drawing)
             {
+                drawing.ExtendPin(Pins["n"]);
+                drawing.ExtendPin(Pins["o"], HasVariant(_differentialOutput) ? 3 : 2);
+
                 // The triangle
                 drawing.Polygon(new Vector2[] {
                     new(-5, -9),
@@ -63,6 +72,7 @@ namespace SimpleCircuit.Components.Analog
 
             private void DrawInputSigns(SvgDrawing drawing, bool swapped)
             {
+                drawing.ExtendPin(Pins["p"]);
                 if (swapped)
                     drawing.Signs(new(-2, -4), new(-2, 4));
                 else
@@ -70,16 +80,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawOutputSigns(SvgDrawing drawing, bool swapped)
             {
-                if (Pins[4].Connections == 0)
-                {
-                    var loc = ((FixedOrientedPin)Pins[4]).Offset;
-                    drawing.Line(loc, loc + new Vector2(3, 0), new("wire"));
-                }
-                if (Pins[5].Connections == 0)
-                {
-                    var loc = ((FixedOrientedPin)Pins[5]).Offset;
-                    drawing.Line(loc, loc + new Vector2(3, 0), new("wire"));
-                }
+                drawing.ExtendPin(Pins["no"], 3);
 
                 if (swapped)
                     drawing.Signs(new(6, 7), new(6, -7));
@@ -91,29 +92,25 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Arrow(new(-7, 10), new(6, -12));
             }
 
-            private void SetPin(int index, Vector2 offset)
-            {
-                ((FixedOrientedPin)Pins[index]).Offset = offset;
-            }
             private void RedefineInput(bool differential, bool swapped)
             {
                 if (differential)
                 {
                     if (swapped)
                     {
-                        SetPin(0, new(-5, 4));
-                        SetPin(1, new(-5, -4));
+                        SetPinOffset(0, new(-5, 4));
+                        SetPinOffset(1, new(-5, -4));
                     }
                     else
                     {
-                        SetPin(0, new(-5, -4));
-                        SetPin(1, new(-5, 4));
+                        SetPinOffset(0, new(-5, -4));
+                        SetPinOffset(1, new(-5, 4));
                     }
                 }
                 else
                 {
-                    SetPin(0, new(-5, 0));
-                    SetPin(1, new(-5, 0));
+                    SetPinOffset(0, new(-5, 0));
+                    SetPinOffset(1, new(-5, 0));
                 }
             }
             private void RedefineOutput(bool differential, bool swapped)
@@ -122,19 +119,19 @@ namespace SimpleCircuit.Components.Analog
                 {
                     if (swapped)
                     {
-                        SetPin(4, new(5, -4));
-                        SetPin(5, new(5, 4));
+                        SetPinOffset(4, new(5, -4));
+                        SetPinOffset(5, new(5, 4));
                     }
                     else
                     {
-                        SetPin(4, new(5, 4));
-                        SetPin(5, new(5, -4));
+                        SetPinOffset(4, new(5, 4));
+                        SetPinOffset(5, new(5, -4));
                     }
                 }
                 else
                 {
-                    SetPin(4, new(5, 0));
-                    SetPin(5, new(5, 0));
+                    SetPinOffset(4, new(5, 0));
+                    SetPinOffset(5, new(5, 0));
                 }
             }
         }

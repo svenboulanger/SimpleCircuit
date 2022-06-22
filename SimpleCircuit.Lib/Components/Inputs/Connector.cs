@@ -24,13 +24,14 @@ namespace SimpleCircuit.Components.Inputs
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(-6, 0), new(-1, 0)), "n", "neg", "b");
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(6, 0), new(1, 0)), "p", "pos", "a");
+                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(-4, 0), new(-1, 0)), "n", "neg", "b");
+                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(2, 0), new(1, 0)), "p", "pos", "a");
                 DrawingVariants = Variant.Do(DrawConnector);
             }
             private void DrawConnector(SvgDrawing drawing)
             {
-                drawing.Path(b => b.MoveTo(-6, 0).LineTo(-4, 0).MoveTo(2, 0).LineTo(6, 0), new("wire"));
+                drawing.ExtendPin(Pins["n"]);
+                drawing.ExtendPin(Pins["p"], 4);
                 drawing.Circle(new(), 1.5);
                 drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
             }

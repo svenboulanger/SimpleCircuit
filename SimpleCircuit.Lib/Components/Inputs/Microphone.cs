@@ -29,6 +29,7 @@ namespace SimpleCircuit.Components.Inputs
             }
             private void DrawMic(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
 

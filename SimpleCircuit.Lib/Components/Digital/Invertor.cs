@@ -24,6 +24,8 @@ namespace SimpleCircuit.Components.Digital
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("input", "The input pin.", this, new(-6, 0), new(-1, 0)), "in", "input");
+                Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
+                Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
 
                 DrawingVariants = Variant.Do(DrawInverter);
@@ -32,6 +34,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc/>
             private void DrawInverter(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins, 2, "in", "out");
                 drawing.Polygon(new[]
                 {
                     new Vector2(-6, 6), new Vector2(6, 0), new Vector2(-6, -6)

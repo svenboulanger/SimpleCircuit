@@ -8,6 +8,9 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("L", "An inductor.", "Analog")]
     public class Inductor : DrawableFactory
     {
+        private const string _dot = "dot";
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -28,8 +31,8 @@ namespace SimpleCircuit.Components.Analog
 
                 DrawingVariants = Variant.All(
                     Variant.Do(DrawInductor),
-                    Variant.If("dot").Then(DrawDot),
-                    Variant.If("programmable").Then(DrawProgrammable));
+                    Variant.If(_dot).Then(DrawDot),
+                    Variant.If(_programmable).Then(DrawProgrammable));
             }
 
             /// <inheritdoc />

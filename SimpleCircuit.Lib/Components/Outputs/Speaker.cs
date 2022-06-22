@@ -32,15 +32,12 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawSpeaker(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
+                drawing.Rectangle(4, 8, new());
                 drawing.Polygon(new Vector2[]
                 {
-                new(-2, -4), new(2, -4),
-                new(2, 4), new(-2, 4)
-                });
-                drawing.Polygon(new Vector2[]
-                {
-                new(2, -4), new(6, -9),
-                new(6, 9), new(2, 4)
+                    new(2, -4), new(6, -9),
+                    new(6, 9), new(2, 4)
                 });
 
                 if (!string.IsNullOrWhiteSpace(Label))
