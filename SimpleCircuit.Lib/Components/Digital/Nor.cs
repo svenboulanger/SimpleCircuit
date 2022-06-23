@@ -8,9 +8,16 @@ namespace SimpleCircuit.Components.Digital
     [Drawable("NOR", "A NOR gate.", "Digital")]
     public class Nor : DrawableFactory
     {
+        private const string _iec = "iec";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options.IEC)
+                device.AddVariant(_iec);
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -27,7 +34,10 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-4, 2.5), new(-1, 0)), "b");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(9, 0), new(1, 0)), "o", "out", "output");
 
-                DrawingVariants = Variant.Do(DrawNor);
+                PinUpdate = Variant.Map(_iec, UpdatePins);
+                DrawingVariants = Variant.FirstOf(
+                    Variant.If(_iec).Then(DrawNorIEC),
+                    Variant.Do(DrawNor));
             }
             private void DrawNor(SvgDrawing drawing)
             {
@@ -45,6 +55,33 @@ namespace SimpleCircuit.Components.Digital
 
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, -6), new(0, -1));
+            }
+            private void DrawNorIEC(SvgDrawing drawing)
+            {
+                drawing.ExtendPins(Pins);
+
+                drawing.Rectangle(8, 10, new());
+                drawing.Circle(new(5.5, 0), 1.5);
+                drawing.Text("&#8805;1", new(), new());
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(0, -6), new(0, -1));
+            }
+
+            private void UpdatePins(bool iec)
+            {
+                if (iec)
+                {
+                    SetPinOffset(0, new(-4, -2.5));
+                    SetPinOffset(1, new(-4, 2.5));
+                    SetPinOffset(2, new(7, 0));
+                }
+                else
+                {
+                    SetPinOffset(0, new(-4, -2.5));
+                    SetPinOffset(1, new(-4, 2.5));
+                    SetPinOffset(2, new(9, 0));
+                }
             }
         }
     }
