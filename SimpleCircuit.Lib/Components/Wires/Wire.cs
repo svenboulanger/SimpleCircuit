@@ -81,10 +81,14 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public override void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Reset()
         {
             _vectors.Clear();
+        }
 
+        /// <inheritdoc />
+        public override void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        {
             double x = 0.0, y = 0.0;
             if (state.TryGetValue(context.Nodes.Shorts[StartX], out var solX))
                 x = solX.Value;
@@ -157,7 +161,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             string x = StartX, y = StartY;
             for (int i = 0; i < _info.Segments.Count; i++)
@@ -169,7 +173,7 @@ namespace SimpleCircuit.Components.Wires
             }
         }
 
-        private void RegisterWire(CircuitContext context, string x, string y, string tx, string ty, WireSegmentInfo segment)
+        private void RegisterWire(CircuitSolverContext context, string x, string y, string tx, string ty, WireSegmentInfo segment)
         {
             var map = context.Nodes.Shorts;
             string ox = map[x];
@@ -228,6 +232,16 @@ namespace SimpleCircuit.Components.Wires
                                 continue;
                             nx /= nx.Length;
                             Vector2 ny = new(nx.Y, -nx.X);
+                            if (Math.Abs(ny.Y) > Math.Abs(ny.X))
+                            {
+                                if (ny.Y > 0)
+                                    ny = -ny; // Choose upward direction
+                            }
+                            else
+                            {
+                                if (ny.X > 0)
+                                    ny = -ny; // Choose leftward direction
+                            }
                             Vector2 o = _vectors[i].Location;
                             Vector2 s = o - nx * _jumpOverRadius;
                             Vector2 e = o + _jumpOverRadius * nx;

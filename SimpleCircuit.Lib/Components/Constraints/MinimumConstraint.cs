@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A constraint between two nodes that tries to guarantee a minimum between the two.
     /// </summary>
-    public class MinimumConstraint : ICircuitPresence
+    public class MinimumConstraint : ICircuitSolverPresence
     {
         public const string DiodeModelName = "#MinimumOffsetPinModel";
 
@@ -106,12 +106,15 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
+        public void Reset() { }
+
+        /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
         }
 
         /// <inheritdoc />
-        public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             var highest = context.Nodes.Shorts[Highest];
             var lowest = context.Nodes.Shorts[Lowest];
@@ -120,7 +123,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
         }
     }

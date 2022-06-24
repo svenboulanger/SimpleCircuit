@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             if (Fix)
             {
@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components.Pins
             MinimumConstraint.AddMinimum(ckt, $"{Owner.Name}[{Name}].min.y", oy, y, direction.Y * MinimumOffset);
         }
 
-        private void RegisterFixed(CircuitContext context, IDiagnosticHandler diagnostics)
+        private void RegisterFixed(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             // No need to go through all these difficult things, let's just apply directly
             var map = context.Nodes.Shorts;

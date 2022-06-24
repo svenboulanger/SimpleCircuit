@@ -42,13 +42,19 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
+        public virtual void Reset()
+        {
+            Location = new();
+        }
+
+        /// <inheritdoc />
         public abstract void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
 
         /// <inheritdoc />
-        public abstract void Register(CircuitContext context, IDiagnosticHandler diagnostics);
+        public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             double x = 0, y = 0;
             if (state.TryGetValue(context.Nodes.Shorts[X], out var xValue))

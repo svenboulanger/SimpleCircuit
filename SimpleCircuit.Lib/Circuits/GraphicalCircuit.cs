@@ -172,15 +172,24 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         /// </summary>
         public void Solve(IDiagnosticHandler diagnostics)
         {
-            var context = new CircuitContext();
+            var context = new CircuitSolverContext();
             bool first = true;
             void Log(object sender, SpiceSharp.WarningEventArgs e)
             {
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
             }
 
-            // First discover any node maps
-            foreach (var c in _presences.Values)
+            // First reset all circuit presences
+            foreach (var c in _presences)
+                c.Value.Reset();
+
+            // Preparation presences
+            foreach (var c in _presences.Values.OfType<ICircuitPreparationPresence>())
+                c.Prepare(this, diagnostics);
+
+            // Solver presences
+            var presences = _presences.Values.OfType<ICircuitSolverPresence>();
+            foreach (var c in presences)
             {
                 c.DiscoverNodeRelationships(context.Nodes, diagnostics);
                 if (first && c is ILocatedPresence lp)
@@ -191,7 +200,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
                 }
             }
 
-            foreach (var c in _presences.Values)
+            foreach (var c in presences)
                 c.Register(context, diagnostics);
 
             if (context.Circuit.Count == 0)
@@ -231,7 +240,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
                     // Extract the information
                     var state = op.GetState<IBiasingSimulationState>();
                     context.WireSegments.Clear();
-                    foreach (var c in _presences.Values)
+                    foreach (var c in presences)
                         c.Update(state, context, diagnostics);
                 }
                 while (context.Recalculate);

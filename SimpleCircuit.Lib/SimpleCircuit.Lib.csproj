@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <Compile Include="Circuits\GraphicalCircuit.cs" />
-    <Compile Include="Circuits\CircuitContext.cs" />
+    <Compile Include="Circuits\CircuitSolverContext.cs" />
     <Compile Include="Circuits\ICircuitPresence.cs" />
     <Compile Include="Circuits\ILocatedPresence.cs" />
     <Compile Include="Circuits\NodeContext.cs" />

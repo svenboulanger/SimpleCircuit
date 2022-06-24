@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Pins
     /// A loose pin, i.e. a pin that is not related to anything else.
     /// The owner is responsible for not letting this pin escape!
     /// </summary>
-    public class LoosePin : Pin
+    public class LoosePin : Pin, IOrientedPin
     {
         /// <summary>
         /// Creates a loose pin. This means that any constrains need to be applied manually!
@@ -20,15 +20,26 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
+        public Vector2 Orientation { get; private set; }
+
+        /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             // Left to whoever owns this pin...
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             // Left to whoever owns this pin...
+        }
+
+        /// <inheritdoc />
+        public bool ResolveOrientation(Vector2 orientation, IDiagnosticHandler diagnostics)
+        {
+            // We are not being difficult, just give the orientation it wants...
+            Orientation = orientation;
+            return true;
         }
     }
 }

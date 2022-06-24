@@ -36,7 +36,14 @@ namespace SimpleCircuit.Components
         protected OrientedDrawable(string name)
             : base(name)
         {
+        }
 
+        /// <inheritdoc />
+        public override void Reset()
+        {
+            base.Reset();
+            _dof = 2;
+            UpdateTransform();
         }
 
         /// <inheritdoc />
@@ -102,7 +109,7 @@ namespace SimpleCircuit.Components
         {
             switch (_dof)
             {
-                case 0:
+                case 2:
                     // Just whatever
                     Transform = Flipped ? (new(-1, 0, 0, -1)) : Matrix2.Identity;
                     break;
@@ -116,7 +123,7 @@ namespace SimpleCircuit.Components
                     Transform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;
                     break;
 
-                case 2:
+                case 0:
                     // Fully constrained, don't do anything
                     break;
             }

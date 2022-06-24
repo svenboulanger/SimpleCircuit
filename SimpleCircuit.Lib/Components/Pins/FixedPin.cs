@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             Vector2 offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
             var map = context.Nodes.Shorts;

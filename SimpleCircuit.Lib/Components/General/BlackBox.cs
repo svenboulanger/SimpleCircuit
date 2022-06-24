@@ -4,7 +4,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -71,6 +70,9 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
+            public void Reset() { }
+
+            /// <inheritdoc />
             public void Render(SvgDrawing drawing)
             {
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
@@ -88,37 +90,19 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void AddVariant(string variant)
-            {
-            }
-
-            /// <inheritdoc />
-            public void RemoveVariant(string variant)
-            {
-            }
-
-            /// <inheritdoc />
-            public bool HasVariant(string variant) => false;
-
-            /// <inheritdoc />
-            public void CollectPossibleVariants(ISet<string> variants)
-            {
-            }
-
-            /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
                 _pins.DiscoverNodeRelationships(context, diagnostics);
             }
 
             /// <inheritdoc />
-            public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+            public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
             {
                 _pins.Register(context, diagnostics);
             }
 
             /// <inheritdoc />
-            public void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+            public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
             {
                 var map = context.Nodes.Shorts;
                 double x, y;

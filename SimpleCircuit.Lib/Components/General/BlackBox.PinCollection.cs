@@ -125,7 +125,7 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+            public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
             {
                 var ckt = context.Circuit;
                 var map = context.Nodes.Shorts;

@@ -8,20 +8,9 @@ namespace SimpleCircuit.Components.Pins
     public interface IOrientedPin : IPin
     {
         /// <summary>
-        /// Gets the local orientation of the pin. This is the orientation
-        /// when the owner is in its default orientation.
-        /// </summary>
-        public Vector2 LocalOrientation { get; }
-
-        /// <summary>
-        /// Gets the current orientation of the pin.
+        /// Gets or sets the current orientation of the pin in absolute coordinates.
         /// </summary>
         public Vector2 Orientation { get; }
-
-        /// <summary>
-        /// Gets the owner of the pin.
-        /// </summary>
-        public new IOrientedDrawable Owner { get; }
 
         /// <summary>
         /// Resolves the orientation of a pin. It fails if the orientation cannot be resolved

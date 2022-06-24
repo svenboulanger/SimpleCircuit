@@ -91,15 +91,18 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
+        public abstract void Reset();
+
+        /// <inheritdoc />
         public virtual void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
         }
 
         /// <inheritdoc />
-        public abstract void Register(CircuitContext context, IDiagnosticHandler diagnostics);
+        public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
 
         /// <inheritdoc />
-        public abstract void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics);
+        public abstract void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics);
 
         /// <summary>
         /// Converts the drawable to a string.

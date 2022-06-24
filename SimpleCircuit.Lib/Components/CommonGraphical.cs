@@ -131,7 +131,7 @@ namespace SimpleCircuit.Components
             if (pin.Connections == 0)
             {
                 if (pin is FixedOrientedPin fop)
-                    drawing.Line(fop.Offset, fop.Offset + fop.LocalOrientation * length, new("wire"));
+                    drawing.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
                 else if (pin is FixedPin fp)
                     drawing.Dot(fp.Offset, 1, new("wire"));
             }

@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// Describes a component with a graphical representation, and pins that can be interconnected.
     /// </summary>
-    public interface IDrawable : ICircuitPresence
+    public interface IDrawable : ICircuitSolverPresence
     {
         /// <summary>
         /// Gets the variants.
@@ -23,6 +23,11 @@ namespace SimpleCircuit.Components
         /// to force some components to be drawn over others.
         /// </summary>
         public int Order { get; }
+
+        /// <summary>
+        /// Resets all information of the drawable before solving.
+        /// </summary>
+        public void Reset();
 
         /// <summary>
         /// Renders the component in the specified drawing.

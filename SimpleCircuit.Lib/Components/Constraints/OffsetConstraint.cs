@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A component that describes a constraint between two nodes.
     /// </summary>
-    public class OffsetConstraint : ICircuitPresence
+    public class OffsetConstraint : ICircuitSolverPresence
     {
         /// <summary>
         /// Adds a structure to the circuit that tries to guarantee an offset between two nodes.
@@ -80,6 +80,9 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
+        public void Reset() { }
+
+        /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             if (Offset.IsZero())
@@ -87,7 +90,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             var lowest = context.Nodes.Shorts[Lowest];
             var highest = context.Nodes.Shorts[Highest];
@@ -96,7 +99,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
         }
     }

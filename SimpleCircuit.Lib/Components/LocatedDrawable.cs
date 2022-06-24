@@ -33,7 +33,13 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void Update(IBiasingSimulationState state, CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Reset()
+        {
+            Location = new();
+        }
+
+        /// <inheritdoc />
+        public override void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             double x = 0, y = 0;
 
@@ -58,7 +64,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitContext context, IDiagnosticHandler diagnostics)
+        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
             for (int i = 0; i < Pins.Count; i++)
                 Pins[i].Register(context, diagnostics);

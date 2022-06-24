@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Wires;
@@ -165,10 +166,10 @@ namespace SimpleCircuit.Parser
             context.Circuit.Add(wire);
 
             // Resolve the orientation for the pin to the wire
-            if (pinToWire is IOrientedPin pin1)
-                pin1.ResolveOrientation(wireInfo.Segments[0].Orientation, context.Diagnostics);
-            if (wireToPin is IOrientedPin pin2)
-                pin2.ResolveOrientation(-wireInfo.Segments[^1].Orientation, context.Diagnostics);
+            if (pinToWire is IOrientedPin orientedPin1)
+                context.Circuit.Add(new PinOrientationConstraint($"{name}.pin1", orientedPin1, wireInfo.Segments[0].Orientation));
+            if (wireToPin is IOrientedPin orientedPin2)
+                context.Circuit.Add(new PinOrientationConstraint($"{name}.pin2", orientedPin2, -wireInfo.Segments[^1].Orientation));
 
             // Make sure the start and end are tied together
             context.Circuit.Add(

@@ -3,7 +3,7 @@
     /// <summary>
     /// An circuit presence that has coordinates in 2D space.
     /// </summary>
-    public interface ILocatedPresence : ICircuitPresence
+    public interface ILocatedPresence : ICircuitSolverPresence
     {
         /// <summary>
         /// Gets the name of the node that contains the X-location.
