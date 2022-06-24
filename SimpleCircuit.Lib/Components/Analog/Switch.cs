@@ -12,8 +12,6 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("S", "A switch. The controlling pin is optional.", "Analog")]
     public class Switch : DrawableFactory
     {
-        private const string _arei = "arei";
-
         private const string _closed = "closed";
         private const string _invert = "invert";
         private const string _push = "push";
@@ -27,12 +25,18 @@ namespace SimpleCircuit.Components.Analog
         public override IDrawable Create(string key, string name, Options options)
         {
             var device = new Instance(name, options);
-            if (options?.AREI ?? false)
-                device.AddVariant("arei");
-            else if (options?.IEC ?? false)
-                device.AddVariant("eic");
-            else
-                device.AddVariant("ansi");
+            switch (options?.Style ?? Options.Styles.ANSI)
+            {
+                case Options.Styles.AREI:
+                    device.AddVariant(Options.Arei);
+                    break;
+                case Options.Styles.IEC:
+                    device.AddVariant(Options.Iec);
+                    break;
+                default:
+                    device.AddVariant(Options.Ansi);
+                    break;
+            }
             return device;
         }
 
@@ -55,9 +59,9 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
 
                 PinUpdate = All(
-                    Map(_arei, _push, UpdatePins),
-                    IfNot(_arei).Then(Map(_closed, _invert, UpdateControlPin)));
-                DrawingVariants = If(_arei)
+                    Map(Options.Arei, _push, UpdatePins),
+                    IfNot(Options.Arei).Then(Map(_closed, _invert, UpdateControlPin)));
+                DrawingVariants = If(Options.Arei)
                     .Then(
                         If(_push)
                         .Then(Map(_lamp, _window, DrawAreiPushSwitch))

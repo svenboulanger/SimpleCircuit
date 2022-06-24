@@ -5,18 +5,53 @@
     /// </summary>
     public class Options
     {
-        private enum Styles
+        /// <summary>
+        /// The identifier for AREI style components.
+        /// </summary>
+        public const string Arei = "arei";
+
+        /// <summary>
+        /// The identifier for ANSI style components.
+        /// </summary>
+        public const string Ansi = "ansi";
+
+        /// <summary>
+        /// The identifier for IEC style components.
+        /// </summary>
+        public const string Iec = "iec";
+
+        /// <summary>
+        /// Enumerates the different styles.
+        /// </summary>
+        public enum Styles
         {
+            /// <summary>
+            /// AREI style (Algemeen Reglement op de Elektrische Installaties).
+            /// </summary>
+            AREI,
+
+            /// <summary>
+            /// ANSI style (American National Standards Institute).
+            /// </summary>
             ANSI,
-            EIC
+
+            /// <summary>
+            /// IEC style (International Electrotechnical Commission).
+            /// </summary>
+            IEC
         }
         private Styles _style = Styles.ANSI;
+
+        /// <summary>
+        /// Gets the current style.
+        /// </summary>
+        public Styles Style => _style;
 
         [Description("If true, use ANSI style symbols.")]
         public bool ANSI { get => _style == Styles.ANSI; set => _style = Styles.ANSI; }
 
         [Description("If true, use IEC style symbols.")]
-        public bool IEC { get => _style == Styles.EIC; set => _style = Styles.EIC; }
+        public bool IEC { get => _style == Styles.IEC; set => _style = Styles.IEC; }
 
         [Description("If true, some components will use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
         public bool AREI { get; set; }

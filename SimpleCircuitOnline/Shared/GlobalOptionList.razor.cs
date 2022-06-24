@@ -50,8 +50,12 @@ namespace SimpleCircuitOnline.Shared
             // Find the categories
             foreach (var property in typeof(Options).GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                var attribute = property.GetCustomAttribute<DescriptionAttribute>(true);
-                _options.Add((property, attribute.Description));
+                if (property.CanWrite && property.CanRead)
+                {
+                    var attribute = property.GetCustomAttribute<DescriptionAttribute>(true);
+                    if (attribute != null)
+                        _options.Add((property, attribute.Description));
+                }
             }
         }
 
