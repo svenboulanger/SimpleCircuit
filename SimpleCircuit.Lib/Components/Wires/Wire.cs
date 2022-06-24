@@ -61,7 +61,6 @@ namespace SimpleCircuit.Components.Wires
         public Wire(string name, WireInfo info)
             : base(name)
         {
-            DrawingVariants = Variant.Do(DrawWire);
             _info = info ?? throw new ArgumentNullException(nameof(info));
         }
 
@@ -210,7 +209,7 @@ namespace SimpleCircuit.Components.Wires
             }
         }
 
-        private void DrawWire(SvgDrawing drawing)
+        protected override void Draw(SvgDrawing drawing)
         {
             if (_info.IsVisible && _vectors.Count > 0)
             {

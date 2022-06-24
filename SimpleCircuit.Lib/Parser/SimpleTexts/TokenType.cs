@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Parser.SimpleTexts
+﻿namespace SimpleCircuit.Parser.SimpleTexts
 {
     public enum TokenType
     {

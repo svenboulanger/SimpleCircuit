@@ -1,8 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using static SimpleCircuit.Components.Variant;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -28,13 +26,15 @@ namespace SimpleCircuit.Components.Analog
             switch (options?.Style ?? Options.Styles.ANSI)
             {
                 case Options.Styles.AREI:
-                    device.AddVariant(Options.Arei);
+                    device.Variants.Add(Options.Arei);
                     break;
+
                 case Options.Styles.IEC:
-                    device.AddVariant(Options.Iec);
+                    device.Variants.Add(Options.Iec);
                     break;
+
                 default:
-                    device.AddVariant(Options.Ansi);
+                    device.Variants.Add(Options.Ansi);
                     break;
             }
             return device;
@@ -57,22 +57,33 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, -6), new(0, -1)), "c", "ctrl");
                 Pins.Add(new FixedOrientedPin("backside", "The backside controlling pin. Can be used to link multiple switches.", this, new(0, -6), new(0, 1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
-
-                PinUpdate = All(
-                    Map(Options.Arei, _push, UpdatePins),
-                    IfNot(Options.Arei).Then(Map(_closed, _invert, UpdateControlPin)));
-                DrawingVariants = If(Options.Arei)
-                    .Then(
-                        If(_push)
-                        .Then(Map(_lamp, _window, DrawAreiPushSwitch))
-                        .Else(Map(_toggle, _double, _lamp, DrawAreiSwitch)))
-                    .Else(
-                        If(_knife).Then(Map(_closed, DrawKnifeSwitch)).Else(
-                        If(_push)
-                        .Then(Map(_closed, _invert, DrawPushSwitch))
-                        .Else(Map(_closed, _invert, DrawRegularSwitch))));
+                Variants.Changed += UpdatePins;
             }
 
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select(Options.Arei, Options.Ansi))
+                {
+                    case 0: DrawAreiSwitch(drawing); break;
+                    case 1: DrawAnsiSwitch(drawing); break;
+                }
+            }
+            private void DrawAreiSwitch(SvgDrawing drawing)
+            {
+                if (Variants.Contains(_push))
+                    DrawAreiPushSwitch(drawing, Variants.Contains(_lamp), Variants.Contains(_window));
+                else
+                    DrawAreiSwitch(drawing, Variants.Contains(_toggle), Variants.Contains(_double), Variants.Contains(_lamp));
+            }
+            private void DrawAnsiSwitch(SvgDrawing drawing)
+            {
+                if (Variants.Contains(_knife))
+                    DrawKnifeSwitch(drawing, Variants.Contains(_closed));
+                else if (Variants.Contains(_push))
+                    DrawPushSwitch(drawing, Variants.Contains(_closed), Variants.Contains(_invert));
+                else
+                    DrawRegularSwitch(drawing, Variants.Contains(_closed), Variants.Contains(_invert));
+            }
             private void DrawKnifeSwitch(SvgDrawing drawing, bool closed)
             {
                 if (closed)
@@ -227,11 +238,11 @@ namespace SimpleCircuit.Components.Analog
                 }
             }
 
-            private void UpdateControlPin(bool closed, bool inverted)
+            private void UpdatePins(object sender, EventArgs e)
             {
-                if (inverted)
+                if (Variants.Contains(_invert))
                 {
-                    if (closed)
+                    if (Variants.Contains(_closed))
                     {
                         SetPinOffset(1, new(0, -2));
                         SetPinOffset(2, new());
@@ -244,7 +255,7 @@ namespace SimpleCircuit.Components.Analog
                 }
                 else
                 {
-                    if (closed)
+                    if (Variants.Contains(_closed))
                     {
                         SetPinOffset(1, new());
                         SetPinOffset(2, new());
@@ -255,12 +266,10 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(2, new(0, -2));
                     }
                 }
-            }
-            private void UpdatePins(bool onewire, bool push)
-            {
-                if (onewire)
+            
+                if (Variants.Contains(Options.Arei))
                 {
-                    if (push)
+                    if (Variants.Contains(_push))
                     {
                         SetPinOffset(0, new(-4, 0));
                         SetPinOffset(3, new(4, 0));

@@ -13,7 +13,10 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class Drawable : IDrawable
     {
-        private readonly HashSet<string> _variants = new(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        /// Gets the variants of the drawable.
+        /// </summary>
+        public VariantSet Variants { get; } = new();
 
         /// <inheritdoc />
         public string Name { get; }
@@ -30,16 +33,6 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         IPinCollection IDrawable.Pins => Pins;
-
-        /// <summary>
-        /// Resolves how pins are updated before solving.
-        /// </summary>
-        protected IVariantResolver PinUpdate { get; set; }
-
-        /// <summary>
-        /// Resolves how the drawable is drawn.
-        /// </summary>
-        protected IVariantResolver DrawingVariants { get; set; }
 
         /// <inheritdoc />
         public virtual int Order => 0;
@@ -60,48 +53,17 @@ namespace SimpleCircuit.Components
             Name = name;
         }
 
-        /// <inheritdoc />
-        public virtual void AddVariant(string variant)
-        {
-            _variants.Add(variant);
-
-            // We may need to update the pin locations!
-            if (PinUpdate != null)
-            {
-                var c = new VariantResolverContext(_variants);
-                PinUpdate.Resolve(c);
-            }
-        }
-
-        /// <inheritdoc />
-        public virtual void RemoveVariant(string variant)
-        {
-            _variants.Remove(variant);
-
-            // We may need to update our pin locations!
-            if (PinUpdate != null)
-            {
-                var c = new VariantResolverContext(_variants);
-                PinUpdate.Resolve(c);
-            }
-        }
-
-        /// <inheritdoc />
-        public virtual void CollectPossibleVariants(ISet<string> variants)
-        {
-            PinUpdate?.CollectPossibleVariants(variants);
-            DrawingVariants?.CollectPossibleVariants(variants);
-        }
-
-        /// <inheritdoc />
-        public virtual bool HasVariant(string variant)
-            => _variants.Contains(variant);
-
         /// <summary>
         /// Creates a transform.
         /// </summary>
         /// <returns></returns>
         protected virtual Transform CreateTransform() => Transform.Identity;
+
+        /// <summary>
+        /// Draws the component.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        protected abstract void Draw(SvgDrawing drawing);
 
         /// <inheritdoc />
         public virtual void Render(SvgDrawing drawing)
@@ -110,7 +72,7 @@ namespace SimpleCircuit.Components
             var go = new GraphicOptions() { Id = Name };
             if (!string.IsNullOrWhiteSpace(Type))
                 go.Classes.Add(Type.ToLower());
-            foreach (string name in _variants)
+            foreach (string name in Variants)
                 go.Classes.Add(name.ToLower());
             if (GroupClasses != null)
             {
@@ -121,11 +83,7 @@ namespace SimpleCircuit.Components
 
             // Transform all the elements inside the drawing method
             drawing.BeginTransform(CreateTransform());
-            if (DrawingVariants != null)
-            {
-                var context = new VariantResolverContext<SvgDrawing>(_variants, drawing);
-                DrawingVariants.Resolve(context);
-            }
+            Draw(drawing);
             drawing.EndTransform();
 
             // Stop grouping elements

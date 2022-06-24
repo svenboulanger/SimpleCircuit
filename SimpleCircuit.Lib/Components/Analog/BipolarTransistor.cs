@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components.Analog
             };
 
             if (options?.PackagedTransistors ?? false)
-                device.AddVariant(_packaged);
+                device.Variants.Add(_packaged);
             return device;
         }
 
@@ -41,18 +41,16 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-8, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
-
-                DrawingVariants = Variant.Map(_packaged, Draw);
-                PinUpdate = Variant.Map(_packaged, UpdatePins);
+                Variants.Changed += UpdatePins;
             }
-            private void Draw(SvgDrawing drawing, bool packaged)
+            protected override void Draw(SvgDrawing drawing)
             {
                 // Wires
                 if (Pins[0].Connections == 0)
                     drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
                 if (Pins[1].Connections == 0)
                 {
-                    if (packaged)
+                    if (Variants.Contains(_packaged))
                         drawing.Line(new(0, 4), new(0, 8), new("wire"));
                     else
                         drawing.Line(new(0, 4), new(0, 6), new("wire"));
@@ -66,7 +64,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
-                if (packaged)
+                if (Variants.Contains(_packaged))
                     drawing.Circle(new(), 8.0);
 
                 // Label
@@ -74,8 +72,8 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
 
             }
-            private void UpdatePins(bool packaged)
-                => SetPinOffset(1, new(0, packaged ? 8 : 6));
+            private void UpdatePins(object sender, EventArgs e)
+                => SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
         {
@@ -91,19 +89,17 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
-
-                DrawingVariants = Variant.Map(_packaged, Draw);
-                PinUpdate = Variant.Map(_packaged, UpdatePins);
+                Variants.Changed += UpdatePins;
             }
 
-            private void Draw(SvgDrawing drawing, bool packaged)
+            protected override void Draw(SvgDrawing drawing)
             {
                 // Wires
                 if (Pins[0].Connections == 0)
                     drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
                 if (Pins[1].Connections == 0)
                 {
-                    if (packaged)
+                    if (Variants.Contains(_packaged))
                         drawing.Line(new(0, 4), new(0, 8), new("wire"));
                     else
                         drawing.Line(new(0, 4), new(0, 6), new("wire"));
@@ -117,15 +113,15 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
-                if (packaged)
+                if (Variants.Contains(_packaged))
                     drawing.Circle(new(), 8.0);
 
                 // Label
                 if (!string.IsNullOrEmpty(Label))
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
-            private void UpdatePins(bool packaged)
-                => SetPinOffset(1, new(0, packaged ? 8 : 6));
+            private void UpdatePins(object sender, EventArgs e)
+                => SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
         }
     }
 }

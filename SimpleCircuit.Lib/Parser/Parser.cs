@@ -889,12 +889,6 @@ namespace SimpleCircuit.Parser
                 var member = component.GetType().GetProperty(propertyToken.Content.ToString(), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (member == null || !member.CanWrite)
                 {
-                    // Check if we can maybe resolve to a variant
-                    var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    component.CollectPossibleVariants(set);
-                    if (!set.Contains(propertyToken.Content.ToString()))
-                        context.Diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, propertyToken.Content.ToString(), component.Name);
-
                     // Treat it as a boolean
                     if (!lexer.Branch(TokenType.Equals))
                         context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
@@ -902,9 +896,9 @@ namespace SimpleCircuit.Parser
                     if (value == null)
                         return false;
                     if (value == true)
-                        component.AddVariant(propertyToken.Content.ToString());
+                        component.Variants.Add(propertyToken.Content.ToString());
                     else
-                        component.RemoveVariant(propertyToken.Content.ToString());
+                        component.Variants.Remove(propertyToken.Content.ToString());
                     return true;
                 }
 

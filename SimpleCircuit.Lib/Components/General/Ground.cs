@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components
 {
@@ -13,17 +12,10 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
-            switch (key)
-            {
-                case "GND":
-                    return new Instance(name, options);
-                case "SGND":
-                    var result = new Instance(name, options);
-                    result.AddVariant("signal");
-                    return result;
-                default:
-                    throw new ArgumentException($"Could not recognize key '{key}' for ground.");
-            }
+            var device = new Instance(name, options);
+            if (key == "SGND" || (options?.SmallSignal ?? false))
+                device.Variants.Add("signal");
+            return device;
         }
 
         private class Instance : ScaledOrientedDrawable
@@ -35,14 +27,15 @@ namespace SimpleCircuit.Components
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
-
-                if (options?.SmallSignal ?? false)
-                    AddVariant("signal");
-
-                DrawingVariants = Variant.FirstOf(
-                    Variant.If("earth").Then(DrawEarth),
-                    Variant.If("signal").Then(DrawSignalGround),
-                    Variant.Do(DrawGround));
+            }
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select("earth", "signal"))
+                {
+                    case 0: DrawEarth(drawing); break;
+                    case 1: DrawSignalGround(drawing); break;
+                    default: DrawGround(drawing); break;
+                }
             }
             private void DrawGround(SvgDrawing drawing)
             {

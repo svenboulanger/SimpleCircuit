@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -9,6 +8,8 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("BUS", "A bus or wire segment.", "Wires")]
     public class Bus : DrawableFactory
     {
+        private const string _straight = "straight";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -28,13 +29,12 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
-
-                DrawingVariants = Variant.Map("straight", Draw);
             }
-            private void Draw(SvgDrawing drawing, bool straight)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, Crossings + 2);
 
+                bool straight = Variants.Contains(_straight);
                 if (Crossings > 0)
                 {
                     drawing.Path(b =>

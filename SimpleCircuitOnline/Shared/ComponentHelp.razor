@@ -3,7 +3,7 @@
 <div class="bd-callout container">
     <div class="preview">
         <div class="preview-bounds" style="min-width: @(MaxPreviewWidth)px;">
-            @((MarkupString)CreateSvg())
+            @(_svg)
         </div>
     </div>
     <div class="content">
@@ -39,11 +39,16 @@
                 }
                 </dl>
             </HelpAccordionItem>
-            <HelpAccordionItem Title="Variants" Count="Variants.Count">
+            <HelpAccordionItem Title="Variants" Count="_drawable.Variants.BranchCount">
                 <p>
-                @foreach (var variant in Variants.OrderBy(n => n.Key))
+                @foreach (var variant in _drawable.Variants)
                 {
-                    <a href="javascript:void(0);" class="btn @(variant.Value ? "shown" : "")" @onclick="x => ToggleVariant(variant.Key)">@variant.Key</a>
+                    <a href="javascript:void(0);" class="shown" @onclick="x => ToggleVariant(variant)">@variant</a>
+                }
+                <br />
+                @foreach (var variant in _drawable.Variants.Branches)
+                {
+                    <a href="javascript:void(0);" @onclick="x => ToggleVariant(variant)">@variant</a>
                 }
                 </p>
             </HelpAccordionItem>

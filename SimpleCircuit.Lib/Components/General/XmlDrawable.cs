@@ -76,6 +76,8 @@ namespace SimpleCircuit.Components.General
         }
         private class Instance : ScaledOrientedDrawable
         {
+            private readonly XmlNode _drawing;
+
             /// <inheritdoc />
             public override string Type { get; }
 
@@ -90,8 +92,13 @@ namespace SimpleCircuit.Components.General
                     else
                         Pins.Add(new FixedOrientedPin(pin.Name, pin.Description, this, pin.Location, pin.Direction), pin.Name);
                 }
-                if (drawing != null)
-                    DrawingVariants = Variant.Do((SvgDrawing svg) => svg.DrawXml(drawing, null));
+                _drawing = drawing;
+            }
+
+            protected override void Draw(SvgDrawing drawing)
+            {
+                if (_drawing != null)
+                    drawing.DrawXml(_drawing, null);
             }
         }
     }

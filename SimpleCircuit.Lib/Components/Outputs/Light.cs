@@ -18,7 +18,12 @@ namespace SimpleCircuit.Components.Outputs
 
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options?.AREI ?? false)
+                device.Variants.Add(Options.Arei);
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -35,32 +40,29 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
-
-                DrawingVariants = Variant.All(
-                    Variant.Do(DrawLamp),
-                    Variant.IfNot(_arei).Then(DrawCasing),
-                    Variant.If(_projector).Then(DrawProjector),
-                    Variant.If(_direction).Then(Variant.Map(_diverging, DrawDirectional)),
-                    Variant.If(_emergency).Then(DrawEmergency));
-                PinUpdate = Variant.Map(_arei, UpdatePins);
-
-                if (options?.AREI ?? false)
-                    AddVariant("arei");
+                Variants.Changed += UpdatePins;
             }
-
-            private void DrawLamp(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Cross(new(), _sqrt2);
 
+                if (!Variants.Contains(Options.Arei))
+                    drawing.Circle(new Vector2(), 4);
+
+                if (Variants.Contains(_projector))
+                    DrawProjector(drawing);
+                if (Variants.Contains(_direction))
+                    DrawDirectional(drawing, Variants.Contains(_diverging));
+                if (Variants.Contains(_emergency))
+                    DrawDirectional(drawing, Variants.Contains(_emergency));
+
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+
             }
-            private void DrawCasing(SvgDrawing drawing)
-            {
-                drawing.Circle(new Vector2(), 4);
-            }
+
             private void DrawProjector(SvgDrawing drawing)
             {
                 drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
@@ -83,9 +85,9 @@ namespace SimpleCircuit.Components.Outputs
             {
                 drawing.Circle(new(), 1.5, new("dot"));
             }
-            private void UpdatePins(bool arei)
+            private void UpdatePins(object sender, EventArgs e)
             {
-                if (arei)
+                if (Variants.Contains(Options.Arei))
                 {
                     SetPinOffset(0, new());
                     SetPinOffset(1, new());

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
@@ -20,6 +21,9 @@ namespace SimpleCircuit.Components
         protected class Instance : ILocatedDrawable, ILabeled
         {
             private readonly PinCollection _pins;
+
+            /// <inheritdoc />
+            public VariantSet Variants { get; } = new();
 
             /// <inheritdoc />
             public int Order => 0;

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -12,13 +13,13 @@ namespace SimpleCircuit.Components.Wires
             switch (options?.Style ?? Options.Styles.ANSI)
             {
                 case Options.Styles.AREI:
-                    device.AddVariant(Options.Arei);
+                    device.Variants.Add(Options.Arei);
                     break;
                 case Options.Styles.IEC:
-                    device.AddVariant(Options.Iec);
+                    device.Variants.Add(Options.Iec);
                     break;
                 default:
-                    device.AddVariant(Options.Ansi);
+                    device.Variants.Add(Options.Ansi);
                     break;
             }
             return device;
@@ -39,14 +40,18 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("control", "The control pin.", this, new(0, -1.875), new(0, -1)), "c", "ctrl");
                 Pins.Add(new FixedOrientedPin("backside", "The backside control pin.", this, new(0, -1.875), new(0, 1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
-
-                PinUpdate = Variant.Do(UpdatePins);
-                DrawingVariants = Variant.FirstOf(
-                    Variant.If(Options.Arei).Then(DrawCircuitBreakerArei),
-                    Variant.If(Options.Iec).Then(DrawCircuitBreakerIec),
-                    Variant.Do(DrawRegular));
+                Variants.Changed += UpdatePins;
             }
-
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select(Options.Arei, Options.Iec, Options.Ansi))
+                {
+                    case 0: DrawCircuitBreakerArei(drawing); break;
+                    case 1: DrawCircuitBreakerIec(drawing); break;
+                    case 2:
+                    default: DrawRegular(drawing); break;
+                }
+            }
             private void DrawRegular(SvgDrawing drawing)
             {
                 // ANSI style circuit breaker
@@ -93,9 +98,9 @@ namespace SimpleCircuit.Components.Wires
                     drawing.Text(Label, new(0, 3), new(0, 1));
             }
 
-            private void UpdatePins()
+            private void UpdatePins(object sender, EventArgs e)
             {
-                if (HasVariant(Options.Arei) || HasVariant(Options.Iec))
+                if (Variants.Contains(Options.Arei) || Variants.Contains(Options.Iec))
                 {
                     SetPinOffset(1, new(0, -2));
                     SetPinOffset(2, new(0, -2));

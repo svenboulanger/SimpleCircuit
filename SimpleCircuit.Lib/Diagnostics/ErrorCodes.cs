@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Diagnostics
+﻿namespace SimpleCircuit.Diagnostics
 {
     /// <summary>
     /// The error codes used by SimpleCircuit.

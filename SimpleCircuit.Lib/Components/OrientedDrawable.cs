@@ -1,7 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -11,7 +9,6 @@ namespace SimpleCircuit.Components
     public abstract class OrientedDrawable : LocatedDrawable, IOrientedDrawable
     {
         private int _dof = 2;
-        private bool _flipped = false;
         private Vector2 _p, _b;
 
         /// <summary>
@@ -20,10 +17,13 @@ namespace SimpleCircuit.Components
         [Description("Flips the element if possible.")]
         public bool Flipped
         {
-            get => _flipped;
+            get => Variants.Contains("flip");
             set
             {
-                _flipped = value;
+                if (value)
+                    Variants.Add("flip");
+                else
+                    Variants.Remove("flip");
                 UpdateTransform();
             }
         }
@@ -36,37 +36,7 @@ namespace SimpleCircuit.Components
         protected OrientedDrawable(string name)
             : base(name)
         {
-        }
 
-        /// <inheritdoc />
-        public override void AddVariant(string variant)
-        {
-            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
-                Flipped = true;
-            base.AddVariant(variant);
-        }
-
-        /// <inheritdoc />
-        public override void RemoveVariant(string variant)
-        {
-            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
-                Flipped = false;
-            base.RemoveVariant(variant);
-        }
-
-        /// <inheritdoc />
-        public override bool HasVariant(string variant)
-        {
-            if (StringComparer.OrdinalIgnoreCase.Equals(variant, "flip"))
-                return Flipped;
-            return base.HasVariant(variant);
-        }
-
-        /// <inheritdoc />
-        public override void CollectPossibleVariants(ISet<string> variants)
-        {
-            base.CollectPossibleVariants(variants);
-            variants.Add("flip");
         }
 
         /// <inheritdoc />
@@ -134,14 +104,14 @@ namespace SimpleCircuit.Components
             {
                 case 0:
                     // Just whatever
-                    Transform = _flipped ? (new(-1, 0, 0, -1)) : Matrix2.Identity;
+                    Transform = Flipped ? (new(-1, 0, 0, -1)) : Matrix2.Identity;
                     break;
 
                 case 1:
                     // We already have one axis, we want to flip around that instead
                     Vector2 altp = new(_p.Y, -_p.X);
                     Vector2 altb = new(_b.Y, -_b.X);
-                    if (_flipped)
+                    if (Flipped)
                         altp = -altp;
                     Transform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;
                     break;

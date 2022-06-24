@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -8,14 +9,12 @@ namespace SimpleCircuit.Components.Digital
     [Drawable(new[] { "INV", "NOT" }, "An invertor.", new[] { "Digital" })]
     public class Invertor : DrawableFactory
     {
-        private const string _iec = "iec";
-
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
             var device = new Instance(name, options);
             if (options.IEC)
-                device.AddVariant(_iec);
+                device.Variants.Add(Options.Iec);
             return device;
         }
 
@@ -34,13 +33,17 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
-
-                PinUpdate = Variant.Map(_iec, UpdatePins);
-                DrawingVariants = Variant.FirstOf(
-                    Variant.If(_iec).Then(DrawInverterIEC),
-                    Variant.Do(DrawInverter));
+                Variants.Changed += UpdatePins;
             }
-
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select(Options.Iec, Options.Ansi))
+                {
+                    case 0: DrawInverterIEC(drawing); break;
+                    case 1:
+                    default: DrawInverter(drawing); break;
+                }
+            }
             private void DrawInverter(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "in", "out");
@@ -66,9 +69,9 @@ namespace SimpleCircuit.Components.Digital
                     drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
-            private void UpdatePins(bool iec)
+            private void UpdatePins(object sender, EventArgs e)
             {
-                if (iec)
+                if (Variants.Contains(Options.Iec))
                 {
                     SetPinOffset(0, new(-4, 0));
                     SetPinOffset(1, new(0, -5));

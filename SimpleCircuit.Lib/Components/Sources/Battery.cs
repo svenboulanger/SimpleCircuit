@@ -41,10 +41,8 @@ namespace SimpleCircuit.Components.Sources
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-1, 0), new(-1, 0)), "n", "neg", "b");
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(1, 0), new(1, 0)), "p", "pos", "a");
-                DrawingVariants = Variant.Do(DrawBattery);
-                PinUpdate = Variant.Do(UpdatePins);
             }
-            private void DrawBattery(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 // Wires
                 double offset = Length / 2;

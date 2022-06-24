@@ -25,9 +25,8 @@ namespace SimpleCircuit.Components.Inputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, 1.5), new(0, 1)), "p", "a", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "n", "b", "neg");
-                DrawingVariants = Variant.Do(DrawJack);
             }
-            private void DrawJack(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPin(Pins["p"], 4);
                 drawing.ExtendPin(Pins["n"]);

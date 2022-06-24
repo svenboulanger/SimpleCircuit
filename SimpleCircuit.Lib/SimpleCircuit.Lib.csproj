@@ -37,8 +37,8 @@
     <Compile Include="Components\Analog\Mofset.cs" />
     <Compile Include="Components\Analog\OperationalTransconductanceAmplifier.cs" />
     <Compile Include="Components\Analog\Resistor.cs" />
-    <Compile Include="Components\Analog\Switch.cs" />
     <Compile Include="Components\Analog\SinglePoleDoubleThrow.cs" />
+    <Compile Include="Components\Analog\Switch.cs" />
     <Compile Include="Components\Analog\TransmissionLine.cs" />
   </ItemGroup>
 

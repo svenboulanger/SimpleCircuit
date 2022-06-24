@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -10,6 +9,12 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("SEG", "A wire segment.", "Wires")]
     public class Segment : DrawableFactory
     {
+        private const string _underground = "underground";
+        private const string _air = "air";
+        private const string _tube = "tube";
+        private const string _inwall = "inwall";
+        private const string _onwall = "onwall";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -29,34 +34,20 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
-
-                DrawingVariants = Variant.All(
-                    Variant.If("underground").Then(DrawUnderground),
-                    Variant.If("air").Then(DrawAir),
-                    Variant.If("tube").Then(DrawTube),
-                    Variant.If("inwall").Then(DrawInWall),
-                    Variant.If("onwall").Then(DrawOnWall),
-                    Variant.Do(DrawWire)
-                    );
             }
-
-            /// <inheritdoc />
-            public override void AddVariant(string variant)
-            {
-                _textY = 0;
-                base.AddVariant(variant);
-            }
-
-            /// <inheritdoc />
-            public override void RemoveVariant(string variant)
-            {
-                _textY = 0;
-                base.RemoveVariant(variant);
-            }
-
-            private void DrawWire(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 4);
+
+                _textY = 0.0;
+                switch (Variants.Select(_underground, _air, _tube, _inwall, _onwall))
+                {
+                    case 0: DrawUnderground(drawing); break;
+                    case 1: DrawAir(drawing); break;
+                    case 2: DrawTube(drawing); break;
+                    case 3: DrawInWall(drawing); break;
+                    case 4: DrawOnWall(drawing); break;
+                }
 
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, _textY - 2), new(0, -1));

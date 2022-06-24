@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -9,13 +8,26 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("FUSE", "A fuse.", "Wires")]
     public class Fuse : DrawableFactory
     {
-        private const string _iec = "iec";
-        private const string _ansi = "ansi";
         private const string _alt = "alt";
 
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            switch (options?.Style ?? Options.Styles.ANSI)
+            {
+                case Options.Styles.AREI:
+                    device.Variants.Add(Options.Arei);
+                    break;
+                case Options.Styles.IEC:
+                    device.Variants.Add(Options.Iec);
+                    break;
+                default:
+                    device.Variants.Add(Options.Ansi);
+                    break;
+            }
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -30,19 +42,21 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
-
-                if (options?.IEC ?? false)
-                    AddVariant(_iec);
-                else
-                    AddVariant(_ansi);
-
-                DrawingVariants = Variant.FirstOf(
-                    Variant.If(_ansi).Then(
-                        Variant.If(_alt).Then(DrawANSIalt).Else(DrawANSI)
-                    ),
-                    Variant.Do(DrawIEC));
             }
-
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select(Options.Iec, Options.Ansi))
+                {
+                    case 0: DrawIEC(drawing); break;
+                    case 1:
+                    default:
+                        if (Variants.Contains(_alt))
+                            DrawANSIalt(drawing);
+                        else
+                            DrawANSI(drawing);
+                        break;
+                }
+            }
             private void DrawIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);

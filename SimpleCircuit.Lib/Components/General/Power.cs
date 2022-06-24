@@ -24,9 +24,8 @@ namespace SimpleCircuit.Components
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
-                DrawingVariants = Variant.Do(DrawPower);
             }
-            private void DrawPower(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
 

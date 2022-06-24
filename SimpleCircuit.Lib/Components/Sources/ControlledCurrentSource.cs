@@ -25,11 +25,10 @@ namespace SimpleCircuit.Components.Sources
             {
                 Pins.Add(new FixedOrientedPin("positive", "The current end point.", this, new(-6, 0), new(-1, 0)), "p", "b");
                 Pins.Add(new FixedOrientedPin("negative", "The current starting point.", this, new(6, 0), new(1, 0)), "n", "a");
-                DrawingVariants = Variant.Do(DrawSource);
             }
 
             /// <inheritdoc/>
-            private void DrawSource(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
 

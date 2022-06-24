@@ -29,9 +29,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("set", "The set pin.", this, new(0, -12), new(0, -1)), "s", "set");
                 Pins.Add(new FixedOrientedPin("nq", "The inverted output pin.", this, new(9, 6), new(1, 0)), "nq", "qn");
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
-                DrawingVariants = Variant.Do(DrawFlipFlop);
             }
-            private void DrawFlipFlop(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "d", "c", "q");
 

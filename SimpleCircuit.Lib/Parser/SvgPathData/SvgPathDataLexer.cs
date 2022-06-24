@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Parser.SvgPathData
+﻿namespace SimpleCircuit.Parser.SvgPathData
 {
     public class SvgPathDataLexer : Lexer<TokenType>
     {

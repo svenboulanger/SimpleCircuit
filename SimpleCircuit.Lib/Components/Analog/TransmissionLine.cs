@@ -1,7 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
-using System;
-using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -69,11 +67,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");
                 Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(_inner, _height), new(0, 1)), "gb", "gr");
                 Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(_width, 0), new(1, 0)), "b", "r");
-
-                PinUpdate = Variant.Do(UpdatePins);
-                DrawingVariants = Variant.Do(DrawTransmissionLine);
             }
-            private void DrawTransmissionLine(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 double offset = 0.5 * (Length - _width);
 

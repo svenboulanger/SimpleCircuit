@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -8,14 +9,12 @@ namespace SimpleCircuit.Components.Digital
     [Drawable("AND", "An AND gate.", "Digital")]
     public class And : DrawableFactory
     {
-        private const string _iec = "iec";
-
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
         {
             var device = new Instance(name, options);
             if (options.IEC)
-                device.AddVariant(_iec);
+                device.Variants.Add(Options.Iec);
             return device;
         }
 
@@ -33,10 +32,16 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("a", "The first input.", this, new(-6, -2.5), new(-1, 0)), "a");
                 Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-6, 2.5), new(-1, 0)), "b");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(6, 0), new(1, 0)), "o", "out", "output");
-                PinUpdate = Variant.Map(_iec, UpdatePins);
-                DrawingVariants = Variant.FirstOf(
-                    Variant.If(_iec).Then(DrawAndIEC),
-                    Variant.Do(DrawAnd));
+                Variants.Changed += UpdatePins;
+            }
+            protected override void Draw(SvgDrawing drawing)
+            {
+                switch (Variants.Select(Options.Iec, Options.Ansi))
+                {
+                    case 0: DrawAndIEC(drawing); break;
+                    case 1:
+                    default: DrawAnd(drawing); break;
+                }
             }
             private void DrawAnd(SvgDrawing drawing)
             {
@@ -64,9 +69,9 @@ namespace SimpleCircuit.Components.Digital
                     drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
-            private void UpdatePins(bool iec)
+            private void UpdatePins(object sender, EventArgs e)
             {
-                if (iec)
+                if (Variants.Contains(Options.Iec))
                 {
                     SetPinOffset(0, new(-4, -2.5));
                     SetPinOffset(1, new(-4, 2.5));

@@ -29,10 +29,9 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
-                DrawingVariants = Variant.Do(DrawPoint);
             }
 
-            private void DrawPoint(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 int connections = Pins[0].Connections;
                 if (connections == 0 || connections > 2)
