@@ -114,9 +114,14 @@ namespace SimpleCircuit.Parser
         Comma = 0x80000,
 
         /// <summary>
+        /// An integer.
+        /// </summary>
+        Integer = 0x100000,
+
+        /// <summary>
         /// An unknown character.
         /// </summary>
-        Unknown = 0x100000,
+        Unknown = 0x200000,
 
         /// <summary>
         /// All characters

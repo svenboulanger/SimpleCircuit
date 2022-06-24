@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SpiceSharp.Simulations;
@@ -10,7 +11,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A generic black box.
     /// </summary>
-    [Drawable("BB", "A black box. Pins are created on the fly, where the first character (n, s, e, w) indicate the side.", "General")]
+    [Drawable("BB", "A black box. Pins are created on the fly, where the first character (n, s, e, w for north, south, east and west respectively) indicates the side of the pin.", "General")]
     public partial class BlackBox : DrawableFactory
     {
         /// <inheritdoc />
@@ -19,7 +20,10 @@ namespace SimpleCircuit.Components
 
         protected class Instance : ILocatedDrawable, ILabeled
         {
-            private PinCollection _pins { get; }
+            private readonly PinCollection _pins;
+
+            /// <inheritdoc />
+            public VariantSet Variants { get; } = new();
 
             /// <inheritdoc />
             public int Order => 0;

@@ -1,8 +1,5 @@
 ﻿using SimpleCircuit.Parser;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace SimpleCircuit.Diagnostics
 {

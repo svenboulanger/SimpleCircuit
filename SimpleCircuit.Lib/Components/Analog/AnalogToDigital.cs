@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -13,6 +14,11 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private const string _differentialInput = "diffin";
+            private const string _swapInput = "swapin";
+            private const string _differentialOutput = "diffout";
+            private const string _swapOutput = "swapout";
+
             [Description("The width of the ADC.")]
             public double Width { get; set; } = 18;
 
@@ -32,18 +38,31 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(9, 0), new(1, 0)), "outn", "no");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, new(9, 0), new(1, 0)), "output", "out", "po", "outp");
-
-                PinUpdate = Variant.All(
-                    Variant.Map("diffin", RedefineInputPins),
-                    Variant.Map("diffout", RedefineOutputPins));
-                DrawingVariants = Variant.All(
-                    Variant.Do(DrawADC),
-                    Variant.If("diffin").Then(DrawInputSigns),
-                    Variant.If("diffout").Then(DrawOutputSigns));
+                Variants.Changed += UpdatePins;
             }
 
-            private void DrawADC(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
+                if (Variants.Contains(_differentialInput))
+                {
+                    drawing.ExtendPins(Pins, 2, "inp", "inn");
+                    double x = -Width / 2 + 3;
+                    double y = Height / 4;
+                    drawing.Signs(new(x, -y), new(x, y));
+                }
+                else
+                    drawing.ExtendPin(Pins["in"]);
+
+                if (Variants.Contains(_differentialOutput))
+                {
+                    drawing.ExtendPins(Pins, 4, "outp", "outn");
+                    double x = Width / 2 - Height / 4 + 2;
+                    double y = Height / 4 + 1.5;
+                    drawing.Signs(new(x, -y), new(x, y));
+                }
+                else
+                    drawing.ExtendPin(Pins["out"]);
+
                 drawing.Polygon(new[]
                 {
                     new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
@@ -54,40 +73,49 @@ namespace SimpleCircuit.Components.Analog
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
             }
-            private void DrawInputSigns(SvgDrawing drawing)
+            private void UpdatePins(object sender, EventArgs e)
             {
-                double x = -Width / 2 + 3;
+                double x = -Width / 2;
                 double y = Height / 4;
-                drawing.Signs(new(x, -y), new(x, y));
-            }
-            private void DrawOutputSigns(SvgDrawing drawing)
-            {
-                if (Pins[2].Connections == 0)
+                if (Variants.Contains(_differentialInput))
                 {
-                    var loc = ((FixedOrientedPin)Pins[2]).Offset;
-                    drawing.Line(loc, loc + new Vector2(4, 0), new("wire"));
+                    if (Variants.Contains(_swapInput))
+                    {
+                        SetPinOffset(0, new(x, y));
+                        SetPinOffset(1, new(x, -y));
+                    }
+                    else
+                    {
+                        SetPinOffset(0, new(x, -y));
+                        SetPinOffset(1, new(x, y));
+                    }
                 }
-                if (Pins[3].Connections == 0)
+                else
                 {
-                    var loc = ((FixedOrientedPin)Pins[3]).Offset;
-                    drawing.Line(loc, loc + new Vector2(4, 0), new("wire"));
+                    SetPinOffset(0, new(x, 0));
+                    SetPinOffset(1, new(x, 0));
                 }
 
-                double x = Width / 2 - Height / 4 + 2;
-                double y = Height / 4 + 1.5;
-                drawing.Signs(new(x, -y), new(x, y));
-            }
-            private void SetPinOffset(int index, Vector2 offset)
-                => ((FixedOrientedPin)Pins[index]).Offset = offset;
-            private void RedefineInputPins(bool differential)
-            {
-                SetPinOffset(0, differential ? new(-Width / 2, -Height / 4) : new(-Width / 2, 0));
-                SetPinOffset(1, differential ? new(-Width / 2, Height / 4) : new(-Width / 2, 0));
-            }
-            private void RedefineOutputPins(bool differential)
-            {
-                SetPinOffset(2, differential ? new(Width / 2 - Height / 4, Height / 4) : new(Width / 2, 0));
-                SetPinOffset(3, differential ? new(Width / 2 - Height / 4, -Height / 4) : new(Width / 2, 0));
+                if (Variants.Contains(_differentialOutput))
+                {
+                    x = Width / 2 - Height / 4;
+                    if (Variants.Contains(_swapOutput))
+                    {
+                        SetPinOffset(2, new(x, -y));
+                        SetPinOffset(3, new(x, y));
+                    }
+                    else
+                    {
+                        SetPinOffset(2, new(x, y));
+                        SetPinOffset(3, new(x, -y));
+                    }
+                }
+                else
+                {
+                    x = Width / 2;
+                    SetPinOffset(2, new(x, 0));
+                    SetPinOffset(3, new(x, 0));
+                }
             }
         }
     }

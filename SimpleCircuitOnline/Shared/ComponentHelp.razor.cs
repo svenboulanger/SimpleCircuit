@@ -11,10 +11,10 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class ComponentHelp
     {
+        private MarkupString _svg;
         private const double MaxPreviewWidth = 90;
         private IDrawable _drawable;
         private List<(PropertyInfo, string)> _properties;
-        private Dictionary<string, bool> _variants;
 
         [Parameter]
         public string Class { get; set; }
@@ -29,8 +29,12 @@ namespace SimpleCircuitOnline.Shared
             set
             {
                 _properties = null;
-                _variants = null;
                 _drawable = value;
+
+                // Show where the label is
+                if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Label))
+                    labeled.Label = "label";
+                CreateSvg();
             }
         }
 
@@ -61,42 +65,18 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-        protected Dictionary<string, bool> Variants
-        {
-            get
-            {
-                if (_variants == null && _drawable != null)
-                {
-                    var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    _drawable.CollectPossibleVariants(set);
-                    _variants = new(StringComparer.OrdinalIgnoreCase);
-                    foreach (string name in set)
-                        _variants.Add(name, _drawable.HasVariant(name));
-                }
-                return _variants;
-            }
-        }
-
-        private string CreateSvg()
+        private void CreateSvg()
         {
             if (Metadata == null || _drawable == null)
-                return "";
-
-            // We can update the variants
-            if (_variants != null)
             {
-                foreach (var variant in _variants)
-                {
-                    if (variant.Value)
-                        _drawable.AddVariant(variant.Key);
-                    else
-                        _drawable.RemoveVariant(variant.Key);
-                }
+                _svg = default;
+                return;
             }
 
             var drawing = new SvgDrawing
             {
-                Style = GraphicalCircuit.DefaultStyle
+                Style = GraphicalCircuit.DefaultStyle,
+                ElementFormatter = _jsTextFormatter
             };
             _drawable.Render(drawing);
             var doc = drawing.GetDocument();
@@ -119,12 +99,20 @@ namespace SimpleCircuitOnline.Shared
                 doc.WriteTo(xml);
 
             // Converting to Base 64 allows us to not interfere with any styling going on outside
-            return $"<img src=\"data:image/svg+xml;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()))}\" />";
+            _svg = (MarkupString)$"<img src=\"data:image/svg+xml;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()))}\" />";
         }
 
         private void ToggleVariant(string name)
         {
-            _variants[name] = !_variants[name];
+            if (_drawable != null)
+            {
+                if (_drawable.Variants.Contains(name))
+                    _drawable.Variants.Remove(name);
+                else
+                    _drawable.Variants.Add(name);
+                _drawable.Variants.Reset();
+                CreateSvg();
+            }
             StateHasChanged();
         }
 

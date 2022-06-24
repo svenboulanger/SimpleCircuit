@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Diagnostics
+﻿namespace SimpleCircuit.Diagnostics
 {
     /// <summary>
     /// The error codes used by SimpleCircuit.
@@ -120,6 +117,9 @@ namespace SimpleCircuit.Diagnostics
 
         [Diagnostic(SeverityLevel.Warning, "PW036", "Dots can only appear at the start or end of a wire definition")]
         DotWireStartEnd,
+
+        [Diagnostic(SeverityLevel.Error, "PE037", "Cannot create a component with a wildcard character ('*')")]
+        NoWildcardCharacter,
 
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,

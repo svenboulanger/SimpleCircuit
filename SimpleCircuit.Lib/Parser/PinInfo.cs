@@ -96,9 +96,9 @@ namespace SimpleCircuit.Parser
                 foreach (var variant in Variants)
                 {
                     if (variant.Include)
-                        _component.AddVariant(variant.Name);
+                        _component.Variants.Add(variant.Name);
                     else
-                        _component.RemoveVariant(variant.Name);
+                        _component.Variants.Remove(variant.Name);
                 }
             }
             return _component;

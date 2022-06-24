@@ -22,16 +22,11 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4.5, 0), new(1, 0)), "n", "neg", "b");
-                DrawingVariants = Variant.Do(DrawCrystal);
             }
 
-            private void DrawCrystal(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-4.5, 0), new(-6, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(4.5, 0), new(6, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // The crystal
                 drawing.Rectangle(5, 10, options: new("body"));

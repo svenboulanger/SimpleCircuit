@@ -102,11 +102,10 @@ namespace SimpleCircuit.Components
                             possibleNames);
                     }
                 }
-                DrawingVariants = Variant.Do(DrawSubcircuit);
             }
 
             /// <inheritdoc/>
-            private void DrawSubcircuit(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 _ckt.Render(drawing);
             }

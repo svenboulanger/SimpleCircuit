@@ -8,6 +8,8 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("R", "A resistor, potentially programmable.", "Analog")]
     public class ResistorFactory : DrawableFactory
     {
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -33,19 +35,27 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 8), new(0, 1)), "c", "ctrl");
                 Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
-
-                DrawingVariants = Variant.All(
-                    Variant.Do(DrawANSIResistor),
-                    Variant.If("programmable").Then(DrawProgrammable));
             }
+            protected override void Draw(SvgDrawing drawing)
+            {
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
+                switch (Variants.Select(Options.Ansi, Options.Iec))
+                {
+                    case 1:
+                        DrawIECResistor(drawing);
+                        break;
+                    case 0:
+                    default:
+                        DrawANSIResistor(drawing);
+                        break;
+                }
+                if (Variants.Contains(_programmable))
+                    drawing.Arrow(new(-5, 5), new(6, -7));
+            }
             private void DrawANSIResistor(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[2].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // The resistor
                 drawing.Polyline(new Vector2[]
@@ -62,21 +72,14 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -7), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
             }
-            private void DrawProgrammable(SvgDrawing drawing)
-                => drawing.Line(new(-5, 5), new(6, -7), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
-
-            private void DrawEICResistor(SvgDrawing drawing)
+            private void DrawIECResistor(SvgDrawing drawing)
             {
-                // Draw some wire extensions if nothing is connected
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // The rectangle
-                CommonGraphical.Rectangle(drawing, 12, 6);
+                drawing.Rectangle(12, 6);
 
                 // The label
                 if (!string.IsNullOrWhiteSpace(Label))

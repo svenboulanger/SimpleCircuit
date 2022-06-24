@@ -9,6 +9,10 @@ namespace SimpleCircuit.Components.Outputs
     [Drawable("WP", "A wall plug.", "Outputs")]
     public class Plug : DrawableFactory
     {
+        private const string _earth = "earth";
+        private const string _sealed = "sealed";
+        private const string _child = "child";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -26,17 +30,21 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(), new(-1, 0)), "in", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(), new(1, 0)), "out", "b");
-
-                DrawingVariants = Variant.All(
-                    Variant.Do(DrawPlug),
-                    Variant.If("earth").Then(DrawProtectiveConnection),
-                    Variant.If("sealed").Then(DrawSealed),
-                    Variant.If("child").Then(DrawChildProtection));
             }
-
-            private void DrawPlug(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
+                drawing.ExtendPin(Pins["a"]);
                 drawing.Arc(new(4, 0), Math.PI / 2, -Math.PI / 2, 4, null, 1);
+
+                if (Variants.Contains(_earth))
+                    DrawProtectiveConnection(drawing);
+                if (Variants.Contains(_sealed))
+                    DrawSealed(drawing);
+                if (Variants.Contains(_child))
+                    DrawChildProtection(drawing);
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                    drawing.Text(Label, new(6, -1), new(1, -1));
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

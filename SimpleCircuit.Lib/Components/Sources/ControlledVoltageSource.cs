@@ -23,20 +23,18 @@ namespace SimpleCircuit.Components.Sources
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");
-                DrawingVariants = Variant.Do(DrawSource);
+                Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-6, 0), new(-1, 0)), "n", "neg", "b");
+                Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(6, 0), new(1, 0)), "p", "pos", "a");
             }
 
-            private void DrawSource(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                drawing.Path(b => b.MoveTo(-8, 0).LineTo(-6, 0).MoveTo(6, 0).LineTo(8, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // Diamond
                 drawing.Polygon(new Vector2[]
                 {
-                new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
+                    new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
                 });
 
                 // Plus and minus

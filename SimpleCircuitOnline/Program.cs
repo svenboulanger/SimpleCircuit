@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Blazored.LocalStorage;
+using Microsoft.JSInterop;
 
 namespace SimpleCircuitOnline
 {
@@ -19,6 +20,7 @@ namespace SimpleCircuitOnline
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton(sp => new ElementFormatter(sp.GetService<IJSRuntime>()));
             builder.Services.AddBlazoredLocalStorage();
 
             await builder.Build().RunAsync();

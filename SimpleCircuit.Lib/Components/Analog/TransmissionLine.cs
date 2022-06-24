@@ -1,7 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
-using System;
-using System.Linq;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -17,23 +15,31 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private const double _width = 8.0;
+            private const double _width = 12.0;
             private const double _height = 3.0;
             private const double _rx = _height * 0.5;
             private const double _ry = _height;
             private const double _kx = 0.5522847498 * _rx;
             private const double _ky = 0.5522847498 * _ry;
             private const double _inner = _width - _rx;
-            private readonly static Action<PathBuilder> _shape = builder => builder
-                .MoveTo(new(-_inner, _height)).LineTo(new(_inner, _height))
-                .CurveTo(new(_inner + _kx, _height), new(_width, _ky), new(_width, 0))
-                .SmoothTo(new(_inner + _kx, -_height), new(_inner, -_height))
-                .LineTo(new(-_inner, -_height))
-                .CurveTo(new(-_inner - _kx, -_height), new(-_width, -_ky), new(-_width, 0))
-                .SmoothTo(new(-_inner - _kx, _height), new(-_inner, _height))
-                .SmoothTo(new(-_inner + _rx, _ky), new(-_inner + _rx, 0))
-                .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
-            private double _length = 8.0;
+            private double _length = _width;
+
+            /// <summary>
+            /// Draws the transmission line shape.
+            /// </summary>
+            /// <param name="builder">The path builder.</param>
+            private static void DrawShape(PathBuilder builder)
+            {
+                builder
+                    .MoveTo(new(-_inner, _height)).LineTo(new(_inner, _height))
+                    .CurveTo(new(_inner + _kx, _height), new(_width, _ky), new(_width, 0))
+                    .SmoothTo(new(_inner + _kx, -_height), new(_inner, -_height))
+                    .LineTo(new(-_inner, -_height))
+                    .CurveTo(new(-_inner - _kx, -_height), new(-_width, -_ky), new(-_width, 0))
+                    .SmoothTo(new(-_inner - _kx, _height), new(-_inner, _height))
+                    .SmoothTo(new(-_inner + _rx, _ky), new(-_inner + _rx, 0))
+                    .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
+            }
 
             [Description("The label in the transmission line.")]
             public string Label { get; set; }
@@ -61,19 +67,19 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");
                 Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(_inner, _height), new(0, 1)), "gb", "gr");
                 Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(_width, 0), new(1, 0)), "b", "r");
-
-                PinUpdate = Variant.Do(UpdatePins);
-                DrawingVariants = Variant.Do(DrawTransmissionLine);
             }
-            private void DrawTransmissionLine(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 double offset = 0.5 * (Length - _width);
 
                 // Wire
-                drawing.Line(new(-_width - offset, 0), new(-_inner - offset, 0), new("wire"));
+                if (Pins[0].Connections == 0)
+                    drawing.ExtendPin(Pins[0]);
+                if (Pins[1].Connections == 0)
+                    drawing.ExtendPin(Pins[3]);
 
                 // Transmission line
-                drawing.Path(builder => _shape(builder.WithAbsoluteModifier(v =>
+                drawing.Path(builder => DrawShape(builder.WithAbsoluteModifier(v =>
                 {
                     if (v.X < 0)
                         return new(v.X - offset, v.Y);
@@ -87,11 +93,13 @@ namespace SimpleCircuit.Components.Analog
             }
             private void UpdatePins()
             {
-                void SetPin(int index, Vector2 offset) => ((FixedOrientedPin)Pins[index]).Offset = offset;
-                SetPin(0, new(-_inner - (Length - _width) / 2, 0));
-                SetPin(1, new(-_inner - (Length - _width) / 2, _height));
-                SetPin(2, new(_inner + (Length - _width) / 2, _height));
-                SetPin(3, new(_width + (Length - _width) / 2, 0));
+                double x = -_inner - (Length - _width) / 2;
+                SetPinOffset(0, new(x, 0));
+                SetPinOffset(1, new(x, _height));
+
+                x = _inner + (Length - _width) / 2;
+                SetPinOffset(2, new(x, _height));
+                SetPinOffset(3, new(x, 0));
             }
         }
     }

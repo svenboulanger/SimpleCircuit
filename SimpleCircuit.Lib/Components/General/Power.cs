@@ -24,17 +24,15 @@ namespace SimpleCircuit.Components
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
-                DrawingVariants = Variant.Do(DrawPower);
             }
-            private void DrawPower(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                // Wire
-                drawing.Line(new Vector2(0, 0), new Vector2(0, -3), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // Power
-                drawing.Line(new Vector2(-5, -3), new Vector2(5, -3), new("plane"));
+                drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
         }
     }

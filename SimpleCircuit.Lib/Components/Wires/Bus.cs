@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -9,6 +8,8 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("BUS", "A bus or wire segment.", "Wires")]
     public class Bus : DrawableFactory
     {
+        private const string _straight = "straight";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -26,15 +27,14 @@ namespace SimpleCircuit.Components.Wires
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("input", "The input.", this, new(-2, 0), new(-1, 0)), "i", "a", "in", "input");
-                Pins.Add(new FixedOrientedPin("output", "The output.", this, new(2, 0), new(1, 0)), "o", "b", "out", "output");
-
-                DrawingVariants = Variant.Map("straight", Draw);
-                PinUpdate = Variant.Do(UpdatePins);
+                Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
+                Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
             }
-            private void Draw(SvgDrawing drawing, bool straight)
+            protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Line(new(-Crossings - 2, 0), new(Crossings + 2, 0), new("wire"));
+                drawing.ExtendPins(Pins, Crossings + 2);
+
+                bool straight = Variants.Contains(_straight);
                 if (Crossings > 0)
                 {
                     drawing.Path(b =>
@@ -53,11 +53,6 @@ namespace SimpleCircuit.Components.Wires
                 // The label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, -4), new(0, -1));
-            }
-            private void UpdatePins()
-            {
-                ((FixedOrientedPin)Pins[0]).Offset = new(-(Crossings - 1) - 2, 0);
-                ((FixedOrientedPin)Pins[1]).Offset = new(Crossings + 1, 0);
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -11,7 +10,12 @@ namespace SimpleCircuit.Components.Sources
     {
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var device = new Instance(name, options);
+            if (options?.SmallSignal ?? false)
+                device.Variants.Add("ac");
+            return device;
+        }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -26,33 +30,22 @@ namespace SimpleCircuit.Components.Sources
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-6, 0), new(-1, 0)), "n", "neg", "b");
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(6, 0), new(1, 0)), "p", "pos", "a");
-
-                if (options?.SmallSignal ?? false)
-                    AddVariant("ac");
-
-                DrawingVariants = Variant.All(
-                    Variant.If("ac").Then(DrawAC).Else(DrawDC),
-                    Variant.Do(DrawSource));
             }
-            private void DrawSource(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // Circle
                 drawing.Circle(new(0, 0), 6);
+                if (Variants.Contains("ac"))
+                    drawing.AC(vertical: true);
+                else
+                    drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
             }
-            private void DrawDC(SvgDrawing drawing)
-                => drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
-            private void DrawAC(SvgDrawing drawing)
-                => CommonGraphical.AC(drawing, vertical: true);
         }
     }
 }

@@ -8,6 +8,9 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("L", "An inductor.", "Analog")]
     public class Inductor : DrawableFactory
     {
+        private const string _dot = "dot";
+        private const string _programmable = "programmable";
+
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
             => new Instance(name, options);
@@ -25,21 +28,12 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
-
-                DrawingVariants = Variant.All(
-                    Variant.Do(DrawInductor),
-                    Variant.If("dot").Then(DrawDot),
-                    Variant.If("programmable").Then(DrawProgrammable));
             }
 
             /// <inheritdoc />
-            private void DrawInductor(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
+                drawing.ExtendPins(Pins);
 
                 // Inductor
                 drawing.Path(b => b
@@ -52,13 +46,15 @@ namespace SimpleCircuit.Components.Analog
                     .SmoothTo(new(2, 4), new(2, 0))
                     .SmoothTo(new(6, -4), new(6, 0)));
 
+                if (Variants.Contains(_dot))
+                    drawing.Dot(new(-8, 3.5));
+                if (Variants.Contains(_programmable))
+                    drawing.Arrow(new(-5, 5), new(6, -7));
+
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -6), new Vector2(0, -1));
+                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
-            private void DrawDot(SvgDrawing drawing) => drawing.Dot(new(-8, 3.5));
-            private void DrawProgrammable(SvgDrawing drawing)
-                => drawing.Arrow(new(-5, 5), new(6, -7));
         }
     }
 }

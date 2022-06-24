@@ -25,11 +25,9 @@ namespace SimpleCircuit.Components.General
             {
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(), new(1, 0)), "o", "b", "out", "output");
-
-                DrawingVariants = Variant.Do(DrawLabel);
             }
 
-            private void DrawLabel(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new(0, 4), new(0, 1));

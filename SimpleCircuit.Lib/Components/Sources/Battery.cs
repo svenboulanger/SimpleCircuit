@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Sources
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private int _cells = 1;
-            private double Length => _cells * 4 + 8;
+            private double Length => _cells * 4 - 2;
             
             [Description("The label next to the battery.")]
             public string Label { get; set; }
@@ -29,6 +29,7 @@ namespace SimpleCircuit.Components.Sources
                     _cells = value;
                     if (_cells < 1)
                         _cells = 1;
+                    UpdatePins();
                 }
             }
 
@@ -38,19 +39,17 @@ namespace SimpleCircuit.Components.Sources
             public Instance(string name, Options options)
                 : base(name, options)
             {
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-8, 0), new(-1, 0)), "n", "neg", "b");
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(8, 0), new(1, 0)), "p", "pos", "a");
-                DrawingVariants = Variant.Do(DrawBattery);
-                PinUpdate = Variant.Do(UpdatePins);
+                Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-1, 0), new(-1, 0)), "n", "neg", "b");
+                Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(1, 0), new(1, 0)), "p", "pos", "a");
             }
-            private void DrawBattery(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
                 // Wires
-                double offset = Length / 2, cellOffset = _cells * 2 - 1;
-                drawing.Path(b => b.MoveTo(-offset, 0).LineTo(-cellOffset, 0).MoveTo(cellOffset, 0).LineTo(offset, 0), new("wire"));
+                double offset = Length / 2;
+                drawing.ExtendPins(Pins);
 
                 // The cells
-                double x = -_cells * 2 + 1;
+                double x = -offset;
                 for (int i = 0; i < _cells; i++)
                 {
                     drawing.Line(new(x, -2), new(x, 2), new("neg"));
@@ -60,7 +59,7 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Add a little plus and minus next to the terminals!
-                drawing.Signs(new(offset - 2, 3), new(-offset + 2, 3), vertical: true);
+                drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
                 if (!string.IsNullOrWhiteSpace(Label))
@@ -69,8 +68,8 @@ namespace SimpleCircuit.Components.Sources
             private void UpdatePins()
             {
                 double offset = Length / 2;
-                ((FixedOrientedPin)Pins[0]).Offset = new(-offset, 0);
-                ((FixedOrientedPin)Pins[1]).Offset = new(offset, 0);
+                SetPinOffset(0, new(-offset, 0));
+                SetPinOffset(1, new(offset, 0));
             }
         }
     }

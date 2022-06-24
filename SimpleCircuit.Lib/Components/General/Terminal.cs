@@ -23,14 +23,13 @@ namespace SimpleCircuit.Components
                 : base(name, options)
             {
                 Pins.Add(new FixedOrientedPin("p", "The pin.", this, new Vector2(), new Vector2(1, 0)), "p", "a", "o", "i");
-                DrawingVariants = Variant.Do(DrawTerminal);
             }
-            private void DrawTerminal(SvgDrawing drawing)
+            protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Line(new Vector2(), new Vector2(-4, 0), new("wire"));
-                drawing.Circle(new Vector2(-5.5, 0), 1.5, new("terminal"));
+                drawing.ExtendPins(Pins, 4);
+                drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
                 if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(-8, 0), new Vector2(-1, 0));
+                    drawing.Text(Label, new Vector2(-4, 0), new Vector2(-1, 0));
             }
         }
     }
