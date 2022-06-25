@@ -11,6 +11,7 @@ namespace SimpleCircuit.Components.Analog
     public class Mofset : DrawableFactory
     {
         private const string _packaged = "packaged";
+        private const string _depletion = "depletion";
 
         /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
@@ -61,6 +62,9 @@ namespace SimpleCircuit.Components.Analog
                 // Source and drain
                 drawing.Line(new(-4, 0), new(-4, 4), new("source"));
                 drawing.Line(new(4, 0), new(4, 4), new("drain"));
+
+                if (Variants.Contains(_depletion))
+                    drawing.Rectangle(8, 1.5, new(0, 3.25), new("dot"));
 
                 // Label
                 if (!string.IsNullOrWhiteSpace(Label))
@@ -151,6 +155,9 @@ namespace SimpleCircuit.Components.Analog
                 // Source and drain
                 drawing.Line(new(-4, 0), new(-4, 4), new("source"));
                 drawing.Line(new(4, 0), new(4, 4), new("drain"));
+
+                if (Variants.Contains(_depletion))
+                    drawing.Rectangle(8, 1.5, new(0, 3.25), new("dot"));
 
                 // Label
                 if (Pins["b"].Connections > 0)

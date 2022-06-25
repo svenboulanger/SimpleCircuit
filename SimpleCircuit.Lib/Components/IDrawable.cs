@@ -25,11 +25,6 @@ namespace SimpleCircuit.Components
         public int Order { get; }
 
         /// <summary>
-        /// Resets all information of the drawable before solving.
-        /// </summary>
-        public void Reset();
-
-        /// <summary>
         /// Renders the component in the specified drawing.
         /// </summary>
         /// <param name="minimizer">The minimizer.</param>
