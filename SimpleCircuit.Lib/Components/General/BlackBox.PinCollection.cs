@@ -3,6 +3,7 @@ using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components
 {
@@ -16,7 +17,6 @@ namespace SimpleCircuit.Components
             private readonly Instance _parent;
             private readonly Dictionary<string, IPin> _pinsByName = new();
             private readonly List<IPin> _pinsByIndex = new();
-            private readonly List<IPin> _pinsNorth = new(), _pinsWest = new(), _pinsEast = new(), _pinsSouth = new();
 
             /// <summary>
             /// Gets or sets the minimum horizontal spacing.
@@ -28,8 +28,14 @@ namespace SimpleCircuit.Components
             /// </summary>
             public double MinimumVerticalSpacing { get; set; } = 20.0;
 
+            /// <summary>
+            /// Gets the name of the node for the right side of the black box.
+            /// </summary>
             public string Right { get; }
 
+            /// <summary>
+            /// Gets the name of the node for the bottom side of the black box.
+            /// </summary>
             public string Bottom { get; }
 
             /// <inheritdoc/>
@@ -37,22 +43,13 @@ namespace SimpleCircuit.Components
             {
                 get
                 {
-                    if (_pinsByName.TryGetValue(name, out var pin))
-                        return pin;
-                    List<IPin> list = char.ToLower(name[0]) switch
+                    if (!_pinsByName.TryGetValue(name, out var pin))
                     {
-                        'n' => _pinsNorth,
-                        'e' => _pinsEast,
-                        's' => _pinsSouth,
-                        _ => _pinsWest,
-                    };
-
-                    // If the pin is the first in the list, we use a fixed pin at the origin.
-                    pin = new LoosePin(name, name, _parent);
-                    list.Add(pin);
-                    _pinsByName.Add(name, pin);
-                    _pinsByIndex.Add(pin);
-                    return list[^1];
+                        pin = new LoosePin(name, name, _parent);
+                        _pinsByName.Add(name, pin);
+                        _pinsByIndex.Add(pin);
+                    }
+                    return pin;
                 }
             }
 
@@ -72,7 +69,7 @@ namespace SimpleCircuit.Components
                 Right = $"{parent.Name}.right";
                 Bottom = $"{parent.Name}.bottom";
 
-                // This pin is not used, but only serves to avoid wires and stuff to work...
+                // This pin is not used, but avoids breaking things...
                 var pin = new FixedPin("x", "x", _parent, new());
                 _pinsByIndex.Add(pin);
             }
@@ -80,48 +77,17 @@ namespace SimpleCircuit.Components
             /// <inheritdoc/>
             public IEnumerable<string> NamesOf(IPin pin)
             {
-                if (pin is Pin p)
-                    yield return p.Name;
+                yield return pin.Name;
             }
 
             /// <inheritdoc />
             public void Render(SvgDrawing drawing)
             {
-                foreach (var pin in _pinsNorth)
+                foreach (var pin in _pinsByIndex.OfType<LoosePin>().Where(p => !p.Orientation.X.IsZero() || !p.Orientation.Y.IsZero()))
                 {
-                    string name = Transform(pin.Name);
-                    if (!string.IsNullOrWhiteSpace(name))
-                        drawing.Text(name, pin.Location + new Vector2(0, 2), new(0, 1));
+                    if (!string.IsNullOrWhiteSpace(pin.Name))
+                        drawing.Text(pin.Name, pin.Location - pin.Orientation * 2, -pin.Orientation);
                 }
-                foreach (var pin in _pinsSouth)
-                {
-
-                    string name = Transform(pin.Name);
-                    if (!string.IsNullOrWhiteSpace(name))
-                        drawing.Text(name, pin.Location + new Vector2(0, -2), new(0, -1));
-                }
-                foreach (var pin in _pinsEast)
-                {
-                    string name = Transform(pin.Name);
-                    if (!string.IsNullOrWhiteSpace(name))
-                        drawing.Text(name, pin.Location + new Vector2(-2, 0), new(-1, 0));
-                }
-                foreach (var pin in _pinsWest)
-                {
-                    string name = Transform(pin.Name);
-                    if (!string.IsNullOrWhiteSpace(name))
-                        drawing.Text(name, pin.Location + new Vector2(2, 0), new(1, 0));
-                }
-            }
-
-            private string Transform(string value)
-            {
-                string name = value.Substring(1);
-
-                // If the name is between brackets, don't show the pin name
-                if (name[0] == '(' && name[name.Length - 1] == ')')
-                    return null;
-                return name;
             }
 
             /// <inheritdoc />
@@ -129,40 +95,48 @@ namespace SimpleCircuit.Components
             {
                 var ckt = context.Circuit;
                 var map = context.Nodes.Shorts;
-                void Apply(string name, string start, List<IPin> list, string end, Func<IPin, string> sel, double spacing)
+                void Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing)
                 {
+                    start = map[start];
+                    end = map[end];
                     string lastNode = start;
                     int index = 0;
-                    if (list.Count > 0)
+                    foreach (var node in pinNodes)
                     {
-                        foreach (var pin in list)
-                            MinimumConstraint.AddMinimum(ckt, $"{name}.{index++}", lastNode, lastNode = map[sel(pin)], index == 1 ? spacing / 2 : spacing, 1);
-                        MinimumConstraint.AddMinimum(ckt, $"{name}.{index}", lastNode, end, spacing / 2, 1);
+                        string n = map[node];
+                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, n, spacing);
+                        lastNode = n;
                     }
-                    else
-                    {
-                        MinimumConstraint.AddMinimum(ckt, $"{name}.{index}", lastNode, end, spacing, 1);
-                    }
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, end, spacing);
                 }
 
-                Apply($"{_parent.Name}.n", map[_parent.X], _pinsNorth, map[Right], p => p.X, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.s", map[_parent.X], _pinsSouth, map[Right], p => p.X, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.e", map[_parent.Y], _pinsEast, map[Bottom], p => p.Y, MinimumVerticalSpacing);
-                Apply($"{_parent.Name}.w", map[_parent.Y], _pinsWest, map[Bottom], p => p.Y, MinimumVerticalSpacing);
+                var pins = _pinsByIndex.OfType<LoosePin>();
+                Apply($"{_parent.Name}.n", _parent.X, pins.Where(p => PointsUp(p)).Select(p => p.X), Right, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.s", _parent.X, pins.Where(p => PointsDown(p)).Select(p => p.X), Right, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.e", _parent.Y, pins.Where(p => PointsRight(p)).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
+                Apply($"{_parent.Name}.w", _parent.Y, pins.Where(p => PointsLeft(p)).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
             }
+
+            private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
+            private static bool PointsDown(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y > 0;
+            private static bool PointsLeft(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X < 0;
+            private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
 
             /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
                 // We will group the X-coordinates and Y-coordinates of each side
-                foreach (var pin in _pinsNorth)
-                    context.Shorts.Group(_parent.Y, pin.Y);
-                foreach (var pin in _pinsSouth)
-                    context.Shorts.Group(Bottom, pin.Y);
-                foreach (var pin in _pinsEast)
-                    context.Shorts.Group(Right, pin.X);
-                foreach (var pin in _pinsWest)
-                    context.Shorts.Group(_parent.X, pin.X);
+                foreach (var pin in _pinsByIndex.OfType<LoosePin>())
+                {
+                    if (PointsUp(pin))
+                        context.Shorts.Group(_parent.Y, pin.Y);
+                    else if (PointsDown(pin))
+                        context.Shorts.Group(Bottom, pin.Y);
+                    else if (PointsLeft(pin))
+                        context.Shorts.Group(_parent.X, pin.X);
+                    else
+                        context.Shorts.Group(Right, pin.X);
+                }
             }
 
             /// <inheritdoc />

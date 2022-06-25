@@ -139,6 +139,9 @@ namespace SimpleCircuit.Parser
         /// <returns>The pin, or <c>null</c> if no pin could be retrieved.</returns>
         public IPin GetOrCreate(ParsingContext context, int defaultPin)
         {
+            if (Component == null)
+                return null;
+
             // Get the component
             var component = Component.GetOrCreate(context);
             if (component == null)

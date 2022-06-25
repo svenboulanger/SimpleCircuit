@@ -72,7 +72,7 @@ namespace SimpleCircuit.Parser
             }
         }
 
-        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, ParsingContext> singleComponent, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
+        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
         {
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
             var component = ParseComponent(lexer, context);
@@ -102,25 +102,47 @@ namespace SimpleCircuit.Parser
 
                     // Optional pin
                     Token wireToPin = default;
-                    if (lexer.Check(TokenType.OpenIndex))
+                    ComponentInfo nextComponent = null;
+                    switch (lexer.Type)
                     {
-                        wireToPin = ParsePin(lexer, context);
-                        if (wireToPin.Content.Length == 0)
+                        case TokenType.OpenIndex:
+                            wireToPin = ParsePin(lexer, context);
+                            if (wireToPin.Content.Length == 0)
+                                return false;
+
+                            // We really need a component now that we have a pin
+                            nextComponent = ParseComponent(lexer, context);
+                            if (nextComponent == null)
+                                return false;
+                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, new(nextComponent, wireToPin), context);
+                            isFirst = false;
+                            break;
+
+                        case TokenType.Word:
+                            // Optional end component
+                            nextComponent = ParseComponent(lexer, context);
+                            if (nextComponent == null)
+                                return false;
+                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, new(nextComponent, wireToPin), context);
+                            isFirst = false;
+                            break;
+
+                        case TokenType.Newline:
+                            // End at a wire definition
+                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, default, context);
+                            isFirst = false;
+                            break;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
                             return false;
                     }
-
-                    // End component
-                    var nextComponent = ParseComponent(lexer, context);
-                    if (nextComponent == null)
-                        return false;
-                    stringTogether?.Invoke(new(component, pinToWire), wireInfo, new(nextComponent, wireToPin), context);
                     component = nextComponent;
-                    isFirst = false;
                 }
             }
 
             if (isFirst)
-                singleComponent?.Invoke(new(component, pinToWire), context);
+                stringTogether?.Invoke(new(component, pinToWire), null, default, context);
             return true;
         }
 
@@ -131,18 +153,8 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <returns>Returns <c>true</c> if the statement was parsed successfully; otherwise, <c>false</c>.</returns>
         private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
-            => ParseChainStatement(lexer, context, ComponentChainSingle, ComponentChainWire);
+            => ParseChainStatement(lexer, context, ComponentChainWire);
 
-        private static void ComponentChainSingle(PinInfo pin, ParsingContext context)
-        {
-            // Check the name of the component for wildcards
-            if (pin.Component.Fullname.Contains('*'))
-            {
-                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.NoWildcardCharacter);
-                return;
-            }
-            pin.GetOrCreate(context, 0);
-        }
         private static void ComponentChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context)
         {
             if (pinToWireInfo.Component.Fullname.Contains('*'))
@@ -150,36 +162,43 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-            if (wireToPinInfo.Component.Fullname.ToString().Contains('*'))
+            var pinToWire = pinToWireInfo.GetOrCreate(context, -1);
+
+            // Second pin is optional
+            if (wireToPinInfo.Component != null && wireToPinInfo.Component.Fullname.ToString().Contains('*'))
             {
                 context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-
-            // First create or get the first component and its pin
-            var pinToWire = pinToWireInfo.GetOrCreate(context, -1);
             var wireToPin = wireToPinInfo.GetOrCreate(context, 0);
 
             // Create the wire
-            string name = $"W:{++context.WireCount}";
-            var wire = new Wire(name, wireInfo);
-            context.Circuit.Add(wire);
+            if (wireInfo != null)
+            {
+                string name = $"W:{++context.WireCount}";
 
-            // Resolve the orientation for the pin to the wire
-            if (pinToWire is IOrientedPin orientedPin1)
-                context.Circuit.Add(new PinOrientationConstraint($"{name}.pin1", orientedPin1, wireInfo.Segments[0].Orientation));
-            if (wireToPin is IOrientedPin orientedPin2)
-                context.Circuit.Add(new PinOrientationConstraint($"{name}.pin2", orientedPin2, -wireInfo.Segments[^1].Orientation));
+                // Resolve the orientation for the pin to the wire
+                if (pinToWire is IOrientedPin orientedPin1)
+                    context.Circuit.Add(new PinOrientationConstraint($"{name}.pin1", orientedPin1, wireInfo.Segments[0].Orientation));
+                if (wireToPin is IOrientedPin orientedPin2)
+                    context.Circuit.Add(new PinOrientationConstraint($"{name}.pin2", orientedPin2, -wireInfo.Segments[^1].Orientation));
 
-            // Make sure the start and end are tied together
-            context.Circuit.Add(
-                new OffsetConstraint($"{name}.start.x", pinToWire.X, wire.StartX),
-                new OffsetConstraint($"{name}.start.y", pinToWire.Y, wire.StartY),
-                new OffsetConstraint($"{name}.end.x", wireToPin.X, wire.EndX),
-                new OffsetConstraint($"{name}.end.y", wireToPin.Y, wire.EndY));
+                // Resolve the pin locations
+                if (pinToWire != null && wireToPin != null)
+                {
+                    var wire = new Wire(name, wireInfo);
+                    context.Circuit.Add(wire);
 
-            pinToWire.Connections++;
-            wireToPin.Connections++;
+                    context.Circuit.Add(
+                        new OffsetConstraint($"{name}.start.x", pinToWire.X, wire.StartX),
+                        new OffsetConstraint($"{name}.start.y", pinToWire.Y, wire.StartY),
+                        new OffsetConstraint($"{name}.end.x", wireToPin.X, wire.EndX),
+                        new OffsetConstraint($"{name}.end.y", wireToPin.Y, wire.EndY));
+                    pinToWire.Connections++;
+                    wireToPin.Connections++;
+                }
+
+            }
         }
 
         /// <summary>
@@ -702,7 +721,6 @@ namespace SimpleCircuit.Parser
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
             // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
             ParseChainStatement(lexer, context,
-                (p, c) => c.SchedulePostProcess((context) => VirtualChainSingle(p, context, x, y)),
                 (p2w, wi, w2p, c) => c.SchedulePostProcess((context) => VirtualChainWire(p2w, wi, w2p, c, x, y)));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
@@ -773,6 +791,9 @@ namespace SimpleCircuit.Parser
         }
         private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, bool x, bool y)
         {
+            if (wireToPinInfo.Component == null)
+                VirtualChainSingle(pinToWireInfo, context, x, y);
+
             // Try to get the components
             if (!context.Circuit.ContainsKey(pinToWireInfo.Component.Fullname))
             {
