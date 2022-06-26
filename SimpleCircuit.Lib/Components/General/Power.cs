@@ -14,6 +14,8 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private const string _anchor = "anchor";
+
             [Description("The power plane name.")]
             public string Label { get; set; } = "VDD";
 
@@ -35,8 +37,10 @@ namespace SimpleCircuit.Components
             {
                 drawing.ExtendPins(Pins);
 
-                // Power
-                drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
+                if (Variants.Contains(_anchor))
+                    drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
+                else
+                    drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
                 if (!string.IsNullOrWhiteSpace(Label))
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }

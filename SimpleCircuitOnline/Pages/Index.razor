@@ -11,7 +11,7 @@
             </Tab>
             <Tab Title="Style">
                 <div class="full-width">
-                    <a href="javascript:void(0);" class="btn">Restore default style</a>
+                    <a href="javascript:void(0);" class="btn" @onclick="RestoreStyle">Restore default style</a>
                 </div>
                 <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
             </Tab>

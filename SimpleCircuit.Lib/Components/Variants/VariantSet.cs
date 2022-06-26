@@ -61,7 +61,7 @@ namespace SimpleCircuit.Components.Variants
         {
             _checked.Clear();
             _set.Clear();
-            Changed?.Invoke(this, null);
+            Changed?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components.Variants
         {
             if (_set.Add(variant))
             {
-                Changed?.Invoke(this, null);
+                Changed?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Variants
         {
             if (_set.Remove(variant))
             {
-                Changed?.Invoke(this, null);
+                Changed?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;

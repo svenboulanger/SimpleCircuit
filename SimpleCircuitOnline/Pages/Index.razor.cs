@@ -22,6 +22,11 @@ namespace SimpleCircuitOnline.Pages
         private bool _updateDynamic = false;
         private SvgOutput _mainOutput;
 
+        private async Task RestoreStyle()
+        {
+            await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle);
+        }
+
         private async Task SetCurrentScript(string script, string style = null)
         {
             // Temporarily suspend any dynamic updates

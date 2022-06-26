@@ -731,13 +731,14 @@ namespace SimpleCircuit
         /// <param name="options">The options.</param>
         public void Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
+            // Don't bother with text that is null or just whitespaces.
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
             var formatter = ElementFormatter ?? new ElementFormatter();
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
 
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-            
             // Create the DOM elements and a span element for each 
             var txt = _document.CreateElement("text", Namespace);
             options?.Apply(txt);
