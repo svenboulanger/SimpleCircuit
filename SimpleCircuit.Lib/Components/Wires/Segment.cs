@@ -16,8 +16,8 @@ namespace SimpleCircuit.Components.Wires
         private const string _onwall = "onwall";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -29,12 +29,18 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             public string Label { get; set; }
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 4);

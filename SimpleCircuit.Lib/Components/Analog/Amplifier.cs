@@ -19,16 +19,18 @@ namespace SimpleCircuit.Components.Analog
         private const string _programmable = "programmable";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
         {
-            var result = new Instance(name, options);
             switch (key)
             {
                 case "OA":
+                    var result = new Instance(name);
                     result.Variants.Add(_differentialInput);
-                    break;
+                    return result;
+
+                default:
+                    return new Instance(name);
             }
-            return result;
         }
 
         private class Instance : ScaledOrientedDrawable, ILabeled
@@ -55,8 +57,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "amplifier";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name of the instance.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _inputCommon, new(-1, 0)), "i", "in", "inp", "pi", "p");
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _inputCommon, new(-1, 0)), "inn", "ni", "n");
@@ -66,6 +72,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 // Differential input?

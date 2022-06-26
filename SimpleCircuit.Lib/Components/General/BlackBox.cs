@@ -14,8 +14,20 @@ namespace SimpleCircuit.Components
     public partial class BlackBox : DrawableFactory
     {
         /// <inheritdoc />
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
+
+        /// <inheritdoc />
         public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        {
+            var instance = (Instance)base.Create(key, name, options);
+            if (options != null)
+            {
+                instance.MinimumSpacingX = options.HorizontalPinSpacing;
+                instance.MinimumSpacingY = options.VerticalPinSpacing;
+            }
+            return instance;
+        }
 
         protected class Instance : ILocatedDrawable, ILabeled
         {
@@ -49,21 +61,22 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public string Name { get; }
 
+            [Description("The minimum space between two pins for top and bottom.")]
+            public double MinimumSpacingX { get => _pins.MinimumHorizontalSpacing; set => _pins.MinimumHorizontalSpacing = value; }
+
+            [Description("The minimum space between two pins for left and right.")]
+            public double MinimumSpacingY { get => _pins.MinimumVerticalSpacing; set => _pins.MinimumVerticalSpacing = value; }
+
             /// <summary>
             /// Creates a new black box.
             /// </summary>
             /// <param name="name">The name.</param>
-            public Instance(string name, Options options)
+            public Instance(string name)
             {
                 if (string.IsNullOrWhiteSpace(name))
                     throw new ArgumentNullException(nameof(name));
                 Name = name;
                 _pins = new(this);
-                if (options != null)
-                {
-                    _pins.MinimumHorizontalSpacing = options.HorizontalPinSpacing;
-                    _pins.MinimumVerticalSpacing = options.VerticalPinSpacing;
-                }
                 X = $"{Name}.x";
                 Y = $"{Name}.y";
                 EndLocation = new(20, 20);

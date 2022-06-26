@@ -16,9 +16,9 @@ namespace SimpleCircuit.Components.Analog
         private const string _programmable = "programmable";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
         {
-            var result = new Instance(name, options);
+            var result = new Instance(name);
 
             // We will just add a differential input as the default
             result.Variants.Add(_differentialInput);
@@ -33,8 +33,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "ota";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "inn", "neg");
                 Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "inp", "pos");
@@ -45,6 +49,7 @@ namespace SimpleCircuit.Components.Analog
                 Variants.Changed += UpdatePins;
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Variants.Contains(_differentialInput))

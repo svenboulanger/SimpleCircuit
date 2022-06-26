@@ -7,34 +7,26 @@ namespace SimpleCircuit.Components.Wires
     public class CircuitBreaker : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-        {
-            var device = new Instance(name, options);
-            switch (options?.Style ?? Options.Styles.ANSI)
-            {
-                case Options.Styles.AREI:
-                    device.Variants.Add(Options.Arei);
-                    break;
-                case Options.Styles.IEC:
-                    device.Variants.Add(Options.Iec);
-                    break;
-                default:
-                    device.Variants.Add(Options.Ansi);
-                    break;
-            }
-            return device;
-        }
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             [Description("The label next to the circuit breaker.")]
             public string Label { get; set; }
 
             /// <inheritdoc />
+            public Standards Supported { get; } = Standards.AREI | Standards.IEC | Standards.ANSI;
+
+            /// <inheritdoc />
             public override string Type => "circuitbreaker";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("control", "The control pin.", this, new(0, -1.875), new(0, -1)), "c", "ctrl");
@@ -42,6 +34,8 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(Options.Arei, Options.Iec, Options.Ansi))

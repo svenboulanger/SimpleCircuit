@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components
     public class PowerFactory : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -20,11 +20,17 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public override string Type => "power";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);

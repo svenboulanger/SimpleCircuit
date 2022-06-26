@@ -65,8 +65,8 @@ namespace SimpleCircuitOnline
             // Inverting amplifier
             new Demo("2. Inverting amplifier", "An inverting amplifier using an opamp.", string.Join(Environment.NewLine, new[]
             {
-                "// Display signal grounds",
-                ".options smallsignal = true",
+                "// Display signal grounds by telling SimpleCircuit all GND components should get a \"signal\" variant",
+                ".variants GND signal",
                 "",
                 "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
                 "// Wires can be given a fixed length by adding a number after the direction.",

@@ -7,8 +7,8 @@ namespace SimpleCircuit.Components.Inputs
     {
         private const string _alt = "alt";
 
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -18,12 +18,17 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             public override string Type => "antenna";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("pin", "The pin of the antenna.", this, new(), new(0, 1)), "p", "pin", "a");
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Variants.Contains(_alt))

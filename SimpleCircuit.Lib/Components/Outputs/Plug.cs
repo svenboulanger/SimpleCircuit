@@ -14,8 +14,8 @@ namespace SimpleCircuit.Components.Outputs
         private const string _child = "child";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -25,12 +25,18 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             public override string Type => "plug";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(), new(-1, 0)), "in", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(), new(1, 0)), "out", "b");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPin(Pins["a"]);

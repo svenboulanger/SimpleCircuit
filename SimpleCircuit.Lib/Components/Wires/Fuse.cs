@@ -11,38 +11,33 @@ namespace SimpleCircuit.Components.Wires
         private const string _alt = "alt";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-        {
-            var device = new Instance(name, options);
-            switch (options?.Style ?? Options.Styles.ANSI)
-            {
-                case Options.Styles.AREI:
-                    device.Variants.Add(Options.Arei);
-                    break;
-                case Options.Styles.IEC:
-                    device.Variants.Add(Options.Iec);
-                    break;
-                default:
-                    device.Variants.Add(Options.Ansi);
-                    break;
-            }
-            return device;
-        }
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             [Description("The label next to the fuse.")]
             public string Label { get; set; }
 
             /// <inheritdoc />
+            public Standards Supported { get; } = Standards.ANSI | Standards.IEC;
+
+            /// <inheritdoc />
             public override string Type => "fuse";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(Options.Iec, Options.Ansi))

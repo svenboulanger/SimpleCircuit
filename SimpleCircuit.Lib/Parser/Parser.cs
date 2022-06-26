@@ -488,6 +488,10 @@ namespace SimpleCircuit.Parser
                 case "options":
                     return ParseOptions(lexer, context);
 
+                case "variant":
+                case "variants":
+                    return ParseVariants(lexer, context);
+
                 default:
                     context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
                     return false;
@@ -686,6 +690,56 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
+        private static bool ParseVariants(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.Word, out var tokenKey))
+            {
+                context.Diagnostics?.Post(tokenKey, ErrorCodes.ExpectedComponentKey);
+                return false;
+            }
+
+            // Check whether the key is actually a key
+            if (!context.Factory.IsKey(tokenKey.Content.ToString()))
+            {
+                context.Diagnostics?.Post(tokenKey, ErrorCodes.NotAKey, tokenKey.Content.ToString());
+                return false;
+            }
+
+            // Start reading variants
+            string key = tokenKey.Content.ToString();
+            while (lexer.Check(TokenType.Word | TokenType.Comma | TokenType.Dash))
+            {
+                switch (lexer.Type)
+                {
+                    case TokenType.Word:
+                        // Add the variant
+                        context.Options.AddInclude(key, lexer.Content.ToString());
+                        lexer.Next();
+                        break;
+
+                    case TokenType.Dash:
+                        // Remove the variant
+                        lexer.Next();
+                        if (!lexer.Branch(TokenType.Word, out var noVariant))
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
+                            return false;
+                        }
+                        context.Options.AddExclude(key, noVariant.Content.ToString());
+                        break;
+
+                    case TokenType.Comma:
+                        lexer.Next();
+                        break;
+
+                    default:
+                        lexer.Next();
+                        break;
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Parses a virtual chain of coordinates.
@@ -791,8 +845,11 @@ namespace SimpleCircuit.Parser
         }
         private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, bool x, bool y)
         {
-            if (wireToPinInfo.Component == null)
+            if (wireInfo == null)
+            {
                 VirtualChainSingle(pinToWireInfo, context, x, y);
+                return;
+            }
 
             // Try to get the components
             if (!context.Circuit.ContainsKey(pinToWireInfo.Component.Fullname))

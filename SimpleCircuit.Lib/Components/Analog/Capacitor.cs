@@ -13,16 +13,8 @@ namespace SimpleCircuit.Components.Analog
         private const string _programmable = "programmable";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-        {
-            var device = new Instance(name, options);
-            if (options?.PolarCapacitors ?? false)
-            {
-                device.Variants.Add("polar");
-                device.Variants.Add("signs");
-            }
-            return device;
-        }
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -32,12 +24,18 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "capacitor";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-1.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(1.5, 0), new(1, 0)), "n", "neg", "b");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 3.5);

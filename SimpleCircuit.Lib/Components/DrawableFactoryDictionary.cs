@@ -168,6 +168,13 @@ namespace SimpleCircuit.Components
         public bool IsAnonymous(string fullname) => Extract(fullname, out _, out _);
 
         /// <summary>
+        /// Determines whether the given key is present in the factory.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns>Returns <c>true</c> if the key is present; otherwise, <c>false</c>.</returns>
+        public bool IsKey(string key) => Extract(key, out string realKey, out _) && key == realKey;
+
+        /// <summary>
         /// Creates a new drawable for the specified name.
         /// </summary>
         /// <param name="fullname">The full name of the component.</param>

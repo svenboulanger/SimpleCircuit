@@ -10,8 +10,8 @@ namespace SimpleCircuit.Components.Analog
     public class TransmissionLine : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -60,23 +60,26 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "transmissionline";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("left", "The left signal.", this, new(-_inner, 0), new(-1, 0)), "a", "l");
                 Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");
                 Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(_inner, _height), new(0, 1)), "gb", "gr");
                 Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(_width, 0), new(1, 0)), "b", "r");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 double offset = 0.5 * (Length - _width);
 
                 // Wire
-                if (Pins[0].Connections == 0)
-                    drawing.ExtendPin(Pins[0]);
-                if (Pins[1].Connections == 0)
-                    drawing.ExtendPin(Pins[3]);
+                drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // Transmission line
                 drawing.Path(builder => DrawShape(builder.WithAbsoluteModifier(v =>

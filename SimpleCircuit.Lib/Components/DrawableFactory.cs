@@ -24,7 +24,54 @@ namespace SimpleCircuit.Components
                 _metadata.Add(attribute.Metadata);
         }
 
+        /// <summary>
+        /// Creates a new instance of the drawable.
+        /// </summary>
+        /// <param name="key">The key of the drawable being created.</param>
+        /// <param name="name">The name of the drawable being created.</param>
+        /// <returns>The drawable.</returns>
+        protected abstract IDrawable Factory(string key, string name);
+
         /// <inheritdoc />
-        public abstract IDrawable Create(string key, string name, Options options);
+        public virtual IDrawable Create(string key, string name, Options options)
+        {
+            var result = Factory(key, name);
+            if (options != null)
+            {
+                if (result is IScaledDrawable scaled)
+                    scaled.Scale = options.Scale;
+                if (result is IStandardizedDrawable standardized)
+                {
+                    switch (options.Standard)
+                    {
+                        case Standards.AREI:
+                            if ((standardized.Supported & Standards.AREI) == Standards.AREI)
+                                standardized.Variants.Add(Options.Arei);
+                            else
+                                goto default;
+                            break;
+
+                        case Standards.IEC:
+                            if ((standardized.Supported & Standards.IEC) == Standards.IEC)
+                                standardized.Variants.Add(Options.Iec);
+                            else
+                                goto default;
+                            break;
+
+                        case Standards.ANSI:
+                            if ((standardized.Supported & Standards.ANSI) == Standards.ANSI)
+                                standardized.Variants.Add(Options.Ansi);
+                            else
+                                goto default;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                options.ApplyVariants(key, result);
+            }
+            return result;
+        }
     }
 }

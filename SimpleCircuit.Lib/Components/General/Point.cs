@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components
     public class PointFactory : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
         private class Instance : LocatedDrawable, ILabeled
@@ -25,12 +25,17 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public override string Type => "point";
 
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
             public Instance(string name)
                 : base(name)
             {
                 Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 int connections = Pins[0].Connections;

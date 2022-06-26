@@ -9,8 +9,9 @@ namespace SimpleCircuit.Components.Analog
     [Drawable("ADC", "An analog-to-digital converter.", "Digital")]
     public class AnalogToDigital : DrawableFactory
     {
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        /// <inheritdoc />
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -31,8 +32,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "adc";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, new(-9, 0), new(-1, 0)), "input", "in", "pi", "inp");
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
@@ -41,6 +46,7 @@ namespace SimpleCircuit.Components.Analog
                 Variants.Changed += UpdatePins;
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Variants.Contains(_differentialInput))

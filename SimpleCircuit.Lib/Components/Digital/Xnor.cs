@@ -10,15 +10,10 @@ namespace SimpleCircuit.Components.Digital
     public class Xnor : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-        {
-            var device = new Instance(name, options);
-            if (options.IEC)
-                device.Variants.Add(Options.Iec);
-            return device;
-        }
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             /// <inheritdoc />
             public override string Type => "xnor";
@@ -26,14 +21,23 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             public string Label { get; set; }
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <inheritdoc />
+            public Standards Supported { get; } = Standards.ANSI | Standards.IEC;
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("a", "The first input.", this, new(-5.5, -2.5), new(-1, 0)), "a");
                 Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-5.5, 2.5), new(-1, 0)), "b");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(9, 0), new(1, 0)), "o", "out", "output");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(Options.Iec, Options.Ansi))

@@ -9,19 +9,23 @@ namespace SimpleCircuit.Components.Digital
     public class FlipFlop : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the transistor.")]
-            public string Label { get; set; }
-
             /// <inheritdoc />
             public override string Type => "flipflop";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <inheritdoc />
+            public string Label { get; set; }
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("data", "The data pin.", this, new(-9, -6), new(-1, 0)), "d", "data");
                 Pins.Add(new FixedOrientedPin("clock", "The clock pin.", this, new(-9, 6), new(-1, 0)), "c", "clock");
@@ -30,6 +34,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("nq", "The inverted output pin.", this, new(9, 6), new(1, 0)), "nq", "qn");
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "d", "c", "q");

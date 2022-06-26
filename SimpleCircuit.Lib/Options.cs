@@ -1,10 +1,16 @@
-﻿namespace SimpleCircuit
+﻿using SimpleCircuit.Components;
+using System;
+using System.Collections.Generic;
+
+namespace SimpleCircuit
 {
     /// <summary>
     /// Describes options for parsing SimpleCircuit.
     /// </summary>
     public class Options
     {
+        private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
+
         /// <summary>
         /// The identifier for AREI style components.
         /// </summary>
@@ -21,43 +27,21 @@
         public const string Iec = "iec";
 
         /// <summary>
-        /// Enumerates the different styles.
-        /// </summary>
-        public enum Styles
-        {
-            /// <summary>
-            /// AREI style (Algemeen Reglement op de Elektrische Installaties).
-            /// </summary>
-            AREI,
-
-            /// <summary>
-            /// ANSI style (American National Standards Institute).
-            /// </summary>
-            ANSI,
-
-            /// <summary>
-            /// IEC style (International Electrotechnical Commission).
-            /// </summary>
-            IEC
-        }
-        private Styles _style = Styles.ANSI;
-
-        /// <summary>
         /// Gets the current style.
         /// </summary>
-        public Styles Style => _style;
+        public Standards Standard { get; private set; }
+
+        [Description("If true, use native symbols.")]
+        public bool Native { get => Standard == Standards.Native; set => Standard = Standards.Native; }
 
         [Description("If true, use ANSI style symbols.")]
-        public bool ANSI { get => _style == Styles.ANSI; set => _style = Styles.ANSI; }
+        public bool ANSI { get => Standard == Standards.ANSI; set => Standard = Standards.ANSI; }
 
         [Description("If true, use IEC style symbols.")]
-        public bool IEC { get => _style == Styles.IEC; set => _style = Styles.IEC; }
+        public bool IEC { get => Standard == Standards.IEC; set => Standard = Standards.IEC; }
 
         [Description("If true, some components will use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
-        public bool AREI { get; set; }
-
-        [Description("If true, transistors will by default show as packaged transistors.")]
-        public bool PackagedTransistors { get; set; } = false;
+        public bool AREI { get => Standard == Standards.AREI; set => Standard = Standards.AREI; }
 
         [Description("The minimum wire length used for wires when no minimum or fixed length is specified.")]
         public double MinimumWireLength { get; set; } = 10.0;
@@ -71,12 +55,6 @@
         [Description("The default scale for any amplifier created. The default is 1.")]
         public double Scale { get; set; } = 1.0;
 
-        [Description("If true, capacitors will show polarized capacitor symbols.")]
-        public bool PolarCapacitors { get; set; } = false;
-
-        [Description("If true, some components will use small-signal model related symbols.")]
-        public bool SmallSignal { get; set; }
-
         [Description("The margin along the border of the drawing.")]
         public double Margin { get; set; } = 1.0;
 
@@ -88,5 +66,67 @@
 
         [Description("If true, wires will draw small arcs indicating jumping over another wire.")]
         public bool JumpOverWires { get; set; } = false;
+
+        /// <summary>
+        /// Adds a variant that needs to be included for the given key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="variant">The variant.</param>
+        public void AddInclude(string key, string variant)
+        {
+            // If it was excluded previously, remove it from there
+            if (_excludes.TryGetValue(key, out var set))
+                set.Remove(variant);
+            if (!_includes.TryGetValue(key, out set))
+            {
+                set = new(StringComparer.OrdinalIgnoreCase);
+                _includes.Add(key, set);
+            }
+            set.Add(variant);
+        }
+
+        /// <summary>
+        /// Adds a variant that needs to be removed for the given key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="variant">The variant.</param>
+        public void AddExclude(string key, string variant)
+        {
+            if (_includes.TryGetValue(key, out var set))
+                set.Remove(variant);
+            if (!_excludes.TryGetValue(key, out set))
+            {
+                set = new(StringComparer.OrdinalIgnoreCase);
+                _excludes.Add(key, set);
+            }
+            set.Add(variant);
+        }
+
+        /// <summary>
+        /// Clears the variants from the options.
+        /// </summary>
+        public void ClearVariants()
+        {
+            _includes.Clear();
+            _excludes.Clear();
+        }
+
+        /// <summary>
+        /// Applies the variants for the given drawable and key.
+        /// </summary>
+        /// <param name="drawable">The drawable.</param>
+        public void ApplyVariants(string key, IDrawable drawable)
+        {
+            if (_includes.TryGetValue(key, out var set))
+            {
+                foreach (string variant in set)
+                    drawable.Variants.Add(variant);
+            }
+            if (_excludes.TryGetValue(key, out set))
+            {
+                foreach (string variant in set)
+                    drawable.Variants.Remove(variant);
+            }
+        }
     }
 }

@@ -12,19 +12,14 @@ namespace SimpleCircuit.Components.Analog
     {
         private const string _packaged = "packaged";
 
-        /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
         {
-            IDrawable device = key switch
+            return key switch
             {
-                "QN" or "NPN" => new Npn(name, options),
-                "QP" or "PNP" => new Pnp(name, options),
-                _ => throw new ArgumentException($"Invalid key '{key}' for bipolar transistor."),
+                "QN" or "NPN" => new Npn(name),
+                "QP" or "PNP" => new Pnp(name),
+                _ => throw new ArgumentException($"Invalid key '{key}' for bipolar transistor.")
             };
-
-            if (options?.PackagedTransistors ?? false)
-                device.Variants.Add(_packaged);
-            return device;
         }
 
         private class Npn : ScaledOrientedDrawable, ILabeled
@@ -35,14 +30,20 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "npn";
 
-            public Npn(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Npn"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Npn(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-8, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 // Wires
@@ -83,8 +84,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "pnp";
 
-            public Pnp(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Pnp"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Pnp(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
@@ -92,6 +97,7 @@ namespace SimpleCircuit.Components.Analog
                 Variants.Changed += UpdatePins;
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 // Wires

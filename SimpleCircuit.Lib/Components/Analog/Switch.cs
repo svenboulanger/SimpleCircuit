@@ -20,38 +20,30 @@ namespace SimpleCircuit.Components.Analog
         private const string _knife = "knife";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
+
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
-            var device = new Instance(name, options);
-            switch (options?.Style ?? Options.Styles.ANSI)
-            {
-                case Options.Styles.AREI:
-                    device.Variants.Add(Options.Arei);
-                    break;
-
-                case Options.Styles.IEC:
-                    device.Variants.Add(Options.Iec);
-                    break;
-
-                default:
-                    device.Variants.Add(Options.Ansi);
-                    break;
-            }
-            return device;
-        }
-
-        private class Instance : ScaledOrientedDrawable, ILabeled
-        {
+            /// <inheritdoc />
             [Description("The label next to the switch.")]
             public string Label { get; set; }
+
             [Description("The number of poles on the switch.")]
             public int Poles { get; set; }
 
             /// <inheritdoc />
+            public Standards Supported { get; } = Standards.AREI | Standards.ANSI;
+
+            /// <inheritdoc />
             public override string Type => "switch";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
                 Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, -6), new(0, -1)), "c", "ctrl");

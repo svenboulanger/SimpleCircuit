@@ -65,7 +65,7 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options)
-            => new Instance(key, name, options, _drawing, _pins);
+            => new Instance(key, name, _drawing, _pins);
 
         private class PinDescription
         {
@@ -81,8 +81,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             public override string Type { get; }
 
-            public Instance(string type, string name, Options options, XmlNode drawing, IEnumerable<PinDescription> pins)
-                : base(name, options)
+            public Instance(string type, string name, XmlNode drawing, IEnumerable<PinDescription> pins)
+                : base(name)
             {
                 Type = type;
                 foreach (var pin in pins)

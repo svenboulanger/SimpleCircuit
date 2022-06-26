@@ -11,8 +11,8 @@ namespace SimpleCircuit.Components.Analog
         private const string _programmable = "programmable";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -28,14 +28,15 @@ namespace SimpleCircuit.Components.Analog
             /// Initializes a new instance of the <see cref="Instance"/> class.
             /// </summary>
             /// <param name="name">The name.</param>
-            /// <param name="options">Options that can be used for the component.</param>
-            public Instance(string name, Options options)
-                : base(name, options)
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("p", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 8), new(0, 1)), "c", "ctrl");
                 Pins.Add(new FixedOrientedPin("n", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");

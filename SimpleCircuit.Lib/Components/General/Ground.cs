@@ -10,10 +10,10 @@ namespace SimpleCircuit.Components
     public class Ground : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
         {
-            var device = new Instance(name, options);
-            if (key == "SGND" || (options?.SmallSignal ?? false))
+            var device = new Instance(name);
+            if (key == "SGND")
                 device.Variants.Add("signal");
             return device;
         }
@@ -23,11 +23,17 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public override string Type => "ground";
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select("earth", "signal"))

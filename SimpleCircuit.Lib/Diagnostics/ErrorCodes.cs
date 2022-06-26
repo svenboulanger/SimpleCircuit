@@ -121,6 +121,12 @@
         [Diagnostic(SeverityLevel.Error, "PE037", "Cannot create a component with a wildcard character ('*')")]
         NoWildcardCharacter,
 
+        [Diagnostic(SeverityLevel.Error, "PE038", "Expected a component key.")]
+        ExpectedComponentKey,
+
+        [Diagnostic(SeverityLevel.Error, "PE039", "'{0}' is not a component key.")]
+        NotAKey,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

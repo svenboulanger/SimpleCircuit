@@ -6,10 +6,10 @@ namespace SimpleCircuit.Components.General
     /// A direction that is like a regular point, but can be oriented.
     /// This is useful for example when combined with subcircuits to give an orientation.
     /// </summary>
-    [Drawable("DIR", "Directional point, useful for subcircuit definitions or indicating busses (using crossings).", "General")]
+    [Drawable("DIR", "Directional point, useful for defining subcircuit definition ports.", "General")]
     public class Direction : DrawableFactory
     {
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
         private class Instance : OrientedDrawable, ILabeled
@@ -20,6 +20,10 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             public override string Type => "direction";
 
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
             public Instance(string name)
                 : base(name)
             {
@@ -27,6 +31,7 @@ namespace SimpleCircuit.Components.General
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(), new(1, 0)), "o", "b", "out", "output");
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (!string.IsNullOrWhiteSpace(Label))

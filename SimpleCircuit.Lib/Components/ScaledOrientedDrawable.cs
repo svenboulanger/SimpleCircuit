@@ -27,10 +27,9 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="name">The name of the drawable.</param>
         /// <param name="options">The options.</param>
-        protected ScaledOrientedDrawable(string name, Options options)
+        protected ScaledOrientedDrawable(string name)
             : base(name)
         {
-            _scale = options?.Scale ?? 1.0;
         }
 
         /// <summary>

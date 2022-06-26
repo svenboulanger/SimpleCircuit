@@ -14,17 +14,14 @@ namespace SimpleCircuit.Components.Analog
         private const string _depletion = "depletion";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        protected override IDrawable Factory(string key, string name)
         {
-            IDrawable device = key switch
+            return key switch
             {
-                "MN" or "NMOS" => new Nmos(name, options),
-                "MP" or "PMOS" => new Pmos(name, options),
+                "MN" or "NMOS" => new Nmos(name),
+                "MP" or "PMOS" => new Pmos(name),
                 _ => throw new ArgumentException($"Could not recognize key '{key}' for a mosfet.")
             };
-            if (options?.PackagedTransistors ?? false)
-                device.Variants.Add(_packaged);
-            return device;
         }
 
         private class Nmos : ScaledOrientedDrawable, ILabeled
@@ -35,8 +32,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "nmos";
 
-            public Nmos(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Nmos"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Nmos(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
                 Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 6), new Vector2(0, 1)), "g", "gate");
@@ -44,6 +45,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Variants.Contains(_packaged))
@@ -120,8 +123,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "pmos";
 
-            public Pmos(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Pmos"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Pmos(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
                 Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 9), new Vector2(0, 1)), "g", "gate");
@@ -129,6 +136,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Variants.Contains(_packaged))

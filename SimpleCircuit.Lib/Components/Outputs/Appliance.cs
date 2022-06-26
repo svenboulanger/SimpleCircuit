@@ -26,8 +26,8 @@ namespace SimpleCircuit.Components.Outputs
         private const string _accu = "accu";
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-            => new Instance(name, options);
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
@@ -40,15 +40,16 @@ namespace SimpleCircuit.Components.Outputs
             public override string Type => "appliance";
 
             /// <summary>
-            /// Creates a new appliance.
+            /// Creates a new <see cref="Instance"/>.
             /// </summary>
             /// <param name="name">The name of the appliance.</param>
-            /// <param name="options">The options.</param>
-            public Instance(string name, Options options)
-                : base(name, options)
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("p", "The connection.", this, new(), new(-1, 0)), "p", "a");
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(_ventilator, _heater, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer))

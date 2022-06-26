@@ -10,24 +10,26 @@ namespace SimpleCircuit.Components.Digital
     public class Buffer : DrawableFactory
     {
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
-        {
-            var device = new Instance(name, options);
-            if (options.IEC)
-                device.Variants.Add(Options.Iec);
-            return device;
-        }
+        protected override IDrawable Factory(string key, string name)
+            => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
-            [Description("The label next to the inverter.")]
+            /// <inheritdoc />
+            public override string Type => "buffer";
+
+            /// <inheritdoc />
             public string Label { get; set; }
 
             /// <inheritdoc />
-            public override string Type => "invertor";
+            public Standards Supported { get; } = Standards.ANSI | Standards.IEC;
 
-            public Instance(string name, Options options)
-                : base(name, options)
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
             {
                 Pins.Add(new FixedOrientedPin("input", "The input pin.", this, new(-6, 0), new(-1, 0)), "in", "input");
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
@@ -35,6 +37,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(6, 0), new(1, 0)), "out", "output");
                 Variants.Changed += UpdatePins;
             }
+
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(Options.Iec, Options.Ansi))
