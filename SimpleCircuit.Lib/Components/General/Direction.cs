@@ -17,6 +17,9 @@ namespace SimpleCircuit.Components.General
             [Description("The label placed next to the wire.")]
             public string Label { get; set; }
 
+            [Description("The label placed on the other side of the wire.")]
+            public string Label2 { get; set; }
+
             /// <inheritdoc />
             public override string Type => "direction";
 
@@ -34,7 +37,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Text(Label, new(0, 4), new(0, 1));
+                drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Label2, new(0, -3), new(0, -1));
             }
         }
     }

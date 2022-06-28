@@ -19,15 +19,5 @@
         /// Gets the length of the wire.
         /// </summary>
         public double Length { get; set; }
-
-        /// <summary>
-        /// Gets the label for the wire segment.
-        /// </summary>
-        public string Label { get; set; }
-
-        /// <summary>
-        /// Gets whether the label should be flipping sides.
-        /// </summary>
-        public bool Flipped { get; set; }
     }
 }

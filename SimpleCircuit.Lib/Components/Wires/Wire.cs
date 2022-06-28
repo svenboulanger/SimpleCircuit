@@ -221,8 +221,6 @@ namespace SimpleCircuit.Components.Wires
                 {
                     // Start the first point and build the path
                     builder.MoveTo(_vectors[0].Location);
-                    Vector2 lastActual = _vectors[0].Location;
-
                     for (int i = 1; i < _vectors.Count; i++)
                     {
                         // Draw a small half circle for crossing over this point
@@ -241,21 +239,7 @@ namespace SimpleCircuit.Components.Wires
                             builder.SmoothTo(e + ny, e);
                         }
                         else
-                        {
                             builder.LineTo(_vectors[i].Location);
-
-                            string label = _info.Segments[i - 1].Label;
-                            if (!string.IsNullOrWhiteSpace(label))
-                            {
-                                Vector2 o = 0.5 * (_vectors[i].Location + lastActual);
-                                GetNewAxes(lastActual, _vectors[i].Location, out var nx, out var ny);
-                                if (_info.Segments[i - 1].Flipped)
-                                    drawing.Text(label, o - ny * 2, -ny);
-                                else
-                                    drawing.Text(label, o + ny * 2, ny);
-                            }
-                            lastActual = _vectors[i].Location;
-                        }
                     }
                 }, _info.Options);
             }

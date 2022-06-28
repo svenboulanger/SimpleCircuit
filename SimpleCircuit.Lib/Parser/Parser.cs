@@ -379,9 +379,8 @@ namespace SimpleCircuit.Parser
                                 wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
                             break;
 
-                        case "flipped":
-                            if (wireInfo.Segments.Count > 0)
-                                wireInfo.Segments[^1].Flipped = true;
+                        default:
+                            context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeDirection, directionToken.Content.ToString());
                             break;
                     }
                 }
@@ -391,11 +390,6 @@ namespace SimpleCircuit.Parser
                         wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Slash;
                     else
                         wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
-                }
-                else if (lexer.Check(TokenType.String))
-                {
-                    if (wireInfo.Segments.Count > 0)
-                        wireInfo.Segments[^1].Label = ParseString(lexer, context);
                 }
                 else if (lexer.Branch(TokenType.Plus))
                 {
