@@ -56,8 +56,8 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), new("neg"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-4, 3), new(5, 3), vertical: true);
-                        y = Math.Min(y, -5);
-                        y2 = Math.Max(y2, 5);
+                        y = Math.Min(y, -6);
+                        y2 = Math.Max(y2, 6);
                         break;
 
                     case 1:
@@ -66,8 +66,8 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Rectangle(1.5, 8, new(1.5, 0), new("neg", "dot"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-5, 3), new(5, 3), vertical: true);
-                        y = Math.Min(y, -5);
-                        y2 = Math.Max(y2, 5);
+                        y = Math.Min(y, -6);
+                        y2 = Math.Max(y2, 6);
                         break;
 
                     default:
@@ -76,8 +76,8 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Line(new(1.5, -4), new(1.5, 4), new("neg", "plane"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-4, 3), new(4, 3), vertical: true);
-                        y = Math.Min(y, -5);
-                        y2 = Math.Max(y2, 5);
+                        y = Math.Min(y, -6);
+                        y2 = Math.Max(y2, 6);
                         break;
                 }
 
@@ -85,20 +85,20 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Arrow(new(-4, 4), new(6, -5));
-                        y = Math.Min(y, -6);
-                        y2 = Math.Max(y2, 5);
+                        y = Math.Min(y, -7);
+                        y2 = Math.Max(y2, 6);
                         break;
 
                     case 1:
                         drawing.Polyline(new Vector2[] { new(-6, 6), new(-4, 6), new(4, -6) });
-                        y = Math.Min(y, -7);
-                        y2 = Math.Max(y2, 7);
+                        y = Math.Min(y, -8);
+                        y2 = Math.Max(y2, 8);
                         break;
                 }
 
                 // Label
                 drawing.Text(Label, new(0, y), new(0, -1), new("lbl"));
-                drawing.Text(Label2, new(0, y2), new(0, -1), new("lbl"));
+                drawing.Text(Label2, new(0, y2), new(0, 1), new("lbl2"));
             }
 
             private void UpdatePins(object sender, EventArgs e)

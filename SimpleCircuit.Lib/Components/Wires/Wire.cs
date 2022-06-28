@@ -250,9 +250,9 @@ namespace SimpleCircuit.Components.Wires
                                 Vector2 o = 0.5 * (_vectors[i].Location + lastActual);
                                 GetNewAxes(lastActual, _vectors[i].Location, out var nx, out var ny);
                                 if (_info.Segments[i - 1].Flipped)
-                                    drawing.Text(label, o - ny, -ny);
+                                    drawing.Text(label, o - ny * 2, -ny);
                                 else
-                                    drawing.Text(label, o + ny, ny);
+                                    drawing.Text(label, o + ny * 2, ny);
                             }
                             lastActual = _vectors[i].Location;
                         }

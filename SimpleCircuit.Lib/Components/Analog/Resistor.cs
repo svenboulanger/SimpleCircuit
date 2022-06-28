@@ -133,8 +133,8 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     default:
-                        drawing.Text(Label, new(0, -5), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, 5), new(0, 1), new("lbl2"));
+                        drawing.Text(Label, new(0, -6), new(0, -1), new("lbl"));
+                        drawing.Text(Label2, new(0, 6), new(0, 1), new("lbl2"));
                         break;
                 }
             }
