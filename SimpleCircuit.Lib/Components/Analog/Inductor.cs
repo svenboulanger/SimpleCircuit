@@ -56,8 +56,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Arrow(new(-5, 5), new(6, -7));
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
         }
     }

@@ -70,13 +70,10 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Rectangle(8, 1.5, new(0, 3.25), new("dot"));
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                {
-                    if (Pins["b"].Connections > 0)
-                        drawing.Text(Label, new(-3, -3), new(-1, -1));
-                    else
-                        drawing.Text(Label, new(0, -3), new(0, -1));
-                }
+                if (Pins["b"].Connections > 0)
+                    drawing.Text(Label, new(-3, -3), new(-1, -1));
+                else
+                    drawing.Text(Label, new(0, -3), new(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -98,8 +95,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(3, -10), new(1, 1));
+                drawing.Text(Label, new(3, -10), new(1, 1));
             }
             private void UpdatePins(object sender, EventArgs e)
             {
@@ -171,10 +167,9 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    if (!string.IsNullOrEmpty(Label))
-                        drawing.Text(Label, new Vector2(-3, -3), new Vector2(-1, -1));
+                    drawing.Text(Label, new Vector2(-3, -3), new Vector2(-1, -1));
                 }
-                else if (!string.IsNullOrEmpty(Label))
+                else
                     drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
@@ -203,8 +198,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(3, -10), new(1, 1));
+                drawing.Text(Label, new(3, -10), new(1, 1));
             }
             private void UpdatePins(object sender, EventArgs e)
             {

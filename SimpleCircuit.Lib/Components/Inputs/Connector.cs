@@ -40,8 +40,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 1.5);
                 drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -5), new(0, -1));
+                drawing.Text(Label, new(0, -5), new(0, -1));
             }
         }
     }

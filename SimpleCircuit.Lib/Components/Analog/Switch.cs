@@ -92,8 +92,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Label, new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
@@ -117,8 +116,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, 3), new Vector2(0, 1));
+                drawing.Text(Label, new Vector2(0, 3), new Vector2(0, 1));
             }
             private void DrawPushSwitch(SvgDrawing drawing, bool closed, bool inverted)
             {
@@ -149,8 +147,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
+                drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
             }
             private void DrawAreiPushSwitch(SvgDrawing drawing, bool lamp, bool window)
             {
@@ -173,8 +170,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
             private void DrawAreiSwitch(SvgDrawing drawing, bool toggling, bool doublePole, bool lamp)
             {
@@ -193,8 +189,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -length), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -length), new Vector2(0, -1));
 
                 // Small cross for illuminator lamps
                 if (lamp)

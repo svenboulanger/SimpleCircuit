@@ -42,11 +42,8 @@ namespace SimpleCircuit.Components
                 if (connections == 0 || connections > 2)
                     drawing.Circle(new Vector2(), 1, new("dot"));
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                {
-                    var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                    drawing.Text(Label, n * Distance, n);
-                }
+                var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
+                drawing.Text(Label, n * Distance, n);
             }
         }
     }

@@ -46,8 +46,7 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Line(new(5, -4), new(7, -4), new("minus"));
                 }
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 6), new(0, 1));
+                drawing.Text(Label, new(0, 6), new(0, 1));
             }
         }
     }

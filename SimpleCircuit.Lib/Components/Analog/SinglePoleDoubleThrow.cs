@@ -59,8 +59,7 @@ namespace SimpleCircuit.Components.Analog
                 }   
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(-6, 6), new(-1, 1));
+                drawing.Text(Label, new(-6, 6), new(-1, 1));
             }
             private void UpdatePins(object sender, EventArgs e)
             {

@@ -47,8 +47,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (!Variants.Contains(_off))
                     DrawOn(drawing);
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(8, 10), new(1, 1));
+                drawing.Text(Label, new(8, 10), new(1, 1));
             }
             private void DrawOn(SvgDrawing drawing)
             {

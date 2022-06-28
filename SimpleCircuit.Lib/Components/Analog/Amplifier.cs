@@ -140,15 +140,11 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Labels
-                if (!string.IsNullOrWhiteSpace(Label))
-                {
-                    if (Variants.Contains(_differentialOutput))
-                        drawing.Text(Label, new(2, 7), new(1, 1));
-                    else
-                        drawing.Text(Label, new(2, 5), new(1, 1));
-                }
-                if (!string.IsNullOrWhiteSpace(Gain))
-                    drawing.Text(Gain, new(-2.5, 0), new());
+                if (Variants.Contains(_differentialOutput))
+                    drawing.Text(Label, new(2, 7), new(1, 1));
+                else
+                    drawing.Text(Label, new(2, 5), new(1, 1));
+                drawing.Text(Gain, new(-2.5, 0), new());
             }
             private void UpdatePins(object sender, EventArgs e)
             {

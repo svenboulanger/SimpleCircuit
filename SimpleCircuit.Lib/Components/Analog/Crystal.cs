@@ -38,8 +38,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(b => b.MoveTo(-4.5, -3.5).Line(0, 7).MoveTo(4.5, -3.5).Line(0, 7));
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
         }
     }

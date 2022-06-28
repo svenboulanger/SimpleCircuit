@@ -68,8 +68,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
             }
             private void UpdatePins()
             {

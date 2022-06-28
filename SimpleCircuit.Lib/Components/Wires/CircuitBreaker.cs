@@ -59,8 +59,7 @@ namespace SimpleCircuit.Components.Wires
                     new(4, -2)
                 });
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Label, new(0, 3), new(0, 1));
             }
 
             private void DrawCircuitBreakerIec(SvgDrawing drawing)
@@ -71,8 +70,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Line(new(-4, 0), new(4, -4));
                 drawing.Cross(new(4, 0), 2);
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Label, new(0, 3), new(0, 1));
             }
 
             private void DrawCircuitBreakerArei(SvgDrawing drawing)
@@ -88,8 +86,7 @@ namespace SimpleCircuit.Components.Wires
                     new(1.25, -4.5), new(2, -3)
                 }, new("dot"));
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Label, new(0, 3), new(0, 1));
             }
 
             private void UpdatePins(object sender, EventArgs e)

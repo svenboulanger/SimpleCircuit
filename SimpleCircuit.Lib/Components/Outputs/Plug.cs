@@ -49,8 +49,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(6, -1), new(1, -1));
+                drawing.Text(Label, new(6, -1), new(1, -1));
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

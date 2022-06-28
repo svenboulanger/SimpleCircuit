@@ -53,8 +53,7 @@ namespace SimpleCircuit.Components.Wires
                 }
 
                 // The label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -4), new(0, -1));
+                drawing.Text(Label, new(0, -4), new(0, -1));
             }
         }
     }

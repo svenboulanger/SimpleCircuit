@@ -47,8 +47,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
             }
         }
     }

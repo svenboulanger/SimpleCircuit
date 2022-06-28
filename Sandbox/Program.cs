@@ -10,23 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"// Black boxes are boxes that can have custom pins.
-// When accessing pins on a black box, the order is important, as they will appear
-// from top to bottom or from left to right.
-// Additionally, the first letter of the pin indicates n(orth), s(outh), e(ast) or w(est).
-// These statements only serve to instantiate the pins in the correct order:
-BB1[wInput1] <l>
-BB1[wInput2] <l>
-
-// The order of the pins is fixed now, so we can connect whatever we want.
-BB1[nVDD] <u> POW
-BB1[sVSS] <d> GND
-
-// The pins are ordered, but their spacing can still depend on other elements
-BB1[eOutput1] <r u> R <u l> [eOutput2]BB1
-
-// We can also align the pins and resize the black box using them
-(x BB1[wInput1] <r +60> [eOutput1]BB1)";
+            var script = @"X <""label"" r> X";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
@@ -56,7 +40,7 @@ BB1[eOutput1] <r u> R <u l> [eOutput2]BB1
                     fw.WriteLine("</body>");
                     fw.WriteLine("</html>");
                 }
-                Process.Start(@"""C:\Program Files (x86)\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
+                Process.Start(@"""C:\Program Files\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
             }
         }
     }

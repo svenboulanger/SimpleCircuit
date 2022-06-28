@@ -65,8 +65,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(7.5, 0), 1.5);
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void DrawXnorIEC(SvgDrawing drawing)
@@ -77,8 +76,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(5.5, 0), 1.5);
                 drawing.Text("=1", new(), new());
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void UpdatePins(object sender, EventArgs e)

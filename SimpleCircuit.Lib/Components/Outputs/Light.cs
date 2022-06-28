@@ -62,8 +62,7 @@ namespace SimpleCircuit.Components.Outputs
                     DrawEmergency(drawing);
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
 
             private void DrawProjector(SvgDrawing drawing)

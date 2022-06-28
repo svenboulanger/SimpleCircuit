@@ -69,8 +69,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
 
                 // Label
-                if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
 
             }
             private void UpdatePins(object sender, EventArgs e)
@@ -123,8 +122,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
 
                 // Label
-                if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
             }
             private void UpdatePins(object sender, EventArgs e)
                 => SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));

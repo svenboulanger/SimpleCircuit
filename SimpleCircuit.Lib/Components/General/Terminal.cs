@@ -34,8 +34,7 @@ namespace SimpleCircuit.Components
             {
                 drawing.ExtendPins(Pins, 4);
                 drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(-4, 0), new Vector2(-1, 0));
+                drawing.Text(Label, new Vector2(-4, 0), new Vector2(-1, 0));
             }
         }
     }

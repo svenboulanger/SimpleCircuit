@@ -91,8 +91,7 @@ namespace SimpleCircuit.Components.Analog
                 })));
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(), new Vector2());
+                drawing.Text(Label, new Vector2(), new Vector2());
             }
             private void UpdatePins()
             {

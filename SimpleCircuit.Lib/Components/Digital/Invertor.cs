@@ -57,8 +57,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new Vector2(7.5, 0), 1.5);
 
-                if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
+                drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
             }
 
             private void DrawInverterIEC(SvgDrawing drawing)
@@ -69,8 +68,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(5.5, 0), 1.5);
                 drawing.Text("1", new(), new());
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void UpdatePins(object sender, EventArgs e)

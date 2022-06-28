@@ -24,6 +24,7 @@
         {
             Start = start;
             End = end;
+
         }
 
         /// <inheritdoc />

@@ -58,8 +58,7 @@ namespace SimpleCircuit.Components.Digital
                     drawing.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), new("small"));
                 if (Pins["r"].Connections > 0)
                     drawing.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), new("small"));
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(10, 12), new Vector2(1, -1));
+                drawing.Text(Label, new Vector2(10, 12), new Vector2(1, -1));
             }
         }
     }

@@ -41,8 +41,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Line(new(-3, 0), new(3, 0), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
 
                 // Depending on the orientation, let's anchor the text differently
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -8), new(0, -1));
+                drawing.Text(Label, new(0, -8), new(0, -1));
             }
         }
     }

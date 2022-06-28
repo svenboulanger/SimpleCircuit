@@ -221,27 +221,14 @@ namespace SimpleCircuit.Components.Wires
                 {
                     // Start the first point and build the path
                     builder.MoveTo(_vectors[0].Location);
+                    Vector2 lastActual = _vectors[0].Location;
 
                     for (int i = 1; i < _vectors.Count; i++)
                     {
+                        // Draw a small half circle for crossing over this point
                         if (_vectors[i].IsJumpOver)
                         {
-                            // Draw a small half circle for crossing over this point
-                            Vector2 nx = _vectors[i].Location - _vectors[i - 1].Location;
-                            if (nx.X.IsZero() && nx.Y.IsZero())
-                                continue;
-                            nx /= nx.Length;
-                            Vector2 ny = new(nx.Y, -nx.X);
-                            if (Math.Abs(ny.Y) > Math.Abs(ny.X))
-                            {
-                                if (ny.Y > 0)
-                                    ny = -ny; // Choose upward direction
-                            }
-                            else
-                            {
-                                if (ny.X > 0)
-                                    ny = -ny; // Choose leftward direction
-                            }
+                            GetNewAxes(_vectors[i].Location, _vectors[i - 1].Location, out var nx, out var ny);
                             Vector2 o = _vectors[i].Location;
                             Vector2 s = o - nx * _jumpOverRadius;
                             Vector2 e = o + _jumpOverRadius * nx;
@@ -254,9 +241,49 @@ namespace SimpleCircuit.Components.Wires
                             builder.SmoothTo(e + ny, e);
                         }
                         else
+                        {
                             builder.LineTo(_vectors[i].Location);
+
+                            string label = _info.Segments[i - 1].Label;
+                            if (!string.IsNullOrWhiteSpace(label))
+                            {
+                                Vector2 o = 0.5 * (_vectors[i].Location + lastActual);
+                                GetNewAxes(lastActual, _vectors[i].Location, out var nx, out var ny);
+                                if (_info.Segments[i - 1].Flipped)
+                                    drawing.Text(label, o - ny, -ny);
+                                else
+                                    drawing.Text(label, o + ny, ny);
+                            }
+                            lastActual = _vectors[i].Location;
+                        }
                     }
                 }, _info.Options);
+            }
+        }
+
+        private void GetNewAxes(Vector2 a, Vector2 b, out Vector2 nx, out Vector2 ny)
+        {
+            // Get the normal of the wire segment
+            nx = b - a;
+            if (!nx.X.IsZero() || !nx.Y.IsZero())
+                nx /= nx.Length;
+            else
+            {
+                ny = new();
+                return;
+            }
+
+            // Perpendicular direction
+            ny = new(nx.Y, -nx.X);
+            if (Math.Abs(ny.Y) > Math.Abs(ny.X))
+            {
+                if (ny.Y > 0)
+                    ny = -ny; // Choose upward direction
+            }
+            else
+            {
+                if (ny.X > 0)
+                    ny = -ny; // Choose leftward direction
             }
         }
 

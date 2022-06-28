@@ -56,8 +56,7 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-6, 6), new Vector2(6, 0), new Vector2(-6, -6)
                 });
 
-                if (!string.IsNullOrEmpty(Label))
-                    drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
+                drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -67,8 +66,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(8, 10, new());
                 drawing.Text("1", new(), new());
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void UpdatePins(object sender, EventArgs e)

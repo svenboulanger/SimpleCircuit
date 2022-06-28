@@ -67,8 +67,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing) => drawing.Line(new(4, -4), new(4, 4), new("cathode"));

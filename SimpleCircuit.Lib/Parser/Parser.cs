@@ -298,12 +298,21 @@ namespace SimpleCircuit.Parser
             {
                 JumpOverWires = context.Options.JumpOverWires
             };
+
+            string label = null;
+            bool flipped = false;
             while (lexer.Type != TokenType.CloseBeak)
             {
                 // Get the direction
                 bool isSegment = true;
                 Vector2 orientation = new();
                 var token = lexer.Token;
+                if (lexer.Type == TokenType.String)
+                {
+                    label = ParseString(lexer, context);
+                    continue;
+                }
+
                 switch (token.Content.ToString())
                 {
                     case "n":
@@ -410,6 +419,12 @@ namespace SimpleCircuit.Parser
                         isSegment = false;
                         break;
 
+                    case "flipped":
+                        lexer.Next();
+                        flipped = true;
+                        isSegment = false;
+                        break;
+
                     default:
                         context.Diagnostics?.Post(token, ErrorCodes.CouldNotRecognizeDirection);
                         lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
@@ -424,11 +439,12 @@ namespace SimpleCircuit.Parser
                     if (lexer.Check(TokenType.Number | TokenType.Integer))
                     {
                         double length = ParseDouble(lexer, context);
-                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, isFixed, length));
+                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, isFixed, length, label, flipped));
                     }
                     else
                         // Default wire segment with a minimum wire length defined by the options
-                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, false, context.Options.MinimumWireLength));
+                        wireInfo.Segments.Add(new WireSegmentInfo(orientation, false, context.Options.MinimumWireLength, label, flipped));
+                    flipped = false;
                 }
             }
 
@@ -804,7 +820,7 @@ namespace SimpleCircuit.Parser
 
             // Align
             var zeroWire = new WireInfo();
-            zeroWire.Segments.Add(new(new(), true, 0.0));
+            zeroWire.Segments.Add(new(new(), true, 0.0, null, false));
             if (pin.Pin.Content.Length == 0)
             {
                 // Align all the centers

@@ -158,8 +158,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawLabel(SvgDrawing drawing)
             {
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -10), new(1, -1));
+                drawing.Text(Label, new(0, -10), new(1, -1));
             }
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

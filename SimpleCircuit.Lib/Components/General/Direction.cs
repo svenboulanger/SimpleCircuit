@@ -34,8 +34,7 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, 4), new(0, 1));
+                drawing.Text(Label, new(0, 4), new(0, 1));
             }
         }
     }

@@ -59,8 +59,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(12, 6, new());
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -4), new(0, -1));
+                drawing.Text(Label, new(0, -4), new(0, -1));
             }
             private void DrawANSI(SvgDrawing drawing)
             {
@@ -69,8 +68,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(12, 6, new());
                 drawing.Line(new(-6, 0), new(6, 0));
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -4), new(0, -1));
+                drawing.Text(Label, new(0, -4), new(0, -1));
             }
             private void DrawANSIalt(SvgDrawing drawing)
             {

@@ -38,8 +38,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(-6, 0), new(-1, 0));
+                drawing.Text(Label, new(-6, 0), new(-1, 0));
             }
         }
     }

@@ -60,8 +60,7 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-3, -2), new Vector2(-3, 2), new Vector2(-5, 5)
                 });
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void DrawOrIEC(SvgDrawing drawing)
@@ -71,8 +70,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(8, 10, new());
                 drawing.Text("&#8805;1", new(), new());
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
             private void UpdatePins(object sender, EventArgs e)

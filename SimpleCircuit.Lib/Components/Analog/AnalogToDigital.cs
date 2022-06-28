@@ -76,8 +76,7 @@ namespace SimpleCircuit.Components.Analog
                     new Vector2(-Width / 2, -Height / 2)
                 });
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
+                drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
             }
             private void UpdatePins(object sender, EventArgs e)
             {

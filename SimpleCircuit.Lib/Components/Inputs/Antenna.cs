@@ -56,8 +56,7 @@ namespace SimpleCircuit.Components.Inputs
                     });
                 }
 
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new(5, -5), new(1, 0));
+                drawing.Text(Label, new(5, -5), new(1, 0));
             }
         }
     }

@@ -44,8 +44,7 @@ namespace SimpleCircuit.Components.Sources
                     drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
 
                 // Label
-                if (!string.IsNullOrWhiteSpace(Label))
-                    drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
             }
         }
     }
