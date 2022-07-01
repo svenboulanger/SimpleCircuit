@@ -151,6 +151,13 @@ namespace SimpleCircuit.Components
                 pin = this[name];
                 return true;
             }
+
+            /// <inheritdoc />
+            public void Clear()
+            {
+                _pinsByIndex.Clear();
+                _pinsByName.Clear();
+            }
         }
     }
 }

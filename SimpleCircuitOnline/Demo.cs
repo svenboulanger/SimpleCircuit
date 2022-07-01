@@ -158,7 +158,7 @@ namespace SimpleCircuitOnline
                 "BB1[Output1] <r d> R <d l> [Output2]BB1",
                 "",
                 "// We can also align the pins and resize the black box using them",
-                "(x BB1[wInput1] <r +60> [eOutput1]BB1)",
+                "(x BB1[Input1] <r +80> [Output1]BB1)",
             })),
 
             // Double pole switch

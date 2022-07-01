@@ -53,6 +53,14 @@ namespace SimpleCircuit.Components
             Name = name;
         }
 
+        /// <inheritdoc />
+        public abstract void Reset();
+
+        /// <inheritdoc />
+        public virtual void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
+        }
+
         /// <summary>
         /// Creates a transform.
         /// </summary>
@@ -89,9 +97,6 @@ namespace SimpleCircuit.Components
             // Stop grouping elements
             drawing.EndGroup();
         }
-
-        /// <inheritdoc />
-        public abstract void Reset();
 
         /// <inheritdoc />
         public virtual void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)

@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Simulations;
 
 namespace SimpleCircuit.Components
 {
@@ -14,50 +13,20 @@ namespace SimpleCircuit.Components
         public string Name { get; }
 
         /// <summary>
-        /// Resets the circuit presence before solving.
+        /// Gets the order in which the presence needs to be executed.
+        /// </summary>
+        public int Order { get; }
+
+        /// <summary>
+        /// Resets the circuit presence before resolving a graphical circuit.
         /// </summary>
         public void Reset();
-    }
 
-    /// <summary>
-    /// Represents an item that has a presence in a circuit involving preparation.
-    /// </summary>
-    public interface ICircuitPreparationPresence : ICircuitPresence
-    {
         /// <summary>
-        /// Prepares the given graphical circuit before solving.
+        /// Prepares the circuit presence for resolving a graphical circuit.
         /// </summary>
-        /// <param name="circuit">The graphical circuit.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
         public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics);
-    }
-
-    /// <summary>
-    /// Represents an item that has a presence in a circuit involving the solver stage. This means it can participate
-    /// in the solving of a graphical circuit unknowns.
-    /// </summary>
-    public interface ICircuitSolverPresence : ICircuitPresence
-    {
-        /// <summary>
-        /// Allows the discovering of aliases. This can reduce the number of unknowns to solve.
-        /// </summary>
-        /// <param name="context">The context containing the node relationships.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
-
-        /// <summary>
-        /// Registers the pin's presence in the circuit that will solve all coordinates.
-        /// </summary>
-        /// <param name="context">The context for simulation the graphical elements of the circuit.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
-
-        /// <summary>
-        /// Updates the presence with the simulated results for the graphical elements.
-        /// </summary>
-        /// <param name="state">The state containing the simulation results.</param>
-        /// <param name="context">The context previously used to build the simulation.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics);
     }
 }

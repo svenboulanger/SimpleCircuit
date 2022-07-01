@@ -13,6 +13,9 @@ namespace SimpleCircuit.Components
     {
         public const string DiodeModelName = "#MinimumOffsetPinModel";
 
+        /// <inheritdoc />
+        public int Order => 0;
+
         /// <summary>
         /// Adds the diode model that can be used to define minimum constraints.
         /// </summary>
@@ -107,6 +110,11 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public void Reset() { }
+
+        /// <inheritdoc />
+        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
+        }
 
         /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)

@@ -2,109 +2,9 @@
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser
 {
-    /// <summary>
-    /// Represents variant information.
-    /// </summary>
-    public struct VariantInfo
-    {
-        /// <summary>
-        /// Determines whether the variant should be included. If <c>false</c>, the
-        /// variant should be removed.
-        /// </summary>
-        public bool Include { get; }
-
-        /// <summary>
-        /// The name of the variant.
-        /// </summary>
-        public string Name { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="VariantInfo"/>.
-        /// </summary>
-        /// <param name="include">If <c>true</c>, the variant should be added; otherwise, the variant should be removed.</param>
-        /// <param name="name">The variant name.</param>
-        public VariantInfo(bool include, string name)
-        {
-            Include = include;
-            Name = name;
-        }
-    }
-
-    /// <summary>
-    /// Represents component information.
-    /// </summary>
-    public class ComponentInfo
-    {
-        private IDrawable _component = null;
-
-        /// <summary>
-        /// Gets the token that describes the component name.
-        /// </summary>
-        public Token Name { get; }
-
-        /// <summary>
-        /// Gets the full name of the component.
-        /// </summary>
-        public string Fullname { get; }
-
-        /// <summary>
-        /// Gets the label of the component.
-        /// </summary>
-        public string Label { get; set; }
-
-        /// <summary>
-        /// Gets the variants of the component.
-        /// </summary>
-        public List<VariantInfo> Variants { get; } = new();
-
-        /// <summary>
-        /// Creates a new component information.
-        /// </summary>
-        /// <param name="name">The token name.</param>
-        /// <param name="fullname">The full name of the component.</param>
-        public ComponentInfo(Token name, string fullname)
-        {
-            Name = name;
-            Fullname = fullname;
-        }
-
-        /// <summary>
-        /// Gets or creates a component.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>Returns the component, or <c>null</c> if no component could be created.</returns>
-        public IDrawable GetOrCreate(ParsingContext context)
-        {
-            if (_component == null)
-            {
-                _component = context.GetOrCreate(Fullname, context.Options);
-                if (_component == null)
-                {
-                    context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
-                    return null;
-                }
-
-                // Handle the label
-                if (Label != null && _component is ILabeled labeled)
-                    labeled.Label = Label;
-
-                // Handle variants
-                foreach (var variant in Variants)
-                {
-                    if (variant.Include)
-                        _component.Variants.Add(variant.Name);
-                    else
-                        _component.Variants.Remove(variant.Name);
-                }
-            }
-            return _component;
-        }
-    }
-
     /// <summary>
     /// Represents pin information.
     /// </summary>
@@ -129,6 +29,55 @@ namespace SimpleCircuit.Parser
         {
             Component = component ?? throw new ArgumentNullException(nameof(component));
             Pin = pin;
+        }
+
+        /// <summary>
+        /// Finds the pin in the graphical circuit.
+        /// </summary>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="defaultIndex">If no pin is specified, this pin index is used. If negative, counts from the last pin.</param>
+        /// <returns>The pin, or <c>null</c> if the pin could not be found.</returns>
+        public IPin Find(IDiagnosticHandler diagnostics, int defaultIndex)
+        {
+            if (Component != null)
+                return Find(Component.Component, diagnostics, defaultIndex);
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the pin in the graphical circuit.
+        /// </summary>
+        /// <param name="drawable">The drawable to find the pin on.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="defaultIndex">If no pin is specified, this pin index is used. If negative, counts from the last pin.</param>
+        /// <returns>The pin, or <c>null</c> if the pin could not be found.</returns>
+        public IPin Find(IDrawable drawable, IDiagnosticHandler diagnostics, int defaultIndex)
+        {
+            if (drawable == null)
+                throw new ArgumentNullException(nameof(drawable));
+
+            // Find the pin
+            if (Pin.Content.Length == 0)
+            {
+                if (drawable.Pins.Count == 0)
+                {
+                    diagnostics?.Post(Component.Name, ErrorCodes.DoesNotHavePins, Component.Fullname);
+                    return null;
+                }
+                if (defaultIndex >= 0)
+                    return drawable.Pins[defaultIndex];
+                else
+                    return drawable.Pins[drawable.Pins.Count + defaultIndex];
+            }
+            else
+            {
+                if (!drawable.Pins.TryGetValue(Pin.Content.ToString(), out var pin))
+                {
+                    diagnostics?.Post(Pin, ErrorCodes.CouldNotFindPin, Pin.Content, Component.Fullname);
+                    return null;
+                }
+                return pin;
+            }
         }
 
         /// <summary>

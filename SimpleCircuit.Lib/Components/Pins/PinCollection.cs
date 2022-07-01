@@ -59,5 +59,12 @@ namespace SimpleCircuit.Components.Pins
 
         /// <inheritdoc />
         public bool TryGetValue(string name, out IPin pin) => _pinsByName.TryGetValue(name, out pin);
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _pinsByIndex.Clear();
+            _pinsByName.Clear();
+        }
     }
 }

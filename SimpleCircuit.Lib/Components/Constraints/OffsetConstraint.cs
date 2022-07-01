@@ -11,6 +11,9 @@ namespace SimpleCircuit.Components
     /// </summary>
     public class OffsetConstraint : ICircuitSolverPresence
     {
+        /// <inheritdoc />
+        public int Order => 0;
+
         /// <summary>
         /// Adds a structure to the circuit that tries to guarantee an offset between two nodes.
         /// </summary>
@@ -81,6 +84,11 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public void Reset() { }
+
+        /// <inheritdoc />
+        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
+        }
 
         /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)

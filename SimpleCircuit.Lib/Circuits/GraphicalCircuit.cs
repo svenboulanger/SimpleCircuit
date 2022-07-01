@@ -178,18 +178,18 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             {
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
             }
+            var presences = _presences.Values.OrderBy(p => p.Order).ToList();
 
             // First reset all circuit presences
-            foreach (var c in _presences)
-                c.Value.Reset();
+            foreach (var c in presences)
+                c.Reset();
 
             // Preparation presences
-            foreach (var c in _presences.Values.OfType<ICircuitPreparationPresence>())
+            foreach (var c in presences)
                 c.Prepare(this, diagnostics);
 
             // Solver presences
-            var presences = _presences.Values.OfType<ICircuitSolverPresence>();
-            foreach (var c in presences)
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
             {
                 c.DiscoverNodeRelationships(context.Nodes, diagnostics);
                 if (first && c is ILocatedPresence lp)
@@ -200,16 +200,18 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
                 }
             }
 
-            foreach (var c in presences)
+            // Register any solvable presences in the circuit
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
                 c.Register(context, diagnostics);
 
+            // If there are no circuit components to solve, let's stop here
             if (context.Circuit.Count == 0)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001",
-                    $"No elements to solve for."));
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001", $"No elements to solve for."));
                 return;
             }
 
+            // Solve the circuit
             var op = new OP("op");
             SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
             try
@@ -240,7 +242,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
                     // Extract the information
                     var state = op.GetState<IBiasingSimulationState>();
                     context.WireSegments.Clear();
-                    foreach (var c in presences)
+                    foreach (var c in presences.OfType<ICircuitSolverPresence>())
                         c.Update(state, context, diagnostics);
                 }
                 while (context.Recalculate);

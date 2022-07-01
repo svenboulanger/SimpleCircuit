@@ -40,5 +40,10 @@ namespace SimpleCircuit.Components.Pins
         /// <param name="pin">The pin.</param>
         /// <returns>Returns <c>true</c> if the pin was found; otherwise, <c>false</c>.</returns>
         public bool TryGetValue(string name, out IPin pin);
+
+        /// <summary>
+        /// Clears the pin collection.
+        /// </summary>
+        public void Clear();
     }
 }

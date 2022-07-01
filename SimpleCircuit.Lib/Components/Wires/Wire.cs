@@ -1,4 +1,6 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 using System;
@@ -23,6 +25,8 @@ namespace SimpleCircuit.Components.Wires
             }
         }
 
+        private IPin _w2p, _p2w;
+        private readonly PinInfo _wireToPin, _pinToWire;
         private readonly WireInfo _info;
         private readonly List<WirePoint> _vectors = new();
         private const double _jumpOverRadius = 1.5;
@@ -57,16 +61,63 @@ namespace SimpleCircuit.Components.Wires
         /// Creates a new wire.
         /// </summary>
         /// <param name="name">The name of the wire.</param>
+        /// <param name="pinToWire">The pin that will start the wire.</param>
         /// <param name="info">The wire information.</param>
-        public Wire(string name, WireInfo info)
+        /// <param name="wireToPin">The pin that will end the wire.</param>
+        public Wire(string name, PinInfo pinToWire, WireInfo info, PinInfo wireToPin)
             : base(name)
         {
+            _pinToWire = pinToWire;
             _info = info ?? throw new ArgumentNullException(nameof(info));
+            _wireToPin = wireToPin;
+        }
+
+        /// <inheritdoc />
+        public override void Reset()
+        {
+            _vectors.Clear();
+            _p2w = null;
+            _w2p = null;
+        }
+
+        /// <inheritdoc />
+        public override void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
+            // Find the pins
+            _p2w = _pinToWire.Find(diagnostics, -1);
+            _w2p = _wireToPin.Find(diagnostics, 0);
+
+            // Fix the orientation of these pins
+            if (_p2w != null)
+            {
+                _p2w.Connections++;
+                if (_p2w is IOrientedPin op2w)
+                    op2w.ResolveOrientation(_info.Segments[0].Orientation, diagnostics);
+            }
+            if (_w2p != null)
+            {
+                _w2p.Connections++;
+                if (_w2p is IOrientedPin ow2p)
+                    ow2p.ResolveOrientation(-_info.Segments[^1].Orientation, diagnostics);
+            }
         }
 
         /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
+            // Align the pins
+            if (_p2w != null)
+            {
+                context.Shorts.Group(_p2w.X, StartX);
+                context.Shorts.Group(_p2w.Y, StartY);
+            }
+            if (_w2p != null)
+            {
+                context.Shorts.Group(_w2p.X, EndX);
+                context.Shorts.Group(_w2p.Y, EndY);
+            }
+
+            // The segments themselves
             string x = StartX, y = StartY;
             for (int i = 0; i < _info.Segments.Count; i++)
             {
@@ -78,12 +129,6 @@ namespace SimpleCircuit.Components.Wires
                 x = tx;
                 y = ty;
             }
-        }
-
-        /// <inheritdoc />
-        public override void Reset()
-        {
-            _vectors.Clear();
         }
 
         /// <inheritdoc />

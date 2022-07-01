@@ -10,7 +10,20 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"X <""label"" r> X";
+            var script = @"BB1[Input1] <l>
+BB1[Input2] <l>
+BB1[Output1] <r>
+BB1[Output2] <r>
+BB1[VDD] <u> POW
+BB1[VSS] <d> GND
+
+// The distance between pins can vary, but they cannot change order
+BB1[Output1] <r d> R <d l> [Output2]BB1
+
+(y BB1[Input1] <r> [Output1]BB1)
+
+// We can also align the pins and resize the black box using them
+(x BB1[Input1] <r +60> [Output1]BB1)";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext

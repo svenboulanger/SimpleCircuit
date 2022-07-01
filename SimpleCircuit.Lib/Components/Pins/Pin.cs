@@ -10,6 +10,9 @@ namespace SimpleCircuit.Components.Pins
     public abstract class Pin : IPin
     {
         /// <inheritdoc />
+        public int Order => 0;
+
+        /// <inheritdoc />
         public string Name { get; }
 
         /// <inheritdoc />
@@ -45,6 +48,11 @@ namespace SimpleCircuit.Components.Pins
         public virtual void Reset()
         {
             Location = new();
+        }
+
+        /// <inheritdoc />
+        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
         }
 
         /// <inheritdoc />

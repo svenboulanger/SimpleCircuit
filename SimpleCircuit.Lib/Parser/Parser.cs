@@ -157,47 +157,27 @@ namespace SimpleCircuit.Parser
 
         private static void ComponentChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context)
         {
+            // We just want to make sure here that the name isn't bogus
             if (pinToWireInfo.Component.Fullname.Contains('*'))
             {
                 context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-            var pinToWire = pinToWireInfo.GetOrCreate(context, -1);
-
-            // Second pin is optional
             if (wireToPinInfo.Component != null && wireToPinInfo.Component.Fullname.ToString().Contains('*'))
             {
                 context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-            var wireToPin = wireToPinInfo.GetOrCreate(context, 0);
+
+            // Create the components
+            pinToWireInfo.Component.GetOrCreate(context);
+            wireToPinInfo.Component?.GetOrCreate(context);
 
             // Create the wire
             if (wireInfo != null)
             {
                 string name = $"W:{++context.WireCount}";
-
-                // Resolve the orientation for the pin to the wire
-                if (pinToWire is IOrientedPin orientedPin1)
-                    context.Circuit.Add(new PinOrientationConstraint($"{name}.pin1", orientedPin1, wireInfo.Segments[0].Orientation));
-                if (wireToPin is IOrientedPin orientedPin2)
-                    context.Circuit.Add(new PinOrientationConstraint($"{name}.pin2", orientedPin2, -wireInfo.Segments[^1].Orientation));
-
-                // Resolve the pin locations
-                if (pinToWire != null && wireToPin != null)
-                {
-                    var wire = new Wire(name, wireInfo);
-                    context.Circuit.Add(wire);
-
-                    context.Circuit.Add(
-                        new OffsetConstraint($"{name}.start.x", pinToWire.X, wire.StartX),
-                        new OffsetConstraint($"{name}.start.y", pinToWire.Y, wire.StartY),
-                        new OffsetConstraint($"{name}.end.x", wireToPin.X, wire.EndX),
-                        new OffsetConstraint($"{name}.end.y", wireToPin.Y, wire.EndY));
-                    pinToWire.Connections++;
-                    wireToPin.Connections++;
-                }
-
+                context.Circuit.Add(new Wire(name, pinToWireInfo, wireInfo, wireToPinInfo));
             }
         }
 
@@ -744,13 +724,14 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedVirtualChainDirection);
                 return false;
             }
-            bool x = false, y = false;
+
+            VirtualWire.Direction direction = VirtualWire.Direction.None;
             switch (directionToken.Content.ToString().ToLower())
             {
-                case "x": x = true; break;
-                case "y": y = true; break;
+                case "x": direction = VirtualWire.Direction.X; break;
+                case "y": direction = VirtualWire.Direction.Y; break;
                 case "xy":
-                case "yx": x = true; y = true; break;
+                case "yx": direction = VirtualWire.Direction.X | VirtualWire.Direction.Y; break;
                 default:
                     context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeVirtualChainDirection, directionToken.Content.ToString());
                     return false;
@@ -759,180 +740,17 @@ namespace SimpleCircuit.Parser
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
             // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
             ParseChainStatement(lexer, context,
-                (p2w, wi, w2p, c) => c.SchedulePostProcess((context) => VirtualChainWire(p2w, wi, w2p, c, x, y)));
+                (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, direction));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ")");
             return true;
         }
-        private static void VirtualChainSingle(PinInfo pin, ParsingContext context, bool x, bool y)
+        
+        private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, VirtualWire.Direction direction)
         {
-            ILocatedDrawable[] components = null;
-            if (pin.Component.Fullname.Contains('*'))
-            {
-                // Align all given pins of all named components that match the name with wildcard
-                string format = $"^{pin.Component.Fullname.Replace("*", "[\\w_]+")}$";
-                components = context.Circuit.OfType<ILocatedDrawable>().Where(p => Regex.IsMatch(p.Name, format)).ToArray();
-            }
-            else if (context.Factory.IsAnonymous(pin.Component.Fullname))
-            {
-                // Align all the given pins of all anonymous components within the same section
-                string lead = pin.Component.Fullname + DrawableFactoryDictionary.AnonymousSeparator;
-                components = context.Circuit.OfType<ILocatedDrawable>().Where(p => p.Name.StartsWith(lead)).ToArray();
-            }
-            if (components == null || components.Length == 0)
-            {
-                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.VirtualChainComponentNotFound, pin.Component.Fullname);
-                return;
-            }
-
-            // Align
-            var zeroWire = new WireInfo();
-            zeroWire.Segments.Add(new());
-            if (pin.Pin.Content.Length == 0)
-            {
-                // Align all the centers
-                ILocatedPresence last = null;
-                foreach (var presence in components)
-                {
-                    if (last != null)
-                    {
-                        if (x)
-                            Align(new Vector2(1, 0), last.X, zeroWire, presence.X, context);
-                        if (y)
-                            Align(new Vector2(0, 1), last.Y, zeroWire, presence.Y, context);
-                    }
-                    last = presence;
-                }
-            }
-            else
-            {
-                // Align all the pins
-                ILocatedPresence last = null;
-                foreach (var drawable in components)
-                {
-                    if (!drawable.Pins.TryGetValue(pin.Pin.Content.ToString(), out var next))
-                    {
-                        context.Diagnostics?.Post(pin.Pin, ErrorCodes.CannotFindPin, pin.Pin.Content.ToString(), drawable.Name);
-                        return;
-                    }
-                    if (last != null)
-                    {
-                        if (x)
-                            Align(new Vector2(1, 0), last.X, zeroWire, next.X, context);
-                        if (y)
-                            Align(new Vector2(0, 1), last.Y, zeroWire, next.Y, context);
-                    }
-                    last = next;
-                }
-            }
-        }
-        private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, bool x, bool y)
-        {
-            if (wireInfo == null)
-            {
-                VirtualChainSingle(pinToWireInfo, context, x, y);
-                return;
-            }
-
-            // Try to get the components
-            if (!context.Circuit.ContainsKey(pinToWireInfo.Component.Fullname))
-            {
-                context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.VirtualChainComponentNotFound, pinToWireInfo.Component.Fullname);
-                return;
-            }
-            if (!context.Circuit.ContainsKey(wireToPinInfo.Component.Fullname))
-            {
-                context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.VirtualChainComponentNotFound, wireToPinInfo.Component.Fullname);
-                return;
-            }
-
-            // Both components exist, let's check the pins
-            ILocatedPresence a, b;
-            if (pinToWireInfo.Pin.Content.Length > 0)
-                a = pinToWireInfo.GetOrCreate(context, 0);
-            else
-            {
-                // No pin, let's take the center of the object if possible
-                var component = pinToWireInfo.Component.GetOrCreate(context);
-                if (component is ILocatedPresence located)
-                    a = located;
-                else if (component.Pins.Count > 0)
-                    a = component.Pins[^1];
-                else
-                {
-                    context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, pinToWireInfo.Component.Fullname);
-                    return;
-                }
-            }
-
-            if (wireToPinInfo.Pin.Content.Length > 0)
-                b = wireToPinInfo.GetOrCreate(context, 0);
-            else
-            {
-                // No pin, let's take the center of the object if possible
-                var component = wireToPinInfo.Component.GetOrCreate(context);
-                if (component is ILocatedPresence located)
-                    b = located;
-                else if (component.Pins.Count > 0)
-                    b = component.Pins[0];
-                else
-                {
-                    context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, wireToPinInfo.Component.Fullname);
-                    return;
-                }
-            }
-
-            // Align the located presences
-            if (x)
-                Align(new Vector2(1, 0), a.X, wireInfo, b.X, context);
-            if (y)
-                Align(new Vector2(0, 1), a.Y, wireInfo, b.Y, context);
-        }
-        private static void Align(Vector2 normal, string a, WireInfo wireInfo, string b, ParsingContext context)
-        {
-            double offset = 0;
-            bool extendLeft = false, extendRight = false;
-
-            // We will go through each wire and only consider those that have an effect on the wires
-            var segments = wireInfo.Segments;
-            for (int i = 0; i < segments.Count; i++)
-            {
-                double dot = segments[i].Orientation.Dot(normal);
-                offset += dot * segments[i].Length;
-                if (!dot.IsZero() && !segments[i].IsFixed)
-                {
-                    if (dot < 0)
-                        extendLeft = true;
-                    if (dot > 0)
-                        extendRight = true;
-                }
-            }
-
-            if (extendLeft && extendRight)
-            {
-                // The virtual wire can extend in both directions at some point, so this
-                // virtual wire doesn't actually fix anything...
-                return;
-            }
-
-            if (extendLeft)
-            {
-                (a, b) = (b, a);
-                extendRight = true;
-                offset = -offset;
-            }
-
-            if (extendRight)
-            {
-                // The difference is a minimum
-                context.Circuit.Add(new MinimumConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", a, b, offset));
-            }
-            else
-            {
-                // Fixed offset
-                context.Circuit.Add(new OffsetConstraint($"virtual.constraint.{++context.VirtualCoordinateCount}", a, b, offset));
-            }
+            if (direction != VirtualWire.Direction.None)
+                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", pinToWireInfo, wireInfo, wireToPinInfo, direction));
         }
 
         private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)

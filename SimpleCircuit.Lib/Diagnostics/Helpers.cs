@@ -11,7 +11,7 @@ namespace SimpleCircuit.Diagnostics
         /// <param name="handler">The diagnostic message handler.</param>
         /// <param name="code">The error code.</param>
         /// <param name="arguments">The arguments for the error message.</param>
-        public static SeverityLevel Post(this IDiagnosticHandler handler, ErrorCodes code, params string[] arguments)
+        public static SeverityLevel Post(this IDiagnosticHandler handler, ErrorCodes code, params object[] arguments)
         {
             // Get the severity and code from the attribute
             var attributes = typeof(ErrorCodes).GetField(code.ToString()).GetCustomAttributes(typeof(DiagnosticAttribute), false);
@@ -37,7 +37,7 @@ namespace SimpleCircuit.Diagnostics
         /// <param name="token">The token.</param>
         /// <param name="code">The error code.</param>
         /// <param name="arguments">The arguments for the error message.</param>
-        public static SeverityLevel Post(this IDiagnosticHandler handler, Token token, ErrorCodes code, params string[] arguments)
+        public static SeverityLevel Post(this IDiagnosticHandler handler, Token token, ErrorCodes code, params object[] arguments)
         {
             // Get the severity and code from the attribute
             var attributes = typeof(ErrorCodes).GetField(code.ToString()).GetCustomAttributes(typeof(DiagnosticAttribute), false);

@@ -86,6 +86,11 @@ namespace SimpleCircuit.Components
             public void Reset() { }
 
             /// <inheritdoc />
+            public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+            {
+            }
+
+            /// <inheritdoc />
             public void Render(SvgDrawing drawing)
             {
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
