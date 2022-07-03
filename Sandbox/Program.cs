@@ -10,20 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @"BB1[Input1] <l>
-BB1[Input2] <l>
-BB1[Output1] <r>
-BB1[Output2] <r>
-BB1[VDD] <u> POW
-BB1[VSS] <d> GND
-
-// The distance between pins can vary, but they cannot change order
-BB1[Output1] <r d> R <d l> [Output2]BB1
-
-(y BB1[Input1] <r> [Output1]BB1)
-
-// We can also align the pins and resize the black box using them
-(x BB1[Input1] <r +60> [Output1]BB1)";
+            var script = @"X <?> R <?> X";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
@@ -37,6 +24,8 @@ BB1[Output1] <r d> R <d l> [Output2]BB1
             if (context.Circuit.Count > 0 && logger.ErrorCount == 0)
             {
                 var doc = context.Circuit.Render(logger);
+                if (doc == null)
+                    return;
                 using var sw = new StringWriter();
                 using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                     doc.WriteTo(xml);

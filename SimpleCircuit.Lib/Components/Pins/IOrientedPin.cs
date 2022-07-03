@@ -13,6 +13,18 @@ namespace SimpleCircuit.Components.Pins
         public Vector2 Orientation { get; }
 
         /// <summary>
+        /// Gets whether the pin is fixed in terms of orientation or not.
+        /// </summary>
+        public bool HasFixedOrientation { get; }
+
+        /// <summary>
+        /// Gets whether the pin can freely orient itself. If <c>false</c>, the pin
+        /// might still not be fixed - in which case it only has one alternative
+        /// orientation.
+        /// </summary>
+        public bool HasFreeOrientation { get; }
+
+        /// <summary>
         /// Resolves the orientation of a pin. It fails if the orientation cannot be resolved
         /// correctly, e.g. if contradicting information is used as the input.
         /// </summary>

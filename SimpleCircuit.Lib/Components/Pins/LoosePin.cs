@@ -8,6 +8,15 @@ namespace SimpleCircuit.Components.Pins
     /// </summary>
     public class LoosePin : Pin, IOrientedPin
     {
+        /// <inheritdoc />
+        public bool HasFixedOrientation { get; private set; }
+
+        /// <inheritdoc />
+        public Vector2 Orientation { get; private set; }
+
+        /// <inheritdoc />
+        public bool HasFreeOrientation => HasFixedOrientation;
+
         /// <summary>
         /// Creates a loose pin. This means that any constrains need to be applied manually!
         /// </summary>
@@ -20,7 +29,10 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public Vector2 Orientation { get; private set; }
+        public override void Reset()
+        {
+            HasFixedOrientation = false;
+        }
 
         /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
@@ -38,6 +50,7 @@ namespace SimpleCircuit.Components.Pins
         public bool ResolveOrientation(Vector2 orientation, IDiagnosticHandler diagnostics)
         {
             // We are not being difficult, just give the orientation it wants...
+            HasFixedOrientation = true;
             Orientation = orientation;
             return true;
         }

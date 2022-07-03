@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
         {
             if (_info == null)
             {
@@ -86,7 +86,11 @@ namespace SimpleCircuit.Components.Wires
                 }
 
                 if (_single == null || _single.Length == 0)
+                {
                     diagnostics?.Post(_pinToWire.Component.Name, ErrorCodes.VirtualChainComponentNotFound, _pinToWire.Component.Fullname);
+                    return PresenceResult.GiveUp;
+                }
+                return PresenceResult.Success;
             }
             else
             {
@@ -126,6 +130,7 @@ namespace SimpleCircuit.Components.Wires
                             _extendDown = true;
                     }
                 }
+                return PresenceResult.Success;
             }
         }
 

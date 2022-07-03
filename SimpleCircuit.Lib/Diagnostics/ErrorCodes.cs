@@ -133,6 +133,15 @@
         [Diagnostic(SeverityLevel.Error, "PE041", "Cannot find the pin '{0}' on component {1}")]
         CouldNotFindPin,
 
+        [Diagnostic(SeverityLevel.Error, "PE042", "Could not constrain pin '{0}' on component {1}")]
+        UnconstrainedPin,
+
+        [Diagnostic(SeverityLevel.Error, "PE043", "The pin '{0}' on component {1} cannot be resolved to a unique orientation")]
+        AmbiguousOrientation,
+
+        [Diagnostic(SeverityLevel.Error, "PE044", "Undefined wire segments are only allowed for the first and last segment in the wire")]
+        UndefinedWireSegment,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

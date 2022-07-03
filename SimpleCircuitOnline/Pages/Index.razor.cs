@@ -216,7 +216,10 @@ namespace SimpleCircuitOnline.Pages
             string warnings = logger.Warning.ToString();
             if (!string.IsNullOrWhiteSpace(warnings))
                 _warnings = (_warnings == null) ? warnings : _warnings + Environment.NewLine + warnings;
-            return doc;
+            if (logger.ErrorCount == 0)
+                return doc;
+            else
+                return null;
         }
 
         private string ModifyCSS(string style)

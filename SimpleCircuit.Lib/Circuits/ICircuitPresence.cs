@@ -26,7 +26,13 @@ namespace SimpleCircuit.Components
         /// Prepares the circuit presence for resolving a graphical circuit.
         /// </summary>
         /// <param name="circuit">The circuit.</param>
+        /// <param name="mode">The current mode of operation.</param>
         /// <param name="diagnostics">The diagnostics.</param>
-        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics);
+        /// <returns>
+        ///     Returns <c>true</c> if the presence successfully prepared; otherwise, <c>false</c>,
+        ///     in which case the graphical circuit should prepare this circuit presence again after
+        ///     first preparing all other presences.
+        /// </returns>
+        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics);
     }
 }

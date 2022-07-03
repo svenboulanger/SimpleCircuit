@@ -28,6 +28,9 @@ namespace SimpleCircuit.Components
             }
         }
 
+        /// <inheritdoc />
+        public int OrientationDegreesOfFreedom => _dof;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OrientedDrawable"/> class.
         /// </summary>
@@ -51,6 +54,23 @@ namespace SimpleCircuit.Components
 
         /// <inheritdoc />
         public Matrix2 Transform { get; set; } = Matrix2.Identity;
+
+        /// <inheritdoc />
+        public bool IsConstrained(Vector2 p)
+        {
+            switch (_dof)
+            {
+                case 0: return true;
+                case 1:
+                    // If the relative orientation is a scalar of the already specified _p, it is constrained
+                    if ((_p.X * p.Y - _p.Y * p.X).IsZero())
+                        return true;
+                    return false;
+                case 2: return false;
+                default:
+                    return true;
+            }
+        }
 
         /// <inheritdoc />
         public bool ConstrainOrientation(Vector2 p, Vector2 b, IDiagnosticHandler diagnostics)

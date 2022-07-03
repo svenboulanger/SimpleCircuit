@@ -177,7 +177,10 @@ namespace SimpleCircuit.Parser
             if (wireInfo != null)
             {
                 string name = $"W:{++context.WireCount}";
-                context.Circuit.Add(new Wire(name, pinToWireInfo, wireInfo, wireToPinInfo));
+                context.Circuit.Add(new PinOrientationConstraint($"{name}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
+                context.Circuit.Add(new Wire($"{name}.w", pinToWireInfo, wireInfo, wireToPinInfo));
+                if (wireToPinInfo.Component != null)
+                    context.Circuit.Add(new PinOrientationConstraint($"{name}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
             }
         }
 
@@ -288,43 +291,43 @@ namespace SimpleCircuit.Parser
                     {
                         case "n":
                         case "u":
-                            wireInfo.Segments.Add(new() { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "s":
                         case "d":
-                            wireInfo.Segments.Add(new() { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "e":
                         case "l":
-                            wireInfo.Segments.Add(new() { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "w":
                         case "r":
-                            wireInfo.Segments.Add(new() { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "ne":
-                            wireInfo.Segments.Add(new() { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "nw":
-                            wireInfo.Segments.Add(new() { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "se":
-                            wireInfo.Segments.Add(new() { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "sw":
-                            wireInfo.Segments.Add(new() { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "a":
                             double angle = ParseDouble(lexer, context);
-                            wireInfo.Segments.Add(new() { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength });
+                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength });
                             break;
 
                         case "hidden": wireInfo.IsVisible = false; break;
@@ -388,6 +391,11 @@ namespace SimpleCircuit.Parser
                         wireInfo.Segments[^1].IsFixed = true;
                         wireInfo.Segments[^1].Length = l;
                     }
+                }
+                else if (lexer.Branch(TokenType.Question))
+                {
+                    // Don't give an orientation, and in that case the orientation should come from the pin itself!
+                    wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
                 }
                 else
                 {

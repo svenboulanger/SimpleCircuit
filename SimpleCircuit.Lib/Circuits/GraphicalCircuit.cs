@@ -170,7 +170,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         /// <summary>
         /// Solves the unknowns in this circuit.
         /// </summary>
-        public void Solve(IDiagnosticHandler diagnostics)
+        public bool Solve(IDiagnosticHandler diagnostics)
         {
             var context = new CircuitSolverContext();
             bool first = true;
@@ -180,13 +180,13 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             }
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
 
-            // First reset all circuit presences
+            // Prepare all the presences
             foreach (var c in presences)
                 c.Reset();
 
-            // Preparation presences
-            foreach (var c in presences)
-                c.Prepare(this, diagnostics);
+            // Prepare the circuit
+            if (!Prepare(presences, diagnostics))
+                return false;
 
             // Solver presences
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
@@ -208,7 +208,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             if (context.Circuit.Count == 0)
             {
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001", $"No elements to solve for."));
-                return;
+                return false;
             }
 
             // Solve the circuit
@@ -251,6 +251,88 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             {
                 SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
             }
+            return true;
+        }
+
+        private bool Prepare(IEnumerable<ICircuitPresence> presences, IDiagnosticHandler diagnostics)
+        {
+            bool success = true;
+
+            // Preparation presences
+            List<ICircuitPresence> _todo = new();
+            foreach (var c in presences)
+            {
+                var result = c.Prepare(this, PresenceMode.Normal, diagnostics);
+                if (result == PresenceResult.Incomplete)
+                    _todo.Add(c);
+                if (result == PresenceResult.GiveUp)
+                    success = false;
+            }
+
+            // Resolve presences
+            while (_todo.Count > 0)
+            {
+                int oldCount = _todo.Count;
+                int index = 0;
+
+                // Redo the todo-list after doing everything else
+                while (index < _todo.Count)
+                {
+                    switch (_todo[index].Prepare(this, PresenceMode.Normal, diagnostics))
+                    {
+                        case PresenceResult.Success:
+                            _todo.RemoveAt(index);
+                            break;
+
+                        case PresenceResult.GiveUp:
+                            _todo.RemoveAt(index);
+                            success = false;
+                            break;
+
+                        default:
+                            index++;
+                            break;
+                    }
+                }
+
+                if (oldCount == _todo.Count)
+                {
+                    // We did not manage to reduce the number of todo-items on the list...
+                    // Tell all the remaining presences that we are becoming desparate
+                    index = 0;
+                    while (index < _todo.Count)
+                    {
+                        switch (_todo[index].Prepare(this, PresenceMode.Fix, diagnostics))
+                        {
+                            case PresenceResult.Success:
+                                _todo.RemoveAt(index);
+                                break;
+
+                            case PresenceResult.GiveUp:
+                                _todo.RemoveAt(index);
+                                success = false;
+                                break;
+
+                            default:
+                                index++;
+                                success = false;
+                                break;
+                        }
+                    }
+
+                    // Stop trying to go forward if we already failed
+                    if (!success)
+                    {
+                        // Give a chance to all presences left to raise some errors
+                        for (int i = 0; i < _todo.Count; i++)
+                            _todo[i].Prepare(this, PresenceMode.GiveUp, diagnostics);
+                        break;
+                    }
+                    else
+                        continue; // We managed to solve some stuff trying to fix, so let's go again
+                }
+            }
+            return success;
         }
 
         /// <summary>
@@ -273,11 +355,14 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         /// Renders the graphical circuit to an SVG XML document.
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        /// <returns>The XML document.</returns>
+        /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
         public XmlDocument Render(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
         {
             if (!Solved)
-                Solve(diagnostics);
+            {
+                if (!Solve(diagnostics))
+                    return null;
+            }
 
             // Create our drawing
             var drawing = new SvgDrawing

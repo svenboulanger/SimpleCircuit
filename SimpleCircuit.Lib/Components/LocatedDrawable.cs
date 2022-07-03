@@ -35,6 +35,7 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public override void Reset()
         {
+            base.Reset();
             Location = new();
         }
 

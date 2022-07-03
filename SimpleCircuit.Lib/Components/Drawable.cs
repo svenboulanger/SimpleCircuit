@@ -54,11 +54,16 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public abstract void Reset();
+        public virtual void Reset()
+        {
+            foreach (var pin in Pins)
+                pin.Reset();
+        }
 
         /// <inheritdoc />
-        public virtual void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public virtual PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
         {
+            return PresenceResult.Success;
         }
 
         /// <summary>

@@ -51,7 +51,14 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public virtual PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
+        {
+            return PresenceResult.Success;
+        }
+
+
+        /// <inheritdoc />
+        public virtual void Fail(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
         {
         }
 

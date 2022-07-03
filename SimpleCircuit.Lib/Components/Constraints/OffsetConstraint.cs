@@ -86,8 +86,9 @@ namespace SimpleCircuit.Components
         public void Reset() { }
 
         /// <inheritdoc />
-        public void Prepare(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
         {
+            return PresenceResult.Success;
         }
 
         /// <inheritdoc />

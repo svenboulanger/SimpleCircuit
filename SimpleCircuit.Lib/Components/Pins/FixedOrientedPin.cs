@@ -27,6 +27,12 @@ namespace SimpleCircuit.Components.Pins
         public Vector2 RelativeOrientation { get; set; }
 
         /// <inheritdoc />
+        public bool HasFixedOrientation => Owner.IsConstrained(RelativeOrientation);
+
+        /// <inheritdoc />
+        public bool HasFreeOrientation => Owner.OrientationDegreesOfFreedom == 2;
+
+        /// <inheritdoc />
         public Vector2 Orientation => _origin is ITransformingDrawable tfd ? tfd.TransformNormal(RelativeOrientation) : RelativeOrientation;
 
         /// <summary>
