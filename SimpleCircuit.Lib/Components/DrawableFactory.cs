@@ -51,16 +51,16 @@ namespace SimpleCircuit.Components
                                 goto default;
                             break;
 
-                        case Standards.IEC:
-                            if ((standardized.Supported & Standards.IEC) == Standards.IEC)
-                                standardized.Variants.Add(Options.Iec);
+                        case Standards.European:
+                            if ((standardized.Supported & Standards.European) == Standards.European)
+                                standardized.Variants.Add(Options.European);
                             else
                                 goto default;
                             break;
 
-                        case Standards.ANSI:
-                            if ((standardized.Supported & Standards.ANSI) == Standards.ANSI)
-                                standardized.Variants.Add(Options.Ansi);
+                        case Standards.American:
+                            if ((standardized.Supported & Standards.American) == Standards.American)
+                                standardized.Variants.Add(Options.American);
                             else
                                 goto default;
                             break;

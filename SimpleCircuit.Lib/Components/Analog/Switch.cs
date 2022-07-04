@@ -18,6 +18,9 @@ namespace SimpleCircuit.Components.Analog
         private const string _toggle = "toggle";
         private const string _double = "double";
         private const string _knife = "knife";
+        private const string _closing = "closing";
+        private const string _opening = "opening";
+        private const string _reed = "reed";
 
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -33,7 +36,7 @@ namespace SimpleCircuit.Components.Analog
             public int Poles { get; set; }
 
             /// <inheritdoc />
-            public Standards Supported { get; } = Standards.AREI | Standards.ANSI;
+            public Standards Supported { get; } = Standards.AREI;
 
             /// <inheritdoc />
             public override string Type => "switch";
@@ -54,7 +57,7 @@ namespace SimpleCircuit.Components.Analog
             public override void Reset()
             {
                 base.Reset();
-                switch (Variants.Select(Options.Arei, Options.Ansi))
+                switch (Variants.Select(Options.Arei))
                 {
                     case 0:
                         if (Variants.Contains(_push))
@@ -69,7 +72,6 @@ namespace SimpleCircuit.Components.Analog
                         }
                         break;
 
-                    case 1:
                     default:
                         SetPinOffset(0, new(-6, 0));
                         SetPinOffset(3, new(6, 0));
@@ -106,32 +108,26 @@ namespace SimpleCircuit.Components.Analog
 
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(Options.Arei, Options.Ansi))
+                switch (Variants.Select(Options.Arei, Options.American))
                 {
                     case 0: DrawAreiSwitch(drawing); break;
                     case 1:
-                    default: DrawAnsiSwitch(drawing); break;
+                    default: DrawSwitch(drawing); break;
                 }
             }
-            private void DrawAreiSwitch(SvgDrawing drawing)
-            {
-                if (Variants.Contains(_push))
-                    DrawAreiPushSwitch(drawing, Variants.Contains(_lamp), Variants.Contains(_window));
-                else
-                    DrawAreiSwitch(drawing, Variants.Contains(_toggle), Variants.Contains(_double), Variants.Contains(_lamp));
-            }
-            private void DrawAnsiSwitch(SvgDrawing drawing)
+
+            private void DrawSwitch(SvgDrawing drawing)
             {
                 if (Variants.Contains(_knife))
-                    DrawKnifeSwitch(drawing, Variants.Contains(_closed));
+                    DrawKnifeSwitch(drawing);
                 else if (Variants.Contains(_push))
-                    DrawPushSwitch(drawing, Variants.Contains(_closed), Variants.Contains(_invert));
+                    DrawPushSwitch(drawing);
                 else
-                    DrawRegularSwitch(drawing, Variants.Contains(_closed), Variants.Contains(_invert));
+                    DrawRegularSwitch(drawing);
             }
-            private void DrawKnifeSwitch(SvgDrawing drawing, bool closed)
+            private void DrawKnifeSwitch(SvgDrawing drawing)
             {
-                if (closed)
+                if (Variants.Contains(_closed))
                 {
                     drawing.Circle(new(-5, 0), 1);
                     drawing.Circle(new(5, 0), 1);
@@ -147,7 +143,7 @@ namespace SimpleCircuit.Components.Analog
 
                 drawing.Text(Label, new(0, 3), new(0, 1));
             }
-            private void DrawRegularSwitch(SvgDrawing drawing, bool closed, bool inverted)
+            private void DrawRegularSwitch(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
 
@@ -155,32 +151,64 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
 
-                if (closed)
+                if (Variants.Contains(_closed))
                 {
-                    if (inverted)
+                    if (Variants.Contains(_invert))
                         drawing.Circle(new(0, -1), 1);
                     drawing.Line(new(-4, 0), new(4, 0), new("wire"));
                 }
                 else
                 {
-                    if (inverted)
+                    if (Variants.Contains(_invert))
                         drawing.Circle(new(0, -3.25), 1);
                     drawing.Line(new(-4, 0), new(4, -4), new("wire"));
+                }
+
+                switch (Variants.Select(_closing, _opening))
+                {
+                    case 0:
+                        drawing.OpenBezier(new Vector2[]
+                        {
+                            new(-3, -5), new(1, -3), new(1, -2), new(2, 2)
+                        }, new() { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                        break;
+
+                    case 1:
+                        drawing.OpenBezier(new Vector2[]
+                        {
+                           new(-4, -6), new(1, -3), new(1, -2), new(2, 1)
+                        }, new() { StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow });
+                        break;
+                }
+
+                if (Variants.Contains(_reed))
+                {
+                    drawing.Path(b =>
+                    {
+                        b.MoveTo(-5, -6);
+                        b.LineTo(5, -6);
+                        b.CurveTo(new(8.3, -6), new(11, -3.3), new(11, 0));
+                        b.SmoothTo(new(8.3, 6), new(5, 6));
+                        b.LineTo(-5, 6);
+                        b.CurveTo(new(-8.3, 6), new(-11, 3.3), new(-11, 0));
+                        b.SmoothTo(new(-8.3, -6), new(-5, -6));
+                        b.Close();
+                    });
                 }
 
                 // Label
                 drawing.Text(Label, new Vector2(0, 3), new Vector2(0, 1));
             }
-            private void DrawPushSwitch(SvgDrawing drawing, bool closed, bool inverted)
+            private void DrawPushSwitch(SvgDrawing drawing)
             {
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
 
-                if (closed)
+                if (Variants.Contains(_closed))
                 {
                     drawing.Line(new(-4, 0), new(4, 0));
-                    if (inverted)
+                    if (Variants.Contains(_invert))
                     {
                         drawing.Circle(new(0, -1), 1);
                         drawing.Line(new(0, -2), new(0, -6), new("wire"));
@@ -191,10 +219,8 @@ namespace SimpleCircuit.Components.Analog
                 else
                 {
                     drawing.Line(new(-5, -4), new(5, -4));
-                    if (inverted)
-                    {
+                    if (Variants.Contains(_invert))
                         drawing.Circle(new(0, -5), 1);
-                    }
                     else
                         drawing.Line(new(0, -4), new(0, -6), new("wire"));
                 }
@@ -202,19 +228,27 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
             }
-            private void DrawAreiPushSwitch(SvgDrawing drawing, bool lamp, bool window)
+
+            private void DrawAreiSwitch(SvgDrawing drawing)
+            {
+                if (Variants.Contains(_push))
+                    DrawAreiPushSwitch(drawing);
+                else
+                    DrawAreiRegularSwitch(drawing);
+            }
+            private void DrawAreiPushSwitch(SvgDrawing drawing)
             {
                 drawing.ExtendPin(Pins["a"]);
                 drawing.Circle(new(), 4);
                 drawing.Circle(new(), 2);
 
-                if (lamp)
+                if (Variants.Contains(_lamp))
                 {
                     double x = 2 / Math.Sqrt(2);
                     drawing.Path(b => b.MoveTo(-x, -x).LineTo(x, x).MoveTo(-x, x).LineTo(x, -x), new("lamp"));
                 }
 
-                if (window)
+                if (Variants.Contains(_window))
                 {
                     drawing.Polyline(new Vector2[]
                     {
@@ -225,19 +259,19 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
             }
-            private void DrawAreiSwitch(SvgDrawing drawing, bool toggling, bool doublePole, bool lamp)
+            private void DrawAreiRegularSwitch(SvgDrawing drawing)
             {
                 double length = Math.Max(8, 5 + Math.Max(1, Poles) * 2);
                 drawing.Circle(new(), 2);
                 var n = Vector2.Normal(-Math.PI * 0.37);
                 drawing.Line(n * 2, n * length);
-                if (toggling)
+                if (Variants.Contains(_toggle))
                     drawing.Line(-n * 2, -n * length);
-                if (doublePole)
+                if (Variants.Contains(_double))
                 {
                     Vector2 np = new(-n.X, n.Y);
                     drawing.Line(np * 2, np * length);
-                    if (toggling)
+                    if (Variants.Contains(_toggle))
                         drawing.Line(-np * 2, -np * length);
                 }
 
@@ -245,7 +279,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Text(Label, new Vector2(0, -length), new Vector2(0, -1));
 
                 // Small cross for illuminator lamps
-                if (lamp)
+                if (Variants.Contains(_lamp))
                 {
                     double x = 2.0 / Math.Sqrt(2.0);
                     drawing.Path(b => b.MoveTo(-x, -x).LineTo(x, x).MoveTo(-x, x).LineTo(x, -x), new("lamp"));
@@ -264,12 +298,12 @@ namespace SimpleCircuit.Components.Analog
                             var r = n * length;
                             var end = r + p * 3;
                             b.MoveTo(r).LineTo(end);
-                            if (toggling)
+                            if (Variants.Contains(_toggle))
                                 b.MoveTo(-r).LineTo(-end);
-                            if (doublePole)
+                            if (Variants.Contains(_double))
                             {
                                 b.MoveTo(-r.X, r.Y).LineTo(-end.X, end.Y);
-                                if (toggling)
+                                if (Variants.Contains(_toggle))
                                     b.MoveTo(r.X, -r.Y).LineTo(end.X, -end.Y);
                             }
                             length -= 2.0;

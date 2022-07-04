@@ -21,7 +21,7 @@ namespace SimpleCircuit.Components.Wires
             public string Label { get; set; }
 
             /// <inheritdoc />
-            public Standards Supported { get; } = Standards.ANSI | Standards.IEC;
+            public Standards Supported { get; } = Standards.American | Standards.European;
 
             /// <inheritdoc />
             public override string Type => "fuse";
@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(Options.Iec, Options.Ansi))
+                switch (Variants.Select(Options.European, Options.American))
                 {
                     case 0: DrawIEC(drawing); break;
                     case 1:

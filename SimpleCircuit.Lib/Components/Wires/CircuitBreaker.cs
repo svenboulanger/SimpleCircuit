@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Wires
             public string Label { get; set; }
 
             /// <inheritdoc />
-            public Standards Supported { get; } = Standards.AREI | Standards.IEC | Standards.ANSI;
+            public Standards Supported { get; } = Standards.AREI | Standards.European | Standards.American;
 
             /// <inheritdoc />
             public override string Type => "circuitbreaker";
@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(Options.Arei, Options.Iec, Options.Ansi))
+                switch (Variants.Select(Options.Arei, Options.European, Options.American))
                 {
                     case 0: DrawCircuitBreakerArei(drawing); break;
                     case 1: DrawCircuitBreakerIec(drawing); break;
@@ -91,7 +91,7 @@ namespace SimpleCircuit.Components.Wires
 
             private void UpdatePins(object sender, EventArgs e)
             {
-                if (Variants.Contains(Options.Arei) || Variants.Contains(Options.Iec))
+                if (Variants.Contains(Options.Arei) || Variants.Contains(Options.European))
                 {
                     SetPinOffset(1, new(0, -2));
                     SetPinOffset(2, new(0, -2));

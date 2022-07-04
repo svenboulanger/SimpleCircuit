@@ -17,14 +17,14 @@ namespace SimpleCircuit
         public const string Arei = "arei";
 
         /// <summary>
-        /// The identifier for ANSI style components.
+        /// The identifier for American style components.
         /// </summary>
-        public const string Ansi = "ansi";
+        public const string American = "american";
 
         /// <summary>
-        /// The identifier for IEC style components.
+        /// The identifier for European style components.
         /// </summary>
-        public const string Iec = "iec";
+        public const string European = "euro";
 
         /// <summary>
         /// Gets the current style.
@@ -35,10 +35,10 @@ namespace SimpleCircuit
         public bool Native { get => Standard == Standards.Native; set => Standard = Standards.Native; }
 
         [Description("If true, use ANSI style symbols.")]
-        public bool ANSI { get => Standard == Standards.ANSI; set => Standard = Standards.ANSI; }
+        public bool AmericanStyle { get => Standard == Standards.American; set => Standard = Standards.American; }
 
         [Description("If true, use IEC style symbols.")]
-        public bool IEC { get => Standard == Standards.IEC; set => Standard = Standards.IEC; }
+        public bool EuropeanStyle { get => Standard == Standards.European; set => Standard = Standards.European; }
 
         [Description("If true, some components will use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
         public bool AREI { get => Standard == Standards.AREI; set => Standard = Standards.AREI; }

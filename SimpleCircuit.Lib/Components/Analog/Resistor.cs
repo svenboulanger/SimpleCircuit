@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
 
-                switch (Variants.Select(Options.Ansi, Options.Iec))
+                switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
                         DrawIECResistor(drawing);
@@ -179,7 +179,7 @@ namespace SimpleCircuit.Components.Analog
             private void UpdatePins(object sender, EventArgs e)
             {
                 double x = Length * (_wiper - 0.5) * 0.5;
-                if (Variants.Contains(Options.Iec))
+                if (Variants.Contains(Options.European))
                     SetPinOffset(1, new(x, 3));
                 else
                     SetPinOffset(1, new(x, 4));

@@ -8,6 +8,10 @@ namespace SimpleCircuit.Components.Sources
     [Drawable("V", "A voltage source.", "Sources")]
     public class VoltageSource : DrawableFactory
     {
+        private const string _ac = "ac";
+        private const string _pulse = "pulse";
+        private const string _tri = "tri";
+
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
@@ -38,10 +42,31 @@ namespace SimpleCircuit.Components.Sources
 
                 // Circle
                 drawing.Circle(new(0, 0), 6);
-                if (Variants.Contains("ac"))
-                    drawing.AC(vertical: true);
-                else
-                    drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
+
+                switch (Variants.Select(_ac, _pulse, _tri))
+                {
+                    case 0:
+                        drawing.AC(vertical: true);
+                        break;
+
+                    case 1:
+                        drawing.Polyline(new Vector2[]
+                        {
+                            new(0, -3), new(3, -3), new(3, 0), new(-3, 0), new(-3, 3), new(0, 3)
+                        });
+                        break;
+
+                    case 2:
+                        drawing.Polyline(new Vector2[]
+                        {
+                            new(0, -3), new(1.5, -1.5), new(-1.5, 1.5), new(0, 3)
+                        });
+                        break;
+
+                    default:
+                        drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
+                        break;
+                }
 
                 // Label
                 drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));

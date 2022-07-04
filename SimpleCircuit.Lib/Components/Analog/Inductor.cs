@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 get
                 {
-                    switch (Variants.Select(Options.Ansi, Options.Iec))
+                    switch (Variants.Select(Options.American, Options.European))
                     {
                         case 0:
                         case 1:
@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Add a tap for each winding
                 double x = -l;
-                switch (Variants.Select(Options.Ansi, Options.Iec))
+                switch (Variants.Select(Options.American, Options.European))
                 {
                     case 0:
                     case 1:
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.ExtendPins(Pins, 2, "a", "b");
                 double l = Length * 0.5;
 
-                switch (Variants.Select(Options.Ansi, Options.Iec))
+                switch (Variants.Select(Options.American, Options.European))
                 {
                     case 0:
                     case 1:

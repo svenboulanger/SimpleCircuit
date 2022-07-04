@@ -21,11 +21,11 @@ namespace SimpleCircuit
         /// <summary>
         /// ANSI style (American National Standards Institute).
         /// </summary>
-        ANSI = 0x02,
+        American = 0x02,
 
         /// <summary>
         /// IEC style (International Electrotechnical Commission).
         /// </summary>
-        IEC = 0x04
+        European = 0x04
     }
 }

@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(Options.Ansi))
+                switch (Variants.Select(Options.American))
                 {
                     case 0:
                         switch (Variants.Select(_male, _female))
@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Inputs
 
             private void UpdatePins(object sender, EventArgs e)
             {
-                switch (Variants.Select(Options.Ansi))
+                switch (Variants.Select(Options.American))
                 {
                     case 0:
                         switch (Variants.Select(_male, _female))

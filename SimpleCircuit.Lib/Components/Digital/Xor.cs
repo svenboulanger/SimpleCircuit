@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Digital
             public string Label { get; set; }
 
             /// <inheritdoc />
-            public Standards Supported { get; } = Standards.ANSI | Standards.IEC;
+            public Standards Supported { get; } = Standards.American | Standards.European;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(Options.Iec, Options.Ansi))
+                switch (Variants.Select(Options.European, Options.American))
                 {
                     case 0: DrawXorIEC(drawing); break;
                     case 1:
@@ -79,7 +79,7 @@ namespace SimpleCircuit.Components.Digital
 
             private void UpdatePins(object sender, EventArgs e)
             {
-                if (Variants.Contains(Options.Iec))
+                if (Variants.Contains(Options.European))
                 {
                     SetPinOffset(0, new(-4, -2.5));
                     SetPinOffset(1, new(-4, 2.5));
