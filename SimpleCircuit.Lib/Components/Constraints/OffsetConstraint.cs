@@ -96,6 +96,7 @@ namespace SimpleCircuit.Components
         {
             if (Offset.IsZero())
                 context.Shorts.Group(Lowest, Highest);
+            context.Relative.Group(Lowest, Highest);
         }
 
         /// <inheritdoc />

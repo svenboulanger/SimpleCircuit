@@ -184,11 +184,15 @@ namespace SimpleCircuit.Components.Wires
             {
                 context.Shorts.Group(_p2w.X, StartX);
                 context.Shorts.Group(_p2w.Y, StartY);
+                context.Relative.Group(_p2w.X, StartX);
+                context.Relative.Group(_p2w.Y, StartY);
             }
             if (_w2p != null)
             {
                 context.Shorts.Group(_w2p.X, EndX);
                 context.Shorts.Group(_w2p.Y, EndY);
+                context.Relative.Group(_w2p.X, EndX);
+                context.Relative.Group(_w2p.Y, EndY);
             }
 
             // The segments themselves
@@ -211,6 +215,8 @@ namespace SimpleCircuit.Components.Wires
                     context.Shorts.Group(x, tx);
                 if (orientation.Y.IsZero())
                     context.Shorts.Group(y, ty);
+                context.Relative.Group(x, tx);
+                context.Relative.Group(y, ty);
                 x = tx;
                 y = ty;
             }

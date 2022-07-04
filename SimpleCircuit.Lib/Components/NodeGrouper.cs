@@ -33,6 +33,22 @@ namespace SimpleCircuit.Components
         private readonly Dictionary<string, NodeGroup> _dict = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
+        /// Gets all the representatives in the grouper.
+        /// </summary>
+        public IEnumerable<string> Representatives
+        {
+            get
+            {
+                HashSet<string> _done = new(StringComparer.OrdinalIgnoreCase);
+                foreach (var group in _dict.Values)
+                {
+                    if (_done.Add(group.Representative))
+                        yield return group.Representative;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the representative for a nodes.
         /// </summary>
         /// <param name="name">The name of the node.</param>

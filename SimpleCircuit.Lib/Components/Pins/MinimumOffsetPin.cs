@@ -119,6 +119,10 @@ namespace SimpleCircuit.Components.Pins
                 context.Shorts.Group(X, _origin.X);
             if (direction.Y.IsZero())
                 context.Shorts.Group(Y, _origin.Y);
+
+            // Link the pin to its owner
+            context.Relative.Group(X, _origin.X);
+            context.Relative.Group(Y, _origin.Y);
         }
     }
 }

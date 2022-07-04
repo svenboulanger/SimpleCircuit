@@ -190,15 +190,9 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
 
             // Solver presences
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
-            {
                 c.DiscoverNodeRelationships(context.Nodes, diagnostics);
-                if (first && c is ILocatedPresence lp)
-                {
-                    context.Nodes.Shorts.Group("0", lp.X);
-                    context.Nodes.Shorts.Group("0", lp.Y);
-                    first = false;
-                }
-            }
+            foreach (var group in context.Nodes.Relative.Representatives)
+                context.Nodes.Shorts.Group(group, "0");
 
             // Register any solvable presences in the circuit
             foreach (var c in presences.OfType<ICircuitSolverPresence>())

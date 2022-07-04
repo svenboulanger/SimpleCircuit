@@ -136,6 +136,10 @@ namespace SimpleCircuit.Components
                         context.Shorts.Group(_parent.X, pin.X);
                     else
                         context.Shorts.Group(Right, pin.X);
+
+                    // Link the pin to the owner
+                    context.Relative.Group(_parent.Y, pin.Y);
+                    context.Relative.Group(_parent.X, pin.X);
                 }
             }
 

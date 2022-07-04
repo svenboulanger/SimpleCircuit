@@ -12,8 +12,13 @@
         public GraphicalCircuit Circuit { get; }
 
         /// <summary>
-        /// Gets the node groups of nodes that are shorted together.
+        /// Gets the groups of nodes that are shorted together, i.e. are exactly the same.
         /// </summary>
         public NodeGrouper Shorts { get; } = new();
+
+        /// <summary>
+        /// Get the groups of nodes that are constrained relative to each other.
+        /// </summary>
+        public NodeGrouper Relative { get; } = new();
     }
 }

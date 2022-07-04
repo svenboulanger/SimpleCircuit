@@ -148,6 +148,7 @@ namespace SimpleCircuit.Components.Wires
                             coord = c.X;
                         else
                             context.Shorts.Group(coord, c.X);
+                        context.Relative.Group(coord, c.X);
                     }
                 }
                 if ((_direction & Direction.Y) != 0)
@@ -159,6 +160,7 @@ namespace SimpleCircuit.Components.Wires
                             coord = c.Y;
                         else
                             context.Shorts.Group(coord, c.Y);
+                        context.Relative.Group(coord, c.Y);
                     }
                 }
             }
@@ -169,13 +171,21 @@ namespace SimpleCircuit.Components.Wires
                     return;
                 if ((_direction & Direction.X) != 0)
                 {
-                    if (_offset.X.IsZero() && !_extendLeft && !_extendRight)
-                        context.Shorts.Group(_p2w.X, _w2p.X);
+                    if (!_extendLeft && !_extendRight)
+                    {
+                        if (_offset.X.IsZero())
+                            context.Shorts.Group(_p2w.X, _w2p.X);
+                        context.Relative.Group(_p2w.X, _w2p.X);
+                    }
                 }
                 if ((_direction & Direction.Y) != 0)
                 {
-                    if (_offset.Y.IsZero() && !_extendDown && !_extendUp)
-                        context.Shorts.Group(_p2w.Y, _w2p.Y);
+                    if (!_extendLeft && !_extendRight)
+                    {
+                        if (_offset.Y.IsZero())
+                            context.Shorts.Group(_p2w.Y, _w2p.Y);
+                        context.Relative.Group(_p2w.Y, _w2p.Y);
+                    }
                 }
             }
         }
