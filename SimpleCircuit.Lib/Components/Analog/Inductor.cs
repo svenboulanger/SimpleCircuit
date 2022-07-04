@@ -12,7 +12,8 @@ namespace SimpleCircuit.Components.Analog
     {
         private const string _dot = "dot";
         private const string _programmable = "programmable";
-        private const string _core = "core";
+        private const string _choke = "choke";
+        private const string _singleLine = "single";
 
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -130,10 +131,11 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                             drawing.Dot(new(-l, 3.5));
                         
-                        if (Variants.Contains(_core))
+                        if (Variants.Contains(_choke))
                         {
-                            drawing.Line(new(-l, -4.5), new(l, -4.5));
-                            drawing.Line(new(-l, -6), new(l, -6));
+                            drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
+                            if (!Variants.Contains(_singleLine))
+                                drawing.Line(new(-l, -6), new(l, -6), new("choke"));
                             if (Variants.Contains(_programmable))
                                 drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
                         }
@@ -163,10 +165,11 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                             drawing.Dot(new(-l - 2, 3.5));
                         
-                        if (Variants.Contains(_core))
+                        if (Variants.Contains(_choke))
                         {
-                            drawing.Line(new(-l, -4.5), new(l, -4.5));
-                            drawing.Line(new(-l, -6), new(l, -6));
+                            drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
+                            if (!Variants.Contains(_singleLine))
+                                drawing.Line(new(-l, -6), new(l, -6), new("choke"));
                             if (Variants.Contains(_programmable))
                                 drawing.Arrow(new(-l + 1, 5), new(l, -10));
                         }

@@ -106,7 +106,7 @@
         [Diagnostic(SeverityLevel.Error, "PE032", "Component {0} does not have a location")]
         ComponentWithoutLocation,
 
-        [Diagnostic(SeverityLevel.Error, "PE033", "Cannot find {0} for virtual chain")]
+        [Diagnostic(SeverityLevel.Warning, "PW033", "Cannot find any component matching '{0}' for virtual chain")]
         VirtualChainComponentNotFound,
 
         [Diagnostic(SeverityLevel.Warning, "PW034", "Arrows can only appear at the start or end of a wire definition")]
