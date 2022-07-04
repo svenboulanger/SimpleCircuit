@@ -165,6 +165,8 @@ namespace SimpleCircuit.Components.Wires
 
             if (_info != null)
             {
+                if (_p2w == null || _w2p == null)
+                    return;
                 if ((_direction & Direction.X) != 0)
                 {
                     if (_offset.X.IsZero() && !_extendLeft && !_extendRight)

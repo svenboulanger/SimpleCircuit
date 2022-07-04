@@ -49,7 +49,59 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control", "The controlling pin.", this, new(0, -6), new(0, -1)), "c", "ctrl");
                 Pins.Add(new FixedOrientedPin("backside", "The backside controlling pin. Can be used to link multiple switches.", this, new(0, -6), new(0, 1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
-                Variants.Changed += UpdatePins;
+            }
+
+            public override void Reset()
+            {
+                base.Reset();
+                switch (Variants.Select(Options.Arei, Options.Ansi))
+                {
+                    case 0:
+                        if (Variants.Contains(_push))
+                        {
+                            SetPinOffset(0, new(-4, 0));
+                            SetPinOffset(3, new(4, 0));
+                        }
+                        else
+                        {
+                            SetPinOffset(0, new(-2, 0));
+                            SetPinOffset(3, new(2, 0));
+                        }
+                        break;
+
+                    case 1:
+                    default:
+                        SetPinOffset(0, new(-6, 0));
+                        SetPinOffset(3, new(6, 0));
+
+                        if (Variants.Contains(_invert))
+                        {
+                            if (Variants.Contains(_closed))
+                            {
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new());
+                            }
+                            else
+                            {
+                                SetPinOffset(1, new(0, -4.25));
+                                SetPinOffset(2, new(0, -2));
+                            }
+                        }
+                        else
+                        {
+                            if (Variants.Contains(_closed))
+                            {
+                                SetPinOffset(1, new());
+                                SetPinOffset(2, new());
+                            }
+                            else
+                            {
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new(0, -2));
+                            }
+                        }
+                        break;
+                }
             }
 
             protected override void Draw(SvgDrawing drawing)
@@ -57,7 +109,8 @@ namespace SimpleCircuit.Components.Analog
                 switch (Variants.Select(Options.Arei, Options.Ansi))
                 {
                     case 0: DrawAreiSwitch(drawing); break;
-                    case 1: DrawAnsiSwitch(drawing); break;
+                    case 1:
+                    default: DrawAnsiSwitch(drawing); break;
                 }
             }
             private void DrawAreiSwitch(SvgDrawing drawing)
@@ -222,55 +275,6 @@ namespace SimpleCircuit.Components.Analog
                             length -= 2.0;
                         }
                     });
-                }
-            }
-
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_invert))
-                {
-                    if (Variants.Contains(_closed))
-                    {
-                        SetPinOffset(1, new(0, -2));
-                        SetPinOffset(2, new());
-                    }
-                    else
-                    {
-                        SetPinOffset(1, new(0, -4.25));
-                        SetPinOffset(2, new(0, -2));
-                    }
-                }
-                else
-                {
-                    if (Variants.Contains(_closed))
-                    {
-                        SetPinOffset(1, new());
-                        SetPinOffset(2, new());
-                    }
-                    else
-                    {
-                        SetPinOffset(1, new(0, -2));
-                        SetPinOffset(2, new(0, -2));
-                    }
-                }
-            
-                if (Variants.Contains(Options.Arei))
-                {
-                    if (Variants.Contains(_push))
-                    {
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(3, new(4, 0));
-                    }
-                    else
-                    {
-                        SetPinOffset(0, new(-2, 0));
-                        SetPinOffset(3, new(2, 0));
-                    }
-                }
-                else
-                {
-                    SetPinOffset(0, new(-6, 0));
-                    SetPinOffset(3, new(6, 0));
                 }
             }
         }

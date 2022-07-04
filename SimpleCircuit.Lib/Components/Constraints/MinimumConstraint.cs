@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The minimum between the two.</param>
-        public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1e-3)
+        public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1)
         {
             string i = $"{name}.i";
             circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
