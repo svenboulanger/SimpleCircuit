@@ -142,6 +142,9 @@
         [Diagnostic(SeverityLevel.Error, "PE044", "Undefined wire segments are only allowed for the first and last segment in the wire")]
         UndefinedWireSegment,
 
+        [Diagnostic(SeverityLevel.Warning, "PW045", "The scale of symbol '{0}' is not a number")]
+        SymbolScaleNotANumber,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -10,6 +11,7 @@ namespace SimpleCircuit.Components.General
     /// </summary>
     public class XmlDrawable : IDrawableFactory
     {
+        private readonly double _scale;
         private readonly DrawableMetadata _metadata;
         private readonly XmlNode _drawing;
         private readonly List<PinDescription> _pins = new();
@@ -33,6 +35,11 @@ namespace SimpleCircuit.Components.General
         {
             // Extract the metadata
             string description = definition.Attributes?["description"]?.Value ?? "";
+            if (!double.TryParse(definition.Attributes?["scale"]?.Value ?? "1", out _scale))
+            {
+                diagnostics?.Post(ErrorCodes.SymbolScaleNotANumber, key);
+                _scale = 1.0;
+            }
             _metadata = new(new[] { key }, description, new[] { "Symbol" });
 
             // Build the pins
@@ -51,7 +58,7 @@ namespace SimpleCircuit.Components.General
                         {
                             Name = pinName,
                             Description = pinDescription,
-                            Location = location,
+                            Location = location * _scale,
                             Direction = direction
                         });
                         break;
@@ -65,7 +72,7 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options)
-            => new Instance(key, name, _drawing, _pins);
+            => new Instance(key, name, _drawing, _scale, _pins);
 
         private class PinDescription
         {
@@ -77,14 +84,16 @@ namespace SimpleCircuit.Components.General
         private class Instance : ScaledOrientedDrawable
         {
             private readonly XmlNode _drawing;
+            private readonly double _scale;
 
             /// <inheritdoc />
             public override string Type { get; }
 
-            public Instance(string type, string name, XmlNode drawing, IEnumerable<PinDescription> pins)
+            public Instance(string type, string name, XmlNode drawing, double scale, IEnumerable<PinDescription> pins)
                 : base(name)
             {
                 Type = type;
+                _scale = scale;
                 foreach (var pin in pins)
                 {
                     if (pin.Direction.Equals(new Vector2()))
@@ -97,8 +106,12 @@ namespace SimpleCircuit.Components.General
 
             protected override void Draw(SvgDrawing drawing)
             {
+                if (!_scale.Equals(1.0))
+                    drawing.BeginTransform(new Transform(new(), Matrix2.Scale(_scale)));
                 if (_drawing != null)
                     drawing.DrawXml(_drawing, null);
+                if (!_scale.Equals(1.0))
+                    drawing.EndTransform();
             }
         }
     }
