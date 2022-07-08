@@ -134,7 +134,7 @@ namespace SimpleCircuitOnline.Pages
             _errors = null;
             _warnings = null;
             var doc = await ComputeXml(includeScript: true);
-            using var sw = new StringWriter();
+            using var sw = new Utf8StringWriter();
             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
                 doc.WriteTo(xml);
             byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
