@@ -90,9 +90,9 @@ namespace SimpleCircuit.Components
                 drawing.ExtendPins(Pins, 3);
 
                 // Ground
-                drawing.Polygon(new[]
+                drawing.Polygon(new Vector2[]
                 {
-                    new Vector2(-5, 0), new Vector2(5, 0), new Vector2(0, 4)
+                    new(-5, 0), new(5, 0), new(0, 4)
                 });
             }
         }

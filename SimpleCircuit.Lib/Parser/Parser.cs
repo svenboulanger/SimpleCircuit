@@ -126,6 +126,7 @@ namespace SimpleCircuit.Parser
                             isFirst = false;
                             break;
 
+                        case TokenType.EndOfContent:
                         case TokenType.Newline:
                             // End at a wire definition
                             stringTogether?.Invoke(new(component, pinToWire), wireInfo, default, context);
