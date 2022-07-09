@@ -173,7 +173,6 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         public bool Solve(IDiagnosticHandler diagnostics)
         {
             var context = new CircuitSolverContext();
-            bool first = true;
             void Log(object sender, SpiceSharp.WarningEventArgs e)
             {
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));

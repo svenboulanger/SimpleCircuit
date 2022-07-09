@@ -14,6 +14,7 @@ namespace SimpleCircuit.Components.Analog
         private const string _zener = "zener";
         private const string _tunnel = "tunnel";
         private const string _schottky = "schottky";
+        private const string _shockley = "shockley";
         private const string _photodiode = "photodiode";
         private const string _led = "led";
         private const string _laser = "laser";
@@ -49,26 +50,27 @@ namespace SimpleCircuit.Components.Analog
             public override void Reset()
             {
                 base.Reset();
-                switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _tvs, _bidirectional))
+                switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
-                    case 0:
+                    case 0: // Varactor
                         SetPinOffset(0, new(-4, 0));
                         SetPinOffset(1, new(6, 0));
                         break;
 
-                    case 1:
-                    case 2:
-                    case 3:
+                    case 1: // Zener
+                    case 2: // Tunnel
+                    case 3: // Schottky
+                    case 4: // Shockley
                         SetPinOffset(0, new(-4, 0));
                         SetPinOffset(1, new(4, 0));
                         break;
 
-                    case 4:
+                    case 5: // TVS
                         SetPinOffset(0, new(-4, 0));
                         SetPinOffset(1, new(12, 0));
                         break;
 
-                    case 5:
+                    case 6: // Bidirectional
                         SetPinOffset(0, new(-4, -4));
                         SetPinOffset(1, new(4, -4));
                         break;
@@ -84,21 +86,39 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-
-                // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-
-                switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _tvs, _bidirectional))
+                switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
-                    case 0: DrawVaractor(drawing); break;
-                    case 1: DrawZenerDiode(drawing); break;
-                    case 2: DrawTunnelDiode(drawing); break;
-                    case 3: DrawSchottkyDiode(drawing); break;
-                    case 4: DrawTVSDiode(drawing); break;
-                    case 5: DrawBidirectional(drawing); break;
-                    default: DrawJunctionDiode(drawing); break;
+                    case 0: // Varactor
+                        DrawVaractor(drawing);
+                        break;
+
+                    case 1: // Zener
+                        DrawZenerDiode(drawing);
+                        break;
+
+                    case 2: // Tunnel
+                        DrawTunnelDiode(drawing);
+                        break;
+
+                    case 3: // Schottky
+                        DrawSchottkyDiode(drawing);
+                        break;
+
+                    case 4: // Shockley
+                        DrawShockleyDiode(drawing);
+                        break;
+
+                    case 5: // TVS
+                        DrawTVSDiode(drawing);
+                        break;
+
+                    case 6: // Bidirectional
+                        DrawBidirectional(drawing);
+                        break;
+
+                    default: // Just a regular diode
+                        DrawJunctionDiode(drawing);
+                        break;
                 }
 
                 switch (Variants.Select(_photodiode, _led, _laser))
@@ -118,9 +138,20 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Text(Label, new(0, -6), new(0, -1));
             }
 
-            private void DrawJunctionDiode(SvgDrawing drawing) => drawing.Line(new(4, -4), new(4, 4), new("cathode"));
+            private void DrawJunctionDiode(SvgDrawing drawing)
+            {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
+                drawing.Line(new(4, -4), new(4, 4), new("cathode"));
+            }
             private void DrawZenerDiode(SvgDrawing drawing)
             {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
                 switch (Variants.Select(_zenerSingle, _zenerSlanted))
                 {
                     case 0:
@@ -137,10 +168,37 @@ namespace SimpleCircuit.Components.Analog
                 }
 
             }
-            private void DrawTunnelDiode(SvgDrawing drawing) => drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(2, 4) }, new("cathode"));
-            private void DrawSchottkyDiode(SvgDrawing drawing) => drawing.Polyline(new Vector2[] { new(6, -3), new(6, -4), new(4, -4), new(4, 4), new(2, 4), new(2, 3) }, new("cathode"));
+            private void DrawTunnelDiode(SvgDrawing drawing)
+            {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
+                drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(2, 4) }, new("cathode"));
+            }
+            private void DrawSchottkyDiode(SvgDrawing drawing)
+            {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
+                drawing.Polyline(new Vector2[] { new(6, -3), new(6, -4), new(4, -4), new(4, 4), new(2, 4), new(2, 3) }, new("cathode"));
+            }
+            private void DrawShockleyDiode(SvgDrawing drawing)
+            {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 0)
+                }, new("anode"));
+                drawing.Line(new(-4, 0), new(-4, 4));
+                drawing.Line(new(4, -4), new(4, 4));
+            }
             private void DrawVaractor(SvgDrawing drawing)
             {
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
                 drawing.Line(new(6, -4), new(6, 4), new("cathode"));
             }
@@ -162,19 +220,27 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawTVSDiode(SvgDrawing drawing)
             {
-                drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
                 drawing.Polygon(new Vector2[] {
                     new(4, 0), new(12, -4), new(12, 4)
                 }, new("anode2"));
+                drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
             }
             private void DrawBidirectional(SvgDrawing drawing)
             {
-                drawing.Line(new(-4, -4), new(-4, -12));
-                drawing.Line(new(4, -4), new(4, 4));
+                // The diode
+                drawing.Polygon(new Vector2[] {
+                    new(-4, -4), new(4, 0), new(-4, 4)
+                }, new("anode"));
                 drawing.Polygon(new Vector2[]
                 {
                     new(-4, -8), new(4, -12), new(4, -4)
                 }, new("anode2"));
+                drawing.Line(new(-4, -4), new(-4, -12));
+                drawing.Line(new(4, -4), new(4, 4));
             }
         }
     }
