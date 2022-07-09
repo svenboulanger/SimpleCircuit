@@ -54,6 +54,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
             }
 
+            /// <inheritdoc />
             public override void Reset()
             {
                 base.Reset();
@@ -106,6 +107,7 @@ namespace SimpleCircuit.Components.Analog
                 }
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 switch (Variants.Select(Options.Arei, Options.American))

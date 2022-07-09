@@ -37,7 +37,31 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control2", "The backside controlling pin.", this, new(0, 0), new(0, -1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("throw1", "The first throwing pin.", this, new(6, 4), new(1, 0)), "t1");
                 Pins.Add(new FixedOrientedPin("throw2", "The second throwing pin.", this, new(6, -4), new(1, 0)), "t2");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_swap))
+                {
+                    SetPinOffset(3, new(6, -4));
+                    SetPinOffset(4, new(6, 4));
+                }
+                else
+                {
+                    SetPinOffset(3, new(6, -4));
+                    SetPinOffset(4, new(6, 4));
+                }
+
+                Vector2 loc = Variants.Select(_t1, _t2) switch
+                {
+                    0 => new(0, Variants.Contains(_swap) ? -2 : 2),
+                    1 => new(0, Variants.Contains(_swap) ? 2 : -2),
+                    _ => new()
+                };
+                SetPinOffset(1, loc);
+                SetPinOffset(2, loc);
             }
 
             /// <inheritdoc />
@@ -60,27 +84,6 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 drawing.Text(Label, new(-6, 6), new(-1, 1));
-            }
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_swap))
-                {
-                    SetPinOffset(3, new(6, -4));
-                    SetPinOffset(4, new(6, 4));
-                }
-                else
-                {
-                    SetPinOffset(3, new(6, -4));
-                    SetPinOffset(4, new(6, 4));
-                }
-
-                Vector2 loc = Variants.Select(_t1, _t2) switch {
-                    0 => new(0, Variants.Contains(_swap) ? -2 : 2),
-                    1 => new(0, Variants.Contains(_swap) ? 2 : -2),
-                    _ => new()
-                };
-                SetPinOffset(1, loc);
-                SetPinOffset(2, loc);
             }
         }
     }

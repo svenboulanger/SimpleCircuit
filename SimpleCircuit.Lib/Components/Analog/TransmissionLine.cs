@@ -43,17 +43,16 @@ namespace SimpleCircuit.Components.Analog
 
             [Description("The label in the transmission line.")]
             public string Label { get; set; }
+
             [Description("The length of the transmission line.")]
             public double Length
             {
                 get => _length;
                 set
                 {
-                    if (value < 8.0)
+                    _length = value;
+                    if (_length < 8.0)
                         _length = 8.0;
-                    else
-                        _length = value;
-                    UpdatePins();
                 }
             }
 
@@ -71,6 +70,19 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");
                 Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(_inner, _height), new(0, 1)), "gb", "gr");
                 Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(_width, 0), new(1, 0)), "b", "r");
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                double x = -_inner - (Length - _width) / 2;
+                SetPinOffset(0, new(x, 0));
+                SetPinOffset(1, new(x, _height));
+
+                x = _inner + (Length - _width) / 2;
+                SetPinOffset(2, new(x, _height));
+                SetPinOffset(3, new(x, 0));
             }
 
             /// <inheritdoc />
@@ -92,16 +104,6 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 drawing.Text(Label, new Vector2(), new Vector2());
-            }
-            private void UpdatePins()
-            {
-                double x = -_inner - (Length - _width) / 2;
-                SetPinOffset(0, new(x, 0));
-                SetPinOffset(1, new(x, _height));
-
-                x = _inner + (Length - _width) / 2;
-                SetPinOffset(2, new(x, _height));
-                SetPinOffset(3, new(x, 0));
             }
         }
     }

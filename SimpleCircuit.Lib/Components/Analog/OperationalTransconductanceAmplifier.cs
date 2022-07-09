@@ -46,7 +46,48 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 0), new(1, 0)), "no", "outn");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
-                Variants.Changed += UpdatePins;
+            }
+
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_differentialInput))
+                {
+                    if (Variants.Contains(_swapInput))
+                    {
+                        SetPinOffset(0, new(-5, 4));
+                        SetPinOffset(1, new(-5, -4));
+                    }
+                    else
+                    {
+                        SetPinOffset(0, new(-5, -4));
+                        SetPinOffset(1, new(-5, 4));
+                    }
+                }
+                else
+                {
+                    SetPinOffset(0, new(-5, 0));
+                    SetPinOffset(1, new(-5, 0));
+                }
+
+                if (Variants.Contains(_differentialOutput))
+                {
+                    if (Variants.Contains(_swapOutput))
+                    {
+                        SetPinOffset(4, new(5, -4));
+                        SetPinOffset(5, new(5, 4));
+                    }
+                    else
+                    {
+                        SetPinOffset(4, new(5, 4));
+                        SetPinOffset(5, new(5, -4));
+                    }
+                }
+                else
+                {
+                    SetPinOffset(4, new(5, 0));
+                    SetPinOffset(5, new(5, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -85,50 +126,8 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                     drawing.Arrow(new(-7, 10), new(6, -12));
 
-
                 // Label
                 drawing.Text(Label, new Vector2(2, 8), new Vector2(1, 1));
-            }
-
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_differentialInput))
-                {
-                    if (Variants.Contains(_swapInput))
-                    {
-                        SetPinOffset(0, new(-5, 4));
-                        SetPinOffset(1, new(-5, -4));
-                    }
-                    else
-                    {
-                        SetPinOffset(0, new(-5, -4));
-                        SetPinOffset(1, new(-5, 4));
-                    }
-                }
-                else
-                {
-                    SetPinOffset(0, new(-5, 0));
-                    SetPinOffset(1, new(-5, 0));
-                }
-
-                if (Variants.Contains(_differentialOutput))
-                {
-                    if (Variants.Contains(_swapOutput))
-                    {
-                        SetPinOffset(4, new(5, -4));
-                        SetPinOffset(5, new(5, 4));
-                    }
-                    else
-                    {
-                        SetPinOffset(4, new(5, 4));
-                        SetPinOffset(5, new(5, -4));
-                    }
-                }
-                else
-                {
-                    SetPinOffset(4, new(5, 0));
-                    SetPinOffset(5, new(5, 0));
-                }
             }
         }
     }

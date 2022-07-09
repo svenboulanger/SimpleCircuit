@@ -17,11 +17,40 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private double _width = 6, _length = 12;
+
             [Description("The label next to the element.")]
             public string Label { get; set; }
 
+            [Description("The label on the other side of the element")]
+            public string Label2 { get; set; }
+
             /// <inheritdoc />
             public override string Type { get; }
+
+            [Description("The length of the element")]
+            public double Length
+            {
+                get => _length;
+                set
+                {
+                    _length = value;
+                    if (_length < 6)
+                        _length = 6;
+                }
+            }
+
+            [Description("The width of the element")]
+            public double Width
+            {
+                get => _width;
+                set
+                {
+                    _width = value;
+                    if (_width < 4)
+                        _width = 4;
+                }
+            }
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -42,13 +71,19 @@ namespace SimpleCircuit.Components.Analog
                 drawing.ExtendPins(Pins);
 
                 // The rectangle
-                CommonGraphical.Rectangle(drawing, 12, 6);
+                CommonGraphical.Rectangle(drawing, Length, Width);
 
+                double w = Width * 0.5;
                 if (Variants.Contains(_programmable))
-                    drawing.Arrow(new(-5, 5), new(6, -7));
+                {
+                    drawing.Arrow(new(-5, w + 1), new(6, -w - 4));
+                    drawing.Text(Label, new(0, -w - 4), new(0, -1));
+                }
+                else
+                    drawing.Text(Label, new(0, -w - 1), new(0, -1));
 
                 // The label
-                drawing.Text(Label, new(0, -5), new(0, -1));
+                drawing.Text(Label2, new(0, w + 1), new(0, 1));
             }
         }
     }

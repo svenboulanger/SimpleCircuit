@@ -43,7 +43,22 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 6), new Vector2(0, 1)), "g", "gate");
                 Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 4), new Vector2(0, -1)), "b", "bulk");
                 Pins.Add(new FixedOrientedPin("drain", "The drain", this, new Vector2(4, 0), new Vector2(1, 0)), "d", "drain");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_packaged))
+                {
+                    SetPinOffset(0, new(-5, 0));
+                    SetPinOffset(3, new(5, 0));
+                }
+                else
+                {
+                    SetPinOffset(0, new(-4, 0));
+                    SetPinOffset(3, new(4, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -97,19 +112,6 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 drawing.Text(Label, new(3, -10), new(1, 1));
             }
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_packaged))
-                {
-                    SetPinOffset(0, new(-5, 0));
-                    SetPinOffset(3, new(5, 0));
-                }    
-                else
-                {
-                    SetPinOffset(0, new(-4, 0));
-                    SetPinOffset(3, new(4, 0));
-                }
-            }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
         {
@@ -130,7 +132,23 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("gate", "The gate.", this, new Vector2(0, 9), new Vector2(0, 1)), "g", "gate");
                 Pins.Add(new FixedOrientedPin("bulk", "The bulk.", this, new Vector2(0, 0), new Vector2(0, -1)), "b", "bulk");
                 Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
-                Variants.Changed += UpdatePins;
+            }
+
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_packaged))
+                {
+                    SetPinOffset(0, new(5, 0));
+                    SetPinOffset(1, new(0, 6));
+                    SetPinOffset(3, new(-5, 0));
+                }
+                else
+                {
+                    SetPinOffset(0, new(4, 0));
+                    SetPinOffset(1, new(0, 9));
+                    SetPinOffset(3, new(-4, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -199,21 +217,6 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 drawing.Text(Label, new(3, -10), new(1, 1));
-            }
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_packaged))
-                {
-                    SetPinOffset(0, new(5, 0));
-                    SetPinOffset(1, new(0, 6));
-                    SetPinOffset(3, new(-5, 0));
-                }
-                else
-                {
-                    SetPinOffset(0, new(4, 0));
-                    SetPinOffset(1, new(0, 9));
-                    SetPinOffset(3, new(-4, 0));
-                }
             }
         }
     }

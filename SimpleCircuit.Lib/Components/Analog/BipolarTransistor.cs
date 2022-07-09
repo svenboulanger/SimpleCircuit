@@ -40,7 +40,13 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-8, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
             }
 
             /// <inheritdoc />
@@ -72,8 +78,6 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
 
             }
-            private void UpdatePins(object sender, EventArgs e)
-                => SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
         {
@@ -93,7 +97,13 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
             }
 
             /// <inheritdoc />
@@ -122,10 +132,8 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
 
                 // Label
-                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                drawing.Text(Label, new(0, -3), new(0, -1));
             }
-            private void UpdatePins(object sender, EventArgs e)
-                => SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
         }
     }
 }

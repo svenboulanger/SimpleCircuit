@@ -47,6 +47,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(4, 0), new(1, 0)), "n", "c", "cathode");
             }
 
+            /// <inheritdoc />
             public override void Reset()
             {
                 base.Reset();

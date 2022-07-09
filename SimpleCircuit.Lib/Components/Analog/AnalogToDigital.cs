@@ -43,43 +43,12 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(9, 0), new(1, 0)), "outn", "no");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, new(9, 0), new(1, 0)), "output", "out", "po", "outp");
-                Variants.Changed += UpdatePins;
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            public override void Reset()
             {
-                if (Variants.Contains(_differentialInput))
-                {
-                    drawing.ExtendPins(Pins, 2, "inp", "inn");
-                    double x = -Width / 2 + 3;
-                    double y = Height / 4;
-                    drawing.Signs(new(x, -y), new(x, y));
-                }
-                else
-                    drawing.ExtendPin(Pins["in"]);
-
-                if (Variants.Contains(_differentialOutput))
-                {
-                    drawing.ExtendPins(Pins, 4, "outp", "outn");
-                    double x = Width / 2 - Height / 4 + 2;
-                    double y = Height / 4 + 1.5;
-                    drawing.Signs(new(x, -y), new(x, y));
-                }
-                else
-                    drawing.ExtendPin(Pins["out"]);
-
-                drawing.Polygon(new[]
-                {
-                    new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
-                    new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
-                    new Vector2(-Width / 2, -Height / 2)
-                });
-
-                drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
-            }
-            private void UpdatePins(object sender, EventArgs e)
-            {
+                base.Reset();
                 double x = -Width / 2;
                 double y = Height / 4;
                 if (Variants.Contains(_differentialInput))
@@ -121,6 +90,39 @@ namespace SimpleCircuit.Components.Analog
                     SetPinOffset(2, new(x, 0));
                     SetPinOffset(3, new(x, 0));
                 }
+            }
+
+            /// <inheritdoc />
+            protected override void Draw(SvgDrawing drawing)
+            {
+                if (Variants.Contains(_differentialInput))
+                {
+                    drawing.ExtendPins(Pins, 2, "inp", "inn");
+                    double x = -Width / 2 + 3;
+                    double y = Height / 4;
+                    drawing.Signs(new(x, -y), new(x, y));
+                }
+                else
+                    drawing.ExtendPin(Pins["in"]);
+
+                if (Variants.Contains(_differentialOutput))
+                {
+                    drawing.ExtendPins(Pins, 4, "outp", "outn");
+                    double x = Width / 2 - Height / 4 + 2;
+                    double y = Height / 4 + 1.5;
+                    drawing.Signs(new(x, -y), new(x, y));
+                }
+                else
+                    drawing.ExtendPin(Pins["out"]);
+
+                drawing.Polygon(new[]
+                {
+                    new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
+                    new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
+                    new Vector2(-Width / 2, -Height / 2)
+                });
+
+                drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
             }
         }
     }

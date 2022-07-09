@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -15,11 +14,70 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
+            private int _inputs = 2;
+            private double _spacing = 5;
+
             /// <inheritdoc />
             public override string Type => "nand";
 
             /// <inheritdoc />
             public string Label { get; set; }
+
+            [Description("The number of inputs (1 to 10)")]
+            public int Inputs
+            {
+                get => _inputs;
+                set
+                {
+                    _inputs = value;
+                    if (_inputs < 1)
+                        _inputs = 1;
+                    if (_inputs > 10)
+                        _inputs = 10;
+                }
+            }
+
+            [Description("The space between inputs")]
+            public double Spacing
+            {
+                get => _spacing;
+                set
+                {
+                    _spacing = value;
+                    if (_spacing < 1)
+                        _spacing = 1;
+                }
+            }
+
+            /// <summary>
+            /// Gets the width
+            /// </summary>
+            protected double Width
+            {
+                get
+                {
+                    if (Variants.Contains(Options.European))
+                        return 10;
+                    else
+                    {
+                        if (Height * 0.15 > 5)
+                            return 5 + Height * 0.5;
+                        return Height * 0.85;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets the height
+            /// </summary>
+            protected double Height
+            {
+                get
+                {
+                    double h = _inputs * Spacing;
+                    return h < 8 ? 8 : h;
+                }
+            }
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -31,10 +89,25 @@ namespace SimpleCircuit.Components.Digital
             public Instance(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("a", "The first input.", this, new(-6, -2.5), new(-1, 0)), "a");
-                Pins.Add(new FixedOrientedPin("b", "The second input.", this, new(-6, 2.5), new(-1, 0)), "b");
-                Pins.Add(new FixedOrientedPin("output", "The output.", this, new(9, 0), new(1, 0)), "o", "output");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+
+                double r = Width * 0.5;
+                double y = -(_inputs - 1) * Spacing * 0.5;
+
+                Pins.Clear();
+                char c = 'a';
+                for (int i = 0; i < _inputs; i++)
+                {
+                    Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(-r, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
+                    y += Spacing;
+                    c++;
+                }
+                Pins.Add(new FixedOrientedPin("output", "Output", this, new(r + 3, 0), new(1, 0)), "output", "out", "o");
             }
 
             /// <inheritdoc />
@@ -49,45 +122,31 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawNand(SvgDrawing drawing)
             {
+                double radius = Height * 0.5;
+                double handle = 0.55 * radius;
+                double w = Width * 0.5;
+                double xr = w - radius;
+                double h = Height * 0.5;
+
                 drawing.ExtendPins(Pins);
-                drawing.ClosedBezier(new[]
-                {
-                    new Vector2(-6, 5),
-                    new Vector2(-6, 5), new Vector2(1, 5), new Vector2(1, 5),
-                    new Vector2(4, 5), new Vector2(6, 2), new Vector2(6, 0),
-                    new Vector2(6, -2), new Vector2(4, -5), new Vector2(1, -5),
-                    new Vector2(1, -5), new Vector2(-6, -5), new Vector2(-6, -5)
-                });
-                drawing.Circle(new Vector2(7.5, 0), 1.5);
-
-                drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Path(builder => builder
+                    .MoveTo(new(-w, h))
+                    .LineTo(new(xr, h))
+                    .CurveTo(new(xr + handle, h), new(w, handle), new(w, 0))
+                    .SmoothTo(new(xr + handle, -h), new(xr, -h))
+                    .LineTo(new(-w, -h))
+                    .Close()
+                );
+                drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
+                drawing.Text(Label, new(0, -h - 1), new(0, -1));
             }
-
             private void DrawNandIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-
-                drawing.Rectangle(8, 10, new());
-                drawing.Circle(new(5.5, 0), 1.5);
+                drawing.Rectangle(Width, Height);
+                drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
-
-                drawing.Text(Label, new(0, -6), new(0, -1));
-            }
-
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(Options.European))
-                {
-                    SetPinOffset(0, new(-4, -2.5));
-                    SetPinOffset(1, new(-4, 2.5));
-                    SetPinOffset(2, new(7, 0));
-                }
-                else
-                {
-                    SetPinOffset(0, new(-6, -2.5));
-                    SetPinOffset(1, new(-6, 2.5));
-                    SetPinOffset(2, new(9, 0));
-                }
+                drawing.Text(Label, new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

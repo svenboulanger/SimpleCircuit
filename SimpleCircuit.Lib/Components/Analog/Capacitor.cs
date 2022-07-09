@@ -39,7 +39,22 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-1.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(1.5, 0), new(1, 0)), "n", "neg", "b");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_electrolytic))
+                {
+                    SetPinOffset(Pins["a"], new(-2.25, 0));
+                    SetPinOffset(Pins["b"], new(2.25, 0));
+                }
+                else
+                {
+                    SetPinOffset(Pins["a"], new(-1.5, 0));
+                    SetPinOffset(Pins["b"], new(1.5, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -99,20 +114,6 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 drawing.Text(Label, new(0, y), new(0, -1), new("lbl"));
                 drawing.Text(Label2, new(0, y2), new(0, 1), new("lbl2"));
-            }
-
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_electrolytic))
-                {
-                    SetPinOffset(Pins["a"], new(-2.25, 0));
-                    SetPinOffset(Pins["b"], new(2.25, 0));
-                }
-                else
-                {
-                    SetPinOffset(Pins["a"], new(-1.5, 0));
-                    SetPinOffset(Pins["b"], new(1.5, 0));
-                }
             }
         }
     }

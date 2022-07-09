@@ -35,7 +35,26 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(6, 0), new(1, 0)), "out", "output");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(Options.European))
+                {
+                    SetPinOffset(0, new(-5, 0));
+                    SetPinOffset(1, new(0, -5));
+                    SetPinOffset(2, new(0, 5));
+                    SetPinOffset(3, new(5, 0));
+                }
+                else
+                {
+                    SetPinOffset(0, new(-6, 0));
+                    SetPinOffset(1, new(0, -3));
+                    SetPinOffset(2, new(0, 3));
+                    SetPinOffset(3, new(6, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -51,40 +70,22 @@ namespace SimpleCircuit.Components.Digital
             private void DrawBuffer(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "in", "out");
-                drawing.Polygon(new[]
+                drawing.Polygon(new Vector2[]
                 {
-                    new Vector2(-6, 6), new Vector2(6, 0), new Vector2(-6, -6)
+                    new(-6, 6), new(6, 0), new(-6, -6)
                 });
 
-                drawing.Text(Label, new Vector2(0, -4), new Vector2(1, -1));
+                drawing.Text(Label, new(0, -4), new(1, -1));
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins, 2, "in", "out");
 
-                drawing.Rectangle(8, 10, new());
+                drawing.Rectangle(10, 10, new());
                 drawing.Text("1", new(), new());
 
                 drawing.Text(Label, new(0, -6), new(0, -1));
-            }
-
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(Options.European))
-                {
-                    SetPinOffset(0, new(-4, 0));
-                    SetPinOffset(1, new(0, -5));
-                    SetPinOffset(2, new(0, 5));
-                    SetPinOffset(3, new(4, 0));
-                }
-                else
-                {
-                    SetPinOffset(0, new(-6, 0));
-                    SetPinOffset(1, new(0, -3));
-                    SetPinOffset(2, new(0, 3));
-                    SetPinOffset(3, new(6, 0));
-                }
             }
         }
     }

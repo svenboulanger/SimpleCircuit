@@ -10,8 +10,7 @@ namespace Sandbox
     {
         static void Main(string[] args)
         {
-            var script = @".property R thermistor = true
-R1[c] <d> T";
+            var script = @"- OR.inputs = 10";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
