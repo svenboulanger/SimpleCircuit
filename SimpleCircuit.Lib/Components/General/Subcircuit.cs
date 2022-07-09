@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public IDrawable Create(string key, string name, Options options)
+        public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
             => new Instance(key, name, _circuit, _pins);
 
         private class Instance : ScaledOrientedDrawable

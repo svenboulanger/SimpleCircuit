@@ -145,6 +145,9 @@
         [Diagnostic(SeverityLevel.Warning, "PW045", "The scale of symbol '{0}' is not a number")]
         SymbolScaleNotANumber,
 
+        [Diagnostic(SeverityLevel.Error, "PE046", "Expected a property value")]
+        ExpectedPropertyValue,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

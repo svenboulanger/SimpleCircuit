@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleCircuit.Diagnostics;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -16,7 +17,7 @@ namespace SimpleCircuit.Components
         /// Creates a drawable with the specified name.
         /// </summary>
         /// <param name="name">The name of the factory, which starts with a key given by the <see cref="Keys"/> property.</param>
-        /// <returns>The drawable.</returns>
-        public IDrawable Create(string key, string name, Options options);
+        /// <returns>The drawable, or <c>null</c> if it couldn't be created.</returns>
+        public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics);
     }
 }

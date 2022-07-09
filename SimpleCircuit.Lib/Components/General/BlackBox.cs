@@ -18,9 +18,9 @@ namespace SimpleCircuit.Components
             => new Instance(name);
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options)
+        public override IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
         {
-            var instance = (Instance)base.Create(key, name, options);
+            var instance = (Instance)base.Create(key, name, options, diagnostics);
             if (options != null)
             {
                 instance.MinimumSpacingX = options.HorizontalPinSpacing;

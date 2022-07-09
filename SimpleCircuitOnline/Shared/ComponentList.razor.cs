@@ -63,7 +63,7 @@ namespace SimpleCircuitOnline.Shared
                         }
 
                         // Add our description
-                        list.Add((metadata, factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options)));
+                        list.Add((metadata, factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options, context.Diagnostics)));
                     }
                 }
             }

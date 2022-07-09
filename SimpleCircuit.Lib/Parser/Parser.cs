@@ -32,7 +32,6 @@ namespace SimpleCircuit.Parser
                 if (!ParseStatement(lexer, context))
                     lexer.Skip(~TokenType.Newline);
             }
-            context.FlushActions();
         }
 
         /// <summary>
@@ -464,6 +463,10 @@ namespace SimpleCircuit.Parser
                 case "variants":
                     return ParseVariants(lexer, context);
 
+                case "property":
+                case "properties":
+                    return ParseProperties(lexer, context);
+
                 default:
                     context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
                     return false;
@@ -530,7 +533,6 @@ namespace SimpleCircuit.Parser
             }
 
             // Add a subcircuit definition to the context drawable factory
-            localContext.FlushActions();
             var subckt = new Subcircuit(nameToken.Content.ToString(), localContext.Circuit, ports, context.Diagnostics);
             context.Factory.Register(subckt);
             return true;
@@ -671,14 +673,14 @@ namespace SimpleCircuit.Parser
             }
 
             // Check whether the key is actually a key
-            if (!context.Factory.IsKey(tokenKey.Content.ToString()))
+            string key = tokenKey.Content.ToString();
+            if (!context.Factory.IsKey(key))
             {
                 context.Diagnostics?.Post(tokenKey, ErrorCodes.NotAKey, tokenKey.Content.ToString());
                 return false;
             }
 
             // Start reading variants
-            string key = tokenKey.Content.ToString();
             while (lexer.Check(TokenType.Word | TokenType.Comma | TokenType.Dash))
             {
                 switch (lexer.Type)
@@ -710,6 +712,66 @@ namespace SimpleCircuit.Parser
                 }
             }
 
+            return true;
+        }
+        private static bool ParseProperties(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.Word, out var tokenKey))
+            {
+                context.Diagnostics?.Post(tokenKey, ErrorCodes.ExpectedComponentKey);
+                return false;
+            }
+
+            // Check whether the key is actually a key
+            string key = tokenKey.Content.ToString();
+            if (!context.Factory.IsKey(key))
+            {
+                context.Diagnostics?.Post(tokenKey, ErrorCodes.NotAKey, tokenKey.Content.ToString());
+                return false;
+            }
+
+            // Start reading properties
+            while (lexer.Check(TokenType.Word))
+            {
+                switch (lexer.Type)
+                {
+                    case TokenType.Word:
+                        lexer.Branch(TokenType.Word, out var tokenProperty);
+                        if (!lexer.Branch(TokenType.Equals))
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
+                        object value = null;
+                        switch (lexer.Type)
+                        {
+                            case TokenType.String:
+                                value = ParseString(lexer, context);
+                                break;
+
+                            case TokenType.Word:
+                                value = ParseBoolean(lexer, context);
+                                break;
+
+                            case TokenType.Integer:
+                            case TokenType.Number:
+                                value = ParseDouble(lexer, context);
+                                break;
+
+                            default:
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyValue);
+                                break;
+                        }
+                        if (value != null)
+                            context.Options.AddDefaultProperty(key, tokenProperty.Content.ToString(), value);
+                        break;
+
+                    case TokenType.Comma:
+                        lexer.Next();
+                        break;
+
+                    default:
+                        lexer.Next();
+                        break;
+                }
+            }
             return true;
         }
 

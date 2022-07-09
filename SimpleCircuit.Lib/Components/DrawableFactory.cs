@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleCircuit.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SimpleCircuit.Components
@@ -33,7 +34,7 @@ namespace SimpleCircuit.Components
         protected abstract IDrawable Factory(string key, string name);
 
         /// <inheritdoc />
-        public virtual IDrawable Create(string key, string name, Options options)
+        public virtual IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
         {
             var result = Factory(key, name);
             if (options != null)
@@ -69,7 +70,7 @@ namespace SimpleCircuit.Components
                             break;
                     }
                 }
-                options.ApplyVariants(key, result);
+                options.Apply(key, result, diagnostics);
             }
             return result;
         }

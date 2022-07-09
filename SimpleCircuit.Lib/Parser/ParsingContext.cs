@@ -10,8 +10,6 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class ParsingContext
     {
-        private readonly List<Action<ParsingContext>> _postActions = new();
-
         /// <summary>
         /// Gets the options.
         /// </summary>
@@ -59,37 +57,19 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets or creates a component.
         /// </summary>
-        /// <param name="path">The path of the component.</param>
-        /// <param name="name">The name of the component.</param>
+        /// <param name="fullname">The full name of the drawable.</param>
         /// <param name="options">Options that can be used for the component.</param>
-        /// <returns>The component.</returns>
-        public IDrawable GetOrCreate(string fullname, Options options)
+        /// <param name="diagnostics">The diagnostic handler.</param>
+        /// <returns>The component, or <c>null</c> if no drawable could be created.</returns>
+        public IDrawable GetOrCreate(string fullname, Options options, IDiagnosticHandler diagnostics)
         {
             IDrawable result;
             if (Circuit.TryGetValue(fullname, out var presence) && presence is IDrawable drawable)
                 return drawable;
-            result = Factory.Create(fullname, options);
+            result = Factory.Create(fullname, options, diagnostics);
             if (result != null)
                 Circuit.Add(result);
             return result;
-        }
-
-        /// <summary>
-        /// Schedules a process to be executed after all components have been created.
-        /// </summary>
-        /// <param name="action">The action to execute.</param>
-        public void SchedulePostProcess(Action<ParsingContext> action)
-        {
-            _postActions.Add(action);
-        }
-
-        /// <summary>
-        /// Executes all processes that need to be executed after all components have been created.
-        /// </summary>
-        public void FlushActions()
-        {
-            for (int i = 0; i < _postActions.Count; i++)
-                _postActions[i].Invoke(this);
         }
     }
 }

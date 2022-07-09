@@ -1,6 +1,8 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SimpleCircuit
 {
@@ -10,6 +12,7 @@ namespace SimpleCircuit
     public class Options
     {
         private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
+        private readonly Dictionary<string, List<Action<IDrawable, IDiagnosticHandler>>> _properties = new();
 
         /// <summary>
         /// The identifier for AREI style components.
@@ -68,6 +71,64 @@ namespace SimpleCircuit
         public bool JumpOverWires { get; set; } = false;
 
         /// <summary>
+        /// Adds a default property value for any drawable of the given key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="property">The property.</param>
+        /// <param name="value">The value.</param>
+        public void AddDefaultProperty(string key, string property, object value)
+        {
+            if (!_properties.TryGetValue(key, out var list))
+            {
+                list = new();
+                _properties.Add(key, list);
+            }
+
+            var action = (IDrawable drawable, IDiagnosticHandler diagnostics) =>
+            {
+                if (drawable == null)
+                    throw new ArgumentNullException(nameof(drawable));
+
+                // Use reflection to find the property
+                var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (info == null)
+                {
+                    // No property, if the value is a boolean, we can instead add a variant instead
+                    if (value is bool b)
+                    {
+                        // Just add the variant with the given property
+                        if (b)
+                            drawable.Variants.Add(property);
+                        else
+                            drawable.Variants.Remove(property);
+                        return;
+                    }
+                    else
+                    {
+                        // No idea what to do with this
+                        diagnostics.Post(ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
+                        return;
+                    }
+                }
+                else
+                {
+                    var type = value.GetType();
+                    if (info.PropertyType == type)
+                        info.SetValue(drawable, value);
+                    else
+                    {
+                        // Some implicit type conversion here
+                        if (info.PropertyType == typeof(int) && type == typeof(double))
+                            info.SetValue(drawable, (int)(double)value);
+                        else if (info.PropertyType == typeof(double) && type == typeof(int))
+                            info.SetValue(drawable, (double)(int)value);
+                    }
+                }
+            };
+            list.Add(action);
+        }
+
+        /// <summary>
         /// Adds a variant that needs to be included for the given key.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -105,17 +166,18 @@ namespace SimpleCircuit
         /// <summary>
         /// Clears the variants from the options.
         /// </summary>
-        public void ClearVariants()
+        public void ClearPropertiesAndVariants()
         {
             _includes.Clear();
             _excludes.Clear();
+            _properties.Clear();
         }
 
         /// <summary>
         /// Applies the variants for the given drawable and key.
         /// </summary>
         /// <param name="drawable">The drawable.</param>
-        public void ApplyVariants(string key, IDrawable drawable)
+        public void Apply(string key, IDrawable drawable, IDiagnosticHandler diagnostics)
         {
             if (_includes.TryGetValue(key, out var set))
             {
@@ -126,6 +188,11 @@ namespace SimpleCircuit
             {
                 foreach (string variant in set)
                     drawable.Variants.Remove(variant);
+            }
+            if (_properties.TryGetValue(key, out var list))
+            {
+                foreach (var action in list)
+                    action(drawable, diagnostics);
             }
         }
     }

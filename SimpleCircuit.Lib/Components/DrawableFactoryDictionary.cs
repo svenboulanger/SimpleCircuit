@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -179,15 +180,14 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="fullname">The full name of the component.</param>
         /// <param name="options">The options.</param>
-        /// <returns>The created variable.</returns>
-        public IDrawable Create(string fullname, Options options)
+        /// <param name="diagnostics">The diagnostic handler.</param>
+        /// <returns>The created drawable, or <c>null</c> if the drawable could not be created.</returns>
+        public IDrawable Create(string fullname, Options options, IDiagnosticHandler diagnostics)
         {
             bool isAnonymous = Extract(fullname, out var key, out var factory);
             if (isAnonymous)
-            {
-                return factory?.Create(key, $"{fullname}{AnonymousSeparator}{++_anonymousIndex}", options);
-            }
-            return factory?.Create(key, fullname, options);
+                return factory?.Create(key, $"{fullname}{AnonymousSeparator}{++_anonymousIndex}", options, diagnostics);
+            return factory?.Create(key, fullname, options, diagnostics);
         }
     }
 }

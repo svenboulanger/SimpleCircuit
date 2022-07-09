@@ -54,7 +54,7 @@ namespace SimpleCircuit.Parser
         {
             if (Component == null)
             {
-                Component = context.GetOrCreate(Fullname, context.Options);
+                Component = context.GetOrCreate(Fullname, context.Options, context.Diagnostics);
                 if (Component == null)
                 {
                     context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
