@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components
                         if (!newOrientation.IsOrthonormal)
                         {
                             // We don't want non-orthonormal orientations...
-                            diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "CE001", $"Could not constrain orientation of {Name}."));
+                            diagnostics.Post(ErrorCodes.CouldNotConstrainPin, Name);
                             return false;
                         }
                         Transform = newOrientation;
@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components
                             return true;
                         else
                         {
-                            diagnostics.Post(new DiagnosticMessage(SeverityLevel.Warning, "CE001", $"Could not constrain orientation of {Name}."));
+                            diagnostics.Post(ErrorCodes.CouldNotConstrainPin, Name);
                             return false;
                         }
                     }

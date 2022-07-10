@@ -10,9 +10,6 @@ namespace SimpleCircuit.Components.Pins
     {
         private readonly ILocatedPresence _origin;
 
-        /// <inheritdoc/>
-        public new IOrientedDrawable Owner { get; }
-
         /// <inheritdoc />
         ILocatedDrawable IPin.Owner => Owner;
 
@@ -27,10 +24,28 @@ namespace SimpleCircuit.Components.Pins
         public Vector2 RelativeOrientation { get; set; }
 
         /// <inheritdoc />
-        public bool HasFixedOrientation => Owner.IsConstrained(RelativeOrientation);
+        public bool HasFixedOrientation
+        {
+            get
+            {
+                if (Owner is IOrientedDrawable od)
+                    return od.IsConstrained(RelativeOrientation);
+                else
+                    return true;
+            }
+        }
 
         /// <inheritdoc />
-        public bool HasFreeOrientation => Owner.OrientationDegreesOfFreedom == 2;
+        public bool HasFreeOrientation
+        {
+            get
+            {
+                if (Owner is IOrientedDrawable od)
+                    return od.OrientationDegreesOfFreedom == 2;
+                else
+                    return false;
+            }
+        }
 
         /// <inheritdoc />
         public Vector2 Orientation => _origin is ITransformingDrawable tfd ? tfd.TransformNormal(RelativeOrientation) : RelativeOrientation;
@@ -44,10 +59,9 @@ namespace SimpleCircuit.Components.Pins
         /// <param name="relativeOffset">The relative offset.</param>
         /// <param name="relativeOrientation">The relative orientation.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="owner"/> is <c>null</c>.</exception>
-        public FixedOrientedPin(string name, string description, IOrientedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation)
+        public FixedOrientedPin(string name, string description, ILocatedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation)
             : base(name, description, owner)
         {
-            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             Offset = relativeOffset;
             RelativeOrientation = relativeOrientation / relativeOrientation.Length;
             _origin = owner;
@@ -60,7 +74,18 @@ namespace SimpleCircuit.Components.Pins
             orientation /= orientation.Length;
 
             // Constrain the owner orientation
-            return Owner.ConstrainOrientation(RelativeOrientation, orientation, diagnostics);
+            if (Owner is IOrientedDrawable od)
+                return od.ConstrainOrientation(RelativeOrientation, orientation, diagnostics);
+            else
+            {
+                var error = orientation - RelativeOrientation;
+                if (!error.X.IsZero() || !error.Y.IsZero())
+                {
+                    diagnostics?.Post(ErrorCodes.CouldNotConstrainPin, Name);
+                    return false;
+                }
+                return true;
+            }
         }
 
         /// <inheritdoc />
