@@ -21,11 +21,8 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the capacitor.")]
-            public string Label { get; set; }
-
-            [Description("The label on the other side of the capacitor.")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type => "capacitor";
@@ -112,8 +109,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new(0, y), new(0, -1), new("lbl"));
-                drawing.Text(Label2, new(0, y2), new(0, 1), new("lbl2"));
+                drawing.Text(Labels[0], new(0, y), new(0, -1), new("lbl"));
+                drawing.Text(Labels[1], new(0, y2), new(0, 1), new("lbl2"));
             }
         }
     }

@@ -26,8 +26,8 @@ namespace SimpleCircuit.Components.Analog
 
         private class Nmos : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the transistor.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "nmos";
@@ -86,9 +86,9 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (Pins["b"].Connections > 0)
-                    drawing.Text(Label, new(-3, -3), new(-1, -1));
+                    drawing.Text(Labels[0], new(-3, -3), new(-1, -1));
                 else
-                    drawing.Text(Label, new(0, -3), new(0, -1));
+                    drawing.Text(Labels[0], new(0, -3), new(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -110,13 +110,13 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                drawing.Text(Label, new(3, -10), new(1, 1));
+                drawing.Text(Labels[0], new(3, -10), new(1, 1));
             }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the transistor.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "pmos";
@@ -185,10 +185,10 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    drawing.Text(Label, new Vector2(-3, -3), new Vector2(-1, -1));
+                    drawing.Text(Labels[0], new Vector2(-3, -3), new Vector2(-1, -1));
                 }
                 else
-                    drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                    drawing.Text(Labels[0], new Vector2(0, -3), new Vector2(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -216,7 +216,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                drawing.Text(Label, new(3, -10), new(1, 1));
+                drawing.Text(Labels[0], new(3, -10), new(1, 1));
             }
         }
     }

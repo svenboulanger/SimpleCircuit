@@ -16,8 +16,8 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("Adds a label next to the speaker.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "speaker";
@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (!Variants.Contains(_off))
                     DrawOn(drawing);
 
-                drawing.Text(Label, new(8, 10), new(1, 1));
+                drawing.Text(Labels[0], new(8, 10), new(1, 1));
             }
             private void DrawOn(SvgDrawing drawing)
             {

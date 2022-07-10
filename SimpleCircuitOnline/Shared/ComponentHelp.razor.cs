@@ -31,9 +31,9 @@ namespace SimpleCircuitOnline.Shared
                 _properties = null;
                 _drawable = value;
 
-                // Show where the label is
-                if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Label))
-                    labeled.Label = "label";
+                // Show where the primary label is
+                if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]))
+                    labeled.Labels[0] = "label";
                 CreateSvg();
             }
         }

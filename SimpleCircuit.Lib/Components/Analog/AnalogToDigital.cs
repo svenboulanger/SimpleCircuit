@@ -15,6 +15,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private string _label = null;
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
             private const string _differentialOutput = "diffout";
@@ -26,8 +27,8 @@ namespace SimpleCircuit.Components.Analog
             [Description("The height of the ADC.")]
             public double Height { get; set; } = 12;
 
-            [Description("The label inside the ADC.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "adc";
@@ -122,7 +123,7 @@ namespace SimpleCircuit.Components.Analog
                     new Vector2(-Width / 2, -Height / 2)
                 });
 
-                drawing.Text(Label, new Vector2(-Height / 4, 0), new Vector2(0, 0));
+                drawing.Text(Labels[0], new Vector2(-Height / 4, 0), new Vector2(0, 0));
             }
         }
     }

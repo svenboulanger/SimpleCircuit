@@ -14,11 +14,8 @@ namespace SimpleCircuit.Components.General
 
         private class Instance : OrientedDrawable, ILabeled
         {
-            [Description("The label placed next to the wire.")]
-            public string Label { get; set; }
-
-            [Description("The label placed on the other side of the wire.")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type => "direction";
@@ -37,8 +34,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Text(Label, new(0, 3), new(0, 1));
-                drawing.Text(Label2, new(0, -3), new(0, -1));
+                drawing.Text(Labels[0], new(0, 3), new(0, 1));
+                drawing.Text(Labels[1], new(0, -3), new(0, -1));
             }
         }
     }

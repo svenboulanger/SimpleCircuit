@@ -27,7 +27,7 @@ namespace SimpleCircuit.Components.Wires
             public override string Type => "segment";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Wires
                     case 4: DrawOnWall(drawing); break;
                 }
 
-                drawing.Text(Label, new(0, _textY - 2), new(0, -1));
+                drawing.Text(Labels[0], new(0, _textY - 2), new(0, -1));
             }
             private void DrawUnderground(SvgDrawing drawing)
             {

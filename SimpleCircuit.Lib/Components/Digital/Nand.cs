@@ -21,7 +21,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "nand";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             [Description("The number of inputs (1 to 10)")]
             public int Inputs
@@ -138,7 +138,7 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                 );
                 drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
-                drawing.Text(Label, new(0, -h - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
             }
             private void DrawNandIEC(SvgDrawing drawing)
             {
@@ -146,7 +146,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(Width, Height);
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
-                drawing.Text(Label, new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

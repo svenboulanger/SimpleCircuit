@@ -33,8 +33,8 @@ namespace SimpleCircuit.Components.Outputs
         {
             private const double _k = 0.5522847498;
 
-            [Description("Adds a label next to the appliance.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "appliance";
@@ -158,7 +158,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawLabel(SvgDrawing drawing)
             {
-                drawing.Text(Label, new(0, -10), new(1, -1));
+                drawing.Text(Labels[0], new(0, -10), new(1, -1));
             }
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

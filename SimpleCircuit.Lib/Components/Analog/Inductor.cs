@@ -23,8 +23,8 @@ namespace SimpleCircuit.Components.Analog
         {
             private int _windings = 3;
 
-            [Description("The label next to the inductor.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             [Description("The number of windings.")]
             public int Windings
@@ -112,6 +112,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
                 double l = Length * 0.5;
+                double ty1 = -5, ty2 = 5;
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
@@ -134,13 +135,23 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_choke))
                         {
                             drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
+                            ty1 = ty1 > -5.5 ? -5.5 : ty1;
                             if (!Variants.Contains(_singleLine))
+                            {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
+                                ty1 = ty1 > -7 ? -7 : ty1;
+                            }
                             if (Variants.Contains(_programmable))
+                            {
                                 drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
+                                ty1 = ty1 > -11 ? -11 : ty1;
+                            }
                         }
                         else if (Variants.Contains(_programmable))
+                        {
                             drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
+                            ty1 = ty1 > -8 ? -8 : ty1;
+                        }
                         break;
 
                     default:
@@ -169,15 +180,26 @@ namespace SimpleCircuit.Components.Analog
                         {
                             drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
                             if (!Variants.Contains(_singleLine))
+                            {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
+                                ty1 = ty1 > -7 ? -7 : ty1;
+                            }
                             if (Variants.Contains(_programmable))
+                            {
                                 drawing.Arrow(new(-l + 1, 5), new(l, -10));
+                                ty1 = ty1 > -11 ? -11 : ty1;
+                            }
                         }
                         else if (Variants.Contains(_programmable))
+                        {
                             drawing.Arrow(new(-l + 1, 5), new(l, -7));
+                            ty1 = ty1 > -8 ? -8 : ty1;
+                        }
 
                         // Label
-                        drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                        drawing.Text(Labels[0], new(0, ty1), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, ty2), new(0, 1), new("lbl2"));
+
                         break;
                 }
             }

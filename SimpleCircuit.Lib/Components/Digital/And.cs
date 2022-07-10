@@ -21,7 +21,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "and";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -140,14 +140,14 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close()
                 );
-                drawing.Text(Label, new(0, -h - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
             }
             private void DrawAndIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(Width, Height);
                 drawing.Text("&amp;", new(), new());
-                drawing.Text(Label, new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

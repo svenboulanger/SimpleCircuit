@@ -16,8 +16,8 @@
 
         private class Instance : ModelingDrawable, ILabeled
         {
-            [Description("The text inside the block")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             protected override double Size => 12;
@@ -35,7 +35,7 @@
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-                drawing.Text(Label, new(), new());
+                drawing.Text(Labels[0], new(), new());
             }
         }
     }

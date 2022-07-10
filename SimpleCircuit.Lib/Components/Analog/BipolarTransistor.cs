@@ -24,11 +24,11 @@ namespace SimpleCircuit.Components.Analog
 
         private class Npn : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the transistor.")]
-            public string Label { get; set; }
-
             /// <inheritdoc />
             public override string Type => "npn";
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Creates a new <see cref="Npn"/>.
@@ -75,14 +75,14 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
 
                 // Label
-                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                drawing.Text(Labels[0], new Vector2(0, -3), new Vector2(0, -1));
 
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the transistor.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "pnp";
@@ -132,7 +132,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
 
                 // Label
-                drawing.Text(Label, new(0, -3), new(0, -1));
+                drawing.Text(Labels[0], new(0, -3), new(0, -1));
             }
         }
     }

@@ -16,8 +16,8 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label of the motor.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "motor";
@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Line(new(5, -4), new(7, -4), new("minus"));
                 }
 
-                drawing.Text(Label, new(0, 6), new(0, 1));
+                drawing.Text(Labels[0], new(0, 6), new(0, 1));
             }
         }
     }

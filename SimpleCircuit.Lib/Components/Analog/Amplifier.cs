@@ -45,9 +45,8 @@ namespace SimpleCircuit.Components.Analog
                 _outputNeg = new(0, -4),
                 _outputCommon = new(8, 0);
 
-
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Gets or sets the gain string.
@@ -70,7 +69,49 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power supply.", this, _supplyNeg, new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputCommon, new(1, 0)), "outn", "no");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(_differentialInput))
+                {
+                    if (Variants.Contains(_swapInput))
+                    {
+                        SetPinOffset(0, _inputNeg);
+                        SetPinOffset(1, _inputPos);
+                    }
+                    else
+                    {
+                        SetPinOffset(0, _inputPos);
+                        SetPinOffset(1, _inputNeg);
+                    }
+                }
+                else
+                {
+                    SetPinOffset(0, _inputCommon);
+                    SetPinOffset(1, _inputCommon);
+                }
+
+                if (Variants.Contains(_differentialOutput))
+                {
+                    if (Variants.Contains(_differentialInput))
+                    {
+                        SetPinOffset(4, _outputPos);
+                        SetPinOffset(5, _outputNeg);
+                    }
+                    else
+                    {
+                        SetPinOffset(4, _outputNeg);
+                        SetPinOffset(5, _outputPos);
+                    }
+                }
+                else
+                {
+                    SetPinOffset(4, _outputCommon);
+                    SetPinOffset(5, _outputCommon);
+                }
             }
 
             /// <inheritdoc />
@@ -141,50 +182,10 @@ namespace SimpleCircuit.Components.Analog
 
                 // Labels
                 if (Variants.Contains(_differentialOutput))
-                    drawing.Text(Label, new(2, 7), new(1, 1));
+                    drawing.Text(Labels[0], new(2, 7), new(1, 1));
                 else
-                    drawing.Text(Label, new(2, 5), new(1, 1));
+                    drawing.Text(Labels[0], new(2, 5), new(1, 1));
                 drawing.Text(Gain, new(-2.5, 0), new());
-            }
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(_differentialInput))
-                {
-                    if (Variants.Contains(_swapInput))
-                    {
-                        SetPinOffset(0, _inputNeg);
-                        SetPinOffset(1, _inputPos);
-                    }
-                    else
-                    {
-                        SetPinOffset(0, _inputPos);
-                        SetPinOffset(1, _inputNeg);
-                    }
-                }
-                else
-                {
-                    SetPinOffset(0, _inputCommon);
-                    SetPinOffset(1, _inputCommon);
-                }
-
-                if (Variants.Contains(_differentialOutput))
-                {
-                    if (Variants.Contains(_differentialInput))
-                    {
-                        SetPinOffset(4, _outputPos);
-                        SetPinOffset(5, _outputNeg);
-                    }
-                    else
-                    {
-                        SetPinOffset(4, _outputNeg);
-                        SetPinOffset(5, _outputPos);
-                    }
-                }
-                else
-                {
-                    SetPinOffset(4, _outputCommon);
-                    SetPinOffset(5, _outputCommon);
-                }
             }
         }
     }

@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components
             return instance;
         }
 
-        protected class Instance : ILocatedDrawable, ILabeled
+        protected class Instance : ILocatedDrawable
         {
             private readonly PinCollection _pins;
 
@@ -38,10 +38,6 @@ namespace SimpleCircuit.Components
 
             /// <inheritdoc />
             public int Order => 0;
-
-            /// <inheritdoc/>
-            [Description("The label next to the element.")]
-            public string Label { get; set; }
 
             /// <inheritdoc />
             IPinCollection IDrawable.Pins => _pins;

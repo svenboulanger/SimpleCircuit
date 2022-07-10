@@ -14,8 +14,8 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("Adds a label next to the microphone.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "mic";
@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
 
-                drawing.Text(Label, new(-6, 0), new(-1, 0));
+                drawing.Text(Labels[0], new(-6, 0), new(-1, 0));
             }
         }
     }

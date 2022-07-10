@@ -29,8 +29,7 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             /// <inheritdoc />
-            [Description("The label next to the switch.")]
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             [Description("The number of poles on the switch.")]
             public int Poles { get; set; }
@@ -143,7 +142,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                drawing.Text(Label, new(0, 3), new(0, 1));
+                drawing.Text(Labels[0], new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing)
             {
@@ -199,7 +198,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new Vector2(0, 3), new Vector2(0, 1));
+                drawing.Text(Labels[0], new Vector2(0, 3), new Vector2(0, 1));
             }
             private void DrawPushSwitch(SvgDrawing drawing)
             {
@@ -228,7 +227,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new Vector2(0, 6), new Vector2(0, 1));
+                drawing.Text(Labels[0], new Vector2(0, 6), new Vector2(0, 1));
             }
 
             private void DrawAreiSwitch(SvgDrawing drawing)
@@ -259,7 +258,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                drawing.Text(Labels[0], new Vector2(0, -5), new Vector2(0, -1));
             }
             private void DrawAreiRegularSwitch(SvgDrawing drawing)
             {
@@ -278,7 +277,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new Vector2(0, -length), new Vector2(0, -1));
+                drawing.Text(Labels[0], new Vector2(0, -length), new Vector2(0, -1));
 
                 // Small cross for illuminator lamps
                 if (Variants.Contains(_lamp))

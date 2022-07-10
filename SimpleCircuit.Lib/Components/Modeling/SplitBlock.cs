@@ -15,11 +15,8 @@
 
         private class Instance : ModelingDrawable, ILabeled
         {
-            [Description("The label on the top-left")]
-            public string Label { get; set; } = "A";
-
-            [Description("The label on the bottom-right")]
-            public string Label2 { get; set; } = "D";
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             protected override double Size => 12;
 
@@ -38,8 +35,8 @@
                 base.Draw(drawing);
                 double s = Size * 0.5;
                 drawing.Line(new(-s, s), new(s, -s));
-                drawing.Text(Label, new(-s * 0.5, -s * 0.5), new());
-                drawing.Text(Label2, new(s * 0.5, s * 0.5), new());
+                drawing.Text(Labels[0], new(-s * 0.5, -s * 0.5), new());
+                drawing.Text(Labels[1], new(s * 0.5, s * 0.5), new());
             }
         }
     }

@@ -151,6 +151,9 @@
         [Diagnostic(SeverityLevel.Error, "PE047", "Could not constrain orientation of pin {0} of {1}")]
         CouldNotConstrainPin,
 
+        [Diagnostic(SeverityLevel.Warning, "PW048", "Too many labels are specified")]
+        TooManyLabels,
+
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
     }

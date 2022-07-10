@@ -10,7 +10,6 @@ namespace SimpleCircuit.Components.Outputs
     [Drawable("LIGHT", "A light point.", "Outputs")]
     public class Light : DrawableFactory
     {
-        private const string _arei = "arei";
         private const string _direction = "direction";
         private const string _diverging = "diverging";
         private const string _projector = "projector";
@@ -24,8 +23,8 @@ namespace SimpleCircuit.Components.Outputs
         {
             private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
 
-            [Description("The label next to the light.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.AREI;
@@ -42,7 +41,22 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "b", "n", "neg");
-                Variants.Changed += UpdatePins;
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                if (Variants.Contains(Options.Arei))
+                {
+                    SetPinOffset(0, new());
+                    SetPinOffset(1, new());
+                }
+                else
+                {
+                    SetPinOffset(0, new(-4, 0));
+                    SetPinOffset(1, new(4, 0));
+                }
             }
 
             /// <inheritdoc />
@@ -62,7 +76,7 @@ namespace SimpleCircuit.Components.Outputs
                     DrawEmergency(drawing);
 
                 // Label
-                drawing.Text(Label, new Vector2(0, -5), new Vector2(0, -1));
+                drawing.Text(Labels[0], new Vector2(0, -5), new Vector2(0, -1));
             }
 
             private void DrawProjector(SvgDrawing drawing)
@@ -86,19 +100,6 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawEmergency(SvgDrawing drawing)
             {
                 drawing.Circle(new(), 1.5, new("dot"));
-            }
-            private void UpdatePins(object sender, EventArgs e)
-            {
-                if (Variants.Contains(Options.Arei))
-                {
-                    SetPinOffset(0, new());
-                    SetPinOffset(1, new());
-                }
-                else
-                {
-                    SetPinOffset(0, new(-4, 0));
-                    SetPinOffset(1, new(4, 0));
-                }
             }
         }
     }

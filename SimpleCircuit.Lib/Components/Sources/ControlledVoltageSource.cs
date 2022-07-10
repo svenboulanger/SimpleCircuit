@@ -14,11 +14,8 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the source.")]
-            public string Label { get; set; }
-
-            [Description("The label on the other side of the source.")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "cvs";
@@ -48,7 +45,7 @@ namespace SimpleCircuit.Components.Sources
                     case 0:
                     default:
                         SetPinOffset(0, new(-6, 0));
-                        SetPinOffset(1, new(-6, 0));
+                        SetPinOffset(1, new(6, 0));
                         break;
                 }
             }
@@ -84,8 +81,8 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
 
                 // Label
-                drawing.Text(Label, new(0, -8), new(0, -1));
-                drawing.Text(Label2, new(0, 8), new(0, 1));
+                drawing.Text(Labels[0], new(0, -8), new(0, -1));
+                drawing.Text(Labels[1], new(0, 8), new(0, 1));
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -94,8 +91,8 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 });
                 drawing.Line(new(-4, 0), new(4, 0));
-                drawing.Text(Label, new(0, -6), new(0, -1));
-                drawing.Text(Label2, new(0, 6), new(0, 1));
+                drawing.Text(Labels[0], new(0, -6), new(0, -1));
+                drawing.Text(Labels[1], new(0, 6), new(0, 1));
             }
         }
     }

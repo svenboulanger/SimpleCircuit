@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit.Parser
@@ -214,7 +213,7 @@ namespace SimpleCircuit.Parser
                     switch (lexer.Type)
                     {
                         case TokenType.String:
-                            info.Label = lexer.Content[1..^1].ToString();
+                            info.Labels.Add(lexer.Token);
                             lexer.Next();
                             break;
 
@@ -737,7 +736,7 @@ namespace SimpleCircuit.Parser
                 switch (lexer.Type)
                 {
                     case TokenType.Word:
-                        lexer.Branch(TokenType.Word, out var tokenProperty);
+                        lexer.Branch(TokenType.Word, out var propertyToken);
                         if (!lexer.Branch(TokenType.Equals))
                             context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
                         object value = null;
@@ -761,7 +760,7 @@ namespace SimpleCircuit.Parser
                                 break;
                         }
                         if (value != null)
-                            context.Options.AddDefaultProperty(key, tokenProperty.Content.ToString(), value);
+                            context.Options.AddDefaultProperty(key, propertyToken, value);
                         break;
 
                     case TokenType.Comma:
@@ -832,6 +831,7 @@ namespace SimpleCircuit.Parser
                 return false;
             }
 
+            bool result = true;
             while (lexer.Check(~TokenType.Newline))
             {
                 // Parse the component
@@ -851,54 +851,34 @@ namespace SimpleCircuit.Parser
                     return false;
                 }
 
-                // Find the property on the component
-                var member = component.GetType().GetProperty(propertyToken.Content.ToString(), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                if (member == null || !member.CanWrite)
-                {
-                    // Treat it as a boolean
-                    if (!lexer.Branch(TokenType.Equals))
-                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
-                    var value = ParseBoolean(lexer, context);
-                    if (value == null)
-                        return false;
-                    if (value == true)
-                        component.Variants.Add(propertyToken.Content.ToString());
-                    else
-                        component.Variants.Remove(propertyToken.Content.ToString());
-                    return true;
-                }
-
-                // Equal sign
+                // Equals
                 if (!lexer.Branch(TokenType.Equals))
                     context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
 
-                if (member.PropertyType == typeof(bool))
-                    member.SetValue(component, ParseBoolean(lexer, context));
-                else if (member.PropertyType == typeof(double))
+                // The value
+                object value = null;
+                switch (lexer.Type)
                 {
-                    double result = ParseDouble(lexer, context);
-                    if (double.IsNaN(result))
+                    case TokenType.Number:
+                    case TokenType.Integer:
+                        value = ParseDouble(lexer, context);
+                        break;
+
+                    case TokenType.String:
+                        value = ParseString(lexer, context);
+                        break;
+
+                    case TokenType.Word:
+                        value = ParseBoolean(lexer, context);
+                        break;
+
+                    default:
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyValue);
                         return false;
-                    member.SetValue(component, result);
                 }
-                else if (member.PropertyType == typeof(int))
-                {
-                    double result = ParseDouble(lexer, context);
-                    if (double.IsNaN(result))
-                        return false;
-                    member.SetValue(component, (int)Math.Round(result, MidpointRounding.AwayFromZero));
-                }
-                else if (member.PropertyType == typeof(string))
-                {
-                    member.SetValue(component, ParseString(lexer, context));
-                }
-                else
-                {
-                    context.Diagnostics?.Post(propertyToken, ErrorCodes.CouldNotRecognizeType, propertyToken.Content.ToString(), component.Name);
-                    return false;
-                }
+                result &= context.Options.SetProperty(context.Diagnostics, component, propertyToken, value);
             }
-            return true;
+            return result;
         }
         private static bool? ParseBoolean(SimpleCircuitLexer lexer, ParsingContext context)
         {

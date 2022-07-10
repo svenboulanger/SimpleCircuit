@@ -19,8 +19,8 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label of the wall plug.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "plug";
@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                drawing.Text(Label, new(6, -1), new(1, -1));
+                drawing.Text(Labels[0], new(6, -1), new(1, -1));
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

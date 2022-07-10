@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "invertor";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -76,7 +76,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(7.5, 0), 1.5);
 
-                drawing.Text(Label, new(0, -4), new(1, -1));
+                drawing.Text(Labels[0], new(0, -4), new(1, -1));
             }
 
             private void DrawInverterIEC(SvgDrawing drawing)
@@ -87,7 +87,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(6.5, 0), 1.5);
                 drawing.Text("1", new(), new());
 
-                drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Labels[0], new(0, -6), new(0, -1));
             }
         }
     }

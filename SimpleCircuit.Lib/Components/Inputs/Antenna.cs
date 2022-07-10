@@ -12,8 +12,8 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("Adds a label next to the antenna.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "antenna";
@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components.Inputs
                     });
                 }
 
-                drawing.Text(Label, new(5, -5), new(1, 0));
+                drawing.Text(Labels[0], new(5, -5), new(1, 0));
             }
         }
     }

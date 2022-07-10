@@ -18,11 +18,8 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the source.")]
-            public string Label { get; set; }
-
-            [Description("The label on the other side of the source.")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type => "vs";
@@ -106,16 +103,16 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Label
-                drawing.Text(Label, new(0, -8), new(0, -1));
-                drawing.Text(Label2, new(0, 8), new(0, 1));
+                drawing.Text(Labels[0], new(0, -8), new(0, -1));
+                drawing.Text(Labels[1], new(0, 8), new(0, 1));
             }
 
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, 0), 4);
                 drawing.Line(new(-4, 0), new(4, 0));
-                drawing.Text(Label, new(0, -6), new(0, -1));
-                drawing.Text(Label2, new(0, 6), new(0, 1));
+                drawing.Text(Labels[0], new(0, -6), new(0, -1));
+                drawing.Text(Labels[1], new(0, 6), new(0, 1));
             }
         }
     }

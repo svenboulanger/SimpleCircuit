@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "mux";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Digital
 
                 drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
                 drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
-                drawing.Text(Label, new Vector2(4, 6), new Vector2(1, 1));
+                drawing.Text(Labels[0], new Vector2(4, 6), new Vector2(1, 1));
             }
         }
     }

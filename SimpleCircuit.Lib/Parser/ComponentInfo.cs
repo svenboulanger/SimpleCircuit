@@ -22,7 +22,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the label of the component.
         /// </summary>
-        public string Label { get; set; }
+        public List<Token> Labels { get; } = new(2);
 
         /// <summary>
         /// Gets the variants of the component.
@@ -62,9 +62,21 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Handle the label
-                if (Label != null && Component is ILabeled labeled)
-                    labeled.Label = Label;
-
+                if (Labels.Count > 0 && Component is ILabeled labeled)
+                {
+                    if (Labels.Count > labeled.Labels.Count)
+                    {
+                        context.Diagnostics?.Post(Labels[labeled.Labels.Count], ErrorCodes.TooManyLabels);
+                        for (int i = 0; i < labeled.Labels.Count; i++)
+                            labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Labels.Count; i++)
+                            labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
+                    }    
+                }
+                
                 // Handle variants
                 foreach (var variant in Variants)
                 {

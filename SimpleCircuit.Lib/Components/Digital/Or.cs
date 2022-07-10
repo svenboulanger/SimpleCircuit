@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "or";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -147,14 +147,14 @@ namespace SimpleCircuit.Components.Digital
                     b.CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h));
                 });
 
-                drawing.Text(Label, new(0, -h - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
             }
             private void DrawOrIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(Width, Height, new());
                 drawing.Text("&#8805;1", new(), new());
-                drawing.Text(Label, new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

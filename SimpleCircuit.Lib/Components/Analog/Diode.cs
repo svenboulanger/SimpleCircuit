@@ -30,8 +30,10 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the diode.")]
-            public string Label { get; set; }
+            private double _ty1, _ty2;
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type => "diode";
@@ -87,6 +89,8 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
+                _ty1 = 0;
+                _ty2 = 0;
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -136,7 +140,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Labels[0], new(0, _ty1), new(0, -1));
+                drawing.Text(Labels[1], new(0, _ty2), new(0, 1));
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing)
@@ -146,6 +151,8 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
+                _ty1 = -5;
+                _ty2 = 5;
             }
             private void DrawZenerDiode(SvgDrawing drawing)
             {
@@ -157,17 +164,22 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4) }, new("cathode"));
+                        _ty1 = -5;
+                        _ty2 = 5;
                         break;
 
                     case 1:
                         drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
+                        _ty1 = -6;
+                        _ty2 = 6;
                         break;
 
                     default:
                         drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(6, 4) }, new("cathode"));
+                        _ty1 = -5;
+                        _ty2 = 5;
                         break;
                 }
-
             }
             private void DrawTunnelDiode(SvgDrawing drawing)
             {
@@ -176,6 +188,8 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(2, 4) }, new("cathode"));
+                _ty1 = -5;
+                _ty2 = 5;
             }
             private void DrawSchottkyDiode(SvgDrawing drawing)
             {
@@ -184,6 +198,8 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Polyline(new Vector2[] { new(6, -3), new(6, -4), new(4, -4), new(4, 4), new(2, 4), new(2, 3) }, new("cathode"));
+                _ty1 = -5;
+                _ty2 = 5;
             }
             private void DrawShockleyDiode(SvgDrawing drawing)
             {
@@ -193,6 +209,8 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode"));
                 drawing.Line(new(-4, 0), new(-4, 4));
                 drawing.Line(new(4, -4), new(4, 4));
+                _ty1 = -5;
+                _ty2 = 5;
             }
             private void DrawVaractor(SvgDrawing drawing)
             {
@@ -202,22 +220,28 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
                 drawing.Line(new(6, -4), new(6, 4), new("cathode"));
+                _ty1 = -5;
+                _ty2 = 5;
             }
             private void DrawPhotodiode(SvgDrawing drawing)
             {
                 drawing.Arrow(new(2, 7.5), new(1, 3.5));
                 drawing.Arrow(new(-1, 9.5), new(-2, 5.5));
+                _ty2 = _ty2 < 10.5 ? 10.5 : _ty2;
             }
             private void DrawLed(SvgDrawing drawing)
             {
                 drawing.Arrow(new(1, 3.5), new(2, 7.5));
                 drawing.Arrow(new(-2, 5.5), new(-1, 9.5));
+                _ty2 = _ty2 < 10.5 ? 10.5 : _ty2;
+
             }
             private void DrawLaser(SvgDrawing drawing)
             {
                 drawing.Line(new(0, -4), new(0, 4));
                 drawing.Arrow(new(-2, 5), new(-2, 10));
                 drawing.Arrow(new(2, 5), new(2, 10));
+                _ty2 = _ty2 < 11 ? 11 : _ty2;
             }
             private void DrawTVSDiode(SvgDrawing drawing)
             {
@@ -229,6 +253,8 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 0), new(12, -4), new(12, 4)
                 }, new("anode2"));
                 drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
+                _ty1 = -5;
+                _ty2 = 6;
             }
             private void DrawBidirectional(SvgDrawing drawing)
             {
@@ -242,6 +268,8 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode2"));
                 drawing.Line(new(-4, -4), new(-4, -12));
                 drawing.Line(new(4, -4), new(4, 4));
+                _ty1 = -13;
+                _ty2 = 5;
             }
         }
     }

@@ -27,8 +27,8 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the OTA.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "ota";
@@ -127,7 +127,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Arrow(new(-7, 10), new(6, -12));
 
                 // Label
-                drawing.Text(Label, new Vector2(2, 8), new Vector2(1, 1));
+                drawing.Text(Labels[0], new(2, 8), new(1, 1));
             }
         }
     }

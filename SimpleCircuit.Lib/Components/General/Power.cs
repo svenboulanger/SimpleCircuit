@@ -16,8 +16,8 @@ namespace SimpleCircuit.Components
         {
             private const string _anchor = "anchor";
 
-            [Description("The power plane name.")]
-            public string Label { get; set; } = "VDD";
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "power";
@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components
                     drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
                 else
                     drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
-                drawing.Text(Label, new Vector2(0, -3), new Vector2(0, -1));
+                drawing.Text(Labels[0], new(0, -3), new(0, -1));
             }
         }
     }

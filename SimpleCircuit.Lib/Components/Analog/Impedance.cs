@@ -19,11 +19,8 @@ namespace SimpleCircuit.Components.Analog
         {
             private double _width = 6, _length = 12;
 
-            [Description("The label next to the element.")]
-            public string Label { get; set; }
-
-            [Description("The label on the other side of the element")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type { get; }
@@ -77,13 +74,13 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                 {
                     drawing.Arrow(new(-5, w + 1), new(6, -w - 4));
-                    drawing.Text(Label, new(0, -w - 4), new(0, -1));
+                    drawing.Text(Labels[0], new(0, -w - 4), new(0, -1), new("lbl"));
                 }
                 else
-                    drawing.Text(Label, new(0, -w - 1), new(0, -1));
+                    drawing.Text(Labels[0], new(0, -w - 1), new(0, -1), new("lbl"));
 
                 // The label
-                drawing.Text(Label2, new(0, w + 1), new(0, 1));
+                drawing.Text(Labels[1], new(0, w + 1), new(0, 1), new("lbl2"));
             }
         }
     }

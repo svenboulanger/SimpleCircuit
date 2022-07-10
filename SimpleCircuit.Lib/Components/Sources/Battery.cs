@@ -16,9 +16,9 @@ namespace SimpleCircuit.Components.Sources
         {
             private int _cells = 1;
             private double Length => _cells * 4 - 2;
-            
-            [Description("The label next to the battery.")]
-            public string Label { get; set; }
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             [Description("The number of cells.")]
             public int Cells
@@ -29,7 +29,6 @@ namespace SimpleCircuit.Components.Sources
                     _cells = value;
                     if (_cells < 1)
                         _cells = 1;
-                    UpdatePins();
                 }
             }
 
@@ -45,6 +44,15 @@ namespace SimpleCircuit.Components.Sources
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-1, 0), new(-1, 0)), "n", "neg", "b");
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(1, 0), new(1, 0)), "p", "pos", "a");
+            }
+
+            /// <inheritdoc />
+            public override void Reset()
+            {
+                base.Reset();
+                double offset = Length / 2;
+                SetPinOffset(0, new(-offset, 0));
+                SetPinOffset(1, new(offset, 0));
             }
 
             /// <inheritdoc />
@@ -68,13 +76,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                drawing.Text(Label, new Vector2(0, -8), new Vector2(0, -1));
-            }
-            private void UpdatePins()
-            {
-                double offset = Length / 2;
-                SetPinOffset(0, new(-offset, 0));
-                SetPinOffset(1, new(offset, 0));
+                drawing.Text(Labels[0], new Vector2(0, -8), new Vector2(0, -1));
             }
         }
     }

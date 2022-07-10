@@ -18,8 +18,9 @@ namespace SimpleCircuit.Components.Wires
         {
             [Description("The number of crossings. Can be used to indicate a bus.")]
             public int Crossings { get; set; } = 1;
-            [Description("The label next to the direction.")]
-            public string Label { get; set; }
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "bus";
@@ -53,7 +54,7 @@ namespace SimpleCircuit.Components.Wires
                 }
 
                 // The label
-                drawing.Text(Label, new(0, -4), new(0, -1));
+                drawing.Text(Labels[0], new(0, -4), new(0, -1));
             }
         }
     }

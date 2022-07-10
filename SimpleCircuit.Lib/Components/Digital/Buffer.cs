@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "buffer";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-6, 6), new(6, 0), new(-6, -6)
                 });
 
-                drawing.Text(Label, new(0, -4), new(1, -1));
+                drawing.Text(Labels[0], new(0, -4), new(1, -1));
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(10, 10, new());
                 drawing.Text("1", new(), new());
 
-                drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Labels[0], new(0, -6), new(0, -1));
             }
         }
     }

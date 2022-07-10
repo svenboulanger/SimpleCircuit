@@ -26,12 +26,8 @@ namespace SimpleCircuit.Components.Analog
             private double _wiper = 0.5, _length = 12, _width = 8;
             private bool _isSet = false;
 
-            /// <inheritdoc/>
-            [Description("The label next to the resistor.")]
-            public string Label { get; set; }
-
-            [Description("The label on the other side of the resistor.")]
-            public string Label2 { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new(2);
 
             [Description("The length of the resistor.")]
             public double Length
@@ -155,15 +151,15 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 2));
-                        drawing.Text(Label, new(0, -w - 3), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, w + 2), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 3), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, w + 2), new(0, 1), new("lbl2"));
                         break;
 
                     case 1:
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        drawing.Text(Label, new(0, -w - 1), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, w + 6), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 1), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, w + 6), new(0, 1), new("lbl2"));
                         break;
 
                     case 2:
@@ -171,13 +167,13 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
                         });
-                        drawing.Text(Label, new(0, -w - 4), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(-3, w + 3), new(1, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 4), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(-3, w + 3), new(1, 1), new("lbl2"));
                         break;
 
                     default:
-                        drawing.Text(Label, new(0, -w - 2), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, w + 2), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 2), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, w + 2), new(0, 1), new("lbl2"));
                         break;
                 }
             }
@@ -199,15 +195,15 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0: // Programmable
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 3));
-                        drawing.Text(Label, new(0, -w - 3), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, w + 2), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 3), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, w + 2), new(0, 1), new("lbl2"));
                         break;
 
                     case 1: // Photoresistor
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        drawing.Text(Label, new(0, -w - 1), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, w + 6), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 1), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, w + 6), new(0, 1), new("lbl2"));
                         break;
 
                     case 2: // Thermistor
@@ -215,8 +211,8 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
                         });
-                        drawing.Text(Label, new(0, -w - 4), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(-l * 0.85 + 2, w + 2), new(1, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -w - 4), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(-l * 0.85 + 2, w + 2), new(1, 1), new("lbl2"));
                         break;
 
                     case 3: // Assymmetric
@@ -236,8 +232,8 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     default:
-                        drawing.Text(Label, new(0, -4), new(0, -1), new("lbl"));
-                        drawing.Text(Label2, new(0, 4), new(0, 1), new("lbl2"));
+                        drawing.Text(Labels[0], new(0, -4), new(0, -1), new("lbl"));
+                        drawing.Text(Labels[1], new(0, 4), new(0, 1), new("lbl2"));
                         break;
                 }
             }

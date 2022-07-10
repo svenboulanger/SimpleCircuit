@@ -223,7 +223,7 @@ namespace SimpleCircuitOnline
                 ".subckt PIXEL DIRleft DIRtop DIRbottom DIRright",
                 "    // Reset",
                 "    GND <u> D(photodiode) <u> Xd <u> MNrst <u> POW",
-                "    MNrst[g] <l 0> T(\"RST\")",
+                "    MNrst[g] <l> T(\"RST\")",
                 "    Xd <r> [g]MNsf[d] <u> POW",
                 "    MNsf[s] <d r> MNsel <r> Xcol",
                 "    MNsel[g] <u 60> Xrow",
@@ -242,10 +242,10 @@ namespace SimpleCircuitOnline
                 "PIXEL3 <r> PIXEL4[DIRtop] <u> [DIRbottom]PIXEL2",
                 "",
                 "// Add some terminals",
-                "PIXEL1[DIRtop] <u 0> T(\"COL_{OUT,k}\")",
-                "PIXEL2[DIRtop] <u 0> T(\"COL_{OUT,k+1}\")",
-                "PIXEL2[DIRright] <r 0> T(\"ROW_{SEL,i}\")",
-                "PIXEL4[DIRright] <r 0> T(\"ROW_{SEL,i+1}\")",
+                "PIXEL1[DIRtop] <u> T(\"COL_{OUT,k}\")",
+                "PIXEL2[DIRtop] <u> T(\"COL_{OUT,k+1}\")",
+                "PIXEL2[DIRright] <r> T(\"ROW_{SEL,i}\")",
+                "PIXEL4[DIRright] <r> T(\"ROW_{SEL,i+1}\")",
             })),
 
             // Full adder logic - showing off digital logic cells
@@ -314,7 +314,7 @@ namespace SimpleCircuitOnline
                 "// The cross-coupled wires",
                 "NAND1[b] <l d a -20 d> Xob",
                 "Xoa <d a -160 d r> [b]NAND2",
-                "(x NAND1[o] <0> [o]NAND2)",
+                "(x NAND1 <d> NAND2)",
                 "",
                 "// Finally flip the bottom one",
                 "- NAND2.Flipped = true",
@@ -354,7 +354,7 @@ namespace SimpleCircuitOnline
                 "",
                 "// We can still enforce alignment between elements",
                 "// This would not be possible with subcircuits",
-                "(y Input/GND1 <0> Output/GND1)"
+                "(y Input/GND1 <r> Output/GND1)"
             }))
         };
     }

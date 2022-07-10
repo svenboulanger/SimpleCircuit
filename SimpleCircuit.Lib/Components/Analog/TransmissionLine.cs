@@ -41,8 +41,8 @@ namespace SimpleCircuit.Components.Analog
                     .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
             }
 
-            [Description("The label in the transmission line.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             [Description("The length of the transmission line.")]
             public double Length
@@ -103,7 +103,7 @@ namespace SimpleCircuit.Components.Analog
                 })));
 
                 // Label
-                drawing.Text(Label, new Vector2(), new Vector2());
+                drawing.Text(Labels[0], new(), new());
             }
         }
     }

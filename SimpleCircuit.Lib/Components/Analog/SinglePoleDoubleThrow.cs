@@ -19,8 +19,8 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            [Description("The label next to the switch.")]
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "spdt";
@@ -80,10 +80,10 @@ namespace SimpleCircuit.Components.Analog
                     case 0: drawing.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4)); break;
                     case 1: drawing.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4)); break;
                     default: drawing.Line(new(-4, 0), new(5, 0)); break;
-                }   
+                }
 
                 // Label
-                drawing.Text(Label, new(-6, 6), new(-1, 1));
+                drawing.Text(Labels[0], new(-6, 6), new(-1, 1));
             }
         }
     }

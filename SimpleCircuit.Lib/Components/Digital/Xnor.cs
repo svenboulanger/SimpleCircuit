@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "xnor";
 
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -153,7 +153,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-w * 1.3, h), new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)
                 });
                 drawing.Circle(new(w + 1.5, 0), 1.5);
-                drawing.Text(Label, new(0, -h - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
             }
 
             private void DrawXnorIEC(SvgDrawing drawing)
@@ -162,7 +162,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(Width, Height);
                 drawing.Text("=1", new(), new());
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
-                drawing.Text(Label, new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

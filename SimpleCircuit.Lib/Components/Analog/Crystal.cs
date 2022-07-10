@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             /// <inheritdoc />
-            public string Label { get; set; }
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public override string Type => "crystal";
@@ -38,7 +38,8 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(b => b.MoveTo(-4.5, -3.5).Line(0, 7).MoveTo(4.5, -3.5).Line(0, 7));
 
                 // Label
-                drawing.Text(Label, new(0, -6), new(0, -1));
+                drawing.Text(Labels[0], new(0, -6), new(0, -1), new("lbl"));
+                drawing.Text(Labels[1], new(0, 6), new(0, 1), new("lbl2"));
             }
         }
     }

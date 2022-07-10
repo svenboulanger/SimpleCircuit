@@ -19,8 +19,9 @@ namespace SimpleCircuit.Components
             public double Angle { get; set; }
             [Description("The label distance from the point. The default is 4.")]
             public double Distance { get; set; } = 4.0;
-            [Description("The label next to the point.")]
-            public string Label { get; set; }
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "point";
@@ -43,7 +44,7 @@ namespace SimpleCircuit.Components
                     drawing.Circle(new Vector2(), 1, new("dot"));
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                drawing.Text(Label, n * Distance, n);
+                drawing.Text(Labels[0], n * Distance, n);
             }
         }
     }

@@ -6,11 +6,8 @@
     public interface ILabeled
     {
         /// <summary>
-        /// Gets or sets the label.
+        /// Gets the labels supporting the drawable.
         /// </summary>
-        /// <value>
-        /// The label.
-        /// </value>
-        string Label { get; set; }
+        public Labels Labels { get; }
     }
 }

@@ -14,7 +14,8 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            public string Label { get; set; }
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "terminal";
@@ -34,7 +35,7 @@ namespace SimpleCircuit.Components
             {
                 drawing.ExtendPins(Pins, 4);
                 drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
-                drawing.Text(Label, new Vector2(-4, 0), new Vector2(-1, 0));
+                drawing.Text(Labels[0], new Vector2(-4, 0), new Vector2(-1, 0));
             }
         }
     }
