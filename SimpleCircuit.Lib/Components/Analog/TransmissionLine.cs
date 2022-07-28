@@ -82,7 +82,7 @@ namespace SimpleCircuit.Components.Analog
 
                 x = _inner + (Length - _width) / 2;
                 SetPinOffset(2, new(x, _height));
-                SetPinOffset(3, new(x, 0));
+                SetPinOffset(3, new(_width + (Length - _width) / 2, 0));
             }
 
             /// <inheritdoc />
