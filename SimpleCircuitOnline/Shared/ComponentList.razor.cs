@@ -13,15 +13,16 @@ namespace SimpleCircuitOnline.Shared
         private string _filterString = string.Empty;
         private bool _expandAll = false;
         private readonly HashSet<string> _searchTerms = new();
-        private Dictionary<string, List<(DrawableMetadata, IDrawable)>> _categories = new();
+        private Dictionary<string, List<(DrawableMetadata, IDrawable, HashSet<string>)>> _categories = new();
 
-        private bool IsFiltered((DrawableMetadata Metadata, IDrawable Drawable) argument)
+        private bool IsFiltered((DrawableMetadata Metadata, IDrawable Drawable, HashSet<string> Variants) argument)
         {
             int count = 0;
             foreach (var term in _searchTerms)
             {
                 if (argument.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-                    argument.Metadata.Keys.Any(key => key.Contains(term, StringComparison.CurrentCultureIgnoreCase)))
+                    argument.Metadata.Keys.Any(key => key.Contains(term, StringComparison.CurrentCultureIgnoreCase)) ||
+                    argument.Variants.Contains(term))
                     count++;
             }
             return count == _searchTerms.Count;
@@ -49,6 +50,7 @@ namespace SimpleCircuitOnline.Shared
 
             // Find all the different components
             var context = new ParsingContext();
+            var drawing = new SvgDrawing();
             foreach (var factory in context.Factory.Factories)
             {
                 foreach (var metadata in factory.Metadata)
@@ -63,7 +65,10 @@ namespace SimpleCircuitOnline.Shared
                         }
 
                         // Add our description
-                        list.Add((metadata, factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options, context.Diagnostics)));
+                        var drawable = factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options, context.Diagnostics);
+                        drawable.Render(drawing);
+                        var variants = drawable.Variants.Branches.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                        list.Add((metadata, drawable, variants));
                     }
                 }
             }
