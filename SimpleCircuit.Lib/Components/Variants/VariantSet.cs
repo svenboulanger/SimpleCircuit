@@ -104,9 +104,9 @@ namespace SimpleCircuit.Components.Variants
         }
 
         /// <summary>
-        /// Selects a single variant from the list.
+        /// Find the index of the specified variant that is selected. Allows using variants inside a switch statement.
         /// </summary>
-        /// <param name="variantNames">The possible list of variants.</param>
+        /// <param name="variantNames">The list of variants that need to be checked.</param>
         /// <returns>Returns the index of the variant, -1 if no variants were selected, and -2 if multiple variants were selected.</returns>
         public int Select(params string[] variantNames)
         {

@@ -19,7 +19,7 @@ namespace SimpleCircuit.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,27 @@ namespace SimpleCircuit.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to path, polyline, line, circle, polygon {
+        ///    stroke: black;
+        ///    stroke-width: 0.5pt;
+        ///    fill: none;
+        ///    stroke-linecap: round;
+        ///    stroke-linejoin: round;
+        ///}
+        ///.super, .sub { font-size: 0.75em; }
+        ///.dot, .arrowhead { fill: black; }
+        ///.plane { stroke-width: 1pt; }
+        ///.battery .neg { stroke-width: 0.75pt; }
+        ///text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
+        ///.small tspan { font-size: 0.8em; }.
+        /// </summary>
+        internal static string DefaultStyle {
+            get {
+                return ResourceManager.GetString("DefaultStyle", resourceCulture);
             }
         }
     }

@@ -27,38 +27,6 @@ namespace SimpleCircuit
         public string Style { get; set; } = DefaultStyle;
 
         /// <summary>
-        /// Gets or sets the target length of a wire.
-        /// </summary>
-        /// <value>
-        /// The target length of the wire.
-        /// </value>
-        public double WireLength { get; set; } = 7.5;
-
-        /// <summary>
-        /// Gets or sets the text line height.
-        /// </summary>
-        /// <value>
-        /// The line height.
-        /// </value>
-        public double LineHeight { get; set; } = 5.0;
-
-        /// <summary>
-        /// Gets or sets the width of a lower-case character.
-        /// </summary>
-        /// <value>
-        /// The width of a lowercase character.
-        /// </value>
-        public double LowerCharacterWidth { get; set; } = 3.0;
-
-        /// <summary>
-        /// Gets or sets the width of an upper-case character.
-        /// </summary>
-        /// <value>
-        /// The width of an uppercase character.
-        /// </value>
-        public double UpperCharacterWidth { get; set; } = 4.0;
-
-        /// <summary>
         /// Gets the number of graphical circuit presences.
         /// </summary>
         public int Count => _presences.Count;
@@ -66,20 +34,7 @@ namespace SimpleCircuit
         /// <summary>
         /// The default style for drawings.
         /// </summary>
-        public static string DefaultStyle =
-@"path, polyline, line, circle, polygon {
-    stroke: black;
-    stroke-width: 0.5pt;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-.super, .sub { font-size: 0.75em; }
-.dot, .arrowhead { fill: black; }
-.plane { stroke-width: 1pt; }
-.battery .neg { stroke-width: 0.75pt; }
-text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
-.small tspan { font-size: 0.8em; }";
+        public static string DefaultStyle { get; set; } = Properties.Resources.DefaultStyle;
 
         /// <summary>
         /// Gets a dictionary of metadata key-value pairs that are optional.
@@ -200,7 +155,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
             // If there are no circuit components to solve, let's stop here
             if (context.Circuit.Count == 0)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001", $"No elements to solve for."));
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001", "No elements to solve for."));
                 return false;
             }
 
