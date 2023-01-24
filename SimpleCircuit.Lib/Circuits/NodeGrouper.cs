@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Circuits
 {
     /// <summary>
     /// A class for grouping nodes together.

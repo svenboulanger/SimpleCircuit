@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components
+﻿using SimpleCircuit.Circuits;
+
+namespace SimpleCircuit.Components
 {
     /// <summary>
     /// The context used for collecting information about nodes in a
