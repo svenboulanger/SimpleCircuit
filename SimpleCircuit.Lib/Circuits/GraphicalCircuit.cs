@@ -17,6 +17,7 @@ namespace SimpleCircuit
     public class GraphicalCircuit : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<ICircuitPresence> _extra = new List<ICircuitPresence>();
 
         /// <summary>
         /// Gets or sets the style for the graphics.
@@ -50,6 +51,16 @@ namespace SimpleCircuit
         /// Gets whether the circuit has been solved.
         /// </summary>
         public bool Solved { get; private set; } = false;
+
+        /// <summary>
+        /// Gets or sets the minimum spacing in X-direction between blocks.
+        /// </summary>
+        public double SpacingX { get; set; } = 50.0;
+
+        /// <summary>
+        /// Gets or sets the minimum spacing in Y-directionb between blocks.
+        /// </summary>
+        public double SpacingY { get; set; } = 50.0;
 
         /// <summary>
         /// Adds the specified component.
@@ -133,6 +144,7 @@ namespace SimpleCircuit
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
             }
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
+            _extra.Clear();
 
             // Prepare all the presences
             foreach (var c in presences)
@@ -143,10 +155,12 @@ namespace SimpleCircuit
                 return false;
 
             // Solver presences
-            foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                c.DiscoverNodeRelationships(context.Nodes, diagnostics);
-            foreach (var group in context.Nodes.Relative.Representatives)
-                context.Nodes.Shorts.Group(group, "0");
+            DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), context.Nodes, diagnostics);
+
+            // Space loose blocks next to each other to avoid overlaps
+            if (!Space(context))
+                return false;
+            presences.AddRange(_extra);
 
             // Register any solvable presences in the circuit
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
@@ -281,6 +295,123 @@ namespace SimpleCircuit
                 }
             }
             return success;
+        }
+
+        private void DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context, IDiagnosticHandler diagnostics)
+        {
+            // First deal with shorts to reduce the number of variables as much as possible
+            context.Mode = NodeRelationMode.Shorts;
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                c.DiscoverNodeRelationships(context, diagnostics);
+
+            // Order coordinates to discover the bounds on blocks
+            context.Mode = NodeRelationMode.Links;
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                c.DiscoverNodeRelationships(context, diagnostics);
+
+            // Group nodes together that belong to the same "drawn block"
+            context.Mode = NodeRelationMode.Groups;
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                c.DiscoverNodeRelationships(context, diagnostics);
+        }
+
+        private bool Space(CircuitSolverContext context)
+        {
+            // Make a map of representatives and their extremes
+            var dict = new Dictionary<string, (List<string> Minima, List<string> Maxima)>(StringComparer.OrdinalIgnoreCase);
+            foreach (var node in context.Nodes.Extremes.Linked.Representatives)
+                dict.Add(node, (new List<string>(), new List<string>()));
+
+            // Map all minima
+            foreach (var node in context.Nodes.Extremes.Minimum.Extremes)
+            {
+                string representative = context.Nodes.Extremes.Linked[node];
+                if (dict.TryGetValue(representative, out var extremes))
+                    extremes.Minima.Add(node);
+            }
+
+            // Map all maxima
+            foreach (var node in context.Nodes.Extremes.Maximum.Extremes)
+            {
+                string representative = context.Nodes.Extremes.Linked[node];
+                if (dict.TryGetValue(representative, out var extremes))
+                    extremes.Maxima.Add(node);
+            }
+
+            // Use the XY sets to make a vertical stack of graphical blocks
+            Dictionary<string, HashSet<string>> stacked = new();
+            foreach (var set in context.Nodes.XYSets)
+            {
+                Console.WriteLine($"Grouped: {set}");
+                if (!stacked.TryGetValue(set.NodeY, out var horiz))
+                {
+                    horiz = new HashSet<string>();
+                    stacked.Add(set.NodeY, horiz);
+                }
+                horiz.Add(set.NodeX);
+            }
+
+            // Fix the positions
+            int constraint = 0;
+            List<string> lastMaxY = null;
+            foreach (var blocks in stacked)
+            {
+                // The Y-coordinate is all related to each other, so we can simply use the minima for the y-node
+                if (!dict.TryGetValue(blocks.Key, out var minMaxY))
+                    continue;
+
+                // Add the minima for y-coordinates
+                if (lastMaxY == null)
+                {
+                    foreach (var min in minMaxY.Minima)
+                        _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                }
+                else
+                {
+                    foreach (var min in minMaxY.Minima)
+                    {
+                        foreach (var max in lastMaxY)
+                            _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, SpacingY) { Weight = 1e-6 });
+                    }
+                }
+                lastMaxY = minMaxY.Maxima;
+                dict.Remove(blocks.Key);
+
+                // Deal with the X-coordinates
+                List<string> lastMaxX = null;
+                foreach (var nodeX in blocks.Value)
+                {
+                    if (!dict.TryGetValue(nodeX, out var minMaxX))
+                        continue;
+
+                    // Add the minima for x-coordinates
+                    if (lastMaxX == null)
+                    {
+                        foreach (var min in minMaxX.Minima)
+                            _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                    }
+                    else
+                    {
+                        foreach (var min in minMaxX.Minima)
+                        {
+                            foreach (var max in lastMaxX)
+                                _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, SpacingX) { Weight = 1e-6 });
+                        }
+                    }
+                    lastMaxX = minMaxX.Maxima;
+                    dict.Remove(nodeX);
+                }
+            }
+
+            // Deal with loose ends
+            foreach (var pair in dict)
+            {
+                if (pair.Value.Minima.Count == 0 || pair.Value.Maxima.Count == 0)
+                    continue;
+                foreach (var min in pair.Value.Minima)
+                    _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+            }
+            return true;
         }
 
         /// <summary>

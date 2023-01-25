@@ -115,14 +115,40 @@ namespace SimpleCircuit.Components.Pins
         {
             // Deal with shorts
             var direction = _origin is ITransformingDrawable tfd ? tfd.TransformNormal(Direction) : Direction;
-            if (direction.X.IsZero())
-                context.Shorts.Group(X, _origin.X);
-            if (direction.Y.IsZero())
-                context.Shorts.Group(Y, _origin.Y);
 
-            // Link the pin to its owner
-            context.Relative.Group(X, _origin.X);
-            context.Relative.Group(Y, _origin.Y);
+            switch (context.Mode)
+            {
+                case NodeRelationMode.Shorts:
+                    if (direction.X.IsZero())
+                        context.Shorts.Group(X, _origin.X);
+                    if (direction.Y.IsZero())
+                        context.Shorts.Group(Y, _origin.Y);
+                    break;
+
+                case NodeRelationMode.Links:
+                    if (!direction.X.IsZero())
+                    {
+                        string ox = context.Shorts[_origin.X];
+                        string x = context.Shorts[X];
+                        if (direction.X > 0)
+                            context.Extremes.Order(ox, x);
+                        else
+                            context.Extremes.Order(x, ox);
+                    }
+                    if (!direction.Y.IsZero())
+                    {
+                        string oy = context.Shorts[_origin.Y];
+                        string y = context.Shorts[Y];
+                        if (direction.Y > 0)
+                            context.Extremes.Order(oy, y);
+                        else
+                            context.Extremes.Order(y, oy);
+                    }
+                    break;
+
+                default:
+                    return;
+            }
         }
     }
 }

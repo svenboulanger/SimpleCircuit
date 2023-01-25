@@ -138,54 +138,94 @@ namespace SimpleCircuit.Components.Wires
         {
             if (_info == null && _single != null && _single.Length > 1)
             {
-                // Only single pin/wire is given, so let's align those with wildcards
-                if ((_direction & Direction.X) != 0)
+                // This is an alignment of many items
+                switch (context.Mode)
                 {
-                    string coord = null;
-                    foreach (var c in _single)
-                    {
-                        if (coord == null)
-                            coord = c.X;
-                        else
-                            context.Shorts.Group(coord, c.X);
-                        context.Relative.Group(coord, c.X);
-                    }
-                }
-                if ((_direction & Direction.Y) != 0)
-                {
-                    string coord = null;
-                    foreach (var c in _single)
-                    {
-                        if (coord == null)
-                            coord = c.Y;
-                        else
-                            context.Shorts.Group(coord, c.Y);
-                        context.Relative.Group(coord, c.Y);
-                    }
+                    case NodeRelationMode.Shorts:
+                        if ((_direction & Direction.X) != 0)
+                        {
+                            string coord = null;
+                            foreach (var p in _single)
+                            {
+                                if (coord == null)
+                                    coord = p.X;
+                                else
+                                    context.Shorts.Group(coord, p.X);
+                            }
+                        }
+                        if ((_direction & Direction.Y) != 0)
+                        {
+                            string coord = null;
+                            foreach (var p in _single)
+                            {
+                                if (coord == null)
+                                    coord = p.Y;
+                                else
+                                    context.Shorts.Group(coord, p.Y);
+                            }
+                        }
+                        break;
+
+                    default:
+                        break;
                 }
             }
 
             if (_info != null)
             {
+                // This is a real virtual wire, with wire segments
+                // We already combined all info in the Prepare method
                 if (_p2w == null || _w2p == null)
                     return;
-                if ((_direction & Direction.X) != 0)
+
+                switch (context.Mode)
                 {
-                    if (!_extendLeft && !_extendRight)
-                    {
-                        if (_offset.X.IsZero())
-                            context.Shorts.Group(_p2w.X, _w2p.X);
-                        context.Relative.Group(_p2w.X, _w2p.X);
-                    }
-                }
-                if ((_direction & Direction.Y) != 0)
-                {
-                    if (!_extendLeft && !_extendRight)
-                    {
-                        if (_offset.Y.IsZero())
-                            context.Shorts.Group(_p2w.Y, _w2p.Y);
-                        context.Relative.Group(_p2w.Y, _w2p.Y);
-                    }
+                    case NodeRelationMode.Shorts:
+                        if ((_direction & Direction.X) != 0)
+                        {
+                            if (!_extendLeft && !_extendRight)
+                            {
+                                if (_offset.X.IsZero())
+                                    context.Shorts.Group(_p2w.X, _w2p.X);
+                            }
+                        }
+                        if ((_direction & Direction.Y) != 0)
+                        {
+                            if (!_extendLeft && !_extendRight)
+                            {
+                                if (_offset.Y.IsZero())
+                                    context.Shorts.Group(_p2w.Y, _w2p.Y);
+                            }
+                        }
+                        break;
+
+                    case NodeRelationMode.Links:
+                        if ((_direction & Direction.X) != 0)
+                        {
+                            if (_extendLeft && _extendRight)
+                            {
+                                // Nothing can be inferred here...
+                            }
+                            else if (_extendRight)
+                                context.Extremes.Order(context.Shorts[_p2w.X], context.Shorts[_w2p.X]);
+                            else if (_extendLeft)
+                                context.Extremes.Order(context.Shorts[_w2p.X], context.Shorts[_p2w.X]);
+                        }
+                        if ((_direction & Direction.Y) != 0)
+                        {
+                            if (_extendUp && _extendDown)
+                            {
+                                // Nothing can be inferred here...
+                            }
+                            else if (_extendDown)
+                                context.Extremes.Order(context.Shorts[_p2w.Y], context.Shorts[_w2p.Y]);
+                            else if (_extendUp)
+                                context.Extremes.Order(context.Shorts[_w2p.Y], context.Shorts[_p2w.Y]);
+                        }
+                        break;
+
+                    default:
+                        break;
                 }
             }
         }

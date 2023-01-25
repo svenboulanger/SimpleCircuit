@@ -1,13 +1,20 @@
 ﻿using SimpleCircuit.Circuits;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
+
     /// <summary>
     /// The context used for collecting information about nodes in a
     /// graphical circuit.
     /// </summary>
     public class NodeContext
     {
+        /// <summary>
+        /// Gets the current mode for discovering node relationships.
+        /// </summary>
+        public NodeRelationMode Mode { get; set; }
+
         /// <summary>
         /// Gets the graphical circuit defining the nodes.
         /// </summary>
@@ -19,8 +26,13 @@ namespace SimpleCircuit.Components
         public NodeGrouper Shorts { get; } = new();
 
         /// <summary>
-        /// Get the groups of nodes that are constrained relative to each other.
+        /// Gets the extremes of the nodes.
         /// </summary>
-        public NodeGrouper Relative { get; } = new();
+        public Extremes Extremes { get; } = new();
+
+        /// <summary>
+        /// Gets a set of X- and Y-coordinate node combinations.
+        /// </summary>
+        public HashSet<XYNode> XYSets { get; } = new();
     }
 }

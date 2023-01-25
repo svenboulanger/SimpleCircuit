@@ -87,6 +87,11 @@ namespace SimpleCircuit.Components
         public double Minimum { get; }
 
         /// <summary>
+        /// Gets or sets the weight of the minimum constraint.
+        /// </summary>
+        public double Weight { get; set; } = 1.0;
+
+        /// <summary>
         /// Creates a new <see cref="MinimumConstraint"/>.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -120,6 +125,17 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
+            switch (context.Mode)
+            {
+                case NodeRelationMode.Links:
+                    string highest = context.Shorts[Highest];
+                    string lowest = context.Shorts[Lowest];
+                    context.Extremes.Order(lowest, highest);
+                    break;
+
+                default:
+                    return;
+            }
         }
 
         /// <inheritdoc />
@@ -128,7 +144,7 @@ namespace SimpleCircuit.Components
             var highest = context.Nodes.Shorts[Highest];
             var lowest = context.Nodes.Shorts[Lowest];
             if (highest != lowest)
-                AddMinimum(context.Circuit, Name, lowest, highest, Minimum);
+                AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
         }
 
         /// <inheritdoc />

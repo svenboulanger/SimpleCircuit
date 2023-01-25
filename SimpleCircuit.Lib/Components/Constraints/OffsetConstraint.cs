@@ -94,9 +94,22 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            if (Offset.IsZero())
-                context.Shorts.Group(Lowest, Highest);
-            context.Relative.Group(Lowest, Highest);
+            switch (context.Mode)
+            {
+                case NodeRelationMode.Shorts:
+                    if (Offset.IsZero())
+                        context.Shorts.Group(Lowest, Highest);
+                    break;
+
+                case NodeRelationMode.Links:
+                    if (!Offset.IsZero())
+                    {
+                        string lowest = context.Shorts[Lowest];
+                        string highest = context.Shorts[Highest];
+                        context.Extremes.Order(lowest, highest);
+                    }
+                    break;
+            }
         }
 
         /// <inheritdoc />

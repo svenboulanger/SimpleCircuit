@@ -110,16 +110,40 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            // Register shorts
             var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
-            if (offset.X.IsZero())
-                context.Shorts.Group(X, _origin.X);
-            if (offset.Y.IsZero())
-                context.Shorts.Group(Y, _origin.Y);
+            switch (context.Mode)
+            {
+                case NodeRelationMode.Shorts:
+                    if (offset.X.IsZero())
+                        context.Shorts.Group(X, _origin.X);
+                    if (offset.Y.IsZero())
+                        context.Shorts.Group(Y, _origin.Y);
+                    break;
 
-            // Link the pin to its owner
-            context.Relative.Group(X, _origin.X);
-            context.Relative.Group(Y, _origin.Y);
+                case NodeRelationMode.Links:
+                    if (!offset.X.IsZero())
+                    {
+                        string ox = context.Shorts[_origin.X];
+                        string x = context.Shorts[X];
+                        if (offset.X > 0)
+                            context.Extremes.Order(ox, x);
+                        else
+                            context.Extremes.Order(x, ox);
+                    }
+                    if (!offset.Y.IsZero())
+                    {
+                        string oy = context.Shorts[_origin.Y];
+                        string y = context.Shorts[Y];
+                        if (offset.Y > 0)
+                            context.Extremes.Order(oy, y);
+                        else
+                            context.Extremes.Order(y, oy);
+                    }
+                    break;
+
+                default:
+                    return;
+            }
         }
 
         /// <summary>

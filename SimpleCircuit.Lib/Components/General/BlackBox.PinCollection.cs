@@ -125,22 +125,46 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
-                // We will group the X-coordinates and Y-coordinates of each side
-                foreach (var pin in _pinsByIndex.OfType<LoosePin>())
+                switch (context.Mode)
                 {
-                    if (PointsUp(pin))
-                        context.Shorts.Group(_parent.Y, pin.Y);
-                    else if (PointsDown(pin))
-                        context.Shorts.Group(Bottom, pin.Y);
-                    else if (PointsLeft(pin))
-                        context.Shorts.Group(_parent.X, pin.X);
-                    else
-                        context.Shorts.Group(Right, pin.X);
+                    case NodeRelationMode.Shorts:
+                        foreach (var pin in _pinsByIndex.OfType<LoosePin>())
+                        {
+                            if (PointsUp(pin))
+                                context.Shorts.Group(_parent.Y, pin.Y);
+                            else if (PointsDown(pin))
+                                context.Shorts.Group(Bottom, pin.Y);
+                            else if (PointsLeft(pin))
+                                context.Shorts.Group(_parent.X, pin.X);
+                            else if (PointsRight(pin))
+                                context.Shorts.Group(Right, pin.X);
+                        }
+                        break;
 
-                    // Link the pin to the owner
-                    context.Relative.Group(_parent.Y, pin.Y);
-                    context.Relative.Group(_parent.X, pin.X);
+                    case NodeRelationMode.Links:
+                        var pins = _pinsByIndex.OfType<LoosePin>();
+                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), Right, context);
+                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), Right, context);
+                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), Bottom, context);
+                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), Bottom, context);
+                        break;
+
+                    default:
+                        return;
                 }
+            }
+
+            private void OrderCoordinates(IEnumerable<string> coordinates, string final, NodeContext context)
+            {
+                string lastCoordinate = null;
+                foreach (var coordinate in coordinates)
+                {
+                    var c = context.Shorts[coordinate];
+                    if (lastCoordinate != null)
+                        context.Extremes.Order(lastCoordinate, c);
+                    lastCoordinate = c;
+                }
+                context.Extremes.Order(lastCoordinate, final);
             }
 
             /// <inheritdoc />

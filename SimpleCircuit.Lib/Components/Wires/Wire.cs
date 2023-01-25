@@ -179,47 +179,90 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            // Align the pins
-            if (_p2w != null)
+            string x, y;
+            switch (context.Mode)
             {
-                context.Shorts.Group(_p2w.X, StartX);
-                context.Shorts.Group(_p2w.Y, StartY);
-                context.Relative.Group(_p2w.X, StartX);
-                context.Relative.Group(_p2w.Y, StartY);
-            }
-            if (_w2p != null)
-            {
-                context.Shorts.Group(_w2p.X, EndX);
-                context.Shorts.Group(_w2p.Y, EndY);
-                context.Relative.Group(_w2p.X, EndX);
-                context.Relative.Group(_w2p.Y, EndY);
-            }
+                case NodeRelationMode.Shorts:
 
-            // The segments themselves
-            string x = StartX, y = StartY;
-            for (int i = 0; i < _info.Segments.Count; i++)
+                    // Short wire ends to the correct pins
+                    if (_p2w != null)
+                    {
+                        context.Shorts.Group(_p2w.X, StartX);
+                        context.Shorts.Group(_p2w.Y, StartY);
+                    }
+                    if (_w2p != null)
+                    {
+                        context.Shorts.Group(_w2p.X, EndX);
+                        context.Shorts.Group(_w2p.Y, EndY);
+                    }
+
+                    // Deal with horizontal and vertical segments
+                    x = StartX;
+                    y = StartY;
+                    for (int i = 0; i < _info.Segments.Count; i++)
+                    {
+                        string tx = GetXName(i);
+                        string ty = GetYName(i);
+                        var orientation = GetOrientation(i);
+                        if (orientation.X.IsZero())
+                            context.Shorts.Group(x, tx);
+                        if (orientation.Y.IsZero())
+                            context.Shorts.Group(y, ty);
+                        x = tx;
+                        y = ty;
+                    }
+                    break;
+
+                case NodeRelationMode.Links:
+                    x = context.Shorts[StartX];
+                    y = context.Shorts[StartY];
+                    for (int i = 0; i < _info.Segments.Count; i++)
+                    {
+                        string tx = context.Shorts[GetXName(i)];
+                        string ty = context.Shorts[GetYName(i)];
+                        var orientation = GetOrientation(i);
+                        if (!orientation.X.IsZero())
+                        {
+                            if (orientation.X > 0)
+                                context.Extremes.Order(x, tx);
+                            else
+                                context.Extremes.Order(tx, x);
+                        }
+                        if (!orientation.Y.IsZero())
+                        {
+                            if (orientation.Y > 0)
+                                context.Extremes.Order(y, ty);
+                            else
+                                context.Extremes.Order(ty, y);
+                        }
+                        x = tx;
+                        y = ty;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private Vector2 GetOrientation(int index)
+        {
+            var orientation = _info.Segments[index].Orientation;
+            if (orientation.X.IsZero() && orientation.Y.IsZero())
             {
-                string tx = GetXName(i), ty = GetYName(i);
-                Vector2 orientation = _info.Segments[i].Orientation;
+                // Use pin orientation
                 if (orientation.X.IsZero() && orientation.Y.IsZero())
                 {
                     // Take the pin orientation instead
-                    if (i == 0 && _p2w is IOrientedPin p1)
+                    if (index == 0 && _p2w is IOrientedPin p1)
                         orientation = p1.Orientation;
-                    else if (i == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
+                    else if (index == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
                         orientation = p2.Orientation;
                     else
                         orientation = new(1, 0);
                 }
-                if (orientation.X.IsZero())
-                    context.Shorts.Group(x, tx);
-                if (orientation.Y.IsZero())
-                    context.Shorts.Group(y, ty);
-                context.Relative.Group(x, tx);
-                context.Relative.Group(y, ty);
-                x = tx;
-                y = ty;
             }
+            return orientation;
         }
 
         /// <inheritdoc />

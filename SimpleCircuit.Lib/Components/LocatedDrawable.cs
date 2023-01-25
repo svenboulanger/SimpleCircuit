@@ -62,6 +62,18 @@ namespace SimpleCircuit.Components
             base.DiscoverNodeRelationships(context, diagnostics);
             for (int i = 0; i < Pins.Count; i++)
                 Pins[i].DiscoverNodeRelationships(context, diagnostics);
+
+            switch (context.Mode)
+            {
+                case NodeRelationMode.Groups:
+                    string x = context.Extremes.Linked[context.Shorts[X]];
+                    string y = context.Extremes.Linked[context.Shorts[Y]];
+                    context.XYSets.Add(new XYNode(x, y));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         /// <inheritdoc />

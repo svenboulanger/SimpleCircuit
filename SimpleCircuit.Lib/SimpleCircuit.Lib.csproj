@@ -21,15 +21,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Circuits\Extremes.cs" />
     <Compile Include="Circuits\GraphicalCircuit.cs" />
     <Compile Include="Circuits\CircuitSolverContext.cs" />
     <Compile Include="Circuits\ICircuitPresence.cs" />
     <Compile Include="Circuits\ICircuitSolverPresence.cs" />
     <Compile Include="Circuits\ILocatedPresence.cs" />
     <Compile Include="Circuits\NodeContext.cs" />
+    <Compile Include="Circuits\NodeExtremeFinder.cs" />
     <Compile Include="Circuits\NodeGrouper.cs" />
+    <Compile Include="Circuits\NodeRelationMode.cs" />
     <Compile Include="Circuits\PresenceMode.cs" />
     <Compile Include="Circuits\PresenceResult.cs" />
+    <Compile Include="Circuits\XYNode.cs" />
     <Compile Include="Components\Analog\Amplifier.cs" />
     <Compile Include="Components\Analog\AnalogToDigital.cs" />
     <Compile Include="Components\Analog\BipolarTransistor.cs" />
