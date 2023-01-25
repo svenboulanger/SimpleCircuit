@@ -55,12 +55,12 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the minimum spacing in X-direction between blocks.
         /// </summary>
-        public double SpacingX { get; set; } = 50.0;
+        public double SpacingX { get; set; } = 20.0;
 
         /// <summary>
         /// Gets or sets the minimum spacing in Y-directionb between blocks.
         /// </summary>
-        public double SpacingY { get; set; } = 50.0;
+        public double SpacingY { get; set; } = 20.0;
 
         /// <summary>
         /// Adds the specified component.
@@ -342,7 +342,6 @@ namespace SimpleCircuit
             Dictionary<string, HashSet<string>> stacked = new();
             foreach (var set in context.Nodes.XYSets)
             {
-                Console.WriteLine($"Grouped: {set}");
                 if (!stacked.TryGetValue(set.NodeY, out var horiz))
                 {
                     horiz = new HashSet<string>();
@@ -353,53 +352,41 @@ namespace SimpleCircuit
 
             // Fix the positions
             int constraint = 0;
-            List<string> lastMaxY = null;
+            IEnumerable<string> lastMaxY = null;
             foreach (var blocks in stacked)
             {
                 // The Y-coordinate is all related to each other, so we can simply use the minima for the y-node
                 if (!dict.TryGetValue(blocks.Key, out var minMaxY))
-                    continue;
-
-                // Add the minima for y-coordinates
-                if (lastMaxY == null)
                 {
-                    foreach (var min in minMaxY.Minima)
-                        _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                    var list = new[] { blocks.Key };
+                    AddMinimumSpacing(lastMaxY, list, SpacingY, ref constraint);
+                    lastMaxY = list;
                 }
                 else
                 {
-                    foreach (var min in minMaxY.Minima)
-                    {
-                        foreach (var max in lastMaxY)
-                            _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, SpacingY) { Weight = 1e-6 });
-                    }
+                    // Add the minima for y-coordinates
+                    AddMinimumSpacing(lastMaxY, minMaxY.Minima, SpacingY, ref constraint);
+                    lastMaxY = minMaxY.Maxima;
+                    dict.Remove(blocks.Key);
                 }
-                lastMaxY = minMaxY.Maxima;
-                dict.Remove(blocks.Key);
 
                 // Deal with the X-coordinates
-                List<string> lastMaxX = null;
+                IEnumerable<string> lastMaxX = null;
                 foreach (var nodeX in blocks.Value)
                 {
                     if (!dict.TryGetValue(nodeX, out var minMaxX))
-                        continue;
-
-                    // Add the minima for x-coordinates
-                    if (lastMaxX == null)
                     {
-                        foreach (var min in minMaxX.Minima)
-                            _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                        var list = new[] { nodeX };
+                        AddMinimumSpacing(lastMaxX, new[] { nodeX }, SpacingX, ref constraint);
+                        lastMaxX = list;
                     }
                     else
                     {
-                        foreach (var min in minMaxX.Minima)
-                        {
-                            foreach (var max in lastMaxX)
-                                _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, SpacingX) { Weight = 1e-6 });
-                        }
+                        // Add the minima for x-coordinates
+                        AddMinimumSpacing(lastMaxX, minMaxX.Minima, SpacingX, ref constraint);
+                        lastMaxX = minMaxX.Maxima;
+                        dict.Remove(nodeX);
                     }
-                    lastMaxX = minMaxX.Maxima;
-                    dict.Remove(nodeX);
                 }
             }
 
@@ -412,6 +399,23 @@ namespace SimpleCircuit
                     _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
             }
             return true;
+        }
+
+        private void AddMinimumSpacing(IEnumerable<string> lastMax, IEnumerable<string> nextMin, double spacing, ref int constraint)
+        {
+            if (lastMax == null)
+            {
+                foreach (var min in nextMin)
+                    _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+            }
+            else
+            {
+                foreach (var min in nextMin)
+                {
+                    foreach (var max in lastMax)
+                        _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, spacing) { Weight = 1e-6 });
+                }
+            }
         }
 
         /// <summary>

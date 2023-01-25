@@ -210,6 +210,8 @@ namespace SimpleCircuit.Components.Wires
                                 context.Extremes.Order(context.Shorts[_p2w.X], context.Shorts[_w2p.X]);
                             else if (_extendLeft)
                                 context.Extremes.Order(context.Shorts[_w2p.X], context.Shorts[_p2w.X]);
+                            else if (!_offset.X.IsZero())
+                                context.Extremes.Linked.Group(context.Shorts[_p2w.X], context.Shorts[_w2p.X]);
                         }
                         if ((_direction & Direction.Y) != 0)
                         {
@@ -221,7 +223,12 @@ namespace SimpleCircuit.Components.Wires
                                 context.Extremes.Order(context.Shorts[_p2w.Y], context.Shorts[_w2p.Y]);
                             else if (_extendUp)
                                 context.Extremes.Order(context.Shorts[_w2p.Y], context.Shorts[_p2w.Y]);
+                            else if (!_offset.Y.IsZero())
+                                context.Extremes.Linked.Group(context.Shorts[_p2w.Y], context.Shorts[_w2p.Y]);
                         }
+                        break;
+
+                    case NodeRelationMode.Groups:
                         break;
 
                     default:

@@ -34,14 +34,18 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
+                Variants.Add("dot");
             }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                int connections = Pins[0].Connections;
-                if (connections == 0 || connections > 2)
-                    drawing.Circle(new Vector2(), 1, new("dot"));
+                if (Variants.Contains("dot"))
+                {
+                    int connections = Pins[0].Connections;
+                    if (connections == 0 || connections > 2)
+                        drawing.Circle(new Vector2(), 1, new("dot"));
+                }
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
                 drawing.Text(Labels[0], n * Distance, n);

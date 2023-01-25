@@ -111,10 +111,10 @@ namespace SimpleCircuit.Components
                 }
 
                 var pins = _pinsByIndex.OfType<LoosePin>();
-                Apply($"{_parent.Name}.n", _parent.X, pins.Where(p => PointsUp(p)).Select(p => p.X), Right, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.s", _parent.X, pins.Where(p => PointsDown(p)).Select(p => p.X), Right, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.e", _parent.Y, pins.Where(p => PointsRight(p)).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
-                Apply($"{_parent.Name}.w", _parent.Y, pins.Where(p => PointsLeft(p)).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
+                Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinimumHorizontalSpacing);
+                Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
+                Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
@@ -125,10 +125,11 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
+                var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
                 {
                     case NodeRelationMode.Shorts:
-                        foreach (var pin in _pinsByIndex.OfType<LoosePin>())
+                        foreach (var pin in pins)
                         {
                             if (PointsUp(pin))
                                 context.Shorts.Group(_parent.Y, pin.Y);
@@ -142,11 +143,10 @@ namespace SimpleCircuit.Components
                         break;
 
                     case NodeRelationMode.Links:
-                        var pins = _pinsByIndex.OfType<LoosePin>();
-                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), Right, context);
-                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), Right, context);
-                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), Bottom, context);
-                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), Bottom, context);
+                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context);
+                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context);
+                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context);
+                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context);
                         break;
 
                     default:
@@ -154,17 +154,16 @@ namespace SimpleCircuit.Components
                 }
             }
 
-            private void OrderCoordinates(IEnumerable<string> coordinates, string final, NodeContext context)
+            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, NodeContext context)
             {
-                string lastCoordinate = null;
+                string lastCoordinate = context.Shorts[first];
                 foreach (var coordinate in coordinates)
                 {
                     var c = context.Shorts[coordinate];
-                    if (lastCoordinate != null)
-                        context.Extremes.Order(lastCoordinate, c);
+                    context.Extremes.Order(lastCoordinate, c);
                     lastCoordinate = c;
                 }
-                context.Extremes.Order(lastCoordinate, final);
+                context.Extremes.Order(lastCoordinate, context.Shorts[final]);
             }
 
             /// <inheritdoc />
