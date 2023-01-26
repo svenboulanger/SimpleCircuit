@@ -50,8 +50,8 @@ namespace SimpleCircuit.Components.Analog
                 }
                 else
                 {
-                    SetPinOffset(3, new(6, -4));
-                    SetPinOffset(4, new(6, 4));
+                    SetPinOffset(3, new(6, 4));
+                    SetPinOffset(4, new(6, -4));
                 }
 
                 Vector2 loc = Variants.Select(_t1, _t2) switch
