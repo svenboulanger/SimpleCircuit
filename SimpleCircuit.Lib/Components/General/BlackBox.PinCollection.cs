@@ -21,12 +21,32 @@ namespace SimpleCircuit.Components
             /// <summary>
             /// Gets or sets the minimum horizontal spacing.
             /// </summary>
-            public double MinimumHorizontalSpacing { get; set; } = 30.0;
+            public double MinSpaceX { get; set; } = 20.0;
+
+            /// <summary>
+            /// Gets or sets the minimum horizontal spacing at the edges.
+            /// </summary>
+            public double MinEdgeX { get; set; } = 10.0;
 
             /// <summary>
             /// Gets or sets the minimum vertical spacing.
             /// </summary>
-            public double MinimumVerticalSpacing { get; set; } = 20.0;
+            public double MinSpaceY { get; set; } = 10.0;
+
+            /// <summary>
+            /// Gets or sets the minimum vertical spacing at the edges.
+            /// </summary>
+            public double MinEdgeY { get; set; } = 5.0;
+
+            /// <summary>
+            /// Gets or sets the minimum width.
+            /// </summary>
+            public double MinWidth { get; set; } = 30;
+
+            /// <summary>
+            /// Gets or sets the minimum height.
+            /// </summary>
+            public double MinHeight { get; set; } = 10;
 
             /// <summary>
             /// Gets the name of the node for the right side of the black box.
@@ -95,8 +115,9 @@ namespace SimpleCircuit.Components
             {
                 var ckt = context.Circuit;
                 var map = context.Nodes.Shorts;
-                void Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing)
+                double Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing, double edgeSpacing)
                 {
+                    double width = 0.0;
                     start = map[start];
                     end = map[end];
                     string lastNode = start;
@@ -104,17 +125,27 @@ namespace SimpleCircuit.Components
                     foreach (var node in pinNodes)
                     {
                         string n = map[node];
-                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, n, spacing);
+                        double currentSpace = index == 0 ? edgeSpacing : spacing;
+                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, n, currentSpace, 100.0);
+                        width += currentSpace;
                         lastNode = n;
                     }
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, end, spacing);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, end, edgeSpacing, 100.0);
+                    width += edgeSpacing;
+                    return width;
                 }
 
                 var pins = _pinsByIndex.OfType<LoosePin>();
-                Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinimumHorizontalSpacing);
-                Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
-                Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinimumVerticalSpacing);
+                double width = 0, height = 0;
+                width = Math.Max(width, Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinSpaceX, MinEdgeX));
+                width = Math.Max(width, Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinSpaceX, MinEdgeX));
+                height = Math.Max(height, Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
+                height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
+
+                if (width < MinWidth)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Shorts[_parent.X], context.Nodes.Shorts[Right], MinWidth);
+                if (height < MinHeight)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Shorts[_parent.Y], context.Nodes.Shorts[Bottom], MinHeight);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;

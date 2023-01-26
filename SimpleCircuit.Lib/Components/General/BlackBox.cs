@@ -23,8 +23,8 @@ namespace SimpleCircuit.Components
             var instance = (Instance)base.Create(key, name, options, diagnostics);
             if (options != null)
             {
-                instance.MinimumSpacingX = options.HorizontalPinSpacing;
-                instance.MinimumSpacingY = options.VerticalPinSpacing;
+                instance.MinSpaceX = options.HorizontalPinSpacing;
+                instance.MinSpaceY = options.VerticalPinSpacing;
             }
             return instance;
         }
@@ -57,11 +57,23 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public string Name { get; }
 
-            [Description("The minimum space between two pins for top and bottom.")]
-            public double MinimumSpacingX { get => _pins.MinimumHorizontalSpacing; set => _pins.MinimumHorizontalSpacing = value; }
+            [Description("The minimum horizontal space between two pins.")]
+            public double MinSpaceX { get => _pins.MinSpaceX; set => _pins.MinSpaceX = value; }
 
-            [Description("The minimum space between two pins for left and right.")]
-            public double MinimumSpacingY { get => _pins.MinimumVerticalSpacing; set => _pins.MinimumVerticalSpacing = value; }
+            [Description("The minimum vertical space between two pins.")]
+            public double MinSpaceY { get => _pins.MinSpaceY; set => _pins.MinSpaceY = value; }
+
+            [Description("The minimum horizontal space between a pin and the edge of the black box.")]
+            public double MinEdgeX { get => _pins.MinEdgeX; set => _pins.MinEdgeX = value; }
+
+            [Description("The minimum vertical space between a pin and the edge of the black box.")]
+            public double MinEdgeY { get => _pins.MinEdgeY; set => _pins.MinEdgeY = value; }
+
+            [Description("The minimum width.")]
+            public double MinWidth { get => _pins.MinWidth; set => _pins.MinWidth = value; }
+
+            [Description("The minimum height.")]
+            public double MinHeight { get => _pins.MinHeight; set => _pins.MinHeight = value; }
 
             /// <summary>
             /// Creates a new black box.

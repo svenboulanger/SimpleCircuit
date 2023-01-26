@@ -157,7 +157,7 @@ namespace SimpleCircuitOnline
                 "// The distance between pins can vary, but they cannot change order",
                 "BB1[Output1] <r d> R <d l> [Output2]BB1",
                 "",
-                "// We can also align the pins and resize the black box using them",
+                "// The size of the black box is only a minimum, we can stretch them out",
                 "(x BB1[Input1] <r +80> [Output1]BB1)",
             })),
 
