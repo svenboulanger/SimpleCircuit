@@ -191,7 +191,7 @@ namespace SimpleCircuit.Components.Wires
                         }
                         if ((_direction & Direction.Y) != 0)
                         {
-                            if (!_extendLeft && !_extendRight)
+                            if (!_extendUp && !_extendDown)
                             {
                                 if (_offset.Y.IsZero())
                                     context.Shorts.Group(_p2w.Y, _w2p.Y);
