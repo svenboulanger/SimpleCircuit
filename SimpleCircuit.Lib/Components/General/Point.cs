@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components
                 if (Variants.Contains("dot"))
                 {
                     int connections = Pins[0].Connections;
-                    if (connections == 0 || connections > 2)
+                    if (Variants.Contains("forced") || connections == 0 || connections > 2)
                         drawing.Circle(new Vector2(), 1, new("dot"));
                 }
 
