@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components
             return instance;
         }
 
-        protected class Instance : ILocatedDrawable
+        protected class Instance : ILocatedDrawable, ILabeled
         {
             private readonly PinCollection _pins;
 
@@ -75,6 +75,9 @@ namespace SimpleCircuit.Components
             [Description("The minimum height.")]
             public double MinHeight { get => _pins.MinHeight; set => _pins.MinHeight = value; }
 
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
+
             /// <summary>
             /// Creates a new black box.
             /// </summary>
@@ -105,11 +108,11 @@ namespace SimpleCircuit.Components
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
                 go.Classes.Add("blackbox");
                 drawing.StartGroup(go);
-                drawing.Polygon(new[]
-                {
-                    Location, new Vector2(EndLocation.X, Location.Y),
-                    EndLocation, new Vector2(Location.X, EndLocation.Y)
-                });
+                var center = 0.5 * (Location + EndLocation);
+                drawing.Rectangle(EndLocation - Location, center);
+
+                // Draw the label
+                drawing.Text(Labels[0], center, new());
 
                 // Draw the port names
                 _pins.Render(drawing);

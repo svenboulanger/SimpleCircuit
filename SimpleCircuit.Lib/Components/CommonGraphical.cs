@@ -10,12 +10,13 @@ namespace SimpleCircuit.Components
     public static class CommonGraphical
     {
         /// <summary>
-        /// Draws a rectangle centered around the origin
+        /// Draws a rectangle centered around the given point.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
         /// <param name="width">The width, default is 12.</param>
         /// <param name="height">The height, default is 6.</param>
         /// <param name="center">The center of the rectangle, default is the origin.</param>
+        /// <param name="options">Path options.</param>
         public static void Rectangle(this SvgDrawing drawing, double width = 12.0, double height = 6.0, Vector2 center = new(), PathOptions options = null)
         {
             width *= 0.5;
@@ -26,6 +27,25 @@ namespace SimpleCircuit.Components
                 new Vector2(width, height) + center,
                 new Vector2(width, -height) + center,
                 new Vector2(-width, -height) + center
+            }, options);
+        }
+
+        /// <summary>
+        /// Draws a rectangle center around the given point.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="size">The size.</param>
+        /// <param name="center">The center of the rectangle, default is the origin.</param>
+        /// <param name="options">Path options.</param>
+        public static void Rectangle(this SvgDrawing drawing, Vector2 size, Vector2 center = new(), PathOptions options = null)
+        {
+            size *= 0.5;
+            drawing.Polygon(new Vector2[]
+            {
+                new Vector2(-size.X, size.Y) + center,
+                new Vector2(size.X, size.Y) + center,
+                new Vector2(size.X, -size.Y) + center,
+                new Vector2(-size.X, -size.Y) + center
             }, options);
         }
 
