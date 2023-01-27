@@ -11,13 +11,7 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class DropZone
     {
-        public class UploadEventArgs : EventArgs
-        {
-            public string Script { get; set; }
-            public string Style { get; set; }
-            public string Errors { get; set; }
-            public string Warnings { get; set; }
-        }
+
         public class ShrinkToSizeEventArgs : EventArgs
         {
             public bool ShrinkToWidth { get; set; }
@@ -34,7 +28,7 @@ namespace SimpleCircuitOnline.Shared
         public EventCallback<UploadEventArgs> Upload { get; set; }
 
         [Parameter]
-        public EventCallback<EventArgs> Download { get; set; }
+        public EventCallback<DownloadEventArgs> Download { get; set; }
 
         [Parameter]
         public EventCallback<ShrinkToSizeEventArgs> ShrinkToSizeChanged { get; set; }
@@ -144,7 +138,17 @@ namespace SimpleCircuitOnline.Shared
 
         protected async Task DownloadSVG()
         {
-            var args = new EventArgs();
+            var args = new DownloadEventArgs(DownloadEventArgs.Types.Svg);
+            await Download.InvokeAsync(args);
+        }
+        protected async Task DownloadPNG()
+        {
+            var args = new DownloadEventArgs(DownloadEventArgs.Types.Png);
+            await Download.InvokeAsync(args);
+        }
+        protected async Task DownloadJPG()
+        {
+            var args = new DownloadEventArgs(DownloadEventArgs.Types.Jpeg);
             await Download.InvokeAsync(args);
         }
 

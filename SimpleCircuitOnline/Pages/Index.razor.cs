@@ -1,14 +1,17 @@
 ﻿using BlazorMonaco;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuitOnline.Shared;
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SimpleCircuitOnline.Pages
 {
@@ -122,23 +125,72 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
-        protected async Task UploadFile(DropZone.UploadEventArgs args)
+        protected async Task UploadFile(UploadEventArgs args)
         {
             _errors = args.Errors;
             _warnings = args.Warnings;
             await SetCurrentScript(args.Script, args.Style);
         }
 
-        public async Task DownloadFile()
+        public async Task DownloadFile(DownloadEventArgs args)
         {
             _errors = null;
             _warnings = null;
-            var doc = await ComputeXml(includeScript: true);
-            using var sw = new Utf8StringWriter();
-            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
-                doc.WriteTo(xml);
-            byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
-            await _js.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+
+            switch (args.Type)
+            {
+                case DownloadEventArgs.Types.Svg:
+                    {
+                        var doc = await ComputeXml(includeScript: true);
+                        using var sw = new Utf8StringWriter();
+                        using var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false });
+                        doc.WriteTo(xml);
+                        sw.Flush();
+                        byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
+                        await _js.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+                    }
+                    break;
+
+                case DownloadEventArgs.Types.Png:
+                    {
+                        var doc = await ComputeXml(includeScript: true);
+
+                        // Compute the width and height to compute the scale of the image
+                        if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
+                            w = 10.0;
+                        if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
+                            h = 10.0;
+                        
+                        using var sw = new StringWriter();
+                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                            doc.WriteTo(xml);
+                        string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
+                        await _js.InvokeVoidAsync("BlazorExportImage", "circuit.png", "image/png", result, (int)w, (int)h);
+                    }
+                    break;
+
+                case DownloadEventArgs.Types.Jpeg:
+                    {
+                        var doc = await ComputeXml(includeScript: true);
+
+                        // Compute the width and height to compute the scale of the image
+                        if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
+                            w = 10.0;
+                        if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
+                            h = 10.0;
+
+                        using var sw = new StringWriter();
+                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                            doc.WriteTo(xml);
+                        string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
+                        await _js.InvokeVoidAsync("BlazorExportImage", "circuit.jpg", "image/jpg", result, (int)w, (int)h, "white");
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Unrecognized download format");
+                    break;
+            }
         }
 
         public void ChangeShrinkToSize(DropZone.ShrinkToSizeEventArgs e)
