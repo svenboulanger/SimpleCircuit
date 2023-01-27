@@ -35,7 +35,7 @@
         </TabMenu>
     </div>
     <div class="output">
-        <DropZone Upload="@UploadFile" Download="@DownloadFile" ShrinkToSizeChanged="@ChangeShrinkToSize">
+        <DropZone @ref="_dropZone" Upload="@UploadFile" Download="@DownloadFile" ShrinkToSizeChanged="@ChangeShrinkToSize">
             <SvgOutput @ref="_mainOutput" Svg="@_svg" Loading="_loading" />
         </DropZone>
         <Errors Error="@_errors" Warning="@_warnings" />

@@ -22,6 +22,7 @@ namespace SimpleCircuitOnline.Pages
         private Timer _timer;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
+        private DropZone _dropZone;
         private bool _updateDynamic = false;
         private SvgOutput _mainOutput;
 
@@ -32,6 +33,12 @@ namespace SimpleCircuitOnline.Pages
 
         private async Task SetCurrentScript(string script, string style = null)
         {
+            // Let us strip a few characters that might accumulate when storing inside XML for example
+            if (script != null)
+                script = script.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
+            if (style != null)
+                style = style.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
+
             // Temporarily suspend any dynamic updates
             _updateDynamic = false;
             Update(null);
@@ -129,6 +136,7 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = args.Errors;
             _warnings = args.Warnings;
+            _dropZone.Filename = args.Filename ?? "";
             await SetCurrentScript(args.Script, args.Style);
         }
 
@@ -136,6 +144,7 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = null;
             _warnings = null;
+            string filename = _dropZone?.Filename ?? "circuit";
 
             switch (args.Type)
             {
@@ -147,7 +156,7 @@ namespace SimpleCircuitOnline.Pages
                         doc.WriteTo(xml);
                         sw.Flush();
                         byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
-                        await _js.InvokeVoidAsync("BlazorDownloadFile", "circuit.svg", "text/plain", file);
+                        await _js.InvokeVoidAsync("BlazorDownloadFile", $"{filename}.svg", "text/plain", file);
                     }
                     break;
 
@@ -165,7 +174,7 @@ namespace SimpleCircuitOnline.Pages
                         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
                             doc.WriteTo(xml);
                         string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", "circuit.png", "image/png", result, (int)w, (int)h);
+                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.png", "image/png", result, (int)w, (int)h);
                     }
                     break;
 
@@ -183,7 +192,7 @@ namespace SimpleCircuitOnline.Pages
                         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
                             doc.WriteTo(xml);
                         string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", "circuit.jpg", "image/jpg", result, (int)w, (int)h, "white");
+                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpg", result, (int)w, (int)h, "white");
                     }
                     break;
 

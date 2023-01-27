@@ -19,6 +19,9 @@ namespace SimpleCircuitOnline.Shared
         }
 
         [Parameter]
+        public string Filename { get; set; }
+
+        [Parameter]
         public string Class { get; set; }
 
         [Parameter]
@@ -125,6 +128,9 @@ namespace SimpleCircuitOnline.Shared
             StringWriter swStyle = new();
             foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
                 swStyle.WriteLine(node.InnerText);
+
+            // Search for the file name
+            args.Filename = Path.GetFileNameWithoutExtension(e.File.Name);
 
             // Call the event
             args.Script = swScript.ToString();
