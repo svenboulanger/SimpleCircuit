@@ -9,7 +9,7 @@
 .dot, .arrowhead { fill: #c9d1d9; }
 .plane { stroke-width: 1pt; }
 .battery .neg { stroke-width: 0.75pt; }
-text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; fill: #c9d1d9; }
 .small tspan { font-size: 0.8em; }</style><metadata><sc:script><![CDATA[
 .subckt LPF R1[p] DIRoutput[out]
 R1 <r> Xo <d> C1 <d> GND2
