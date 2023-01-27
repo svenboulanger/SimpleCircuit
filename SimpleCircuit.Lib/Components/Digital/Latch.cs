@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components.Digital
             {
                 Pins.Add(new FixedOrientedPin("set", "The set pin.", this, new(-9, -6), new(-1, 0)), "s", "set");
                 Pins.Add(new FixedOrientedPin("reset", "The reset pin.", this, new(-9, 6), new(-1, 0)), "r", "reset");
-                Pins.Add(new FixedOrientedPin("nq", "The inverted output pin.", this, new(-9, 6), new(1, 0)), "nq", "qn");
+                Pins.Add(new FixedOrientedPin("nq", "The inverted output pin.", this, new(9, 6), new(1, 0)), "nq", "qn");
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
             }
 
@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
 
                 if (Pins["nq"].Connections > 0)
-                    drawing.Text("nQ", new Vector2(8, 6), new Vector2(-1, 0));
+                    drawing.Text("Q'", new Vector2(8, 6), new Vector2(-1, 0));
                 drawing.Text(Labels[0], new Vector2(10, 12), new Vector2(1, -1));
             }
         }
