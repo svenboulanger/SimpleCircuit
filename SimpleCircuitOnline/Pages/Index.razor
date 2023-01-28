@@ -11,7 +11,7 @@
             </Tab>
             <Tab Title="Style">
                 <div class="full-width">
-                    <a href="javascript:void(0);" class="btn" @onclick="RestoreStyle">Restore default style</a>
+                    <a href="javascript:void(0);" class="btn" @onclick="@(x => _styleEditor.SetValue(GraphicalCircuit.DefaultStyle))">Restore default style</a>
                 </div>
                 <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
             </Tab>
@@ -35,8 +35,8 @@
         </TabMenu>
     </div>
     <div class="output">
-        <DropZone @ref="_dropZone" Upload="@UploadFile" Download="@DownloadFile" ShrinkToSizeChanged="@ChangeShrinkToSize">
-            <SvgOutput @ref="_mainOutput" Svg="@_svg" Loading="_loading" />
+        <DropZone Upload="@UploadFile" Download="@DownloadFile" @bind-Filename="_filename" @bind-ShrinkX="_shrinkX" @bind-ShrinkY="_shrinkY">
+            <SvgOutput Svg="@_svg" Loading="_loading" ShrinkX="_shrinkX" ShrinkY="_shrinkY" />
         </DropZone>
         <Errors Error="@_errors" Warning="@_warnings" />
     </div>

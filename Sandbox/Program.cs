@@ -8,7 +8,7 @@ namespace Sandbox
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var script = @"- OR.inputs = 10";
             var logger = new Logger();

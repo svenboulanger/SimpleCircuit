@@ -1,17 +1,14 @@
 ﻿using BlazorMonaco;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuitOnline.Shared;
 using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SimpleCircuitOnline.Pages
 {
@@ -22,14 +19,9 @@ namespace SimpleCircuitOnline.Pages
         private Timer _timer;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
-        private DropZone _dropZone;
         private bool _updateDynamic = false;
-        private SvgOutput _mainOutput;
-
-        private async Task RestoreStyle()
-        {
-            await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle);
-        }
+        private bool _shrinkX = true, _shrinkY = true;
+        private string _filename = null;
 
         private async Task SetCurrentScript(string script, string style = null)
         {
@@ -51,7 +43,7 @@ namespace SimpleCircuitOnline.Pages
                     await _styleEditor.SetValue(style);
 
                 // Update the preview
-                await RenderPreview();
+                _svg = await ComputeXml(false);
                 _loading = 0;
                 StateHasChanged();
             }
@@ -144,7 +136,11 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = null;
             _warnings = null;
-            string filename = _dropZone?.Filename ?? "circuit";
+
+            // Decide on the filename
+            string filename = _filename;
+            if (string.IsNullOrWhiteSpace(filename))
+                filename = "circuit";
 
             switch (args.Type)
             {
@@ -202,11 +198,6 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
-        public void ChangeShrinkToSize(DropZone.ShrinkToSizeEventArgs e)
-        {
-            _mainOutput.SetShrinkToSize(e.ShrinkToWidth, e.ShrinkToHeight);
-        }
-
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             // If another task is still running, restart the timer
@@ -222,14 +213,9 @@ namespace SimpleCircuitOnline.Pages
                 _warnings = null;
                 StateHasChanged();
                 _timer.Stop();
-                Task.Run(RenderPreview)
+                Task.Run(async () => _svg = await ComputeXml(false))
                     .ContinueWith(task => { _loading = 0; StateHasChanged(); });
             }
-        }
-
-        private async Task RenderPreview()
-        {
-            _svg = await ComputeXml(includeScript: false);
         }
 
         private async Task<XmlDocument> ComputeXml(bool includeScript)

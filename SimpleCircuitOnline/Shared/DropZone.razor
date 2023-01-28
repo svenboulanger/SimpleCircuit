@@ -5,42 +5,30 @@
 
 @* https://www.meziantou.net/upload-files-with-drag-drop-or-paste-from-clipboard-in-blazor.htm *@
 
-<div @ref="dropZoneElement" class="@ContainerClasses">
+<div @ref="_dropZoneElement" class="@ContainerClasses">
     <div class="output">
         @ChildContent
     </div>
     <div class="menu clearfix">
-        <a href="javascript:void(0);" class="btn toggle-shrink@(_shrinkToWidth ? " active" : "")" @onclick="OnShrinkToWidthChanged">Fit width</a>
-        <a href="javascript:void(0);" class="btn toggle-shrink@(_shrinkToHeight ? " active" : "")" @onclick="OnShrinkToHeightChanged">Fit height</a>
+        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkX ? " active" : "")" @onclick="ToggleShrinkX">Fit width</a>
+        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkY ? " active" : "")" @onclick="ToggleShrinkY">Fit height</a>
         <EditForm Model="this" class="form-inline my-2 mx-3">
-            <InputText @bind-Value="Filename" class="form-control" placeholder="Filename" aria-label="Filename" />
+            <InputText @bind-Value="InternalFilename" class="form-control" placeholder="Filename" aria-label="Filename" />
         </EditForm>
         <a href="javascript:void(0);" class="btn download" @onclick="DownloadSVG">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-            </svg> SVG
+            <DownloadIcon /> SVG
         </a>
         <a href="javascript:void(0);" class="btn download" @onclick="DownloadPNG">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-              <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-            </svg> PNG
+            <DownloadIcon /> PNG
         </a>
         <a href="javascript:void(0);" class="btn download" @onclick="DownloadJPG">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-            </svg> JPG
+            <DownloadIcon /> JPG
         </a>
         <label for="file-upload" class="btn upload">
             <div class="hidden">
-                <InputFile OnChange="@OnChange" @ref="inputFile" accept=".svg" id="file-upload" class="d-none" />
+                <InputFile OnChange="@OnChange" @ref="_inputFile" accept=".svg" id="file-upload" class="d-none" />
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
-                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
-            </svg> SVG meta
+            <UploadIcon /> SVG meta
         </label>
     </div>
 </div>

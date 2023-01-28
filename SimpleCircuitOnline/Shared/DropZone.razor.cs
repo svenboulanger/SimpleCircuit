@@ -11,15 +11,29 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class DropZone
     {
+        private ElementReference _dropZoneElement;
+        private InputFile _inputFile;
+        private IJSObjectReference _module;
+        private IJSObjectReference _dropZoneInstance;
 
-        public class ShrinkToSizeEventArgs : EventArgs
+        protected string InternalFilename
         {
-            public bool ShrinkToWidth { get; set; }
-            public bool ShrinkToHeight { get; set; }
+            get => Filename;
+            set
+            {
+                if (Filename != value)
+                {
+                    Filename = value;
+                    FilenameChanged.InvokeAsync(value);
+                }
+            }
         }
 
         [Parameter]
         public string Filename { get; set; }
+
+        [Parameter]
+        public EventCallback<string> FilenameChanged { get; set; }
 
         [Parameter]
         public string Class { get; set; }
@@ -34,7 +48,16 @@ namespace SimpleCircuitOnline.Shared
         public EventCallback<DownloadEventArgs> Download { get; set; }
 
         [Parameter]
-        public EventCallback<ShrinkToSizeEventArgs> ShrinkToSizeChanged { get; set; }
+        public bool ShrinkX { get; set; }
+
+        [Parameter]
+        public EventCallback<bool> ShrinkXChanged { get; set; }
+
+        [Parameter]
+        public bool ShrinkY { get; set; }
+
+        [Parameter]
+        public EventCallback<bool> ShrinkYChanged { get; set; }
 
         protected string ContainerClasses
         {
@@ -50,35 +73,16 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-        ElementReference dropZoneElement;
-        InputFile inputFile;
-
-        IJSObjectReference _module;
-        IJSObjectReference _dropZoneInstance;
-        bool _shrinkToWidth = true, _shrinkToHeight = true;
-
-        protected async Task OnShrinkToWidthChanged()
+        private async Task ToggleShrinkX()
         {
-            _shrinkToWidth = !_shrinkToWidth;
-            StateHasChanged();
-            await ShrinkToSizeChanged.InvokeAsync(
-                new ShrinkToSizeEventArgs()
-                {
-                    ShrinkToWidth = _shrinkToWidth,
-                    ShrinkToHeight = _shrinkToHeight,
-                });
+            ShrinkX = !ShrinkX;
+            await ShrinkXChanged.InvokeAsync(ShrinkX);
         }
 
-        protected async Task OnShrinkToHeightChanged()
+        private async Task ToggleShrinkY()
         {
-            _shrinkToHeight = !_shrinkToHeight;
-            StateHasChanged();
-            await ShrinkToSizeChanged.InvokeAsync(
-                new ShrinkToSizeEventArgs()
-                {
-                    ShrinkToWidth = _shrinkToWidth,
-                    ShrinkToHeight = _shrinkToHeight,
-                });
+            ShrinkY = !ShrinkY;
+            await ShrinkYChanged.InvokeAsync(ShrinkY);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -89,7 +93,7 @@ namespace SimpleCircuitOnline.Shared
                 _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dropzone.js");
 
                 // Initialize the drop zone
-                _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", dropZoneElement, inputFile.Element);
+                _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", _dropZoneElement, _inputFile.Element);
             }
         }
 
