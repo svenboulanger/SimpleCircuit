@@ -106,8 +106,7 @@ namespace SimpleCircuit.Drawing
 
             // Find the metadata tag
             var defs = document.DocumentElement.SelectSingleNode("defs");
-            if (defs == null)
-                defs = document.DocumentElement.PrependChild(document.CreateElement("defs", ns));
+            defs ??= document.DocumentElement.PrependChild(document.CreateElement("defs", ns));
 
             // For each marker, provide a definition
             XmlElement elt;

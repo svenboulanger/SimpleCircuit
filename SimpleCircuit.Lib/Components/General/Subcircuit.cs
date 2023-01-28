@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components
                     // Make a shorthand notation for DIR
                     if (pinName.StartsWith("DIR") && pinName.Length > 3)
                     {
-                        pinName = pinName.Substring(3);
+                        pinName = pinName[3..];
                         if (taken.Add(pinName))
                             possibleNames.Add(pinName);
                     }

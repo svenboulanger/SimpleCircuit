@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Represents a text location.
     /// </summary>
-    public struct TextLocation : IEquatable<TextLocation>
+    public readonly struct TextLocation : IEquatable<TextLocation>
     {
         /// <summary>
         /// Gets the line number.

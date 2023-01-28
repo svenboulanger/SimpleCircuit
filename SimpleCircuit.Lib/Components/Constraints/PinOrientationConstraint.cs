@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Constraints
         }
 
         /// <inheritdoc />
-        public void Fail(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public void Fail(IDiagnosticHandler diagnostics)
         {
             var drawable = Pin.Component?.Component;
             if (drawable == null)

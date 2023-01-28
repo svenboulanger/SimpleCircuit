@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components
             int index = fullname.LastIndexOf(Separator);
             if (index < 0)
                 return fullname;
-            return fullname.Substring(index + Separator.Length);
+            return fullname[(index + Separator.Length)..];
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace SimpleCircuit.Components
             int index = fullname.LastIndexOf(Separator);
             if (index < 0)
                 return "";
-            return fullname.Substring(0, index + Separator.Length);
+            return fullname[..(index + Separator.Length)];
         }
 
         private bool Extract(string fullname, out string key, out IDrawableFactory factory)

@@ -15,7 +15,6 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private string _label = null;
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
             private const string _differentialOutput = "diffout";
@@ -116,14 +115,14 @@ namespace SimpleCircuit.Components.Analog
                 else
                     drawing.ExtendPin(Pins["out"]);
 
-                drawing.Polygon(new[]
+                drawing.Polygon(new Vector2[]
                 {
-                    new Vector2(-Width / 2, Height / 2), new Vector2(Width / 2 - Height / 2, Height / 2),
-                    new Vector2(Width / 2, 0), new Vector2(Width / 2 - Height / 2, -Height / 2),
-                    new Vector2(-Width / 2, -Height / 2)
+                    new(-Width / 2, Height / 2), new(Width / 2 - Height / 2, Height / 2),
+                    new(Width / 2, 0), new(Width / 2 - Height / 2, -Height / 2),
+                    new(-Width / 2, -Height / 2)
                 });
 
-                drawing.Text(Labels[0], new Vector2(-Height / 4, 0), new Vector2(0, 0));
+                drawing.Text(Labels[0], new(-Height / 4, 0), new(0, 0));
             }
         }
     }

@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class Wire : Drawable
     {
-        private struct WirePoint
+        private readonly struct WirePoint
         {
             public bool IsJumpOver { get; }
             public Vector2 Location { get; }

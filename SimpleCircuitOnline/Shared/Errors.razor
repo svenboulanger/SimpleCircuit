@@ -28,7 +28,7 @@
     [Parameter]
     public string Error
     {
-        get => string.Join(Environment.NewLine, _errors);
+        get => string.Join(System.Environment.NewLine, _errors);
         set
         {
             _errors.Clear();
@@ -42,7 +42,7 @@
     [Parameter]
     public string Warning
     {
-        get => string.Join(Environment.NewLine, _warnings);
+        get => string.Join(System.Environment.NewLine, _warnings);
         set
         {
             _warnings.Clear();

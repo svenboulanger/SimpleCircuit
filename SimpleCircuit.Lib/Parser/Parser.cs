@@ -209,7 +209,6 @@ namespace SimpleCircuit.Parser
                 do
                 {
                     // Parse
-                    Token token;
                     switch (lexer.Type)
                     {
                         case TokenType.String:
@@ -219,7 +218,7 @@ namespace SimpleCircuit.Parser
 
                         case TokenType.Dash:
                             lexer.Next();
-                            if (lexer.Branch(TokenType.Word, out token))
+                            if (lexer.Branch(TokenType.Word, out Token token))
                                 info.Variants.Add(new(false, token.Content.ToString()));
                             else
                             {
@@ -505,7 +504,7 @@ namespace SimpleCircuit.Parser
                     if (pin == null)
                         return false;
                 }
-                pin ??= component.Pins[component.Pins.Count - 1];
+                pin ??= component.Pins[^1];
                 ports.Add(pin);
             }
             if (lexer.Type == TokenType.EndOfContent)

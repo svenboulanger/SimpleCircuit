@@ -10,7 +10,7 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class GlobalOptionList
     {
-        private List<(PropertyInfo, string)> _options = new();
+        private readonly List<(PropertyInfo, string)> _options = new();
 
         [Parameter]
         public MonacoEditor Editor { get; set; }
@@ -33,7 +33,7 @@ namespace SimpleCircuitOnline.Shared
                 Text = cmd + Environment.NewLine,
                 ForceMoveMarkers = true,
             });
-            ends.Add(new Selection()
+            ends.Add(new BlazorMonaco.Selection()
             {
                 StartLineNumber = selection.StartLineNumber,
                 EndLineNumber = selection.StartLineNumber,
@@ -59,7 +59,7 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-        private string GetTypeName(PropertyInfo property)
+        private static string GetTypeName(PropertyInfo property)
         {
             string typeName = "?";
             if (property.PropertyType == typeof(double))

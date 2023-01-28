@@ -919,8 +919,7 @@ namespace SimpleCircuit
 
             // Find the metadata tag
             var metadata = _document.DocumentElement.SelectSingleNode("metadata");
-            if (metadata == null)
-                metadata = _document.DocumentElement.PrependChild(_document.CreateElement("metadata", Namespace));
+            metadata ??= _document.DocumentElement.PrependChild(_document.CreateElement("metadata", Namespace));
 
             // Create the content
             content = content.Replace("]]>", "]]]]><![CDATA["); // Should not happen, but just to be sure

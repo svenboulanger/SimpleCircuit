@@ -13,7 +13,7 @@ namespace SimpleCircuitOnline.Shared
         private string _filterString = string.Empty;
         private bool _expandAll = false;
         private readonly HashSet<string> _searchTerms = new();
-        private Dictionary<string, List<(DrawableMetadata, IDrawable, HashSet<string>)>> _categories = new();
+        private readonly Dictionary<string, List<(DrawableMetadata, IDrawable, HashSet<string>)>> _categories = new();
 
         private bool IsFiltered((DrawableMetadata Metadata, IDrawable Drawable, HashSet<string> Variants) argument)
         {

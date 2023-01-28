@@ -11,7 +11,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         private readonly StringBuilder _sb = new();
         private readonly List<string> _lines = new();
         private readonly Stack<string> _tags = new();
-        private double _dy = 0.0, _emSize = 1.0;
+        private double _dy = 0.0;
 
         /// <summary>
         /// Gets the base line y.
@@ -76,7 +76,6 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 double dy = (BaselineY - _dy) / RelativeFontWeight;
                 _sb.Append($"<tspan dy=\"{dy:G3}em\"{(RelativeFontWeight != 1.0 ? $" style=\"font-size: {RelativeFontWeight:G3}em\"" : "")}>");
                 _dy = BaselineY;
-                _emSize = RelativeFontWeight;
             }
         }
 
@@ -103,7 +102,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             _lines.Clear();
             _tags.Clear();
             _dy = BaselineY = 0.0;
-            _emSize = RelativeFontWeight = 1.0;
+            RelativeFontWeight = 1.0;
         }
     }
 }

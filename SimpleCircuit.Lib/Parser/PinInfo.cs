@@ -8,7 +8,7 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Represents pin information.
     /// </summary>
-    public struct PinInfo
+    public readonly struct PinInfo
     {
         /// <summary>
         /// Gets the name of the component the pin belongs to.

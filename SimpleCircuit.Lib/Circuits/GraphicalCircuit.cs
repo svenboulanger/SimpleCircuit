@@ -17,7 +17,7 @@ namespace SimpleCircuit
     public class GraphicalCircuit : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<ICircuitPresence> _extra = new List<ICircuitPresence>();
+        private readonly List<ICircuitPresence> _extra = new();
 
         /// <summary>
         /// Gets or sets the style for the graphics.

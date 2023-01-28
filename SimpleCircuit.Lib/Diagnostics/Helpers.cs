@@ -24,8 +24,7 @@ namespace SimpleCircuit.Diagnostics
 
             // Search for the message in the resource
             var message = Properties.Resources.ResourceManager.GetString(code.ToString(), CultureInfo.CurrentCulture);
-            if (message == null)
-                message = info.Message;
+            message ??= info.Message;
             handler.Post(new DiagnosticMessage(info.Severity, info.Code, string.Format(message, arguments)));
             return info.Severity;
         }
@@ -50,8 +49,7 @@ namespace SimpleCircuit.Diagnostics
 
             // Search for the message in the resource
             var message = Properties.Resources.ResourceManager.GetString(code.ToString(), CultureInfo.CurrentCulture);
-            if (message == null)
-                message = info.Message;
+            message ??= info.Message;
             handler.Post(new TokenDiagnosticMessage(token, info.Severity, info.Code, string.Format(message, arguments)));
             return info.Severity;
         }

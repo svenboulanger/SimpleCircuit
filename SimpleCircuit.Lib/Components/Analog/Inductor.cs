@@ -46,14 +46,11 @@ namespace SimpleCircuit.Components.Analog
             {
                 get
                 {
-                    switch (Variants.Select(Options.American, Options.European))
+                    return Variants.Select(Options.American, Options.European) switch
                     {
-                        case 0:
-                        case 1:
-                            return _windings * 3;
-                        default:
-                            return 6 + (_windings - 1) * 3;
-                    }
+                        0 or 1 => _windings * 3,
+                        _ => (double)(6 + (_windings - 1) * 3),
+                    };
                 }
             }
 

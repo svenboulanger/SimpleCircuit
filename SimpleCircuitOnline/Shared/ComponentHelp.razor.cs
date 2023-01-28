@@ -116,20 +116,5 @@ namespace SimpleCircuitOnline.Shared
             }
             StateHasChanged();
         }
-
-        private string GetTypeName(PropertyInfo property)
-        {
-            var type = property.PropertyType;
-            string typeName;
-            if (type == typeof(double) || type == typeof(int))
-                typeName = "number";
-            else if (type == typeof(string))
-                typeName = "string";
-            else if (type == typeof(bool))
-                typeName = "boolean";
-            else
-                typeName = "?";
-            return typeName;
-        }
     }
 }

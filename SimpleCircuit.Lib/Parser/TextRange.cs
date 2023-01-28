@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// A text range.
     /// </summary>
-    public struct TextRange : IEquatable<TextRange>
+    public readonly struct TextRange : IEquatable<TextRange>
     {
         /// <summary>
         /// Gets the start of the range.

@@ -5,7 +5,7 @@ namespace SimpleCircuit.Drawing
     /// <summary>
     /// Bounds.
     /// </summary>
-    public struct Bounds : IEquatable<Bounds>, IFormattable
+    public readonly struct Bounds : IEquatable<Bounds>, IFormattable
     {
         /// <summary>
         /// Gets the left.

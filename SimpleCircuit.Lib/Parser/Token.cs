@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// A token.
     /// </summary>
-    public struct Token : IEquatable<Token>
+    public readonly struct Token : IEquatable<Token>
     {
         /// <summary>
         /// Gets the source of the token.

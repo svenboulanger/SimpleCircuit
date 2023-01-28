@@ -155,13 +155,10 @@ namespace SimpleCircuit.Components.Analog
                 // Comparator
                 if (Variants.Contains(_comparator))
                 {
-                    drawing.Path(b =>
-                    {
-                        b.MoveTo(-4, 2)
+                    drawing.Path(b => b.MoveTo(-4, 2)
                         .LineTo(-2, 2)
                         .LineTo(-2, -2)
-                        .LineTo(0, -2);
-                    });
+                        .LineTo(0, -2));
                 }
 
                 // Schmitt trigger

@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
-                _pins.DiscoverNodeRelationships(context, diagnostics);
+                _pins.DiscoverNodeRelationships(context);
 
                 switch (context.Mode)
                 {
@@ -140,7 +140,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
             {
-                _pins.Register(context, diagnostics);
+                _pins.Register(context);
             }
 
             /// <inheritdoc />

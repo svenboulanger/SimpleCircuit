@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents variant information.
     /// </summary>
-    public struct VariantInfo
+    public readonly struct VariantInfo
     {
         /// <summary>
         /// Determines whether the variant should be included. If <c>false</c>, the

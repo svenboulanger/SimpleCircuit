@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes a wire segment with a start and end.
     /// </summary>
-    public struct WireSegment
+    public readonly struct WireSegment
     {
         /// <summary>
         /// Gets the start of the wire segment.

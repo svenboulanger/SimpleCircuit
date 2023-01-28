@@ -57,8 +57,7 @@ namespace SimpleCircuit.Components
         /// <param name="end">The ending point of the arrow.</param>
         public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, PathOptions options = null)
         {
-            if (options == null)
-                options = new PathOptions();
+            options ??= new PathOptions();
             options.EndMarker = PathOptions.MarkerTypes.Arrow;
             options.Classes.Add("arrow");
             drawing.Line(start, end, options);
@@ -111,8 +110,7 @@ namespace SimpleCircuit.Components
         /// <param name="options">The path options.</param>
         public static void Dot(this SvgDrawing drawing, Vector2 center = new(), double size = 1.0, PathOptions options = null)
         {
-            if (options == null)
-                options = new();
+            options ??= new();
             options.Classes.Add("dot");
             drawing.Circle(center, size, options);
         }

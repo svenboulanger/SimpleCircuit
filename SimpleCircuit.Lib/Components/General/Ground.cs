@@ -15,7 +15,6 @@ namespace SimpleCircuit.Components
         private const string _signal = "signal";
         private const string _noiseless = "noiseless";
         private const string _protective = "protective";
-        private const string _alt = "alt";
 
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)

@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+            public void Register(CircuitSolverContext context)
             {
                 var ckt = context.Circuit;
                 var map = context.Nodes.Shorts;
@@ -154,7 +154,7 @@ namespace SimpleCircuit.Components
             private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
 
             /// <inheritdoc />
-            public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            public void DiscoverNodeRelationships(NodeContext context)
             {
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)

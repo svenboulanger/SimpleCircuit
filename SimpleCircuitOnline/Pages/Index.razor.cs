@@ -60,13 +60,14 @@ namespace SimpleCircuitOnline.Pages
             _updateDynamic = true;
         }
 
-        private StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
+        private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
         {
             return new StandaloneEditorConstructionOptions
             {
                 AutomaticLayout = true,
                 Language = "text/css",
                 WordWrap = "on",
+                Value = ""
             };
         }
 
@@ -107,7 +108,7 @@ namespace SimpleCircuitOnline.Pages
                 }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
                 var model = await _scriptEditor.GetModel();
-                await MonacoEditor.SetModelLanguage(model, "simpleCircuit");
+                await MonacoEditorBase.SetModelLanguage(model, "simpleCircuit");
                 await MonacoEditorBase.SetTheme("simpleCircuitTheme");
 
                 // Try to find the last saved script
@@ -136,7 +137,6 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = args.Errors;
             _warnings = args.Warnings;
-            _dropZone.Filename = args.Filename ?? "";
             await SetCurrentScript(args.Script, args.Style);
         }
 
@@ -242,8 +242,10 @@ namespace SimpleCircuitOnline.Pages
             {
                 var code = await _scriptEditor.GetValue();
                 var style = await _styleEditor.GetValue();
-                var context = new SimpleCircuit.Parser.ParsingContext();
-                context.Diagnostics = logger;
+                var context = new SimpleCircuit.Parser.ParsingContext
+                {
+                    Diagnostics = logger
+                };
 
                 // Store the script and style for next time
                 await _localStore.SetItemAsStringAsync("last_script", code);
@@ -283,7 +285,7 @@ namespace SimpleCircuitOnline.Pages
                 return null;
         }
 
-        private string ModifyCSS(string style)
+        private static string ModifyCSS(string style)
         {
             int level = 0;
             StringBuilder sb = new(style.Length);

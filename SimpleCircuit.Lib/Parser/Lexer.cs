@@ -49,7 +49,7 @@ namespace SimpleCircuit.Parser
             {
                 var loc = new TextLocation(Line, Column - Length);
                 if (Content.Length > 0)
-                    return new Token(Source, new TextRange(loc, loc), Content.Slice(0, 1));
+                    return new Token(Source, new TextRange(loc, loc), Content[..1]);
                 return new Token(Source, new TextRange(loc, loc), Content);
             }
         }

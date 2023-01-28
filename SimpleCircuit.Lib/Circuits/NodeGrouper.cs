@@ -14,7 +14,7 @@ namespace SimpleCircuit.Circuits
         /// </summary>
         public static string[] _ground = new[] { "0", "gnd", "gnd!" };
 
-        private struct NodeGroup
+        private readonly struct NodeGroup
         {
             public string Representative { get; }
             public HashSet<string> Nodes { get; }
