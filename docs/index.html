@@ -26,8 +26,8 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <div style="position:absolute;left:-9999cm;top:-9999cm;" id="div_measure">
-    </div>
+    <div style="position:absolute;left:-9999cm;top:-9999cm;" id="div_measure"></div>
+    <canvas id="canvas" width="200" height="200" style="position:absolute;left:-9999px;top:-9999px;"></canvas>
 
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
     <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
@@ -36,13 +36,7 @@
     <script src="js/decode.min.js"></script>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script>
-        // Source code copied from Gérald Barré
-        function BlazorDownloadFile(filename, contentType, data) {
-
-            // Create the URL
-            const file = new File([data], filename, { type: contentType });
-            const exportUrl = URL.createObjectURL(file);
-
+        function DownloadData(filename, exportUrl) {
             // Create the <a> element and click on it
             const a = document.createElement("a");
             document.body.appendChild(a);
@@ -50,10 +44,39 @@
             a.download = filename;
             a.target = "_self";
             a.click();
-
-            // We don't need to keep the url, let's release the memory
-            URL.revokeObjectURL(exportUrl);
             document.body.removeChild(a);
+        }
+
+        // Source code copied and modified from Gérald Barré
+        function BlazorDownloadFile(filename, contentType, data) {
+
+            // Create the URL
+            const file = new File([data], filename, { type: contentType });
+            const exportUrl = URL.createObjectURL(file);
+            DownloadData(filename, exportUrl);
+            URL.revokeObjectURL(exportUrl);
+        }
+
+        function BlazorExportImage(filename, mime, imageData, width, height, backgroundColor) {
+
+            var image = new Image();
+            image.onload = () => {
+                var canvas = document.getElementById("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                var context = canvas.getContext("2d");
+
+                // Draw a background image if necessary
+                if (backgroundColor) {
+                    context.fillStyle = backgroundColor;
+                    context.fillRect(0, 0, width, height);
+                }
+
+                // Draw the image (it has been loaded) and download the image
+                context.drawImage(image, 0, 0, width, height);
+                DownloadData(filename, canvas.toDataURL(mime));
+            };
+            image.src = imageData;
         }
 
         Blazor.start({
@@ -115,9 +138,9 @@
                         { include: '@number' },
                         { include: '@string' },
                         { include: '@boolean' },
-                        [/\=/, 'equals.assignment' ],
-                        [/\w+/, 'word.assignment' ],
-                        [/\./, 'dot.assignment' ],
+                        [/\=/, 'equals.assignment'],
+                        [/\w+/, 'word.assignment'],
+                        [/\./, 'dot.assignment'],
                     ],
                     wire: [
                         { include: '@whitespace' },

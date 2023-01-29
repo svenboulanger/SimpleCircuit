@@ -141,3 +141,7 @@ svg {
 .greyed {
     opacity: 0.4;
 }
+.form-inline {
+    display: inline-block;
+    margin: 0.25rem;
+}
