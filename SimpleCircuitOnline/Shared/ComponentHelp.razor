@@ -20,38 +20,41 @@
             </h5>
             <p>@(Metadata.Description)</p>
         }
-        <HelpAccordion>
-            <HelpAccordionItem Title="Pins" Count="_drawable.Pins.Count">
-                <dl>
-                @foreach (var pin in _drawable.Pins)
-                {
-                    <dt><strong>@(string.Join(", ", _drawable.Pins.NamesOf(pin)))</strong></dt>
-                    <dd>@(pin.Description)</dd>
-                }
-                </dl>
-            </HelpAccordionItem>
-            <HelpAccordionItem Title="Properties" Count="Properties.Count">
-                <dl>
-                @foreach (var property in Properties)
-                {
-                    <dt><strong>@(property.Item1.Name)</strong></dt>
-                    <dd>@(property.Item2)</dd>
-                }
-                </dl>
-            </HelpAccordionItem>
-            <HelpAccordionItem Title="Variants" Count="_drawable.Variants.BranchCount">
-                <p>
-                @foreach (var variant in _drawable.Variants)
-                {
-                    <a href="javascript:void(0);" class="shown" @onclick="x => ToggleVariant(variant)">@variant</a>
-                }
-                <br />
-                @foreach (var variant in _drawable.Variants.Branches)
-                {
-                    <a href="javascript:void(0);" @onclick="x => ToggleVariant(variant)">@variant</a>
-                }
-                </p>
+        @if (Drawable != null)
+        {
+            <HelpAccordion>
+                <HelpAccordionItem Title="Pins" Count="Drawable.Pins.Count">
+                    <dl>
+                        @foreach (var pin in Drawable.Pins)
+                        {
+                            <dt><strong>@(string.Join(", ", Drawable.Pins.NamesOf(pin)))</strong></dt>
+                            <dd>@(pin.Description)</dd>
+                        }
+                    </dl>
+                </HelpAccordionItem>
+                <HelpAccordionItem Title="Properties" Count="Properties.Count">
+                    <dl>
+                        @foreach (var property in Properties)
+                        {
+                            <dt><strong>@(property.Item1.Name)</strong></dt>
+                            <dd>@(property.Item2)</dd>
+                        }
+                    </dl>
+                </HelpAccordionItem>
+                <HelpAccordionItem Title="Variants" Count="Drawable.Variants.BranchCount">
+                    <p>
+                        @foreach (var variant in Drawable.Variants)
+                        {
+                            <a href="javascript:void(0);" class="shown" @onclick="x => ToggleVariant(variant)">@variant</a>
+                        }
+                        <br />
+                        @foreach (var variant in Drawable.Variants.Branches)
+                        {
+                            <a href="javascript:void(0);" @onclick="x => ToggleVariant(variant)">@variant</a>
+                        }
+                    </p>
             </HelpAccordionItem>
         </HelpAccordion>
+        }
     </div>
 </div>

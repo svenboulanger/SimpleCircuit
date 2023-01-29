@@ -80,6 +80,8 @@ namespace SimpleCircuit.Components.Wires
                     new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3),
                     new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
+
+                drawing.Text(Labels[0], new(0, -4), new(0, -1));
             }
         }
     }

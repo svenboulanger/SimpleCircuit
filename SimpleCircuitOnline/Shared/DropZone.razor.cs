@@ -176,6 +176,8 @@ namespace SimpleCircuitOnline.Shared
             {
                 await _module.DisposeAsync();
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

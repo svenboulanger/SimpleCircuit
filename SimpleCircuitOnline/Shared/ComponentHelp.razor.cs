@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace SimpleCircuitOnline.Shared
@@ -13,7 +14,6 @@ namespace SimpleCircuitOnline.Shared
     {
         private MarkupString _svg;
         private const double MaxPreviewWidth = 90;
-        private IDrawable _drawable;
         private List<(PropertyInfo, string)> _properties;
 
         [Parameter]
@@ -23,20 +23,7 @@ namespace SimpleCircuitOnline.Shared
         public DrawableMetadata Metadata { get; set; }
 
         [Parameter]
-        public IDrawable Drawable
-        {
-            get => _drawable;
-            set
-            {
-                _properties = null;
-                _drawable = value;
-
-                // Show where the primary label is
-                if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]))
-                    labeled.Labels[0] = "label";
-                CreateSvg();
-            }
-        }
+        public IDrawable Drawable { get; set; }
 
         /// <summary>
         /// Gets the properties of the component.
@@ -45,10 +32,10 @@ namespace SimpleCircuitOnline.Shared
         {
             get
             {
-                if (_properties == null && _drawable != null)
+                if (_properties == null && Drawable != null)
                 {
                     _properties = new();
-                    foreach (var p in _drawable.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                    foreach (var p in Drawable.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         if (!p.CanRead || !p.CanWrite)
                             continue;
@@ -65,9 +52,25 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
+        /// <inheritdoc />
+        public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            if (parameters.TryGetValue<IDrawable>(nameof(Drawable), out var drawable))
+            {
+                _properties = null;
+
+                // Show where the primary label is
+                Drawable = drawable;
+                if (drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]))
+                    labeled.Labels[0] = "label";
+                CreateSvg();
+            }
+            await base.SetParametersAsync(parameters);
+        }
+
         private void CreateSvg()
         {
-            if (Metadata == null || _drawable == null)
+            if (Metadata == null || Drawable == null)
             {
                 _svg = default;
                 return;
@@ -78,8 +81,8 @@ namespace SimpleCircuitOnline.Shared
                 Style = GraphicalCircuit.DefaultStyle,
                 ElementFormatter = _jsTextFormatter
             };
-            _drawable.Reset();
-            _drawable.Render(drawing);
+            Drawable.Reset();
+            Drawable.Render(drawing);
             var doc = drawing.GetDocument();
 
             // Try to resize the component
@@ -105,13 +108,13 @@ namespace SimpleCircuitOnline.Shared
 
         private void ToggleVariant(string name)
         {
-            if (_drawable != null)
+            if (Drawable != null)
             {
-                if (_drawable.Variants.Contains(name))
-                    _drawable.Variants.Remove(name);
+                if (Drawable.Variants.Contains(name))
+                    Drawable.Variants.Remove(name);
                 else
-                    _drawable.Variants.Add(name);
-                _drawable.Variants.Reset();
+                    Drawable.Variants.Add(name);
+                Drawable.Variants.Reset();
                 CreateSvg();
             }
             StateHasChanged();
