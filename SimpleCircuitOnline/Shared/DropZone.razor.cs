@@ -111,9 +111,9 @@ namespace SimpleCircuitOnline.Shared
             {
                 doc.LoadXml(content);
             }
-            catch (XmlException)
+            catch (XmlException ex)
             {
-                args.Errors = "Invalid XML data found in uploaded SVG file.";
+                args.Errors = "Invalid XML data found in uploaded SVG file.<br />" + ex.Message;
                 await Upload.InvokeAsync(args);
                 return;
             }
@@ -143,7 +143,8 @@ namespace SimpleCircuitOnline.Shared
                 args.Errors = "No SimpleCircuit script metadata found in uploaded SVG file.";
             else if (args.Style.Length == 0)
                 args.Warnings = "No styling information found in uploaded SVG file.";
-            Filename = args.Filename;
+
+            InternalFilename = args.Filename;
             await Upload.InvokeAsync(args);
         }
 

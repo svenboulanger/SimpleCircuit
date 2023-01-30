@@ -147,11 +147,17 @@ namespace SimpleCircuitOnline.Pages
                 case DownloadEventArgs.Types.Svg:
                     {
                         var doc = await ComputeXml(includeScript: true);
-                        using var sw = new Utf8StringWriter();
-                        using var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false });
-                        doc.WriteTo(xml);
-                        sw.Flush();
-                        byte[] file = Encoding.UTF8.GetBytes(sw.ToString());
+                        
+                        string result;
+                        using (var sw = new Utf8StringWriter())
+                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        {
+                            doc.WriteTo(xml);
+                            xml.Flush();
+                            sw.Flush();
+                            result = sw.ToString();
+                        }
+                        byte[] file = Encoding.UTF8.GetBytes(result);
                         await _js.InvokeVoidAsync("BlazorDownloadFile", $"{filename}.svg", "text/plain", file);
                     }
                     break;
@@ -165,12 +171,18 @@ namespace SimpleCircuitOnline.Pages
                             w = 10.0;
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
                             h = 10.0;
-                        
-                        using var sw = new StringWriter();
+
+                        string result;
+                        using (var sw = new StringWriter())
                         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        {
                             doc.WriteTo(xml);
-                        string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.png", "image/png", result, (int)w, (int)h);
+                            xml.Flush();
+                            sw.Flush();
+                            result = sw.ToString();
+                        }
+                        string url = $"data:image/png;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.png", "image/png", url, (int)w, (int)h);
                     }
                     break;
 
@@ -184,11 +196,17 @@ namespace SimpleCircuitOnline.Pages
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
                             h = 10.0;
 
-                        using var sw = new StringWriter();
+                        string result;
+                        using (var sw = new StringWriter())
                         using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        {
                             doc.WriteTo(xml);
-                        string result = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(sw.ToString()))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpg", result, (int)w, (int)h, "white");
+                            xml.Flush();
+                            sw.Flush();
+                            result = sw.ToString();
+                        }
+                        string url = $"data:image/jpeg;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpg", url, (int)w, (int)h, "white");
                     }
                     break;
 
