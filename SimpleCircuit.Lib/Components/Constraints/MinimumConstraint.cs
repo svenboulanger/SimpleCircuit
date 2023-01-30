@@ -12,6 +12,9 @@ namespace SimpleCircuit.Components
     public class MinimumConstraint : ICircuitSolverPresence
     {
         public const string DiodeModelName = "#MinimumOffsetPinModel";
+        private const double OnResistance = 1e-3;
+        private const double OffResistance = 1e9;
+        private const double Hysteresis = 0.01;
 
         /// <inheritdoc />
         public int Order => 0;
@@ -25,10 +28,10 @@ namespace SimpleCircuit.Components
             if (circuit.Contains(DiodeModelName))
                 return;
             var model = new VoltageSwitchModel(DiodeModelName);
-            model.Parameters.OnResistance = 1e-6;
-            model.Parameters.OffResistance = 1e9;
-            model.Parameters.Hysteresis = 1e-3;
-            model.Parameters.Threshold = 0.0;
+            model.Parameters.OnResistance = OnResistance;
+            model.Parameters.OffResistance = OffResistance;
+            model.Parameters.Hysteresis = Hysteresis;
+            model.Parameters.Threshold = 0;
             circuit.Add(model);
         }
 
@@ -42,6 +45,13 @@ namespace SimpleCircuit.Components
         /// <param name="minimum">The minimum between the two.</param>
         public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1)
         {
+            // Check for valid weights
+            // If the weight is significant compared to the off-resistance of a minimum constraint, then 
+            // the results tend to be skewed/distorted.
+            double r = 1.0 / weight;
+            if (r >= OffResistance * 0.1)
+                throw new ArgumentOutOfRangeException(nameof(weight));
+
             string i = $"{name}.i";
             circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
             circuit.Add(new VoltageSource($"V{name}", i, lowest, minimum));
@@ -98,7 +108,7 @@ namespace SimpleCircuit.Components
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The minimum between the two values.</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException">Thrown if any node name is <c>null</c>.</exception>
         public MinimumConstraint(string name, string lowest, string highest, double minimum)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -128,9 +138,12 @@ namespace SimpleCircuit.Components
             switch (context.Mode)
             {
                 case NodeRelationMode.Links:
-                    string highest = context.Shorts[Highest];
-                    string lowest = context.Shorts[Lowest];
-                    context.Extremes.Order(lowest, highest);
+                    if (Minimum.IsZero() || Minimum > 0)
+                    {
+                        string highest = context.Shorts[Highest];
+                        string lowest = context.Shorts[Lowest];
+                        context.Extremes.Order(lowest, highest);
+                    }
                     break;
 
                 default:

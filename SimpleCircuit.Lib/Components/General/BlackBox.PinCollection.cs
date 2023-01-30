@@ -143,9 +143,9 @@ namespace SimpleCircuit.Components
                 height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
 
                 if (width < MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Shorts[_parent.X], context.Nodes.Shorts[Right], MinWidth);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Shorts[_parent.X], context.Nodes.Shorts[Right], MinWidth, 100.0);
                 if (height < MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Shorts[_parent.Y], context.Nodes.Shorts[Bottom], MinHeight);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Shorts[_parent.Y], context.Nodes.Shorts[Bottom], MinHeight, 100.0);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
