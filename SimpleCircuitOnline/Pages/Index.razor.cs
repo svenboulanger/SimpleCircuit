@@ -59,7 +59,8 @@ namespace SimpleCircuitOnline.Pages
                 AutomaticLayout = true,
                 Language = "text/css",
                 WordWrap = "on",
-                Value = ""
+                Value = "",
+                WordBasedSuggestions = false,
             };
         }
 
@@ -91,12 +92,15 @@ namespace SimpleCircuitOnline.Pages
                 _timer.AutoReset = false;
 
                 // Register our own language keywords
-                List<string> keys = new();
+                List<string[]> keys = new();
                 var context = new SimpleCircuit.Parser.ParsingContext();
                 foreach (var factory in context.Factory.Factories)
                 {
                     foreach (var metadata in factory.Metadata)
-                        keys.AddRange(metadata.Keys);
+                    {
+                        foreach (string key in metadata.Keys)
+                            keys.Add(new string[] { key, metadata.Description });
+                    }
                 }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
                 var model = await _scriptEditor.GetModel();

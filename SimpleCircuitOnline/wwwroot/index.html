@@ -218,15 +218,28 @@
                 ]
             });
 
-            suggestions = [];
-            for (var i = 0; i < keywords.length; i++) {
-                suggestions[i] = {
-                    label: keywords[i],
-                    insertText: keywords[i]
-                };
-            }
             monaco.languages.registerCompletionItemProvider('simpleCircuit', {
-                provideCompletionItems: () => {
+                provideCompletionItems: (model, position) => {
+                    const word = model.getWordUntilPosition(position);
+                    const range = {
+                        startLineNumber: position.lineNumber,
+                        endLineNumber: position.lineNumber,
+                        startColumn: word.startColumn,
+                        endColumn: word.endColumn
+                    };
+                    var suggestions = [];
+                    for (var i = 0; i < keywords.length; i++) {
+                        keyword = keywords[i];
+                        if (keyword[0].startsWith(word.word.toUpperCase())) {
+                            suggestions.push({
+                                label: keyword[0],
+                                insertText: keyword[0],
+                                detail: keyword[1],
+                                range: range
+                            });
+                        }
+                    }
+
                     return {
                         suggestions: suggestions
                     }
