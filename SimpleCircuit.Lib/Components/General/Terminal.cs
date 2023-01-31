@@ -35,9 +35,10 @@ namespace SimpleCircuit.Components
             {
                 drawing.ExtendPins(Pins, 4);
 
-                switch (Variants.Select("input", "output", "inout", "other", "pad", "square"))
+                switch (Variants.Select("input", "in", "output", "out", "inout", "other", "pad", "square"))
                 {
                     case 0:
+                    case 1:
                         // Input
                         drawing.Polygon(new Vector2[]
                         {
@@ -47,7 +48,8 @@ namespace SimpleCircuit.Components
                         drawing.Text(Labels[0], new Vector2(-6, 0), new Vector2(-1, 0));
                         break;
 
-                    case 1:
+                    case 2:
+                    case 3:
                         // output
                         drawing.Polygon(new Vector2[]
                         {
@@ -57,7 +59,7 @@ namespace SimpleCircuit.Components
                         drawing.Text(Labels[0], new Vector2(-6, 0), new Vector2(-1, 0));
                         break;
 
-                    case 2:
+                    case 4:
                         // inout
                         drawing.Polygon(new Vector2[]
                         {
@@ -67,7 +69,7 @@ namespace SimpleCircuit.Components
                         drawing.Text(Labels[0], new Vector2(-8, 0), new Vector2(-1, 0));
                         break;
 
-                    case 3:
+                    case 5:
                         // other
                         drawing.Polygon(new Vector2[]
                         {
@@ -76,14 +78,14 @@ namespace SimpleCircuit.Components
                         drawing.Text(Labels[0], new Vector2(-6, 0), new Vector2(-1, 0));
                         break;
 
-                    case 4:
+                    case 6:
                         // pad
                         drawing.Rectangle(4, 4, new(-2, 0));
                         drawing.Cross(new(-2, 0), 4);
                         drawing.Text(Labels[0], new Vector2(-5, 0), new Vector2(-1, 0));
                         break;
 
-                    case 5:
+                    case 7:
                         // square
                         drawing.Rectangle(4, 4, new(-2, 0));
                         drawing.Text(Labels[0], new Vector2(-5, 0), new Vector2(-1, 0));
