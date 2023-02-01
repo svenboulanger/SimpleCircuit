@@ -27,7 +27,7 @@ namespace SimpleCircuit
 
         private readonly XmlDocument _document;
         private XmlNode _current;
-        private readonly ExpandableBounds _bounds;
+        private readonly Stack<ExpandableBounds> _bounds;
         private readonly Stack<Transform> _tf = new();
 
         /// <summary>
@@ -64,6 +64,19 @@ namespace SimpleCircuit
         public bool RemoveEmptyGroups { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets a flag that causes the bounding boxes of groups with an identifier to be rendered as well.
+        /// </summary>
+        /// <remarks>
+        /// Bounding boxes are grouped in a group tag, with the class "bounds".
+        /// </remarks>
+        public bool RenderBounds { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the amount to expand the bounds if <see cref="RenderBounds"/> is <c>true</c>.
+        /// </summary>
+        public double ExpandBounds { get; set; } = 2.0;
+
+        /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
         public SvgDrawing()
@@ -71,8 +84,11 @@ namespace SimpleCircuit
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
             _document.AppendChild(_current);
-            _bounds = new ExpandableBounds();
             _tf.Push(Transform.Identity);
+
+            // Make sure we can track the bounds of our vector image
+            _bounds = new();
+            _bounds.Push(new());
         }
 
         /// <summary>
@@ -517,7 +533,7 @@ namespace SimpleCircuit
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
-            _bounds.Expand(new[] { start, end });
+            _bounds.Peek().Expand(new[] { start, end });
 
             // Create the line
             var line = _document.CreateElement("line", Namespace);
@@ -539,7 +555,7 @@ namespace SimpleCircuit
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
-            _bounds.Expand(new[] { position - new Vector2(radius, radius), position + new Vector2(radius, radius) });
+            _bounds.Peek().Expand(new[] { position - new Vector2(radius, radius), position + new Vector2(radius, radius) });
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
@@ -558,7 +574,7 @@ namespace SimpleCircuit
         public void Polyline(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);
-            _bounds.Expand(points);
+            _bounds.Peek().Expand(points);
 
             // Creates the poly
             var poly = _document.CreateElement("polyline", Namespace);
@@ -575,7 +591,7 @@ namespace SimpleCircuit
         public void Polygon(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);
-            _bounds.Expand(points);
+            _bounds.Peek().Expand(points);
 
             // Create the element
             var poly = _document.CreateElement("polygon", Namespace);
@@ -592,7 +608,7 @@ namespace SimpleCircuit
         public void SmoothBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);
-            _bounds.Expand(points);
+            _bounds.Peek().Expand(points);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
@@ -621,7 +637,7 @@ namespace SimpleCircuit
         public void ClosedBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);
-            _bounds.Expand(points);
+            _bounds.Peek().Expand(points);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
@@ -649,7 +665,7 @@ namespace SimpleCircuit
         public void OpenBezier(IEnumerable<Vector2> points, PathOptions options = null)
         {
             points = CurrentTransform.Apply(points);
-            _bounds.Expand(points);
+            _bounds.Peek().Expand(points);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
@@ -729,7 +745,7 @@ namespace SimpleCircuit
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
         /// <param name="options">The options.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public void Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null, bool transformText = true)
         {
             // Don't bother with text that is null or just whitespaces.
             if (string.IsNullOrWhiteSpace(value))
@@ -745,12 +761,20 @@ namespace SimpleCircuit
             _current.AppendChild(txt);
 
             // Apply text
-            // value = TransformText(value);
-            var lexer = new SimpleTextLexer(value);
-            var context = new SimpleTextContext();
-            SimpleTextParser.Parse(lexer, context);
+            IEnumerable<string> lines;
+            if (transformText)
+            {
+                var lexer = new SimpleTextLexer(value);
+                var context = new SimpleTextContext();
+                SimpleTextParser.Parse(lexer, context);
+                lines = context.Lines;
+            }
+            else
+            {
+                lines = value.Split('\n');
+            }
             List<XmlElement> elements = new();
-            foreach (var line in context.Lines)
+            foreach (var line in lines)
             {
                 var tspan = _document.CreateElement("tspan", Namespace);
                 PopulateText(tspan, line);
@@ -773,20 +797,20 @@ namespace SimpleCircuit
                 if (expand.X.IsZero())
                 {
                     elements[i].SetAttribute("text-anchor", "middle");
-                    _bounds.Expand(location - new Vector2(width / 2, 0));
-                    _bounds.Expand(location + new Vector2(width / 2, 0));
+                    _bounds.Peek().Expand(location - new Vector2(width / 2, 0));
+                    _bounds.Peek().Expand(location + new Vector2(width / 2, 0));
                 }
                 else if (expand.X > 0)
                 {
                     elements[i].SetAttribute("text-anchor", "start");
-                    _bounds.Expand(location);
-                    _bounds.Expand(location + new Vector2(width, 0));
+                    _bounds.Peek().Expand(location);
+                    _bounds.Peek().Expand(location + new Vector2(width, 0));
                 }
                 else
                 {
                     elements[i].SetAttribute("text-anchor", "end");
-                    _bounds.Expand(location - new Vector2(width, 0));
-                    _bounds.Expand(location);
+                    _bounds.Peek().Expand(location - new Vector2(width, 0));
+                    _bounds.Peek().Expand(location);
                 }
             }
 
@@ -794,20 +818,20 @@ namespace SimpleCircuit
             double y;
             if (expand.Y.IsZero())
             {
-                _bounds.Expand(location - new Vector2(0, height / 2));
-                _bounds.Expand(location + new Vector2(0, height / 2));
+                _bounds.Peek().Expand(location - new Vector2(0, height / 2));
+                _bounds.Peek().Expand(location + new Vector2(0, height / 2));
                 y = -height / 2;
             }
             else if (expand.Y > 0)
             {
-                _bounds.Expand(location);
-                _bounds.Expand(location + new Vector2(0, height));
+                _bounds.Peek().Expand(location);
+                _bounds.Peek().Expand(location + new Vector2(0, height));
                 y = 0.0;
             }
             else
             {
-                _bounds.Expand(location - new Vector2(0, height));
-                _bounds.Expand(location);
+                _bounds.Peek().Expand(location - new Vector2(0, height));
+                _bounds.Peek().Expand(location);
                 y = -height;
             }
 
@@ -832,7 +856,7 @@ namespace SimpleCircuit
         {
             if (action == null)
                 return;
-            var builder = new PathBuilder(_bounds, CurrentTransform);
+            var builder = new PathBuilder(_bounds.Peek(), CurrentTransform);
             action(builder);
 
             // Create the path element
@@ -863,6 +887,9 @@ namespace SimpleCircuit
             options?.Apply(elt);
             _current.AppendChild(elt);
             _current = elt;
+
+            // Track the bounds of the group
+            _bounds.Push(new());
         }
 
         /// <summary>
@@ -878,6 +905,38 @@ namespace SimpleCircuit
 
             if (parent != null)
                 _current = parent;
+
+            // Go to the parent bounds
+            if (_bounds.Count > 1)
+            {
+                var bounds = _bounds.Pop();
+                var cBounds = _bounds.Peek();
+                cBounds.Expand(bounds);
+
+                // Draw a rectangle on top of the group to show
+                if (RenderBounds)
+                {
+                    string id = group.Attributes["id"]?.Value;
+                    if (!string.IsNullOrWhiteSpace(id))
+                    {
+                        var b = bounds.Bounds;
+                        var center = new Vector2(0.5 * (b.Left + b.Right), 0.5 * (b.Top + b.Bottom));
+                        double left = b.Left - ExpandBounds, right = b.Right + ExpandBounds;
+                        double top = b.Top - ExpandBounds, bottom = b.Bottom + ExpandBounds;
+
+                        StartGroup(new("bounds"));
+                        Polygon(new Vector2[]
+                        {
+                            new(left, top), new(right, top),
+                            new(right, bottom), new(left, bottom)
+                        });
+
+                        // Show the ID in the middle of the box
+                        Text(id, center, new(), transformText: false);
+                        EndGroup();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -897,7 +956,7 @@ namespace SimpleCircuit
             }
 
             // Try to get the bounds of this
-            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Bounds;
+            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Peek().Bounds;
 
             // Apply a margin along the edges
             bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);

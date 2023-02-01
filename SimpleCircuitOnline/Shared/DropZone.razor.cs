@@ -59,6 +59,12 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public EventCallback<bool> ShrinkYChanged { get; set; }
 
+        [Parameter]
+        public bool Bounds { get; set; }
+
+        [Parameter]
+        public EventCallback<bool> BoundsChanged { get; set; }
+
         protected string ContainerClasses
         {
             get
@@ -78,11 +84,15 @@ namespace SimpleCircuitOnline.Shared
             ShrinkX = !ShrinkX;
             await ShrinkXChanged.InvokeAsync(ShrinkX);
         }
-
         private async Task ToggleShrinkY()
         {
             ShrinkY = !ShrinkY;
             await ShrinkYChanged.InvokeAsync(ShrinkY);
+        }
+        private async Task ToggleBounds()
+        {
+            Bounds = !Bounds;
+            await BoundsChanged.InvokeAsync(Bounds);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -64,6 +64,11 @@ namespace SimpleCircuit
         public double SpacingY { get; set; } = 20.0;
 
         /// <summary>
+        /// Gets or sets a flag that determines whether bounds are rendered.
+        /// </summary>
+        public bool RenderBounds { get; set; }
+
+        /// <summary>
         /// Adds the specified component.
         /// </summary>
         /// <param name="component">The component.</param>
@@ -429,6 +434,7 @@ namespace SimpleCircuit
                 throw new ArgumentNullException(nameof(drawing));
 
             drawing.Style = Style;
+            drawing.RenderBounds = RenderBounds;
 
             // Draw all components
             foreach (var c in _presences.Values.OfType<IDrawable>().OrderBy(d => d.Order))
@@ -452,7 +458,8 @@ namespace SimpleCircuit
             var drawing = new SvgDrawing
             {
                 Style = Style,
-                ElementFormatter = formatter
+                ElementFormatter = formatter,
+                RenderBounds = RenderBounds
             };
 
             // Draw

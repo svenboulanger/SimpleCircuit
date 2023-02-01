@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"- OR.inputs = 10";
+            var script = @"GND <u> V <u r> R <r d> C <d> GND";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
@@ -42,7 +42,7 @@ namespace Sandbox
                     fw.WriteLine("</body>");
                     fw.WriteLine("</html>");
                 }
-                Process.Start(@"""C:\Program Files\Google\Chrome\Application\chrome.exe""", "\"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
+                Process.Start(@"""cmd.exe""", "/c \"" + Path.Combine(Directory.GetCurrentDirectory(), "tmp.html") + "\"");
             }
         }
     }

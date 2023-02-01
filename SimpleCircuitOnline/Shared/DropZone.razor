@@ -10,8 +10,9 @@
         @ChildContent
     </div>
     <div class="menu clearfix">
-        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkX ? " active" : "")" @onclick="ToggleShrinkX">Fit width</a>
-        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkY ? " active" : "")" @onclick="ToggleShrinkY">Fit height</a>
+        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkX ? " active" : "")" @onclick="ToggleShrinkX">Fit X</a>
+        <a href="javascript:void(0);" class="btn toggle-shrink@(ShrinkY ? " active" : "")" @onclick="ToggleShrinkY">Fit Y</a>
+        <a href="javascript:void(0);" class="btn toggle-shrink@(Bounds ? " active" : "")" @onclick="ToggleBounds">Bounds</a>
         <EditForm Model="this" class="form-inline my-2 mx-3">
             <InputText @bind-Value="InternalFilename" class="form-control" placeholder="Filename" aria-label="Filename" />
         </EditForm>

@@ -8,7 +8,7 @@ namespace SimpleCircuit.Drawing
     /// </summary>
     public class ExpandableBounds
     {
-        private double _l = 0, _r = 0, _t = 0, _b = 0;
+        private double _l = double.MaxValue, _r = double.MinValue, _t = double.MaxValue, _b = double.MinValue;
         
         /// <summary>
         /// Gets the bounds.
@@ -32,6 +32,18 @@ namespace SimpleCircuit.Drawing
             _r = Math.Max(x, _r);
             _b = Math.Max(y, _b);
             _t = Math.Min(y, _t);
+        }
+
+        /// <summary>
+        /// Expands the bounds looking at the specified bounds.
+        /// </summary>
+        /// <param name="bounds">The bounds.</param>
+        public void Expand(ExpandableBounds bounds)
+        {
+            _l = Math.Min(bounds._l, _l);
+            _r = Math.Max(bounds._r, _r);
+            _b = Math.Max(bounds._b, _b);
+            _t = Math.Min(bounds._t, _t);
         }
 
         /// <summary>

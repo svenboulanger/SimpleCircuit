@@ -20,7 +20,7 @@ namespace SimpleCircuitOnline.Pages
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
         private bool _updateDynamic = false;
-        private bool _shrinkX = true, _shrinkY = true;
+        private bool _shrinkX = true, _shrinkY = true, _renderBounds = true;
         private string _filename = null;
 
         private async Task SetCurrentScript(string script, string style = null)
@@ -43,7 +43,7 @@ namespace SimpleCircuitOnline.Pages
                     await _styleEditor.SetValue(style);
 
                 // Update the preview
-                _svg = await ComputeXml(false);
+                _svg = await ComputeXml(false, _renderBounds);
                 _loading = 0;
                 StateHasChanged();
             }
@@ -235,12 +235,12 @@ namespace SimpleCircuitOnline.Pages
                 _warnings = null;
                 StateHasChanged();
                 _timer.Stop();
-                Task.Run(async () => _svg = await ComputeXml(false))
+                Task.Run(async () => _svg = await ComputeXml(false, _renderBounds))
                     .ContinueWith(task => { _loading = 0; StateHasChanged(); });
             }
         }
 
-        private async Task<XmlDocument> ComputeXml(bool includeScript)
+        private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
             _errors = null;
             _warnings = null;
@@ -267,6 +267,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Include XML data
                 ckt.Style = style;
+                ckt.RenderBounds = includeBounds;
                 if (includeScript)
                     ckt.Metadata.Add("script", code);
 
