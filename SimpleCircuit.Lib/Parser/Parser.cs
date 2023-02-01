@@ -80,7 +80,7 @@ namespace SimpleCircuit.Parser
             // Parse wires
             bool isFirst = true;
             Token pinToWire = default;
-            while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak))
+            while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash))
             {
                 // Read the starting pin
                 pinToWire = default;
@@ -92,7 +92,7 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Parse the wire itself
-                if (lexer.Check(TokenType.OpenBeak))
+                if (lexer.Check(TokenType.OpenBeak | TokenType.Dash))
                 {
                     var wireInfo = ParseWire(lexer, context);
                     if (wireInfo == null)
@@ -268,7 +268,7 @@ namespace SimpleCircuit.Parser
         /// <returns>The wire information.</returns>
         private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            if (!lexer.Branch(TokenType.OpenBeak))
+            if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash))
             {
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedWire);
                 return null;
@@ -280,131 +280,152 @@ namespace SimpleCircuit.Parser
                 JumpOverWires = context.Options.JumpOverWires
             };
 
-            while (lexer.Type != TokenType.CloseBeak)
+            // Chain together multiple wire definitions
+            while (lexer.Check(TokenType.OpenBeak | TokenType.Dash))
             {
-                // Get the direction
-                if (lexer.Branch(TokenType.Word, out var directionToken))
+                if (lexer.Branch(TokenType.Dash, out var dashToken))
+                    wireInfo.Segments.Add(new(dashToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                else if (lexer.Branch(TokenType.OpenBeak))
                 {
-                    switch (directionToken.Content.ToString().ToLower())
+                    while (lexer.Type != TokenType.CloseBeak)
                     {
-                        case "n":
-                        case "u":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                        // Get the direction
+                        if (lexer.Branch(TokenType.Word, out var directionToken))
+                        {
+                            switch (directionToken.Content.ToString().ToLower())
+                            {
+                                case "n":
+                                case "u":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "s":
-                        case "d":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "s":
+                                case "d":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "e":
-                        case "l":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "e":
+                                case "l":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "w":
-                        case "r":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "w":
+                                case "r":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "ne":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "ne":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "nw":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "nw":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "se":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "se":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "sw":
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "sw":
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "a":
-                            double angle = ParseDouble(lexer, context);
-                            wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength });
-                            break;
+                                case "a":
+                                    double angle = ParseDouble(lexer, context);
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    break;
 
-                        case "hidden": wireInfo.IsVisible = false; break;
+                                case "hidden": wireInfo.IsVisible = false; break;
 
-                        case "nojump":
-                        case "nojmp":
-                        case "njmp": wireInfo.JumpOverWires = false; break;
+                                case "nojump":
+                                case "nojmp":
+                                case "njmp": wireInfo.JumpOverWires = false; break;
 
-                        case "jump":
-                        case "jmp": wireInfo.JumpOverWires = true; break;
+                                case "jump":
+                                case "jmp": wireInfo.JumpOverWires = true; break;
 
-                        case "dotted": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted; break;
-                        case "dashed": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dashed; break;
-                        case "arrow":
+                                case "dotted": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted; break;
+                                case "dashed": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dashed; break;
+                                case "arrow":
+                                    if (wireInfo.Segments.Count == 0)
+                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                                    else
+                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                                    break;
+
+                                case "rarrow":
+                                    if (wireInfo.Segments.Count == 0)
+                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                                    else
+                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                                    break;
+
+                                case "dot":
+                                    if (wireInfo.Segments.Count == 0)
+                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                                    else
+                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                                    break;
+
+                                default:
+                                    context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeDirection, directionToken.Content.ToString());
+                                    break;
+                            }
+                        }
+                        else if (lexer.Branch(TokenType.Divide))
+                        {
                             if (wireInfo.Segments.Count == 0)
-                                wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                                wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Slash;
                             else
-                                wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Arrow;
-                            break;
-
-                        case "rarrow":
-                            if (wireInfo.Segments.Count == 0)
-                                wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
-                            else
-                                wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
-                            break;
-
-                        case "dot":
-                            if (wireInfo.Segments.Count == 0)
-                                wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Dot;
-                            else
-                                wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
-                            break;
-
-                        default:
-                            context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeDirection, directionToken.Content.ToString());
-                            break;
+                                wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
+                        }
+                        else if (lexer.Branch(TokenType.Plus))
+                        {
+                            double l = ParseDouble(lexer, context);
+                            if (wireInfo.Segments.Count > 0)
+                            {
+                                wireInfo.Segments[^1].IsFixed = false;
+                                wireInfo.Segments[^1].Length = l;
+                            }
+                        }
+                        else if (lexer.Check(TokenType.Number | TokenType.Integer))
+                        {
+                            double l = ParseDouble(lexer, context);
+                            if (wireInfo.Segments.Count > 0)
+                            {
+                                wireInfo.Segments[^1].IsFixed = true;
+                                wireInfo.Segments[^1].Length = l;
+                            }
+                        }
+                        else if (lexer.Branch(TokenType.Question))
+                        {
+                            // Don't give an orientation, and in that case the orientation should come from the pin itself!
+                            wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                        }
+                        else
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeDirection);
+                            lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
+                        }
                     }
-                }
-                else if (lexer.Branch(TokenType.Divide))
-                {
-                    if (wireInfo.Segments.Count == 0)
-                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Slash;
-                    else
-                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
-                }
-                else if (lexer.Branch(TokenType.Plus))
-                {
-                    double l = ParseDouble(lexer, context);
-                    if (wireInfo.Segments.Count > 0)
-                    {
-                        wireInfo.Segments[^1].IsFixed = false;
-                        wireInfo.Segments[^1].Length = l;
-                    }
-                }
-                else if (lexer.Check(TokenType.Number | TokenType.Integer))
-                {
-                    double l = ParseDouble(lexer, context);
-                    if (wireInfo.Segments.Count > 0)
-                    {
-                        wireInfo.Segments[^1].IsFixed = true;
-                        wireInfo.Segments[^1].Length = l;
-                    }
-                }
-                else if (lexer.Branch(TokenType.Question))
-                {
-                    // Don't give an orientation, and in that case the orientation should come from the pin itself!
-                    wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
-                }
-                else
-                {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeDirection);
-                    lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
+
+                    // Closing beak
+                    if (!lexer.Branch(TokenType.CloseBeak))
+                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
                 }
             }
 
-            // Closing beak
-            if (!lexer.Branch(TokenType.CloseBeak))
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
+            // Fix some unknown segment orientations
+            for (int i = wireInfo.Segments.Count - 2; i >= 1; i--)
+            {
+                var segment = wireInfo.Segments[i];
+                if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                {
+                    wireInfo.Segments[i - 1].Length += segment.Length;
+                    wireInfo.Segments.RemoveAt(i);
+                }
+            }
+
             return wireInfo;
         }
 

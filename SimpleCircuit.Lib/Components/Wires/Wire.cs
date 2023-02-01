@@ -165,7 +165,24 @@ namespace SimpleCircuit.Components.Wires
                     var segment = _info.Segments[i];
                     if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                     {
-                        if (i != 0 && i != _info.Segments.Count - 1)
+                        if (i == 0)
+                        {
+                            // Check with first pin, and only with first pin...
+                            if (p1 == null)
+                            {
+                                GenerateError(diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                return PresenceResult.GiveUp;
+                            }
+                        }
+                        else if (i == _info.Segments.Count - 1)
+                        {
+                            if (p2 == null)
+                            {
+                                GenerateError(diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                return PresenceResult.GiveUp;
+                            }
+                        }
+                        else
                         {
                             diagnostics?.Post(_info.Segments[i].Source, ErrorCodes.UndefinedWireSegment);
                             return PresenceResult.GiveUp;

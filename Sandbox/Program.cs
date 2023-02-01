@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"GND <u> V <u r> R <r d> C <d> GND";
+            var script = @"X <r d ? r> R1";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
