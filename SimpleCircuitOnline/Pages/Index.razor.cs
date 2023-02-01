@@ -307,16 +307,12 @@ namespace SimpleCircuitOnline.Pages
         private static string EncodeScript(string script)
         {
             // We can encounter arrows in our script, so let's encode them in HTML code
-            script = Regex.Replace(script, "[\u0100-\uFFFF]", match =>
-            {
-                // Convert to "&#xxxx;" notation
-                return $"&#{((int)match.Groups[0].Value[0]).ToString("x4")};";
-            });
+            script = NonUtf8Code().Replace(script, match => $"&#{(int)match.Groups[0].Value[0]:x4};");
             return script;
         }
         private static string DecodeScript(string script)
         {
-            script = Regex.Replace(script, @"\&\#(?<value>[0-9a-fA-F]+);", match =>
+            script = Utf8Encoded().Replace(script, match =>
             {
                 // Convert the resulting ASCI character
                 int value = int.Parse(match.Groups["value"].Value, System.Globalization.NumberStyles.HexNumber);
@@ -350,5 +346,10 @@ namespace SimpleCircuitOnline.Pages
             }
             return sb.ToString();
         }
+
+        [GeneratedRegex("[\u0100-\uffff]")]
+        private static partial Regex NonUtf8Code();
+        [GeneratedRegex("\\&\\#(?<value>[0-9a-fA-F]+);")]
+        private static partial Regex Utf8Encoded();
     }
 }

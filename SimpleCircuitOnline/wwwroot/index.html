@@ -244,69 +244,9 @@
                             });
                         }
                     }
-                    if (suggestions.length == 0 && range.startColumn > 1) {
-                        range.startColumn--;
-                        word = model.getValueInRange(range);
-                        if (word[0] == '-')
-                            suggestions = getWireSuggestions(word, range);
-                    }
-
                     return { suggestions: suggestions };
-                },
-                triggerCharacters: ["-"]
-            });
-        }
-
-        function getWireSuggestions(word, range) {
-            var suggestions = [];
-            for (var i = 1; i < 10; i++) {
-                arrow = getArrowCharacter(i);
-                if (arrow) {
-                    suggestions.push({
-                        label: word + i,
-                        insertText: arrow[0],
-                        detail: arrow[1],
-                        range: range
-                    });
-                    for (var j = 1; j < 10; j++) {
-                        arrow2 = getArrowCharacter(j);
-                        if (arrow2) {
-                            suggestions.push({
-                                label: word + i.toString() + j.toString(),
-                                insertText: arrow[0] + arrow2[0],
-                                detail: arrow2[1],
-                                range: range
-                            });
-                            for (var k = 1; k < 10; k++) {
-                                arrow3 = getArrowCharacter(k);
-                                if (arrow3) {
-                                    suggestions.push({
-                                        label: word + i.toString() + j.toString() + k.toString(),
-                                        insertText: arrow[0] + arrow2[0] + arrow3[0],
-                                        detail: arrow3[1],
-                                        range: range
-                                    });
-                                }
-                            }
-                        }
-                    }
                 }
-            }
-            return suggestions;
-        }
-
-        function getArrowCharacter(number) {
-            number = number.toString()
-            switch (number) {
-                case '1': return ['\u2199', 'Wire down-left'];
-                case '2': return ['\u2193', 'Wire down'];
-                case '3': return ['\u2198', 'Wire down-right'];
-                case '4': return ['\u2190', 'Wire left'];
-                case '6': return ['\u2192', 'Wire right'];
-                case '7': return ['\u2196', 'Wire up-left'];
-                case '8': return ['\u2191', 'Wire up'];
-                case '9': return ['\u2197', 'Wire up-right'];
-            }
+            });
         }
 
         function calculateBounds(element) {
