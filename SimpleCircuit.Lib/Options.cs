@@ -15,6 +15,7 @@ namespace SimpleCircuit
     {
         private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
         private readonly Dictionary<string, List<Action<IDrawable, IDiagnosticHandler>>> _properties = new();
+        private double _spacingX = 20.0, _spacingY = 20.0;
 
         /// <summary>
         /// The identifier for AREI style components.
@@ -71,6 +72,44 @@ namespace SimpleCircuit
 
         [Description("If true, wires will draw small arcs indicating jumping over another wire.")]
         public bool JumpOverWires { get; set; } = false;
+
+        [Description("The spacing in X-direction between two unconnected diagrams.")]
+        public double SpacingX
+        {
+            get => _spacingX;
+            set
+            {
+                if (value != _spacingX)
+                {
+                    _spacingX = value;
+                    SpacingXChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the event that is called when <see cref="SpacingX"/> changes.
+        /// </summary>
+        public event EventHandler<EventArgs> SpacingXChanged;
+
+        [Description("The spacing in Y-direction between two unconnected diagrams.")]
+        public double SpacingY
+        {
+            get => _spacingY;
+            set
+            {
+                if (value != _spacingY)
+                {
+                    _spacingY = value;
+                    SpacingYChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the event that is called when <see cref="SpacingY"/> changes.
+        /// </summary>
+        public event EventHandler<EventArgs> SpacingYChanged;
 
         /// <summary>
         /// Adds a default property value for any drawable of the given key.

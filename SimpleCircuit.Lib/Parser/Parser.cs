@@ -654,6 +654,7 @@ namespace SimpleCircuit.Parser
                 }
                 else
                     context.Diagnostics?.Post(nameToken, ErrorCodes.CouldNotRecognizeType, nameToken.Content.ToString());
+
             }
 
             if (lexer.Type != TokenType.EndOfContent && !lexer.Check(TokenType.Newline))

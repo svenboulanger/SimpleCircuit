@@ -52,6 +52,10 @@ namespace SimpleCircuit.Parser
         public ParsingContext()
         {
             Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+
+            // Link the circuit options to the actual circuit
+            Options.SpacingXChanged += (sender, args) => Circuit.SpacingX = Options.SpacingX;
+            Options.SpacingYChanged += (sender, args) => Circuit.SpacingY = Options.SpacingY;
         }
 
         /// <summary>
