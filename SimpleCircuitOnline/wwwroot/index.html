@@ -33,7 +33,7 @@
     </div>
 
     <div style="position:absolute;left:-9999cm;top:-9999cm;" id="div_measure"></div>
-    <canvas id="canvas" width="200" height="200" style="position:absolute;left:-9999px;top:-9999px;"></canvas>
+    <canvas id="canvas" width="200" height="200" style="position:absolute;left:-9999cm;top:-9999cm;"></canvas>
 
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
     <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
@@ -64,9 +64,8 @@
         }
 
         function BlazorExportImage(filename, mime, imageData, width, height, backgroundColor) {
-
             var image = new Image();
-            image.onload = () => {
+            image.onload = function () {
                 var canvas = document.getElementById("canvas");
                 canvas.width = width;
                 canvas.height = height;

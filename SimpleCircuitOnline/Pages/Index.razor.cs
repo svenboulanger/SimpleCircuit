@@ -162,7 +162,7 @@ namespace SimpleCircuitOnline.Pages
                             result = sw.ToString();
                         }
                         byte[] file = Encoding.UTF8.GetBytes(result);
-                        await _js.InvokeVoidAsync("BlazorDownloadFile", $"{filename}.svg", "text/plain", file);
+                        await _js.InvokeVoidAsync("BlazorDownloadFile", $"{filename}.svg", "image/svg+xml;", file);
                     }
                     break;
 
@@ -185,7 +185,7 @@ namespace SimpleCircuitOnline.Pages
                             sw.Flush();
                             result = sw.ToString();
                         }
-                        string url = $"data:image/png;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                        string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
                         await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.png", "image/png", url, (int)w, (int)h);
                     }
                     break;
@@ -209,8 +209,8 @@ namespace SimpleCircuitOnline.Pages
                             sw.Flush();
                             result = sw.ToString();
                         }
-                        string url = $"data:image/jpeg;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpg", url, (int)w, (int)h, "white");
+                        string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpeg", url, (int)w, (int)h, "white");
                     }
                     break;
 
