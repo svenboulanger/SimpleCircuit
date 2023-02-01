@@ -11,6 +11,12 @@
     <link href="SimpleCircuitOnline.styles.css" rel="stylesheet" />
     <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css" rel="stylesheet" />
     <style id="svg-style"></style>
+    <style>
+        .simplecircuit .bounds polygon { stroke: transparent; fill: transparent; }
+        .simplecircuit .bounds text { stroke: transparent; fill: transparent; }
+        .simplecircuit .bounds:hover polygon { stroke: rgba(0, 148, 255, 0.5); fill: rgba(255, 255, 255, 0.9); }
+        .simplecircuit .bounds:hover text { fill: rgb(0, 148, 255); }
+    </style>
 </head>
 
 <body>
@@ -27,7 +33,7 @@
     </div>
 
     <div style="position:absolute;left:-9999cm;top:-9999cm;" id="div_measure"></div>
-    <canvas id="canvas" width="200" height="200" style="position:absolute;left:-9999px;top:-9999px;"></canvas>
+    <canvas id="canvas" width="200" height="200" style="position:absolute;left:-9999cm;top:-9999cm;"></canvas>
 
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
     <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
@@ -58,9 +64,8 @@
         }
 
         function BlazorExportImage(filename, mime, imageData, width, height, backgroundColor) {
-
             var image = new Image();
-            image.onload = () => {
+            image.onload = function () {
                 var canvas = document.getElementById("canvas");
                 canvas.width = width;
                 canvas.height = height;
@@ -218,15 +223,28 @@
                 ]
             });
 
-            suggestions = [];
-            for (var i = 0; i < keywords.length; i++) {
-                suggestions[i] = {
-                    label: keywords[i],
-                    insertText: keywords[i]
-                };
-            }
             monaco.languages.registerCompletionItemProvider('simpleCircuit', {
-                provideCompletionItems: () => {
+                provideCompletionItems: (model, position) => {
+                    const word = model.getWordUntilPosition(position);
+                    const range = {
+                        startLineNumber: position.lineNumber,
+                        endLineNumber: position.lineNumber,
+                        startColumn: word.startColumn,
+                        endColumn: word.endColumn
+                    };
+                    var suggestions = [];
+                    for (var i = 0; i < keywords.length; i++) {
+                        keyword = keywords[i];
+                        if (keyword[0].startsWith(word.word.toUpperCase())) {
+                            suggestions.push({
+                                label: keyword[0],
+                                insertText: keyword[0],
+                                detail: keyword[1],
+                                range: range
+                            });
+                        }
+                    }
+
                     return {
                         suggestions: suggestions
                     }
