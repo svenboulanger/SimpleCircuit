@@ -23,6 +23,19 @@ namespace SimpleCircuitOnline.Pages
         private bool _shrinkX = true, _shrinkY = true, _renderBounds = true;
         private string _filename = null;
 
+        protected string CurrentFilename
+        {
+            get => _filename;
+            set
+            {
+                if (_filename != value)
+                {
+                    _filename = value;
+                    Task.Run(async () => await _localStore.SetItemAsStringAsync("last_filename", value));
+                }
+            }
+        }
+
         private async Task SetCurrentScript(string script, string style = null)
         {
             // Let us strip a few characters that might accumulate when storing inside XML for example
@@ -113,6 +126,7 @@ namespace SimpleCircuitOnline.Pages
                 {
                     string script = await _localStore.GetItemAsStringAsync("last_script");
                     string style = await _localStore.GetItemAsStringAsync("last_style");
+                    _filename = await _localStore.GetItemAsStringAsync("last_filename");
                     if (!string.IsNullOrWhiteSpace(script))
                     {
                         if (!string.IsNullOrWhiteSpace(style))
@@ -142,7 +156,7 @@ namespace SimpleCircuitOnline.Pages
             _warnings = null;
 
             // Decide on the filename
-            string filename = _filename;
+            string filename = CurrentFilename;
             if (string.IsNullOrWhiteSpace(filename))
                 filename = "circuit";
 

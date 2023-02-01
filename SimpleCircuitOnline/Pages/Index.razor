@@ -35,7 +35,7 @@
         </TabMenu>
     </div>
     <div class="output">
-        <DropZone Upload="@UploadFile" Download="@DownloadFile" @bind-Filename="_filename" @bind-ShrinkX="_shrinkX" @bind-ShrinkY="_shrinkY" @bind-Bounds="_renderBounds">
+        <DropZone Upload="@UploadFile" Download="@DownloadFile" @bind-Filename="CurrentFilename" @bind-ShrinkX="_shrinkX" @bind-ShrinkY="_shrinkY" @bind-Bounds="_renderBounds">
             <SvgOutput Svg="@_svg" Loading="_loading" ShrinkX="_shrinkX" ShrinkY="_shrinkY" />
         </DropZone>
         <Errors Error="@_errors" Warning="@_warnings" />
