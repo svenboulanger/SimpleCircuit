@@ -119,9 +119,14 @@ namespace SimpleCircuit.Parser
         Integer = 0x100000,
 
         /// <summary>
+        /// An arrow character (unicode).
+        /// </summary>
+        Arrow = 0x200000,
+
+        /// <summary>
         /// An unknown character.
         /// </summary>
-        Unknown = 0x200000,
+        Unknown = 0x400000,
 
         /// <summary>
         /// All characters

@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components
                         if (!newOrientation.IsOrthonormal)
                         {
                             // We don't want non-orthonormal orientations...
-                            diagnostics.Post(ErrorCodes.CouldNotConstrainPin, Name);
+                            diagnostics.Post(ErrorCodes.CouldNotConstrainOrientation, Name);
                             return false;
                         }
                         Transform = newOrientation;
@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components
                             return true;
                         else
                         {
-                            diagnostics.Post(ErrorCodes.CouldNotConstrainPin, Name);
+                            diagnostics.Post(ErrorCodes.CouldNotConstrainOrientation, Name);
                             return false;
                         }
                     }

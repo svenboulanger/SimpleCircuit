@@ -81,7 +81,7 @@ namespace SimpleCircuit.Components.Pins
                 var error = orientation - RelativeOrientation;
                 if (!error.X.IsZero() || !error.Y.IsZero())
                 {
-                    diagnostics?.Post(ErrorCodes.CouldNotConstrainPin, Name);
+                    diagnostics?.Post(ErrorCodes.CouldNotConstrainOrientation, Name);
                     return false;
                 }
                 return true;

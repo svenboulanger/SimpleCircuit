@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
@@ -33,64 +34,6 @@ namespace SimpleCircuitOnline.Pages
                     _filename = value;
                     Task.Run(async () => await _localStore.SetItemAsStringAsync("last_filename", value));
                 }
-            }
-        }
-
-        private async Task SetCurrentScript(string script, string style = null)
-        {
-            // Let us strip a few characters that might accumulate when storing inside XML for example
-            if (script != null)
-                script = script.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
-            if (style != null)
-                style = style.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
-
-            // Temporarily suspend any dynamic updates
-            _updateDynamic = false;
-            Update(null);
-
-            // Update the script
-            if (!string.IsNullOrWhiteSpace(script))
-            {
-                await _scriptEditor.SetValue(script);
-                if (!string.IsNullOrWhiteSpace(style))
-                    await _styleEditor.SetValue(style);
-
-                // Update the preview
-                _svg = await ComputeXml(false, _renderBounds);
-                _loading = 0;
-                StateHasChanged();
-            }
-
-            // Enable dynamic updates again
-            _updateDynamic = true;
-        }
-
-        private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
-        {
-            return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Language = "text/css",
-                WordWrap = "on",
-                Value = "",
-                WordBasedSuggestions = false,
-            };
-        }
-
-        private void Update(ModelContentChangedEvent e)
-        {
-            if (_updateDynamic)
-            {
-                _timer.Stop();
-                _timer.Start();
-                if (_loading == 0)
-                    _loading = 1;
-            }
-            else
-            {
-                // Just stop
-                _loading = 0;
-                _timer.Stop();
             }
         }
 
@@ -147,10 +90,10 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = args.Errors;
             _warnings = args.Warnings;
-            await SetCurrentScript(args.Script, args.Style);
+            await SetCurrentScript(DecodeScript(args.Script), args.Style);
         }
 
-        public async Task DownloadFile(DownloadEventArgs args)
+        protected async Task DownloadFile(DownloadEventArgs args)
         {
             _errors = null;
             _warnings = null;
@@ -234,6 +177,61 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
+        private async Task SetCurrentScript(string script, string style = null)
+        {
+            // Let us strip a few characters that might accumulate when storing inside XML for example
+            if (script != null)
+                script = script.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
+            if (style != null)
+                style = style.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
+
+            // Temporarily suspend any dynamic updates
+            _updateDynamic = false;
+            Update(null);
+
+            // Update the script
+            if (!string.IsNullOrWhiteSpace(script))
+            {
+                await _scriptEditor.SetValue(script);
+                if (!string.IsNullOrWhiteSpace(style))
+                    await _styleEditor.SetValue(style);
+
+                // Update the preview
+                _svg = await ComputeXml(false, _renderBounds);
+                _loading = 0;
+                StateHasChanged();
+            }
+
+            // Enable dynamic updates again
+            _updateDynamic = true;
+        }
+        private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
+        {
+            return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Language = "text/css",
+                WordWrap = "on",
+                Value = "",
+                WordBasedSuggestions = false,
+            };
+        }
+        private void Update(ModelContentChangedEvent e)
+        {
+            if (_updateDynamic)
+            {
+                _timer.Stop();
+                _timer.Start();
+                if (_loading == 0)
+                    _loading = 1;
+            }
+            else
+            {
+                // Just stop
+                _loading = 0;
+                _timer.Stop();
+            }
+        }
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             // If another task is still running, restart the timer
@@ -253,7 +251,6 @@ namespace SimpleCircuitOnline.Pages
                     .ContinueWith(task => { _loading = 0; StateHasChanged(); });
             }
         }
-
         private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
             _errors = null;
@@ -283,7 +280,7 @@ namespace SimpleCircuitOnline.Pages
                 ckt.Style = style;
                 ckt.RenderBounds = includeBounds;
                 if (includeScript)
-                    ckt.Metadata.Add("script", code);
+                    ckt.Metadata.Add("script", EncodeScript(code));
 
                 // We now need the last things to have executed
                 if (ckt.Count > 0 && logger.ErrorCount == 0)
@@ -307,7 +304,26 @@ namespace SimpleCircuitOnline.Pages
             else
                 return null;
         }
-
+        private static string EncodeScript(string script)
+        {
+            // We can encounter arrows in our script, so let's encode them in HTML code
+            script = Regex.Replace(script, "[\u0100-\uFFFF]", match =>
+            {
+                // Convert to "&#xxxx;" notation
+                return $"&#{((int)match.Groups[0].Value[0]).ToString("x4")};";
+            });
+            return script;
+        }
+        private static string DecodeScript(string script)
+        {
+            script = Regex.Replace(script, @"\&\#(?<value>[0-9a-fA-F]+);", match =>
+            {
+                // Convert the resulting ASCI character
+                int value = int.Parse(match.Groups["value"].Value, System.Globalization.NumberStyles.HexNumber);
+                return ((char)value).ToString();
+            });
+            return script;
+        }
         private static string ModifyCSS(string style)
         {
             int level = 0;

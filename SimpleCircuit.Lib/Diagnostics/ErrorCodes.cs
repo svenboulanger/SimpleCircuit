@@ -148,8 +148,8 @@
         [Diagnostic(SeverityLevel.Error, "PE046", "Expected a property value")]
         ExpectedPropertyValue,
 
-        [Diagnostic(SeverityLevel.Error, "PE047", "Could not constrain orientation of pin {0} of {1}")]
-        CouldNotConstrainPin,
+        [Diagnostic(SeverityLevel.Error, "PE047", "Could not constrain orientation of {0}")]
+        CouldNotConstrainOrientation,
 
         [Diagnostic(SeverityLevel.Warning, "PW048", "Too many labels are specified")]
         TooManyLabels,

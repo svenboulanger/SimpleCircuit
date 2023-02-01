@@ -7,10 +7,17 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class SimpleCircuitLexer : Lexer<TokenType>
     {
+        private const double _isqr2 = 0.70710678118;
+
         /// <summary>
         /// Gets or sets the diagnostic message handler.
         /// </summary>
         public IDiagnosticHandler Diagnostics { get; set; }
+
+        /// <summary>
+        /// Gets the orientation of the last encountered arrow.
+        /// </summary>
+        public Vector2 ArrowOrientation { get; private set; }
 
         /// <summary>
         /// Creates a new lexer for a string.
@@ -149,6 +156,54 @@ namespace SimpleCircuit.Parser
 
                     case '?':
                         Type = TokenType.Question;
+                        ContinueToken();
+                        break;
+
+                    case '\u2190': // Left arrow
+                        ArrowOrientation = new(-1, 0);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2191': // Up arrow
+                        ArrowOrientation = new(0, -1);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2192': // Right arrow
+                        ArrowOrientation = new(1, 0);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2193': // Down arrow
+                        ArrowOrientation = new(0, 1);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2196': // North-west arrow
+                        ArrowOrientation = new(-_isqr2, -_isqr2);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2197': // North-east arrow
+                        ArrowOrientation = new(_isqr2, -_isqr2);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2198': // South-east arrow
+                        ArrowOrientation = new(_isqr2, _isqr2);
+                        Type = TokenType.Arrow;
+                        ContinueToken();
+                        break;
+
+                    case '\u2199': // South-west arrow
+                        ArrowOrientation = new(-_isqr2, _isqr2);
+                        Type = TokenType.Arrow;
                         ContinueToken();
                         break;
 

@@ -80,7 +80,7 @@ namespace SimpleCircuit.Parser
             // Parse wires
             bool isFirst = true;
             Token pinToWire = default;
-            while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash))
+            while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
                 // Read the starting pin
                 pinToWire = default;
@@ -92,7 +92,7 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Parse the wire itself
-                if (lexer.Check(TokenType.OpenBeak | TokenType.Dash))
+                if (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
                 {
                     var wireInfo = ParseWire(lexer, context);
                     if (wireInfo == null)
@@ -268,7 +268,7 @@ namespace SimpleCircuit.Parser
         /// <returns>The wire information.</returns>
         private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash))
+            if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedWire);
                 return null;
@@ -281,10 +281,19 @@ namespace SimpleCircuit.Parser
             };
 
             // Chain together multiple wire definitions
-            while (lexer.Check(TokenType.OpenBeak | TokenType.Dash))
+            while (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
                 if (lexer.Branch(TokenType.Dash, out var dashToken))
+                {
+                    // Short-hand notation for <?>
                     wireInfo.Segments.Add(new(dashToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                }
+                else if (lexer.Check(TokenType.Arrow))
+                {
+                    // Short-hand notation for a directional wire segment
+                    wireInfo.Segments.Add(new(lexer.Token) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = lexer.ArrowOrientation });
+                    lexer.Next();
+                }
                 else if (lexer.Branch(TokenType.OpenBeak))
                 {
                     while (lexer.Type != TokenType.CloseBeak)
