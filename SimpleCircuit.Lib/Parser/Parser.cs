@@ -424,13 +424,27 @@ namespace SimpleCircuit.Parser
                 }
             }
 
-            // Fix some unknown segment orientations
-            for (int i = wireInfo.Segments.Count - 2; i >= 1; i--)
+            // Simplify segment orientations
+            for (int i = wireInfo.Segments.Count - 1; i > 0; i--)
             {
                 var segment = wireInfo.Segments[i];
-                if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                var prevSegment = wireInfo.Segments[i - 1];
+                if (!segment.Orientation.X.IsZero() || !segment.Orientation.Y.IsZero())
                 {
-                    wireInfo.Segments[i - 1].Length += segment.Length;
+                    // Try combining it with the segment before it
+                    if (segment.Orientation.Equals(prevSegment.Orientation))
+                    {
+                        // Combine the length and fixed-ness
+                        prevSegment.Length += segment.Length;
+                        prevSegment.IsFixed &= segment.IsFixed;
+                        wireInfo.Segments.RemoveAt(i);
+                    }
+                }
+                else if (i < wireInfo.Segments.Count - 1)
+                {
+                    // Fix unknown segment orientation by copying it from the wire before it
+                    prevSegment.Length += segment.Length;
+                    prevSegment.IsFixed &= segment.IsFixed;
                     wireInfo.Segments.RemoveAt(i);
                 }
             }

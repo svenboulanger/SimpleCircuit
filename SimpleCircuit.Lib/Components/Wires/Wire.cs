@@ -436,7 +436,7 @@ namespace SimpleCircuit.Components.Wires
                         // Draw a small half circle for crossing over this point
                         if (_vectors[i].IsJumpOver)
                         {
-                            GetNewAxes(_vectors[i].Location, _vectors[i - 1].Location, out var nx, out var ny);
+                            GetNewAxes(_vectors[i - 1].Location, _vectors[i].Location, out var nx, out var ny);
                             Vector2 o = _vectors[i].Location;
                             Vector2 s = o - nx * _jumpOverRadius;
                             Vector2 e = o + _jumpOverRadius * nx;

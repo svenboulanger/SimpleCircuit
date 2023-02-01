@@ -10,7 +10,14 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"GND ↑ V ↑→ R";
+            var script = @".options JumpOverWires = true
+
+X2 → [b]OR1
+OR2[b] <l u> X2
+AND → X1 ↗→→ OR1
+X1 ↘→→ OR2
+
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
