@@ -10,7 +10,7 @@
 .sidebar
 {
     grid-area: sidebar;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
