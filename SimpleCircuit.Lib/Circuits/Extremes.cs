@@ -30,6 +30,8 @@ namespace SimpleCircuit.Components
         /// <param name="largest">The largest coordinate.</param>
         public void Order(string smallest, string largest)
         {
+            if (largest.Equals(smallest))
+                return; // We can't order same nodes...
             Minimum.Order(smallest, largest);
             Maximum.Order(largest, smallest);
             Linked.Group(smallest, largest);
