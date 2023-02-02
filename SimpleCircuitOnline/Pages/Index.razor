@@ -7,7 +7,8 @@
     <div class="sidebar">
         <TabMenu>
             <Tab Title="Script">
-                <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
+                <div class="arrow-mode@(_arrowMode ? " active" : "")">&#10541;</div>
+                <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" />
             </Tab>
             <Tab Title="Style">
                 <div class="full-width">

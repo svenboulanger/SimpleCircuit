@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
@@ -307,7 +309,7 @@ namespace SimpleCircuitOnline.Pages
         private static string EncodeScript(string script)
         {
             // We can encounter arrows in our script, so let's encode them in HTML code
-            script = NonUtf8Code().Replace(script, match => $"&#{(int)match.Groups[0].Value[0]:x4};");
+            script = NonUtf8Code().Replace(script, match => $"&#{(int)match.Groups[0].Value[0]};");
             return script;
         }
         private static string DecodeScript(string script)
@@ -315,7 +317,7 @@ namespace SimpleCircuitOnline.Pages
             script = Utf8Encoded().Replace(script, match =>
             {
                 // Convert the resulting ASCI character
-                int value = int.Parse(match.Groups["value"].Value, System.Globalization.NumberStyles.HexNumber);
+                int value = int.Parse(match.Groups["value"].Value);
                 return ((char)value).ToString();
             });
             return script;
@@ -349,7 +351,96 @@ namespace SimpleCircuitOnline.Pages
 
         [GeneratedRegex("[\u0100-\uffff]")]
         private static partial Regex NonUtf8Code();
-        [GeneratedRegex("\\&\\#(?<value>[0-9a-fA-F]+);")]
+        [GeneratedRegex("\\&\\#(?<value>[0-9]+);")]
         private static partial Regex Utf8Encoded();
+
+        private bool _arrowMode = false;
+        private async Task KeyUp(KeyboardEvent e)
+        {
+            if (e.CtrlKey && e.KeyCode == KeyCode.US_DOT)
+                _arrowMode = !_arrowMode;
+
+            if (_arrowMode)
+            {
+                // Replace the last character
+                string insertCharacter = null;
+                switch (e.KeyCode)
+                {
+                    case KeyCode.Ctrl:
+                    case KeyCode.Shift:
+                    case KeyCode.Alt:
+                    case KeyCode.US_DOT:
+                        break;
+
+                    case KeyCode.KEY_L:
+                    case KeyCode.KEY_W:
+                    case KeyCode.NUMPAD_4:
+                        insertCharacter = "\u2190";
+                        break;
+
+                    case KeyCode.KEY_U:
+                    case KeyCode.KEY_N:
+                    case KeyCode.NUMPAD_8:
+                        insertCharacter = "\u2191";
+                        break;
+
+                    case KeyCode.KEY_R:
+                    case KeyCode.KEY_E:
+                    case KeyCode.NUMPAD_6:
+                        insertCharacter = "\u2192";
+                        break;
+
+                    case KeyCode.KEY_D:
+                    case KeyCode.KEY_S:
+                    case KeyCode.NUMPAD_2:
+                        insertCharacter = "\u2193";
+                        break;
+
+                    case KeyCode.NUMPAD_7:
+                        insertCharacter = "\u2196";
+                        break;
+
+                    case KeyCode.NUMPAD_9:
+                        insertCharacter = "\u2197";
+                        break;
+
+                    case KeyCode.NUMPAD_3:
+                        insertCharacter = "\u2198";
+                        break;
+
+                    case KeyCode.NUMPAD_1:
+                        insertCharacter = "\u2199";
+                        break;
+
+                    default:
+                        // Break off arrow mode and return to regular behavior
+                        _arrowMode = false;
+                        return;
+                }
+
+                // Insert the text character instead of the key character
+                if (insertCharacter != null)
+                {
+                    var selection = await _scriptEditor.GetSelection();
+                    var model = await _scriptEditor.GetModel();
+                    List<IdentifiedSingleEditOperation> edits = new()
+                    {
+                        new IdentifiedSingleEditOperation()
+                        {
+                            ForceMoveMarkers = true,
+                            Range = new Selection()
+                            {
+                                StartColumn = selection.StartColumn - 1,
+                                EndColumn = selection.EndColumn,
+                                StartLineNumber = selection.StartLineNumber,
+                                EndLineNumber = selection.EndLineNumber
+                            },
+                            Text = insertCharacter
+                        }
+                    };
+                    await model.ApplyEdits(edits);
+                }
+            }
+        }
     }
 }

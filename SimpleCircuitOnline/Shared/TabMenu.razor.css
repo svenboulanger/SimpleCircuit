@@ -16,6 +16,7 @@ div {
     border-bottom-left-radius: 0.25rem;
     border: 1px solid #dee2e6;
     border-top: 0;
+    position: relative;
 }
 div.hidden {
     display: none;

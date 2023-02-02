@@ -22,6 +22,7 @@
                 [keywordRegex, { token: 'component.$S0' }],
                 [/\w+/, { token: 'word.$S0' }],
                 [/\//, { token: 'separator.$S0' }],
+                [/[\u2190\u2191\u2192\u2193\u2196\u2197\u2198\u2199]+/, { token: 'wire.$S0' }],
                 [/\</, { token: 'bracket.wire.$S0', bracket: '@open', next: '@wire.$S0' }],
                 [/\[/, { token: 'bracket.pin.$S0', bracket: '@open', next: '@pin_block' }],
                 [/\(/, { token: 'bracket.label.$S0', bracket: '@open', next: '@label_block' }],
@@ -84,13 +85,18 @@
     monaco.editor.defineTheme('simpleCircuitTheme', {
         base: 'vs',
         inherit: true,
+        colors: {
+            'editor.foreground': '#000000',
+            'editorCursor.foreground': '#0066aa'
+            },
         rules: [
             { token: 'word', foreground: '0000ff', fontStyle: 'bold' },
             { token: 'word.virtual', foreground: '9999ff' },
             { token: 'word.pin', foreground: '7a92cf' },
             { token: 'bracket', foreground: 'ff0000' },
             { token: 'bracket.virtual', foreground: 'ff9999' },
-            { token: 'bracket.wire', foreground: 'cc0000' },
+            { token: 'bracket.wire', foreground: 'cc9966' },
+            { token: 'wire', foreground: 'cc9966', fontStyle: 'bold' },
             { token: 'bracket.wire.virtual', foreground: 'cc9999' },
             { token: 'bracket.pin', foreground: '7a92cf' },
             { token: 'number', foreground: 'a0a0a0' },
@@ -99,8 +105,8 @@
             { token: 'comment', foreground: '00a000' },
             { token: 'component', foreground: '9a47ff', fontStyle: 'bold' },
             { token: 'component.virtual', foreground: 'c799ff' },
-            { token: 'pindirection', foreground: 'cc0000' },
-            { token: 'pindirection.wire.virtual', foreground: 'cc9999' },
+            { token: 'pindirection', foreground: 'cc9966' },
+            { token: 'pindirection.wire.virtual', foreground: 'cc9966' },
             { token: 'string', foreground: 'a633f2' },
             { token: 'operator', foreground: '660000' },
             { token: 'operator.wire', foreground: 'cc0000' },
@@ -162,4 +168,10 @@ function calculateBounds(element) {
 
 function updateStyle(style) {
     svg_style.innerHTML = style;
+}
+
+function stopEventPropagation(e) {
+    console.log(e);
+    e.stopPropagation();
+    return e;
 }
