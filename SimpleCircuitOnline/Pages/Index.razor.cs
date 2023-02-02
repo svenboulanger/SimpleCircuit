@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
@@ -22,39 +21,70 @@ namespace SimpleCircuitOnline.Pages
         private Timer _timer;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
-        private bool _shrinkX = true, _shrinkY = true, _renderBounds = true, _autoUpdate = true;
-        private string _filename = null;
+        private Settings _settings = new();
 
-        protected string CurrentFilename
+        protected string Filename
         {
-            get => _filename;
+            get => _settings.Filename;
             set
             {
-                if (_filename != value)
+                if (_settings.Filename != value)
                 {
-                    _filename = value;
-                    Task.Run(async () => await _localStore.SetItemAsStringAsync("last_filename", value));
+                    _settings.Filename = value;
+                    Task.Run(SaveSettings);
                 }
             }
         }
-        protected bool CurrentRenderBounds
+        protected bool ShrinkX
         {
-            get => _renderBounds;
+            get => _settings.ShrinkX;
             set
             {
-                if (!_renderBounds && value)
-                    Task.Run(() => Update(null));
-                _renderBounds = value;
+                if (_settings.ShrinkX != value)
+                {
+                    _settings.ShrinkX = value;
+                    Task.Run(SaveSettings);
+                }
+            }
+        }
+        protected bool ShrinkY
+        {
+            get => _settings.ShrinkY;
+            set
+            {
+                if (_settings.ShrinkY != value)
+                {
+                    _settings.ShrinkY = value;
+                    Task.Run(SaveSettings);
+                }
+            }
+        }
+        protected bool RenderBounds
+        {
+            get => _settings.RenderBounds;
+            set
+            {
+                if (_settings.RenderBounds != value)
+                {
+                    _settings.RenderBounds = value;
+                    if (value)
+                        Task.Run(() => Update(null));
+                    Task.Run(SaveSettings);
+                }
             }
         }
         protected bool CurrentAutoUpdate
         {
-            get => _autoUpdate;
+            get => _settings.AutoUpdate;
             set
             {
-                if (!_autoUpdate && value)
-                    Task.Run(UpdateNow);
-                _autoUpdate = value;
+                if (_settings.AutoUpdate != value)
+                {
+                    _settings.AutoUpdate = value;
+                    if (value)
+                        Task.Run(UpdateNow);
+                    Task.Run(SaveSettings);
+                }
             }
         }
 
@@ -85,28 +115,25 @@ namespace SimpleCircuitOnline.Pages
                 await MonacoEditorBase.SetTheme("simpleCircuitTheme");
 
                 // Try to find the last saved script
-                bool hasScript = false;
+                string script = null, style = null;
                 if (_localStore != null)
                 {
-                    string script = await _localStore.GetItemAsStringAsync("last_script");
-                    string style = await _localStore.GetItemAsStringAsync("last_style");
-                    _filename = await _localStore.GetItemAsStringAsync("last_filename");
-                    if (!string.IsNullOrWhiteSpace(script))
+                    script = await _localStore.GetItemAsStringAsync("last_script");
+                    style = await _localStore.GetItemAsStringAsync("last_style");
+                    string settings = await _localStore.GetItemAsStringAsync("settings");
+
+                    // Load settings
+                    if (!string.IsNullOrWhiteSpace(settings))
                     {
-                        if (!string.IsNullOrWhiteSpace(style))
-                            await SetCurrentScript(script, style);
-                        else
-                            await SetCurrentScript(script, GraphicalCircuit.DefaultStyle);
-                        hasScript = true;
+                        _settings = JsonSerializer.Deserialize<Settings>(settings);
+                        StateHasChanged();
                     }
                 }
-
-                // Give the user an initial demo
-                if (!hasScript)
-                    await SetCurrentScript(Demo.Demos[0].Code, GraphicalCircuit.DefaultStyle);
-
-                // Deal with initial settings
-                _autoUpdate = true;
+                if (string.IsNullOrWhiteSpace(script))
+                    script = Demo.Demos[0].Code;
+                if (string.IsNullOrWhiteSpace(style))
+                    style = GraphicalCircuit.DefaultStyle;
+                await SetCurrentScript(script, style);
             }
         }
 
@@ -123,7 +150,7 @@ namespace SimpleCircuitOnline.Pages
             _warnings = null;
 
             // Decide on the filename
-            string filename = CurrentFilename;
+            string filename = Filename;
             if (string.IsNullOrWhiteSpace(filename))
                 filename = "circuit";
 
@@ -234,7 +261,7 @@ namespace SimpleCircuitOnline.Pages
         }
         private void Update(ModelContentChangedEvent e)
         {
-            if (_autoUpdate)
+            if (_settings.AutoUpdate)
             {
                 _timer.Stop();
                 _timer.Start();
@@ -269,7 +296,7 @@ namespace SimpleCircuitOnline.Pages
             StateHasChanged();
 
             // Actual action
-            _svg = await ComputeXml(false, _renderBounds);
+            _svg = await ComputeXml(false, _settings.RenderBounds);
             _loading = 0;
             StateHasChanged();
         }
@@ -367,6 +394,11 @@ namespace SimpleCircuitOnline.Pages
                 sb.Append(c);
             }
             return sb.ToString();
+        }
+        private async Task SaveSettings()
+        {
+            string settings = JsonSerializer.Serialize(_settings);
+            await _localStore.SetItemAsStringAsync("settings", settings);
         }
 
         [GeneratedRegex("[\u0100-\uffff]")]
