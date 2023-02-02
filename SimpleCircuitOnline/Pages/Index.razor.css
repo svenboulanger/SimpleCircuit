@@ -58,7 +58,7 @@
     display: none;
     position: absolute;
     left: 15px;
-    bottom: 5px;
+    bottom: 15px;
     background-color: rgba(255, 255, 255, 0.5);
     font-size: 2rem;
     width: auto;
@@ -66,8 +66,13 @@
     z-index: 999;
     color: #007bff;
     margin: 0px;
-    padding: 0px;
+    padding: 0.5rem;
 }
 .arrow-mode.active {
     display: block;
+}
+::deep .style-reset {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
 }

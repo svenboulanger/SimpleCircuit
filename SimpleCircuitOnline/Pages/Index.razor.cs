@@ -286,6 +286,7 @@ namespace SimpleCircuitOnline.Pages
                 Task.Run(UpdateNow);
             }
         }
+        
         private async Task UpdateNow()
         {
             // Notify for running the script
