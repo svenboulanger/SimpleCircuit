@@ -89,25 +89,25 @@ namespace SimpleCircuitOnline.Shared
             }
         }
 
-        private async Task ToggleShrinkX()
+        private async Task ToggleShrinkX(bool value)
         {
-            ShrinkX = !ShrinkX;
-            await ShrinkXChanged.InvokeAsync(ShrinkX);
+            ShrinkX = value;
+            await ShrinkXChanged.InvokeAsync(value);
         }
-        private async Task ToggleShrinkY()
+        private async Task ToggleShrinkY(bool value)
         {
-            ShrinkY = !ShrinkY;
-            await ShrinkYChanged.InvokeAsync(ShrinkY);
+            ShrinkY = value;
+            await ShrinkYChanged.InvokeAsync(value);
         }
-        private async Task ToggleBounds()
+        private async Task ToggleBounds(bool value)
         {
-            Bounds = !Bounds;
-            await BoundsChanged.InvokeAsync(Bounds);
+            Bounds = value;
+            await BoundsChanged.InvokeAsync(value);
         }
-        private async Task ToggleAutoUpdate()
+        private async Task ToggleAutoUpdate(bool value)
         {
-            AutoUpdate = !AutoUpdate;
-            await AutoUpdateChanged.InvokeAsync(AutoUpdate);
+            AutoUpdate = value;
+            await AutoUpdateChanged.InvokeAsync(value);
         }
         private async Task RequestRefresh() => await RefreshRequested.InvokeAsync();
 

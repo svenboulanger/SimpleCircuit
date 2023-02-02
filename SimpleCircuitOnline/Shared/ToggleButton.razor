@@ -1,0 +1,39 @@
+﻿<a href="javascript:void(0);" @attributes="AdditionalAttributes" class="@(string.Join(" ", Classes))" @onclick="Toggle">@ChildContent</a>
+
+@code {
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; }
+
+    protected IEnumerable<string> Classes
+    {
+        get
+        {
+            HashSet<string> classes = new();
+            if (AdditionalAttributes != null && AdditionalAttributes.TryGetValue("class", out var obj) && obj != null)
+            {
+                string txt = obj.ToString();
+                foreach (string @class in txt.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    classes.Add(@class);
+            }
+            classes.Add("btn");
+            if (Value)
+                classes.Add("active");
+            return classes;
+        }
+    }
+
+    protected async Task Toggle()
+    {
+        Value = !Value;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

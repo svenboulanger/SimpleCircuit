@@ -67,8 +67,7 @@ namespace SimpleCircuitOnline.Pages
                 if (_settings.RenderBounds != value)
                 {
                     _settings.RenderBounds = value;
-                    if (value)
-                        Task.Run(() => Update(null));
+                    Task.Run(() => Update(null));
                     Task.Run(SaveSettings);
                 }
             }
