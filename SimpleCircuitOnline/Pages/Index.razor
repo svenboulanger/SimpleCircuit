@@ -7,17 +7,18 @@
     <div class="sidebar">
         <TabMenu>
             <Tab Title="Script">
-                <div class="arrow-mode@(_arrowMode ? " active" : "")">&#10541;</div>
-                <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" />
+                <div class="content fixed">
+                    <div class="arrow-mode@(_arrowMode ? " active" : "")">&#10541;</div>
+                    <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" />
+                </div>
             </Tab>
             <Tab Title="Style">
-                <div class="full-width">
-                    <a href="javascript:void(0);" class="btn" @onclick="@(x => _styleEditor.SetValue(GraphicalCircuit.DefaultStyle))">Restore default style</a>
+                <div class="content fixed">
+                    <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
                 </div>
-                <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="full-height" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
             </Tab>
             <Tab Title="Help">
-                <div class="help">
+                <div class="content scrollable">
                     <Expandable Title="Documentation" Class="mt-2">
                         <a href="https://github.com/svenboulanger/SimpleCircuit" target="_blank" class="bd-callout d-block">Project website</a>
                         <a href="https://github.com/svenboulanger/SimpleCircuit/wiki" target="_blank" class="bd-callout d-block">Wiki</a>

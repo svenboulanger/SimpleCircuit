@@ -9,6 +9,6 @@ div.content {
 }
 svg {
     margin: 0.25rem;
-    overflow: hidden;
+    overflow: visible;
     vertical-align: middle;
 }

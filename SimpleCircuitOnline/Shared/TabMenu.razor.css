@@ -11,12 +11,12 @@
 div {
     padding: 0.5rem;
     height: 100%;
-    overflow: visible;
     border-bottom-right-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
     border: 1px solid #dee2e6;
     border-top: 0;
     position: relative;
+    box-sizing: border-box;
 }
 div.hidden {
     display: none;
