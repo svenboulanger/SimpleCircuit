@@ -15,6 +15,7 @@ namespace SimpleCircuitOnline.Shared
         private InputFile _inputFile;
         private IJSObjectReference _module;
         private IJSObjectReference _dropZoneInstance;
+        private bool _optionsVisible;
 
         protected string InternalFilename
         {
@@ -65,6 +66,15 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public EventCallback<bool> BoundsChanged { get; set; }
 
+        [Parameter]
+        public bool AutoUpdate { get; set; }
+
+        [Parameter]
+        public EventCallback<bool> AutoUpdateChanged { get; set; }
+
+        [Parameter]
+        public EventCallback RefreshRequested { get; set; }
+
         protected string ContainerClasses
         {
             get
@@ -94,6 +104,12 @@ namespace SimpleCircuitOnline.Shared
             Bounds = !Bounds;
             await BoundsChanged.InvokeAsync(Bounds);
         }
+        private async Task ToggleAutoUpdate()
+        {
+            AutoUpdate = !AutoUpdate;
+            await AutoUpdateChanged.InvokeAsync(AutoUpdate);
+        }
+        private async Task RequestRefresh() => await RefreshRequested.InvokeAsync();
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -105,6 +121,12 @@ namespace SimpleCircuitOnline.Shared
                 // Initialize the drop zone
                 _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", _dropZoneElement, _inputFile.Element);
             }
+        }
+
+        public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            await base.SetParametersAsync(parameters);
+            StateHasChanged();
         }
 
         // Called when a new file is uploaded

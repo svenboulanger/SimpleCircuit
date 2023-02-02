@@ -22,8 +22,7 @@ namespace SimpleCircuitOnline.Pages
         private Timer _timer;
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
-        private bool _updateDynamic = false;
-        private bool _shrinkX = true, _shrinkY = true, _renderBounds = true;
+        private bool _shrinkX = true, _shrinkY = true, _renderBounds = true, _autoUpdate = true;
         private string _filename = null;
 
         protected string CurrentFilename
@@ -36,6 +35,26 @@ namespace SimpleCircuitOnline.Pages
                     _filename = value;
                     Task.Run(async () => await _localStore.SetItemAsStringAsync("last_filename", value));
                 }
+            }
+        }
+        protected bool CurrentRenderBounds
+        {
+            get => _renderBounds;
+            set
+            {
+                if (!_renderBounds && value)
+                    Task.Run(() => Update(null));
+                _renderBounds = value;
+            }
+        }
+        protected bool CurrentAutoUpdate
+        {
+            get => _autoUpdate;
+            set
+            {
+                if (!_autoUpdate && value)
+                    Task.Run(UpdateNow);
+                _autoUpdate = value;
             }
         }
 
@@ -85,6 +104,9 @@ namespace SimpleCircuitOnline.Pages
                 // Give the user an initial demo
                 if (!hasScript)
                     await SetCurrentScript(Demo.Demos[0].Code, GraphicalCircuit.DefaultStyle);
+
+                // Deal with initial settings
+                _autoUpdate = true;
             }
         }
 
@@ -188,8 +210,7 @@ namespace SimpleCircuitOnline.Pages
                 style = style.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
 
             // Temporarily suspend any dynamic updates
-            _updateDynamic = false;
-            Update(null);
+            _timer.Stop();
 
             // Update the script
             if (!string.IsNullOrWhiteSpace(script))
@@ -197,15 +218,8 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-
-                // Update the preview
-                _svg = await ComputeXml(false, _renderBounds);
-                _loading = 0;
-                StateHasChanged();
+                await UpdateNow();
             }
-
-            // Enable dynamic updates again
-            _updateDynamic = true;
         }
         private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
         {
@@ -220,7 +234,7 @@ namespace SimpleCircuitOnline.Pages
         }
         private void Update(ModelContentChangedEvent e)
         {
-            if (_updateDynamic)
+            if (_autoUpdate)
             {
                 _timer.Stop();
                 _timer.Start();
@@ -229,14 +243,12 @@ namespace SimpleCircuitOnline.Pages
             }
             else
             {
-                // Just stop
-                _loading = 0;
                 _timer.Stop();
             }
         }
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            // If another task is still running, restart the timer
+            // If another SVG is still rendering, wait for another rerender
             if (_loading > 1)
             {
                 _timer.Stop();
@@ -244,14 +256,22 @@ namespace SimpleCircuitOnline.Pages
             }
             else
             {
-                _loading = 2;
-                _errors = null;
-                _warnings = null;
-                StateHasChanged();
                 _timer.Stop();
-                Task.Run(async () => _svg = await ComputeXml(false, _renderBounds))
-                    .ContinueWith(task => { _loading = 0; StateHasChanged(); });
+                Task.Run(UpdateNow);
             }
+        }
+        private async Task UpdateNow()
+        {
+            // Notify for running the script
+            _errors = null;
+            _warnings = null;
+            _loading = 2;
+            StateHasChanged();
+
+            // Actual action
+            _svg = await ComputeXml(false, _renderBounds);
+            _loading = 0;
+            StateHasChanged();
         }
         private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
@@ -359,6 +379,8 @@ namespace SimpleCircuitOnline.Pages
         {
             if (e.CtrlKey && e.KeyCode == KeyCode.US_DOT)
                 _arrowMode = !_arrowMode;
+            if (e.ShiftKey || e.AltKey)
+                _arrowMode = false;
 
             if (_arrowMode)
             {

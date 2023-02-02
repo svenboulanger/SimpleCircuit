@@ -58,6 +58,9 @@
     width: auto;
     height: auto;
     z-index: 999;
+    color: #007bff;
+    margin: 0px;
+    padding: 0px;
 }
 .arrow-mode.active {
     display: block;

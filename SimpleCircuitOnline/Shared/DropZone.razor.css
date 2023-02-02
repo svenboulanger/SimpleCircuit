@@ -6,8 +6,16 @@
     grid-template-rows: 1fr auto;
     grid-template-areas: "output" "menu";
 }
-.dropzone .output { grid-area: output; overflow: hidden; }
-.dropzone .menu { grid-area: menu; overflow: hidden; }
+.dropzone .output {
+    grid-area: output;
+    overflow: hidden;
+    position: relative;
+}
+.dropzone .menu {
+    grid-area: menu;
+    overflow: visible;
+    position: relative;
+}
 .dropzone label:hover {
     cursor: pointer;
 }
@@ -49,14 +57,37 @@ a {
     background-color: #007bff;
     border: 1px solid #0062cc;
 }
-.toggle-shrink {
+.toggle {
     float: left;
     color: #fff;
     background-color: #5a6268;
     border: 1px solid #545b62;
+    padding: 0.375rem 0.75rem;
 }
-    .toggle-shrink.active {
+    .toggle.active {
         color: #fff;
         background-color: #007bff;
         border: 1px solid #0062cc;
     }
+.bi {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+.options {
+    position: absolute;
+    left: 0px;
+    bottom: 2.5rem;
+}
+.options .toggle {
+    position: relative;
+    float: none;
+    display: block;
+}
+.refresh {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+}

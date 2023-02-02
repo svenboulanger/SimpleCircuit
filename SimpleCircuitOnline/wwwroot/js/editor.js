@@ -139,7 +139,8 @@
                         label: keyword[0],
                         insertText: keyword[0],
                         detail: keyword[1],
-                        range: range
+                        range: range,
+                        kind: monaco.languages.CompletionItemKind.keyword
                     });
                 }
             }
