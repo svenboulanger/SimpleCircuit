@@ -355,6 +355,31 @@ namespace SimpleCircuitOnline
                 "// We can still enforce alignment between elements",
                 "// This would not be possible with subcircuits",
                 "(y Input/GND1 <r> Output/GND1)"
+            })),
+
+            // Shorthand notation characters
+            new Demo("Demo: Shorthand notation", "Demonstration of shorthand notation for wires.", string.Join(Environment.NewLine, new[]
+            {
+                "// Arrow unicode characters can be used as shorthand notation for simple wires",
+                "GND ↑ V ↑ Xin",
+                "",
+                "// A dash '-' character is shorthand for <?>",
+                "Xin - R →↘<d +20> C - GND",
+                "",
+                "(y GND)",
+                "",
+                "// By pressing CTRL + '.' you can enter a mode that replaces certain characters with arrows",
+                "// In this mode, there should be arrows in the bottom-left corner",
+                "// In the \"arrow mode\":",
+                "// 'u', 'n' or numpad 8 turns into ↑",
+                "// 'l', 'w' or numpad 4 turns into ←",
+                "// 'd', 's' or numpad 2 turns into ↓",
+                "// 'r', 'e' or numpad 6 turns into →",
+                "// numpad 7 turns into ↖",
+                "// numpad 9 turns into ↗",
+                "// numpad 1 turns into ↙",
+                "// numpad 3 turns into ↘",
+                "// Any other key will exit the mode.",
             }))
         };
     }
