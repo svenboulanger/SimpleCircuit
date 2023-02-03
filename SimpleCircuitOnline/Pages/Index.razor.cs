@@ -407,13 +407,21 @@ namespace SimpleCircuitOnline.Pages
         private static partial Regex Utf8Encoded();
 
         private bool _arrowMode = false;
+        private void KeyDown(KeyboardEvent e)
+        {
+            if (!_arrowMode)
+            {
+                if (e.CtrlKey && e.KeyCode == KeyCode.US_DOT)
+                    _arrowMode = true;
+            }
+            else
+            {
+                if (e.KeyCode == KeyCode.Escape)
+                    _arrowMode = false;
+            }
+        }
         private async Task KeyUp(KeyboardEvent e)
         {
-            if (e.CtrlKey && e.KeyCode == KeyCode.US_DOT)
-                _arrowMode = !_arrowMode;
-            if (e.ShiftKey || e.AltKey)
-                _arrowMode = false;
-
             if (_arrowMode)
             {
                 // Replace the last character

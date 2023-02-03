@@ -8,7 +8,7 @@
         <TabMenu>
             <Tab Title="Script">
                 <div class="content fixed">
-                    <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" />
+                    <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyDown="KeyDown" OnKeyUp="KeyUp" />
                     <div class="arrow-mode@(_arrowMode ? " active" : "")">&#10541;</div>
                 </div>
             </Tab>
