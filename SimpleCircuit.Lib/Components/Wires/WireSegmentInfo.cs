@@ -23,6 +23,11 @@ namespace SimpleCircuit.Components.Wires
         public bool IsFixed { get; set; }
 
         /// <summary>
+        /// Gets whether or not the wire segment is unconstrained.
+        /// </summary>
+        public bool IsUnconstrained { get; set; }
+
+        /// <summary>
         /// Gets the length of the wire.
         /// </summary>
         public double Length { get; set; }

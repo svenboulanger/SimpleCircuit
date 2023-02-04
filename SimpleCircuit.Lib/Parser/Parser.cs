@@ -408,8 +408,16 @@ namespace SimpleCircuit.Parser
                         }
                         else if (lexer.Branch(TokenType.Question))
                         {
-                            // Don't give an orientation, and in that case the orientation should come from the pin itself!
-                            wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                            if (!lexer.HasTrivia && lexer.Branch(TokenType.Question))
+                            {
+                                // This wire does not have an orientation or length, it simply connects two points that need to be specified/resolved elsewhere
+                                wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = 0.0, Orientation = new(), IsUnconstrained = true });
+                            }
+                            else
+                            {
+                                // Don't give an orientation, and in that case the orientation should come from the pin itself!
+                                wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                            }
                         }
                         else
                         {
@@ -420,35 +428,12 @@ namespace SimpleCircuit.Parser
 
                     // Closing beak
                     if (!lexer.Branch(TokenType.CloseBeak))
-                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
-                }
-            }
-
-            // Simplify segment orientations
-            for (int i = wireInfo.Segments.Count - 1; i > 0; i--)
-            {
-                var segment = wireInfo.Segments[i];
-                var prevSegment = wireInfo.Segments[i - 1];
-                if (!segment.Orientation.X.IsZero() || !segment.Orientation.Y.IsZero())
-                {
-                    // Try combining it with the segment before it
-                    if (segment.Orientation.Equals(prevSegment.Orientation))
                     {
-                        // Combine the length and fixed-ness
-                        prevSegment.Length += segment.Length;
-                        prevSegment.IsFixed &= segment.IsFixed;
-                        wireInfo.Segments.RemoveAt(i);
+                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
+                        return null;
                     }
                 }
-                else if (i < wireInfo.Segments.Count - 1)
-                {
-                    // Fix unknown segment orientation by copying it from the wire before it
-                    prevSegment.Length += segment.Length;
-                    prevSegment.IsFixed &= segment.IsFixed;
-                    wireInfo.Segments.RemoveAt(i);
-                }
             }
-
             return wireInfo;
         }
 

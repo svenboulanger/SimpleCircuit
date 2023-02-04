@@ -10,7 +10,12 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"X1 <r> A2 →↗→ A2";
+            var script = @"X1 → R → X2
+X1 ↓ X3
+X2 <d +50> X4
+
+X3 <??> X4
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext

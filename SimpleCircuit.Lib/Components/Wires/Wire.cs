@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Wires
             var p1 = _p2w as IOrientedPin;
             var p2 = _w2p as IOrientedPin;
 
-            if (_info.Segments.Count == 1 && _info.Segments[0].Orientation.X.IsZero() && _info.Segments[0].Orientation.Y.IsZero())
+            if (_info.Segments.Count == 1 && _info.Segments[0].Orientation.X.IsZero() && _info.Segments[0].Orientation.Y.IsZero() && !_info.Segments[0].IsUnconstrained)
             {
                 // We have a wire that connects two pins but does not have a defined orientation yet
                 // This piece of code will pass this orientation to other nodes if they can be resolved
@@ -158,12 +158,13 @@ namespace SimpleCircuit.Components.Wires
             }
             else
             {
-                // We have multiple wires, but we want to make sure that the wire doesn't contain unresolved segment
-                // orientations in the middle...
+                // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
                 for (int i = 0; i < _info.Segments.Count; i++)
                 {
                     var segment = _info.Segments[i];
-                    if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                    if (segment.IsUnconstrained)
+                        continue;
+                    else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                     {
                         if (i == 0)
                         {
@@ -184,7 +185,7 @@ namespace SimpleCircuit.Components.Wires
                         }
                         else
                         {
-                            diagnostics?.Post(_info.Segments[i].Source, ErrorCodes.UndefinedWireSegment);
+                            diagnostics?.Post(segment.Source, ErrorCodes.UndefinedWireSegment);
                             return PresenceResult.GiveUp;
                         }
                     }
@@ -220,11 +221,16 @@ namespace SimpleCircuit.Components.Wires
                     {
                         string tx = GetXName(i);
                         string ty = GetYName(i);
-                        var orientation = GetOrientation(i);
-                        if (orientation.X.IsZero())
-                            context.Shorts.Group(x, tx);
-                        if (orientation.Y.IsZero())
-                            context.Shorts.Group(y, ty);
+
+                        // Ignore unconstrained wires
+                        if (!_info.Segments[i].IsUnconstrained)
+                        {
+                            var orientation = GetOrientation(i);
+                            if (orientation.X.IsZero())
+                                context.Shorts.Group(x, tx);
+                            if (orientation.Y.IsZero())
+                                context.Shorts.Group(y, ty);
+                        }
                         x = tx;
                         y = ty;
                     }
@@ -235,6 +241,9 @@ namespace SimpleCircuit.Components.Wires
                     y = context.Shorts[StartY];
                     for (int i = 0; i < _info.Segments.Count; i++)
                     {
+                        if (_info.Segments[i].IsUnconstrained)
+                            continue;
+
                         string tx = context.Shorts[GetXName(i)];
                         string ty = context.Shorts[GetYName(i)];
                         var orientation = GetOrientation(i);
@@ -267,17 +276,13 @@ namespace SimpleCircuit.Components.Wires
             var orientation = _info.Segments[index].Orientation;
             if (orientation.X.IsZero() && orientation.Y.IsZero())
             {
-                // Use pin orientation
-                if (orientation.X.IsZero() && orientation.Y.IsZero())
-                {
-                    // Take the pin orientation instead
-                    if (index == 0 && _p2w is IOrientedPin p1)
-                        orientation = p1.Orientation;
-                    else if (index == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
-                        orientation = p2.Orientation;
-                    else
-                        orientation = new(1, 0);
-                }
+                // Take the pin orientation instead
+                if (index == 0 && _p2w is IOrientedPin p1)
+                    orientation = p1.Orientation;
+                else if (index == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
+                    orientation = p2.Orientation;
+                else
+                    orientation = new(1, 0);
             }
             return orientation;
         }
@@ -363,12 +368,15 @@ namespace SimpleCircuit.Components.Wires
             for (int i = 0; i < _info.Segments.Count; i++)
             {
                 string tx = GetXName(i), ty = GetYName(i);
-                var defaultOrientation = new Vector2(1, 0);
-                if (i == 0 && _p2w is IOrientedPin op)
-                    defaultOrientation = op.Orientation;
-                else if (i == _info.Segments.Count - 1 && _w2p is IOrientedPin op2)
-                    defaultOrientation = -op2.Orientation;
-                RegisterWire(context, x, y, tx, ty, _info.Segments[i], defaultOrientation);
+                if (!_info.Segments[i].IsUnconstrained)
+                {
+                    var defaultOrientation = new Vector2(1, 0);
+                    if (i == 0 && _p2w is IOrientedPin op)
+                        defaultOrientation = op.Orientation;
+                    else if (i == _info.Segments.Count - 1 && _w2p is IOrientedPin op2)
+                        defaultOrientation = -op2.Orientation;
+                    RegisterWire(context, x, y, tx, ty, _info.Segments[i], defaultOrientation);
+                }
                 x = tx;
                 y = ty;
             }
