@@ -67,7 +67,7 @@ namespace SimpleCircuitOnline.Pages
                 if (_settings.RenderBounds != value)
                 {
                     _settings.RenderBounds = value;
-                    Task.Run(() => Update(null));
+                    Task.Run(() => Update());
                     Task.Run(SaveSettings);
                 }
             }
@@ -244,7 +244,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                await UpdateNow();
+                UpdateNow();
             }
         }
         private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
@@ -258,7 +258,7 @@ namespace SimpleCircuitOnline.Pages
                 WordBasedSuggestions = false,
             };
         }
-        private void Update(ModelContentChangedEvent e)
+        private void Update()
         {
             if (_settings.AutoUpdate)
             {
@@ -268,9 +268,7 @@ namespace SimpleCircuitOnline.Pages
                     _loading = 1;
             }
             else
-            {
                 _timer.Stop();
-            }
         }
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
@@ -287,18 +285,18 @@ namespace SimpleCircuitOnline.Pages
             }
         }
         
-        private async Task UpdateNow()
+        private void UpdateNow()
         {
             // Notify for running the script
             _errors = null;
             _warnings = null;
             _loading = 2;
-            StateHasChanged();
 
-            // Actual action
-            _svg = await ComputeXml(false, _settings.RenderBounds);
-            _loading = 0;
-            StateHasChanged();
+            // Actual loading
+            Task.Run(async () =>
+            {
+                _svg = await ComputeXml(false, _settings.RenderBounds);
+            }).ContinueWith(task => { _loading = 0; StateHasChanged(); });
         }
         private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
