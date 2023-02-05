@@ -241,25 +241,25 @@ namespace SimpleCircuit.Components.Wires
                     y = context.Shorts[StartY];
                     for (int i = 0; i < _info.Segments.Count; i++)
                     {
-                        if (_info.Segments[i].IsUnconstrained)
-                            continue;
-
                         string tx = context.Shorts[GetXName(i)];
                         string ty = context.Shorts[GetYName(i)];
-                        var orientation = GetOrientation(i);
-                        if (!orientation.X.IsZero())
+                        if (!_info.Segments[i].IsUnconstrained)
                         {
-                            if (orientation.X > 0)
-                                context.Extremes.Order(x, tx);
-                            else
-                                context.Extremes.Order(tx, x);
-                        }
-                        if (!orientation.Y.IsZero())
-                        {
-                            if (orientation.Y > 0)
-                                context.Extremes.Order(y, ty);
-                            else
-                                context.Extremes.Order(ty, y);
+                            var orientation = GetOrientation(i);
+                            if (!orientation.X.IsZero())
+                            {
+                                if (orientation.X > 0)
+                                    context.Extremes.Order(x, tx);
+                                else
+                                    context.Extremes.Order(tx, x);
+                            }
+                            if (!orientation.Y.IsZero())
+                            {
+                                if (orientation.Y > 0)
+                                    context.Extremes.Order(y, ty);
+                                else
+                                    context.Extremes.Order(ty, y);
+                            }
                         }
                         x = tx;
                         y = ty;

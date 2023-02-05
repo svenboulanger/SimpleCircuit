@@ -434,6 +434,9 @@ namespace SimpleCircuit.Parser
                     }
                 }
             }
+
+            // Simplify the wire as much as possible
+            wireInfo.Simplify();
             return wireInfo;
         }
 
