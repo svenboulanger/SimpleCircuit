@@ -7,7 +7,7 @@ namespace SimpleCircuit.Parser
     /// An abstract class for a lexer.
     /// </summary>
     /// <typeparam name="T">The token type.</typeparam>
-    public abstract class Lexer<T> : ILexer
+    public abstract class Lexer<T> : ILexer<T>
     {
         private readonly ReadOnlyMemory<char> _contents;
         private int _line, _trivia = 0, _index = 0, _length = 0, _column = 1;
@@ -76,9 +76,7 @@ namespace SimpleCircuit.Parser
             Next();
         }
 
-        /// <summary>
-        /// Goes to the next token.
-        /// </summary>
+        /// <inheritdoc />
         public void Next()
         {
             _length = 0;
@@ -88,12 +86,7 @@ namespace SimpleCircuit.Parser
             ReadToken();
         }
 
-        /// <summary>
-        /// Checks whether the current token has flags.
-        /// </summary>
-        /// <returns>
-        ///     <c>true</c> if there are flags; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public abstract bool Check(T flags);
 
         /// <summary>
@@ -117,13 +110,7 @@ namespace SimpleCircuit.Parser
             return false;
         }
 
-        /// <summary>
-        /// Checks whether the current token matches the flag and consumes it if it matches.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <returns>
-        ///     <c>true</c> if the token matched and was consumed; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public bool Branch(T flag)
         {
             if (Check(flag))
@@ -134,35 +121,7 @@ namespace SimpleCircuit.Parser
             return false;
         }
 
-        /// <summary>
-        /// Checks whether current token matches the flag and a first character and consumes it
-        /// if it matches.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="first">The first character of the content.</param>
-        /// <returns>
-        ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
-        /// </returns>
-        public bool Branch(T flag, char first)
-        {
-            if (Check(flag) && Content.Span[0] == first)
-            {
-                Next();
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks whether current token matches the flag and content and consumes it
-        /// if it matches.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="content">The content to match.</param>
-        /// <param name="comparison">The type of comparison for the content.</param>
-        /// <returns>
-        ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public bool Branch(T flag, string content, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             if (Check(flag, content, comparison))
@@ -173,15 +132,7 @@ namespace SimpleCircuit.Parser
             return false;
         }
 
-        /// <summary>
-        /// Checks whether the current token matches the flag, and consumes it if it matches.
-        /// The contents of the matched token is returned.
-        /// </summary>
-        /// <param name="flag">The flag.</param>
-        /// <param name="content">The content of the matched token.</param>
-        /// <returns>
-        ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public bool Branch(T flag, out Token token)
         {
             if (Check(flag))
@@ -283,11 +234,7 @@ namespace SimpleCircuit.Parser
         /// </summary>
         protected void Newline() => _line++;
 
-        /// <summary>
-        /// Creates a tracker that allows to track combined tokens using <see cref="GetTracked(Tracker, bool)"/>.
-        /// </summary>
-        /// <param name="includeTrivia">If <c>true</c>, the trivia is included in the tracker.</param>
-        /// <returns>Returns the tracker.</returns>
+        /// <inheritdoc />
         public Tracker Track(bool includeTrivia = false)
         {
             if (includeTrivia)
@@ -295,17 +242,12 @@ namespace SimpleCircuit.Parser
             return new(_index - _length, _tokenStart);
         }
 
-        /// <summary>
-        /// Gets a token that contains the combined content since the tracker.
-        /// </summary>
-        /// <param name="tracker">The tracker.</param>
-        /// <param name="includeCurrentToken">If <c>true</c>, the current token is included in the tracked token.</param>
-        /// <returns>The tracked token.</returns>
+        /// <inheritdoc />
         public Token GetTracked(Tracker tracker, bool includeCurrentToken = false)
         {
             if (includeCurrentToken)
-                return new(Source, tracker.Location, _contents[tracker.Index..(_index - _length - _trivia)]);
-            return new(Source, tracker.Location, _contents[tracker.Index.._index]);
+                return new(Source, tracker.Location, _contents[tracker.Index.._index]);
+            return new(Source, tracker.Location, _contents[tracker.Index..(_index - _length - _trivia)]);
         }
     }
 }

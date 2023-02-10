@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Digital;
+using System;
 
 namespace SimpleCircuitOnline
 {
@@ -50,87 +51,72 @@ namespace SimpleCircuitOnline
         public static Demo[] Demos { get; } = new[]
         {
             // Low-pass RC filter
-            new Demo("1. Low-pass filter", "A simple passive RC low-pass filter.", string.Join(Environment.NewLine, new[]
-            {
-                "// A component chain is a series of components seperated by <wires>.",
-                "// The type of component is defined by the first letter(s), which have to be capital letters.",
-                "// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.",
-                "GND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2",
-                "",
-                "// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.",
-                "// These are between brackets, and the \"y\" tells along which axis alignment is needed.",
-                "(y GND1 <r> GND2)"
-            })),
+            new Demo(
+                "1. Component chains",
+                "Tutorial explaining component chains.",
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// A component chain is a series of components seperated by <wires>.\r\n// The type of component is defined by the first letter(s), which have to be capital letters.\r\n// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.\r\n// Most components also have labels, which are specified as quoted strings between parenthesis.\r\nGND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2\r\n\r\n// Virtual chains act like component chains but are not drawn.\r\n// They can be used to align components.\r\n// Virtual chains are always between brackets.\r\n(GND1 <r> GND2)\r\n"
+            ),
+
+            // Tutorial about pins
+            new Demo(
+                "2. Pins",
+                "Tutorial explaining pins.", 
+                "// Pins are specified between square brackets\r\n// It is important whether the pin is specified before or after the component\r\nX1 <r> [g]NMOS1[s] <d> GND1\r\n\r\n// The pin order of the component is important\r\n// If no pin is specified, then the first pin is used as the default for wires ending in the component.\r\n// The last pin is used for wires starting from that component.\r\nNMOS1[d] <u> R1 <u> POW\r\n// You can find this information in Help > Components.\r\n\r\n// The resistor actually has 3 pins: 'p', 'c' and 'n' (each of them have aliases too). The 'c' pin however, if not used, is hidden.\r\nR1[c] <r> T(\"hello\")"
+                ),
+
+            new Demo(
+                "3. Virtual chains / alignment",
+                "Tutorial explaining virtual chains more.",
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// We define a number of component chains\r\nGND1 <u> V <u r> R <r> X1\r\nX1 <d> C <d> GND2\r\nX1 <r> X2 <d> L <d> R <d> GND3\r\nX2 <r> X3 <d> C <d> R <d> GND4\r\nX3 <r> T(\"output\")\r\n\r\n// We can now start aligning them using virtual chains\r\n// It is possible to align components only along one axis\r\n// This is done by adding \"x\" or \"y\" at the start of the virtual chain\r\n(x X1 <r +20> X2 <r +20> X3)\r\n\r\n// It is also possible to align components using a filter on their name\r\n// For example, we would like to align all the grounds in our circuit:\r\n(y GND*)\r\n// The '*' character acts as a wildcard\r\n\r\n// We can also align all anonymous components of a certain type in one statement.\r\n// We can for example align all anonymous capacitors:\r\n(y C)\r\n"
+                ),
 
             // Inverting amplifier
-            new Demo("2. Inverting amplifier", "An inverting amplifier using an opamp.", string.Join(Environment.NewLine, new[]
-            {
-                "// Display signal grounds by telling SimpleCircuit all GND components should get a \"signal\" variant",
-                ".variants GND signal",
-                "",
-                "// You can control which pin a wire starts from or ends in by adding the pin name between square brackets.",
-                "// Wires can be given a fixed length by adding a number after the direction.",
-                "GND <u> V(\"V_in\") <u r> R(\"R_1\") <r> Xfb <r> [n]OA1(flip) <r> Xout <u l> [n]R(\"R_fb\")[p] <l d 20> Xfb",
-                "OA1[p] <l d> GND",
-                "Xout <r 5> T(\"V_out\")",
-                "",
-                "// Align all anonymous grounds",
-                "(y GND)"
-            })),
-
-            // Non-inverting amplifier
-            new Demo("3. Non-inverting amplifier", "The circuit on EEVblog's \"I only give negative feedback\" shirt.", string.Join(Environment.NewLine, new[]
-            {
-                "// Make sure you specify the pin on the right side of the component name! This should not be OA1[p].",
-                "T(\"V_in\") <r> [p]OA1",
-                "",
-                "// Resistive voltage divider:",
-                "OA1[out] <r> Xout <d l> R(\"R_F\") <l> Xfb <d> R(\"R_G\") <d> GND",
-                "Xfb <u 10 r> [n]OA1",
-                "",
-                "Xout <r 5> T(\"V_out\")"
-            })),
+            new Demo(
+                "4. Variants and properties",
+                "Tutorial explaining variants for changing appearances.",
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Variants allow changing the appearance of certain components\r\n// For example, a resistor can have the \"programmable\" variant:\r\nT1(\"in\") <r> R1(programmable) <r> T2(\"out\")\r\n\r\n// Many components also have properties that can be specified as well\r\n- R1.scale = 2\r\n\r\n// The property syntax can also be used to specify variants\r\n- T1.input = true\r\n- T2.output = true\r\n\r\n// Variants can be removed again by adding a '-' before them\r\nT2(-output, +pad)\r\n"
+                ),
 
             // Wheatstone bridge
-            new Demo("4. Wheatstone bridge", "A Wheatstone bridge with the typical diamond-like (45 degree angled) resistor structure.", string.Join(Environment.NewLine, new[]
-            {
-                "// Other possible wire directions are n, s, e and w for north, south, east and west.",
-                "// Non horizontal/vertical wires are also possible (ne, nw, se, sw). Generally, you can",
-                "// specify any angle using <a #> with # the angle in degrees (e.g. <u> is the same as <a 90>).",
-                "X1 <l u> V1(\"V_s\") <u r> X2",
-                "X1 <ne> R <ne> Xright <nw> R <nw> X2",
-                "X1 <nw> R <nw> Xleft <ne> R <ne> X2",
-                "",
-                "Xright <l> T(\"+\")",
-                "Xleft <r> T(\"-\")",
-                "",
-                "// For wires (both normal or virtual), you can also add a '+' before the length to tell",
-                "// that the distance is not exact, but a minimum.",
-                "(x V1 <r +30> Xleft)"
-            })),
+            new Demo(
+                "5. Wires",
+                "Tutorial explaining odd angle wires, and changing their appearance.",
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Wires do not have to be horizontal or vertical, SimpleCircuit can solve any angle\r\n// For shorthand notation, the 4 cardinal directions can be used\r\nX1 <n e s w> X1\r\n\r\n// In fact, the 4 ordinal directions can also be used!\r\nX2 <ne se sw nw> X2\r\n\r\n// It is possible to specify any angled wires by using <a #> as a wire segment with # the angle of the wire (counter-clockwise)\r\nX3 <a 60 r a -60 a -120 l a 120> X3\r\n// One note of caution: Using fine increments of angles can lead to rather unexpected results! Uncomment the next example to see what could happen:\r\n// X4 <e n a -91> X4\r\n// In such events, consider using unconstrained wires instead\r\n\r\n// We might just use <?> or '-' to copy the wire orientation from the pin it is connected to\r\nX5 <ne> R <?> R - R\r\n// Sometimes this could lead to errors though, for example:\r\n// X6 - R\r\n\r\n// Unconstrained wires are wires that do not constrain anything\r\n// While this may be useful for very odd angles, it also means that the components will need to be constrained in other ways.\r\n// They are specified using the <??> syntax:\r\nX7 <u> R <u r> C <r d ??> X7\r\n\r\n// Wires can also have special appearances:\r\nX8 <r arrow> X\r\nX9 <rarrow r> X\r\nX10 <arrow r> X\r\nX11 <r rarrow> X\r\nX12 <r dashed> X\r\nX13 <r dotted> X\r\n"),
 
             // Section demo
-            new Demo("5. Sections", "An example using sections", string.Join(Environment.NewLine, new[]
+            new Demo("5. Sections", "An example using sections.", string.Join(Environment.NewLine, new[]
             {
                 "// Define a section",
                 ".section A",
                 "    // These components are named, but only local to this section",
-                "    GND1 <u> V <u r> Xa",
+                "    GND1 <u> V1 <u r> Xa",
                 "    - GND1.signal = true",
                 ".endsection",
                 "",
                 "// We can reuse names, like GND1, without referring to the ground in the section",
                 "// We can use a forward slash ('/') to refer to components inside a section",
                 "A/Xa <r> L <r d> C <d> GND1",
+                "(y A/GND1 <r> GND1)",
                 "",
-                "// Align both grounds",
-                "(y A/GND1 <r> GND1)"
+                "// You can re-use previously defined section",
+                ".section B A",
+                "B/Xa <r> C <r d> C <d> GND2",
+                "(y B/GND1 <r> GND2)",
+                "",
+                ".section C A",
+                "C/Xa <r> R <r d> C <d> GND3",
+                "(y C/GND1 <r> GND3)",
+                "",
+                "(x GND*)",
+                "",
+                "// We can also aligh instances inside sections",
+                "(x */V1)",
             })),
 
             // Subcircuit demo
-            new Demo("5. Subcircuits", "Demo on how to use a subcircuit definition", string.Join(Environment.NewLine, new[] {
-                "// Subcircuit definitions are similar to Spice netlists. Just start with '.subckt' followed",
-                "// by the pins.",
+            new Demo("6. Subcircuits", "An example using subcircuits", string.Join(Environment.NewLine, new[] {
+                "// Subcircuits are solved on their own, and they can then be used as any other component.",
+                "// The pins need to be specified",
                 ".subckt ABC R1[p] R2[n]",
                 "    R1 <r> R2",
                 ".ends",
@@ -142,7 +128,7 @@ namespace SimpleCircuitOnline
                 "Xs <a -45> ABC <a -45> Xe" })),
 
             // Black-box demo
-            new Demo("6. Black box demo", "Demo on how to use a black box", string.Join(Environment.NewLine, new[] {
+            new Demo("7. Black box demo", "An example using a block box component.", string.Join(Environment.NewLine, new[] {
                 "// Black boxes are boxes that can have custom pins.",
                 "// It is possible to give a black box some pins just by mentioning them somewhere.",
                 "// They are added left to right or top to bottom, and their orientation determines on which",
@@ -160,6 +146,20 @@ namespace SimpleCircuitOnline
                 "// The size of the black box is only a minimum, we can stretch them out",
                 "(x BB1[Input1] <r +80> [Output1]BB1)",
             })),
+
+            // Non-inverting amplifier
+            new Demo("3. Non-inverting amplifier", "The circuit on EEVblog's \"I only give negative feedback\" shirt.", string.Join(Environment.NewLine, new[]
+            {
+                "// Make sure you specify the pin on the right side of the component name! This should not be OA1[p].",
+                "T(\"V_in\") <r> [p]OA1",
+                "",
+                "// Resistive voltage divider:",
+                "OA1[out] <r> Xout <d l> R(\"R_F\") <l> Xfb <d> R(\"R_G\") <d> GND",
+                "Xfb <u 10 r> [n]OA1",
+                "",
+                "Xout <r 5> T(\"V_out\")"
+            })),
+
 
             // Double pole switch
             new Demo("Demo: Two-way light switch", "A circuit for switching a light using two switches.", string.Join(Environment.NewLine, new[]

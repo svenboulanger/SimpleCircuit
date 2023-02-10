@@ -196,7 +196,10 @@ namespace SimpleCircuit.Parser
             }
 
             // Get the full name of the component, this can include wildcards and section separators
-            var nameToken = lexer.ReadWhile(TokenType.Word | TokenType.Integer | TokenType.Divide | TokenType.Times, shouldNotIncludeTrivia: true);
+            var tracker = lexer.Track();
+            lexer.Next();
+            while (!lexer.HasTrivia && lexer.Branch(TokenType.Word | TokenType.Integer | TokenType.Divide | TokenType.Times));
+            var nameToken = lexer.GetTracked(tracker, false);
             string fullname = string.Join(DrawableFactoryDictionary.Separator, context.Section.Reverse().Union(new[] { nameToken.Content.ToString() }));
             var info = new ComponentInfo(nameToken, fullname);
 
@@ -305,12 +308,12 @@ namespace SimpleCircuit.Parser
                                     wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
                                     break;
 
-                                case "e":
+                                case "w":
                                 case "l":
                                     wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
                                     break;
 
-                                case "w":
+                                case "e":
                                 case "r":
                                     wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
                                     break;
@@ -854,24 +857,17 @@ namespace SimpleCircuit.Parser
                 return false;
             }
 
-            // Get the axis of the virtual chain
-            if (!lexer.Branch(TokenType.Word, out var directionToken))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVirtualChainDirection);
-                return false;
-            }
-
+            // Determine the virtual wire alignment
             VirtualWire.Direction direction = VirtualWire.Direction.None;
-            switch (directionToken.Content.ToString().ToLower())
-            {
-                case "x": direction = VirtualWire.Direction.X; break;
-                case "y": direction = VirtualWire.Direction.Y; break;
-                case "xy":
-                case "yx": direction = VirtualWire.Direction.X | VirtualWire.Direction.Y; break;
-                default:
-                    context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeVirtualChainDirection, directionToken.Content.ToString());
-                    return false;
-            }
+            if (lexer.Branch(TokenType.Word, "x", StringComparison.Ordinal))
+                direction = VirtualWire.Direction.X;
+            else if (lexer.Branch(TokenType.Word, "y", StringComparison.Ordinal))
+                direction = VirtualWire.Direction.Y;
+            else if (lexer.Branch(TokenType.Word, "xy", StringComparison.Ordinal) ||
+                lexer.Branch(TokenType.Word, "yx", StringComparison.Ordinal))
+                direction = VirtualWire.Direction.X | VirtualWire.Direction.Y;
+            else
+                direction = VirtualWire.Direction.X | VirtualWire.Direction.Y;
 
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
             // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
