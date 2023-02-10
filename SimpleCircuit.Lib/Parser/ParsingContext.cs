@@ -49,7 +49,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the defined sections until now.
         /// </summary>
-        public Dictionary<string, (int, ReadOnlyMemory<char>)> SectionTemplates { get; } = new();
+        public Dictionary<string, Token> SectionTemplates { get; } = new();
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.

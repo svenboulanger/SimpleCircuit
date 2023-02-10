@@ -28,7 +28,7 @@ namespace SimpleCircuit.Diagnostics
         /// <inheritdoc />
         public override string ToString()
         {
-            string result = $"{Severity}: {Code}: {Message} at line {Token.Range.Start.Line}, column {Token.Range.End.Column}";
+            string result = $"{Severity}: {Code}: {Message} at line {Token.Location.Line}, column {Token.Location.Column}";
             if (!string.IsNullOrWhiteSpace(Token.Source))
                 result += $" {Token.Source}";
             return result;

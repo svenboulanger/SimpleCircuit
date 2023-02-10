@@ -23,7 +23,7 @@ namespace SimpleCircuit.Parser
         /// <param name="lexer">The lexer.</param>
         /// <param name="message">The message.</param>
         public ParseException(ILexer lexer, string message)
-            : base($"{message} at line {lexer.Line}, column {lexer.Column}")
+            : base($"{message} at line {lexer.Token.Location.Line}, column {lexer.Token.Location.Column}")
         {
         }
     }

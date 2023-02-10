@@ -254,7 +254,7 @@ namespace SimpleCircuit.Parser
                 while (lexer.Branch(TokenType.Comma));
 
                 if (!lexer.Branch(TokenType.CloseParenthesis))
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ")");
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
             }
             return info;
         }
@@ -262,7 +262,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedWire);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedWire);
                 return null;
             }
 
@@ -421,7 +421,7 @@ namespace SimpleCircuit.Parser
                     // Closing beak
                     if (!lexer.Branch(TokenType.CloseBeak))
                     {
-                        context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ">");
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ">");
                         return null;
                     }
                 }
@@ -435,7 +435,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.OpenIndex))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedPin);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPin);
                 return default;
             }
 
@@ -443,14 +443,14 @@ namespace SimpleCircuit.Parser
             var token = lexer.ReadWhile(~TokenType.Newline & ~TokenType.CloseIndex & ~TokenType.Whitespace);
 
             if (!lexer.Branch(TokenType.CloseIndex))
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, "]");
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, "]");
             return token;
         }
         private static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.Word, out var typeToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Expected control statement type"));
+                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected control statement type"));
                 return false;
             }
 
@@ -487,7 +487,7 @@ namespace SimpleCircuit.Parser
             // Read the name of the subcircuit
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedSubcircuit);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSubcircuit);
                 return false;
             }
 
@@ -563,25 +563,22 @@ namespace SimpleCircuit.Parser
             // Read the name of the subcircuit
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.StartToken, SeverityLevel.Error, "PE001", "Expected symbol name"));
+                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected symbol name"));
                 return false;
             }
             string symbolKey = nameToken.Content.ToString();
-            int line = lexer.Line;
-            int column = lexer.Column;
             lexer.Skip(~TokenType.Newline);
-            int start = lexer.TrackIndex();
+            var tracker = lexer.Track();
 
             // Read until a .ENDS and treat the contents as XML to be read
-            ReadOnlyMemory<char> xml;
+            Token xml;
             while (true)
             {
-                if (lexer.Check(TokenType.Dot))
+                if (lexer.Branch(TokenType.Dot))
                 {
-                    xml = lexer.Track(start);
-                    lexer.Next();
                     if (BranchControlWord(lexer, _symbolEnd))
                     {
+                        xml = lexer.GetTracked(tracker);
                         lexer.Skip(~TokenType.Newline);
                         break;
                     }
@@ -594,13 +591,13 @@ namespace SimpleCircuit.Parser
             var doc = new XmlDocument();
             try
             {
-                doc.LoadXml($"<symbol>{Environment.NewLine}{xml}{Environment.NewLine}</symbol>");
+                doc.LoadXml($"<symbol>{Environment.NewLine}{xml.Content[..^4]}{Environment.NewLine}</symbol>");
             }
             catch (XmlException ex)
             {
                 // Create a token for the XML problem
-                var loc = new TextLocation(line + ex.LineNumber - 1, ex.LineNumber == 1 ? column + ex.LinePosition : ex.LinePosition);
-                var token = new Token(lexer.Source, new(loc, loc), "".AsMemory());
+                var loc = new TextLocation(xml.Location.Line + ex.LineNumber - 1, ex.LineNumber == 1 ? xml.Location.Column + ex.LinePosition : ex.LinePosition);
+                var token = new Token(lexer.Source, loc, "".AsMemory());
                 context.Diagnostics?.Post(token, ErrorCodes.XMLError, ex.Message);
                 return false;
             }
@@ -615,7 +612,7 @@ namespace SimpleCircuit.Parser
             // Read the name of the section
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedSectionName);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSectionName);
                 return false;
             }
             if (context.SectionTemplates.ContainsKey(nameToken.Content.ToString()))
@@ -631,17 +628,17 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.Word, out var templateToken))
             {
                 // Try to use a previously defined section instead of this one
-                if (!context.SectionTemplates.TryGetValue(templateToken.Content.ToString(), out var content))
+                if (!context.SectionTemplates.TryGetValue(templateToken.Content.ToString(), out var token))
                 {
                     context.Diagnostics.Post(ErrorCodes.UnknownSectionTemplate, templateToken.Content);
                     lexer.Skip(~TokenType.Newline);
                     return false;
                 }
-                context.SectionTemplates.Add(nameToken.Content.ToString(), content);
+                context.SectionTemplates.Add(nameToken.Content.ToString(), token);
 
                 // Parse the template again
                 context.Section.Push(nameToken.Content.ToString());
-                var sectionLexer = SimpleCircuitLexer.FromString(content.Item2.ToString(), lexer.Source, content.Item1);
+                var sectionLexer = SimpleCircuitLexer.FromString(token.Content, lexer.Source, token.Location.Line);
                 while (sectionLexer.Type != TokenType.EndOfContent)
                 {
                     if (sectionLexer.Branch(TokenType.Dot))
@@ -664,8 +661,7 @@ namespace SimpleCircuit.Parser
 
                 // Parse section contents
                 context.Section.Push(nameToken.Content.ToString());
-                int start = lexer.TrackIndex();
-                int line = lexer.Token.Range.Start.Line;
+                var tracker = lexer.Track();
 
                 // Read the contents
                 while (lexer.Type != TokenType.EndOfContent)
@@ -676,8 +672,8 @@ namespace SimpleCircuit.Parser
                         {
                             // End of section reached
                             lexer.Skip(~TokenType.Newline);
-                            ReadOnlyMemory<char> content = lexer.Track(start);
-                            context.SectionTemplates.Add(nameToken.Content.ToString(), (line, content));
+                            var token = lexer.GetTracked(tracker);
+                            context.SectionTemplates.Add(nameToken.Content.ToString(), token);
                             context.Section.Pop();
                             return true;
                         }
@@ -712,7 +708,7 @@ namespace SimpleCircuit.Parser
                 }
 
                 if (!lexer.Branch(TokenType.Equals))
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
 
                 // Parse depending on the type
                 if (member.PropertyType == typeof(bool))
@@ -735,7 +731,7 @@ namespace SimpleCircuit.Parser
 
             if (lexer.Type != TokenType.EndOfContent && !lexer.Check(TokenType.Newline))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.UnexpectedEndOfLine);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfLine);
                 return false;
             }
             return true;
@@ -854,14 +850,14 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.OpenParenthesis))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedVirtualChain);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVirtualChain);
                 return false;
             }
 
             // Get the axis of the virtual chain
             if (!lexer.Branch(TokenType.Word, out var directionToken))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedVirtualChainDirection);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVirtualChainDirection);
                 return false;
             }
 
@@ -883,7 +879,7 @@ namespace SimpleCircuit.Parser
                 (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, direction));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, ")");
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
             return true;
         }
         
@@ -896,7 +892,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.Dash))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedPropertyAssignment);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
                 return false;
             }
 
@@ -911,18 +907,18 @@ namespace SimpleCircuit.Parser
                 // Property
                 if (!lexer.Branch(TokenType.Dot))
                 {
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedDot);
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedDot);
                     return false;
                 }
                 if (!lexer.Branch(TokenType.Word, out var propertyToken))
                 {
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedProperty);
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedProperty);
                     return false;
                 }
 
                 // Equals
                 if (!lexer.Branch(TokenType.Equals))
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedAssignment);
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
 
                 // The value
                 object value = null;
@@ -955,7 +951,7 @@ namespace SimpleCircuit.Parser
             {
                 if (!lexer.Branch(TokenType.Word, "false", StringComparison.Ordinal))
                 {
-                    context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedBoolean);
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedBoolean);
                     return null;
                 }
                 else
@@ -971,7 +967,7 @@ namespace SimpleCircuit.Parser
                 inverted = true;
             if (!lexer.Branch(TokenType.Number | TokenType.Integer, out var numberToken))
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedNumber);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNumber);
                 return double.NaN;
             }
             double result = double.Parse(numberToken.Content.ToString(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture);
@@ -985,7 +981,7 @@ namespace SimpleCircuit.Parser
                 return stringToken.Content[1..^1].ToString();
             else
             {
-                context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedString);
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedString);
                 return null;
             }
         }

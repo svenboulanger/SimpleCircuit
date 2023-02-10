@@ -86,7 +86,7 @@ namespace SimpleCircuit
             // Now we can start parsing the input file
             _circuit = await Task.Run(() =>
             {
-                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript, Path.GetFileName(Filename));
+                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Path.GetFileName(Filename));
                 var context = new ParsingContext() { Diagnostics = _logger };
                 Parser.Parser.Parse(lexer, context);
 

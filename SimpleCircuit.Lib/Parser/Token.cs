@@ -13,9 +13,9 @@ namespace SimpleCircuit.Parser
         public string Source { get; }
 
         /// <summary>
-        /// Gets the range of the token.
+        /// Gets the line number of the token.
         /// </summary>
-        public TextRange Range { get; }
+        public TextLocation Location { get; }
 
         /// <summary>
         /// Gets the contents of the token.
@@ -26,19 +26,19 @@ namespace SimpleCircuit.Parser
         /// Creates a new <see cref="Token"/>
         /// </summary>
         /// <param name="source">The source of the token.</param>
-        /// <param name="range">The range of the token.</param>
+        /// <param name="location">The location of the token.</param>
         /// <param name="content">The contents of the token.</param>
-        public Token(string source, TextRange range, ReadOnlyMemory<char> content)
+        public Token(string source, TextLocation location, ReadOnlyMemory<char> content)
         {
             Source = source;
-            Range = range;
+            Location = location;
             Content = content;
         }
 
         /// <inheritdoc />
-        public bool Equals(Token other) => Source.Equals(other.Source) && Range.Equals(other.Range) && Content.Equals(other.Content);
+        public bool Equals(Token other) => Source.Equals(other.Source) && Location.Equals(other.Location) && Content.Equals(other.Content);
 
         /// <inheritdoc />
-        public override string ToString() => $"{Content} in {Source ?? ""} ({Range})";
+        public override string ToString() => $"{Content} in {Source ?? ""} ({Location})";
     }
 }

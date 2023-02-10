@@ -10,7 +10,6 @@ namespace SimpleCircuitOnline.Shared
     public partial class SvgOutput
     {
         private string _svg;
-        private XmlDocument _lastSvg;
         private bool _invalid;
 
         [Parameter]
@@ -75,7 +74,6 @@ namespace SimpleCircuitOnline.Shared
                     using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
                         doc.WriteTo(xml);
                     _svg = sw.ToString();
-                    _lastSvg = Svg;
                 }
                 else
                 {
@@ -84,7 +82,6 @@ namespace SimpleCircuitOnline.Shared
                         Svg.WriteTo(xml);
                     var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
                     _svg = $"<img src=\"data:image/svg+xml;base64,{data}\" />";
-                    _lastSvg = Svg;
                 }
                 StateHasChanged();
             }

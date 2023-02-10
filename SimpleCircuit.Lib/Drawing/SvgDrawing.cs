@@ -138,7 +138,7 @@ namespace SimpleCircuit
                 Vector2 o = new();
                 if (offset != null)
                 {
-                    var lexer = new SvgPathDataLexer(offset.Value);
+                    var lexer = new SvgPathDataLexer(offset.Value.AsMemory());
                     lexer.ParseVector(diagnostics, out o);
                 }
                 double a = rotate != null ? -double.Parse(rotate.Value, NumberStyles.Float, CultureInfo.InvariantCulture) * Math.PI / 180.0 : 0.0;
@@ -201,7 +201,7 @@ namespace SimpleCircuit
             string pointdata = node.Attributes["points"]?.Value;
             if (pointdata != null)
             {
-                var lexer = new SvgPathDataLexer(pointdata);
+                var lexer = new SvgPathDataLexer(pointdata.AsMemory());
                 points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
             }
             else if (node.HasChildNodes)
@@ -234,7 +234,7 @@ namespace SimpleCircuit
             List<Vector2> points;
             if (pointdata != null)
             {
-                var lexer = new SvgPathDataLexer(pointdata);
+                var lexer = new SvgPathDataLexer(pointdata.AsMemory());
                 points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
             }
             else if (node.HasChildNodes)
@@ -284,7 +284,7 @@ namespace SimpleCircuit
             {
                 Path(b =>
                 {
-                    var lexer = new SvgPathDataLexer(d);
+                    var lexer = new SvgPathDataLexer(d.AsMemory());
                     SvgPathDataParser.Parse(lexer, b, diagnostics);
                 }, options);
             }

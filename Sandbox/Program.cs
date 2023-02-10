@@ -19,7 +19,7 @@ R1
 B/R1[b] <r> [a]A/R1
 ";
             var logger = new Logger();
-            var lexer = SimpleCircuitLexer.FromString(script);
+            var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext
             {
                 Diagnostics = logger

@@ -293,10 +293,7 @@ namespace SimpleCircuitOnline.Pages
             _loading = 2;
 
             // Actual loading
-            Task.Run(async () =>
-            {
-                _svg = await ComputeXml(false, _settings.RenderBounds);
-            }).ContinueWith(task => { _loading = 0; StateHasChanged(); });
+            Task.Run(async () => _svg = await ComputeXml(false, _settings.RenderBounds)).ContinueWith(task => { _loading = 0; StateHasChanged(); });
         }
         private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
@@ -319,7 +316,7 @@ namespace SimpleCircuitOnline.Pages
                 await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
                 // Parse the script
-                var lexer = SimpleCircuit.Parser.SimpleCircuitLexer.FromString(code);
+                var lexer = SimpleCircuit.Parser.SimpleCircuitLexer.FromString(code.AsMemory());
                 SimpleCircuit.Parser.Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
 

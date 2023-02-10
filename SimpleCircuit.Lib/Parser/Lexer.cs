@@ -4,93 +4,29 @@ using System.IO;
 namespace SimpleCircuit.Parser
 {
     /// <summary>
-    /// A lexer.
+    /// An abstract class for a lexer.
     /// </summary>
     /// <typeparam name="T">The token type.</typeparam>
     public abstract class Lexer<T> : ILexer
     {
-        private readonly string _contents;
-        private int _lastLineIndex = 0, _line, _trivia = 0;
+        private readonly ReadOnlyMemory<char> _contents;
+        private int _line, _trivia = 0, _index = 0, _length = 0, _column = 1;
+        private TextLocation _triviaStart, _tokenStart;
+        private bool _isTrivia = true;
 
         /// <inheritdoc />
         public string Source { get; }
 
         /// <inheritdoc/>
-        public ReadOnlyMemory<char> CurrentLine => _contents.AsMemory(_lastLineIndex, Index - _lastLineIndex);
-
-        /// <inheritdoc/>
-        public ReadOnlyMemory<char> LastLine { get; private set; }
-
-        /// <inheritdoc/>
-        public ReadOnlyMemory<char> Content => _contents.AsMemory(Index - Length, Length);
-
-        /// <inheritdoc/>
-        public ReadOnlyMemory<char> Trivia => _contents.AsMemory(Index - Length - _trivia, _trivia);
-
-        /// <inheritdoc/>
-        public ReadOnlyMemory<char> ContentWithTrivia => _contents.AsMemory(Index - Length - _trivia, Length + _trivia);
+        public ReadOnlyMemory<char> Content => _contents[(_index-_length).._index];
 
         /// <inheritdoc />
-        public Token Token
-        {
-            get
-            {
-                return new Token(Source, new TextRange(
-                    new TextLocation(Line, Column - Length),
-                    new TextLocation(Line, Column)),
-                    Content);
-            }
-        }
-
-        /// <inheritdoc />
-        public Token StartToken
-        {
-            get
-            {
-                var loc = new TextLocation(Line, Column - Length);
-                if (Content.Length > 0)
-                    return new Token(Source, new TextRange(loc, loc), Content[..1]);
-                return new Token(Source, new TextRange(loc, loc), Content);
-            }
-        }
+        public Token Token => new(Source, _tokenStart, Content);
 
         /// <summary>
         /// Gets the current token type.
         /// </summary>
         public T Type { get; protected set; }
-
-        /// <inheritdoc/>
-        public int Line
-        {
-            get
-            {
-                int index = Index - _lastLineIndex - Length + 1;
-                if (index <= 0)
-                    return _line - 1;
-                return _line;
-            }
-        }
-
-        /// <inheritdoc/>
-        public int Column
-        {
-            get
-            {
-                int index = Index - _lastLineIndex - Length + 1;
-                if (index <= 0)
-                    return LastLine.Length + index;
-                return index;
-            }
-
-        }
-
-        /// <summary>
-        /// Gets the current index.
-        /// </summary>
-        public int Index { get; private set; }
-
-        /// <inheritdoc/>
-        public int Length { get; private set; }
 
         /// <inheritdoc/>
         public bool HasTrivia => _trivia > 0;
@@ -102,9 +38,9 @@ namespace SimpleCircuit.Parser
         {
             get
             {
-                if (Index >= _contents.Length)
+                if (_index >= _contents.Length)
                     return '\0';
-                return _contents[Index];
+                return _contents.Span[_index];
             }
         }
 
@@ -119,7 +55,7 @@ namespace SimpleCircuit.Parser
             Source = source;
             using (reader)
             {
-                _contents = reader.ReadToEnd();
+                _contents = reader.ReadToEnd().AsMemory();
             }
             _line = line;
             Next();
@@ -132,13 +68,10 @@ namespace SimpleCircuit.Parser
         /// <param name="netlist">The source.</param>
         /// <param name="source">The source.</param>
         /// <param name="line">The initial line number.</param>
-        protected Lexer(string netlist, string source = null, int line = 1)
+        protected Lexer(ReadOnlyMemory<char> netlist, string source = null, int line = 1)
         {
             Source = source;
-            if (string.IsNullOrEmpty(netlist))
-                _contents = "";
-            else
-                _contents = netlist;
+            _contents = netlist;
             _line = line;
             Next();
         }
@@ -148,8 +81,10 @@ namespace SimpleCircuit.Parser
         /// </summary>
         public void Next()
         {
-            Length = 0;
+            _length = 0;
             _trivia = 0;
+            _triviaStart = new(_line, _column);
+            _isTrivia = true;
             ReadToken();
         }
 
@@ -269,8 +204,8 @@ namespace SimpleCircuit.Parser
         public Token ReadWhile(T flags, bool shouldNotIncludeTrivia = false)
         {
             // We include the current token
-            int start = Index - Length;
-            TextLocation startLocation = new(Line, Column - Length);
+            int startIndex = _index - _length;
+            var startToken = _tokenStart;
 
             // Consume the first one
             ReadOnlyMemory<char> result;
@@ -287,7 +222,7 @@ namespace SimpleCircuit.Parser
                 }
 
                 // Take the relevant memory chunk
-                result = _contents.AsMemory(start, Index - _trivia - Length - start);
+                result = _contents[startIndex..(_index - _trivia - _length)];
             }
             else
             {
@@ -296,9 +231,7 @@ namespace SimpleCircuit.Parser
             }
 
             // The current token should not be considered
-            return new Token(Source,
-                new TextRange(startLocation, new TextLocation(Line, Column - Length)),
-                result);
+            return new(Source, startToken, result);
         }
 
         /// <summary>
@@ -316,10 +249,16 @@ namespace SimpleCircuit.Parser
         /// </summary>
         protected void ContinueToken()
         {
-            if (Index < _contents.Length)
+            if (_index < _contents.Length)
             {
-                Index++;
-                Length++;
+                if (_isTrivia)
+                {
+                    _isTrivia = false;
+                    _tokenStart = new(_line, _column);
+                }
+                _column++;
+                _index++;
+                _length++;
             }
         }
 
@@ -330,55 +269,43 @@ namespace SimpleCircuit.Parser
         /// </summary>
         protected void ContinueTrivia()
         {
-            if (Index < _contents.Length)
+            if (_index < _contents.Length)
             {
-                Index++;
-                _trivia += Length + 1;
-                Length = 0;
+                _isTrivia = true;
+                _index++;
+                _trivia += _length + 1;
+                _length = 0;
             }
-        }
-
-        /// <summary>
-        /// Stores the last line.
-        /// </summary>
-        protected void StoreLine()
-        {
-            LastLine = _contents.AsMemory(_lastLineIndex, Index - _lastLineIndex);
         }
 
         /// <summary>
         /// Starts a new line (just for line numbering).
         /// </summary>
-        protected void Newline()
-        {
-            StoreLine();
-            _lastLineIndex = Index;
-            _line++;
-        }
+        protected void Newline() => _line++;
 
         /// <summary>
-        /// Begins tracking any parsed input from the lexer. Tracking can be nested.
+        /// Creates a tracker that allows to track combined tokens using <see cref="GetTracked(Tracker, bool)"/>.
         /// </summary>
-        /// <param name="includeTrivia">If <c>true</c>, the trivia leading up to this token are included.</param>
-        /// <returns>Returns the index at the start of the current token.</returns>
-        public int TrackIndex(bool includeTrivia = false)
+        /// <param name="includeTrivia">If <c>true</c>, the trivia is included in the tracker.</param>
+        /// <returns>Returns the tracker.</returns>
+        public Tracker Track(bool includeTrivia = false)
         {
             if (includeTrivia)
-                return Index - Length - _trivia;
-            else
-                return Index - Length;
+                return new(_index - _length - _trivia, _triviaStart);
+            return new(_index - _length, _tokenStart);
         }
 
         /// <summary>
-        /// Stops tracking any parsed input from the lexer and returns the result. Tracking can be nested.
+        /// Gets a token that contains the combined content since the tracker.
         /// </summary>
-        /// <param name="includeCurrentToken">If <c>true</c>, the current token is included.</param>
-        /// <returns>The tracked input.</returns>
-        public ReadOnlyMemory<char> Track(int start, bool includeCurrentToken = false)
+        /// <param name="tracker">The tracker.</param>
+        /// <param name="includeCurrentToken">If <c>true</c>, the current token is included in the tracked token.</param>
+        /// <returns>The tracked token.</returns>
+        public Token GetTracked(Tracker tracker, bool includeCurrentToken = false)
         {
             if (includeCurrentToken)
-                return _contents.AsMemory(start, Index - start);
-            return _contents.AsMemory(start, Index - Length - _trivia - start);
+                return new(Source, tracker.Location, _contents[tracker.Index..(_index - _length - _trivia)]);
+            return new(Source, tracker.Location, _contents[tracker.Index.._index]);
         }
     }
 }

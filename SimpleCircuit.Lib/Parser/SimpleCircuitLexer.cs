@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using System;
 
 namespace SimpleCircuit.Parser
 {
@@ -26,7 +27,7 @@ namespace SimpleCircuit.Parser
         /// <param name="source">The source.</param>
         /// <param name="line">The line number.</param>
         /// <returns>The lexer.</returns>
-        public static SimpleCircuitLexer FromString(string netlist, string source = null, int line = 1)
+        public static SimpleCircuitLexer FromString(ReadOnlyMemory<char> netlist, string source = null, int line = 1)
             => new(netlist, source, line);
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="code">The source.</param>
         /// <param name="line">The starting line number.</param>
-        private SimpleCircuitLexer(string code, string source, int line = 1)
+        protected SimpleCircuitLexer(ReadOnlyMemory<char> code, string source, int line = 1)
             : base(code, source, line)
         {
         }
@@ -315,8 +316,7 @@ namespace SimpleCircuit.Parser
             }
             if (c != end)
             {
-                var loc = new TextLocation(Line, Column);
-                Diagnostics?.Post(new Token(Source, new(loc, loc), Content), ErrorCodes.QuoteMismatch);
+                Diagnostics?.Post(Token, ErrorCodes.QuoteMismatch);
             }
             ContinueToken();
         }

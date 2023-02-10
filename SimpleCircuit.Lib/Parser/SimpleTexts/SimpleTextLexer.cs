@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser.SimpleTexts
+﻿using System;
+
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     public class SimpleTextLexer : Lexer<TokenType>
     {
@@ -9,9 +11,8 @@
         /// Creates a new <see cref="SimpleTextLexer"/>.
         /// </summary>
         /// <param name="text">The text.</param>
-        /// <param name="line">The line.</param>
         public SimpleTextLexer(string text)
-            : base(text, text)
+            : base(text.AsMemory(), text)
         {
         }
 

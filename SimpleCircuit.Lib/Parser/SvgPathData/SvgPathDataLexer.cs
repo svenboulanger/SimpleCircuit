@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser.SvgPathData
+﻿using System;
+
+namespace SimpleCircuit.Parser.SvgPathData
 {
     public class SvgPathDataLexer : Lexer<TokenType>
     {
@@ -6,7 +8,7 @@
         /// Creates a new <see cref="SvgPathDataLexer"/>
         /// </summary>
         /// <param name="data">The data.</param>
-        public SvgPathDataLexer(string data)
+        public SvgPathDataLexer(ReadOnlyMemory<char> data)
             : base(data)
         {
         }
