@@ -10,14 +10,13 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"// A component chain is a series of components seperated by <wires>.
-// The type of component is defined by the first letter(s), which have to be capital letters.
-// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.
-GND1 <u> V1(""1V"") <u r ?? ??> R(""1k"") <r d> C1(""1uF"") <d> GND2
+            var script = @".section A
+R1
+.ends
 
-// In a lot of cases, we wish to align pins or components. This can be done using virtual chains.
-// These are between brackets, and the ""y"" tells along which axis alignment is needed.
-(y GND1 <r> GND2)
+.section B A
+
+B/R1[b] <r> [a]A/R1
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);

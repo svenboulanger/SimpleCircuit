@@ -18,6 +18,10 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public static class Parser
     {
+        private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
+        private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
+        private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
+
         /// <summary>
         /// Parses SimpleCircuit code.
         /// </summary>
@@ -40,6 +44,16 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <returns>Returns <c>true</c> if the statement was parsed successfully; otherwise, <c>false</c>.</returns>
         private static bool ParseStatement(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (lexer.Type == TokenType.Dot)
+            {
+                lexer.Next();
+                return ParseControlStatement(lexer, context);
+            }
+            else
+                return ParseNonControlStatement(lexer, context);
+        }
+        private static bool ParseNonControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             switch (lexer.Type)
             {
@@ -69,7 +83,6 @@ namespace SimpleCircuit.Parser
                     return false;
             }
         }
-
         private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
         {
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
@@ -144,16 +157,8 @@ namespace SimpleCircuit.Parser
                 stringTogether?.Invoke(new(component, pinToWire), null, default, context);
             return true;
         }
-
-        /// <summary>
-        /// Parses a chain of components.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="context">The parsing context.</param>
-        /// <returns>Returns <c>true</c> if the statement was parsed successfully; otherwise, <c>false</c>.</returns>
         private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
             => ParseChainStatement(lexer, context, ComponentChainWire);
-
         private static void ComponentChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context)
         {
             // We just want to make sure here that the name isn't bogus
@@ -182,13 +187,6 @@ namespace SimpleCircuit.Parser
                     context.Circuit.Add(new PinOrientationConstraint($"{name}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
             }
         }
-
-        /// <summary>
-        /// Parses a component.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="context">The parsing context.</param>
-        /// <returns>The component.</returns>
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Check(TokenType.Word | TokenType.Times))
@@ -260,12 +258,6 @@ namespace SimpleCircuit.Parser
             }
             return info;
         }
-
-        /// <summary>
-        /// Parses a wire.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <returns>The wire information.</returns>
         private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
@@ -439,12 +431,6 @@ namespace SimpleCircuit.Parser
             wireInfo.Simplify();
             return wireInfo;
         }
-
-        /// <summary>
-        /// Parses a single pin name.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <returns>The name of the pin.</returns>
         private static Token ParsePin(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.OpenIndex))
@@ -460,13 +446,6 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.BracketMismatch, "]");
             return token;
         }
-
-        /// <summary>
-        /// Parses an option.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="context">The parsing context.</param>
-        /// <returns>Returns <c>true</c> if the statement was parsed successfully; otherwise, <c>false</c>.</returns>
         private static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.Word, out var typeToken))
@@ -503,7 +482,6 @@ namespace SimpleCircuit.Parser
                     return false;
             }
         }
-
         private static bool ParseSubcircuitDefinition(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // Read the name of the subcircuit
@@ -518,12 +496,15 @@ namespace SimpleCircuit.Parser
             List<IPin> ports = new();
 
             // Parse the pins
-            while (lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
+            while (lexer.Check(~TokenType.Newline))
             {
                 // Parse the component
                 var component = ParseComponent(lexer, localContext)?.GetOrCreate(localContext);
                 if (component == null)
+                {
+                    SkipToControlWord(lexer, _subcktEnd);
                     return false;
+                }
 
                 // Find the pin
                 IPin pin = null;
@@ -531,42 +512,51 @@ namespace SimpleCircuit.Parser
                 {
                     var pinName = ParsePin(lexer, localContext);
                     if (pinName.Content.Length == 0)
+                    {
+                        SkipToControlWord(lexer, _subcktEnd);
                         return false;
+                    }
                     pin = component.Pins[pinName.Content.ToString().Trim()];
                     if (pin == null)
+                    {
+                        SkipToControlWord(lexer, _subcktEnd);
                         return false;
+                    }
                 }
                 pin ??= component.Pins[^1];
                 ports.Add(pin);
             }
-            if (lexer.Type == TokenType.EndOfContent)
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
-                return false;
-            }
 
             // Parse the netlist contents
-            bool stillSubcircuit = true;
-            while (stillSubcircuit && lexer.Type != TokenType.EndOfContent)
+            while (lexer.Type != TokenType.EndOfContent)
             {
                 if (lexer.Branch(TokenType.Dot))
                 {
-                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsubckt"))
+                    if (BranchControlWord(lexer, _subcktEnd))
                     {
                         lexer.Skip(~TokenType.Newline);
-                        stillSubcircuit = false;
+
+                        // Add a subcircuit definition to the context drawable factory
+                        var subckt = new Subcircuit(nameToken.Content.ToString(), localContext.Circuit, ports, context.Diagnostics);
+                        context.Factory.Register(subckt);
+                        return true;
                     }
                     else if (!ParseControlStatement(lexer, localContext))
-                        lexer.Skip(~TokenType.Newline);
+                    {
+                        SkipToControlWord(lexer, _subcktEnd);
+                        return false;
+                    }
                 }
-                else if (!ParseStatement(lexer, localContext))
-                    lexer.Skip(~TokenType.Newline);
+                else if (!ParseNonControlStatement(lexer, localContext))
+                {
+                    SkipToControlWord(lexer, _subcktEnd);
+                    return false;
+                }
             }
 
-            // Add a subcircuit definition to the context drawable factory
-            var subckt = new Subcircuit(nameToken.Content.ToString(), localContext.Circuit, ports, context.Diagnostics);
-            context.Factory.Register(subckt);
-            return true;
+            // Check if we reached the end of
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
+            return false;
         }
         private static bool ParseSymbolDefinition(SimpleCircuitLexer lexer, ParsingContext context)
         {
@@ -580,27 +570,24 @@ namespace SimpleCircuit.Parser
             int line = lexer.Line;
             int column = lexer.Column;
             lexer.Skip(~TokenType.Newline);
+            int start = lexer.TrackIndex();
 
             // Read until a .ENDS and treat the contents as XML to be read
-            StringBuilder xml = new();
+            ReadOnlyMemory<char> xml;
             while (true)
             {
-                if (lexer.Branch(TokenType.Dot))
+                if (lexer.Check(TokenType.Dot))
                 {
-                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsymbol"))
+                    xml = lexer.Track(start);
+                    lexer.Next();
+                    if (BranchControlWord(lexer, _symbolEnd))
                     {
                         lexer.Skip(~TokenType.Newline);
                         break;
                     }
-                    else
-                    {
-                        xml.Append('.');
-                        xml.AppendLine(lexer.ReadWhile(~TokenType.Newline).Content.ToString());
-                    }
                 }
                 else
-                    xml.AppendLine(lexer.ReadWhile(~TokenType.Newline).Content.ToString());
-                lexer.Next();
+                    lexer.Next();
             }
 
             // Parse the XML
@@ -631,29 +618,86 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedSectionName);
                 return false;
             }
-            lexer.Skip(~TokenType.Newline);
-
-            // Parse section contents
-            context.Section.Push(nameToken.Content.ToString());
-            bool stillSubcircuit = true;
-            while (stillSubcircuit && lexer.Type != TokenType.EndOfContent)
+            if (context.SectionTemplates.ContainsKey(nameToken.Content.ToString()))
             {
-                if (lexer.Branch(TokenType.Dot))
-                {
-                    if (lexer.Branch(TokenType.Word, "ends") || lexer.Branch(TokenType.Word, "endsection"))
-                    {
-                        lexer.Skip(~TokenType.Newline);
-                        stillSubcircuit = false;
-                    }
-                    else if (!ParseControlStatement(lexer, context))
-                        lexer.Skip(~TokenType.Newline);
-                }
-                else if (!ParseStatement(lexer, context))
+                context.Diagnostics?.Post(ErrorCodes.DuplicateSection, nameToken.Content);
+                if (lexer.Branch(TokenType.Word))
                     lexer.Skip(~TokenType.Newline);
+                else
+                    SkipToControlWord(lexer, _sectionEnd);
+                return false;
             }
-            lexer.Skip(~TokenType.Newline);
-            context.Section.Pop();
-            return true;
+
+            if (lexer.Branch(TokenType.Word, out var templateToken))
+            {
+                // Try to use a previously defined section instead of this one
+                if (!context.SectionTemplates.TryGetValue(templateToken.Content.ToString(), out var content))
+                {
+                    context.Diagnostics.Post(ErrorCodes.UnknownSectionTemplate, templateToken.Content);
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
+                context.SectionTemplates.Add(nameToken.Content.ToString(), content);
+
+                // Parse the template again
+                context.Section.Push(nameToken.Content.ToString());
+                var sectionLexer = SimpleCircuitLexer.FromString(content.Item2.ToString(), lexer.Source, content.Item1);
+                while (sectionLexer.Type != TokenType.EndOfContent)
+                {
+                    if (sectionLexer.Branch(TokenType.Dot))
+                    {
+                        if (BranchControlWord(sectionLexer, _sectionEnd))
+                        {
+                            context.Section.Pop();
+                            return true;
+                        }
+                        else if (!ParseControlStatement(sectionLexer, context))
+                            return false;
+                    }
+                    else if (!ParseNonControlStatement(sectionLexer, context))
+                        return false;
+                }
+            }
+            else
+            {
+                lexer.Skip(~TokenType.Newline);
+
+                // Parse section contents
+                context.Section.Push(nameToken.Content.ToString());
+                int start = lexer.TrackIndex();
+                int line = lexer.Token.Range.Start.Line;
+
+                // Read the contents
+                while (lexer.Type != TokenType.EndOfContent)
+                {
+                    if (lexer.Branch(TokenType.Dot))
+                    {
+                        if (BranchControlWord(lexer, _sectionEnd))
+                        {
+                            // End of section reached
+                            lexer.Skip(~TokenType.Newline);
+                            ReadOnlyMemory<char> content = lexer.Track(start);
+                            context.SectionTemplates.Add(nameToken.Content.ToString(), (line, content));
+                            context.Section.Pop();
+                            return true;
+                        }
+                        else if (!ParseControlStatement(lexer, context))
+                        {
+                            lexer.Skip(~TokenType.Newline);
+                            return false;
+                        }
+                    }
+                    else if (!ParseNonControlStatement(lexer, context))
+                    {
+                        SkipToControlWord(lexer, _sectionEnd);
+                        return false;
+                    }
+                }
+            }
+
+            // Check if we reached the end of
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
+            return false;
         }
         private static bool ParseOptions(SimpleCircuitLexer lexer, ParsingContext context)
         {
@@ -806,12 +850,6 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-
-        /// <summary>
-        /// Parses a virtual chain of coordinates.
-        /// </summary>
-        /// <param name="lexer">The lexer.</param>
-        /// <param name="context">The context.</param>
         private static bool ParseVirtualChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.OpenParenthesis))
@@ -854,7 +892,6 @@ namespace SimpleCircuit.Parser
             if (direction != VirtualWire.Direction.None)
                 context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", pinToWireInfo, wireInfo, wireToPinInfo, direction));
         }
-
         private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Branch(TokenType.Dash))
@@ -950,6 +987,34 @@ namespace SimpleCircuit.Parser
             {
                 context.Diagnostics?.Post(lexer.StartToken, ErrorCodes.ExpectedString);
                 return null;
+            }
+        }
+
+        private static bool BranchControlWord(SimpleCircuitLexer lexer, params string[] names)
+        {
+            if (lexer.HasTrivia)
+                return false;
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (lexer.Branch(TokenType.Word, names[i]))
+                    return true;
+            }
+            return false;
+        }
+        private static void SkipToControlWord(SimpleCircuitLexer lexer, params string[] names)
+        {
+            bool keepGoing = true;
+            while (keepGoing)
+            {
+                while (lexer.Check(~TokenType.Dot))
+                    lexer.Next();
+                if (lexer.Branch(TokenType.Dot))
+                {
+                    if (BranchControlWord(lexer, names))
+                        return;
+                }
+                else
+                    keepGoing = false;
             }
         }
     }

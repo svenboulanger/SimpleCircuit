@@ -47,6 +47,11 @@ namespace SimpleCircuit.Parser
         public Stack<string> Section { get; } = new Stack<string>();
 
         /// <summary>
+        /// Gets the defined sections until now.
+        /// </summary>
+        public Dictionary<string, (int, ReadOnlyMemory<char>)> SectionTemplates { get; } = new();
+
+        /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         public ParsingContext()

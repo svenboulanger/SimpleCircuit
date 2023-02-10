@@ -156,5 +156,11 @@
 
         [Diagnostic(SeverityLevel.Error, "LE001", "Quote mismatch")]
         QuoteMismatch,
+
+        [Diagnostic(SeverityLevel.Error, "PE049", "Duplicate section name '{0}'")]
+        DuplicateSection,
+
+        [Diagnostic(SeverityLevel.Error, "PE050", "Could not find section template for '{0}'")]
+        UnknownSectionTemplate,
     }
 }

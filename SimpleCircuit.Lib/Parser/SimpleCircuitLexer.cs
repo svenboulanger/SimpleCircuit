@@ -23,9 +23,11 @@ namespace SimpleCircuit.Parser
         /// Creates a new lexer for a string.
         /// </summary>
         /// <param name="netlist">The netlist.</param>
+        /// <param name="source">The source.</param>
+        /// <param name="line">The line number.</param>
         /// <returns>The lexer.</returns>
-        public static SimpleCircuitLexer FromString(string netlist, string source = null)
-            => new(netlist, source);
+        public static SimpleCircuitLexer FromString(string netlist, string source = null, int line = 1)
+            => new(netlist, source, line);
 
         /// <summary>
         /// Creates a new <see cref="SimpleCircuitLexer"/>.
