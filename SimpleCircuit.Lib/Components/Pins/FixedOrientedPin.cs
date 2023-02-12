@@ -91,20 +91,6 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            // Our pin is relative to the owner's location, so we need to create an offset for that!
-            var map = context.Nodes.Shorts;
-            string x = map[X];
-            string ox = map[_origin.X];
-            string y = map[Y];
-            string oy = map[_origin.Y];
-            var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
-            offset = offset.Order(ref ox, ref x, ref oy, ref y);
-
-            // Apply locations according to this offset!
-            if (x != ox)
-                OffsetConstraint.AddOffset(context.Circuit, X, ox, x, offset.X);
-            if (y != oy)
-                OffsetConstraint.AddOffset(context.Circuit, Y, oy, y, offset.Y);
         }
 
         /// <inheritdoc />
@@ -113,32 +99,9 @@ namespace SimpleCircuit.Components.Pins
             var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
             switch (context.Mode)
             {
-                case NodeRelationMode.Shorts:
-                    if (offset.X.IsZero())
-                        context.Shorts.Group(X, _origin.X);
-                    if (offset.Y.IsZero())
-                        context.Shorts.Group(Y, _origin.Y);
-                    break;
-
-                case NodeRelationMode.Links:
-                    if (!offset.X.IsZero())
-                    {
-                        string ox = context.Shorts[_origin.X];
-                        string x = context.Shorts[X];
-                        if (offset.X > 0)
-                            context.Extremes.Order(ox, x);
-                        else
-                            context.Extremes.Order(x, ox);
-                    }
-                    if (!offset.Y.IsZero())
-                    {
-                        string oy = context.Shorts[_origin.Y];
-                        string y = context.Shorts[Y];
-                        if (offset.Y > 0)
-                            context.Extremes.Order(oy, y);
-                        else
-                            context.Extremes.Order(y, oy);
-                    }
+                case NodeRelationMode.Offsets:
+                    context.Offsets.Group(_origin.X, X, offset.X);
+                    context.Offsets.Group(_origin.Y, Y, offset.Y);
                     break;
 
                 default:

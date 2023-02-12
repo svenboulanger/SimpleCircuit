@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Diagnostics;
 using SpiceSharp.Components;
 using SpiceSharp.Entities;
 using SpiceSharp.Simulations;
@@ -42,7 +43,7 @@ namespace SimpleCircuit.Components
         /// <param name="name">A unique name for the elements.</param>
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
-        /// <param name="minimum">The minimum between the two.</param>
+        /// <param name="minimum">The weight of the minimum.</param>
         public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1)
         {
             // Check for valid weights
@@ -56,6 +57,88 @@ namespace SimpleCircuit.Components
             circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
             circuit.Add(new VoltageSource($"V{name}", i, lowest, minimum));
             AddRectifyingElement(circuit, $"D{name}", i, highest);
+        }
+
+        /// <summary>
+        /// Adds a structure to the circuit that guarantees a minimum distance but keeps the order of the nodes depending on <paramref name="minimum"/>.
+        /// </summary>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="name">A unique name for the elements.</param>
+        /// <param name="start">The starting node.</param>
+        /// <param name="end">The end node.</param>
+        /// <param name="minimum">The mininum.</param>
+        /// <param name="weight">The weight of the minimum.</param>
+        public static void AddDirectionalMinimum(IEntityCollection circuit, string name, string start, string end, double minimum, double weight = 1)
+        {
+            if (minimum > 0)
+                AddMinimum(circuit, name, start, end, minimum, weight);
+            else
+                AddMinimum(circuit, name, end, start, -minimum, weight);
+        }
+
+        /// <summary>
+        /// Adds a structure to the circuit that tries to guarantee a minimum between two relative items.
+        /// </summary>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="name">A unique name for the structure.</param>
+        /// <param name="lowest">The lowest node.</param>
+        /// <param name="highest">The highest node.</param>
+        /// <param name="minimum">The offset between the two nodes.</param>
+        /// <param name="weight"></param>
+        public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1)
+        {
+            double realOffset = lowest.Offset - highest.Offset + minimum;
+            AddMinimum(circuit, name, lowest.Representative, highest.Representative, realOffset, weight);
+        }
+
+        /// <summary>
+        /// Adds a structure to the circuit that guarantees a minimum distance but keeps the order of the nodes depending on <paramref name="minimum"/>.
+        /// </summary>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="name">A unique name for the elements.</param>
+        /// <param name="start">The starting node.</param>
+        /// <param name="end">The end node.</param>
+        /// <param name="minimum">The mininum.</param>
+        /// <param name="weight">The weight of the minimum.</param>
+        public static void AddDirectionalMinimum(IEntityCollection circuit, string name, RelativeItem start, RelativeItem end, double minimum, double weight = 1)
+        {
+            if (minimum > 0)
+                AddMinimum(circuit, name, start, end, minimum, weight);
+            else
+                AddMinimum(circuit, name, end, start, -minimum, weight);
+        }
+
+        /// <summary>
+        /// Computes a link for a minimum node.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="lowest">The lowest node.</param>
+        /// <param name="highest">The highest node.</param>
+        /// <param name="minimum">The minimum.</param>
+        public static void MinimumLink(NodeContext context, RelativeItem lowest, RelativeItem highest, double minimum)
+        {
+            // We will try to see if this minimum allows us to order the representatives
+            double offset = lowest.Offset - highest.Offset + minimum;
+            double reqDistance = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
+            if (offset > reqDistance)
+                context.Extremes.Order(lowest.Representative, highest.Representative);
+            else
+                context.Extremes.Linked.Group(lowest.Representative, highest.Representative);
+        }
+
+        /// <summary>
+        /// Computes a link for a minimum node keeping the order depending on <paramref name="minimum"/>.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="start">The start node.</param>
+        /// <param name="end">The end node.</param>
+        /// <param name="minimum">The minimum.</param>
+        public static void MinimumDirectionalLink(NodeContext context, RelativeItem start, RelativeItem end, double minimum)
+        {
+            if (minimum > 0)
+                MinimumLink(context, start, end, minimum);
+            else
+                MinimumLink(context, end, start, -minimum);
         }
 
         /// <summary>

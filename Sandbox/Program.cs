@@ -10,27 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"// For more tutorials, go to Help > Demo's
-
-// Sections allow logical grouping of components
-.section logic
-    Ti1(in) <r> AND1
-    Ti2(in) <r> [b]AND1
-    AND1 <r> OR1
-    Ti3(in) <r u r 5> [b]OR1 <r> Xout <r> To1(out)
-    (x Ti*)
-.ends
-
-// Such sections can be re-instanced
-.section logic2 logic
-.section logic3 logic
-
-// Elements inside section can be accessed using the '/' separator
-logic2/Xout <d> C <d> GND
-logic3/Xout <d> R <d> GND
-
-
-- logic/OR1.scale = 5
+            var script = @"T <r> NAND1 <r> T
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

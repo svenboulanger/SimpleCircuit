@@ -70,14 +70,7 @@ namespace SimpleCircuit.Components.Pins
 
         /// <inheritdoc />
         public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
-        {
-            double x = 0, y = 0;
-            if (state.TryGetValue(context.Nodes.Shorts[X], out var xValue))
-                x = xValue.Value;
-            if (state.TryGetValue(context.Nodes.Shorts[Y], out var yValue))
-                y = yValue.Value;
-            Location = new(x, y);
-        }
+            => Location = context.Nodes.GetValue(state, X, Y);
 
         /// <inheritdoc />
         public override string ToString()

@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Circuits;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {

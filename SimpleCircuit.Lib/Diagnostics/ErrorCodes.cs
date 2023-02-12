@@ -162,5 +162,11 @@
 
         [Diagnostic(SeverityLevel.Error, "PE050", "Could not find section template for '{0}'")]
         UnknownSectionTemplate,
+
+        [Diagnostic(SeverityLevel.Error, "PE051", "Virtual wires cannot contain unconstrained segments")]
+        VirtualWireUnconstrainedSegment,
+
+        [Diagnostic(SeverityLevel.Error, "PE052", "Virtual wires cannot contain unknown segment orientations")]
+        VirtualWireUnknownSegment,
     }
 }

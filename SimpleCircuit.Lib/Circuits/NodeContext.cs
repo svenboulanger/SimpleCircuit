@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits;
+using SpiceSharp.Simulations;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
@@ -26,6 +27,11 @@ namespace SimpleCircuit.Components
         public NodeGrouper Shorts { get; } = new();
 
         /// <summary>
+        /// Gets the relative fixed offsets.
+        /// </summary>
+        public NodeOffsetFinder Offsets { get; } = new();
+
+        /// <summary>
         /// Gets the extremes of the nodes.
         /// </summary>
         public Extremes Extremes { get; } = new();
@@ -34,5 +40,29 @@ namespace SimpleCircuit.Components
         /// Gets a set of X- and Y-coordinate node combinations.
         /// </summary>
         public HashSet<XYNode> XYSets { get; } = new();
+
+        /// <summary>
+        /// Gets the value from the solver for the specified node.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        /// <param name="node">The node.</param>
+        /// <returns>The value.</returns>
+        public double GetValue(IBiasingSimulationState state, string node)
+        {
+            var r = Offsets[node];
+            if (state.TryGetValue(r.Representative, out var value))
+                return value.Value + r.Offset;
+            return r.Offset;
+        }
+
+        /// <summary>
+        /// Gets the value from the solver for the specified set of nodes.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        /// <param name="nodeX">The node for the X-coordinate.</param>
+        /// <param name="nodeY">The node for the Y-coordinate.</param>
+        /// <returns>The location.</returns>
+        public Vector2 GetValue(IBiasingSimulationState state, string nodeX, string nodeY)
+            => new(GetValue(state, nodeX), GetValue(state, nodeY));
     }
 }

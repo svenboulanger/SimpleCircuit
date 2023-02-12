@@ -1,5 +1,9 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Constraints;
+using SimpleCircuit.Components.General;
+using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
+using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 using System;
 using System.Linq;
@@ -12,24 +16,10 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class VirtualWire : ICircuitSolverPresence
     {
-        private ILocatedPresence[] _single;
-        private ILocatedPresence _p2w, _w2p;
-        private readonly PinInfo _pinToWire, _wireToPin;
+        private ILocatedPresence _start, _end;
+        private readonly PinInfo _startInfo, _endInfo;
         private readonly WireInfo _info;
-        private readonly Direction _direction;
-        private Vector2 _offset;
-        private bool _extendLeft, _extendUp, _extendRight, _extendDown;
-
-        /// <summary>
-        /// Enumeration of the directions along which the virtual wire acts
-        /// </summary>
-        [Flags]
-        public enum Direction
-        {
-            None = 0x00,
-            X = 0x01,
-            Y = 0x02
-        }
+        private readonly Axis _direction;
 
         /// <inheritdoc />
         public string Name { get; }
@@ -38,235 +28,243 @@ namespace SimpleCircuit.Components.Wires
         public int Order => 1;
 
         /// <summary>
+        /// Gets the X-coordinate name of the first point of the wire.
+        /// </summary>
+        public string StartX => GetXName(-1);
+
+        /// <summary>
+        /// Gets the Y-coordinate name of the first point of the wire.
+        /// </summary>
+        public string StartY => GetYName(-1);
+
+        /// <summary>
+        /// Gets the X-coordinate name of the last point of the wire.
+        /// </summary>
+        public string EndX => GetXName(_info.Segments.Count - 1);
+
+        /// <summary>
+        /// Gets the Y-coordinate name of the last point of the wire.
+        /// </summary>
+        public string EndY => GetYName(_info.Segments.Count - 1);
+
+        /// <summary>
         /// Creates a new <see cref="VirtualWire"/>.
         /// </summary>
         /// <param name="name">The name of the virtual wire.</param>
         /// <param name="pinToWire">The pin starting the virtual wire.</param>
         /// <param name="info">The wire information.</param>
         /// <param name="wireToPin">The pin ending the virtual wire.</param>
-        public VirtualWire(string name, PinInfo pinToWire, WireInfo info, PinInfo wireToPin, Direction direction)
+        public VirtualWire(string name, PinInfo pinToWire, WireInfo info, PinInfo wireToPin, Axis axis)
         {
             Name = name;
             _info = info;
-            _pinToWire = pinToWire;
-            _wireToPin = wireToPin;
-            _direction = direction;
+            _startInfo = pinToWire;
+            _endInfo = wireToPin;
+            _direction = axis;
         }
 
         /// <inheritdoc />
         public void Reset()
         {
-            _single = null;
-            _p2w = null;
-            _w2p = null;
-            _offset = new();
-            _extendLeft = false;
-            _extendRight = false;
-            _extendUp = false;
-            _extendDown = false;
+            _start = null;
+            _end = null;
         }
 
         /// <inheritdoc />
         public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
         {
-            if (_info == null)
+            // Find the start and end locations
+            if (circuit.TryGetValue(_startInfo.Component.Fullname, out var presence) && presence is IDrawable p2wd)
             {
-                // We try to align many components here
-                if (_pinToWire.Component.Fullname.Contains("*"))
-                {
-                    // Align all given pins of all named components that match the name with wildcard
-                    string format = $"^{_pinToWire.Component.Fullname.Replace("*", "[\\w_]+")}$";
-                    _single = circuit.OfType<ILocatedDrawable>().Where(p => Regex.IsMatch(p.Name, format)).ToArray();
-                }
+                if (_startInfo.Pin.Content.Length == 0 && p2wd is ILocatedPresence ld)
+                    _start = ld;
                 else
-                {
-                    // Align all anonymous components that match the name
-                    string lead = _pinToWire.Component.Fullname + DrawableFactoryDictionary.AnonymousSeparator;
-                    _single = circuit.OfType<ILocatedDrawable>().Where(p => p.Name.StartsWith(lead)).ToArray();
-                }
+                    _start = _startInfo.Find(p2wd, diagnostics, -1);
+            }
 
-                if (_single == null || _single.Length == 0)
+            // Find last pin
+            if (circuit.TryGetValue(_endInfo.Component.Fullname, out presence) && presence is IDrawable w2pd)
+            {
+                if (_endInfo.Pin.Content.Length == 0 && w2pd is ILocatedPresence ld)
+                    _end = ld;
+                else
+                    _end = _endInfo.Find(w2pd, diagnostics, 0);
+            }
+
+            for (int i = 0; i < _info.Segments.Count; i++)
+            {
+                var segment = _info.Segments[i];
+                if (segment.IsUnconstrained)
                 {
-                    diagnostics?.Post(_pinToWire.Component.Name, ErrorCodes.VirtualChainComponentNotFound, _pinToWire.Component.Fullname);
+                    diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
                     return PresenceResult.GiveUp;
                 }
-                return PresenceResult.Success;
+                else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                {
+                    diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
+                    return PresenceResult.GiveUp;
+                }
             }
-            else
-            {
-                // Find first pin
-                if (circuit.TryGetValue(_pinToWire.Component.Fullname, out var presence) && presence is IDrawable p2wd)
-                {
-                    if (_pinToWire.Pin.Content.Length == 0 && p2wd is ILocatedPresence ld)
-                        _p2w = ld;
-                    else
-                        _p2w = _pinToWire.Find(p2wd, diagnostics, -1);
-                }
-
-                // Find last pin
-                if (circuit.TryGetValue(_wireToPin.Component.Fullname, out presence) && presence is IDrawable w2pd)
-                {
-                    if (_wireToPin.Pin.Content.Length == 0 && w2pd is ILocatedPresence ld)
-                        _w2p = ld;
-                    else
-                        _w2p = _wireToPin.Find(w2pd, diagnostics, 0);
-                }
-
-                // Calculate the combined effect of the virtual wire
-                var segments = _info.Segments;
-                for (int i = 0; i < segments.Count; i++)
-                {
-                    var normal = segments[i].Orientation;
-                    _offset += segments[i].Length * normal;
-                    if (!segments[i].IsFixed)
-                    {
-                        if (normal.X < 0 && !normal.X.IsZero())
-                            _extendLeft = true;
-                        if (normal.X > 0 && !normal.X.IsZero())
-                            _extendRight = true;
-                        if (normal.Y < 0 && !normal.Y.IsZero())
-                            _extendUp = true;
-                        if (normal.Y > 0 && !normal.Y.IsZero())
-                            _extendDown = true;
-                    }
-                }
-                return PresenceResult.Success;
-            }
+            return PresenceResult.Success;
         }
 
+        /// <inheritdoc />
         public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            if (_info == null && _single != null && _single.Length > 1)
+            bool doX = (_direction & Axis.X) != 0;
+            bool doY = (_direction & Axis.Y) != 0;
+
+            string x, y;
+            switch (context.Mode)
             {
-                // This is an alignment of many items
-                switch (context.Mode)
-                {
-                    case NodeRelationMode.Shorts:
-                        if ((_direction & Direction.X) != 0)
+                case NodeRelationMode.Offsets:
+                    if (_start != null)
+                    {
+                        if (doX)
+                            context.Offsets.Group(_start.X, StartX, 0.0);
+                        if (doY)
+                            context.Offsets.Group(_start.Y, StartY, 0.0);
+                    }
+                    if (_end != null)
+                    {
+                        if (doX)
+                            context.Offsets.Group(_end.X, EndX, 0.0);
+                        if (doY)
+                            context.Offsets.Group(_end.Y, EndY, 0.0);
+                    }
+
+                    // Deal with the horizontal and vertical segments
+                    x = StartX;
+                    y = StartY;
+                    for (int i = 0; i < _info.Segments.Count; i++)
+                    {
+                        string tx = GetXName(i);
+                        string ty = GetYName(i);
+                        var segment = _info.Segments[i];
+                        if (segment.IsFixed)
                         {
-                            string coord = null;
-                            foreach (var p in _single)
+                            if (doX)
+                                context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length);
+                            if (doY)
+                                context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length);
+                        }
+                        else
+                        {
+                            if (segment.Orientation.X.IsZero())
+                                context.Offsets.Group(x, tx, 0.0);
+                            if (segment.Orientation.Y.IsZero())
+                                context.Offsets.Group(y, ty, 0.0);
+                        }
+                        x = tx;
+                        y = ty;
+                    }
+                    break;
+
+                case NodeRelationMode.Links:
+                    var offsetX = context.Offsets[StartX];
+                    var offsetY = context.Offsets[StartY];
+                    for (int i = 0; i < _info.Segments.Count; i++)
+                    {
+                        var toOffsetX = context.Offsets[GetXName(i)];
+                        var toOffsetY = context.Offsets[GetYName(i)];
+                        var segment = _info.Segments[i];
+                        if (!segment.IsFixed)
+                        {
+                            if (doX && !segment.Orientation.X.IsZero())
                             {
-                                if (coord == null)
-                                    coord = p.X;
+                                if (segment.Orientation.X > 0)
+                                    MinimumConstraint.MinimumLink(context, offsetX, toOffsetX, segment.Orientation.X * segment.Length);
                                 else
-                                    context.Shorts.Group(coord, p.X);
+                                    MinimumConstraint.MinimumLink(context, toOffsetX, offsetX, -segment.Orientation.X * segment.Length);
                             }
-                        }
-                        if ((_direction & Direction.Y) != 0)
-                        {
-                            string coord = null;
-                            foreach (var p in _single)
+                            if (doY && !segment.Orientation.Y.IsZero())
                             {
-                                if (coord == null)
-                                    coord = p.Y;
+                                if (segment.Orientation.Y > 0)
+                                    MinimumConstraint.MinimumLink(context, offsetY, toOffsetY, segment.Orientation.Y * segment.Length);
                                 else
-                                    context.Shorts.Group(coord, p.Y);
+                                    MinimumConstraint.MinimumLink(context, toOffsetY, offsetY, -segment.Orientation.Y * segment.Length);
                             }
                         }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            if (_info != null)
-            {
-                // This is a real virtual wire, with wire segments
-                // We already combined all info in the Prepare method
-                if (_p2w == null || _w2p == null)
-                    return;
-
-                switch (context.Mode)
-                {
-                    case NodeRelationMode.Shorts:
-                        if ((_direction & Direction.X) != 0)
-                        {
-                            if (!_extendLeft && !_extendRight)
-                            {
-                                if (_offset.X.IsZero())
-                                    context.Shorts.Group(_p2w.X, _w2p.X);
-                            }
-                        }
-                        if ((_direction & Direction.Y) != 0)
-                        {
-                            if (!_extendUp && !_extendDown)
-                            {
-                                if (_offset.Y.IsZero())
-                                    context.Shorts.Group(_p2w.Y, _w2p.Y);
-                            }
-                        }
-                        break;
-
-                    case NodeRelationMode.Links:
-                        if ((_direction & Direction.X) != 0)
-                        {
-                            if (_extendLeft && _extendRight)
-                            {
-                                // Nothing can be inferred here...
-                            }
-                            else if (_extendRight)
-                                context.Extremes.Order(context.Shorts[_p2w.X], context.Shorts[_w2p.X]);
-                            else if (_extendLeft)
-                                context.Extremes.Order(context.Shorts[_w2p.X], context.Shorts[_p2w.X]);
-                            else if (!_offset.X.IsZero())
-                                context.Extremes.Linked.Group(context.Shorts[_p2w.X], context.Shorts[_w2p.X]);
-                        }
-                        if ((_direction & Direction.Y) != 0)
-                        {
-                            if (_extendUp && _extendDown)
-                            {
-                                // Nothing can be inferred here...
-                            }
-                            else if (_extendDown)
-                                context.Extremes.Order(context.Shorts[_p2w.Y], context.Shorts[_w2p.Y]);
-                            else if (_extendUp)
-                                context.Extremes.Order(context.Shorts[_w2p.Y], context.Shorts[_p2w.Y]);
-                            else if (!_offset.Y.IsZero())
-                                context.Extremes.Linked.Group(context.Shorts[_p2w.Y], context.Shorts[_w2p.Y]);
-                        }
-                        break;
-
-                    case NodeRelationMode.Groups:
-                        break;
-
-                    default:
-                        break;
-                }
+                        offsetX = toOffsetX;
+                        offsetY = toOffsetY;
+                    }
+                    break;
             }
         }
 
+        /// <inheritdoc />
         public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            // All single components should have been aligned already, only consider if wire info is available
-            if (_info != null && _p2w != null && _w2p != null)
+            // Determine the active axis
+            bool doX = (_direction & Axis.X) != 0;
+            bool doY = (_direction & Axis.Y) != 0;
+            if (!doX && !doY)
+                return;
+
+            var map = context.Nodes.Offsets;
+            var fromX = map[StartX];
+            var fromY = map[StartY];
+            for (int i = 0; i < _info.Segments.Count; i++)
             {
-                if ((_direction & Direction.X) != 0)
+                string x = GetXName(i);
+                string y = GetYName(i);
+                var toX = map[x];
+                var toY = map[y];
+                var segment = _info.Segments[i];
+                if (!segment.IsFixed)
                 {
-                    // If we can extend wherever, don't deal with this
-                    string name = $"{Name}.x";
-                    string x1 = context.Nodes.Shorts[_p2w.X];
-                    string x2 = context.Nodes.Shorts[_w2p.X];
-                    if (!_extendLeft && !_extendRight)
-                        OffsetConstraint.AddOffset(context.Circuit, name, x1, x2, _offset.X);
-                    else if (!_extendLeft)
-                        MinimumConstraint.AddMinimum(context.Circuit, name, x1, x2, _offset.X);
-                    else if (!_extendRight)
-                        MinimumConstraint.AddMinimum(context.Circuit, name, x2, x1, -_offset.X);
+                    if (doY && segment.Orientation.X.IsZero() && fromY.Representative != toY.Representative)
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, segment.Orientation.Y * segment.Length);
+                    if (doX && segment.Orientation.Y.IsZero() && fromX.Representative != toX.Representative)
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, segment.Orientation.X * segment.Length);
+                    if (!segment.Orientation.X.IsZero() && !segment.Orientation.Y.IsZero())
+                    {
+                        // The wire definition is an odd angle, the axis becomes important
+                        if (doX && doY)
+                        {
+                            // Both axis alignment
+                            string ox, oy;
+                            double dx = fromX.Offset - toX.Offset;
+                            double dy = fromY.Offset - toY.Offset;
+                            if (dx.IsZero())
+                                ox = fromX.Representative;
+                            else
+                            {
+                                ox = $"{x}.ox";
+                                context.Circuit.Add(new VoltageSource($"V{x}.ox", ox, fromX.Representative, fromX.Offset - toX.Offset));
+                            }
+                            if (dy.IsZero())
+                                oy = fromY.Representative;
+                            else
+                            {
+                                oy = $"{y}.oy";
+                                context.Circuit.Add(new VoltageSource($"V{y}.oy", oy, fromY.Representative, fromY.Offset - toY.Offset));
+                            }
+                            string tx = toX.Representative;
+                            string ty = toY.Representative;
+
+                            // General case, in any direction
+                            // Link the X and Y coordinates such that the slope remains correct
+                            string inside = $"{x}.xc";
+                            MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, tx);
+                            context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, ox, ty, oy, segment.Orientation.X / segment.Orientation.Y));
+
+                            inside = $"{y}.c";
+                            MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, ty);
+                            context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, oy, tx, ox, segment.Orientation.Y / segment.Orientation.X));
+
+                            // Make sure the X and Y length cannot go below their theoretical minimum
+                            MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.mx", ox, tx, segment.Orientation.X * segment.Length);
+                            MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{y}.my", oy, ty, segment.Orientation.Y * segment.Length);
+                        }
+                        else if (doX)
+                            MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, segment.Orientation.X * segment.Length);
+                        else
+                            MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, segment.Orientation.Y * segment.Length);
+                    }
                 }
-                if ((_direction & Direction.Y) != 0)
-                {
-                    string name = $"{Name}.y";
-                    string y1 = context.Nodes.Shorts[_p2w.Y];
-                    string y2 = context.Nodes.Shorts[_w2p.Y];
-                    if (!_extendUp && !_extendDown)
-                        OffsetConstraint.AddOffset(context.Circuit, name, y1, y2, _offset.Y);
-                    else if (!_extendUp)
-                        MinimumConstraint.AddMinimum(context.Circuit, name, y1, y2, _offset.Y);
-                    else if (!_extendDown)
-                        MinimumConstraint.AddMinimum(context.Circuit, name, y2, y1, -_offset.Y);
-                }
+                fromX = toX;
+                fromY = toY;
             }
         }
 
@@ -274,5 +272,8 @@ namespace SimpleCircuit.Components.Wires
         public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
         }
+
+        private string GetXName(int index) => $"{Name}.{index + 1}.x";
+        private string GetYName(int index) => $"{Name}.{index + 1}.y";
     }
 }

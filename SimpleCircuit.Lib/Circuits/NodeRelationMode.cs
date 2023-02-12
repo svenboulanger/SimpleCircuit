@@ -6,7 +6,7 @@
     public enum NodeRelationMode
     {
         None,
-        Shorts,
+        Offsets,
         Links,
         Groups,
     }

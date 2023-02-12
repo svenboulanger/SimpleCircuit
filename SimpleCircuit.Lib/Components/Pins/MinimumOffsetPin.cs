@@ -118,7 +118,9 @@ namespace SimpleCircuit.Components.Pins
 
             switch (context.Mode)
             {
-                case NodeRelationMode.Shorts:
+                case NodeRelationMode.Offsets:
+                    context.Offsets.Group(_origin.X, X, direction.X);
+                    context.Offsets.Group(_origin.Y, Y, direction.Y);
                     if (direction.X.IsZero())
                         context.Shorts.Group(X, _origin.X);
                     if (direction.Y.IsZero())

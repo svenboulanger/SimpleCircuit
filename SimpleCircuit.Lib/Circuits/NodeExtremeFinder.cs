@@ -21,8 +21,8 @@ namespace SimpleCircuit.Circuits
         /// <param name="comparer">The comparer. The default is a case-insensitive comparer.</param>
         public NodeExtremeFinder(IEqualityComparer<string> comparer = null)
         {
-            _extremes = new HashSet<string>(comparer ?? StringComparer.OrdinalIgnoreCase);
-            _nonExtremes = new HashSet<string>(comparer ?? StringComparer.OrdinalIgnoreCase);
+            _extremes = new(comparer ?? StringComparer.OrdinalIgnoreCase);
+            _nonExtremes = new(comparer ?? StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>

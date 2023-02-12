@@ -1,9 +1,12 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Digital;
+using SimpleCircuit.Components.General;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,6 +26,7 @@ namespace SimpleCircuit.Components.Wires
                 Location = location;
                 IsJumpOver = isJumpOver;
             }
+            public override string ToString() => Location.ToString();
         }
 
         private IPin _w2p, _p2w;
@@ -200,18 +204,18 @@ namespace SimpleCircuit.Components.Wires
             string x, y;
             switch (context.Mode)
             {
-                case NodeRelationMode.Shorts:
+                case NodeRelationMode.Offsets:
 
                     // Short wire ends to the correct pins
                     if (_p2w != null)
                     {
-                        context.Shorts.Group(_p2w.X, StartX);
-                        context.Shorts.Group(_p2w.Y, StartY);
+                        context.Offsets.Group(_p2w.X, StartX, 0.0);
+                        context.Offsets.Group(_p2w.Y, StartY, 0.0);
                     }
                     if (_w2p != null)
                     {
-                        context.Shorts.Group(_w2p.X, EndX);
-                        context.Shorts.Group(_w2p.Y, EndY);
+                        context.Offsets.Group(_w2p.X, EndX, 0.0);
+                        context.Offsets.Group(_w2p.Y, EndY, 0.0);
                     }
 
                     // Deal with horizontal and vertical segments
@@ -226,10 +230,20 @@ namespace SimpleCircuit.Components.Wires
                         if (!_info.Segments[i].IsUnconstrained)
                         {
                             var orientation = GetOrientation(i);
-                            if (orientation.X.IsZero())
-                                context.Shorts.Group(x, tx);
-                            if (orientation.Y.IsZero())
-                                context.Shorts.Group(y, ty);
+                            if (_info.Segments[i].IsFixed)
+                            {
+                                double l = _info.Segments[i].Length;
+
+                                context.Offsets.Group(x, tx, orientation.X * l);
+                                context.Offsets.Group(y, ty, orientation.Y * l);
+                            }
+                            else
+                            {
+                                if (orientation.X.IsZero())
+                                    context.Offsets.Group(x, tx, 0.0);
+                                if (orientation.Y.IsZero())
+                                    context.Offsets.Group(y, ty, 0.0);
+                            }
                         }
                         x = tx;
                         y = ty;
@@ -237,36 +251,28 @@ namespace SimpleCircuit.Components.Wires
                     break;
 
                 case NodeRelationMode.Links:
-                    x = context.Shorts[StartX];
-                    y = context.Shorts[StartY];
+
+                    // Go through all segments and determine the order of coordinates
+                    var offsetX = context.Offsets[StartX];
+                    var offsetY = context.Offsets[StartY];
                     for (int i = 0; i < _info.Segments.Count; i++)
                     {
-                        string tx = context.Shorts[GetXName(i)];
-                        string ty = context.Shorts[GetYName(i)];
-                        if (!_info.Segments[i].IsUnconstrained)
+                        var toOffsetX = context.Offsets[GetXName(i)];
+                        var toOffsetY = context.Offsets[GetYName(i)];
+                        var segment = _info.Segments[i];
+                        if (!segment.IsUnconstrained && !segment.IsFixed)
                         {
                             var orientation = GetOrientation(i);
-                            if (!orientation.X.IsZero())
-                            {
-                                if (orientation.X > 0)
-                                    context.Extremes.Order(x, tx);
-                                else
-                                    context.Extremes.Order(tx, x);
-                            }
-                            if (!orientation.Y.IsZero())
-                            {
-                                if (orientation.Y > 0)
-                                    context.Extremes.Order(y, ty);
-                                else
-                                    context.Extremes.Order(ty, y);
-                            }
-                        }
-                        x = tx;
-                        y = ty;
-                    }
-                    break;
 
-                default:
+                            // If the wire is length is fixed, then we just need to compare their relative offset
+                            if (!orientation.X.IsZero())
+                                MinimumConstraint.MinimumDirectionalLink(context, offsetX, toOffsetX, orientation.X * segment.Length);
+                            if (!orientation.Y.IsZero())
+                                MinimumConstraint.MinimumDirectionalLink(context, offsetY, toOffsetY, orientation.Y * segment.Length);
+                        }
+                        offsetX = toOffsetX;
+                        offsetY = toOffsetY;
+                    }
                     break;
             }
         }
@@ -280,7 +286,7 @@ namespace SimpleCircuit.Components.Wires
                 if (index == 0 && _p2w is IOrientedPin p1)
                     orientation = p1.Orientation;
                 else if (index == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
-                    orientation = p2.Orientation;
+                    orientation = -p2.Orientation;
                 else
                     orientation = new(1, 0);
             }
@@ -290,24 +296,13 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            double x = 0.0, y = 0.0;
-            if (state.TryGetValue(context.Nodes.Shorts[StartX], out var solX))
-                x = solX.Value;
-            if (state.TryGetValue(context.Nodes.Shorts[StartY], out var solY))
-                y = solY.Value;
-            Vector2 last = new(x, y);
-            _vectors.Add(new(last, false));
-
+            // Extract the first node
+            var last = context.Nodes.GetValue(state, StartX, StartY);
             int count = context.WireSegments.Count;
+            _vectors.Add(new(last, false));
             for (int i = 0; i < _info.Segments.Count; i++)
             {
-                x = 0.0;
-                y = 0.0;
-                if (state.TryGetValue(context.Nodes.Shorts[GetXName(i)], out solX))
-                    x = solX.Value;
-                if (state.TryGetValue(context.Nodes.Shorts[GetYName(i)], out solY))
-                    y = solY.Value;
-                Vector2 next = new(x, y);
+                var next = context.Nodes.GetValue(state, GetXName(i), GetYName(i));
 
                 // Add jump-over points if specified
                 if (_info.JumpOverWires)
@@ -364,70 +359,65 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            string x = StartX, y = StartY;
+            var map = context.Nodes.Offsets;
+            var fromX = map[StartX];
+            var fromY = map[StartY];
             for (int i = 0; i < _info.Segments.Count; i++)
             {
-                string tx = GetXName(i), ty = GetYName(i);
-                if (!_info.Segments[i].IsUnconstrained)
+                string x = GetXName(i);
+                string y = GetYName(i);
+                var toX = map[x];
+                var toY = map[y];
+                var segment = _info.Segments[i];
+                if (!segment.IsUnconstrained && !segment.IsFixed)
                 {
-                    var defaultOrientation = new Vector2(1, 0);
-                    if (i == 0 && _p2w is IOrientedPin op)
-                        defaultOrientation = op.Orientation;
-                    else if (i == _info.Segments.Count - 1 && _w2p is IOrientedPin op2)
-                        defaultOrientation = -op2.Orientation;
-                    RegisterWire(context, x, y, tx, ty, _info.Segments[i], defaultOrientation);
+                    var orientation = GetOrientation(i);
+
+                    // Wire is of minimum length
+                    if (orientation.X.IsZero())
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
+                    if (orientation.Y.IsZero())
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
+                    if (!orientation.X.IsZero() && !orientation.Y.IsZero())
+                    {
+                        // Odd-angle wire segment
+                        string ox, oy;
+                        double dx = fromX.Offset - toX.Offset;
+                        double dy = fromY.Offset - toY.Offset;
+                        if (dx.IsZero())
+                            ox = fromX.Representative;
+                        else
+                        {
+                            ox = $"{x}.ox";
+                            context.Circuit.Add(new VoltageSource($"V{x}.ox", ox, fromX.Representative, fromX.Offset - toX.Offset));
+                        }
+                        if (dy.IsZero())
+                            oy = fromY.Representative;
+                        else
+                        {
+                            oy = $"{y}.oy";
+                            context.Circuit.Add(new VoltageSource($"V{y}.oy", oy, fromY.Representative, fromY.Offset - toY.Offset));
+                        }
+                        string tx = toX.Representative;
+                        string ty = toY.Representative;
+
+                        // General case, in any direction
+                        // Link the X and Y coordinates such that the slope remains correct
+                        string inside = $"{x}.xc";
+                        MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, tx);
+                        context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, ox, ty, oy, orientation.X / orientation.Y));
+
+                        inside = $"{y}.yc";
+                        MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, ty);
+                        context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, oy, tx, ox, orientation.Y / orientation.X));
+
+                        // Make sure the X and Y length cannot go below their theoretical minimum
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.mx", ox, tx, orientation.X * segment.Length);
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{y}.my", oy, ty, orientation.Y * segment.Length);
+                    }
                 }
-                x = tx;
-                y = ty;
-            }
-        }
-
-        private void RegisterWire(CircuitSolverContext context, string x, string y, string tx, string ty, WireSegmentInfo segment, Vector2 defaultOrientation)
-        {
-            var map = context.Nodes.Shorts;
-            string ox = map[x];
-            string oy = map[y];
-            tx = map[tx];
-            ty = map[ty];
-
-            // Get the orientation
-            var direction = segment.Orientation;
-            if (direction.X.IsZero() && direction.Y.IsZero())
-                direction = defaultOrientation;
-            direction = direction.Order(ref ox, ref tx, ref oy, ref ty);
-
-            // Deal with the segment itself
-            if (segment.IsFixed)
-            {
-                // Fixed length segment
-                if (ox != tx)
-                    OffsetConstraint.AddOffset(context.Circuit, x, ox, tx, direction.X * segment.Length);
-                if (oy != ty)
-                    OffsetConstraint.AddOffset(context.Circuit, y, oy, ty, direction.Y * segment.Length);
-            }
-            else
-            {
-                // Minimum length segment
-                if (ox == tx)
-                    MinimumConstraint.AddMinimum(context.Circuit, y, oy, ty, segment.Length);
-                else if (oy == ty)
-                    MinimumConstraint.AddMinimum(context.Circuit, x, ox, tx, segment.Length);
-                else
-                {
-                    // General case, in any direction
-                    // Link the X and Y coordinates such that the slope remains correct
-                    string i = $"{x}.xc";
-                    MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{i}", i, tx);
-                    context.Circuit.Add(new VoltageControlledVoltageSource($"E{i}", i, ox, ty, oy, direction.X / direction.Y));
-
-                    i = $"{y}.yc";
-                    MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{i}", i, ty);
-                    context.Circuit.Add(new VoltageControlledVoltageSource($"E{i}", i, oy, tx, ox, direction.Y / direction.X));
-
-                    // Make sure the X and Y length cannot go below their theoretical minimum
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{x}.mx", ox, tx, direction.X * segment.Length);
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{y}.my", oy, ty, direction.Y * segment.Length);
-                }
+                fromX = toX;
+                fromY = toY;
             }
         }
 

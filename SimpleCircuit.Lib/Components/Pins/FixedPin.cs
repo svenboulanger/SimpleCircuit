@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Components;
 
 namespace SimpleCircuit.Components.Pins
 {
@@ -15,11 +14,26 @@ namespace SimpleCircuit.Components.Pins
         /// </summary>
         public Vector2 Offset { get; set; }
 
+        /// <summary>
+        /// Creates a pin at a fixed relative position.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="owner">The owner.</param>
+        /// <param name="offset">The offset relative to the owner position.</param>
         public FixedPin(string name, string description, ILocatedDrawable owner, Vector2 offset)
             : this(name, description, owner, owner, offset)
         {
         }
 
+        /// <summary>
+        /// Creates a pin at a fixed relative position.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="owner">The owner.</param>
+        /// <param name="origin">The origin.</param>
+        /// <param name="offset">The offset.</param>
         public FixedPin(string name, string description, ILocatedDrawable owner, ILocatedPresence origin, Vector2 offset)
             : base(name, description, owner)
         {
@@ -34,60 +48,16 @@ namespace SimpleCircuit.Components.Pins
 
             switch (context.Mode)
             {
-                case NodeRelationMode.Shorts:
-                    if (offset.X.IsZero())
-                        context.Shorts.Group(X, _origin.X);
-                    if (offset.Y.IsZero())
-                        context.Shorts.Group(Y, _origin.Y);
+                case NodeRelationMode.Offsets:
+                    context.Offsets.Group(_origin.X, X, offset.X);
+                    context.Offsets.Group(_origin.Y, Y, offset.Y);
                     break;
-
-                case NodeRelationMode.Links:
-                    if (!offset.X.IsZero())
-                    {
-                        string ox = context.Shorts[_origin.X];
-                        string x = context.Shorts[X];
-                        if (offset.X > 0)
-                            context.Extremes.Order(ox, x);
-                        else
-                            context.Extremes.Order(x, ox);
-                    }
-                    if (!offset.Y.IsZero())
-                    {
-                        string oy = context.Shorts[_origin.Y];
-                        string y = context.Shorts[Y];
-                        if (offset.Y > 0)
-                            context.Extremes.Order(oy, y);
-                        else
-                            context.Extremes.Order(y, oy);
-                    }
-                    break;
-
-                default:
-                    return;
             }
         }
 
         /// <inheritdoc />
         public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            Vector2 offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
-            var map = context.Nodes.Shorts;
-            string x = map[X];
-            string ox = map[_origin.X];
-            string y = map[Y];
-            string oy = map[_origin.Y];
-            if (x != ox)
-            {
-                string i = $"{X}.i";
-                context.Circuit.Add(new Resistor($"R{X}", i, x, 1e-3));
-                context.Circuit.Add(new VoltageSource($"V{X}", i, ox, offset.X));
-            }
-            if (y != oy)
-            {
-                string i = $"{Y}.i";
-                context.Circuit.Add(new Resistor($"R{Y}", i, y, 1e-3));
-                context.Circuit.Add(new VoltageSource($"V{Y}", y, oy, offset.Y));
-            }
         }
     }
 }

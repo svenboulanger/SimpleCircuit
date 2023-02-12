@@ -159,17 +159,29 @@ namespace SimpleCircuit.Components
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
                 {
-                    case NodeRelationMode.Shorts:
+                    case NodeRelationMode.Offsets:
                         foreach (var pin in pins)
                         {
                             if (PointsUp(pin))
+                            {
+                                context.Offsets.Group(_parent.Y, pin.Y, 0.0);
                                 context.Shorts.Group(_parent.Y, pin.Y);
+                            }
                             else if (PointsDown(pin))
+                            {
+                                context.Offsets.Group(Bottom, pin.Y, 0.0);
                                 context.Shorts.Group(Bottom, pin.Y);
+                            }
                             else if (PointsLeft(pin))
+                            {
+                                context.Offsets.Group(_parent.X, pin.X, 0.0);
                                 context.Shorts.Group(_parent.X, pin.X);
+                            }
                             else if (PointsRight(pin))
+                            {
+                                context.Offsets.Group(Right, pin.X, 0.0);
                                 context.Shorts.Group(Right, pin.X);
+                            }
                         }
                         break;
 

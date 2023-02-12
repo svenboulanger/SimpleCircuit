@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit.Parser
@@ -858,31 +859,44 @@ namespace SimpleCircuit.Parser
             }
 
             // Determine the virtual wire alignment
-            VirtualWire.Direction direction = VirtualWire.Direction.None;
+            Axis axis = Axis.XY;
             if (lexer.Branch(TokenType.Word, "x", StringComparison.Ordinal))
-                direction = VirtualWire.Direction.X;
+                axis = Axis.X;
             else if (lexer.Branch(TokenType.Word, "y", StringComparison.Ordinal))
-                direction = VirtualWire.Direction.Y;
+                axis = Axis.Y;
             else if (lexer.Branch(TokenType.Word, "xy", StringComparison.Ordinal) ||
                 lexer.Branch(TokenType.Word, "yx", StringComparison.Ordinal))
-                direction = VirtualWire.Direction.X | VirtualWire.Direction.Y;
-            else
-                direction = VirtualWire.Direction.X | VirtualWire.Direction.Y;
+                axis = Axis.XY;
 
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
             // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
             ParseChainStatement(lexer, context,
-                (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, direction));
+                (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, axis));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
             return true;
         }
-        
-        private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, VirtualWire.Direction direction)
+
+        private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, Axis axis)
         {
-            if (direction != VirtualWire.Direction.None)
-                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", pinToWireInfo, wireInfo, wireToPinInfo, direction));
+            if (axis == Axis.None)
+                return;
+
+            if (wireInfo != null)
+                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", pinToWireInfo, wireInfo, wireToPinInfo, axis));
+            else
+            {
+                // Rules for filtering
+                string filter = "^" + pinToWireInfo.Component.Fullname;
+                if (context.Factory.IsAnonymous(filter))
+                    filter += DrawableFactoryDictionary.AnonymousSeparator;
+                filter = filter.Replace(".", "\\.");
+                filter = filter.Replace("*", "[a-zA-Z0-9_]*");
+                var regex = new Regex(filter, RegexOptions.IgnoreCase);
+                var presences = context.Circuit.OfType<ILocatedPresence>().Where(p => regex.IsMatch(p.Name));
+                context.Circuit.Add(new AlignedWire($"virtual.{context.VirtualCoordinateCount++}", presences, axis));
+            }
         }
         private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {

@@ -305,9 +305,10 @@ namespace SimpleCircuit
         private void DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context, IDiagnosticHandler diagnostics)
         {
             // First deal with shorts to reduce the number of variables as much as possible
-            context.Mode = NodeRelationMode.Shorts;
+            context.Mode = NodeRelationMode.Offsets;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
                 c.DiscoverNodeRelationships(context, diagnostics);
+            context.Offsets.ComputeBounds();
 
             // Order coordinates to discover the bounds on blocks
             context.Mode = NodeRelationMode.Links;

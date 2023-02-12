@@ -96,17 +96,11 @@ namespace SimpleCircuit.Components
         {
             switch (context.Mode)
             {
-                case NodeRelationMode.Shorts:
-                    if (Offset.IsZero())
-                        context.Shorts.Group(Lowest, Highest);
-                    break;
-
-                case NodeRelationMode.Links:
-                    if (!Offset.IsZero())
+                case NodeRelationMode.Offsets:
+                    if (!context.Offsets.Group(Lowest, Highest, Offset))
                     {
-                        string lowest = context.Shorts[Lowest];
-                        string highest = context.Shorts[Highest];
-                        context.Extremes.Order(lowest, highest);
+                        // Return error
+                        throw new Exception();
                     }
                     break;
             }

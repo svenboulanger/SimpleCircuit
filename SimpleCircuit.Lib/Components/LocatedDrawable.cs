@@ -42,14 +42,7 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public override void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            double x = 0, y = 0;
-
-            // Let's first deal with our own problems
-            if (state.TryGetValue(context.Nodes.Shorts[X], out var solX))
-                x = solX.Value;
-            if (state.TryGetValue(context.Nodes.Shorts[Y], out var solY))
-                y = solY.Value;
-            Location = new Vector2(x, y);
+            Location = context.Nodes.GetValue(state, X, Y);
 
             // Give the pins a chance to update as well
             for (int i = 0; i < Pins.Count; i++)
@@ -66,8 +59,8 @@ namespace SimpleCircuit.Components
             switch (context.Mode)
             {
                 case NodeRelationMode.Groups:
-                    string x = context.Extremes.Linked[context.Shorts[X]];
-                    string y = context.Extremes.Linked[context.Shorts[Y]];
+                    string x = context.Extremes.Linked[context.Offsets[X].Representative];
+                    string y = context.Extremes.Linked[context.Offsets[Y].Representative];
                     context.XYSets.Add(new XYNode(x, y));
                     break;
 
