@@ -43,7 +43,7 @@
             ],
             wire: [
                 { include: '@whitespace' },
-                [/\b([lurdneswa]|ne|nw|se|sw)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
+                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                 { include: '@number' },
                 [/\+/, { token: 'operator.$S0' }],
