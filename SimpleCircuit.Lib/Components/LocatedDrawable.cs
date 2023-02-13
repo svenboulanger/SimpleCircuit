@@ -59,12 +59,7 @@ namespace SimpleCircuit.Components
             switch (context.Mode)
             {
                 case NodeRelationMode.Groups:
-                    string x = context.Extremes.Linked[context.Offsets[X].Representative];
-                    string y = context.Extremes.Linked[context.Offsets[Y].Representative];
-                    context.XYSets.Add(new XYNode(x, y));
-                    break;
-
-                default:
+                    context.Link(X, Y);
                     break;
             }
         }

@@ -127,9 +127,7 @@ namespace SimpleCircuit.Components
                 switch (context.Mode)
                 {
                     case NodeRelationMode.Groups:
-                        string x = context.Extremes.Linked[context.Shorts[X]];
-                        string y = context.Extremes.Linked[context.Shorts[Y]];
-                        context.XYSets.Add(new XYNode(x, y));
+                        context.Link(X, Y);
                         break;
 
                     default:
@@ -146,39 +144,8 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
             {
-                var map = context.Nodes.Shorts;
-                double x, y;
-                if (state.TryGetValue(map[X], out var value))
-                    x = value.Value;
-                else
-                {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
-                    x = 0.0;
-                }
-                if (state.TryGetValue(map[Y], out value))
-                    y = value.Value;
-                else
-                {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
-                    y = 0.0;
-                }
-                Location = new(x, y);
-
-                if (state.TryGetValue(map[_pins.Right], out value))
-                    x = value.Value;
-                else
-                {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
-                    x = 0.0;
-                }
-                if (state.TryGetValue(map[_pins.Bottom], out value))
-                    y = value.Value;
-                else
-                {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "U001", $"Could not find variable '{X}'."));
-                    y = 0.0;
-                }
-                EndLocation = new(x, y);
+                Location = context.Nodes.GetValue(state, X, Y);
+                EndLocation = context.Nodes.GetValue(state, _pins.Right, _pins.Bottom);
 
                 // Update all pin locations as well
                 // We ignore pin 0, because that is a dummy pin

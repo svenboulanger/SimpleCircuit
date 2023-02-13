@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -114,23 +113,25 @@ namespace SimpleCircuit.Components
             public void Register(CircuitSolverContext context)
             {
                 var ckt = context.Circuit;
-                var map = context.Nodes.Shorts;
+                var map = context.Nodes.Offsets;
                 double Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing, double edgeSpacing)
                 {
                     double width = 0.0;
-                    start = map[start];
-                    end = map[end];
-                    string lastNode = start;
+                    var lastOffset = map[start];
+                    var offsetEnd = map[end];
                     int index = 0;
                     foreach (var node in pinNodes)
                     {
-                        string n = map[node];
+                        var newOffset = map[node];
                         double currentSpace = index == 0 ? edgeSpacing : spacing;
-                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, n, currentSpace, 100.0);
+                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastOffset, newOffset, currentSpace, 100.0);
                         width += currentSpace;
-                        lastNode = n;
+                        lastOffset = newOffset;
                     }
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastNode, end, edgeSpacing, 100.0);
+
+                    // If there were no pins, we will just rely on the general minimum width
+                    if (width > 0)
+                        MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastOffset, offsetEnd, edgeSpacing, 100.0);
                     width += edgeSpacing;
                     return width;
                 }
@@ -143,9 +144,9 @@ namespace SimpleCircuit.Components
                 height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
 
                 if (width < MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Shorts[_parent.X], context.Nodes.Shorts[Right], MinWidth, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Offsets[_parent.X], context.Nodes.Offsets[Right], MinWidth, 100.0);
                 if (height < MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Shorts[_parent.Y], context.Nodes.Shorts[Bottom], MinHeight, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Offsets[_parent.Y], context.Nodes.Offsets[Bottom], MinHeight, 100.0);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
@@ -163,50 +164,37 @@ namespace SimpleCircuit.Components
                         foreach (var pin in pins)
                         {
                             if (PointsUp(pin))
-                            {
                                 context.Offsets.Group(_parent.Y, pin.Y, 0.0);
-                                context.Shorts.Group(_parent.Y, pin.Y);
-                            }
                             else if (PointsDown(pin))
-                            {
                                 context.Offsets.Group(Bottom, pin.Y, 0.0);
-                                context.Shorts.Group(Bottom, pin.Y);
-                            }
                             else if (PointsLeft(pin))
-                            {
                                 context.Offsets.Group(_parent.X, pin.X, 0.0);
-                                context.Shorts.Group(_parent.X, pin.X);
-                            }
                             else if (PointsRight(pin))
-                            {
                                 context.Offsets.Group(Right, pin.X, 0.0);
-                                context.Shorts.Group(Right, pin.X);
-                            }
                         }
                         break;
 
                     case NodeRelationMode.Links:
-                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context);
-                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context);
-                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context);
-                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context);
+                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context, MinSpaceX, MinEdgeX);
+                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context, MinSpaceX, MinEdgeX);
+                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context, MinSpaceY, MinEdgeY);
+                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context, MinSpaceY, MinEdgeY);
                         break;
-
-                    default:
-                        return;
                 }
             }
 
-            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, NodeContext context)
+            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, NodeContext context, double spacing, double edgeSpacing)
             {
-                string lastCoordinate = context.Shorts[first];
+                var lastCoordinate = context.Offsets[first];
+                double s = edgeSpacing;
                 foreach (var coordinate in coordinates)
                 {
-                    var c = context.Shorts[coordinate];
-                    context.Extremes.Order(lastCoordinate, c);
+                    var c = context.Offsets[coordinate];
+                    MinimumConstraint.MinimumLink(context, lastCoordinate, c, s);
+                    s = spacing;
                     lastCoordinate = c;
                 }
-                context.Extremes.Order(lastCoordinate, context.Shorts[final]);
+                MinimumConstraint.MinimumLink(context, lastCoordinate, context.Offsets[final], edgeSpacing);
             }
 
             /// <inheritdoc />

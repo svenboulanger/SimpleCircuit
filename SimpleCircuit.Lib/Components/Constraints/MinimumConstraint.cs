@@ -221,12 +221,9 @@ namespace SimpleCircuit.Components
             switch (context.Mode)
             {
                 case NodeRelationMode.Links:
-                    if (Minimum.IsZero() || Minimum > 0)
-                    {
-                        string highest = context.Shorts[Highest];
-                        string lowest = context.Shorts[Lowest];
-                        context.Extremes.Order(lowest, highest);
-                    }
+                    var lowest = context.Offsets[Lowest];
+                    var highest = context.Offsets[Highest];
+                    MinimumLink(context, lowest, highest, Minimum);
                     break;
 
                 default:
@@ -237,9 +234,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            var highest = context.Nodes.Shorts[Highest];
-            var lowest = context.Nodes.Shorts[Lowest];
-            if (highest != lowest)
+            var lowest = context.Nodes.Offsets[Lowest];
+            var highest = context.Nodes.Offsets[Highest];
+            if (lowest.Representative != highest.Representative)
                 AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
         }
 

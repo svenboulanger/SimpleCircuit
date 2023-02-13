@@ -109,10 +109,6 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
         {
-            var lowest = context.Nodes.Shorts[Lowest];
-            var highest = context.Nodes.Shorts[Highest];
-            if (lowest != highest)
-                AddOffset(context.Circuit, $"constraint.{Name}", lowest, highest, Offset);
         }
 
         /// <inheritdoc />

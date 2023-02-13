@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
-
     /// <summary>
     /// The context used for collecting information about nodes in a
     /// graphical circuit.
@@ -22,11 +21,6 @@ namespace SimpleCircuit.Components
         public GraphicalCircuit Circuit { get; }
 
         /// <summary>
-        /// Gets the groups of nodes that are shorted together, i.e. are exactly the same.
-        /// </summary>
-        public NodeGrouper Shorts { get; } = new();
-
-        /// <summary>
         /// Gets the relative fixed offsets.
         /// </summary>
         public NodeOffsetFinder Offsets { get; } = new();
@@ -40,6 +34,21 @@ namespace SimpleCircuit.Components
         /// Gets a set of X- and Y-coordinate node combinations.
         /// </summary>
         public HashSet<XYNode> XYSets { get; } = new();
+
+        /// <summary>
+        /// Linked two nodes together as XY-variables.
+        /// </summary>
+        /// <remarks>
+        /// This is used for spacing graphically distinct blocks.
+        /// </remarks>
+        /// <param name="x">The X-variable.</param>
+        /// <param name="y">The Y-variable.</param>
+        public void Link(string x, string y)
+        { 
+            string repX = Extremes.Linked[Offsets[x].Representative];
+            string repY = Extremes.Linked[Offsets[y].Representative];
+            XYSets.Add(new(repX, repY));
+        }
 
         /// <summary>
         /// Gets the value from the solver for the specified node.
