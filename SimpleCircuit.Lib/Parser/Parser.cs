@@ -860,12 +860,12 @@ namespace SimpleCircuit.Parser
 
             // Determine the virtual wire alignment
             Axis axis = Axis.XY;
-            if (lexer.Branch(TokenType.Word, "x", StringComparison.Ordinal))
+            if (lexer.Branch(TokenType.Word, "x"))
                 axis = Axis.X;
-            else if (lexer.Branch(TokenType.Word, "y", StringComparison.Ordinal))
+            else if (lexer.Branch(TokenType.Word, "y"))
                 axis = Axis.Y;
-            else if (lexer.Branch(TokenType.Word, "xy", StringComparison.Ordinal) ||
-                lexer.Branch(TokenType.Word, "yx", StringComparison.Ordinal))
+            else if (lexer.Branch(TokenType.Word, "xy") ||
+                lexer.Branch(TokenType.Word, "yx"))
                 axis = Axis.XY;
 
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
