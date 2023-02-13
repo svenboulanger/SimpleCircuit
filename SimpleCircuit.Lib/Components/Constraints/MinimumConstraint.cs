@@ -52,6 +52,7 @@ namespace SimpleCircuit.Components
             double r = 1.0 / weight;
             if (r >= OffResistance * 0.1)
                 throw new ArgumentOutOfRangeException(nameof(weight));
+            Console.WriteLine($"{lowest} --[{minimum}]--> {highest}");
 
             string i = $"{name}.i";
             circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
@@ -87,8 +88,11 @@ namespace SimpleCircuit.Components
         /// <param name="weight"></param>
         public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1)
         {
-            double realOffset = lowest.Offset - highest.Offset + minimum;
-            AddMinimum(circuit, name, lowest.Representative, highest.Representative, realOffset, weight);
+            double delta = lowest.Offset - highest.Offset;
+            AddMinimum(circuit, name, lowest.Representative, highest.Representative, delta + minimum, weight);
+
+            // Balancing for symmetric spacing
+            circuit.Add(new CurrentSource($"I{name}", lowest.Representative, highest.Representative, delta * weight));
         }
 
         /// <summary>

@@ -179,7 +179,7 @@ namespace SimpleCircuit.Parser
             wireToPinInfo.Component?.GetOrCreate(context);
 
             // Create the wire
-            if (wireInfo != null)
+            if (wireInfo != null && wireInfo.Segments.Count > 0)
             {
                 string name = $"W:{++context.WireCount}";
                 context.Circuit.Add(new PinOrientationConstraint($"{name}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
@@ -417,7 +417,7 @@ namespace SimpleCircuit.Parser
                         }
                         else
                         {
-                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeDirection);
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeDirection, lexer.Token.Content);
                             lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
                         }
                     }
