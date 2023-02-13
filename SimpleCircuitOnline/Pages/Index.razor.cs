@@ -132,7 +132,7 @@ namespace SimpleCircuitOnline.Pages
                     script = Demo.Demos[0].Code;
                 if (string.IsNullOrWhiteSpace(style))
                     style = GraphicalCircuit.DefaultStyle;
-                await SetCurrentScript(script, style);
+                await SetCurrentScript(new(script, style));
             }
         }
 
@@ -140,7 +140,7 @@ namespace SimpleCircuitOnline.Pages
         {
             _errors = args.Errors;
             _warnings = args.Warnings;
-            await SetCurrentScript(DecodeScript(args.Script), args.Style);
+            await SetCurrentScript(new(DecodeScript(args.Script), args.Style));
         }
 
         protected async Task DownloadFile(DownloadEventArgs args)
@@ -227,9 +227,11 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
-        private async Task SetCurrentScript(string script, string style = null)
+        private async Task SetCurrentScript(Netlist netlist)
         {
             // Let us strip a few characters that might accumulate when storing inside XML for example
+            string script = netlist.Script;
+            string style = netlist.Style;
             if (script != null)
                 script = script.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
             if (style != null)

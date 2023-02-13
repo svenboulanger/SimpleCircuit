@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Digital;
+﻿using SimpleCircuit;
+using SimpleCircuit.Components.Digital;
 using System;
 
 namespace SimpleCircuitOnline
@@ -35,6 +36,9 @@ namespace SimpleCircuitOnline
         /// <summary>
         /// Gets the style (if <c>null</c>, refer to default style).
         /// </summary>
+        /// <value>
+        /// The style.
+        /// </value>
         public string Style { get; }
 
         /// <summary>
@@ -167,6 +171,13 @@ namespace SimpleCircuitOnline
                 "Example: Unicode arrows",
                 "Demonstration of shorthand unicode arrow notation for wires.",
                 "// Arrow unicode characters can be used as shorthand notation for simple wires\r\nGND ↑ V ↑ Xin\r\n\r\n// A dash '-' character is shorthand for <?>\r\nXin - R →↘<d +20> C - GND\r\n\r\n(y GND)\r\n\r\n// To enter the \"arrow\" mode in this editor,\r\n// press CTRL+'.' (some configs CTRL+SHIFT+'.')\r\n// In this mode, there should be an arrows icon in the bottom-left corner\r\n\r\n// In \"arrow\" mode:\r\n// 'u', 'n' or numpad 8 turns into ↑ (<u>)\r\n// 'l', 'w' or numpad 4 turns into ← (<l>)\r\n// 'd', 's' or numpad 2 turns into ↓ (<d>)\r\n// 'r', 'e' or numpad 6 turns into → (<r>)\r\n// numpad 7 turns into ↖ (<nw>)\r\n// numpad 9 turns into ↗ (<ne>)\r\n// numpad 1 turns into ↙ (<sw>)\r\n// numpad 3 turns into ↘ (<se>)\r\n// Any other key will exit the mode.\r\n"),
+
+            // CSS styling example
+            new Demo(
+                "Example: CSS styling",
+                "Demonstration of how you can use CSS styling to change the circuit",
+                ".section buck\r\n    GND1 <u> V1 <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1 <r> X2\r\n    X2 <d> C1 <d> GND3\r\n    X2 <r +30> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n",
+                GraphicalCircuit.DefaultStyle + "\r\n\r\n/* Styling section \"buck\" */\r\n#buck\\/_W\\:4 path,\r\n#buck\\/D1 polygon, #buck\\/D1 line,\r\n#buck\\/_W\\:5 path,\r\n#buck\\/_W\\:6 path,\r\n#buck\\/L1 path,\r\n#buck\\/_W\\:7 path,\r\n#buck\\/_W\\:10 path,\r\n#buck\\/_W\\:11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/_W\\:12 path { stroke: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/_W\\:1 path,\r\n#buck2\\/V1 circle, #buck2\\/V1 line, #buck2\\/V1 path,\r\n#buck2\\/_W\\:2 path,\r\n#buck2\\/L1 path,\r\n#buck2\\/_W\\:3 path,\r\n#buck2\\/S1 line, #buck2\\/S1 circle,\r\n#buck2\\/_W\\:6 path,\r\n#buck2\\/_W\\:7 path,\r\n#buck2\\/_W\\:10 path,\r\n#buck2\\/_W\\:11 path,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/_W\\:12 path { stroke: red; }"),
         };
     }
 }

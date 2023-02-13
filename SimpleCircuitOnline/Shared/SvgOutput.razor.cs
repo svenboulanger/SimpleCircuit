@@ -32,7 +32,7 @@ namespace SimpleCircuitOnline.Shared
         {
             // Update the SVG
             _invalid = false;
-            bool update = false, render = true;
+            bool update = false, render = false;
             if (parameters.TryGetValue<XmlDocument>(nameof(Svg), out var cSvg) && !ReferenceEquals(Svg, cSvg))
             {
                 Svg = cSvg;
@@ -43,10 +43,16 @@ namespace SimpleCircuitOnline.Shared
                 UseDOM = cUseDom;
                 update = true;
             }
-            if (parameters.TryGetValue<bool>(nameof(ShrinkX), out var shrinkX))
+            if (parameters.TryGetValue<bool>(nameof(ShrinkX), out var shrinkX) && ShrinkX != shrinkX)
+            {
                 ShrinkX = shrinkX;
-            if (parameters.TryGetValue<bool>(nameof(ShrinkY), out var shrinkY))
+                update = true;
+            }
+            if (parameters.TryGetValue<bool>(nameof(ShrinkY), out var shrinkY) && ShrinkY != shrinkY)
+            {
                 ShrinkY = shrinkY;
+                update = true;
+            }
             if (parameters.TryGetValue<int>(nameof(Loading), out var loading) && Loading != loading)
             {
                 Loading = loading;

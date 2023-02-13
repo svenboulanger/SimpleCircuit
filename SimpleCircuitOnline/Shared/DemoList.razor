@@ -2,7 +2,7 @@
 {
     @foreach (var demo in Demo.Demos)
     {
-        <a @onclick="x => Update(demo.Code)" class="bd-callout" role="button">
+        <a @onclick="x => Update(new(demo.Code, demo.Style))" class="bd-callout" role="button">
             <h5>@demo.Title</h5>
             <p>@demo.Description</p>
         </a>
@@ -11,7 +11,7 @@
 
 @code {
     [Parameter]
-    public EventCallback<string> DemoSelected { get; set; }
+    public EventCallback<Netlist> DemoSelected { get; set; }
 
-    private async Task Update(string code) => await DemoSelected.InvokeAsync(code);
+    private async Task Update(Netlist code) => await DemoSelected.InvokeAsync(code);
 }

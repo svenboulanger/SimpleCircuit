@@ -2,6 +2,7 @@
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Parser
 {
@@ -10,6 +11,18 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class ParsingContext
     {
+        private readonly struct SectionInfo
+        {
+            public string Name { get; }
+            public int WireCount { get; }
+            public SectionInfo(string name, int wireCount)
+            {
+                Name = name;
+                WireCount = wireCount;
+            }
+        }
+        private readonly Stack<SectionInfo> _sections = new();
+
         /// <summary>
         /// Gets the options.
         /// </summary>
@@ -39,12 +52,6 @@ namespace SimpleCircuit.Parser
         /// Gets the circuit.
         /// </summary>
         public GraphicalCircuit Circuit { get; } = new GraphicalCircuit();
-
-        /// <summary>
-        /// Gets the stack of current sections. This can be used to separate parts of the circuit
-        /// from each other.
-        /// </summary>
-        public Stack<string> Section { get; } = new Stack<string>();
 
         /// <summary>
         /// Gets the defined sections until now.
@@ -80,5 +87,44 @@ namespace SimpleCircuit.Parser
                 Circuit.Add(result);
             return result;
         }
+
+        /// <summary>
+        /// Pushes a new section.
+        /// </summary>
+        /// <param name="name"></param>
+        public void PushSection(string name)
+        {
+            _sections.Push(new(name, WireCount));
+            WireCount = 0;
+        }
+
+        /// <summary>
+        /// Pops the last section.
+        /// </summary>
+        public string PopSection()
+        {
+            if (_sections.Count > 0)
+            {
+                var section = _sections.Pop();
+                WireCount = section.WireCount;
+                return section.Name;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the full name based on the current section stack.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The full name.</returns>
+        public string GetFullname(string name)
+            => string.Join(DrawableFactoryDictionary.Separator, _sections.Select(s => s.Name).Reverse().Union(new[] { name }));
+
+        /// <summary>
+        /// Gets the full name of a wire.
+        /// </summary>
+        /// <returns>The wire name.</returns>
+        public string GetWireFullname()
+            => GetFullname($"_W:{++WireCount}");
     }
 }

@@ -181,11 +181,11 @@ namespace SimpleCircuit.Parser
             // Create the wire
             if (wireInfo != null && wireInfo.Segments.Count > 0)
             {
-                string name = $"W:{++context.WireCount}";
-                context.Circuit.Add(new PinOrientationConstraint($"{name}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
-                context.Circuit.Add(new Wire($"{name}.w", pinToWireInfo, wireInfo, wireToPinInfo));
+                string fullname = context.GetWireFullname();
+                context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
+                context.Circuit.Add(new Wire(fullname, pinToWireInfo, wireInfo, wireToPinInfo));
                 if (wireToPinInfo.Component != null)
-                    context.Circuit.Add(new PinOrientationConstraint($"{name}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
+                    context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
             }
         }
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
@@ -201,7 +201,7 @@ namespace SimpleCircuit.Parser
             lexer.Next();
             while (!lexer.HasTrivia && lexer.Branch(TokenType.Word | TokenType.Integer | TokenType.Divide | TokenType.Times));
             var nameToken = lexer.GetTracked(tracker, false);
-            string fullname = string.Join(DrawableFactoryDictionary.Separator, context.Section.Reverse().Union(new[] { nameToken.Content.ToString() }));
+            string fullname = context.GetFullname(nameToken.Content.ToString());
             var info = new ComponentInfo(nameToken, fullname);
 
             // Labels
@@ -414,6 +414,11 @@ namespace SimpleCircuit.Parser
                                 // Don't give an orientation, and in that case the orientation should come from the pin itself!
                                 wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
                             }
+                        }
+                        else if (lexer.Check(TokenType.Newline))
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfLine);
+                            return null;
                         }
                         else
                         {
@@ -641,7 +646,7 @@ namespace SimpleCircuit.Parser
                 context.SectionTemplates.Add(nameToken.Content.ToString(), token);
 
                 // Parse the template again
-                context.Section.Push(nameToken.Content.ToString());
+                context.PushSection(nameToken.Content.ToString());
                 var sectionLexer = SimpleCircuitLexer.FromString(token.Content, lexer.Source, token.Location.Line);
                 while (sectionLexer.Type != TokenType.EndOfContent)
                 {
@@ -649,7 +654,7 @@ namespace SimpleCircuit.Parser
                     {
                         if (BranchControlWord(sectionLexer, _sectionEnd))
                         {
-                            context.Section.Pop();
+                            context.PopSection();
                             return true;
                         }
                         else if (!ParseControlStatement(sectionLexer, context))
@@ -664,7 +669,7 @@ namespace SimpleCircuit.Parser
                 lexer.Skip(~TokenType.Newline);
 
                 // Parse section contents
-                context.Section.Push(nameToken.Content.ToString());
+                context.PushSection(nameToken.Content.ToString());
                 var tracker = lexer.Track();
 
                 // Read the contents
@@ -678,7 +683,7 @@ namespace SimpleCircuit.Parser
                             lexer.Skip(~TokenType.Newline);
                             var token = lexer.GetTracked(tracker);
                             context.SectionTemplates.Add(nameToken.Content.ToString(), token);
-                            context.Section.Pop();
+                            context.PopSection();
                             return true;
                         }
                         else if (!ParseControlStatement(lexer, context))

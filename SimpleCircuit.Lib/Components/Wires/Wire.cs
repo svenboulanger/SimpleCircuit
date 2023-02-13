@@ -421,6 +421,7 @@ namespace SimpleCircuit.Components.Wires
             }
         }
 
+        /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
             if (_info.IsVisible && _vectors.Count > 0)
