@@ -63,7 +63,7 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public abstract void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
+        public abstract bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
 
         /// <inheritdoc />
         public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);

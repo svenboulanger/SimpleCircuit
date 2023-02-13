@@ -168,5 +168,44 @@
 
         [Diagnostic(SeverityLevel.Error, "PE052", "Virtual wires cannot contain unknown segment orientations")]
         VirtualWireUnknownSegment,
+
+        [Diagnostic(SeverityLevel.Info, "SOL001", "No unknowns to solve for")]
+        NoUnknownsToSolve,
+
+        [Diagnostic(SeverityLevel.Error, "DE001", "Could not recognize drawing command '{0}'")]
+        CouldNotRecognizeDrawingCommand,
+
+        [Diagnostic(SeverityLevel.Error, "DE002", "No polygon data given")]
+        NoPolygonData,
+
+        [Diagnostic(SeverityLevel.Error, "DE003", "No polyline data given")]
+        NoPolylineData,
+
+        [Diagnostic(SeverityLevel.Error, "DE004", "Could not recognize path command '{0}'")]
+        CouldNotRecognizePathCommand,
+
+        [Diagnostic(SeverityLevel.Error, "DE005", "No path data given")]
+        NoPathData,
+
+        [Diagnostic(SeverityLevel.Error, "PE053", "Could not recognize statement start '{0}'")]
+        CouldNotRecognizeStatementStart,
+
+        [Diagnostic(SeverityLevel.Error, "PE054", "Expected control statement type")]
+        ExpectedControlStatementType,
+
+        [Diagnostic(SeverityLevel.Error, "PE055", "Expected the symbol name")]
+        ExpectedSymbolName,
+
+        [Diagnostic(SeverityLevel.Error, "PE056", "Expected attribute '{0}' on {1}")]
+        ExpectedAttributeOn,
+
+        [Diagnostic(SeverityLevel.Warning, "DW057", "Expected coordinate for '{0}' on {1}, but was '{2}'")]
+        ExpectedCoordinateForOnButWas,
+
+        [Diagnostic(SeverityLevel.Warning, "DW058", "Expected coordinate, but was '{0}'")]
+        ExpectedCoordinateButWas,
+
+        [Diagnostic(SeverityLevel.Warning, "SW059", "Cannot resolve fixed offset for '{0}'")]
+        CannotResolveFixedOffset,
     }
 }

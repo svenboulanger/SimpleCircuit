@@ -35,10 +35,8 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
-        {
-            // Left to whoever owns this pin...
-        }
+        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            => true;
 
         /// <inheritdoc />
         public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)

@@ -120,19 +120,18 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
-                _pins.DiscoverNodeRelationships(context);
+                if (!_pins.DiscoverNodeRelationships(context, diagnostics))
+                    return false;
 
                 switch (context.Mode)
                 {
                     case NodeRelationMode.Groups:
                         context.Link(X, Y);
                         break;
-
-                    default:
-                        break;
                 }
+                return true;
             }
 
             /// <inheritdoc />

@@ -79,8 +79,8 @@ namespace SimpleCircuit.Parser
                     return true;
 
                 default:
-                    context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", $"Unrecognized {lexer.Content}"));
-                    lexer.Next();
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeStatementStart, lexer.Content.ToString());
+                    lexer.Skip(~TokenType.Newline);
                     return false;
             }
         }
@@ -459,7 +459,7 @@ namespace SimpleCircuit.Parser
         {
             if (!lexer.Branch(TokenType.Word, out var typeToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected control statement type"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedControlStatementType);
                 return false;
             }
 
@@ -572,7 +572,7 @@ namespace SimpleCircuit.Parser
             // Read the name of the subcircuit
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new TokenDiagnosticMessage(lexer.Token, SeverityLevel.Error, "PE001", "Expected symbol name"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSymbolName);
                 return false;
             }
             string symbolKey = nameToken.Content.ToString();
@@ -893,11 +893,12 @@ namespace SimpleCircuit.Parser
             else
             {
                 // Rules for filtering
-                string filter = "^" + pinToWireInfo.Component.Fullname;
+                string filter = pinToWireInfo.Component.Fullname;
                 if (context.Factory.IsAnonymous(filter))
                     filter += DrawableFactoryDictionary.AnonymousSeparator;
-                filter = filter.Replace(".", "\\.");
+                filter = "^" + filter.Replace(".", "\\.");
                 filter = filter.Replace("*", "[a-zA-Z0-9_]*");
+                Console.WriteLine(filter);
                 var regex = new Regex(filter, RegexOptions.IgnoreCase);
                 var presences = context.Circuit.OfType<ILocatedPresence>().Where(p => regex.IsMatch(p.Name));
                 context.Circuit.Add(new AlignedWire($"virtual.{context.VirtualCoordinateCount++}", presences, axis));

@@ -32,7 +32,7 @@ namespace SimpleCircuit.Parser
         public override int GetHashCode() => (Index * 1023) ^ Location.GetHashCode();
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Tracker && Equals((Tracker)obj);
+        public override bool Equals(object obj) => obj is Tracker tracker && Equals(tracker);
 
         /// <inheritdoc />
         public bool Equals(Tracker other)

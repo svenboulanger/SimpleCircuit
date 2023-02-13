@@ -94,19 +94,25 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
             switch (context.Mode)
             {
                 case NodeRelationMode.Offsets:
-                    context.Offsets.Group(_origin.X, X, offset.X);
-                    context.Offsets.Group(_origin.Y, Y, offset.Y);
+                    if (!context.Offsets.Group(_origin.X, X, offset.X))
+                    {
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        return false;
+                    }
+                    if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
+                    {
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        return false;
+                    }
                     break;
-
-                default:
-                    return;
             }
+            return true;
         }
 
         /// <summary>

@@ -14,7 +14,8 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="context">The context containing the node relationships.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
+        /// <returns>Returns <c>true</c> if the discovery is successful; or <c>false</c> if the solver should fail.</returns>
+        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
 
         /// <summary>
         /// Registers the pin's presence in the circuit that will solve all coordinates.

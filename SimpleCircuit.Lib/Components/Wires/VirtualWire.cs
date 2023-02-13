@@ -109,7 +109,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             bool doX = (_direction & Axis.X) != 0;
             bool doY = (_direction & Axis.Y) != 0;
@@ -121,16 +121,40 @@ namespace SimpleCircuit.Components.Wires
                     if (_start != null)
                     {
                         if (doX)
-                            context.Offsets.Group(_start.X, StartX, 0.0);
+                        {
+                            if (!context.Offsets.Group(_start.X, StartX, 0.0))
+                            {
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
+                            }
+                        }
                         if (doY)
-                            context.Offsets.Group(_start.Y, StartY, 0.0);
+                        {
+                            if (!context.Offsets.Group(_start.Y, StartY, 0.0))
+                            {
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
+                            }
+                        }
                     }
                     if (_end != null)
                     {
                         if (doX)
-                            context.Offsets.Group(_end.X, EndX, 0.0);
+                        {
+                            if (!context.Offsets.Group(_end.X, EndX, 0.0))
+                            {
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
+                            }
+                        }
                         if (doY)
-                            context.Offsets.Group(_end.Y, EndY, 0.0);
+                        {
+                            if (!context.Offsets.Group(_end.Y, EndY, 0.0))
+                            {
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
+                            }
+                        }
                     }
 
                     // Deal with the horizontal and vertical segments
@@ -144,16 +168,40 @@ namespace SimpleCircuit.Components.Wires
                         if (segment.IsFixed)
                         {
                             if (doX)
-                                context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length);
+                            {
+                                if (!context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
+                            }
                             if (doY)
-                                context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length);
+                            {
+                                if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
+                            }
                         }
                         else
                         {
                             if (segment.Orientation.X.IsZero())
-                                context.Offsets.Group(x, tx, 0.0);
+                            {
+                                if (!context.Offsets.Group(x, tx, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
+                            }
                             if (segment.Orientation.Y.IsZero())
-                                context.Offsets.Group(y, ty, 0.0);
+                            {
+                                if (!context.Offsets.Group(y, ty, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
+                            }
                         }
                         x = tx;
                         y = ty;
@@ -190,6 +238,7 @@ namespace SimpleCircuit.Components.Wires
                     }
                     break;
             }
+            return true;
         }
 
         /// <inheritdoc />

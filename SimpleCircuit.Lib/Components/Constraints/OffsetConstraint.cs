@@ -92,18 +92,19 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             switch (context.Mode)
             {
                 case NodeRelationMode.Offsets:
                     if (!context.Offsets.Group(Lowest, Highest, Offset))
                     {
-                        // Return error
-                        throw new Exception();
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        return false;
                     }
                     break;
             }
+            return true;
         }
 
         /// <inheritdoc />

@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             switch (context.Mode)
             {
@@ -49,17 +49,20 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (doX && !context.Offsets.Group(last.X, presence.X, 0.0))
                             {
-                                throw new Exception();
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
                             }
                             if (doY && !context.Offsets.Group(last.Y, presence.Y, 0.0))
                             {
-                                throw new Exception();
+                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                return false;
                             }
                         }
                         last = presence;
                     }
                     break;
             }
+            return true;
         }
 
         /// <inheritdoc />

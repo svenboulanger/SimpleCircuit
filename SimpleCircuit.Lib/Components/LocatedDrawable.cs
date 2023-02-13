@@ -50,11 +50,15 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
-            base.DiscoverNodeRelationships(context, diagnostics);
+            if (!base.DiscoverNodeRelationships(context, diagnostics))
+                return false;
             for (int i = 0; i < Pins.Count; i++)
-                Pins[i].DiscoverNodeRelationships(context, diagnostics);
+            {
+                if (!Pins[i].DiscoverNodeRelationships(context, diagnostics))
+                    return false;
+            }
 
             switch (context.Mode)
             {
@@ -62,6 +66,7 @@ namespace SimpleCircuit.Components
                     context.Link(X, Y);
                     break;
             }
+            return true;
         }
 
         /// <inheritdoc />

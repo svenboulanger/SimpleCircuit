@@ -160,7 +160,8 @@ namespace SimpleCircuit
                 return false;
 
             // Solver presences
-            DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), context.Nodes, diagnostics);
+            if (!DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), context.Nodes, diagnostics))
+                return false;
 
             // Space loose blocks next to each other to avoid overlaps
             if (!Space(context))
@@ -174,7 +175,7 @@ namespace SimpleCircuit
             // If there are no circuit components to solve, let's stop here
             if (context.Circuit.Count == 0)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "SOL001", "No elements to solve for."));
+                diagnostics?.Post(ErrorCodes.NoUnknownsToSolve);
                 return false;
             }
 
@@ -302,23 +303,33 @@ namespace SimpleCircuit
             return success;
         }
 
-        private void DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context, IDiagnosticHandler diagnostics)
+        private bool DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context, IDiagnosticHandler diagnostics)
         {
             // First deal with shorts to reduce the number of variables as much as possible
             context.Mode = NodeRelationMode.Offsets;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                c.DiscoverNodeRelationships(context, diagnostics);
+            {
+                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                    return false;
+            }
             context.Offsets.ComputeBounds();
 
             // Order coordinates to discover the bounds on blocks
             context.Mode = NodeRelationMode.Links;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                c.DiscoverNodeRelationships(context, diagnostics);
+            {
+                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                    return false;
+            }
 
             // Group nodes together that belong to the same "drawn block"
             context.Mode = NodeRelationMode.Groups;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                c.DiscoverNodeRelationships(context, diagnostics);
+            {
+                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                    return false;
+            }
+            return true;
         }
 
         private bool Space(CircuitSolverContext context)

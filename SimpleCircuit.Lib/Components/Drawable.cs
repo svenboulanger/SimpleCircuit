@@ -104,9 +104,8 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
-        {
-        }
+        public virtual bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            => true;
 
         /// <inheritdoc />
         public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);

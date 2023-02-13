@@ -199,7 +199,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public override void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             string x, y;
             switch (context.Mode)
@@ -209,13 +209,29 @@ namespace SimpleCircuit.Components.Wires
                     // Short wire ends to the correct pins
                     if (_p2w != null)
                     {
-                        context.Offsets.Group(_p2w.X, StartX, 0.0);
-                        context.Offsets.Group(_p2w.Y, StartY, 0.0);
+                        if (!context.Offsets.Group(_p2w.X, StartX, 0.0))
+                        {
+                            diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                            return false;
+                        }
+                        if (!context.Offsets.Group(_p2w.Y, StartY, 0.0))
+                        {
+                            diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                            return false;
+                        }
                     }
                     if (_w2p != null)
                     {
-                        context.Offsets.Group(_w2p.X, EndX, 0.0);
-                        context.Offsets.Group(_w2p.Y, EndY, 0.0);
+                        if (!context.Offsets.Group(_w2p.X, EndX, 0.0))
+                        {
+                            diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                            return false;
+                        }
+                        if (!context.Offsets.Group(_w2p.Y, EndY, 0.0))
+                        {
+                            diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                            return false;
+                        }
                     }
 
                     // Deal with horizontal and vertical segments
@@ -234,15 +250,35 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 double l = _info.Segments[i].Length;
 
-                                context.Offsets.Group(x, tx, orientation.X * l);
-                                context.Offsets.Group(y, ty, orientation.Y * l);
+                                if (!context.Offsets.Group(x, tx, orientation.X * l))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
+                                if (!context.Offsets.Group(y, ty, orientation.Y * l))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    return false;
+                                }
                             }
                             else
                             {
                                 if (orientation.X.IsZero())
-                                    context.Offsets.Group(x, tx, 0.0);
+                                {
+                                    if (!context.Offsets.Group(x, tx, 0.0))
+                                    {
+                                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                        return false;
+                                    }
+                                }
                                 if (orientation.Y.IsZero())
-                                    context.Offsets.Group(y, ty, 0.0);
+                                {
+                                    if (!context.Offsets.Group(y, ty, 0.0))
+                                    {
+                                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                        return false;
+                                    }
+                                }
                             }
                         }
                         x = tx;
@@ -275,6 +311,7 @@ namespace SimpleCircuit.Components.Wires
                     }
                     break;
             }
+            return true;
         }
 
         private Vector2 GetOrientation(int index)

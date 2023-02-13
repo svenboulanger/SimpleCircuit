@@ -38,13 +38,13 @@ namespace SimpleCircuit
             string value = node.Attributes?[attributeName]?.Value;
             if (value == null)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected attribute '{attributeName}' on {node.Name}."));
+                diagnostics?.Post(ErrorCodes.ExpectedAttributeOn, attributeName, node.Name);
                 result = 0.0;
                 return false;
             }
             if (!double.TryParse(value, NumberStyles.Float, Culture, out result))
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate for '{attributeName}' on {node.Name}, but was '{value}'."));
+                diagnostics?.Post(ErrorCodes.ExpectedCoordinateForOnButWas, attributeName, node.Name, value);
                 result = 0.0;
                 return false;
             }
@@ -64,7 +64,7 @@ namespace SimpleCircuit
             {
                 if (!double.TryParse(value.Content.ToString(), NumberStyles.Float, Culture, out result))
                 {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                    diagnostics?.Post(value, ErrorCodes.ExpectedCoordinateButWas, value.Content);
                     return false;
                 }
                 return true;
@@ -72,7 +72,7 @@ namespace SimpleCircuit
             else
             {
                 result = 0.0;
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedCoordinateButWas, lexer.Token.Content);
                 return false;
             }
         }
@@ -130,7 +130,7 @@ namespace SimpleCircuit
             }
             if (!double.TryParse(value, NumberStyles.Float, Culture, out result))
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate for '{attributeName}' on {node.Name}, but was '{value}'."));
+                diagnostics?.Post(ErrorCodes.ExpectedCoordinateForOnButWas, attributeName, node.Name, value);
                 result = defaultValue;
                 return false;
             }
@@ -151,7 +151,7 @@ namespace SimpleCircuit
             {
                 if (!double.TryParse(value.Content.ToString(), NumberStyles.Float, Culture, out result))
                 {
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001", $"Expected coordinate"));
+                    diagnostics?.Post(value, ErrorCodes.ExpectedCoordinateButWas, value.Content);
                     return false;
                 }
                 return true;

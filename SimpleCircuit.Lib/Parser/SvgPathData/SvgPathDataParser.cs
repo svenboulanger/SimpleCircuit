@@ -39,8 +39,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                 bool result = true;
                 if (!lexer.Branch(TokenType.Command, out var cmd))
                 {
-                    diagnostics?.Post(new TokenDiagnosticMessage(cmd, SeverityLevel.Error, "DW001",
-                        $"Could not recognize the SVG path command '{cmd.Content}'"));
+                    diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizePathCommand, lexer.Token.Content.ToString());
                     break;
                 }
                 switch (cmd.Content.Span[0])
@@ -233,8 +232,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                         break;
 
                     default:
-                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
-                            $"Could not recognize path command '{cmd}'."));
+                        diagnostics?.Post(cmd, ErrorCodes.CouldNotRecognizePathCommand, cmd.Content.ToString());
                         break;
                 }
             }

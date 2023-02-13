@@ -52,7 +52,6 @@ namespace SimpleCircuit.Components
             double r = 1.0 / weight;
             if (r >= OffResistance * 0.1)
                 throw new ArgumentOutOfRangeException(nameof(weight));
-            Console.WriteLine($"{lowest} --[{minimum}]--> {highest}");
 
             string i = $"{name}.i";
             circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
@@ -220,7 +219,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
         {
             switch (context.Mode)
             {
@@ -229,10 +228,8 @@ namespace SimpleCircuit.Components
                     var highest = context.Offsets[Highest];
                     MinimumLink(context, lowest, highest, Minimum);
                     break;
-
-                default:
-                    return;
             }
+            return true;
         }
 
         /// <inheritdoc />

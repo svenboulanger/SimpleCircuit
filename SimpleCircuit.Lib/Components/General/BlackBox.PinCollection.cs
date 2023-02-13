@@ -1,8 +1,10 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SimpleCircuit.Components
 {
@@ -155,7 +157,7 @@ namespace SimpleCircuit.Components
             private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
 
             /// <inheritdoc />
-            public void DiscoverNodeRelationships(NodeContext context)
+            public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
             {
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
@@ -164,13 +166,37 @@ namespace SimpleCircuit.Components
                         foreach (var pin in pins)
                         {
                             if (PointsUp(pin))
-                                context.Offsets.Group(_parent.Y, pin.Y, 0.0);
+                            {
+                                if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    return false;
+                                }
+                            }
                             else if (PointsDown(pin))
-                                context.Offsets.Group(Bottom, pin.Y, 0.0);
+                            {
+                                if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    return false;
+                                }
+                            }
                             else if (PointsLeft(pin))
-                                context.Offsets.Group(_parent.X, pin.X, 0.0);
+                            {
+                                if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    return false;
+                                }
+                            }
                             else if (PointsRight(pin))
-                                context.Offsets.Group(Right, pin.X, 0.0);
+                            {
+                                if (!context.Offsets.Group(Right, pin.X, 0.0))
+                                {
+                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    return false;
+                                }
+                            }
                         }
                         break;
 
@@ -181,6 +207,7 @@ namespace SimpleCircuit.Components
                         OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context, MinSpaceY, MinEdgeY);
                         break;
                 }
+                return true;
             }
 
             private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, NodeContext context, double spacing, double edgeSpacing)

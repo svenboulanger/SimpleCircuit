@@ -173,8 +173,7 @@ namespace SimpleCircuit
                         EndGroup();
                         break;
                     default:
-                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW001",
-                            $"Could not recognize drawing node '{node.Name}'"));
+                        diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
                         break;
                 }
             }
@@ -219,8 +218,7 @@ namespace SimpleCircuit
             }
             else
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW002",
-                    "No polygon data given"));
+                diagnostics?.Post(ErrorCodes.NoPolygonData);
                 return;
             }
 
@@ -252,8 +250,7 @@ namespace SimpleCircuit
             }
             else
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DRAW002",
-                    "No polyline data given"));
+                diagnostics?.Post(ErrorCodes.NoPolylineData);
                 return;
             }
 
@@ -402,8 +399,7 @@ namespace SimpleCircuit
                                 break;
 
                             default:
-                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "DRAW001",
-                                    $"Could not recognize path command '{cmd}'."));
+                                diagnostics?.Post(ErrorCodes.CouldNotRecognizePathCommand, cmd);
                                 break;
                         }
                     }
@@ -411,8 +407,7 @@ namespace SimpleCircuit
             }
             else
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "DW001",
-                    "Could not find path data"));
+                diagnostics?.Post(ErrorCodes.NoPathData);
             }
         }
         private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
