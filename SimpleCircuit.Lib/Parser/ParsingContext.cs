@@ -125,6 +125,6 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <returns>The wire name.</returns>
         public string GetWireFullname()
-            => GetFullname($"_W:{++WireCount}");
+            => GetFullname($"w{DrawableFactoryDictionary.AnonymousSeparator}{++WireCount}");
     }
 }

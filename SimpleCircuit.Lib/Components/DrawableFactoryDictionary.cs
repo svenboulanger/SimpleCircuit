@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets or sets the separator for the anonymous index.
         /// </summary>
-        public static string AnonymousSeparator { get; set; } = ":";
+        public static string AnonymousSeparator { get; set; } = "-";
 
         private class KeyNode
         {
