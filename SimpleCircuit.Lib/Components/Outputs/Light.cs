@@ -62,7 +62,6 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.ExtendPins(Pins);
                 drawing.Cross(new(), _sqrt2);
 
                 if (!Variants.Contains(Options.Arei))

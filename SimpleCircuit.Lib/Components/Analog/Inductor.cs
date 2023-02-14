@@ -127,7 +127,7 @@ namespace SimpleCircuit.Components.Analog
                         });
 
                         if (Variants.Contains(_dot))
-                            drawing.Dot(new(-l, 3.5));
+                            drawing.Marker(MarkerTypes.Dot, new(-l, 3.5), new(1, 0), MarkerTypes.Dot.PathOptions());
                         
                         if (Variants.Contains(_choke))
                         {
@@ -171,7 +171,7 @@ namespace SimpleCircuit.Components.Analog
                         });
 
                         if (Variants.Contains(_dot))
-                            drawing.Dot(new(-l - 2, 3.5));
+                            drawing.Marker(MarkerTypes.Dot, new(-l - 2, 3.5), new(1, 0), MarkerTypes.Dot.PathOptions());
                         
                         if (Variants.Contains(_choke))
                         {

@@ -20,12 +20,10 @@ namespace SimpleCircuit.Components.Wires
     {
         private readonly struct WirePoint
         {
-            public int Segment { get; }
             public bool IsJumpOver { get; }
             public Vector2 Location { get; }
-            public WirePoint(int segment, Vector2 location, bool isJumpOver)
+            public WirePoint(Vector2 location, bool isJumpOver)
             {
-                Segment = segment;
                 Location = location;
                 IsJumpOver = isJumpOver;
             }
@@ -346,22 +344,24 @@ namespace SimpleCircuit.Components.Wires
             // Extract the first node
             var last = context.Nodes.GetValue(state, StartX, StartY);
             int count = context.WireSegments.Count;
-            _vectors.Add(new(0, last, false));
+            _vectors.Add(new(last, false));
             for (int i = 0; i < _info.Segments.Count; i++)
             {
                 var next = context.Nodes.GetValue(state, GetXName(i), GetYName(i));
 
                 // Add jump-over points if specified
                 if (_info.JumpOverWires)
-                    AddJumpOverWires(i, last, next, context.WireSegments.Take(count));
+                    AddJumpOverWires(last, next, context.WireSegments.Take(count));
 
-                _vectors.Add(new(i, next, false));
+                _vectors.Add(new(next, false));
                 context.WireSegments.Add(new(last, next));
+                if (_vectors.Count > 2)
+                    count++;
                 last = next;
             }
         }
 
-        private void AddJumpOverWires(int segmentIndex, Vector2 last, Vector2 next, IEnumerable<WireSegment> segments)
+        private void AddJumpOverWires(Vector2 last, Vector2 next, IEnumerable<WireSegment> segments)
         {
             // Calculate overlapping vectors
             Vector2 d = last - next;
@@ -398,7 +398,7 @@ namespace SimpleCircuit.Components.Wires
                 foreach (var pair in pts)
                 {
                     if (pair.Key >= minDist && pair.Key <= maxDist)
-                        _vectors.Add(new(segmentIndex, pair.Value, true));
+                        _vectors.Add(new(pair.Value, true));
                 }
             }
         }
@@ -472,40 +472,19 @@ namespace SimpleCircuit.Components.Wires
         protected override void Draw(SvgDrawing drawing)
         {
             PathOptions markerOptions = new("marker");
-            List<Action> drawMarkers = new();
-            int lastSegment = -1;
+            List<(Vector2 Location, Vector2 Normal, MarkerTypes Type)> markers = new();
             if (_info.IsVisible && _vectors.Count > 0)
             {
+                WirePoint point = _vectors[0];
                 drawing.Path(builder =>
                 {
-                    WirePoint point = _vectors[0];
                     builder.MoveTo(point.Location);
-
-                    void TrackMarkers(object sender, PathCommandAddedEventArgs args)
-                    {
-                        if (point.Segment != lastSegment)
-                        {
-                            var segment = _info.Segments[point.Segment];
-                            if (segment.StartMarker != MarkerTypes.None)
-                            {
-                                Vector2 start = args.Start;
-                                Vector2 normalStart = args.StartNormal;
-                                drawMarkers.Add(() => drawing.DrawMarker(segment.StartMarker, start, normalStart, markerOptions));
-                            }
-                            if (segment.EndMarker != MarkerTypes.None)
-                            {
-                                Vector2 end = args.End;
-                                Vector2 normalEnd = args.EndNormal;
-                                drawMarkers.Add(() => drawing.DrawMarker(segment.EndMarker, end, normalEnd, markerOptions));
-                            }
-                            lastSegment = point.Segment;
-                        }
-                    }
-                    builder.PathCommandAdded += TrackMarkers;
-
+                    int segment = 0;
+                    MarkerTypes startMarker = _info.Segments[0].StartMarker;
                     for (int i = 1; i < _vectors.Count; i++)
                     {
                         point = _vectors[i];
+
                         // Draw a small half circle for crossing over this point
                         if (_vectors[i].IsJumpOver)
                         {
@@ -516,21 +495,45 @@ namespace SimpleCircuit.Components.Wires
                             Vector2 m = o + ny * _jumpOverRadius;
 
                             builder.LineTo(s);
+
+                            // Deal with the start marker
+                            if (startMarker != MarkerTypes.None)
+                                markers.Add((builder.Start, builder.StartNormal, startMarker));
+                            startMarker = MarkerTypes.None;
+
                             nx *= 0.55 * _jumpOverRadius;
                             ny *= 0.55 * _jumpOverRadius;
                             builder.CurveTo(s + ny, m - nx, m);
                             builder.SmoothTo(e + ny, e);
                         }
                         else
+                        {
                             builder.LineTo(_vectors[i].Location);
-                    }
 
-                    builder.PathCommandAdded -= TrackMarkers;
+                            // Deal with the start marker
+                            if (startMarker != MarkerTypes.None)
+                                markers.Add((builder.Start, builder.StartNormal, startMarker));
+                            startMarker = MarkerTypes.None;
+
+                            // Deal with the end marker
+                            var endMarker = _info.Segments[segment].EndMarker;
+                            if (endMarker != MarkerTypes.None)
+                                markers.Add((builder.End, builder.EndNormal, endMarker));
+                            segment++;
+
+                            // Prepare for the next start marker
+                            if (segment < _info.Segments.Count)
+                                startMarker = _info.Segments[segment].StartMarker;
+                        }
+                    }
                 }, _info.Options);
 
-                // Draw the markers
-                foreach (var action in drawMarkers)
-                    action();
+                // Draw the markers (if any)
+                if (markers.Count > 0)
+                {
+                    foreach (var marker in markers)
+                        drawing.Marker(marker.Type, marker.Location, marker.Normal, marker.Type.PathOptions());
+                }
             }
         }
 
@@ -561,7 +564,6 @@ namespace SimpleCircuit.Components.Wires
         }
         private string GetXName(int index) => $"{Name}.{index + 1}.x";
         private string GetYName(int index) => $"{Name}.{index + 1}.y";
-
         private void GenerateError(IDiagnosticHandler diagnostics, PinInfo pin, ErrorCodes code, params object[] arguments)
         {
             if (pin.Pin.Content.Length > 0)

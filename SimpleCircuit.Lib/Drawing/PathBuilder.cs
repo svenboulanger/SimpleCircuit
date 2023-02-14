@@ -18,9 +18,24 @@ namespace SimpleCircuit.Drawing
         private char _impliedAction = '\0';
 
         /// <summary>
-        /// An event that is called whenever the current marker location changes
+        /// Gets the starting point of the last drawn segment.
         /// </summary>
-        public event EventHandler<PathCommandAddedEventArgs> PathCommandAdded;
+        public Vector2 Start => _p1;
+
+        /// <summary>
+        /// Gets the end point of the last drawn segment.
+        /// </summary>
+        public Vector2 End => _p2;
+
+        /// <summary>
+        /// Gets the normal of the path at the starting point of the last drawn segment.
+        /// </summary>
+        public Vector2 StartNormal => _n1;
+
+        /// <summary>
+        /// Gets the normal of the path at the ending point of the last drawn segment.
+        /// </summary>
+        public Vector2 EndNormal => _n2;
 
         /// <summary>
         /// Creates a new path builder.
@@ -574,9 +589,6 @@ namespace SimpleCircuit.Drawing
             else
                 _sb.Append(' ');
             _sb.Append(cmd);
-
-            // Run the path command changed
-            PathCommandAdded?.Invoke(this, new(_p1, _p2, _n1, _n2));
         }
 
         /// <summary>

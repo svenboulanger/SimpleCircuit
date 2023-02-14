@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
                 drawing.Line(new(5, 0), new(5, 4), new("drain"));
                 drawing.Polyline(new Vector2[] { new(-5, 0), new(0, 0), new(0, 4) }, new("bulk"));
-                drawing.DrawMarker(MarkerTypes.Arrow, new(0, 4), new(0, 1));
+                drawing.Marker(MarkerTypes.Arrow, new(0, 4), new(0, 1), MarkerTypes.Arrow.PathOptions());
 
                 // Packaged
                 drawing.Circle(new(0, 3), 8.0);

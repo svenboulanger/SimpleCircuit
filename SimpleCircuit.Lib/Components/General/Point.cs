@@ -44,7 +44,7 @@ namespace SimpleCircuit.Components
                 {
                     int connections = Pins[0].Connections;
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
-                        drawing.Circle(new(), 1, new("dot"));
+                        drawing.Marker(MarkerTypes.Dot, new(), new(1, 0), new("marker", "dot", "wire"));
                     else
                         drawing.Expand(new Vector2());
                 }

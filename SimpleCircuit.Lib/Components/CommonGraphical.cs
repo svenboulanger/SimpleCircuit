@@ -57,12 +57,12 @@ namespace SimpleCircuit.Components
         /// <param name="end">The ending point of the arrow.</param>
         public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, PathOptions options = null)
         {
-            options ??= new PathOptions();
-            options.Classes.Add("arrow");
-            drawing.Line(start, end, options);
+            drawing.StartGroup(options);
+            drawing.Line(start, end);
             var normal = end - start;
             normal /= normal.Length;
-            drawing.DrawMarker(MarkerTypes.Arrow, end, normal);
+            drawing.Marker(MarkerTypes.Arrow, end, normal, MarkerTypes.Arrow.PathOptions());
+            drawing.EndGroup();
         }
 
         /// <summary>
@@ -75,6 +75,8 @@ namespace SimpleCircuit.Components
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
         public static void Signs(this SvgDrawing drawing, Vector2 plus, Vector2 minus, double size = 2, bool vertical = false)
         {
+            drawing.StartGroup(new("signs"));
+
             // Plus sign
             drawing.Path(b => b.MoveTo(plus.X, plus.Y - size * 0.5).Vertical(size).MoveTo(plus.X - size * 0.5, plus.Y).Horizontal(size), new("plus"));
 
@@ -84,6 +86,8 @@ namespace SimpleCircuit.Components
                 drawing.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), new("minus"));
             else
                 drawing.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), new("minus"));
+
+            drawing.EndGroup();
         }
 
         /// <summary>
@@ -101,20 +105,6 @@ namespace SimpleCircuit.Components
                 .Line(size, size)
                 .MoveTo(center - new Vector2(-size, size) * 0.5)
                 .Line(-size, size), options);
-        }
-
-        /// <summary>
-        /// Draws a dot.
-        /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        /// <param name="center">The center.</param>
-        /// <param name="size">The size of the dot.</param>
-        /// <param name="options">The path options.</param>
-        public static void Dot(this SvgDrawing drawing, Vector2 center = new(), double size = 1.0, PathOptions options = null)
-        {
-            options ??= new();
-            options.Classes.Add("dot");
-            drawing.Circle(center, size, options);
         }
 
         /// <summary>
@@ -153,7 +143,7 @@ namespace SimpleCircuit.Components
                 if (pin is FixedOrientedPin fop)
                     drawing.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
                 else if (pin is FixedPin fp)
-                    drawing.Dot(fp.Offset, 1, new("wire"));
+                    drawing.Marker(MarkerTypes.Dot, fp.Offset, new(1, 0), new("marker", "dot", "wire"));
             }
         }
 
@@ -189,7 +179,7 @@ namespace SimpleCircuit.Components
         /// <param name="type">The type.</param>
         /// <param name="location">The location.</param>
         /// <param name="orientation">The orientation.</param>
-        public static void DrawMarker(this SvgDrawing drawing, MarkerTypes type, Vector2 location, Vector2 orientation, PathOptions options = null)
+        public static void Marker(this SvgDrawing drawing, MarkerTypes type, Vector2 location, Vector2 orientation, PathOptions options = null)
         {
             if (type == MarkerTypes.None)
                 return;
@@ -218,6 +208,28 @@ namespace SimpleCircuit.Components
                     break;
             }
             drawing.EndTransform();
+        }
+
+        private readonly static PathOptions _arrowOptions = new("marker", "arrow");
+        private readonly static PathOptions _revArrowOptions = new("marker", "reverse", "arrow");
+        private readonly static PathOptions _dotOptions = new("marker", "dot");
+        private readonly static PathOptions _slashOptions = new("marker", "slash");
+
+        /// <summary>
+        /// Create standard path options for a marker type.
+        /// </summary>
+        /// <param name="type">The marker type.</param>
+        /// <returns>The path options.</returns>
+        public static PathOptions PathOptions(this MarkerTypes type)
+        {
+            return type switch
+            {
+                MarkerTypes.Arrow => _arrowOptions,
+                MarkerTypes.ReverseArrow => _revArrowOptions,
+                MarkerTypes.Dot => _dotOptions,
+                MarkerTypes.Slash => _slashOptions,
+                _ => null
+            };
         }
     }
 }

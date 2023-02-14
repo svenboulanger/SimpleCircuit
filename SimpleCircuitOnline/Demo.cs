@@ -53,7 +53,7 @@ namespace SimpleCircuitOnline
             Title = title;
             Description = description;
             Code = code;
-            Style = style;
+            Style = style ?? GraphicalCircuit.DefaultStyle;
         }
 
         /// <summary>
@@ -176,8 +176,8 @@ namespace SimpleCircuitOnline
             new Demo(
                 "Example: CSS styling",
                 "Demonstration of how you can use CSS styling to change the circuit",
-                "// Check the style tab to see how the red lines were done\r\n.section buck\r\n    GND1 <u> V1 <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1 <r> X2\r\n    X2 <d> C1 <d> GND3\r\n    X2 <r +30> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n",
-                GraphicalCircuit.DefaultStyle + "\r\n\r\n/* Styling section \"buck\" */\r\n#buck\\/w-4 path,\r\n#buck\\/D1 polygon, #buck\\/D1 line,\r\n#buck\\/w-5 path,\r\n#buck\\/w-6 path,\r\n#buck\\/L1 path,\r\n#buck\\/w-7 path,\r\n#buck\\/w-10 path,\r\n#buck\\/w-11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/w-12 path { stroke: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/w-1 path,\r\n#buck2\\/V1 circle, #buck2\\/V1 line, #buck2\\/V1 path,\r\n#buck2\\/w-2 path,\r\n#buck2\\/L1 path,\r\n#buck2\\/w-3 path,\r\n#buck2\\/S1 line, #buck2\\/S1 circle,\r\n#buck2\\/w-6 path,\r\n#buck2\\/w-7 path,\r\n#buck2\\/w-10 path,\r\n#buck2\\/w-11 path,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/w-12 path { stroke: red; }\r\n"),
+                "// Check the style tab to see how the red lines were done\r\n.section buck\r\n    GND1 <u> V1(\"V\") <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1(\"L\") <r> X2\r\n    X2 <d> C1(\"C\") <d> GND3\r\n    X2 <r arrow r> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n",
+                GraphicalCircuit.DefaultStyle + "\r\n\r\n/* Styling section \"buck\" */\r\n#buck\\/w-4 *,\r\n#buck\\/D1 *,\r\n#buck\\/w-5 *,\r\n#buck\\/w-6 *,\r\n#buck\\/L1 path,\r\n#buck\\/w-7 *,\r\n#buck\\/w-10 *,\r\n#buck\\/w-11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/w-12 path { stroke: red; }\r\n#buck\\/w-10 polygon { fill: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/w-1 *,\r\n#buck2\\/V1 *,\r\n#buck2\\/w-2 *,\r\n#buck2\\/L1 path,\r\n#buck2\\/w-3 *,\r\n#buck2\\/S1 *,\r\n#buck2\\/w-6 *,\r\n#buck2\\/w-7 *,\r\n#buck2\\/w-10 *,\r\n#buck2\\/w-11 *,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/w-12 * { stroke: red; }\r\n#buck2\\/w-10 polygon { fill: red; }\r\n#buck2\\/V1 tspan { stroke: none; }\r\n"),
         };
     }
 }

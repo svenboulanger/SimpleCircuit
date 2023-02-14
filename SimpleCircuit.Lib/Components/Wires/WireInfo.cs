@@ -43,6 +43,12 @@ namespace SimpleCircuit.Components.Wires
             {
                 var segment = Segments[i];
                 var prevSegment = Segments[i - 1];
+
+                // If the markers are not the same, skip simplification of these two segments
+                if (prevSegment.StartMarker != segment.StartMarker ||
+                    prevSegment.EndMarker != segment.EndMarker)
+                    continue;
+
                 if (segment.IsUnconstrained || prevSegment.IsUnconstrained)
                 {
                     // If both are unconstrained, then combine them into a single one, it wouldn't make much sense otherwise

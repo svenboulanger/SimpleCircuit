@@ -841,12 +841,6 @@ namespace SimpleCircuit
             if (action == null)
                 return;
             var builder = new PathBuilder(_bounds.Peek(), CurrentTransform);
-            Vector2 loc = new(), d = new();
-            builder.PathCommandAdded += (sender, args) =>
-            {
-                loc = args.End;
-                d = args.EndNormal;
-            };
             action(builder);
 
             // Create the path element
