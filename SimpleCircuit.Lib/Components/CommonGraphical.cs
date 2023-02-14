@@ -58,9 +58,11 @@ namespace SimpleCircuit.Components
         public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, PathOptions options = null)
         {
             options ??= new PathOptions();
-            options.EndMarker = PathOptions.MarkerTypes.Arrow;
             options.Classes.Add("arrow");
             drawing.Line(start, end, options);
+            var normal = end - start;
+            normal /= normal.Length;
+            drawing.DrawMarker(MarkerTypes.Arrow, end, normal);
         }
 
         /// <summary>
@@ -178,6 +180,44 @@ namespace SimpleCircuit.Components
         {
             foreach (string name in names)
                 drawing.ExtendPin(pins[name], length);
+        }
+
+        /// <summary>
+        /// Draws a marker of the given type at the specified location and orientation.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="location">The location.</param>
+        /// <param name="orientation">The orientation.</param>
+        public static void DrawMarker(this SvgDrawing drawing, MarkerTypes type, Vector2 location, Vector2 orientation, PathOptions options = null)
+        {
+            if (type == MarkerTypes.None)
+                return;
+
+            // Figure out the (normalize) orientation
+            if (orientation.IsZero())
+                orientation = new(1, 0);
+
+            drawing.BeginTransform(new(location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
+            switch (type)
+            {
+                case MarkerTypes.Arrow:
+                    drawing.Polygon(new Vector2[] { new(-2.5, -1), new(), new(-2.5, 1) }, options);
+                    break;
+
+                case MarkerTypes.ReverseArrow:
+                    drawing.Polygon(new Vector2[] { new(2.5, -1), new(), new(2.5, 1) }, options);
+                    break;
+
+                case MarkerTypes.Dot:
+                    drawing.Circle(new(), 1.0, options);
+                    break;
+
+                case MarkerTypes.Slash:
+                    drawing.Line(new(-1, 2), new(1, -2), options);
+                    break;
+            }
+            drawing.EndTransform();
         }
     }
 }

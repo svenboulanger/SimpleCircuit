@@ -277,17 +277,20 @@ namespace SimpleCircuit.Parser
             };
 
             // Chain together multiple wire definitions
+            MarkerTypes startMarker = MarkerTypes.None;
             while (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
                 if (lexer.Branch(TokenType.Dash, out var dashToken))
                 {
                     // Short-hand notation for <?>
-                    wireInfo.Segments.Add(new(dashToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
+                    wireInfo.Segments.Add(new(dashToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new(), StartMarker = startMarker });
+                    startMarker = MarkerTypes.None;
                 }
                 else if (lexer.Check(TokenType.Arrow))
                 {
                     // Short-hand notation for a directional wire segment
-                    wireInfo.Segments.Add(new(lexer.Token) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = lexer.ArrowOrientation });
+                    wireInfo.Segments.Add(new(lexer.Token) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = lexer.ArrowOrientation, StartMarker = startMarker });
+                    startMarker = MarkerTypes.None;
                     lexer.Next();
                 }
                 else if (lexer.Branch(TokenType.OpenBeak))
@@ -301,43 +304,52 @@ namespace SimpleCircuit.Parser
                             {
                                 case "n":
                                 case "u":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, -1), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "s":
                                 case "d":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(0, 1), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "w":
                                 case "l":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(-1, 0), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "e":
                                 case "r":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = new(1, 0), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "ne":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "nw":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "se":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.25), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "sw":
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(Math.PI * 0.75), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "a":
                                     double angle = ParseDouble(lexer, context);
-                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength });
+                                    wireInfo.Segments.Add(new(directionToken) { Orientation = Vector2.Normal(-angle / 180.0 * Math.PI), IsFixed = false, Length = context.Options.MinimumWireLength, StartMarker = startMarker });
+                                    startMarker = MarkerTypes.None;
                                     break;
 
                                 case "hidden": wireInfo.IsVisible = false; break;
@@ -349,27 +361,40 @@ namespace SimpleCircuit.Parser
                                 case "jump":
                                 case "jmp": wireInfo.JumpOverWires = true; break;
 
-                                case "dotted": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dotted; break;
-                                case "dashed": wireInfo.Options.LineType = Drawing.PathOptions.LineTypes.Dashed; break;
+                                case "dotted":
+                                    wireInfo.Options.Classes.Add("dotted");
+                                    break;
+
+                                case "dashed":
+                                    wireInfo.Options.Classes.Add("dashed");
+                                    break;
+
                                 case "arrow":
                                     if (wireInfo.Segments.Count == 0)
-                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                                        startMarker = MarkerTypes.Arrow;
                                     else
-                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Arrow;
+                                        wireInfo.Segments[^1].EndMarker = MarkerTypes.Arrow;
                                     break;
 
                                 case "rarrow":
                                     if (wireInfo.Segments.Count == 0)
-                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                                        startMarker = MarkerTypes.ReverseArrow;
                                     else
-                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow;
+                                        wireInfo.Segments[^1].EndMarker = MarkerTypes.ReverseArrow;
                                     break;
 
                                 case "dot":
                                     if (wireInfo.Segments.Count == 0)
-                                        wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                                        startMarker = MarkerTypes.Dot;
                                     else
-                                        wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Dot;
+                                        wireInfo.Segments[^1].EndMarker = MarkerTypes.Dot;
+                                    break;
+
+                                case "slash":
+                                    if (wireInfo.Segments.Count == 0)
+                                        startMarker = MarkerTypes.Slash;
+                                    else
+                                        wireInfo.Segments[^1].EndMarker = MarkerTypes.Slash;
                                     break;
 
                                 default:
@@ -380,9 +405,9 @@ namespace SimpleCircuit.Parser
                         else if (lexer.Branch(TokenType.Divide))
                         {
                             if (wireInfo.Segments.Count == 0)
-                                wireInfo.Options.StartMarker = Drawing.PathOptions.MarkerTypes.Slash;
+                                startMarker = MarkerTypes.Slash;
                             else
-                                wireInfo.Options.EndMarker = Drawing.PathOptions.MarkerTypes.Slash;
+                                wireInfo.Segments[^1].EndMarker = MarkerTypes.Slash;
                         }
                         else if (lexer.Branch(TokenType.Plus))
                         {
@@ -414,6 +439,7 @@ namespace SimpleCircuit.Parser
                                 // Don't give an orientation, and in that case the orientation should come from the pin itself!
                                 wireInfo.Segments.Add(new(directionToken) { IsFixed = false, Length = context.Options.MinimumWireLength, Orientation = new() });
                             }
+                            startMarker = MarkerTypes.None;
                         }
                         else if (lexer.Check(TokenType.Newline))
                         {

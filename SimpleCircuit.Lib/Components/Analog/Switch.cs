@@ -171,14 +171,16 @@ namespace SimpleCircuit.Components.Analog
                         drawing.OpenBezier(new Vector2[]
                         {
                             new(-3, -5), new(1, -3), new(1, -2), new(2, 2)
-                        }, new() { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                        });
+                        drawing.DrawMarker(MarkerTypes.Arrow, new(2, 2), new(0.24253562503, 0.97014250014));
                         break;
 
                     case 1:
                         drawing.OpenBezier(new Vector2[]
                         {
                            new(-4, -6), new(1, -3), new(1, -2), new(2, 1)
-                        }, new() { StartMarker = Drawing.PathOptions.MarkerTypes.ReverseArrow });
+                        });
+                        drawing.DrawMarker(MarkerTypes.Arrow, new(2, 1), new(0.31622777, 0.94868330));
                         break;
                 }
 

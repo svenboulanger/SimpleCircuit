@@ -3,6 +3,7 @@ using System.Text;
 
 namespace SimpleCircuit.Drawing
 {
+
     /// <summary>
     /// A class for building an SVG path.
     /// </summary>
@@ -12,9 +13,14 @@ namespace SimpleCircuit.Drawing
         private bool _isFirst = true;
         private readonly ExpandableBounds _bounds;
         private readonly Transform _transform;
-        private Vector2 _current, _lastHandle;
+        private Vector2 _p1, _n1, _h1, _p2, _n2, _h2;
         private Func<Vector2, Vector2> _relativeModifier = null, _absoluteModifier = null;
         private char _impliedAction = '\0';
+
+        /// <summary>
+        /// An event that is called whenever the current marker location changes
+        /// </summary>
+        public event EventHandler<PathCommandAddedEventArgs> PathCommandAdded;
 
         /// <summary>
         /// Creates a new path builder.
@@ -62,26 +68,6 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
-        /// Most commands require starting from the origin (0,0), but since we apply
-        /// transformations, we cannot assume that the origin should start at (0,0)!
-        /// </summary>
-        private void ValidateOrigin()
-        {
-            if (_sb.Length == 0)
-            {
-                _current = _absoluteModifier?.Invoke(new()) ?? new();
-                _current = _transform.Apply(_current);
-
-                // If this is not the origin, then we need to move there first
-                if (_current.X.IsZero() && _current.Y.IsZero())
-                    return; // We're safe
-
-                // We're not safe, we need to move to our origin first!
-                Append($"M{Convert(_current)}");
-            }
-        }
-
-        /// <summary>
         /// Moves the current point using absolute coordinates.
         /// </summary>
         /// <param name="location">The location.</param>
@@ -89,10 +75,18 @@ namespace SimpleCircuit.Drawing
         public PathBuilder MoveTo(Vector2 location)
         {
             location = _absoluteModifier?.Invoke(location) ?? location;
-            _lastHandle = _current = _transform.Apply(location);
+            location = _transform.Apply(location);
 
-            _bounds.Expand(_current);
-            Append($"{Action('M', 'L')}{Convert(_current)}");
+            // Store the current segment information
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 = location;
+            _h2 = location;
+            _n1 = new();
+            _n2 = new();
+
+            _bounds.Expand(location);
+            Append($"{Action('M', 'L')}{Convert(location)}");
             return this;
         }
 
@@ -112,13 +106,26 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Move(Vector2 delta)
         {
-            ValidateOrigin();
-            delta = _relativeModifier?.Invoke(delta) ?? delta;
-            delta = _transform.ApplyDirection(delta);
-            _current += delta;
-            _lastHandle = _current;
+            if (_isFirst)
+            {
+                delta = _absoluteModifier?.Invoke(delta) ?? delta;
+                delta = _transform.Apply(delta);
+            }
+            else
+            {
+                delta = _relativeModifier?.Invoke(delta) ?? delta;
+                delta = _transform.ApplyDirection(delta);
+            }
 
-            _bounds.Expand(_current);
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p1;
+
+            _n1 = new();
+            _n2 = new();
+
+            _bounds.Expand(_p2);
             Append($"{Action('m', 'l')}{Convert(delta)}");
             return this;
         }
@@ -139,18 +146,26 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder LineTo(Vector2 location)
         {
-            ValidateOrigin();
             location = _absoluteModifier?.Invoke(location) ?? location;
             location = _transform.Apply(location);
-            if ((location.Y - _current.Y).IsZero())
+
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 = location;
+            _h2 = location;
+
+            _n1 = _p2 - _p1;
+            _n1 /= _n1.Length;
+            _n2 = _n1;
+
+            if ((location.Y - _p1.Y).IsZero())
                 Append($"{Action('H')}{Convert(location.X)}");
-            else if ((location.X - _current.X).IsZero())
+            else if ((location.X - _p1.X).IsZero())
                 Append($"{Action('V')}{Convert(location.Y)}");
             else
                 Append($"{Action('L')}{Convert(location)}");
 
-            _lastHandle = _current = location;
-            _bounds.Expand(_current);
+            _bounds.Expand(location);
             return this;
         }
 
@@ -170,9 +185,17 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Line(Vector2 delta)
         {
-            ValidateOrigin();
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
+
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p1;
+
+            _n1 = delta / delta.Length;
+            _n2 = _n1;
+
             if (delta.Y.IsZero())
                 Append($"{Action('h')}{Convert(delta.X)}");
             else if (delta.X.IsZero())
@@ -180,9 +203,7 @@ namespace SimpleCircuit.Drawing
             else
                 Append($"{Action('l')}{Convert(delta)}");
 
-            _current += delta;
-            _lastHandle = _current;
-            _bounds.Expand(_current);
+            _bounds.Expand(_p2);
             return this;
         }
 
@@ -202,7 +223,6 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder HorizontalTo(double x)
         {
-            ValidateOrigin();
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
             Vector2 vnx;
@@ -221,10 +241,19 @@ namespace SimpleCircuit.Drawing
                 vnx /= x;
             }
 
-            double k = x - (_current - vo).Dot(vnx);
-            _current += k * vnx;
-            _bounds.Expand(_current);
-            Append($"{Action('L')}{Convert(_current)}");
+            double k = x - (_p2 - vo).Dot(vnx);
+            var delta = k * vnx;
+
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p2;
+
+            _n1 = delta / delta.Length;
+            _n2 = _n1;
+
+            _bounds.Expand(_p2);
+            Append($"{Action('L')}{Convert(_p2)}");
             return this;
         }
 
@@ -235,14 +264,19 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Horizontal(double dx)
         {
-            ValidateOrigin();
             Vector2 delta = new(dx, 0);
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
-            _current += delta;
-            _lastHandle = _current;
 
-            _bounds.Expand(_current);
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p2;
+
+            _n1 = delta / delta.Length;
+            _n2 = delta;
+
+            _bounds.Expand(_p2);
             Append($"{Action('l')}{Convert(delta)}");
             return this;
         }
@@ -254,7 +288,6 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder VerticalTo(double y)
         {
-            ValidateOrigin();
             Vector2 vo = _absoluteModifier?.Invoke(new()) ?? new();
             vo = _transform.Apply(vo);
             Vector2 vny;
@@ -272,10 +305,20 @@ namespace SimpleCircuit.Drawing
                 y = vny.Length;
                 vny /= y;
             }
-            double k = y - (_current - vo).Dot(vny);
-            _current += k * vny;
-            _bounds.Expand(_current);
-            Append($"{Action('L')}{Convert(_current)}");
+
+            double k = y - (_p2 - vo).Dot(vny);
+            var delta = k * vny;
+
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p2;
+
+            _n1 = delta / delta.Length;
+            _n2 = _n1;
+
+            _bounds.Expand(_p2);
+            Append($"{Action('L')}{Convert(_p2)}");
             return this;
         }
 
@@ -286,16 +329,33 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Vertical(double dy)
         {
-            ValidateOrigin();
             Vector2 delta = new(0, dy);
             delta = _relativeModifier?.Invoke(delta) ?? delta;
             delta = _transform.ApplyDirection(delta);
-            _current += delta;
-            _lastHandle = _current;
 
-            _bounds.Expand(_current);
+            _p1 = _p2;
+            _h1 = _p1;
+            _p2 += delta;
+            _h2 = _p2;
+
+            _n1 = delta / delta.Length;
+            _n2 = _n1;
+
+            _bounds.Expand(_p2);
             Append($"{Action('l')}{Convert(delta)}");
             return this;
+        }
+
+        private void CalculateBezierNormals()
+        {
+            _n1 = _h1 - _p1;
+            if (_n1.X.IsZero() && _n1.Y.IsZero())
+                _n1 = _h2 - _p1;
+            _n1 /= _n1.Length;
+            _n2 = _p2 - _h1;
+            if (_n2.X.IsZero() && _n2.Y.IsZero())
+                _n2 = _p2 - _h1;
+            _n2 /= _n2.Length;
         }
 
         /// <summary>
@@ -307,16 +367,21 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder CurveTo(Vector2 h1, Vector2 h2, Vector2 end)
         {
-            ValidateOrigin();
             h1 = _absoluteModifier?.Invoke(h1) ?? h1;
             h2 = _absoluteModifier?.Invoke(h2) ?? h2;
             end = _absoluteModifier?.Invoke(end) ?? end;
             h1 = _transform.Apply(h1);
-            _lastHandle = _transform.Apply(h2);
-            _current = _transform.Apply(end);
+            h2 = _transform.Apply(h2);
+            end = _transform.Apply(end);
 
-            _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"{Action('C')}{Convert(h1)} {Convert(_lastHandle)} {Convert(_current)}");
+            _p1 = _p2;
+            _h1 = h1;
+            _p2 = end;
+            _h2 = h2;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { h1, h2, end });
+            Append($"{Action('C')}{Convert(h1)} {Convert(h2)} {Convert(end)}");
             return this;
         }
 
@@ -329,17 +394,20 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Curve(Vector2 dh1, Vector2 dh2, Vector2 dend)
         {
-            ValidateOrigin();
             dh1 = _relativeModifier?.Invoke(dh1) ?? dh1;
             dh2 = _relativeModifier?.Invoke(dh2) ?? dh2;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
             dh1 = _transform.ApplyDirection(dh1);
             dh2 = _transform.ApplyDirection(dh2);
             dend = _transform.ApplyDirection(dend);
-            _lastHandle = _current + dh2;
-            _current += dend;
 
-            _bounds.Expand(new[] { _current + dh1, _lastHandle, _current });
+            _p1 = _p2;
+            _h1 = _p1 + dh1;
+            _h2 = _p1 + dh2;
+            _p2 = _p1 + dend;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { _h1, _h2, _p2 });
             Append($"{Action('c')}{Convert(dh1)} {Convert(dh2)} {Convert(dend)}");
             return this;
         }
@@ -352,15 +420,20 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothTo(Vector2 h, Vector2 end)
         {
-            ValidateOrigin();
             h = _absoluteModifier?.Invoke(h) ?? h;
             end = _absoluteModifier?.Invoke(end) ?? end;
-            var h1 = 2 * _current - _lastHandle;
-            _lastHandle = _transform.Apply(h);
-            _current = _transform.Apply(end);
+            h = _transform.Apply(h);
+            end = _transform.Apply(end);
+            var h1 = 2 * _p2 - _h2;
 
-            _bounds.Expand(new[] { h1, _lastHandle, _current });
-            Append($"{Action('S')}{Convert(_lastHandle)} {Convert(_current)}");
+            _p1 = _p2;
+            _h1 = h1;
+            _p2 = end;
+            _h2 = h;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { _h1, _h2, _p2 });
+            Append($"{Action('S')}{Convert(_h2)} {Convert(_p2)}");
             return this;
         }
 
@@ -372,16 +445,19 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Smooth(Vector2 dh, Vector2 dend)
         {
-            ValidateOrigin();
             dh = _relativeModifier?.Invoke(dh) ?? dh;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
-            var h1 = 2 * _current - _lastHandle;
             dh = _transform.ApplyDirection(dh);
             dend = _transform.ApplyDirection(dend);
-            _lastHandle = _current + dh;
-            _current += dend;
+            var h1 = 2 * _p2 - _h2;
 
-            _bounds.Expand(new[] { h1, _lastHandle, _current });
+            _p1 = _p2;
+            _h1 = h1;
+            _p2 = _p1 + dend;
+            _h2 = _p1 + dh;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { _h1, _h2, _p2});
             Append($"{Action('s')}{Convert(dh)} {Convert(dend)}");
             return this;
         }
@@ -394,14 +470,19 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurveTo(Vector2 h, Vector2 end)
         {
-            ValidateOrigin();
             h = _absoluteModifier?.Invoke(h) ?? h;
             end = _absoluteModifier?.Invoke(end) ?? end;
-            _lastHandle = _transform.Apply(h);
-            _current = _transform.Apply(end);
+            h = _transform.Apply(h);
+            end = _transform.Apply(end);
 
-            _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"{Action('Q')}{Convert(_lastHandle)} {Convert(_current)}");
+            _p1 = _p2;
+            _h1 = h;
+            _h2 = h;
+            _p2 = end;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { _h2, _p2 });
+            Append($"{Action('Q')}{Convert(_h2)} {Convert(_p2)}");
             return this;
         }
 
@@ -413,16 +494,19 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurve(Vector2 dh, Vector2 dend)
         {
-            ValidateOrigin();
             dh = _relativeModifier?.Invoke(dh) ?? dh;
             dend = _relativeModifier?.Invoke(dend) ?? dend;
             dh = _transform.ApplyDirection(dh);
             dend = _transform.ApplyDirection(dend);
-            _lastHandle = _current + dh;
-            _current += dend;
 
-            _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"{Action('q')}{Convert(_lastHandle)} {Convert(_current)}");
+            _p1 = _p2;
+            _h1 = _p1 + dh;
+            _p2 = _p1 + dend;
+            _h2 = _h1;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { _h1, _p2 });
+            Append($"{Action('q')}{Convert(dh)} {Convert(dend)}");
             return this;
         }
 
@@ -433,13 +517,18 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuadTo(Vector2 end)
         {
-            ValidateOrigin();
             end = _absoluteModifier?.Invoke(end) ?? end;
-            _lastHandle = 2 * _current - _lastHandle;
-            _current = _transform.Apply(end);
+            var h = 2 * _p2 - _h2;
+            end = _transform.Apply(end);
 
-            _bounds.Expand(new[] { _lastHandle, _current });
-            Append($"{Action('T')}{Convert(_current)}");
+            _p1 = _p2;
+            _h1 = h;
+            _p2 = end;
+            _h2 = h;
+            CalculateBezierNormals();
+
+            _bounds.Expand(new[] { h, end });
+            Append($"{Action('T')}{Convert(end)}");
             return this;
         }
 
@@ -450,13 +539,16 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuad(Vector2 dend)
         {
-            ValidateOrigin();
             dend = _relativeModifier?.Invoke(dend) ?? dend;
-            _lastHandle = 2 * _current - _lastHandle;
+            var h = 2 * _p2 - _h2;
             dend = _transform.ApplyDirection(dend);
-            _current += dend;
 
-            _bounds.Expand(new[] { _lastHandle, _current });
+            _p1 = _p2;
+            _h1 = h;
+            _p2 = _p1 + dend;
+            _h2 = h;
+
+            _bounds.Expand(new[] { _h2, _p2 });
             Append($"{Action('t')}{Convert(dend)}");
             return this;
         }
@@ -482,6 +574,9 @@ namespace SimpleCircuit.Drawing
             else
                 _sb.Append(' ');
             _sb.Append(cmd);
+
+            // Run the path command changed
+            PathCommandAdded?.Invoke(this, new(_p1, _p2, _n1, _n2));
         }
 
         /// <summary>
@@ -514,6 +609,20 @@ namespace SimpleCircuit.Drawing
             if (c == current)
                 return "";
             return c.ToString();
+        }
+
+        /// <summary>
+        /// Calculates the average orientation given the new orientation.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The average orientation.</returns>
+        public static Vector2 Bisector(Vector2 a, Vector2 b)
+        {
+            var newOrientation = a * b.Length + b * a.Length;
+            if (newOrientation.X.IsZero() && newOrientation.Y.IsZero())
+                return new Vector2(a.Y, -a.X) / a.Length;
+            return newOrientation / newOrientation.Length;
         }
 
         /// <summary>

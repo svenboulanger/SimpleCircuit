@@ -85,16 +85,16 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDirectional(SvgDrawing drawing, bool diverging)
             {
-                var options = new PathOptions("direction") { EndMarker = PathOptions.MarkerTypes.Arrow };
+                var options = new PathOptions("direction");
                 if (diverging)
                 {
-                    drawing.Line(new(-2, 6), new(-6, 12), options);
-                    drawing.Line(new(2, 6), new(6, 12), options);
+                    drawing.Arrow(new(-2, 6), new(-6, 12), options);
+                    drawing.Arrow(new(2, 6), new(6, 12), options);
                 }
                 else
                 {
-                    drawing.Line(new(-2, 6), new(-2, 12), options);
-                    drawing.Line(new(2, 6), new(2, 12), options);
+                    drawing.Arrow(new(-2, 6), new(-2, 12), options);
+                    drawing.Arrow(new(2, 6), new(2, 12), options);
                 }
             }
             private void DrawEmergency(SvgDrawing drawing)

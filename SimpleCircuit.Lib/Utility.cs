@@ -26,6 +26,15 @@ namespace SimpleCircuit
         public static bool IsZero(this double value) => Math.Abs(value) < 1e-9;
 
         /// <summary>
+        /// Determines whether the specified vector is zero.
+        /// </summary>
+        /// <param name="vector">The value.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified value is zero; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsZero(this Vector2 vector) => vector.X.IsZero() && vector.Y.IsZero();
+
+        /// <summary>
         /// Parse a coordinate attribute on an XML node.
         /// </summary>
         /// <param name="node">The XML node.</param>

@@ -70,7 +70,7 @@ namespace SimpleCircuit.Components.Sources
             private void DrawAmericanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, 0), 6);
-                drawing.Line(new(-3, 0), new(3, 0), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
                 drawing.Text(Labels[0], new(0, -8), new(0, -1));
                 drawing.Text(Labels[1], new(0, 8), new(0, 1));
             }

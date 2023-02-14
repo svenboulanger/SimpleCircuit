@@ -483,38 +483,6 @@ namespace SimpleCircuit
                 foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
                     options.Classes.Add(name);
             }
-
-            // Read a marker
-            attribute = parent.Attributes?["end"];
-            if (attribute != null)
-            {
-                switch (attribute.Value.ToLower())
-                {
-                    case "arrow": options.EndMarker = PathOptions.MarkerTypes.Arrow; break;
-                    case "slash": options.EndMarker = PathOptions.MarkerTypes.Slash; break;
-                    case "dot": options.EndMarker = PathOptions.MarkerTypes.Dot; break;
-                }
-            }
-            attribute = parent.Attributes?["middle"];
-            if (attribute != null)
-            {
-                switch (attribute.Value.ToLower())
-                {
-                    case "arrow": options.MiddleMarker = PathOptions.MarkerTypes.Arrow; break;
-                    case "slash": options.MiddleMarker = PathOptions.MarkerTypes.Slash; break;
-                    case "dot": options.MiddleMarker = PathOptions.MarkerTypes.Dot; break;
-                }
-            }
-            attribute = parent.Attributes?["start"];
-            if (attribute != null)
-            {
-                switch (attribute.Value.ToLower())
-                {
-                    case "arrow": options.StartMarker = PathOptions.MarkerTypes.Arrow; break;
-                    case "slash": options.StartMarker = PathOptions.MarkerTypes.Slash; break;
-                    case "dot": options.StartMarker = PathOptions.MarkerTypes.Dot; break;
-                }
-            }
             return options;
         }
 
@@ -873,14 +841,20 @@ namespace SimpleCircuit
             if (action == null)
                 return;
             var builder = new PathBuilder(_bounds.Peek(), CurrentTransform);
+            Vector2 loc = new(), d = new();
+            builder.PathCommandAdded += (sender, args) =>
+            {
+                loc = args.End;
+                d = args.EndNormal;
+            };
             action(builder);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
             options?.Apply(path);
+
             _current.AppendChild(path);
             path.SetAttribute("d", builder.ToString());
-
         }
 
         private void PopulateText(XmlNode element, string line)

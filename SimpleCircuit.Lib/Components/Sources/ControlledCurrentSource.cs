@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Sources
                 });
 
                 // The circle with the arrow
-                drawing.Line(new(-3, 0), new(3, 0), new("arrow") { EndMarker = Drawing.PathOptions.MarkerTypes.Arrow });
+                drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
 
                 // Depending on the orientation, let's anchor the text differently
                 drawing.Text(Labels[0], new(0, -8), new(0, -1));

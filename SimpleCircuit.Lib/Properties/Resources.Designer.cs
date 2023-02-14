@@ -73,7 +73,8 @@ namespace SimpleCircuit.Properties {
         ///.plane { stroke-width: 1pt; }
         ///.battery .neg { stroke-width: 0.75pt; }
         ///text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
-        ///.small tspan { font-size: 0.8em; }.
+        ///.small tspan { font-size: 0.8em; }
+        ///.marker { fill: black; }.
         /// </summary>
         internal static string DefaultStyle {
             get {

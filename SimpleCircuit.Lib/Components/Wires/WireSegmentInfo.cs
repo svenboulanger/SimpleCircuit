@@ -33,6 +33,16 @@ namespace SimpleCircuit.Components.Wires
         public double Length { get; set; }
 
         /// <summary>
+        /// Gets or sets the start marker.
+        /// </summary>
+        public MarkerTypes StartMarker { get; set; } = MarkerTypes.None;
+
+        /// <summary>
+        /// Gets or sets the end marker.
+        /// </summary>
+        public MarkerTypes EndMarker { get; set; } = MarkerTypes.None;
+
+        /// <summary>
         /// Creates a new <see cref="WireSegmentInfo"/>.
         /// </summary>
         /// <param name="source">The source.</param>
