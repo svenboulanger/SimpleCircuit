@@ -44,8 +44,12 @@ namespace SimpleCircuit.Components
                 {
                     int connections = Pins[0].Connections;
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
-                        drawing.Circle(new Vector2(), 1, new("dot"));
+                        drawing.Circle(new(), 1, new("dot"));
+                    else
+                        drawing.Expand(new Vector2());
                 }
+                else
+                    drawing.Expand(new Vector2());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
                 drawing.Text(Labels[0], n * Distance, n);

@@ -169,7 +169,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
                                     return false;
                                 }
                             }
@@ -177,7 +177,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
                                     return false;
                                 }
                             }
@@ -185,7 +185,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
                                     return false;
                                 }
                             }
@@ -193,7 +193,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Right, pin.X, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, _parent.Name);
+                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
                                     return false;
                                 }
                             }

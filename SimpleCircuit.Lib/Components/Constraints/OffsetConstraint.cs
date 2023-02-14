@@ -15,25 +15,6 @@ namespace SimpleCircuit.Components
         public int Order => 0;
 
         /// <summary>
-        /// Adds a structure to the circuit that tries to guarantee an offset between two nodes.
-        /// </summary>
-        /// <param name="circuit">The circuit.</param>
-        /// <param name="name">A unique name for the elements.</param>
-        /// <param name="lowest">The lowest node.</param>
-        /// <param name="highest">The highest node.</param>
-        /// <param name="offset">The offset.</param>
-        public static void AddOffset(IEntityCollection circuit, string name, string lowest, string highest, double offset)
-        {
-            // string i = $"{name}.i";
-            // circuit.Add(new Resistor($"R{name}", i, highest, 1e-6));
-            // circuit.Add(new VoltageSource($"V{name}", i, lowest, offset));
-
-            // Northon equivalent has less unknowns to solve
-            circuit.Add(new Resistor($"R{name}", highest, lowest, 1e-6));
-            circuit.Add(new CurrentSource($"I{name}", lowest, highest, offset * 1e6));
-        }
-
-        /// <summary>
         /// Gets the name of the constraint.
         /// </summary>
         public string Name { get; }
@@ -99,7 +80,7 @@ namespace SimpleCircuit.Components
                 case NodeRelationMode.Offsets:
                     if (!context.Offsets.Group(Lowest, Highest, Offset))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
                         return false;
                     }
                     break;

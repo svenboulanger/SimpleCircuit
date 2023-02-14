@@ -36,7 +36,7 @@ namespace SimpleCircuit
         /// <value>
         /// The current transform.
         /// </value>
-        protected Transform CurrentTransform => _tf.Peek();
+        public Transform CurrentTransform => _tf.Peek();
 
         /// <summary>
         /// Gets or sets the style of the drawing.
@@ -519,6 +519,27 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Expands the drawing to include the specified point.
+        /// </summary>
+        /// <param name="point">The point to expand.</param>
+        public void Expand(Vector2 point)
+            => _bounds.Peek().Expand(CurrentTransform.Apply(point));
+
+        /// <summary>
+        /// Expands the drawing to include the specified points.
+        /// </summary>
+        /// <param name="points">The points to expand.</param>
+        public void Expand(params Vector2[] points)
+            => _bounds.Peek().Expand(CurrentTransform.Apply(points));
+
+        /// <summary>
+        /// Expands the drawing to include the specified points.
+        /// </summary>
+        /// <param name="points">The points to expand.</param>
+        public void Expand(IEnumerable<Vector2> points)
+            => _bounds.Peek().Expand(CurrentTransform.Apply(points));
+
+        /// <summary>
         /// Draws a line.
         /// </summary>
         /// <param name="start">The start.</param>
@@ -528,7 +549,7 @@ namespace SimpleCircuit
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
-            _bounds.Peek().Expand(new[] { start, end });
+            _bounds.Peek().Expand(start, end);
 
             // Create the line
             var line = _document.CreateElement("line", Namespace);
@@ -550,7 +571,7 @@ namespace SimpleCircuit
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
-            _bounds.Peek().Expand(new[] { position - new Vector2(radius, radius), position + new Vector2(radius, radius) });
+            _bounds.Peek().Expand(position - new Vector2(radius, radius), position + new Vector2(radius, radius));
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);

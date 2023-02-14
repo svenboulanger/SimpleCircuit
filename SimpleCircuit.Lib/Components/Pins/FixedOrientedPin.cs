@@ -102,12 +102,12 @@ namespace SimpleCircuit.Components.Pins
                 case NodeRelationMode.Offsets:
                     if (!context.Offsets.Group(_origin.X, X, offset.X))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.X, Name);
                         return false;
                     }
                     if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.Y, Name);
                         return false;
                     }
                     break;

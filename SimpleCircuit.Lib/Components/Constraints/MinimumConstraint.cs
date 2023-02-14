@@ -118,15 +118,26 @@ namespace SimpleCircuit.Components
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The minimum.</param>
-        public static void MinimumLink(NodeContext context, RelativeItem lowest, RelativeItem highest, double minimum)
+        public static bool MinimumLink(NodeContext context, RelativeItem lowest, RelativeItem highest, double minimum)
         {
-            // We will try to see if this minimum allows us to order the representatives
             double offset = lowest.Offset - highest.Offset + minimum;
-            double reqDistance = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
-            if (offset > reqDistance)
-                context.Extremes.Order(lowest.Representative, highest.Representative);
+            if (lowest.Representative != highest.Representative)
+            {
+                // We will try to see if this minimum allows us to order the representatives
+                double reqDistance = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
+                if (offset > reqDistance)
+                    context.Extremes.Order(lowest.Representative, highest.Representative);
+                else
+                    context.Extremes.Linked.Group(lowest.Representative, highest.Representative);
+                return true;
+            }
             else
-                context.Extremes.Linked.Group(lowest.Representative, highest.Representative);
+            {
+                // Check whether the minimum is OK
+                if (offset < 0 || offset.IsZero())
+                    return true;
+                return false;
+            }
         }
 
         /// <summary>
@@ -136,12 +147,12 @@ namespace SimpleCircuit.Components
         /// <param name="start">The start node.</param>
         /// <param name="end">The end node.</param>
         /// <param name="minimum">The minimum.</param>
-        public static void MinimumDirectionalLink(NodeContext context, RelativeItem start, RelativeItem end, double minimum)
+        public static bool MinimumDirectionalLink(NodeContext context, RelativeItem start, RelativeItem end, double minimum)
         {
             if (minimum > 0)
-                MinimumLink(context, start, end, minimum);
+                return MinimumLink(context, start, end, minimum);
             else
-                MinimumLink(context, end, start, -minimum);
+                return MinimumLink(context, end, start, -minimum);
         }
 
         /// <summary>

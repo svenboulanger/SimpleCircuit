@@ -116,7 +116,7 @@ namespace SimpleCircuitOnline
             new Demo(
                 "Example: Non-inverting amplifier",
                 "The circuit on EEVblog's \"I only give negative feedback\" t-shirt.",
-                "// Make sure you specify the pin on the right side of the component name! This should not be OA1[p].\r\nT(\"V_in\") <r> [p]OA1\r\n\r\n// Resistive voltage divider:\r\nOA1[out] <r> Xout <d l> R(\"R_F\") <l> Xfb <d> R(\"R_G\") <d> GND\r\nXfb <u 10 r> [n]OA1\r\n\r\nXout <r 5> T(\"V_out\")\r\n"),
+                "// Make sure you specify the pin on the right side of the component name! This should not be OA1[p].\r\nT(\"V_in\") <r> [p]OA1\r\n\r\n// Resistive voltage divider:\r\nOA1[out] <r> Xout <d l> R(\"R_F\") <l> Xfb <d> R(\"R_G\") <d> GND\r\nXfb <u r> [n]OA1\r\n\r\nXout <r 5> T(\"V_out\")\r\n"),
 
             // Full bridge rectifier
             new Demo(

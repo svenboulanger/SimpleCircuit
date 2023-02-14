@@ -49,12 +49,12 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (doX && !context.Offsets.Group(last.X, presence.X, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
                                 return false;
                             }
                             if (doY && !context.Offsets.Group(last.Y, presence.Y, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
                                 return false;
                             }
                         }

@@ -64,6 +64,16 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Expands the bounds looking at the specified points.
+        /// </summary>
+        /// <param name="vectors"></param>
+        public void Expand(params Vector2[] vectors)
+        {
+            foreach (var v in vectors)
+                Expand(v);
+        }
+
+        /// <summary>
         /// Converts the bounds to a string.
         /// </summary>
         /// <returns></returns>

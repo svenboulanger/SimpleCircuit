@@ -187,7 +187,7 @@
         [Diagnostic(SeverityLevel.Error, "DE005", "No path data given")]
         NoPathData,
 
-        [Diagnostic(SeverityLevel.Error, "PE053", "Could not recognize statement start '{0}'")]
+        [Diagnostic(SeverityLevel.Error, "PE053", "Could not recognize start of statement '{0}'")]
         CouldNotRecognizeStatementStart,
 
         [Diagnostic(SeverityLevel.Error, "PE054", "Expected control statement type")]
@@ -196,16 +196,28 @@
         [Diagnostic(SeverityLevel.Error, "PE055", "Expected the symbol name")]
         ExpectedSymbolName,
 
-        [Diagnostic(SeverityLevel.Error, "PE056", "Expected attribute '{0}' on {1}")]
+        [Diagnostic(SeverityLevel.Error, "PE056", "Expected attribute {0} on {1}")]
         ExpectedAttributeOn,
 
-        [Diagnostic(SeverityLevel.Warning, "DW057", "Expected coordinate for '{0}' on {1}, but was '{2}'")]
+        [Diagnostic(SeverityLevel.Warning, "DW057", "Expected coordinate for attribute {0} on {1}, but was '{2}'")]
         ExpectedCoordinateForOnButWas,
 
         [Diagnostic(SeverityLevel.Warning, "DW058", "Expected coordinate, but was '{0}'")]
         ExpectedCoordinateButWas,
 
-        [Diagnostic(SeverityLevel.Warning, "SW059", "Cannot resolve fixed offset for '{0}'")]
-        CannotResolveFixedOffset,
+        [Diagnostic(SeverityLevel.Error, "SE059", "Cannot resolve fixed offset {0:g} for '{1}'")]
+        CannotResolveFixedOffsetFor,
+
+        [Diagnostic(SeverityLevel.Error, "SE059", "Cannot align '{0}' and '{1}' along the X-axis")]
+        CannotAlignAlongX,
+
+        [Diagnostic(SeverityLevel.Error, "SE059", "Cannot align '{0}' and '{1}' along the Y-axis")]
+        CannotAlignAlongY,
+
+        [Diagnostic(SeverityLevel.Warning, "SW060", "Could not satisfy a minimum distance of {0} in the X-direction for '{1}'")]
+        CouldNotSatisfyMinimumOfForInX,
+
+        [Diagnostic(SeverityLevel.Warning, "SW061", "Could not satisfy a minimum distance of {0} in the Y-direction for '{1}'")]
+        CouldNotSatisfyMinimumOfForInY,
     }
 }

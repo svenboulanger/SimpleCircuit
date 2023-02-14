@@ -124,7 +124,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.X, StartX, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _start.X, StartX);
                                 return false;
                             }
                         }
@@ -132,7 +132,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.Y, StartY, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
                                 return false;
                             }
                         }
@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.X, EndX, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _end.X, EndX);
                                 return false;
                             }
                         }
@@ -151,7 +151,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.Y, EndY, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
                                 return false;
                             }
                         }
@@ -171,7 +171,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -179,7 +179,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -190,7 +190,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(x, tx, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -198,7 +198,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(y, ty, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotResolveFixedOffset, Name);
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -220,17 +220,13 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (doX && !segment.Orientation.X.IsZero())
                             {
-                                if (segment.Orientation.X > 0)
-                                    MinimumConstraint.MinimumLink(context, offsetX, toOffsetX, segment.Orientation.X * segment.Length);
-                                else
-                                    MinimumConstraint.MinimumLink(context, toOffsetX, offsetX, -segment.Orientation.X * segment.Length);
+                                if (!MinimumConstraint.MinimumDirectionalLink(context, offsetX, toOffsetX, segment.Orientation.X * segment.Length))
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInX, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
                             }
                             if (doY && !segment.Orientation.Y.IsZero())
                             {
-                                if (segment.Orientation.Y > 0)
-                                    MinimumConstraint.MinimumLink(context, offsetY, toOffsetY, segment.Orientation.Y * segment.Length);
-                                else
-                                    MinimumConstraint.MinimumLink(context, toOffsetY, offsetY, -segment.Orientation.Y * segment.Length);
+                                if (!MinimumConstraint.MinimumDirectionalLink(context, offsetY, toOffsetY, segment.Orientation.Y * segment.Length))
+                                    diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
                             }
                         }
                         offsetX = toOffsetX;

@@ -10,12 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".section buckboost
-    GND1 <u> V <u r> S1 <r> X1
-    GND2 <u> D1 <u> X1
-    X1 <r> L1 <r> X2
-    X2 <r
-.ends
+            var script = @"X1 <r> X2 <d 10> X3 <l> X4 <u> X1
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
