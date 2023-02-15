@@ -1,0 +1,33 @@
+﻿@if (Warnings != null && Warnings.Count > 0 || Errors != null && Errors.Count > 0)
+{
+    <div class="container">
+        @if (Errors != null && Errors.Count > 0)
+        {
+            <div class="error" role="alert">
+                <h4>Error</h4>
+            @foreach (var error in Errors)
+            {
+                <p>@error</p>
+            }
+            </div>
+        }
+        @if (Warnings != null && Warnings.Count > 0)
+        {
+            <div class="warning">
+                <h4>Warning</h4>
+            @foreach (var warning in Warnings)
+            {
+                <p>@warning</p>
+            }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<string> Errors { get; set; }
+
+    [Parameter]
+    public List<string> Warnings { get; set; }
+}

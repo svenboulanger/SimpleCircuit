@@ -13,33 +13,42 @@ namespace SimpleCircuitOnline
     public class Logger : IDiagnosticHandler
     {
         /// <summary>
-        /// The informational messages.
+        /// Gets the error messages.
         /// </summary>
-        public StringWriter Info { get; } = new();
+        public List<string> Errors { get; } = new();
 
         /// <summary>
-        /// The warning messages.
+        /// Gets the warning messages.
         /// </summary>
-        public StringWriter Warning { get; } = new();
+        public List<string> Warnings { get; } = new();
 
         /// <summary>
-        /// The error messages.
+        /// Gets the informational messages.
         /// </summary>
-        public StringWriter Error { get; } = new();
+        public List<string> Info { get; } = new();
 
         /// <summary>
-        /// Gets the number of errors.
+        /// Creates a new <see cref="Logger"/>.
         /// </summary>
-        public int ErrorCount { get; private set; }
-
+        /// <param name="message">The message.</param>
         public void Post(IDiagnosticMessage message)
         {
             switch (message.Severity)
             {
-                case SeverityLevel.Info: Info.WriteLine(message); break;
-                case SeverityLevel.Warning: Warning.WriteLine(message); break;
-                case SeverityLevel.Error: Error.WriteLine(message); ErrorCount++; break;
+                case SeverityLevel.Info: Info.Add(message.Message); break;
+                case SeverityLevel.Warning: Warnings.Add(message.Message); break;
+                case SeverityLevel.Error: Errors.Add(message.Message); break;
             }
+        }
+
+        /// <summary>
+        /// Clears any messages in the logger.
+        /// </summary>
+        public void Clear()
+        {
+            Errors.Clear();
+            Warnings.Clear();
+            Info.Clear();
         }
     }
 }

@@ -76,3 +76,11 @@
     right: 15px;
     bottom: 15px;
 }
+.version {
+    display: inline-block;
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: #aaa;
+    text-decoration: none;
+}

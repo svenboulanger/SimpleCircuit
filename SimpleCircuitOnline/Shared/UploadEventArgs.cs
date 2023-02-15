@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuitOnline.Shared
 {
@@ -7,7 +8,8 @@ namespace SimpleCircuitOnline.Shared
         public string Filename { get; set; }
         public string Script { get; set; }
         public string Style { get; set; }
-        public string Errors { get; set; }
-        public string Warnings { get; set; }
+        public string Version { get; set; }
+        public List<string> Errors { get; set; }
+        public List<string> Warnings { get; set; }
     }
 }

@@ -1,12 +1,6 @@
 ﻿@inject IJSRuntime _js
 
 <div class="output">
-    @if (Loading > 0)
-    {
-        <div class="loading-spinner" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-    }
     @if (_svg != null)
     {
         <div class="svg @(_invalid ? "greyed" : "")">
@@ -16,5 +10,16 @@
     else
     {
         <h2 class="text-muted">Preview</h2>
+    }
+
+    @if (Loading > 0)
+    {
+        <div class="spinner" role="status">
+            <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle class="dot dot1" cx="4" cy="12" r="3"/>
+                <circle class="dot dot2" cx="12" cy="12" r="3"/>
+                <circle class="dot dot3" cx="20" cy="12" r="3"/>
+            </svg>
+        </div>
     }
 </div>

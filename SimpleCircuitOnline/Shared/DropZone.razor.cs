@@ -145,7 +145,7 @@ namespace SimpleCircuitOnline.Shared
             }
             catch (XmlException ex)
             {
-                args.Errors = "Invalid XML data found in uploaded SVG file.<br />" + ex.Message;
+                args.Errors.Add("Invalid XML data found in uploaded SVG file.<br />" + ex.Message);
                 await Upload.InvokeAsync(args);
                 return;
             }
@@ -165,6 +165,11 @@ namespace SimpleCircuitOnline.Shared
             foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
                 swStyle.WriteLine(node.InnerText);
 
+            // Search for the version
+            var nodes = doc.DocumentElement.GetElementsByTagName("sc:version");
+            if (nodes.Count > 0)
+                args.Version = nodes[0].InnerText;
+
             // Search for the file name
             args.Filename = Path.GetFileNameWithoutExtension(e.File.Name);
 
@@ -172,9 +177,9 @@ namespace SimpleCircuitOnline.Shared
             args.Script = swScript.ToString();
             args.Style = swStyle.ToString();
             if (args.Script.Length == 0)
-                args.Errors = "No SimpleCircuit script metadata found in uploaded SVG file.";
+                args.Errors.Add("No SimpleCircuit script metadata found in uploaded SVG file.");
             else if (args.Style.Length == 0)
-                args.Warnings = "No styling information found in uploaded SVG file.";
+                args.Warnings.Add("No styling information found in uploaded SVG file.");
 
             InternalFilename = args.Filename;
             await Upload.InvokeAsync(args);
