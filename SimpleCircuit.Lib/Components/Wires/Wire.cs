@@ -3,6 +3,7 @@ using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
@@ -471,8 +472,7 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
-            PathOptions markerOptions = new("marker");
-            List<(Vector2 Location, Vector2 Normal, MarkerTypes Type)> markers = new();
+            List<Marker> markers = new();
             if (_info.IsVisible && _vectors.Count > 0)
             {
                 WirePoint point = _vectors[0];
@@ -480,7 +480,7 @@ namespace SimpleCircuit.Components.Wires
                 {
                     builder.MoveTo(point.Location);
                     int segment = 0;
-                    MarkerTypes startMarker = _info.Segments[0].StartMarker;
+                    var startMarker = _info.Segments[0].StartMarker;
                     for (int i = 1; i < _vectors.Count; i++)
                     {
                         point = _vectors[i];
@@ -497,9 +497,13 @@ namespace SimpleCircuit.Components.Wires
                             builder.LineTo(s);
 
                             // Deal with the start marker
-                            if (startMarker != MarkerTypes.None)
-                                markers.Add((builder.Start, builder.StartNormal, startMarker));
-                            startMarker = MarkerTypes.None;
+                            if (startMarker != null)
+                            {
+                                startMarker.Location = builder.Start;
+                                startMarker.Orientation = builder.StartNormal;
+                                markers.Add(startMarker);
+                                startMarker = null;
+                            }
 
                             nx *= 0.55 * _jumpOverRadius;
                             ny *= 0.55 * _jumpOverRadius;
@@ -511,14 +515,22 @@ namespace SimpleCircuit.Components.Wires
                             builder.LineTo(_vectors[i].Location);
 
                             // Deal with the start marker
-                            if (startMarker != MarkerTypes.None)
-                                markers.Add((builder.Start, builder.StartNormal, startMarker));
-                            startMarker = MarkerTypes.None;
+                            if (startMarker != null)
+                            {
+                                startMarker.Location = builder.Start;
+                                startMarker.Orientation = builder.StartNormal;
+                                markers.Add(startMarker);
+                                startMarker = null;
+                            }
 
                             // Deal with the end marker
                             var endMarker = _info.Segments[segment].EndMarker;
-                            if (endMarker != MarkerTypes.None)
-                                markers.Add((builder.End, builder.EndNormal, endMarker));
+                            if (endMarker != null)
+                            {
+                                endMarker.Location = builder.End;
+                                endMarker.Orientation = builder.EndNormal;
+                                markers.Add(endMarker);
+                            }
                             segment++;
 
                             // Prepare for the next start marker
@@ -529,11 +541,8 @@ namespace SimpleCircuit.Components.Wires
                 }, _info.Options);
 
                 // Draw the markers (if any)
-                if (markers.Count > 0)
-                {
-                    foreach (var marker in markers)
-                        drawing.Marker(marker.Type, marker.Location, marker.Normal, marker.Type.PathOptions());
-                }
+                foreach (var marker in markers)
+                    marker?.Draw(drawing);
             }
         }
 

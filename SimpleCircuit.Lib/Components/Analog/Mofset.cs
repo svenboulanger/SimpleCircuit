@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -105,7 +106,9 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
                 drawing.Line(new(5, 0), new(5, 4), new("drain"));
                 drawing.Polyline(new Vector2[] { new(-5, 0), new(0, 0), new(0, 4) }, new("bulk"));
-                drawing.Marker(MarkerTypes.Arrow, new(0, 4), new(0, 1), MarkerTypes.Arrow.PathOptions());
+
+                var marker = new Arrow(new(0, 4), new(0, 1));
+                marker.Draw(drawing);
 
                 // Packaged
                 drawing.Circle(new(0, 3), 8.0);

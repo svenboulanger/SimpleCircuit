@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Parser;
+﻿using SimpleCircuit.Drawing.Markers;
+using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -35,12 +36,12 @@ namespace SimpleCircuit.Components.Wires
         /// <summary>
         /// Gets or sets the start marker.
         /// </summary>
-        public MarkerTypes StartMarker { get; set; } = MarkerTypes.None;
+        public Marker StartMarker { get; set; }
 
         /// <summary>
         /// Gets or sets the end marker.
         /// </summary>
-        public MarkerTypes EndMarker { get; set; } = MarkerTypes.None;
+        public Marker EndMarker { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="WireSegmentInfo"/>.

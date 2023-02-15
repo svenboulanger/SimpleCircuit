@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components
@@ -44,7 +45,10 @@ namespace SimpleCircuit.Components
                 {
                     int connections = Pins[0].Connections;
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
-                        drawing.Marker(MarkerTypes.Dot, new(), new(1, 0), new("marker", "dot", "wire"));
+                    {
+                        var marker = new Dot(new(), new(1, 0), new("marker", "dot", "wire"));
+                        marker.Draw(drawing);
+                    }
                     else
                         drawing.Expand(new Vector2());
                 }

@@ -513,7 +513,7 @@ namespace SimpleCircuit
         /// <param name="start">The start.</param>
         /// <param name="end">The end.</param>
         /// <param name="options">Optional options.</param>
-        public void Line(Vector2 start, Vector2 end, PathOptions options = null)
+        public void Line(Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -555,7 +555,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="options">The path options.</param>
-        public void Polyline(IEnumerable<Vector2> points, PathOptions options = null)
+        public void Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             points = CurrentTransform.Apply(points);
             _bounds.Peek().Expand(points);
@@ -572,7 +572,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="options">The options.</param>
-        public void Polygon(IEnumerable<Vector2> points, PathOptions options = null)
+        public void Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             points = CurrentTransform.Apply(points);
             _bounds.Peek().Expand(points);
@@ -589,7 +589,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points.</param>
         /// <param name="classes">The classes.</param>
-        public void SmoothBezier(IEnumerable<Vector2> points, PathOptions options = null)
+        public void SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             points = CurrentTransform.Apply(points);
             _bounds.Peek().Expand(points);
@@ -618,7 +618,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points and handles.</param>
         /// <param name="options">The options.</param>
-        public void ClosedBezier(IEnumerable<Vector2> points, PathOptions options = null)
+        public void ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             points = CurrentTransform.Apply(points);
             _bounds.Peek().Expand(points);
@@ -646,7 +646,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="points">The points and handles.</param>
         /// <param name="options">The options.</param>
-        public void OpenBezier(IEnumerable<Vector2> points, PathOptions options = null)
+        public void OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             points = CurrentTransform.Apply(points);
             _bounds.Peek().Expand(points);
@@ -708,7 +708,7 @@ namespace SimpleCircuit
         /// <param name="rx">The radius along the horizontal axis.</param>
         /// <param name="ry">The radius along the vertical axis.</param>
         /// <param name="options">The options.</param>
-        public void Ellipse(Vector2 center, double rx, double ry, PathOptions options = null)
+        public void Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;

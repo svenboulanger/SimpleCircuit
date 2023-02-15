@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"X <jmp r +40 u a -135 +40> X
+            var script = @"GND <u> D(photodiode) <u r
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

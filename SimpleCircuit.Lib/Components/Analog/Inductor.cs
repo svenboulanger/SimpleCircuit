@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -127,7 +128,10 @@ namespace SimpleCircuit.Components.Analog
                         });
 
                         if (Variants.Contains(_dot))
-                            drawing.Marker(MarkerTypes.Dot, new(-l, 3.5), new(1, 0), MarkerTypes.Dot.PathOptions());
+                        {
+                            var marker = new Dot(new(-l, 3.5), new(1, 0));
+                            marker.Draw(drawing);
+                        }
                         
                         if (Variants.Contains(_choke))
                         {
@@ -171,7 +175,10 @@ namespace SimpleCircuit.Components.Analog
                         });
 
                         if (Variants.Contains(_dot))
-                            drawing.Marker(MarkerTypes.Dot, new(-l - 2, 3.5), new(1, 0), MarkerTypes.Dot.PathOptions());
+                        {
+                            var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
+                            marker.Draw(drawing);
+                        }
                         
                         if (Variants.Contains(_choke))
                         {

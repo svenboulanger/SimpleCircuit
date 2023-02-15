@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components
@@ -61,7 +62,9 @@ namespace SimpleCircuit.Components
             drawing.Line(start, end);
             var normal = end - start;
             normal /= normal.Length;
-            drawing.Marker(MarkerTypes.Arrow, end, normal, MarkerTypes.Arrow.PathOptions());
+
+            var marker = new Arrow(end, normal);
+            marker.Draw(drawing);
             drawing.EndGroup();
         }
 
@@ -143,7 +146,10 @@ namespace SimpleCircuit.Components
                 if (pin is FixedOrientedPin fop)
                     drawing.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
                 else if (pin is FixedPin fp)
-                    drawing.Marker(MarkerTypes.Dot, fp.Offset, new(1, 0), new("marker", "dot", "wire"));
+                {
+                    var marker = new Dot(fp.Offset, new(1, 0), new("marker", "dot", "wire"));
+                    marker.Draw(drawing);
+                }
             }
         }
 
@@ -170,66 +176,6 @@ namespace SimpleCircuit.Components
         {
             foreach (string name in names)
                 drawing.ExtendPin(pins[name], length);
-        }
-
-        /// <summary>
-        /// Draws a marker of the given type at the specified location and orientation.
-        /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        /// <param name="type">The type.</param>
-        /// <param name="location">The location.</param>
-        /// <param name="orientation">The orientation.</param>
-        public static void Marker(this SvgDrawing drawing, MarkerTypes type, Vector2 location, Vector2 orientation, PathOptions options = null)
-        {
-            if (type == MarkerTypes.None)
-                return;
-
-            // Figure out the (normalize) orientation
-            if (orientation.IsZero())
-                orientation = new(1, 0);
-
-            drawing.BeginTransform(new(location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
-            switch (type)
-            {
-                case MarkerTypes.Arrow:
-                    drawing.Polygon(new Vector2[] { new(-2.5, -1), new(), new(-2.5, 1) }, options);
-                    break;
-
-                case MarkerTypes.ReverseArrow:
-                    drawing.Polygon(new Vector2[] { new(2.5, -1), new(), new(2.5, 1) }, options);
-                    break;
-
-                case MarkerTypes.Dot:
-                    drawing.Circle(new(), 1.0, options);
-                    break;
-
-                case MarkerTypes.Slash:
-                    drawing.Line(new(-1, 2), new(1, -2), options);
-                    break;
-            }
-            drawing.EndTransform();
-        }
-
-        private readonly static PathOptions _arrowOptions = new("marker", "arrow");
-        private readonly static PathOptions _revArrowOptions = new("marker", "reverse", "arrow");
-        private readonly static PathOptions _dotOptions = new("marker", "dot");
-        private readonly static PathOptions _slashOptions = new("marker", "slash");
-
-        /// <summary>
-        /// Create standard path options for a marker type.
-        /// </summary>
-        /// <param name="type">The marker type.</param>
-        /// <returns>The path options.</returns>
-        public static PathOptions PathOptions(this MarkerTypes type)
-        {
-            return type switch
-            {
-                MarkerTypes.Arrow => _arrowOptions,
-                MarkerTypes.ReverseArrow => _revArrowOptions,
-                MarkerTypes.Dot => _dotOptions,
-                MarkerTypes.Slash => _slashOptions,
-                _ => null
-            };
         }
     }
 }
