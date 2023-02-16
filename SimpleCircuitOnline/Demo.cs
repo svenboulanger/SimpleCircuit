@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit;
-using SimpleCircuit.Components.Digital;
-using System;
 
 namespace SimpleCircuitOnline
 {
