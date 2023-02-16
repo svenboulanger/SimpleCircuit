@@ -10,26 +10,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"// Top diode
-Tlt <r> Xlt <r> D1 <r> Xrt <r> Trt(""+"")
-
-// Bottom diode
-Tlb <r> Xlb <r> [n]D4[p] <r> Xrb <r> Trb(""-"")
-
-// Cross diodes
-Xlb <u r> D2 <r u> Xrt
-Xrb <u l> D3 <l u> Xlt
-
-// Space the diodes apart for at least 15pt
-(y D1 <d +15> D2 <d +15> D3 <d +15> D4)
-
-// Alignment of some wires
-(x Xlt <r 5> Xlb)
-
-// Align the terminals
-(x Tlt <d> Tlb)
-(x Trt <d> Trb
-(x D*)
+            var script = @".options jumpoverwires = true
+X1 <r +30 u l d> X
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

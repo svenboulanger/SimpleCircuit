@@ -1,14 +1,10 @@
-﻿using SimpleCircuit.Components.Digital;
-using SimpleCircuit.Components.General;
-using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -386,10 +382,9 @@ namespace SimpleCircuit.Components.Wires
                     un = -un;
                 }
                 double tol = 1e-3 * denom;
-                if (tn <= tol || un <= tol)
+                if (tn <= tol || un <= -tol)
                     continue;
-                tol = denom - tol;
-                if (tn >= tol || un >= tol)
+                if (tn >= denom * 0.999 || un >= denom * 1.001)
                     continue;
                 Vector2 intersection = last - tn / denom * d;
                 sd = intersection - last;
@@ -399,10 +394,17 @@ namespace SimpleCircuit.Components.Wires
             {
                 double minDist = _jumpOverRadius * _jumpOverRadius;
                 double maxDist = (d.X * d.X + d.Y * d.Y) - minDist;
+                double lastDist = double.NegativeInfinity;
                 foreach (var pair in pts)
                 {
                     if (pair.Key >= minDist && pair.Key <= maxDist)
-                        _vectors.Add(new(pair.Value, true));
+                    {
+                        if (pair.Key >= lastDist + 2 * _jumpOverRadius)
+                        {
+                            _vectors.Add(new(pair.Value, true));
+                            lastDist = pair.Key;
+                        }
+                    }
                 }
             }
         }
