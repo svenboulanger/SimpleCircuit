@@ -81,7 +81,7 @@ namespace SimpleCircuitOnline.Shared
                 Style = GraphicalCircuit.DefaultStyle,
                 ElementFormatter = _jsTextFormatter
             };
-            Drawable.Reset();
+            Drawable.Reset(null);
             Drawable.Render(drawing);
             var doc = drawing.GetDocument();
 

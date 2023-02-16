@@ -42,11 +42,13 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void Reset()
+        public override bool Reset(IDiagnosticHandler diagnostics)
         {
-            base.Reset();
+            if (!base.Reset(diagnostics))
+                return false;
             _dof = 2;
             UpdateTransform();
+            return true;
         }
 
         /// <inheritdoc />

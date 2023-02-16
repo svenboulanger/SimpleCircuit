@@ -69,9 +69,11 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
             }
 
-            public override void Reset()
+            /// <inheritdoc />
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
 
                 // Let's clear the pins and re-add them correctly
                 Pins.Clear();
@@ -103,6 +105,7 @@ namespace SimpleCircuit.Components.Analog
                         break;
                 }
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
+                return true;
             }
 
             /// <inheritdoc />

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using System;
 
@@ -44,9 +45,10 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(Options.Arei))
                 {
                     SetPinOffset(0, new());
@@ -57,6 +59,7 @@ namespace SimpleCircuit.Components.Outputs
                     SetPinOffset(0, new(-4, 0));
                     SetPinOffset(1, new(4, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />

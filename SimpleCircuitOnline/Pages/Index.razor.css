@@ -77,10 +77,10 @@
     bottom: 15px;
 }
 .version {
-    display: inline-block;
+    display: block;
     position: absolute;
-    top: 20px;
-    right: 25px;
+    top: 5px;
+    right: 5px;
     color: #aaa;
     text-decoration: none;
 }

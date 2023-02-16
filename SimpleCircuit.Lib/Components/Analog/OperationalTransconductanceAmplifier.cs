@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -48,9 +49,11 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
             }
 
-            public override void Reset()
+            /// <inheritdoc />
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(_differentialInput))
                 {
                     if (Variants.Contains(_swapInput))
@@ -88,6 +91,7 @@ namespace SimpleCircuit.Components.Analog
                     SetPinOffset(4, new(5, 0));
                     SetPinOffset(5, new(5, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />

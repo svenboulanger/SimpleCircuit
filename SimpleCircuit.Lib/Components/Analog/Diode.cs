@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using System;
 
@@ -50,9 +51,10 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -83,6 +85,7 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(4, 0));
                         break;
                 }
+                return true;
             }
 
             /// <inheritdoc />

@@ -152,8 +152,8 @@ namespace SimpleCircuit
             _extra.Clear();
 
             // Prepare all the presences
-            foreach (var c in presences)
-                c.Reset();
+            if (!Reset(presences, diagnostics))
+                return false;
 
             // Prepare the circuit
             if (!Prepare(presences, diagnostics))
@@ -218,6 +218,16 @@ namespace SimpleCircuit
             finally
             {
                 SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
+            }
+            return true;
+        }
+
+        private bool Reset(IEnumerable<ICircuitPresence> presences, IDiagnosticHandler diagnostics)
+        {
+            foreach (var c in presences)
+            {
+                if (!c.Reset(diagnostics))
+                    return false;
             }
             return true;
         }

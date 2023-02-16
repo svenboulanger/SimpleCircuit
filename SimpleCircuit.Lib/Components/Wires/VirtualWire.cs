@@ -64,10 +64,11 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Reset()
+        public bool Reset(IDiagnosticHandler diagnostics)
         {
             _start = null;
             _end = null;
+            return true;
         }
 
         /// <inheritdoc />

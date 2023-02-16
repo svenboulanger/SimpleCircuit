@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components
                     drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
                 else
                     drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
-                drawing.Text(Labels[0], new(0, -3), new(0, -1));
+                drawing.Text(Labels[0], new(0, -2), new(0, -1));
             }
         }
     }

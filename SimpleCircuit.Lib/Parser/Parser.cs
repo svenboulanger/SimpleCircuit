@@ -529,38 +529,32 @@ namespace SimpleCircuit.Parser
 
             // Create a new parsing context to separate our circuit
             var localContext = new ParsingContext() { Diagnostics = context.Diagnostics };
-            List<IPin> ports = new();
+            List<PinInfo> ports = new();
 
             // Parse the pins
             while (lexer.Check(~TokenType.Newline))
             {
                 // Parse the component
-                var component = ParseComponent(lexer, localContext)?.GetOrCreate(localContext);
-                if (component == null)
+                var component = ParseComponent(lexer, localContext);
+                var drawable = component?.GetOrCreate(localContext);
+                if (drawable == null)
                 {
                     SkipToControlWord(lexer, _subcktEnd);
                     return false;
                 }
 
                 // Find the pin
-                IPin pin = null;
-                if (lexer.Type == TokenType.OpenIndex)
+                Token pinName = default;
+                if (lexer.Check(TokenType.OpenIndex))
                 {
-                    var pinName = ParsePin(lexer, localContext);
+                    pinName = ParsePin(lexer, localContext);
                     if (pinName.Content.Length == 0)
                     {
                         SkipToControlWord(lexer, _subcktEnd);
                         return false;
                     }
-                    pin = component.Pins[pinName.Content.ToString().Trim()];
-                    if (pin == null)
-                    {
-                        SkipToControlWord(lexer, _subcktEnd);
-                        return false;
-                    }
                 }
-                pin ??= component.Pins[^1];
-                ports.Add(pin);
+                ports.Add(new(component, pinName));
             }
 
             // Parse the netlist contents

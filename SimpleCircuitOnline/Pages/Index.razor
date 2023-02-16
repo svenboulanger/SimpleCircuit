@@ -38,14 +38,14 @@
         </TabMenu>
     </div>
     <div class="output">
-        <span class="version">@_simpleCircuitVersion</span>
         <DropZone Upload=@UploadFile Download=@DownloadFile
             @bind-Filename=@Filename
             @bind-ShrinkX=@ShrinkX
             @bind-ShrinkY=@ShrinkY
             @bind-Bounds=@RenderBounds
-            @bind-AutoUpdate=@CurrentAutoUpdate
+            @bind-AutoUpdate=@AutoUpdate
             RefreshRequested=@UpdateNow>
+            <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>
         <Report Errors=@_logger.Errors Warnings=@_logger.Warnings />

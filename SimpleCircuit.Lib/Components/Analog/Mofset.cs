@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Markers;
 using System;
 
@@ -47,9 +48,10 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(_packaged))
                 {
                     SetPinOffset(0, new(-5, 0));
@@ -60,6 +62,7 @@ namespace SimpleCircuit.Components.Analog
                     SetPinOffset(0, new(-4, 0));
                     SetPinOffset(3, new(4, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />
@@ -138,9 +141,11 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("source", "The source.", this, new Vector2(-4, 0), new Vector2(-1, 0)), "s", "source");
             }
 
-            public override void Reset()
+            /// <inheritdoc />
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(_packaged))
                 {
                     SetPinOffset(0, new(5, 0));
@@ -153,6 +158,7 @@ namespace SimpleCircuit.Components.Analog
                     SetPinOffset(1, new(0, 9));
                     SetPinOffset(3, new(-4, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />

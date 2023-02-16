@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -95,9 +96,10 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
 
                 double r = Width * 0.5;
                 double y = -(_inputs - 1) * Spacing * 0.5;
@@ -111,6 +113,7 @@ namespace SimpleCircuit.Components.Digital
                     c++;
                 }
                 Pins.Add(new FixedOrientedPin("output", "Output", this, new(r, 0), new(1, 0)), "output", "out", "o");
+                return true;
             }
 
             /// <inheritdoc />

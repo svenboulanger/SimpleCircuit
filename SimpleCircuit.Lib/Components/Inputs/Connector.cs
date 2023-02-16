@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Inputs
@@ -36,9 +37,10 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 switch (Variants.Select(Options.American))
                 {
                     case 0:
@@ -62,6 +64,7 @@ namespace SimpleCircuit.Components.Inputs
                         SetPinOffset(1, new(1.5, 0));
                         break;
                 }
+                return true;
             }
 
             /// <inheritdoc />

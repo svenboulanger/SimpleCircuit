@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Markers;
 using System;
 using System.Collections.Generic;
@@ -55,9 +56,10 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 switch (Variants.Select(Options.Arei))
                 {
                     case 0:
@@ -105,6 +107,7 @@ namespace SimpleCircuit.Components.Analog
                         }
                         break;
                 }
+                return true;
             }
 
             /// <inheritdoc />

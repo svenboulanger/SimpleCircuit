@@ -54,10 +54,14 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual void Reset()
+        public virtual bool Reset(IDiagnosticHandler diagnostics)
         {
             foreach (var pin in Pins)
-                pin.Reset();
+            {
+                if (!pin.Reset(diagnostics))
+                    return false;
+            }
+            return true;
         }
 
         /// <inheritdoc />

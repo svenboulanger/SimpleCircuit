@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Digital
@@ -38,9 +39,10 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(Options.European))
                 {
                     SetPinOffset(0, new(-5, 0));
@@ -55,6 +57,7 @@ namespace SimpleCircuit.Components.Digital
                     SetPinOffset(2, new(0, 3));
                     SetPinOffset(3, new(6, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />

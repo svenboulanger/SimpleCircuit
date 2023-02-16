@@ -94,7 +94,15 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Reset() { }
+            public bool Reset(IDiagnosticHandler diagnostics)
+            {
+                foreach (var pin in _pins)
+                {
+                    if (!pin.Reset(diagnostics))
+                        return false;
+                }
+                return true;
+            }
 
             /// <inheritdoc />
             public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)

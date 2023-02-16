@@ -25,7 +25,11 @@ namespace SimpleCircuitOnline.Pages
         private int _loading;
         private MonacoEditor _scriptEditor, _styleEditor;
         private Settings _settings = new();
+        private bool _arrowMode = false;
 
+        /// <summary>
+        /// Gets or sets the filename.
+        /// </summary>
         protected string Filename
         {
             get => _settings.Filename;
@@ -38,6 +42,10 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
+        
+        /// <summary>
+        /// Gets whether the output should be shrunk to fix the width of the output window.
+        /// </summary>
         protected bool ShrinkX
         {
             get => _settings.ShrinkX;
@@ -50,6 +58,10 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
+
+        /// <summary>
+        /// Gets whether the output should be shrunk to fix the height of the output window.
+        /// </summary>
         protected bool ShrinkY
         {
             get => _settings.ShrinkY;
@@ -62,6 +74,10 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets whether the component bounds should be rendered.
+        /// </summary>
         protected bool RenderBounds
         {
             get => _settings.RenderBounds;
@@ -75,7 +91,11 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        protected bool CurrentAutoUpdate
+
+        /// <summary>
+        /// Gets or sets whether changes in the editor should cause an automatic update of the output.
+        /// </summary>
+        protected bool AutoUpdate
         {
             get => _settings.AutoUpdate;
             set
@@ -86,6 +106,8 @@ namespace SimpleCircuitOnline.Pages
                     if (value)
                     {
                         _timer.Start();
+                        lock (_lock)
+                            _updates = 0;
                         UpdateNow();
                     }
                     else
@@ -95,6 +117,7 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
+        /// <inheritdoc />
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             await base.OnAfterRenderAsync(firstRender);
@@ -146,6 +169,11 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
+        /// <summary>
+        /// Called when a new file is uploaded.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns>A task.</returns>
         protected async Task UploadFile(UploadEventArgs args)
         {
             _logger.Clear();
@@ -166,6 +194,11 @@ namespace SimpleCircuitOnline.Pages
             await SetCurrentScript(new(DecodeScript(args.Script), args.Style));
         }
 
+        /// <summary>
+        /// Called when a download request happens.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns>A task.</returns>
         protected async Task DownloadFile(DownloadEventArgs args)
         {
             _logger.Clear();
@@ -285,13 +318,16 @@ namespace SimpleCircuitOnline.Pages
         }
         private void Update()
         {
-            lock (_lock)
+            if (_settings.AutoUpdate)
             {
-                _updates++;
+                lock (_lock)
+                {
+                    _updates++;
 
-                // Something has changed
-                if (_updates > 0)
-                    _loading = 1;
+                    // Something has changed
+                    if (_updates > 0)
+                        _loading = 1;
+                }
             }
         }
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
@@ -314,7 +350,6 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-
         private void UpdateNow()
         {
             _loading = 2;
@@ -425,8 +460,6 @@ namespace SimpleCircuitOnline.Pages
         private static partial Regex NonUtf8Code();
         [GeneratedRegex("\\&\\#(?<value>[0-9]+);")]
         private static partial Regex Utf8Encoded();
-
-        private bool _arrowMode = false;
         private void KeyDown(KeyboardEvent e)
         {
             if (!_arrowMode)

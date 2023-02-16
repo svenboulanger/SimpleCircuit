@@ -79,11 +79,14 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public override void Reset()
+        public override bool Reset(IDiagnosticHandler diagnostics)
         {
+            if (!base.Reset(diagnostics))
+                return false;
             _vectors.Clear();
             _p2w = null;
             _w2p = null;
+            return true;
         }
 
         /// <inheritdoc />

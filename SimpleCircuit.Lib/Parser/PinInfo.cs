@@ -102,7 +102,7 @@ namespace SimpleCircuit.Parser
                 string pinName = Pin.Content.ToString();
                 if (!component.Pins.TryGetValue(pinName, out var pin))
                 {
-                    context.Diagnostics?.Post(Pin, ErrorCodes.CannotFindPin, pinName, Component.Fullname);
+                    context.Diagnostics?.Post(Pin, ErrorCodes.CouldNotFindPin, pinName, Component.Fullname);
                     return null;
                 }
                 return pin;

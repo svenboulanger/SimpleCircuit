@@ -45,9 +45,10 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public virtual void Reset()
+        public virtual bool Reset(IDiagnosticHandler diagnostics)
         {
             Location = new();
+            return true;
         }
 
         /// <inheritdoc />

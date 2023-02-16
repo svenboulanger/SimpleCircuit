@@ -35,9 +35,9 @@ namespace SimpleCircuitOnline
         {
             switch (message.Severity)
             {
-                case SeverityLevel.Info: Info.Add(message.Message); break;
-                case SeverityLevel.Warning: Warnings.Add(message.Message); break;
-                case SeverityLevel.Error: Errors.Add(message.Message); break;
+                case SeverityLevel.Info: Info.Add(message.ToString()); break;
+                case SeverityLevel.Warning: Warnings.Add(message.ToString()); break;
+                case SeverityLevel.Error: Errors.Add(message.ToString()); break;
             }
         }
 

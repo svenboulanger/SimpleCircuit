@@ -58,7 +58,7 @@ namespace SimpleCircuit.Components.Constraints
         }
 
         /// <inheritdoc />
-        public void Reset() { }
+        public bool Reset(IDiagnosticHandler diagnostics) => true;
 
         /// <inheritdoc />
         public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)

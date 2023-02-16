@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Wires
@@ -35,9 +36,10 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 if (Variants.Contains(Options.Arei) || Variants.Contains(Options.European))
                 {
                     SetPinOffset(1, new(0, -2));
@@ -48,6 +50,7 @@ namespace SimpleCircuit.Components.Wires
                     SetPinOffset(1, new(0, -1.875));
                     SetPinOffset(2, new(0, -1.875));
                 }
+                return true;
             }
 
             /// <inheritdoc />

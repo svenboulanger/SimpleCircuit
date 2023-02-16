@@ -1,7 +1,9 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components
 {
@@ -12,7 +14,7 @@ namespace SimpleCircuit.Components
     {
         private readonly string _key;
         private readonly GraphicalCircuit _circuit;
-        private readonly IEnumerable<IPin> _pins;
+        private readonly IEnumerable<PinInfo> _pins;
 
         /// <inheritdoc />
         public IEnumerable<DrawableMetadata> Metadata
@@ -31,7 +33,7 @@ namespace SimpleCircuit.Components
         /// <param name="pins">The pins.</param>
         /// <param name="diagnostics">The diagnostic handler.</param>
         /// <exception cref="ArgumentNullException">Thrown if an argument is <c>null</c>.</exception>
-        public Subcircuit(string key, GraphicalCircuit definition, IEnumerable<IPin> pins, IDiagnosticHandler diagnostics)
+        public Subcircuit(string key, GraphicalCircuit definition, IEnumerable<PinInfo> pins, IDiagnosticHandler diagnostics)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
@@ -49,6 +51,7 @@ namespace SimpleCircuit.Components
         private class Instance : ScaledOrientedDrawable
         {
             private readonly GraphicalCircuit _ckt;
+            private readonly List<PinInfo> _pins;
 
             /// <inheritdoc />
             public override string Type { get; }
@@ -56,52 +59,69 @@ namespace SimpleCircuit.Components
             /// <summary>
             /// Initializes a new instance of the <see cref="Subcircuit"/> class.
             /// </summary>
+            /// <param name="type">The key of the instance.</param>
             /// <param name="name">The name.</param>
-            public Instance(string type, string name, GraphicalCircuit definition, IEnumerable<IPin> pins)
+            /// <param name="definition">The graphical circuit definition.</param>
+            /// <param name="pins">The ports.</param>
+            public Instance(string type, string name, GraphicalCircuit definition, IEnumerable<PinInfo> pins)
                 : base(name)
             {
-                Type = type;
+                Type = type.ToLower();
                 _ckt = definition;
+                _pins = pins.ToList();
+            }
 
-                // Find the pins in the subcircuit
-                var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                List<string> possibleNames = new();
-                foreach (var pin in pins)
+            /// <inheritdoc />
+            public override bool Reset(IDiagnosticHandler diagnostics)
+            {
+                if (!base.Reset(diagnostics))
+                    return false;
+
+                // Calculate the positions of the pins
+                Pins.Clear();
+
+                HashSet<string> takenNames = new(StringComparer.OrdinalIgnoreCase);
+                List<string> pinNames = new();
+                foreach (var pinInfo in _pins)
                 {
-                    possibleNames.Clear();
+                    pinNames.Clear();
 
-                    // Check with the name of the pin owner
-                    string pinName = pin.Owner.Name;
-                    if (taken.Add(pinName))
-                        possibleNames.Add(pinName);
-
-                    // Make a shorthand notation for DIR
-                    if (pinName.StartsWith("DIR") && pinName.Length > 3)
+                    // Find the ports
+                    var pin = pinInfo.Find(diagnostics, -1);
+                    if (pin == null)
                     {
-                        pinName = pinName[3..];
-                        if (taken.Add(pinName))
-                            possibleNames.Add(pinName);
+                        diagnostics?.Post(pinInfo.Pin, ErrorCodes.CouldNotFindPin, pinInfo.Pin.Content, pinInfo.Component.Fullname);
+                        return false;
                     }
 
-                    // General names!
-                    foreach (string pn in pin.Owner.Pins.NamesOf(pin))
+                    // Component name as pin name
+                    if (takenNames.Add(pinInfo.Component.Name.Content.ToString()))
+                        pinNames.Add(pinInfo.Component.Name.Content.ToString());
+
+                    // Shorthand notation for DIR
+                    if (pin.Name.StartsWith("DIR") && pin.Name.Length > 3)
                     {
-                        pinName = $"{pin.Owner.Name}_{pn}";
-                        if (taken.Add(pinName))
-                            possibleNames.Add(pinName);
+                        string name = pin.Name[3..];
+                        if (takenNames.Add(name))
+                            pinNames.Add(name);
                     }
+
+                    // Deduce names
+                    foreach (var name in pin.Owner.Pins.NamesOf(pin))
+                        pinNames.Add($"{pin.Owner.Name}_{name}");
 
                     if (pin is IOrientedPin op)
                     {
                         Pins.Add(new FixedOrientedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location, op.Orientation),
-                            possibleNames);
+                            pinNames);
                     }
                     else
                     {
                         Pins.Add(new FixedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location),
-                            possibleNames);
+                            pinNames);
                     }
                 }
+                return true;
             }
 
             /// <inheritdoc/>

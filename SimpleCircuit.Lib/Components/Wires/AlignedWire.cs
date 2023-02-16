@@ -76,9 +76,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Reset()
-        {
-        }
+        public bool Reset(IDiagnosticHandler diagnostics) => true;
 
         /// <inheritdoc />
         public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)

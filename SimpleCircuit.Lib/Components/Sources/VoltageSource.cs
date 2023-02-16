@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -35,9 +36,11 @@ namespace SimpleCircuit.Components.Sources
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(6, 0), new(1, 0)), "p", "pos", "a");
             }
 
-            public override void Reset()
+            /// <inheritdoc />
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
@@ -51,6 +54,7 @@ namespace SimpleCircuit.Components.Sources
                         SetPinOffset(1, new(6, 0));
                         break;
                 }
+                return true;
             }
 
             /// <inheritdoc />

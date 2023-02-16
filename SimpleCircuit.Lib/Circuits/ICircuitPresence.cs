@@ -20,7 +20,8 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Resets the circuit presence before resolving a graphical circuit.
         /// </summary>
-        public void Reset();
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        public bool Reset(IDiagnosticHandler diagnostics);
 
         /// <summary>
         /// Prepares the circuit presence for resolving a graphical circuit.

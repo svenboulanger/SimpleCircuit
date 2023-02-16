@@ -10,9 +10,6 @@
         /// </summary>
         None = 0,
 
-        [Diagnostic(SeverityLevel.Error, "PE001", "Cannot find pin '{0}' for component '{1}'")]
-        CannotFindPin,
-
         [Diagnostic(SeverityLevel.Error, "PE002", "The component '{0}' does not have pins")]
         DoesNotHavePins,
 

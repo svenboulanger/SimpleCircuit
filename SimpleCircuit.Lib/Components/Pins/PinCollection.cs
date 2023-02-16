@@ -17,7 +17,15 @@ namespace SimpleCircuit.Components.Pins
         public int Count => _pinsByIndex.Count;
 
         /// <inheritdoc />
-        public IPin this[string name] => _pinsByName[name];
+        public IPin this[string name]
+        {
+            get
+            {
+                if (_pinsByName.TryGetValue(name, out var pin))
+                    return pin;
+                return null;
+            }
+        }
 
         /// <inheritdoc />
         public IPin this[int index] => _pinsByIndex[index];

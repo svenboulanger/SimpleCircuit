@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.SymbolStore;
 using System.Text;
 
 namespace SimpleCircuit.Drawing
@@ -154,6 +155,20 @@ namespace SimpleCircuit.Drawing
         public PathBuilder Move(double dx, double dy)
             => Move(new(dx, dy));
 
+        private void AppendLine(Vector2 delta)
+        {
+            bool horiz = delta.Y.IsZero();
+            bool vert = delta.X.IsZero();
+            if (horiz && vert)
+                return;
+            else if (horiz)
+                Append($"{Action('h')}{Convert(delta.X)}");
+            else if (vert)
+                Append($"{Action('v')}{Convert(delta.Y)}");
+            else
+                Append($"{Action('l')}{Convert(delta)}");
+        }
+
         /// <summary>
         /// Draws a line using absolute coordinates.
         /// </summary>
@@ -173,13 +188,7 @@ namespace SimpleCircuit.Drawing
             _n1 /= _n1.Length;
             _n2 = _n1;
 
-            if ((location.Y - _p1.Y).IsZero())
-                Append($"{Action('H')}{Convert(location.X)}");
-            else if ((location.X - _p1.X).IsZero())
-                Append($"{Action('V')}{Convert(location.Y)}");
-            else
-                Append($"{Action('L')}{Convert(location)}");
-
+            AppendLine(location - _p1);
             _bounds.Expand(location);
             return this;
         }
@@ -211,13 +220,7 @@ namespace SimpleCircuit.Drawing
             _n1 = delta / delta.Length;
             _n2 = _n1;
 
-            if (delta.Y.IsZero())
-                Append($"{Action('h')}{Convert(delta.X)}");
-            else if (delta.X.IsZero())
-                Append($"{Action('v')}{Convert(delta.Y)}");
-            else
-                Append($"{Action('l')}{Convert(delta)}");
-
+            AppendLine(delta);
             _bounds.Expand(_p2);
             return this;
         }
@@ -268,7 +271,7 @@ namespace SimpleCircuit.Drawing
             _n2 = _n1;
 
             _bounds.Expand(_p2);
-            Append($"{Action('L')}{Convert(_p2)}");
+            AppendLine(delta);
             return this;
         }
 
@@ -292,7 +295,7 @@ namespace SimpleCircuit.Drawing
             _n2 = delta;
 
             _bounds.Expand(_p2);
-            Append($"{Action('l')}{Convert(delta)}");
+            AppendLine(delta);
             return this;
         }
 
@@ -333,7 +336,7 @@ namespace SimpleCircuit.Drawing
             _n2 = _n1;
 
             _bounds.Expand(_p2);
-            Append($"{Action('L')}{Convert(_p2)}");
+            AppendLine(delta);
             return this;
         }
 
@@ -357,7 +360,7 @@ namespace SimpleCircuit.Drawing
             _n2 = _n1;
 
             _bounds.Expand(_p2);
-            Append($"{Action('l')}{Convert(delta)}");
+            AppendLine(delta);
             return this;
         }
 

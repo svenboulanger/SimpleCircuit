@@ -29,9 +29,12 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void Reset()
+        public override bool Reset(IDiagnosticHandler diagnostics)
         {
+            if (!base.Reset(diagnostics))
+                return false;
             HasFixedOrientation = false;
+            return true;
         }
 
         /// <inheritdoc />

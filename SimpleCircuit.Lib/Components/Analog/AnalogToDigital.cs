@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -46,9 +47,10 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 double x = -Width / 2;
                 double y = Height / 4;
                 if (Variants.Contains(_differentialInput))
@@ -90,6 +92,7 @@ namespace SimpleCircuit.Components.Analog
                     SetPinOffset(2, new(x, 0));
                     SetPinOffset(3, new(x, 0));
                 }
+                return true;
             }
 
             /// <inheritdoc />

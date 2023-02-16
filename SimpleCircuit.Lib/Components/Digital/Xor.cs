@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Digital
@@ -92,9 +93,10 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            public override void Reset()
+            public override bool Reset(IDiagnosticHandler diagnostics)
             {
-                base.Reset();
+                if (!base.Reset(diagnostics))
+                    return false;
                 bool keepLeft = Variants.Contains(Options.European);
 
                 Pins.Clear();
@@ -120,6 +122,7 @@ namespace SimpleCircuit.Components.Digital
                     c++;
                 }
                 Pins.Add(new FixedOrientedPin("output", "Output", this, new(w, 0), new(1, 0)), "output", "out", "o");
+                return true;
             }
 
             /// <inheritdoc />
