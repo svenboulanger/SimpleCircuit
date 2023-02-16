@@ -178,6 +178,12 @@ namespace SimpleCircuitOnline
                 "Demonstration of how you can use CSS styling to change the circuit",
                 "// Check the style tab to see how the red lines were done\r\n.section buck\r\n    GND1 <u> V1(\"V\") <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1(\"L\") <r> X2\r\n    X2 <d> C1(\"C\") <d> GND3\r\n    X2 <r arrow r> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n",
                 GraphicalCircuit.DefaultStyle + "\r\n\r\n/* Styling section \"buck\" */\r\n#buck\\/w-4 *,\r\n#buck\\/D1 *,\r\n#buck\\/w-5 *,\r\n#buck\\/w-6 *,\r\n#buck\\/L1 path,\r\n#buck\\/w-7 *,\r\n#buck\\/w-10 *,\r\n#buck\\/w-11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/w-12 path { stroke: red; }\r\n#buck\\/w-10 polygon { fill: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/w-1 *,\r\n#buck2\\/V1 *,\r\n#buck2\\/w-2 *,\r\n#buck2\\/L1 path,\r\n#buck2\\/w-3 *,\r\n#buck2\\/S1 *,\r\n#buck2\\/w-6 *,\r\n#buck2\\/w-7 *,\r\n#buck2\\/w-10 *,\r\n#buck2\\/w-11 *,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/w-12 * { stroke: red; }\r\n#buck2\\/w-10 polygon { fill: red; }\r\n#buck2\\/V1 tspan { stroke: none; }\r\n"),
+
+            // Bit vector demo
+            new Demo(
+                "Example: Bit vector",
+                "Demonstration on using the BIT component to display bit vectors.",
+                "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\")\r\n- BIT1.separator = \",\"\r\n\r\n// We just want lines, remove the dots on intersections\r\n.variants X -dot\r\n\r\n// Let's temporarily reduce the minimum wire length to avoid warnings\r\n.option minimumwirelength = 3\r\nBIT1[b3] <d r> X1\r\nBIT1[b2] <d 3> X1\r\nBIT1[b1] <d> X2\r\nBIT1[b0] <d l> X2\r\nX1 <r> Xdata <r> X2\r\n\r\nBIT1[b6] <d r> Xaddress\r\nBIT1[b5] <d 3> Xaddress\r\nBIT1[b4] <d l> Xaddress\r\n\r\n// Restore the minimum wire length\r\n.option minimumwirelength = 10\r\n\r\n// Show output text\r\nXdata <d r arrow> Xdo(\"Data\")\r\nXaddress <d r arrow> Xao(\"Address\")\r\n(Xdo <d> Xao)\r\n"),
         };
     }
 }

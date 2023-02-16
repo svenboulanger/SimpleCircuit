@@ -10,7 +10,12 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"X <r arrow> X
+            var script = @"BIT1(""A_0,A_1,A_2"")
+- BIT1.separator = "",""
+BIT1[b0] <d r> X0(""bit 0"")
+BIT1[b1] <d r> X1(""bit 1"")
+BIT1[b2] <d r> X2(""bit 2"")
+(X0 <d> X1 <d> X2)
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
