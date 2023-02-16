@@ -39,4 +39,14 @@
             StateHasChanged();
         }
     }
+
+    /// <summary>
+    /// Selects a tab by index.
+    /// </summary>
+    /// <param name="index">The tab index.</param>
+    public void Select(int index)
+    {
+        if (index >= 0 && index < _tabs.Count)
+            Select(_tabs[index]);
+    }
 }

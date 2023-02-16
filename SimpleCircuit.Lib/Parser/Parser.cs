@@ -900,7 +900,11 @@ namespace SimpleCircuit.Parser
                 (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, axis));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
+            {
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
             return true;
         }
 

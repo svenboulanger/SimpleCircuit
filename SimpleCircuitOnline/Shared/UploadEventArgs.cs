@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Diagnostics;
+using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuitOnline.Shared
@@ -9,7 +10,6 @@ namespace SimpleCircuitOnline.Shared
         public string Script { get; set; }
         public string Style { get; set; }
         public string Version { get; set; }
-        public List<string> Errors { get; } = new();
-        public List<string> Warnings { get; } = new();
+        public List<IDiagnosticMessage> Messages { get; } = new();
     }
 }

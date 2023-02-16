@@ -15,17 +15,12 @@ namespace SimpleCircuitOnline
         /// <summary>
         /// Gets the error messages.
         /// </summary>
-        public List<string> Errors { get; } = new();
+        public List<IDiagnosticMessage> Messages { get; } = new();
 
         /// <summary>
-        /// Gets the warning messages.
+        /// Gets the number of errors tracked by the logger.
         /// </summary>
-        public List<string> Warnings { get; } = new();
-
-        /// <summary>
-        /// Gets the informational messages.
-        /// </summary>
-        public List<string> Info { get; } = new();
+        public int Errors { get; private set; }
 
         /// <summary>
         /// Creates a new <see cref="Logger"/>.
@@ -35,9 +30,15 @@ namespace SimpleCircuitOnline
         {
             switch (message.Severity)
             {
-                case SeverityLevel.Info: Info.Add(message.ToString()); break;
-                case SeverityLevel.Warning: Warnings.Add(message.ToString()); break;
-                case SeverityLevel.Error: Errors.Add(message.ToString()); break;
+                case SeverityLevel.Info: break;
+                case SeverityLevel.Warning:
+                    Messages.Add(message);
+                    break;
+
+                case SeverityLevel.Error:
+                    Messages.Add(message);
+                    Errors++;
+                    break;
             }
         }
 
@@ -46,9 +47,8 @@ namespace SimpleCircuitOnline
         /// </summary>
         public void Clear()
         {
-            Errors.Clear();
-            Warnings.Clear();
-            Info.Clear();
+            Messages.Clear();
+            Errors = 0;
         }
     }
 }

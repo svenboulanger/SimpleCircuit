@@ -1,24 +1,21 @@
-﻿@if (Warnings != null && Warnings.Count > 0 || Errors != null && Errors.Count > 0)
+﻿@using System.Text.RegularExpressions;
+@using SimpleCircuit.Diagnostics;
+@using SimpleCircuit.Parser;
+@if (Messages.Count > 0)
 {
     <div class="container">
-        @if (Errors != null && Errors.Count > 0)
+        @foreach (var message in Messages) 
         {
-            <div class="error" role="alert">
-                <h4>Error</h4>
-            @foreach (var error in Errors)
-            {
-                <p>@error</p>
-            }
-            </div>
-        }
-        @if (Warnings != null && Warnings.Count > 0)
-        {
-            <div class="warning">
-                <h4>Warning</h4>
-            @foreach (var warning in Warnings)
-            {
-                <p>@warning</p>
-            }
+            <div class="@(message.Severity == SeverityLevel.Error ? "error" : "warning")" role="alert">
+                <h4>@(message.Severity == SeverityLevel.Error ? "Error" : "Warning")</h4>
+                @if (message is TokenDiagnosticMessage tdm)
+                {
+                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Token))>line @(tdm.Token.Location.Line), column @(tdm.Token.Location.Column)</a>.</p>
+                }
+                else
+                {
+                    <p>@message.Message</p>
+                }
             </div>
         }
     </div>
@@ -26,8 +23,8 @@
 
 @code {
     [Parameter]
-    public List<string> Errors { get; set; }
+    public List<IDiagnosticMessage> Messages { get; set; }
 
     [Parameter]
-    public List<string> Warnings { get; set; }
+    public EventCallback<Token> MessageClicked { get; set; }
 }

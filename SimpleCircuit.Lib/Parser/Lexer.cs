@@ -223,6 +223,7 @@ namespace SimpleCircuit.Parser
             if (_index < _contents.Length)
             {
                 _isTrivia = true;
+                _column++;
                 _index++;
                 _trivia += _length + 1;
                 _length = 0;
@@ -232,7 +233,11 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Starts a new line (just for line numbering).
         /// </summary>
-        protected void Newline() => _line++;
+        protected void Newline()
+        {
+            _line++;
+            _column = 1;
+        }
 
         /// <inheritdoc />
         public Tracker Track(bool includeTrivia = false)

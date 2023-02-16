@@ -5,7 +5,7 @@
 
 <div class="split-screen">
     <div class="sidebar">
-        <TabMenu>
+        <TabMenu @ref="_tabs">
             <Tab Title="Script">
                 <div class="content fixed">
                     <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" OnKeyDown="KeyDown" />
@@ -48,6 +48,6 @@
             <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>
-        <Report Errors=@_logger.Errors Warnings=@_logger.Warnings />
+        <Report Messages=@_logger.Messages MessageClicked="ReportMessageClicked" />
     </div>
 </div>

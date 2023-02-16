@@ -31,3 +31,13 @@ p {
     margin-top: 0;
     margin-bottom: 1rem;
 }
+.error a {
+    color: #721c24;
+    text-decoration: none;
+    font-weight: bold;
+}
+.warning a {
+    color: #856404;
+    text-decoration: none;
+    font-weight: bold;
+}

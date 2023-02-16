@@ -10,12 +10,26 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"BIT1(""A_0,A_1,A_2"")
-- BIT1.separator = "",""
-BIT1[b0] <d r> X0(""bit 0"")
-BIT1[b1] <d r> X1(""bit 1"")
-BIT1[b2] <d r> X2(""bit 2"")
-(X0 <d> X1 <d> X2)
+            var script = @"// Top diode
+Tlt <r> Xlt <r> D1 <r> Xrt <r> Trt(""+"")
+
+// Bottom diode
+Tlb <r> Xlb <r> [n]D4[p] <r> Xrb <r> Trb(""-"")
+
+// Cross diodes
+Xlb <u r> D2 <r u> Xrt
+Xrb <u l> D3 <l u> Xlt
+
+// Space the diodes apart for at least 15pt
+(y D1 <d +15> D2 <d +15> D3 <d +15> D4)
+
+// Alignment of some wires
+(x Xlt <r 5> Xlb)
+
+// Align the terminals
+(x Tlt <d> Tlb)
+(x Trt <d> Trb
+(x D*)
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
