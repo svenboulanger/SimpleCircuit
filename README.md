@@ -6,13 +6,12 @@ The application runs in the **browser** using Blazor. You can just go to it **[h
 
 ## Quick start
 
-The format is relatively simple. Components (like resistors, capacitors, etc.) all have pins that can be connected using wires. You can usually just give those wires a pretty general direction. The following example starts from a **ground** (`GND`) component, and goes **up** (`<u>`) to a **resistor** (`R`). Note that we don't tell how much "up" the wire travels.
+Components (like resistors, capacitors, etc.) have pins that can be connected using wires. The wires that are connected will also determine their orientation. The following example starts from a **ground** (`GND`) component, and goes **up** (`<u>`) to a **resistor** (`R`). Note that we don't have to tell SimpleCircuit how much "up" the wire travels. By default it will take a _minimum_ of 10 units.
 
 ```
 GND <u> R
 ```
 
-The program fills in the length for you, by minimizing the wire length of all wires in a circuit (the default minimum wire length is 10pt).
 The result looks like this:
 
 <a href="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit.svg#gh-light-mode-only">
@@ -22,7 +21,8 @@ The result looks like this:
   <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_dark.svg#gh-dark-mode-only">
 </a>
 
-The output is immediately shown in the browser, and the SVG file can be downloaded using the download button. More advanced circuits require more complex alignments. For example, an inverting opamp circuit might be scripted like this:
+Components can be anonymous/unnamed (like `R` or `C`) or they can be named by adding more characters (like `R1` or `Cj`). Only named components can be reused later in the netlist.
+More advanced circuits require more complex alignments. For example, an inverting opamp circuit might be scripted like this:
 
 ```
 T("in") <r> R("1k") <r> Xminus <r> OA1 <r> Xout
@@ -38,6 +38,4 @@ Xout <r> T("out")
   <img src="https://svenboulanger.github.io/SimpleCircuit/images/sample_circuit_2_dark.svg#gh-dark-mode-only">
 </a>
 
-This circuit has a **terminal** (`T`) that we give a label "in". We then go on to the right to an anonymous resistor `R`. Then we continue to **point** (`X`) Xminus, which is the point at the negative input of opamp (`OA`) OA1, and so on.
-
-The notation `OA1[p]` represents the pin of opamp OA1 called `p`.
+The point `Xminus` is a named component because we want to reuse it for a different line of code. The notation `R("1k")` represents an anonymous resistor with the label "1k". The notation `OA1[p]` means pin "p" of component "OA1".
