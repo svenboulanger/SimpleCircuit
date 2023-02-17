@@ -2,7 +2,7 @@
 
 SimpleCircuit is a script that allows you to quickly sketch electronic circuits. It tries to fill in as many gaps as you want.
 
-The application runs in the **browser** using Blazor. You can just go to it **[here](https://svenboulanger.github.io/SimpleCircuit/)** and start playing with it!
+The application runs in the **browser** using Blazor WASM. It is statically hosted **[here](https://svenboulanger.github.io/SimpleCircuit/)** so you can start playing with it! The page will store your scripts on your local memory such that you don't accidentally lose your work. You can drag and drop exported SVG files back into the webpage to continue working on the associated script.
 
 ## Quick start
 
