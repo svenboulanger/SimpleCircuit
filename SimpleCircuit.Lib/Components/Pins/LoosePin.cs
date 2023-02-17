@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Pins
 {
@@ -48,11 +49,23 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public bool ResolveOrientation(Vector2 orientation, IDiagnosticHandler diagnostics)
+        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics)
         {
-            // We are not being difficult, just give the orientation it wants...
-            HasFixedOrientation = true;
-            Orientation = orientation;
+            if (HasFixedOrientation)
+            {
+                // We cannot change the orientation after it has already been determined
+                if (orientation.Dot(Orientation) < 0.999)
+                {
+                    diagnostics?.Post(source, ErrorCodes.CouldNotConstrainOrientation, Name);
+                    return false;
+                }
+            }
+            else
+            {
+                // We are not being difficult, just give the orientation it wants...
+                HasFixedOrientation = true;
+                Orientation = orientation;
+            }
             return true;
         }
     }

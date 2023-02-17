@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components
 {
@@ -24,8 +25,9 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="p">The local vector orientation.</param>
         /// <param name="b">The constraining result.</param>
+        /// <param name="source">The source code that results in this orientation resolution.</param>
         /// <param name="diagnostics">The diagnostic handler.</param>
         /// <returns>Returns <c>true</c> if the orientation can be constrained; otherwise, <c>false</c>.</returns>
-        public bool ConstrainOrientation(Vector2 p, Vector2 b, IDiagnosticHandler diagnostics);
+        public bool ConstrainOrientation(Vector2 p, Vector2 b, Token source, IDiagnosticHandler diagnostics);
     }
 }

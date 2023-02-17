@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 using System;
 
 namespace SimpleCircuit.Components.Pins
@@ -68,20 +69,20 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public bool ResolveOrientation(Vector2 orientation, IDiagnosticHandler diagnostics)
+        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics)
         {
             // Make sure the orientation is normalized to avoid issues...
             orientation /= orientation.Length;
 
             // Constrain the owner orientation
             if (Owner is IOrientedDrawable od)
-                return od.ConstrainOrientation(RelativeOrientation, orientation, diagnostics);
+                return od.ConstrainOrientation(RelativeOrientation, orientation, source, diagnostics);
             else
             {
                 var error = orientation - RelativeOrientation;
                 if (!error.X.IsZero() || !error.Y.IsZero())
                 {
-                    diagnostics?.Post(ErrorCodes.CouldNotConstrainOrientation, Name);
+                    diagnostics?.Post(source, ErrorCodes.CouldNotConstrainOrientation, Name);
                     return false;
                 }
                 return true;

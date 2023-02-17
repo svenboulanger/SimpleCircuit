@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components
 {
@@ -75,7 +76,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool ConstrainOrientation(Vector2 p, Vector2 b, IDiagnosticHandler diagnostics)
+        public bool ConstrainOrientation(Vector2 p, Vector2 b, Token source, IDiagnosticHandler diagnostics)
         {
             switch (_dof)
             {
@@ -110,7 +111,7 @@ namespace SimpleCircuit.Components
                             return true;
                         else
                         {
-                            diagnostics.Post(ErrorCodes.CouldNotConstrainOrientation, Name);
+                            diagnostics.Post(source, ErrorCodes.CouldNotConstrainOrientation, Name);
                             return false;
                         }
                     }

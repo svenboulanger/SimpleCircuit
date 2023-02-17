@@ -119,10 +119,10 @@ namespace SimpleCircuit.Components.Wires
                         return PresenceResult.Success;
                     else if (p1f)
                         // The first pin is fixed, so let's use its orientation to set the second one
-                        p2.ResolveOrientation(-p1.Orientation, diagnostics);
+                        p2.ResolveOrientation(-p1.Orientation, _info.Segments[0].Source, diagnostics);
                     else if (p2f)
                         // The second pin is fixed, so let's use its orientation to set the first one
-                        p1.ResolveOrientation(-p2.Orientation, diagnostics);
+                        p1.ResolveOrientation(-p2.Orientation, _info.Segments[0].Source, diagnostics);
                     else
                     {
                         // Both aren't fixed, so we might just not have enough information...

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Pins
 {
@@ -29,8 +30,9 @@ namespace SimpleCircuit.Components.Pins
         /// correctly, e.g. if contradicting information is used as the input.
         /// </summary>
         /// <param name="orientation">The orientation.</param>
+        /// <param name="source">The source code that results in this orientation resolution.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>Returns <c>true</c> if the orientation could be applied; otherwise, <c>false</c>.</returns>
-        public bool ResolveOrientation(Vector2 orientation, IDiagnosticHandler diagnostics);
+        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics);
     }
 }

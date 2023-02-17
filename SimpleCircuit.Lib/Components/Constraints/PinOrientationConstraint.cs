@@ -100,7 +100,7 @@ namespace SimpleCircuit.Components.Constraints
 
                 // If there is no orientation, ignore constraining the pin (it may be that
                 // the segment copies the orientation from the pin instead)
-                op.ResolveOrientation(orientation, diagnostics);
+                op.ResolveOrientation(orientation, Segment.Source, diagnostics);
             }
             return PresenceResult.Success;
         }
