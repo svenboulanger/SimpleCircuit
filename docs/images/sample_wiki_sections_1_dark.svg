@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><svg xmlns:sc="https://github.com/svenboulanger/SimpleCircuit" width="190" height="245" viewBox="-6 -5 38.98 49.98" xmlns="http://www.w3.org/2000/svg"><style>path, polyline, line, circle, polygon {
+    stroke: #aaa;
+    stroke-width: 0.5pt;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.super, .sub { font-size: 0.75em; }
+.plane { stroke-width: 1pt; }
+.battery .neg { stroke-width: 0.75pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; fill: #aaa; }
+.small tspan { font-size: 0.8em; }
+.marker { fill: #aaa; }
+.dotted { stroke-dasharray: 0.5 2; }
+.dashed { stroke-dasharray: 2 2; }
+</style><metadata><sc:version>1.0.1.0</sc:version></metadata><metadata><sc:script><![CDATA[
+// Representing a section A
+.section A
+GND1 <u r> R <r> X1
+.endsection
+
+// Templated section
+.section B A
+]]></sc:script></metadata><g class="wire" id="A/w-1"><path class="wire" d="M0 9.99 v-9.99 h9.99" /></g><g class="wire" id="A/w-2"><path class="wire" d="M21.99 0 h9.99" /></g><g class="wire" id="B/w-1"><path class="wire" d="M0 39.98 v-9.99 h9.99" /></g><g class="wire" id="B/w-2"><path class="wire" d="M21.99 29.99 h9.99" /></g><g class="ground" id="A/GND1"><path d="M-5 9.99 h10 M-3 11.99 h6 M-1 13.99 h2" /></g><g class="resistor" id="A/R-1"><polyline points="9.99,0 10.99,-4 12.99,4 14.99,-4 16.99,4 18.99,-4 20.99,4 21.99,0" /></g><g class="ground" id="B/GND1"><path d="M-5 39.98 h10 M-3 41.98 h6 M-1 43.98 h2" /></g><g class="resistor" id="B/R-2"><polyline points="9.99,29.99 10.99,25.99 12.99,33.99 14.99,25.99 16.99,33.99 18.99,25.99 20.99,33.99 21.99,29.99" /></g></svg>
