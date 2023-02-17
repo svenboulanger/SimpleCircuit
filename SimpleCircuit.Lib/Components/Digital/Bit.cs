@@ -66,6 +66,7 @@ namespace SimpleCircuit.Components.Digital
                 double x = -hw * (_bits.Length - 1);
 
                 // Left pin
+                Pins.Clear();
                 Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-hw * _bits.Length, 0), new(-1, 0)), "left", "l", "w");
                 for (int i = 0; i < _bits.Length; i++)
                 {
