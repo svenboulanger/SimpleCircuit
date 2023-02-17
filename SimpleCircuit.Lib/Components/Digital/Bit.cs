@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Digital
             [Description("The block size for a single bit.")]
             public double BlockSize = 8;
 
-            [Description("If true, the vector is displayed from left to right (default), otherwise the vector goes from right to left.")]
+            [Description("If true, the vector defines pin indices from right to left (default), otherwise the numbering happens from left to right.")]
             public bool MsbFirst { get; set; } = true;
 
             /// <summary>
@@ -71,7 +71,7 @@ namespace SimpleCircuit.Components.Digital
                 for (int i = 0; i < _bits.Length; i++)
                 {
                     // Make a top pin
-                    int bit = _bits.Length - i - 1;
+                    int bit = MsbFirst ? i : _bits.Length - i - 1;
                     Pins.Add(new FixedOrientedPin($"top{bit}", $"Top pin of bit {bit}.", this, new(x, -hw), new(0, -1)), $"t{bit}", $"u{bit}");
                     Pins.Add(new FixedOrientedPin($"bottom{bit}", $"Bottom pin of bit {bit}.", this, new(x, hw), new(0, 1)), $"b{bit}", $"d{bit}");
                     x += BlockSize;
@@ -89,9 +89,8 @@ namespace SimpleCircuit.Components.Digital
                 double x = -hw * (_bits.Length - 1);
                 for (int i = 0; i < _bits.Length; i++)
                 {
-                    int bit = MsbFirst ? i : _bits.Length - i - 1;
                     drawing.Rectangle(BlockSize, BlockSize, new(x, 0));
-                    drawing.Text(_bits[bit], new(x, 0), new());
+                    drawing.Text(_bits[i], new(x, 0), new());
                     x += BlockSize;
                 }
             }
