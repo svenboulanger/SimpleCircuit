@@ -1,4 +1,5 @@
 ﻿using BlazorMonaco;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
@@ -12,6 +13,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Web;
 using System.Xml;
 
 namespace SimpleCircuitOnline.Pages
@@ -144,12 +146,58 @@ namespace SimpleCircuitOnline.Pages
                 await MonacoEditorBase.SetModelLanguage(model, "simpleCircuit");
                 await MonacoEditorBase.SetTheme("simpleCircuitTheme");
 
-                // Try to find the last saved script
-                string script = null, style = null;
+                // Try to find a script and/or style from the query parameters
+                var query = HttpUtility.ParseQueryString(new Uri(_navigation.Uri).Query);
+                string script = query["script"], style = query["style"];
+                if (string.IsNullOrWhiteSpace(script))
+                {
+                    if (_localStore != null)
+                        script = await _localStore.GetItemAsStringAsync("last_script");
+                }
+                else
+                {
+                    // Decode the script as a base64 string
+                    var bytes = Convert.FromBase64String(script);
+
+                    // Use GZip decompression
+                    using (var inputStream = new MemoryStream(bytes))
+                    {
+                        using (var outputStream = new MemoryStream())
+                        {
+                            using (System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress))
+                            {
+                                await gzip.CopyToAsync(outputStream);
+                            }
+                            script = DecodeScript(System.Text.Encoding.UTF8.GetString(outputStream.ToArray()));
+                        }
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(style))
+                {
+                    if (_localStore != null)
+                        style = await _localStore.GetItemAsStringAsync("last_style");
+                }
+                else
+                {
+                    // Decode the script as a base64 string
+                    var bytes = Convert.FromBase64String(style);
+
+                    // Use GZip decompression
+                    using (var inputStream = new MemoryStream(bytes))
+                    {
+                        using (var outputStream = new MemoryStream())
+                        {
+                            using (System.IO.Compression.GZipStream gzip = new(inputStream,
+                                System.IO.Compression.CompressionMode.Decompress))
+                            {
+                                await gzip.CopyToAsync(outputStream);
+                            }
+                            script = DecodeScript(System.Text.Encoding.UTF8.GetString(outputStream.ToArray()));
+                        }
+                    }
+                }
                 if (_localStore != null)
                 {
-                    script = await _localStore.GetItemAsStringAsync("last_script");
-                    style = await _localStore.GetItemAsStringAsync("last_style");
                     string settings = await _localStore.GetItemAsStringAsync("settings");
 
                     // Load settings
@@ -161,6 +209,7 @@ namespace SimpleCircuitOnline.Pages
                 }
                 if (_settings.AutoUpdate)
                     _timer.Start();
+
                 if (string.IsNullOrWhiteSpace(script))
                     script = Demo.Demos[0].Code;
                 if (string.IsNullOrWhiteSpace(style))
@@ -288,6 +337,56 @@ namespace SimpleCircuitOnline.Pages
                         }
                         string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
                         await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpeg", url, (int)w, (int)h, "white");
+                    }
+                    break;
+
+                case DownloadEventArgs.Types.Link:
+                    {
+                        var query = HttpUtility.ParseQueryString(String.Empty);
+
+                        // Extract the script
+                        string script = await _scriptEditor.GetValue();
+                        script = script.Trim('\r', '\n', '\t', ' ');
+                        if (!string.IsNullOrWhiteSpace(script))
+                        {
+                            using MemoryStream output = new();
+                            using (System.IO.Compression.GZipStream gzip = new(output, System.IO.Compression.CompressionLevel.SmallestSize))
+                            {
+                                await gzip.WriteAsync(Encoding.UTF8.GetBytes(EncodeScript(script)));
+                            }
+                            query.Add("script", Convert.ToBase64String(output.ToArray()));
+                        }
+
+                        // Extract the style
+                        string style = await _styleEditor.GetValue();
+                        style = style.Trim('\r', '\n', '\t', ' ');
+                        if (style.StartsWith(GraphicalCircuit.DefaultStyle))
+                            style = style[GraphicalCircuit.DefaultStyle.Length..];
+                        style = style.Trim('\r', '\n', '\t', ' ');
+                        if (!string.IsNullOrWhiteSpace(style))
+                        {
+                            using MemoryStream output = new();
+                            using (System.IO.Compression.GZipStream gzip = new(output, System.IO.Compression.CompressionLevel.SmallestSize))
+                            {
+                                await gzip.WriteAsync(Encoding.UTF8.GetBytes(EncodeScript(style)));
+                            }
+                            query.Add("style", Convert.ToBase64String(output.ToArray()));
+                        }
+
+                        // Build the URI
+                        var uri = _navigation.BaseUri + "?" + query.ToString();
+                        if (uri.Length <= 2048)
+                        {
+                            await _js.InvokeVoidAsync("copyToClipboard", uri);
+                            _logger.Clear();
+                            _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Info, null, "URL copied to clipboard"));
+                        }
+                        else
+                        {
+                            _logger.Clear();
+                            _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error, null, "The script is too large to encode as an URL! Share the SVG file instead"));
+                        }
+                        StateHasChanged();
                     }
                     break;
 

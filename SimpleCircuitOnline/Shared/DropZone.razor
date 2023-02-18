@@ -1,6 +1,6 @@
 ﻿@using System.IO
 @using System.Xml
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime _jsRuntime
 @implements IAsyncDisposable
 
 @* https://www.meziantou.net/upload-files-with-drag-drop-or-paste-from-clipboard-in-blazor.htm *@
@@ -35,6 +35,7 @@
         <Button class="download" Click="DownloadSVG"><DownloadIcon /> SVG</Button>
         <Button class="download" Click="DownloadPNG"><DownloadIcon /> PNG</Button>
         <Button class="download" Click="DownloadJPG"><DownloadIcon /> JPG</Button>
+        <Button class="download" Click="Share"><ShareIcon /></Button>
         <Button class="upload">
             <label for="file-upload">
                 <div class="hidden">

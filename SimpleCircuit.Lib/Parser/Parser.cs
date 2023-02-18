@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
-using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Markers;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -924,7 +922,6 @@ namespace SimpleCircuit.Parser
                     filter += DrawableFactoryDictionary.AnonymousSeparator + ".+";
                 filter = "^" + filter + "$";
                 filter = filter.Replace("*", "[a-zA-Z0-9_]*");
-                Console.WriteLine(filter);
                 var regex = new Regex(filter, RegexOptions.IgnoreCase);
                 var presences = context.Circuit.OfType<ILocatedPresence>().Where(p => regex.IsMatch(p.Name));
                 context.Circuit.Add(new AlignedWire($"virtual.{context.VirtualCoordinateCount++}", presences, axis));

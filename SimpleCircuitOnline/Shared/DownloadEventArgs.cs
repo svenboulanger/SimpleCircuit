@@ -15,6 +15,7 @@ namespace SimpleCircuitOnline.Shared
             Svg,
             Png,
             Jpeg,
+            Link
         }
 
         /// <summary>

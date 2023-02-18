@@ -11,7 +11,7 @@ namespace SimpleCircuitOnline.Shared
     public partial class GlobalOptionList
     {
         private readonly List<(PropertyInfo, string, object)> _options = new();
-        private readonly Options _defaultOptions = new Options();
+        private readonly Options _defaultOptions = new();
 
         [Parameter]
         public MonacoEditor Editor { get; set; }

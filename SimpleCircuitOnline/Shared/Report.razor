@@ -6,8 +6,8 @@
     <div class="container">
         @foreach (var message in Messages) 
         {
-            <div class="@(message.Severity == SeverityLevel.Error ? "error" : "warning")" role="alert">
-                <h4>@(message.Severity == SeverityLevel.Error ? "Error" : "Warning")</h4>
+            <div class="@(message.Severity.ToString().ToLower())" role="alert">
+                <h4>@(message.Severity)</h4>
                 @if (message is TokenDiagnosticMessage tdm)
                 {
                     <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Token))>line @(tdm.Token.Location.Line), column @(tdm.Token.Location.Column)</a>.</p>

@@ -180,3 +180,7 @@ function stopEventPropagation(e) {
     e.stopPropagation();
     return e;
 }
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+}

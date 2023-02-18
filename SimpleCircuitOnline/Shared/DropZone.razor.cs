@@ -117,7 +117,7 @@ namespace SimpleCircuitOnline.Shared
             if (firstRender)
             {
                 // Load the JS file
-                _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/dropzone.js");
+                _module = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/dropzone.js");
 
                 // Initialize the drop zone
                 _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", _dropZoneElement, _inputFile.Element);
@@ -209,6 +209,11 @@ namespace SimpleCircuitOnline.Shared
         protected async Task DownloadJPG()
         {
             var args = new DownloadEventArgs(DownloadEventArgs.Types.Jpeg);
+            await Download.InvokeAsync(args);
+        }
+        protected async Task Share()
+        {
+            var args = new DownloadEventArgs(DownloadEventArgs.Types.Link);
             await Download.InvokeAsync(args);
         }
 
