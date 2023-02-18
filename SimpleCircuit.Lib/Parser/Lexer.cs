@@ -23,6 +23,9 @@ namespace SimpleCircuit.Parser
         /// <inheritdoc />
         public Token Token => new(Source, _tokenStart, Content);
 
+        /// <inheritdoc />
+        public Token TokenWithTrivia => new(Source, _triviaStart, _contents[(_index - _length - _trivia).._index]);
+
         /// <summary>
         /// Gets the current token type.
         /// </summary>

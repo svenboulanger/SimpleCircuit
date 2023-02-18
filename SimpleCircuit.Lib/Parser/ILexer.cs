@@ -18,6 +18,11 @@ namespace SimpleCircuit.Parser
         public Token Token { get; }
 
         /// <summary>
+        /// Gets the token including the trivia.
+        /// </summary>
+        public Token TokenWithTrivia { get; }
+
+        /// <summary>
         /// Determines whether the current token has trivia leading up to it.
         /// </summary>
         bool HasTrivia { get; }

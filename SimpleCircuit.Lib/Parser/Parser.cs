@@ -259,7 +259,7 @@ namespace SimpleCircuit.Parser
                 while (lexer.Branch(TokenType.Comma));
 
                 if (!lexer.Branch(TokenType.CloseParenthesis))
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
             }
             return info;
         }
@@ -457,7 +457,7 @@ namespace SimpleCircuit.Parser
                     // Closing beak
                     if (!lexer.Branch(TokenType.CloseBeak))
                     {
-                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ">");
+                        context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ">");
                         return null;
                     }
                 }
@@ -479,7 +479,7 @@ namespace SimpleCircuit.Parser
             var token = lexer.ReadWhile(~TokenType.Newline & ~TokenType.CloseIndex & ~TokenType.Whitespace);
 
             if (!lexer.Branch(TokenType.CloseIndex))
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, "]");
+                context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, "]");
             return token;
         }
         private static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
@@ -901,7 +901,7 @@ namespace SimpleCircuit.Parser
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
             {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
+                context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
                 lexer.Skip(~TokenType.Newline);
                 return false;
             }
@@ -944,26 +944,34 @@ namespace SimpleCircuit.Parser
                 // Parse the component
                 var component = ParseComponent(lexer, context)?.GetOrCreate(context);
                 if (component == null)
+                {
+                    lexer.Skip(~TokenType.Newline);
                     return false;
+                }
 
                 // Property
                 if (!lexer.Branch(TokenType.Dot))
                 {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedDot);
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedDot);
+                    lexer.Skip(~TokenType.Newline);
                     return false;
                 }
                 if (!lexer.Branch(TokenType.Word, out var propertyToken))
                 {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedProperty);
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedProperty);
                     return false;
                 }
 
                 // Equals
                 if (!lexer.Branch(TokenType.Equals))
+                {
                     context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
 
                 // The value
-                object value = null;
+                object value;
                 switch (lexer.Type)
                 {
                     case TokenType.Number:
@@ -980,8 +988,14 @@ namespace SimpleCircuit.Parser
                         break;
 
                     default:
-                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyValue);
+                        context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedPropertyValue);
+                        lexer.Skip(~TokenType.Newline);
                         return false;
+                }
+                if (value is null)
+                {
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
                 }
                 result &= context.Options.SetProperty(context.Diagnostics, component, propertyToken, value);
             }
