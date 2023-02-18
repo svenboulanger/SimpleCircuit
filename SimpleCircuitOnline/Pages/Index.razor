@@ -25,7 +25,7 @@
                         <a href="https://github.com/svenboulanger/SimpleCircuit/wiki" target="_blank" class="bd-callout d-block">Wiki</a>
                     </Expandable>
                     <Expandable Title="Demo's" Class="mt-2">
-                        <DemoList DemoSelected="@(x => SetCurrentScript(x))" />
+                        <DemoList DemoSelected="@(async x => { _logger.Clear(); await SetCurrentScript(x); })" />
                     </Expandable>
                     <Expandable Title="Global options" Class="mt-2">
                         <GlobalOptionList Editor="_scriptEditor" />

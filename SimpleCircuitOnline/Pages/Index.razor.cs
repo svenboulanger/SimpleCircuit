@@ -130,7 +130,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Register our own language keywords
                 List<string[]> keys = new();
-                var context = new SimpleCircuit.Parser.ParsingContext();
+                var context = new ParsingContext();
                 foreach (var factory in context.Factory.Factories)
                 {
                     foreach (var metadata in factory.Metadata)
@@ -322,9 +322,9 @@ namespace SimpleCircuitOnline.Pages
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
                 UpdateNow();
-                lock (_lock)
-                    _updates = 0;
             }
+            lock (_lock)
+                _updates = 0;
         }
         private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
         {
@@ -388,7 +388,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 var code = await _scriptEditor.GetValue();
                 var style = await _styleEditor.GetValue();
-                var context = new SimpleCircuit.Parser.ParsingContext
+                var context = new ParsingContext
                 {
                     Diagnostics = _logger
                 };
@@ -399,8 +399,8 @@ namespace SimpleCircuitOnline.Pages
                 await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
                 // Parse the script
-                var lexer = SimpleCircuit.Parser.SimpleCircuitLexer.FromString(code.AsMemory());
-                SimpleCircuit.Parser.Parser.Parse(lexer, context);
+                var lexer = SimpleCircuitLexer.FromString(code.AsMemory());
+                Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
 
                 // Include XML data
@@ -419,7 +419,7 @@ namespace SimpleCircuitOnline.Pages
             }
             catch (Exception ex)
             {
-                _logger.Post(new SimpleCircuit.Diagnostics.DiagnosticMessage(SimpleCircuit.Diagnostics.SeverityLevel.Error,
+                _logger.Post(new DiagnosticMessage(SeverityLevel.Error,
                     "Exception", ex.Message));
             }
 
@@ -499,9 +499,9 @@ namespace SimpleCircuitOnline.Pages
         private async Task KeyUp(KeyboardEvent e)
         {
             // Extend the updates
-            if (_updates > 0)
+            lock(_lock)
             {
-                lock (_lock)
+                if (_updates > 0)
                     _updates++;
             }
 
