@@ -106,9 +106,19 @@ namespace SimpleCircuit.Components
             {
                 foreach (var pin in _pinsByIndex.OfType<LoosePin>().Where(p => !p.Orientation.X.IsZero() || !p.Orientation.Y.IsZero()))
                 {
-                    if (!string.IsNullOrWhiteSpace(pin.Name))
-                        drawing.Text(pin.Name, pin.Location - pin.Orientation * 2, -pin.Orientation);
+                    string name = TransformPinName(pin.Name);
+                    if (name is not null)
+                        drawing.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation);
                 }
+            }
+
+            private string TransformPinName(string name)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    return null;
+                if (name[0] == '_')
+                    return null;
+                return name;
             }
 
             /// <inheritdoc />
