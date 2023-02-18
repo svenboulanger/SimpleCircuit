@@ -12,6 +12,16 @@ namespace SimpleCircuit.Drawing
         private readonly Matrix2 _orientation;
 
         /// <summary>
+        /// Gets the matrix of the transform.
+        /// </summary>
+        public Matrix2 Matrix => _orientation;
+
+        /// <summary>
+        /// Gets the offset of the transform.
+        /// </summary>
+        public Vector2 Offset => _origin;
+
+        /// <summary>
         /// Gets the identity transform.
         /// </summary>
         /// <value>

@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Markers;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -73,7 +74,21 @@ namespace SimpleCircuit.Components.Sources
             private void DrawAmericanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, 0), 6);
-                drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
+                switch (Variants.Select("arrow", "ac"))
+                {
+                    case 0:
+                        drawing.Line(new(-3, 0), new(3, 0), new("arrow"));
+                        var marker = new Arrow(new(-3, 0), new(-1, 0));
+                        marker.Draw(drawing);
+                        marker.Location = new(3, 0);
+                        marker.Orientation = new(1, 0);
+                        marker.Draw(drawing);
+                        break;
+
+                    default:
+                        drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
+                        break;
+                }
                 drawing.Text(Labels[0], new(0, -8), new(0, -1));
                 drawing.Text(Labels[1], new(0, 8), new(0, 1));
             }

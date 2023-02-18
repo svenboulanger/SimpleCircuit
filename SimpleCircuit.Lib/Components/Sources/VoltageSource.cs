@@ -11,7 +11,9 @@ namespace SimpleCircuit.Components.Sources
     {
         private const string _ac = "ac";
         private const string _pulse = "pulse";
+        private const string _square = "square";
         private const string _tri = "tri";
+        private const string _step = "step";
 
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -81,24 +83,48 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Circle(new(0, 0), 6);
 
                 // Waveform / inner graphic
-                switch (Variants.Select(_ac, _pulse, _tri))
+                switch (Variants.Select(_ac, _square, _tri, _pulse, _step))
                 {
                     case 0:
-                        drawing.AC(vertical: true);
+                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
+                        drawing.AC();
+                        drawing.EndTransform();
                         break;
 
                     case 1:
+                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
                         drawing.Polyline(new Vector2[]
                         {
-                            new(0, -3), new(3, -3), new(3, 0), new(-3, 0), new(-3, 3), new(0, 3)
+                            new(-3, 0), new(-3, 3), new(0, 3), new(0, -3), new(3, -3), new(3, 0)
                         });
+                        drawing.EndTransform();
                         break;
 
                     case 2:
+                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
                         drawing.Polyline(new Vector2[]
                         {
-                            new(0, -3), new(1.5, -1.5), new(-1.5, 1.5), new(0, 3)
+                            new(-3, 0), new(-1.5, 1.5), new(1.5, -1.5), new(3, 0)
                         });
+                        drawing.EndTransform();
+                        break;
+
+                    case 3:
+                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
+                        drawing.Polyline(new Vector2[]
+                        {
+                            new(-3, 3), new(-1, 3), new(-1, -3), new(1, -3), new(1, 3), new(3, 3)
+                        });
+                        drawing.EndTransform();
+                        break;
+
+                    case 4:
+                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
+                        drawing.Polyline(new Vector2[]
+                        {
+                            new(-3, 3), new(-1.5, 3), new(-1.5, -3), new(3, -3)
+                        });
+                        drawing.EndTransform();
                         break;
 
                     default:
