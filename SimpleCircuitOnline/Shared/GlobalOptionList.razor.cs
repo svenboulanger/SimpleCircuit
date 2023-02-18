@@ -10,12 +10,13 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class GlobalOptionList
     {
-        private readonly List<(PropertyInfo, string)> _options = new();
+        private readonly List<(PropertyInfo, string, object)> _options = new();
+        private readonly Options _defaultOptions = new Options();
 
         [Parameter]
         public MonacoEditor Editor { get; set; }
 
-        protected async Task Insert(string name)
+        protected async Task Insert(string name, object defValue)
         {
             if (Editor == null)
                 return;
@@ -26,14 +27,14 @@ namespace SimpleCircuitOnline.Shared
             List<IdentifiedSingleEditOperation> ops = new();
             List<Selection> ends = new();
 
-            string cmd = $".options {name} = ";
+            string cmd = $".options {name} = {defValue}";
             ops.Add(new()
             {
                 Range = selection,
                 Text = cmd + Environment.NewLine,
                 ForceMoveMarkers = true,
             });
-            ends.Add(new BlazorMonaco.Selection()
+            ends.Add(new Selection()
             {
                 StartLineNumber = selection.StartLineNumber,
                 EndLineNumber = selection.StartLineNumber,
@@ -54,7 +55,10 @@ namespace SimpleCircuitOnline.Shared
                 {
                     var attribute = property.GetCustomAttribute<DescriptionAttribute>(true);
                     if (attribute != null)
-                        _options.Add((property, attribute.Description));
+                    {
+                        var defValue = property.GetValue(_defaultOptions);
+                        _options.Add((property, attribute.Description, defValue));
+                    }
                 }
             }
         }

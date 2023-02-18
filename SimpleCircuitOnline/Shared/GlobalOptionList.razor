@@ -1,8 +1,8 @@
 ﻿@if (_options != null && _options.Count > 0)
 {
-    @foreach (var (member, description) in _options)
+    @foreach (var (member, description, value) in _options)
     {
-        <a @onclick="x => Insert(member.Name)" class="bd-callout d-block" role="button">
+        <a @onclick="x => Insert(member.Name, value)" class="bd-callout d-block" role="button">
             <h5>@member.Name <small>(@GetTypeName(member))</small></h5>
             <p>@description</p>
         </a>
