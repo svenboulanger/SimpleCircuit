@@ -125,7 +125,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.X, StartX, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _start.X, StartX);
+                                diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _start.X, StartX);
                                 return false;
                             }
                         }
@@ -133,7 +133,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.Y, StartY, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
+                                diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
                                 return false;
                             }
                         }
@@ -144,7 +144,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.X, EndX, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _end.X, EndX);
+                                diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _end.X, EndX);
                                 return false;
                             }
                         }
@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.Y, EndY, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
+                                diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
                                 return false;
                             }
                         }

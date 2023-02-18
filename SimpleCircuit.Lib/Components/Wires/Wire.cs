@@ -212,12 +212,12 @@ namespace SimpleCircuit.Components.Wires
                     {
                         if (!context.Offsets.Group(_p2w.X, StartX, 0.0))
                         {
-                            diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
+                            diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
                             return false;
                         }
                         if (!context.Offsets.Group(_p2w.Y, StartY, 0.0))
                         {
-                            diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
+                            diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
                             return false;
                         }
                     }
@@ -225,12 +225,12 @@ namespace SimpleCircuit.Components.Wires
                     {
                         if (!context.Offsets.Group(_w2p.X, EndX, 0.0))
                         {
-                            diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
+                            diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
                             return false;
                         }
                         if (!context.Offsets.Group(_w2p.Y, EndY, 0.0))
                         {
-                            diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
+                            diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
                             return false;
                         }
                     }

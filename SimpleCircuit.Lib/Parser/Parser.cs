@@ -647,7 +647,7 @@ namespace SimpleCircuit.Parser
             }
             if (context.SectionTemplates.ContainsKey(nameToken.Content.ToString()))
             {
-                context.Diagnostics?.Post(ErrorCodes.DuplicateSection, nameToken.Content);
+                context.Diagnostics?.Post(nameToken, ErrorCodes.DuplicateSection, nameToken.Content);
                 if (lexer.Branch(TokenType.Word))
                     lexer.Skip(~TokenType.Newline);
                 else
@@ -660,7 +660,7 @@ namespace SimpleCircuit.Parser
                 // Try to use a previously defined section instead of this one
                 if (!context.SectionTemplates.TryGetValue(templateToken.Content.ToString(), out var token))
                 {
-                    context.Diagnostics.Post(ErrorCodes.UnknownSectionTemplate, templateToken.Content);
+                    context.Diagnostics.Post(templateToken, ErrorCodes.UnknownSectionTemplate, templateToken.Content);
                     lexer.Skip(~TokenType.Newline);
                     return false;
                 }
