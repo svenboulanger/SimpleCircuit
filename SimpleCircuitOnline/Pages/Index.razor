@@ -45,7 +45,7 @@
             @bind-ShrinkY=@ShrinkY
             @bind-Bounds=@RenderBounds
             @bind-AutoUpdate=@AutoUpdate
-            RefreshRequested=@UpdateNow>
+            RefreshRequested=@(() => UpdateNow(true))>
             <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>

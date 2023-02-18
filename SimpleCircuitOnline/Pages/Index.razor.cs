@@ -113,7 +113,7 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        UpdateNow();
+                        UpdateNow(true);
                     }
                     else
                         _timer.Stop();
@@ -160,17 +160,13 @@ namespace SimpleCircuitOnline.Pages
                     var bytes = Convert.FromBase64String(script);
 
                     // Use GZip decompression
-                    using (var inputStream = new MemoryStream(bytes))
+                    using var inputStream = new MemoryStream(bytes);
+                    using var outputStream = new MemoryStream();
+                    using (System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress))
                     {
-                        using (var outputStream = new MemoryStream())
-                        {
-                            using (System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress))
-                            {
-                                await gzip.CopyToAsync(outputStream);
-                            }
-                            script = DecodeScript(System.Text.Encoding.UTF8.GetString(outputStream.ToArray()));
-                        }
+                        await gzip.CopyToAsync(outputStream);
                     }
+                    script = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
                 }
                 if (string.IsNullOrWhiteSpace(style))
                 {
@@ -183,18 +179,14 @@ namespace SimpleCircuitOnline.Pages
                     var bytes = Convert.FromBase64String(style);
 
                     // Use GZip decompression
-                    using (var inputStream = new MemoryStream(bytes))
+                    using var inputStream = new MemoryStream(bytes);
+                    using var outputStream = new MemoryStream();
+                    using (System.IO.Compression.GZipStream gzip = new(inputStream,
+                        System.IO.Compression.CompressionMode.Decompress))
                     {
-                        using (var outputStream = new MemoryStream())
-                        {
-                            using (System.IO.Compression.GZipStream gzip = new(inputStream,
-                                System.IO.Compression.CompressionMode.Decompress))
-                            {
-                                await gzip.CopyToAsync(outputStream);
-                            }
-                            script = DecodeScript(System.Text.Encoding.UTF8.GetString(outputStream.ToArray()));
-                        }
+                        await gzip.CopyToAsync(outputStream);
                     }
+                    script = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
                 }
                 if (_localStore != null)
                 {
@@ -255,7 +247,7 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
 
-            await SetCurrentScript(new(DecodeScript(args.Script), args.Style));
+            await SetCurrentScript(new(DecodeScript(args.Script), args.Style, false));
         }
 
         /// <summary>
@@ -276,7 +268,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
                         
                         string result;
                         using (var sw = new Utf8StringWriter())
@@ -294,7 +286,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -318,7 +310,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -420,7 +412,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                UpdateNow();
+                UpdateNow(netlist.OverwriteLocalHistory);
             }
             lock (_lock)
                 _updates = 0;
@@ -460,7 +452,7 @@ namespace SimpleCircuitOnline.Pages
 
                     // Updating happens asynchronously
                     _logger.Clear();
-                    UpdateNow();
+                    UpdateNow(true);
                 }
                 else if (_updates > 1)
                 {
@@ -470,17 +462,17 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private void UpdateNow()
+        private void UpdateNow(bool updateHistory)
         {
             _loading = 2;
-            Task.Run(async () => _svg = await ComputeXml(false, _settings.RenderBounds))
+            Task.Run(async () => _svg = await ComputeXml(false, updateHistory, _settings.RenderBounds))
                 .ContinueWith(task =>
                 {
                     _loading = 0;
                     StateHasChanged();
                 });
         }
-        private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
+        private async Task<XmlDocument> ComputeXml(bool includeScript, bool storeHistory, bool includeBounds = false)
         {
             XmlDocument doc = null;
             try
@@ -493,8 +485,11 @@ namespace SimpleCircuitOnline.Pages
                 };
 
                 // Store the script and style for next time
-                await _localStore.SetItemAsStringAsync("last_script", code);
-                await _localStore.SetItemAsStringAsync("last_style", style);
+                if (storeHistory)
+                {
+                    await _localStore.SetItemAsStringAsync("last_script", code);
+                    await _localStore.SetItemAsStringAsync("last_style", style);
+                }
                 await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
                 // Parse the script
