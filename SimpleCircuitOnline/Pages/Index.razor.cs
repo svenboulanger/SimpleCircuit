@@ -374,7 +374,8 @@ namespace SimpleCircuitOnline.Pages
                         }
 
                         // Build the URI
-                        var uri = _navigation.BaseUri + "?" + query.ToString();
+                        var b = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
+                        var uri = $"{b}?{query}";
                         if (uri.Length <= 2048)
                         {
                             await _js.InvokeVoidAsync("copyToClipboard", uri);

@@ -117,7 +117,8 @@ namespace SimpleCircuitOnline.Shared
             if (firstRender)
             {
                 // Load the JS file
-                _module = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/dropzone.js");
+                var uri = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
+                _module = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", Path.Combine(uri, "js/dropzone.js"));
 
                 // Initialize the drop zone
                 _dropZoneInstance = await _module.InvokeAsync<IJSObjectReference>("initializeFileDropZone", _dropZoneElement, _inputFile.Element);
