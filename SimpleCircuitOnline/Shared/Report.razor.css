@@ -41,6 +41,11 @@ p {
     margin-top: 0;
     margin-bottom: 1rem;
 }
+.info a {
+    color: #155724;
+    text-decoration: none;
+    font-weight: bold;
+}
 .error a {
     color: #721c24;
     text-decoration: none;

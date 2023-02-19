@@ -1,5 +1,4 @@
 ﻿using BlazorMonaco;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
@@ -30,7 +29,7 @@ namespace SimpleCircuitOnline.Pages
         private MonacoEditor _scriptEditor, _styleEditor;
         private TabMenu _tabs;
         private Settings _settings = new();
-        private bool _arrowMode = false;
+        private bool _arrowMode = false, _viewMode = false;
 
         /// <summary>
         /// Gets or sets the filename.
@@ -113,7 +112,7 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        UpdateNow(true);
+                        UpdateNow();
                     }
                     else
                         _timer.Stop();
@@ -128,7 +127,8 @@ namespace SimpleCircuitOnline.Pages
             await base.OnAfterRenderAsync(firstRender);
             if (firstRender)
             {
-                _timer.Elapsed += OnTimerElapsed;
+                // Determine the version
+                _simpleCircuitVersion = typeof(GraphicalCircuit).Assembly.GetName().Version?.ToString() ?? "?";
 
                 // Register our own language keywords
                 List<string[]> keys = new();
@@ -149,67 +149,71 @@ namespace SimpleCircuitOnline.Pages
                 // Try to find a script and/or style from the query parameters
                 var query = HttpUtility.ParseQueryString(new Uri(_navigation.Uri).Query);
                 string script = query["script"], style = query["style"];
-                if (string.IsNullOrWhiteSpace(script))
-                {
-                    if (_localStore != null)
-                        script = await _localStore.GetItemAsStringAsync("last_script");
-                }
+                if (string.IsNullOrWhiteSpace(script) && string.IsNullOrWhiteSpace(style))
+                    await ReloadLastScript();
                 else
                 {
-                    // Decode the script as a base64 string
-                    var bytes = Convert.FromBase64String(script);
-
-                    // Use GZip decompression
-                    using var inputStream = new MemoryStream(bytes);
-                    using var outputStream = new MemoryStream();
-                    using (System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress))
+                    if (!string.IsNullOrWhiteSpace(script))
                     {
-                        await gzip.CopyToAsync(outputStream);
-                    }
-                    script = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
-                }
-                if (string.IsNullOrWhiteSpace(style))
-                {
-                    if (_localStore != null)
-                        style = await _localStore.GetItemAsStringAsync("last_style");
-                }
-                else
-                {
-                    // Decode the script as a base64 string
-                    var bytes = Convert.FromBase64String(style);
+                        try
+                        {
+                            // Decode the script as a base64 string
+                            var bytes = Convert.FromBase64String(script);
 
-                    // Use GZip decompression
-                    using var inputStream = new MemoryStream(bytes);
-                    using var outputStream = new MemoryStream();
-                    using (System.IO.Compression.GZipStream gzip = new(inputStream,
-                        System.IO.Compression.CompressionMode.Decompress))
-                    {
-                        await gzip.CopyToAsync(outputStream);
+                            // Use GZip decompression
+                            using var inputStream = new MemoryStream(bytes);
+                            using var outputStream = new MemoryStream();
+                            using (System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress))
+                            {
+                                await gzip.CopyToAsync(outputStream);
+                            }
+                            script = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error,
+                                null, $"Loading script failed: {ex.Message}"));
+                            script = Demo.Demos[0].Code;
+                        }
                     }
-                    script = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
-                }
-                if (_localStore != null)
-                {
-                    string settings = await _localStore.GetItemAsStringAsync("settings");
+                    else
+                        script = Demo.Demos[0].Code;
+                    if (!string.IsNullOrWhiteSpace(style))
+                    {
+                        try
+                        {
+                            // Decode the script as a base64 string
+                            var bytes = Convert.FromBase64String(style);
 
-                    // Load settings
-                    if (!string.IsNullOrWhiteSpace(settings))
-                    {
-                        _settings = JsonSerializer.Deserialize<Settings>(settings);
-                        StateHasChanged();
+                            // Use GZip decompression
+                            using var inputStream = new MemoryStream(bytes);
+                            using var outputStream = new MemoryStream();
+                            using (System.IO.Compression.GZipStream gzip = new(inputStream,
+                                System.IO.Compression.CompressionMode.Decompress))
+                            {
+                                await gzip.CopyToAsync(outputStream);
+                            }
+                            style = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error,
+                                null, $"Loading style failed: {ex.Message}"));
+                            style = GraphicalCircuit.DefaultStyle;
+                        }
                     }
+                    else
+                        style = GraphicalCircuit.DefaultStyle;
+                    _viewMode = true;
+                    await SetCurrentScript(new(script, style));
+                    _navigation.NavigateTo("/");
                 }
+                await LoadSettings();
+
+                // Setup the timer
+                _timer.Elapsed += OnTimerElapsed;
                 if (_settings.AutoUpdate)
                     _timer.Start();
-
-                if (string.IsNullOrWhiteSpace(script))
-                    script = Demo.Demos[0].Code;
-                if (string.IsNullOrWhiteSpace(style))
-                    style = GraphicalCircuit.DefaultStyle;
-                await SetCurrentScript(new(script, style));
-
-                // Determine the version
-                _simpleCircuitVersion = typeof(GraphicalCircuit).Assembly.GetName().Version?.ToString() ?? "?";
             }
         }
 
@@ -247,7 +251,8 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
 
-            await SetCurrentScript(new(DecodeScript(args.Script), args.Style, false));
+            _viewMode = true;
+            await SetCurrentScript(new(DecodeScript(args.Script), DecodeScript(args.Style)));
         }
 
         /// <summary>
@@ -257,7 +262,10 @@ namespace SimpleCircuitOnline.Pages
         /// <returns>A task.</returns>
         protected async Task DownloadFile(DownloadEventArgs args)
         {
+            // Clear the logger of error messages (we will be re-generating anyway)
             _logger.Clear();
+            if (_viewMode)
+                _logger.Messages.Add(new ViewModeDiagnosticMessage());
 
             // Decide on the filename
             string filename = Filename;
@@ -268,7 +276,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
+                        var doc = await ComputeXml(includeScript: true);
                         
                         string result;
                         using (var sw = new Utf8StringWriter())
@@ -286,7 +294,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
+                        var doc = await ComputeXml(includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -310,7 +318,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        var doc = await ComputeXml(includeScript: true, storeHistory: true);
+                        var doc = await ComputeXml(includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -383,11 +391,23 @@ namespace SimpleCircuitOnline.Pages
                     break;
 
                 default:
-                    Console.WriteLine("Unrecognized download format");
+                    _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error,
+                        null, $"Could not recognize download format '{args.Type}'"));
                     break;
             }
         }
 
+        private async Task ReloadLastScript()
+        {
+            if (_localStore != null)
+            {
+                string script = await _localStore.GetItemAsStringAsync("last_script");
+                string style = await _localStore.GetItemAsStringAsync("last_style");
+                _logger.Clear();
+                _viewMode = false;
+                await SetCurrentScript(new(script, style));
+            }
+        }
         private async Task ReportMessageClicked(Token token)
         {
             await _scriptEditor.SetPosition(new Position() { LineNumber = token.Location.Line, Column = token.Location.Column });
@@ -412,7 +432,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                UpdateNow(netlist.OverwriteLocalHistory);
+                UpdateNow();
             }
             lock (_lock)
                 _updates = 0;
@@ -452,7 +472,8 @@ namespace SimpleCircuitOnline.Pages
 
                     // Updating happens asynchronously
                     _logger.Clear();
-                    UpdateNow(true);
+                    _viewMode = false;
+                    UpdateNow();
                 }
                 else if (_updates > 1)
                 {
@@ -462,17 +483,17 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private void UpdateNow(bool updateHistory)
+        private void UpdateNow()
         {
             _loading = 2;
-            Task.Run(async () => _svg = await ComputeXml(false, updateHistory, _settings.RenderBounds))
+            Task.Run(async () => _svg = await ComputeXml(false, _settings.RenderBounds))
                 .ContinueWith(task =>
                 {
                     _loading = 0;
                     StateHasChanged();
                 });
         }
-        private async Task<XmlDocument> ComputeXml(bool includeScript, bool storeHistory, bool includeBounds = false)
+        private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {
             XmlDocument doc = null;
             try
@@ -484,11 +505,15 @@ namespace SimpleCircuitOnline.Pages
                     Diagnostics = _logger
                 };
 
-                // Store the script and style for next time
-                if (storeHistory)
+                if (!_viewMode)
                 {
+                    // Store the script and style for next time
                     await _localStore.SetItemAsStringAsync("last_script", code);
                     await _localStore.SetItemAsStringAsync("last_style", style);
+                }
+                else
+                {
+                    _logger.Messages.Add(new ViewModeDiagnosticMessage());
                 }
                 await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
@@ -525,12 +550,17 @@ namespace SimpleCircuitOnline.Pages
         }
         private static string EncodeScript(string script)
         {
+            if (script is null)
+                return script;
+
             // We can encounter arrows in our script, so let's encode them in HTML code
             script = NonUtf8Code().Replace(script, match => $"&#{(int)match.Groups[0].Value[0]};");
             return script;
         }
         private static string DecodeScript(string script)
         {
+            if (script is null)
+                return script;
             script = Utf8Encoded().Replace(script, match =>
             {
                 // Convert the resulting ASCI character
@@ -569,6 +599,20 @@ namespace SimpleCircuitOnline.Pages
         {
             string settings = JsonSerializer.Serialize(_settings);
             await _localStore.SetItemAsStringAsync("settings", settings);
+        }
+        private async Task LoadSettings()
+        {
+            if (_localStore != null)
+            {
+                string settings = await _localStore.GetItemAsStringAsync("settings");
+
+                // Load settings
+                if (!string.IsNullOrWhiteSpace(settings))
+                {
+                    _settings = JsonSerializer.Deserialize<Settings>(settings);
+                    StateHasChanged();
+                }
+            }
         }
 
         [GeneratedRegex("[\u0100-\uffff]")]

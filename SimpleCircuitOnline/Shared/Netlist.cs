@@ -16,21 +16,14 @@
         public string Style { get; }
 
         /// <summary>
-        /// Gets whether the local history should be overwritten by the script.
-        /// </summary>
-        public bool OverwriteLocalHistory { get; }
-
-        /// <summary>
         /// Creates a new <see cref="Netlist"/>.
         /// </summary>
         /// <param name="script">The script.</param>
         /// <param name="style">The style.</param>
-        /// <param name="overwrite">If <c>true</c>, the history should be overwritten.</param>
-        public Netlist(string script, string style, bool overwrite = false)
+        public Netlist(string script, string style)
         {
             Script = script;
             Style = style;
-            OverwriteLocalHistory = overwrite;
         }
     }
 }

@@ -8,7 +8,11 @@
         {
             <div class="@(message.Severity.ToString().ToLower())" role="alert">
                 <h4>@(message.Severity)</h4>
-                @if (message is TokenDiagnosticMessage tdm)
+                @if (message is ViewModeDiagnosticMessage vmdm)
+                {
+                    <p>@(message.Message). Edit the script to start tracking, or click <a href="javascript:void(0);" @onclick=@(async () => await ViewModeClicked.InvokeAsync(true))>here</a> to restore your last saved work.</p>
+                }
+                else if (message is TokenDiagnosticMessage tdm)
                 {
                     <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Token))>line @(tdm.Token.Location.Line), column @(tdm.Token.Location.Column)</a>.</p>
                 }
@@ -27,4 +31,7 @@
 
     [Parameter]
     public EventCallback<Token> MessageClicked { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ViewModeClicked { get; set; }
 }

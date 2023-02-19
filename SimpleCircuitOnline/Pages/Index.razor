@@ -26,7 +26,7 @@
                         <a href="https://github.com/svenboulanger/SimpleCircuit/wiki" target="_blank" class="bd-callout d-block">Wiki</a>
                     </Expandable>
                     <Expandable Title="Demo's" Class="mt-2">
-                        <DemoList DemoSelected="@(async x => { _logger.Clear(); await SetCurrentScript(x); })" />
+                        <DemoList DemoSelected="@(async x => { _viewMode = true; _logger.Clear(); await SetCurrentScript(x); })" />
                     </Expandable>
                     <Expandable Title="Global options" Class="mt-2">
                         <GlobalOptionList Editor="_scriptEditor" />
@@ -45,10 +45,10 @@
             @bind-ShrinkY=@ShrinkY
             @bind-Bounds=@RenderBounds
             @bind-AutoUpdate=@AutoUpdate
-            RefreshRequested=@(() => UpdateNow(true))>
+            RefreshRequested=@(() => UpdateNow())>
             <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>
-        <Report Messages=@_logger.Messages MessageClicked="ReportMessageClicked" />
+        <Report Messages=@_logger.Messages MessageClicked="ReportMessageClicked" ViewModeClicked="ReloadLastScript" />
     </div>
 </div>
