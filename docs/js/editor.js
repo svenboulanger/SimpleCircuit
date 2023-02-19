@@ -9,9 +9,10 @@
     monaco.languages.setMonarchTokensProvider('simpleCircuit', {
         defaultToken: 'invalid',
         includeLF: true,
+        lineComment: /\/\/.*\n/,
         tokenizer: {
             root: [
-                { include: '@comment' },
+                ['@lineComment', 'comment'],
                 [/^[\s\t]*-/, { token: 'dash.assignment', next: '@assignment' }],
                 [/^[\s\t]*\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual' }],
                 [/^[\s\t]*\./, { token: 'dot.command', bracket: '@open', next: '@command' }],
@@ -28,10 +29,12 @@
                 [/\(/, { token: 'bracket.label.$S0', bracket: '@open', next: '@label_block' }],
             ],
             virtual: [
+                [ '@lineComment', 'comment', '@pop'],
                 { include: '@component_chain' },
                 [/\)/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
             ],
             assignment: [
+                [ '@lineComment', 'comment', '@pop' ],
                 [/\n/, { token: 'newline', next: '@pop' }],
                 { include: '@whitespace' },
                 { include: '@number' },
@@ -42,6 +45,7 @@
                 [/\./, 'dot.assignment'],
             ],
             wire: [
+                [ '@lineComment', 'comment', '@pop' ],
                 { include: '@whitespace' },
                 [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
@@ -49,15 +53,18 @@
                 [/\+/, { token: 'operator.$S0' }],
             ],
             command: [
+                [ '@lineComment', 'comment', '@pop' ],
                 [/\b\w+\b/, { token: 'word' }],
                 [/\n/, { token: 'newline', next: '@pop' }],
             ],
             pin_block: [
+                [ '@lineComment', 'comment', '@popall' ],
                 { include: '@whitespace' },
                 [/\w+/, { token: 'word.pin' }],
                 [/\]/, { token: 'bracket.pin', bracket: '@close', next: '@pop' }],
             ],
             label_block: [
+                [ '@lineComment', 'comment', '@popall'],
                 { include: '@whitespace' },
                 [/\)/, { token: 'bracket.label', bracket: '@close', next: '@pop' }],
                 { include: '@string' },
@@ -74,10 +81,7 @@
             ],
             boolean: [
                 [/true|false/, { token: 'boolean.$S0' }],
-            ],
-            comment: [
-                [/^[\s\t]*\/\/.*\n$/, 'comment'],
-            ],
+            ]
         }
     });
 
@@ -114,7 +118,7 @@
             { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
             { token: 'dot', foreground: '0000cc' },
             { token: 'dash', foreground: '0000cc', fontStyle: 'bold' },
-            { token: 'word.assignment', foreground: '990000', fontStyle: 'bold' },
+            { token: 'word.assignment', foreground: '6666ff', fontStyle: 'bold' },
             { token: 'dot.assignment', foreground: '666666' },
             { token: 'equals.assignment', foreground: '666666' },
             { token: 'boolean', foreground: 'a0a0a0' },
@@ -175,4 +179,8 @@ function stopEventPropagation(e) {
     console.log(e);
     e.stopPropagation();
     return e;
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
 }
