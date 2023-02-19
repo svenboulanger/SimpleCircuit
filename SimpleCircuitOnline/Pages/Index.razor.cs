@@ -206,7 +206,9 @@ namespace SimpleCircuitOnline.Pages
                         style = GraphicalCircuit.DefaultStyle;
                     _viewMode = true;
                     await SetCurrentScript(new(script, style));
-                    _navigation.NavigateTo("/");
+
+                    string url = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
+                    _navigation.NavigateTo(url);
                 }
                 await LoadSettings();
 
