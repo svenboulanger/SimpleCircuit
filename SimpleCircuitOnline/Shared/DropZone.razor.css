@@ -48,10 +48,15 @@
     vertical-align: -0.125em;
     fill: currentColor;
 }
+.options-container {
+    position: relative;
+    display: inline-block;
+}
 .options {
     position: absolute;
     left: 0px;
     bottom: 2.75rem;
+    width: 250px;
 }
 .options ::deep a {
     position: relative;
