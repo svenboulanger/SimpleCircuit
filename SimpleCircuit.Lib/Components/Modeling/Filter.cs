@@ -36,9 +36,47 @@ namespace SimpleCircuit.Components.Modeling
             {
                 base.Draw(drawing);
 
+                switch (Variants.Select("graph"))
+                {
+                    case 0:
+                        DrawGraphs(drawing);
+                        break;
+
+                    default:
+                        DrawSquigglies(drawing);
+                        break;
+                }
+            }
+
+            private void DrawGraphs(SvgDrawing drawing)
+            {
+                double s = Size * 0.25;
+                    
+                switch (Variants.Select(_lp, _bp, _hp, _lp2, _hp2))
+                {
+                    default:
+                    case 0:
+                    case 3:
+                        drawing.Polyline(new Vector2[] { new(-s, -s), new(-s, s), new(s, s) });
+                        drawing.Polyline(new Vector2[] { new(-s, -s * 0.6), new(s * 0.1, -s * 0.6), new(s * 0.6, s) });
+                        break;
+
+                    case 1:
+                        drawing.Polyline(new Vector2[] { new(-s, -s), new(-s, s), new(s, s) });
+                        drawing.Polyline(new Vector2[] { new(-s, s), new(-s * 0.45, -s * 0.6), new(s * 0.15, -s * 0.6), new(s * 0.6, s) });
+                        break;
+
+                    case 2:
+                    case 4:
+                        drawing.Polyline(new Vector2[] { new(-s, -s), new(-s, s), new(s, s) });
+                        drawing.Polyline(new Vector2[] { new(-s, s), new(-s * 0.1, -s * 0.6), new(s * 0.6, -s * 0.6) });
+                        break;
+                }
+            }
+
+            private void DrawSquigglies(SvgDrawing drawing)
+            {
                 double s = Size * 0.2;
-
-
                 switch (Variants.Select(_lp, _bp, _hp, _lp2, _hp2))
                 {
                     case 0:
@@ -75,6 +113,10 @@ namespace SimpleCircuit.Components.Modeling
                         drawing.AC(new(0, -s), s);
                         drawing.AC(new(0, s), s);
                         drawing.Line(new(-s * 0.5, s * 1.5), new(s * 0.5, s * 0.5));
+                        break;
+
+                    default:
+                        drawing.AC(new(), s);
                         break;
                 }
             }
