@@ -70,8 +70,8 @@
                 { include: '@string' },
             ],
             string: [
-                [/"([^"]|\\.)+"/, 'string'],
-                [/'([^']|\\.)+'/, 'string'],
+                [/"([^"]|\\.)*"/, 'string'],
+                [/'([^']|\\.)*'/, 'string'],
             ],
             whitespace: [
                 [/[ \t]+/, 'white'],

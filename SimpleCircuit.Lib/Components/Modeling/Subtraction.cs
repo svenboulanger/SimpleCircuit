@@ -1,7 +1,7 @@
 ﻿namespace SimpleCircuit.Components.Modeling
 {
-    [Drawable("ADD", "Addition", "Modeling")]
-    public class Addition : DrawableFactory
+    [Drawable("SUB", "Subtraction", "Modeling")]
+    internal class Subtraction : DrawableFactory
     {
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -10,7 +10,7 @@
         private class Instance : ModelingDrawable
         {
             /// <summary>
-            /// Creates a new <see cref="Instance"/>.
+            /// Creates a new <see cref="Instance"/>
             /// </summary>
             /// <param name="name">The name.</param>
             public Instance(string name)
@@ -24,7 +24,6 @@
                 base.Draw(drawing);
                 double s = Size * 0.3;
                 drawing.Line(new(-s, 0), new(s, 0));
-                drawing.Line(new(0, -s), new(0, s));
             }
         }
     }

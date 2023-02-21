@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Modeling
 {
     [Drawable("FILT", "A filter", "Modeling")]
     public class Filter : DrawableFactory
     {
+        /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
         {
             var result = new Instance(name);
@@ -16,12 +13,14 @@ namespace SimpleCircuit.Components.Modeling
 
         private class Instance : ModelingDrawable
         {
+            private const string _graph = "graph";
             private const string _lp = "lowpass";
             private const string _lp2 = "lowpass2";
             private const string _bp = "bandpass";
             private const string _hp = "highpass";
             private const string _hp2 = "highpass2";
 
+            /// <inheritdoc />
             protected override double Size => 12;
 
             /// <summary>
@@ -32,11 +31,11 @@ namespace SimpleCircuit.Components.Modeling
             {
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-
-                switch (Variants.Select("graph"))
+                switch (Variants.Select(_graph))
                 {
                     case 0:
                         DrawGraphs(drawing);

@@ -17,6 +17,9 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             public Labels Labels { get; } = new(2);
 
+            [Description("The distance of the text to the point.")]
+            public double Length { get; set; } = 2.0;
+
             /// <inheritdoc />
             public override string Type => "direction";
 
@@ -34,8 +37,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Text(Labels[0], new(0, 3), new(0, 1));
-                drawing.Text(Labels[1], new(0, -3), new(0, -1));
+                drawing.Text(Labels[0], new(0, Length), new(0, 1));
+                drawing.Text(Labels[1], new(0, -Length), new(0, -1));
             }
         }
     }

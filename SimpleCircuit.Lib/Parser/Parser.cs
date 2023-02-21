@@ -971,6 +971,7 @@ namespace SimpleCircuit.Parser
                 object value;
                 switch (lexer.Type)
                 {
+                    case TokenType.Dash:
                     case TokenType.Number:
                     case TokenType.Integer:
                         value = ParseDouble(lexer, context);
