@@ -23,6 +23,7 @@ namespace SimpleCircuit.Components.Modeling
         /// </summary>
         [Description("The scale of the block")]
         public double Scale { get; set; }
+        public int OrientationDegreesOfFreedom { get; }
 
         /// <summary>
         /// Creates a new <see cref="ModelingDrawable"/>.
@@ -42,7 +43,7 @@ namespace SimpleCircuit.Components.Modeling
         }
 
         /// <inheritdoc />
-        protected override Transform CreateTransform() => new(Location, Matrix2.Scale(Scale));
+        protected override Transform CreateTransform() => new(Location, Matrix2.Scale(Scale, Scale));
 
         private void SetPinOffset(int index, Vector2 offset)
             => ((FixedOrientedPin)Pins[index]).Offset = offset;
@@ -76,5 +77,11 @@ namespace SimpleCircuit.Components.Modeling
             else
                 drawing.Circle(new(), Size * 0.5);
         }
+
+        /// <inheritdoc />
+        public Vector2 TransformOffset(Vector2 local) => local * Scale;
+
+        /// <inheritdoc />
+        public Vector2 TransformNormal(Vector2 local) => local;
     }
 }

@@ -124,8 +124,8 @@ namespace SimpleCircuit.Components
             if (lowest.Representative != highest.Representative)
             {
                 // We will try to see if this minimum allows us to order the representatives
-                double reqDistance = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
-                if (offset > reqDistance)
+                double delta = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
+                if (offset > delta)
                     context.Extremes.Order(lowest.Representative, highest.Representative);
                 else
                     context.Extremes.Linked.Group(lowest.Representative, highest.Representative);

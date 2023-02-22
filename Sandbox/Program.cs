@@ -10,8 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".options jumpoverwires = true
-X1 <r +30 u l d> X
+            var script = @"INT1
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

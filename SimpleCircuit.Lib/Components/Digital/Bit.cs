@@ -71,7 +71,7 @@ namespace SimpleCircuit.Components.Digital
                 for (int i = 0; i < _bits.Length; i++)
                 {
                     // Make a top pin
-                    int bit = MsbFirst ? i : _bits.Length - i - 1;
+                    int bit = MsbFirst ? _bits.Length - i - 1 : i;
                     Pins.Add(new FixedOrientedPin($"top{bit}", $"Top pin of bit {bit}.", this, new(x, -hw), new(0, -1)), $"t{bit}", $"u{bit}");
                     Pins.Add(new FixedOrientedPin($"bottom{bit}", $"Bottom pin of bit {bit}.", this, new(x, hw), new(0, 1)), $"b{bit}", $"d{bit}");
                     x += BlockSize;

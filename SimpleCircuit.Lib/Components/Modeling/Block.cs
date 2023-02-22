@@ -22,6 +22,9 @@
             /// <inheritdoc />
             protected override double Size => 12;
 
+            /// <inheritdoc />
+            public override string Type => "block";
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>

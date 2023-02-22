@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// Represents a drawable that can be oriented and has a 2D location.
     /// </summary>
-    public interface IOrientedDrawable : ILocatedDrawable, ITransformingDrawable
+    public interface IOrientedDrawable : ITransformingDrawable
     {
         /// <summary>
         /// Determines whether the relative orientation given is already constrained.

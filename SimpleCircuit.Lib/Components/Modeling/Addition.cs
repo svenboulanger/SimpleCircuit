@@ -9,6 +9,9 @@
 
         private class Instance : ModelingDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "add";
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
