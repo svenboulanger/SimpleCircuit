@@ -10,7 +10,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"ADD(sigma)
+            var script = @"ENT1(""Entity 1"", ""B"", ""C"")[r1] <one r se r one> ENT2(""Entity 2"")
+
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

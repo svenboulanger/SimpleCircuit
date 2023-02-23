@@ -76,7 +76,7 @@ namespace SimpleCircuit.Properties {
         ///.text-stroke { stroke-width: 0.025em; }
         ///.text-symbol { fill: black; stroke: none; }
         ///.marker { fill: black; }
-        ///.dotted { stroke [rest of string was truncated]&quot;;.
+        ///.marker.erd { fi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DefaultStyle {
             get {

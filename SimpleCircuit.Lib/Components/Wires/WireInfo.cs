@@ -45,8 +45,8 @@ namespace SimpleCircuit.Components.Wires
                 var prevSegment = Segments[i - 1];
 
                 // If the markers are not the same, skip simplification of these two segments
-                if (prevSegment.StartMarker != segment.StartMarker ||
-                    prevSegment.EndMarker != segment.EndMarker)
+                if (prevSegment.StartMarkers != null || segment.StartMarkers != null ||
+                    prevSegment.EndMarkers != null || segment.EndMarkers != null)
                     continue;
 
                 if (segment.IsUnconstrained || prevSegment.IsUnconstrained)

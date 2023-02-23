@@ -133,6 +133,7 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
 .text-stroke { stroke-width: 0.025em; }
 .text-symbol { fill: black; stroke: none; }
 .marker { fill: black; }
+.marker.erd { fill: white; }
 .dotted { stroke-dasharray: 0.5 2; }
 .dashed { stroke-dasharray: 2 2; }</value>
   </data>

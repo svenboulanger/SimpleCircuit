@@ -485,7 +485,7 @@ namespace SimpleCircuit.Components.Wires
                 {
                     builder.MoveTo(point.Location);
                     int segment = 0;
-                    var startMarker = _info.Segments[0].StartMarker;
+                    var startMarkers = _info.Segments[0].StartMarkers;
                     for (int i = 1; i < _vectors.Count; i++)
                     {
                         point = _vectors[i];
@@ -502,12 +502,15 @@ namespace SimpleCircuit.Components.Wires
                             builder.LineTo(s);
 
                             // Deal with the start marker
-                            if (startMarker != null)
+                            if (startMarkers != null)
                             {
-                                startMarker.Location = builder.Start;
-                                startMarker.Orientation = builder.StartNormal;
-                                markers.Add(startMarker);
-                                startMarker = null;
+                                foreach (var marker in startMarkers)
+                                {
+                                    marker.Location = builder.Start;
+                                    marker.Orientation = -builder.StartNormal; // We will invert the direction to align with the nature of circuits and diagrams
+                                    markers.Add(marker);
+                                    startMarkers = null;
+                                }
                             }
 
                             nx *= 0.55 * _jumpOverRadius;
@@ -520,27 +523,33 @@ namespace SimpleCircuit.Components.Wires
                             builder.LineTo(_vectors[i].Location);
 
                             // Deal with the start marker
-                            if (startMarker != null)
+                            if (startMarkers != null)
                             {
-                                startMarker.Location = builder.Start;
-                                startMarker.Orientation = builder.StartNormal;
-                                markers.Add(startMarker);
-                                startMarker = null;
+                                foreach (var marker in startMarkers)
+                                {
+                                    marker.Location = builder.Start;
+                                    marker.Orientation = -builder.StartNormal; // We will invert the direction to align with the nature of circuits and diagrams
+                                    markers.Add(marker);
+                                    startMarkers = null;
+                                }
                             }
 
                             // Deal with the end marker
-                            var endMarker = _info.Segments[segment].EndMarker;
-                            if (endMarker != null)
+                            var endMarkers = _info.Segments[segment].EndMarkers;
+                            if (endMarkers != null)
                             {
-                                endMarker.Location = builder.End;
-                                endMarker.Orientation = builder.EndNormal;
-                                markers.Add(endMarker);
+                                foreach (var marker in endMarkers)
+                                {
+                                    marker.Location = builder.End;
+                                    marker.Orientation = builder.EndNormal;
+                                    markers.Add(marker);
+                                }
                             }
                             segment++;
 
                             // Prepare for the next start marker
                             if (segment < _info.Segments.Count)
-                                startMarker = _info.Segments[segment].StartMarker;
+                                startMarkers = _info.Segments[segment].StartMarkers;
                         }
                     }
                 }, _info.Options);

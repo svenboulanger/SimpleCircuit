@@ -19,9 +19,8 @@
         /// <param name="orientation">The orientation.</param>
         /// <param name="options">The options.</param>
         public Arrow(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null)
-            : base(location, orientation, options)
+            : base(location, orientation, options ?? DefaultOptions)
         {
-            Options ??= DefaultOptions;
         }
 
         /// <inheritdoc />

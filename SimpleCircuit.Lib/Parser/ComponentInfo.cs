@@ -64,10 +64,10 @@ namespace SimpleCircuit.Parser
                 // Handle the label
                 if (Labels.Count > 0 && Component is ILabeled labeled)
                 {
-                    if (Labels.Count > labeled.Labels.Count)
+                    if (Labels.Count > labeled.Labels.Maximum)
                     {
                         context.Diagnostics?.Post(Labels[labeled.Labels.Count], ErrorCodes.TooManyLabels);
-                        for (int i = 0; i < labeled.Labels.Count; i++)
+                        for (int i = 0; i < labeled.Labels.Maximum; i++)
                             labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
                     }
                     else

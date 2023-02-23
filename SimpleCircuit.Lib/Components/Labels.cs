@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -7,7 +7,8 @@ namespace SimpleCircuit.Components
     /// </summary>
     public class Labels
     {
-        private readonly string[] _labels;
+        private readonly int _max;
+        private readonly List<string> _labels;
 
         /// <summary>
         /// Gets or sets the label at the specified index.
@@ -18,22 +19,29 @@ namespace SimpleCircuit.Components
         {
             get
             {
-                if (index < 0 || index >= _labels.Length)
+                if (index < 0 || index >= _labels.Count)
                     return null;
                 return _labels[index];
             }
             set
             {
-                if (index < 0 || index >= _labels.Length)
+                if (index < 0 || index >= _max)
                     return;
+                while (_labels.Count <= index)
+                    _labels.Add(null);
                 _labels[index] = value;
             }
         }
 
         /// <summary>
-        /// Gets the number of labels supported.
+        /// Gets the number of labels specified.
         /// </summary>
-        public int Count => _labels.Length;
+        public int Count => _labels.Count;
+
+        /// <summary>
+        /// Gets the maximum number of labels that can be supported.
+        /// </summary>
+        public int Maximum => _max;
 
         /// <summary>
         /// Creates a new <see cref="Labels"/> collection.
@@ -41,9 +49,8 @@ namespace SimpleCircuit.Components
         /// <param name="maximum">The maximum.</param>
         public Labels(int maximum = 1)
         {
-            if (maximum < 1)
-                throw new ArgumentOutOfRangeException(nameof(maximum));
-            _labels = new string[maximum];
+            _max = maximum;
+            _labels = new();
         }
     }
 }
