@@ -182,6 +182,12 @@ namespace SimpleCircuitOnline
                 "Example: Bit vector",
                 "Demonstration on using the BIT component to display bit vectors.",
                 "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\")\r\n- BIT1.separator = \",\"\r\n\r\n// We just want lines, remove the dots on intersections\r\n.variants X -dot\r\n\r\n// Let's temporarily reduce the minimum wire length to avoid warnings\r\n.option minimumwirelength = 3\r\nBIT1[b3] <d r> X1\r\nBIT1[b2] <d 3> X1\r\nBIT1[b1] <d> X2\r\nBIT1[b0] <d l> X2\r\nX1 <r> Xdata <r> X2\r\n\r\nBIT1[b6] <d r> Xaddress\r\nBIT1[b5] <d 3> Xaddress\r\nBIT1[b4] <d l> Xaddress\r\n\r\n// Restore the minimum wire length\r\n.option minimumwirelength = 10\r\n\r\n// Show output text\r\nXdata <d r arrow> Xdo(\"Data\")\r\nXaddress <d r arrow> Xao(\"Address\")\r\n(Xdo <d> Xao)\r\n"),
+
+            // Modeling demo
+            new Demo(
+                "Example: modeling",
+                "Demonstration on using the modeling block components.",
+                "// Input to adder\r\nT(in, \"input\") <r arrow plus> ADD1\r\n\r\n// Adder to gain block\r\nADD1 <r> DIR(\"e\", flip) <r arrow> BLOCK1(\"G\")\r\n\r\n// Gain block and output\r\nBLOCK1 <r> Xout(\"y\") <r> T(out, \"output\")\r\n- Xout.angle = 90\r\n\r\n// Feedback branch\r\n// BLOCK components cannot be oriented, they are always upright\r\n// So the pins need to be specified\r\nXout <d +20 l arrow> [r]BLOCKfb(\"&#946;\")[l] <l u arrow minus> [s]ADD1\r\n"),
         };
     }
 }

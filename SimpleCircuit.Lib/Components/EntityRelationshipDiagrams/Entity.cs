@@ -34,7 +34,7 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
             /// <summary>
             /// Gets the height of the entity block (only valid after <see cref="Reset(IDiagnosticHandler)"/>).
             /// </summary>
-            public double Height { get; private set; }
+            protected double Height { get; private set; }
 
             /// <summary>
             /// Creates a new entity.

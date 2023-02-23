@@ -327,7 +327,7 @@ namespace SimpleCircuit.Parser
                                 case "sw": AddWireSegment(directionToken, Vector2.Normal(Math.PI * 0.75)); break;
                                 case "a":
                                     double angle = ParseDouble(lexer, context);
-                                    AddWireSegment(directionToken, Vector2.Normal(-angle));
+                                    AddWireSegment(directionToken, Vector2.Normal(-angle * Math.PI / 180.0));
                                     break;
 
                                 case "hidden": wireInfo.IsVisible = false; break;

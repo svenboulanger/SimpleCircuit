@@ -18,8 +18,8 @@ namespace SimpleCircuit.Components
         {
             [Description("The angle along which the label should extend. 0 degrees will put the text on the right.")]
             public double Angle { get; set; }
-            [Description("The label distance from the point. The default is 4.")]
-            public double Distance { get; set; } = 4.0;
+            [Description("The label distance from the point. The default is 3.")]
+            public double Distance { get; set; } = 3.0;
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
