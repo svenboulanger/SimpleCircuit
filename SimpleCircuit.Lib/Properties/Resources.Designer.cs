@@ -68,14 +68,15 @@ namespace SimpleCircuit.Properties {
         ///    stroke-linecap: round;
         ///    stroke-linejoin: round;
         ///}
-        ///.super, .sub { font-size: 0.75em; }
         ///.plane { stroke-width: 1pt; }
         ///.battery .neg { stroke-width: 0.75pt; }
         ///text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         ///.small tspan { font-size: 0.8em; }
+        ///.super, .sub { font-size: 0.75em; }
+        ///.text-stroke { stroke-width: 0.025em; }
+        ///.text-symbol { fill: black; stroke: none; }
         ///.marker { fill: black; }
-        ///.dotted { stroke-dasharray: 0.5 2; }
-        ///.dashed { stroke-dasharray: 2 2; }.
+        ///.dotted { stroke [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DefaultStyle {
             get {

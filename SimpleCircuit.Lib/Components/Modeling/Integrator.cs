@@ -37,12 +37,29 @@ namespace SimpleCircuit.Components.Modeling
             {
                 base.Draw(drawing);
 
-                // Draw an integral sign
-                drawing.Path(b => {
-                    var lexer = new SvgPathDataLexer(_pathData.AsMemory());
-                    b.WithRelativeModifier(v => v / 11.0 * Size * 0.3).WithAbsoluteModifier(v => v / 11.0 * Size * 0.3);
-                    SvgPathDataParser.Parse(lexer, b, null);
-                });
+                switch (Variants.Select("sdomain", "zdomain"))
+                {
+                    case 0:
+                        drawing.Text("1", new(), new(0, -1), new("small"));
+                        drawing.Line(new(-2, 0), new(2, 0), new("text-stroke"));
+                        drawing.Text("s", new(), new(0, 1), new("small"));
+                        break;
+
+                    case 1:
+                        drawing.Text("1", new(0, -1), new(0, -1), new("small"));
+                        drawing.Line(new(-2, -1), new(2, -1), new("text-stroke"));
+                        drawing.Text("z^{-1}", new(0, -1), new(0, 1), new("small"));
+                        break;
+
+                    default:
+                        // Draw an integral sign
+                        drawing.Path(b => {
+                            var lexer = new SvgPathDataLexer(_pathData.AsMemory());
+                            b.WithRelativeModifier(v => v / 11.0 * Size * 0.3).WithAbsoluteModifier(v => v / 11.0 * Size * 0.3);
+                            SvgPathDataParser.Parse(lexer, b, null);
+                        });
+                        break;
+                }
             }
         }
     }
