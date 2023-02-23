@@ -1,5 +1,41 @@
 ﻿function registerLanguage(keywords) {
 
+    var wireKeywords = [
+        ["n", "A wire segment to the north."],
+        ["u", "A wire segment upward."],
+        ["s", "A wire segment to the south."],
+        ["d", "A wire segment downward."],
+        ["w", "A wire segment to the west."],
+        ["l", "A wire segment to the left."],
+        ["e", "A wire segment to the east."],
+        ["r", "A wire segment to the right."],
+        ["ne", "A wire segment to the north-east."],
+        ["nw", "A wire segment to the north-west."],
+        ["se", "A wire segment to the south-east."],
+        ["sw", "A wire segment to the south-west."],
+        ["a", "An angled wire segment."],
+        ["hidden", "Hides the whole wire."],
+        ["visible", "Shows the whole wire."],
+        ["nojump", "Avoids jumping over wire intersections."],
+        ["jump", "Makes the wire jump over previously drawn wires."],
+        ["dotted", "Makes the wire dotted."],
+        ["dashed", "Makes the wire dashed."],
+        ["arrow", "An arrow marker."],
+        ["rarrow", "A reversed arrow marker."],
+        ["dot", "A dot marker."],
+        ["slash", "A slash marker."],
+        ["plus", "A plus sign marker."],
+        ["plusb", "A plus sign marker on the other side."],
+        ["minus", "A minus sign marker."],
+        ["minusb", "A minus sign marker on the other side."],
+        ["one", "An ERD-style \"one\" marker."],
+        ["onlyone", "An ERD-style \"one and only one\" marker."],
+        ["many", "An ERD-style \"many\" marker."],
+        ["zeroone", "An ERD-style \"zero or one\" marker."],
+        ["onemany", "An ERD-style \"one or many\" marker."],
+        ["zeromany", "An ERD-style \"zero or many\" marker"]
+    ];
+
     // Register a new language
     monaco.languages.register({ id: 'simpleCircuit' });
 
@@ -47,7 +83,7 @@
             wire: [
                 [ '@lineComment', 'comment', '@pop' ],
                 { include: '@whitespace' },
-                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
+                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plusb?|minusb?|one|onlyone|many|zeroone|onemany|zeromany)\b/, { token: 'pindirection.$S0', log: 'wire:$S0 $S1 $S2 $S3' }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                 { include: '@number' },
                 [/\+/, { token: 'operator.$S0' }],
@@ -70,8 +106,8 @@
                 { include: '@string' },
             ],
             string: [
-                [/"([^"]|\\.)+"/, 'string'],
-                [/'([^']|\\.)+'/, 'string'],
+                [/"([^"]|\\.)*"/, 'string'],
+                [/'([^']|\\.)*'/, 'string'],
             ],
             whitespace: [
                 [/[ \t]+/, 'white'],
@@ -129,16 +165,45 @@
     monaco.languages.registerCompletionItemProvider('simpleCircuit', {
         provideCompletionItems: (model, position) => {
             var word = model.getWordUntilPosition(position);
+            var textUntilPosition = model.getValueInRange({
+                startLineNumber: position.lineNumber,
+                endLineNumber: position.lineNumber,
+                startColumn: 1,
+                endColumn: position.column
+            });
             var range = {
                 startLineNumber: position.lineNumber,
                 endLineNumber: position.lineNumber,
                 startColumn: word.startColumn,
                 endColumn: word.endColumn
             };
+
+            // Check if we are inside a wire definition
+            var wire = 0;
+            for (var i = 0; i < textUntilPosition.length; i++) {
+                if (textUntilPosition[i] == '<')
+                    wire++;
+                else if (textUntilPosition[i] == '>')
+                    wire--;
+            }
             var suggestions = [];
-            if (word.word.length > 0) {
+            if (wire == 0) {
+                // Show keyword suggestions
                 for (var i = 0; i < keywords.length; i++) {
-                    keyword = keywords[i];
+                    var keyword = keywords[i];
+                    suggestions.push({
+                        label: keyword[0],
+                        insertText: keyword[0],
+                        detail: keyword[1],
+                        range: range,
+                        kind: monaco.languages.CompletionItemKind.keyword
+                    });
+                }
+            }
+            else {
+                // Show wire suggestions
+                for (var i = 0; i < wireKeywords.length; i++) {
+                    var keyword = wireKeywords[i];
                     suggestions.push({
                         label: keyword[0],
                         insertText: keyword[0],
