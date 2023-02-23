@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Modeling
 
         private class Instance : ModelingDrawable
         {
-            private readonly static string _pathData = @"M3 -8 c0 -2 -1 -3 -2 -3 c-1.5 0 -2 1 -2 3 S1 6 1 8 s-0.5 3 -2 3 c-1 0 -2 -1 -2 -3";
+            private const string _pathData = @"M3 -8 c0 -2 -1 -3 -2 -3 c-1.5 0 -2 1 -2 3 S1 6 1 8 s-0.5 3 -2 3 c-1 0 -2 -1 -2 -3";
 
             /// <inheritdoc />
             public override string Type => "integrator";
