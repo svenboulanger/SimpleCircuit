@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace SimpleCircuit
 {
@@ -15,6 +16,10 @@ namespace SimpleCircuit
         /// <param name="args">The arguments.</param>
         public static void Main(string[] args)
         {
+            // Make sure the current thread culture is invariant
+            // There were issues where numbers were exported with a comma instead of a dot
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
             // Create jobs for each argument
             if (args == null || args.Length == 0)
             {
@@ -22,6 +27,7 @@ namespace SimpleCircuit
                 return;
             }
             var logger = new ConsoleDiagnosticLogger();
+
 
             // Create a simple job
             var jobs = ReadJobs(args, out bool interactiveMode);
