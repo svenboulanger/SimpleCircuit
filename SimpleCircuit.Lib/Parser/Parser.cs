@@ -331,7 +331,7 @@ namespace SimpleCircuit.Parser
                                     // Add a forward anonymous point reference
                                     var component = context.CreateQueuedPoint(directionToken);
 
-                                    // Finisht the wire
+                                    // Finish the wire
                                     if (markers.Count > 0 && wireInfo.Segments.Count > 0)
                                         wireInfo.Segments[^1].EndMarkers = markers.ToArray();
                                     markers.Clear();

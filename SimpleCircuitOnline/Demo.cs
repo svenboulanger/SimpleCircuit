@@ -61,54 +61,60 @@ namespace SimpleCircuitOnline
         {
             // Low-pass RC filter
             new Demo(
-                "1. Component chains",
+                "1. Component chains (basic)",
                 "Tutorial explaining component chains.",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// A component chain is a series of components seperated by <wires>.\r\n// The type of component is defined by the first letter(s), which have to be capital letters.\r\n// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.\r\n// Most components also have labels, which are specified as quoted strings between parenthesis.\r\nGND1 <u> V1(\"1V\") <u r> R(\"1k\") <r d> C1(\"1uF\") <d> GND2\r\n\r\n// Virtual chains act like component chains but are not drawn.\r\n// They can be used to align components.\r\n// Virtual chains are always between brackets.\r\n(GND1 <r> GND2)\r\n"
             ),
 
             // Tutorial about pins
             new Demo(
-                "2. Pins",
+                "2. Pins (basic)",
                 "Tutorial explaining pins.", 
                 "// Pins are specified between square brackets\r\n// It is important whether the pin is specified before or after the component\r\nX1 <r> [g]NMOS1[s] <d> GND1\r\n\r\n// The pin order of the component is important\r\n// If no pin is specified, then the first pin is used as the default for wires ending in the component.\r\n// The last pin is used for wires starting from that component.\r\nNMOS1[d] <u> R1 <u> POW\r\n// You can find this information in Help > Components.\r\n\r\n// The resistor actually has 3 pins: 'p', 'c' and 'n' (each of them have aliases too). The 'c' pin however, if not used, is hidden.\r\nR1[c] <r> T(\"hello\")"
                 ),
 
             new Demo(
-                "3. Virtual chains / alignment",
+                "3. Virtual chains / alignment (basic)",
                 "Tutorial explaining virtual chains more.",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// We define a number of component chains\r\nGND1 <u> V1 <u r> R <r> X1\r\nX1 <d> C <d> GND2\r\nX1 <r> X2 <d> L1 <d> R <d> GND3\r\nX2 <r> X3 <d> C <d> R <d> GND4\r\nX3 <r> T(\"output\")\r\n\r\n// We can now start aligning them using virtual chains\r\n// It is possible to align components only along one axis\r\n// This is done by adding \"x\" or \"y\" at the start of the virtual chain\r\n(x X1 <r +20> X2 <r +20> X3)\r\n\r\n// It is also possible to align components using a filter on their name\r\n// For example, we would like to align all the grounds in our circuit:\r\n(y GND*)\r\n// The '*' character acts as a wildcard\r\n\r\n// We can also align all anonymous components of a certain type in one statement.\r\n// We can for example align all anonymous capacitors:\r\n(y C)\r\n\r\n// Note that if no pins are specified explicitly, then virtual wires will use the center of the component unlike regular wires\r\n(y V1 <r> L1)\r\n"
                 ),
 
             // Inverting amplifier
             new Demo(
-                "4. Variants and properties",
+                "4. Variants and properties (basic)",
                 "Tutorial explaining variants for changing appearances.",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// Variants allow changing the appearance of certain components\r\n// For example, a resistor can have the \"programmable\" variant:\r\nT1(\"in\") <r> R1(programmable) <r> T2(\"out\")\r\n\r\n// Many components also have properties that can be specified as well\r\n- R1.scale = 2\r\n\r\n// The property syntax can also be used to specify variants\r\n- T1.input = true\r\n- T2.output = true\r\n\r\n// Variants can be removed again by adding a '-' before them\r\nT2(-output, +pad)\r\n"
                 ),
 
             // Wheatstone bridge
             new Demo(
-                "5. Wires",
+                "5. Wires (basic)",
                 "Tutorial explaining odd angle wires, and changing their appearance.",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// Wires do not have to be horizontal or vertical, SimpleCircuit can solve any angle\r\n// For shorthand notation, the 4 cardinal directions can be used\r\nX1 <n e s w> X1\r\n\r\n// In fact, the 4 ordinal directions can also be used!\r\nX2 <ne se sw nw> X2\r\n\r\n// It is possible to specify any angled wires by using <a #> as a wire segment with # the angle of the wire (counter-clockwise)\r\nX3 <a 60 r a -60 a -120 l a 120> X3\r\n// One note of caution: Using fine increments of angles can lead to rather unexpected results! Uncomment the next example to see what could happen:\r\n// X4 <e n a -91> X4\r\n// In such events, consider using unconstrained wires instead\r\n\r\n// We might just use <?> or '-' to copy the wire orientation from the pin it is connected to\r\nX5 <ne> R <?> R - R\r\n// Sometimes this could lead to errors though, for example:\r\n// X6 - R\r\n\r\n// Unconstrained wires are wires that do not constrain anything\r\n// While this may be useful for very odd angles, it also means that the components will need to be constrained in other ways.\r\n// They are specified using the <??> syntax:\r\nX7 <u> R <u r> C <r d ??> X7\r\n\r\n// Wires can also have special appearances:\r\nX8 <r arrow r arrow> X\r\nX9 <rarrow r arrow> X\r\nX10 <arrow r> X\r\nX11 <r rarrow> X\r\nX12 <r dashed> X\r\nX13 <r dotted> X\r\n"),
 
             // Section demo
             new Demo(
-                "6. Sections",
+                "6. Sections (intermediate)",
                 "Tutorial explaining sections.",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// Defining a section is achieved with the '.section' control statement\r\n.section A\r\n    GND1 <u> V1 <u r> TL <r> Xo\r\n    - GND1.signal = true\r\n.endsection\r\n\r\n// Elements inside sections can be referenced using a '/'\r\n// Names are local to the section, we can reuse 'GND1' for example\r\nA/Xo <r d> C <d> GND1\r\n(y A/GND1 <r> GND1)\r\n\r\n// You can re-use previously defined sections\r\n.section B A\r\nB/Xo <r d> L <d> GND2\r\n(y B/GND1 <r> GND2)\r\n\r\n.section C A\r\nC/Xo <r d> R <d> GND3\r\n(y C/GND1 <r> GND3)\r\n\r\n// We can align things that are not in sections\r\n(x GND*)\r\n\r\n// Or we can also align instances across sections\r\n(x */V1)\r\n"),
 
             // Subcircuit demo
             new Demo(
-                "7. Subcircuits",
+                "7. Subcircuits (intermediate)",
                 "Tutorial explaining subcircuits",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// Subcircuits are solved separately on their own, after which they act like a component\r\n// The pins need to be specified\r\n.subckt ABC DIR1[in] DIR2[out]\r\n    DIR1 <r> X1\r\n    X1 <u r> R1 <r d> X2\r\n    X1 <d r> C1 <r u> X2\r\n    X2 <r> DIR2\r\n.ends\r\n\r\n// Now we can instantiate this subcircuit definition multiple times.\r\nABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1\r\n\r\n// They can even be angled because our pins also have a direction!\r\n// Also showing how you can refer to pins\r\nXs <a -45> [DIR1_in]ABC[DIR2_out] <a -45 0> L <a -45> Xe\r\n"),
 
             // Black-box demo
             new Demo(
-                "8. Black boxes",
+                "8. Black boxes (advanced)",
                 "Tutorial on black boxes (custom pin components).",
                 "// For more tutorials, go to Help > Demo's.\r\n\r\n// Black boxes are components with custom pins:\r\n// - Pins are added on the fly\r\n// - Pin order is important\r\n// - Black boxes cannot rotate\r\n// - The pin orientation decides the side\r\n// - Pin locations only have minimum spacings\r\n\r\n// You can predefine the order and orientation\r\nBB1[Input1] <l>\r\nBB1[Input2] <l>\r\nBB1[Output1] <r>\r\nBB1[Output2] <r>\r\nBB1[VDD] <u> POW\r\nBB1[VSS] <d> GND\r\n\r\n// The distance between pins can vary, but they cannot change order\r\n// Notice how the two pins are spaced further apart because of the following statement\r\nBB1[Output1] <r d> R <d l> [Output2]BB1\r\n\r\n// The black box can stretch in any direction\r\n(x BB1[Input1] <r +80> [Output1]BB1)\r\n"),
+
+            // Queued anonymous points
+            new Demo(
+                "9. Queued anonymous points (advanced)",
+                "Tutorial on using queued anonymous points.",
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Queued anonymous points are anonymous points (X components) that are specified between wire segments.\r\n// You can specify them using an x or X in a wire.\r\nT(\"a\") <r x r> R <r x r> T(\"b\")\r\n\r\n// If you then use anonymous points in the next statement, it will first try to match them to the queued anonymous points of the previous chain.\r\nX <u r x r> C <r x r d> X\r\n\r\n// This is useful if you want to make parallel branches.\r\nX <u x r> L <r x d> X\r\nX <u r> S <r d> X\r\n"),
 
             // Non-inverting amplifier
             new Demo(
