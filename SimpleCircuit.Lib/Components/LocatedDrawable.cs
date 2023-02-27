@@ -25,11 +25,12 @@ namespace SimpleCircuit.Components
         /// Initializes a new instance of the <see cref="LocatedDrawable"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        protected LocatedDrawable(string name)
+        /// <param name="point">The names of the coordinate of the drawable.</param>
+        protected LocatedDrawable(string name, (string X, string Y) point = default)
             : base(name)
-        {            
-            X = $"{name}.x";
-            Y = $"{name}.y";
+        {
+            X = point.X ?? $"{name}.x";
+            Y = point.Y ?? $"{name}.y";
         }
 
         /// <inheritdoc />

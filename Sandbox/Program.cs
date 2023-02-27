@@ -10,7 +10,9 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"ENT1(""Entity 1"", ""B"", ""C"")[r1] <one r se r one> ENT2(""Entity 2"")
+            var script = @".variants X forced
+GND <u> V <u X r> R <r X d> C <d> GND
+X <u r> C <r d> X
 
 ";
             var logger = new Logger();

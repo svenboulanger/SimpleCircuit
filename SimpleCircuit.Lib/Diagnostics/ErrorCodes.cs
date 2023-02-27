@@ -216,5 +216,11 @@
 
         [Diagnostic(SeverityLevel.Warning, "SW061", "Could not satisfy a minimum distance of {0} in the Y-direction for '{1}'")]
         CouldNotSatisfyMinimumOfForInY,
+
+        [Diagnostic(SeverityLevel.Warning, "PW062", "An anonymous queued point is not available")]
+        NotEnoughAnonymousPoints,
+
+        [Diagnostic(SeverityLevel.Warning, "PW063", "The anonymous queued point is not being used")]
+        LeftOverAnonymousPoints
     }
 }

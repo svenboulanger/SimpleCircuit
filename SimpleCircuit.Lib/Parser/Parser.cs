@@ -35,6 +35,9 @@ namespace SimpleCircuit.Parser
                 if (!ParseStatement(lexer, context))
                     lexer.Skip(~TokenType.Newline);
             }
+
+            // Final check for queued anonymous points
+            context.StoreQueuedPoints();
         }
 
         /// <summary>
@@ -85,6 +88,9 @@ namespace SimpleCircuit.Parser
         }
         private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
         {
+            // Make sure we use the latest set of queued points
+            context.StoreQueuedPoints();
+
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
             var component = ParseComponent(lexer, context);
             if (component == null)
@@ -107,49 +113,9 @@ namespace SimpleCircuit.Parser
                 // Parse the wire itself
                 if (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
                 {
-                    var wireInfo = ParseWire(lexer, context);
-                    if (wireInfo == null)
+                    component = ParseWire(lexer, context, new(component, pinToWire), stringTogether);
+                    if (component == null)
                         return false;
-
-                    // Optional pin
-                    Token wireToPin = default;
-                    ComponentInfo nextComponent = null;
-                    switch (lexer.Type)
-                    {
-                        case TokenType.OpenIndex:
-                            wireToPin = ParsePin(lexer, context);
-                            if (wireToPin.Content.Length == 0)
-                                return false;
-
-                            // We really need a component now that we have a pin
-                            nextComponent = ParseComponent(lexer, context);
-                            if (nextComponent == null)
-                                return false;
-                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, new(nextComponent, wireToPin), context);
-                            isFirst = false;
-                            break;
-
-                        case TokenType.Word:
-                            // Optional end component
-                            nextComponent = ParseComponent(lexer, context);
-                            if (nextComponent == null)
-                                return false;
-                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, new(nextComponent, wireToPin), context);
-                            isFirst = false;
-                            break;
-
-                        case TokenType.EndOfContent:
-                        case TokenType.Newline:
-                            // End at a wire definition
-                            stringTogether?.Invoke(new(component, pinToWire), wireInfo, default, context);
-                            isFirst = false;
-                            break;
-
-                        default:
-                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
-                            return false;
-                    }
-                    component = nextComponent;
                 }
             }
 
@@ -200,8 +166,11 @@ namespace SimpleCircuit.Parser
             lexer.Next();
             while (!lexer.HasTrivia && lexer.Branch(TokenType.Word | TokenType.Integer | TokenType.Divide | TokenType.Times));
             var nameToken = lexer.GetTracked(tracker, false);
-            string fullname = context.GetFullname(nameToken.Content.ToString());
-            var info = new ComponentInfo(nameToken, fullname);
+            ComponentInfo info;
+            if (nameToken.Content.Span.Equals("X".AsSpan(), StringComparison.Ordinal))
+                info = context.GetOrCreateAnonymousPoint(nameToken);
+            else
+                info = new(nameToken, context.GetFullname(nameToken.Content.ToString()));
 
             // Labels
             HashSet<string> possibleVariants = null;
@@ -249,7 +218,7 @@ namespace SimpleCircuit.Parser
                             break;
 
                         default:
-                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedLabelOrVariant, fullname);
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedLabelOrVariant, info.Fullname);
                             lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
                             break;
                     }
@@ -261,7 +230,7 @@ namespace SimpleCircuit.Parser
             }
             return info;
         }
-        private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
+        private static ComponentInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context, PinInfo pinToWire, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
         {
             if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
@@ -277,6 +246,8 @@ namespace SimpleCircuit.Parser
 
             // Chain together multiple wire definitions
             List<Marker> markers = new();
+            Token wireToPin;
+            ComponentInfo nextComponent = null;
             void AddWireSegment(Token token, Vector2 orientation)
             {
                 var segment = new WireSegmentInfo(token)
@@ -355,6 +326,24 @@ namespace SimpleCircuit.Parser
                                 case "onemany": markers.Add(new ERDOneMany()); break;
                                 case "zeromany": markers.Add(new ERDZeroMany()); break;
 
+                                case "X":
+                                case "x":
+                                    // Add a forward anonymous point reference
+                                    var component = context.CreateQueuedPoint(directionToken);
+
+                                    // Finisht the wire
+                                    if (markers.Count > 0 && wireInfo.Segments.Count > 0)
+                                        wireInfo.Segments[^1].EndMarkers = markers.ToArray();
+                                    markers.Clear();
+                                    wireInfo.Simplify();
+                                    stringTogether?.Invoke(pinToWire, wireInfo, new(component, default), context);
+
+                                    // Start a new wire
+                                    wireInfo = new() { JumpOverWires = context.Options.JumpOverWires };
+                                    pinToWire = new(component, default);
+                                    markers.Clear();
+                                    break;
+
                                 default:
                                     context.Diagnostics?.Post(directionToken, ErrorCodes.CouldNotRecognizeDirection, directionToken.Content.ToString());
                                     break;
@@ -417,7 +406,40 @@ namespace SimpleCircuit.Parser
 
             // Simplify the wire as much as possible
             wireInfo.Simplify();
-            return wireInfo;
+
+            // Try finding the result
+            switch (lexer.Type)
+            {
+                case TokenType.OpenIndex:
+                    wireToPin = ParsePin(lexer, context);
+                    if (wireToPin.Content.Length == 0)
+                        return null;
+
+                    // We really need a component now that we have a pin
+                    nextComponent = ParseComponent(lexer, context);
+                    if (nextComponent == null)
+                        return null;
+                    stringTogether?.Invoke(pinToWire, wireInfo, new(nextComponent, wireToPin), context);
+                    return nextComponent;
+
+                case TokenType.Word:
+                    // Optional end component
+                    nextComponent = ParseComponent(lexer, context);
+                    if (nextComponent == null)
+                        return null;
+                    stringTogether?.Invoke(pinToWire, wireInfo, new(nextComponent, default), context);
+                    return nextComponent;
+
+                case TokenType.EndOfContent:
+                case TokenType.Newline:
+                    // End at a wire definition
+                    stringTogether?.Invoke(pinToWire, wireInfo, default, context);
+                    return nextComponent;
+
+                default:
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
+                    return null;
+            }
         }
         private static Token ParsePin(SimpleCircuitLexer lexer, ParsingContext context)
         {

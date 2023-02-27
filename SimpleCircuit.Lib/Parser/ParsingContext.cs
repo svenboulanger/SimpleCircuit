@@ -22,6 +22,7 @@ namespace SimpleCircuit.Parser
             }
         }
         private readonly Stack<SectionInfo> _sections = new();
+        private Queue<ComponentInfo> _queuedPoints = new(), _nextQueuedPoints = new();
 
         /// <summary>
         /// Gets the options.
@@ -37,6 +38,11 @@ namespace SimpleCircuit.Parser
         /// Gets or sets the number of virtual coordinates.
         /// </summary>
         public int VirtualCoordinateCount { get; set; } = 0;
+
+        /// <summary>
+        /// Gets the queued point count.
+        /// </summary>
+        public int QueuedPointCount { get; private set; } = 0;
 
         /// <summary>
         /// Gets the factory for components.
@@ -126,5 +132,44 @@ namespace SimpleCircuit.Parser
         /// <returns>The wire name.</returns>
         public string GetWireFullname()
             => GetFullname($"w{DrawableFactoryDictionary.AnonymousSeparator}{++WireCount}");
+
+        /// <summary>
+        /// Creats a queued anonymous point for later reuse.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <returns>The created queued point.</returns>
+        public ComponentInfo CreateQueuedPoint(Token source)
+        {
+            var component = new ComponentInfo(source, GetFullname($"X{DrawableFactoryDictionary.AnonymousSeparator}Q{++QueuedPointCount}"));
+            _nextQueuedPoints.Enqueue(component);
+            return component;
+        }
+
+        /// <summary>
+        /// Gets a queued anonymous point or creates a new one.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <returns>The point component.</returns>
+        public ComponentInfo GetOrCreateAnonymousPoint(Token source)
+        {
+            if (_queuedPoints.Count > 0)
+            {
+                var c = _queuedPoints.Dequeue();
+                return new ComponentInfo(source, c.Fullname);
+            }
+            return new ComponentInfo(source, GetFullname("X"));
+        }
+
+        /// <summary>
+        /// Stores the current set of queued points for use in the next statement.
+        /// </summary>
+        public void StoreQueuedPoints()
+        {
+            if (_queuedPoints.Count > 0)
+                Diagnostics?.Post(_queuedPoints.First().Name, ErrorCodes.LeftOverAnonymousPoints);
+
+            _queuedPoints.Clear();
+            (_queuedPoints, _nextQueuedPoints) = (_nextQueuedPoints, _queuedPoints);
+        }
     }
 }
