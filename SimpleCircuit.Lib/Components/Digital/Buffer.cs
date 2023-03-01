@@ -1,13 +1,12 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
-using System;
 
 namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
     /// An invertor.
     /// </summary>
-    [Drawable("BUF", "An invertor.", "Digital")]
+    [Drawable("BUF", "A buffer.", "Digital")]
     public class Buffer : DrawableFactory
     {
         /// <inheritdoc />
