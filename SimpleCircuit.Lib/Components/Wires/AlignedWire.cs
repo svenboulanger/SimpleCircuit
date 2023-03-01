@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Simulations;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 
@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(IRelationshipContext context)
         {
             switch (context.Mode)
             {
@@ -49,12 +49,12 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (doX && !context.Offsets.Group(last.X, presence.X, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
+                                context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
                                 return false;
                             }
                             if (doY && !context.Offsets.Group(last.Y, presence.Y, 0.0))
                             {
-                                diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
+                                context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
                                 return false;
                             }
                         }
@@ -66,20 +66,20 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Register(IRegisterContext context)
         {
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Update(IUpdateContext context)
         {
         }
 
         /// <inheritdoc />
-        public bool Reset(IDiagnosticHandler diagnostics) => true;
+        public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
+        public PresenceResult Prepare(IPrepareContext context)
             => PresenceResult.Success;
     }
 }

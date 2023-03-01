@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Circuits
+﻿namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
     /// An item that is relative to another item.

@@ -1,13 +1,8 @@
-﻿using SimpleCircuit.Components.Constraints;
-using SimpleCircuit.Components.General;
-using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
-using SpiceSharp.Simulations;
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -64,7 +59,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public bool Reset(IDiagnosticHandler diagnostics)
+        public bool Reset(IResetContext context)
         {
             _start = null;
             _end = null;
@@ -72,37 +67,39 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
+        public PresenceResult Prepare(IPrepareContext context)
         {
             // Find the start and end locations
-            if (circuit.TryGetValue(_startInfo.Component.Fullname, out var presence) && presence is IDrawable p2wd)
+            if (context.Find(_startInfo.Component.Fullname) is not ILocatedDrawable sp)
             {
-                if (_startInfo.Pin.Content.Length == 0 && p2wd is ILocatedPresence ld)
-                    _start = ld;
-                else
-                    _start = _startInfo.Find(p2wd, diagnostics, -1);
+                context.Diagnostics?.Post(_startInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, _startInfo.Component.Name.Content);
+                return PresenceResult.GiveUp;
             }
-
-            // Find last pin
-            if (circuit.TryGetValue(_endInfo.Component.Fullname, out presence) && presence is IDrawable w2pd)
+            if (_startInfo.Pin.Content.Length == 0)
+                _start = sp;
+            else
+                _start = _startInfo.Find(sp, context.Diagnostics, -1);
+            if (context.Find(_endInfo.Component.Fullname) is not ILocatedDrawable ep)
             {
-                if (_endInfo.Pin.Content.Length == 0 && w2pd is ILocatedPresence ld)
-                    _end = ld;
-                else
-                    _end = _endInfo.Find(w2pd, diagnostics, 0);
+                context.Diagnostics?.Post(_endInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, _endInfo.Component.Name.Content);
+                return PresenceResult.GiveUp;
             }
+            if (_endInfo.Pin.Content.Length == 0)
+                _end = ep;
+            else
+                _end = _endInfo.Find(ep, context.Diagnostics, 0);
 
             for (int i = 0; i < _info.Segments.Count; i++)
             {
                 var segment = _info.Segments[i];
                 if (segment.IsUnconstrained)
                 {
-                    diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
+                    context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
                     return PresenceResult.GiveUp;
                 }
                 else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                 {
-                    diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
+                    context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
                     return PresenceResult.GiveUp;
                 }
             }
@@ -110,7 +107,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(IRelationshipContext context)
         {
             bool doX = (_direction & Axis.X) != 0;
             bool doY = (_direction & Axis.Y) != 0;
@@ -125,7 +122,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.X, StartX, 0.0))
                             {
-                                diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _start.X, StartX);
+                                context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _start.X, StartX);
                                 return false;
                             }
                         }
@@ -133,7 +130,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.Y, StartY, 0.0))
                             {
-                                diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
+                                context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
                                 return false;
                             }
                         }
@@ -144,7 +141,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.X, EndX, 0.0))
                             {
-                                diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _end.X, EndX);
+                                context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _end.X, EndX);
                                 return false;
                             }
                         }
@@ -152,7 +149,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.Y, EndY, 0.0))
                             {
-                                diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
+                                context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
                                 return false;
                             }
                         }
@@ -172,7 +169,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length))
                                 {
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -180,7 +177,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
                                 {
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -191,7 +188,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(x, tx, 0.0))
                                 {
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -199,7 +196,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(y, ty, 0.0))
                                 {
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
                                     return false;
                                 }
                             }
@@ -222,12 +219,12 @@ namespace SimpleCircuit.Components.Wires
                             if (doX && !segment.Orientation.X.IsZero())
                             {
                                 if (!MinimumConstraint.MinimumDirectionalLink(context, offsetX, toOffsetX, segment.Orientation.X * segment.Length))
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInX, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInX, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
                             }
                             if (doY && !segment.Orientation.Y.IsZero())
                             {
                                 if (!MinimumConstraint.MinimumDirectionalLink(context, offsetY, toOffsetY, segment.Orientation.Y * segment.Length))
-                                    diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
                             }
                         }
                         offsetX = toOffsetX;
@@ -239,7 +236,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Register(IRegisterContext context)
         {
             // Determine the active axis
             bool doX = (_direction & Axis.X) != 0;
@@ -247,7 +244,7 @@ namespace SimpleCircuit.Components.Wires
             if (!doX && !doY)
                 return;
 
-            var map = context.Nodes.Offsets;
+            var map = context.Relationships.Offsets;
             var fromX = map[StartX];
             var fromY = map[StartY];
             for (int i = 0; i < _info.Segments.Count; i++)
@@ -315,7 +312,7 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Update(IUpdateContext context)
         {
         }
 

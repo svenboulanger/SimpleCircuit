@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -40,9 +40,9 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IDiagnosticHandler diagnostics)
+            public override bool Reset(IResetContext context)
             {
-                if (!base.Reset(diagnostics))
+                if (!base.Reset(context))
                     return false;
                 if (Variants.Contains(_electrolytic))
                 {

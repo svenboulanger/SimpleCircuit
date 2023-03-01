@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 
@@ -43,9 +44,9 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override bool Reset(IDiagnosticHandler diagnostics)
+        public override bool Reset(IResetContext context)
         {
-            if (!base.Reset(diagnostics))
+            if (!base.Reset(context))
                 return false;
             _dof = 2;
             UpdateTransform();

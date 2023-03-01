@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires

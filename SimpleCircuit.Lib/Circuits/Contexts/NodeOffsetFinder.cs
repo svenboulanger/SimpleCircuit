@@ -1,8 +1,7 @@
-﻿using SimpleCircuit.Diagnostics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Circuits
+namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
     /// A class for grouping nodes together.

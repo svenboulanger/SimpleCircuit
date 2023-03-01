@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
     /// A combination of two nodes representing an X- and Y-coordinate of the same component/block.

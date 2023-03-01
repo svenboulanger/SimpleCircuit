@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Simulations;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Pins
@@ -45,17 +45,14 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public virtual bool Reset(IDiagnosticHandler diagnostics)
+        public virtual bool Reset(IResetContext context)
         {
             Location = new();
             return true;
         }
 
         /// <inheritdoc />
-        public virtual PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
-        {
-            return PresenceResult.Success;
-        }
+        public virtual PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
 
         /// <inheritdoc />
@@ -64,14 +61,14 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public abstract bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
+        public abstract bool DiscoverNodeRelationships(IRelationshipContext context);
 
         /// <inheritdoc />
-        public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
+        public abstract void Register(IRegisterContext context);
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
-            => Location = context.Nodes.GetValue(state, X, Y);
+        public void Update(IUpdateContext context)
+            => Location = context.GetValue(X, Y);
 
         /// <inheritdoc />
         public override string ToString()

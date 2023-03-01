@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Modeling
 {
     [Drawable("OSC", "An oscillator", "Modeling")]
     public class Oscillator : DrawableFactory

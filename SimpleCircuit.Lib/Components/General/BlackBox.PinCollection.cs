@@ -1,10 +1,10 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace SimpleCircuit.Components
 {
@@ -122,10 +122,10 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Register(CircuitSolverContext context)
+            public void Register(IRegisterContext context)
             {
                 var ckt = context.Circuit;
-                var map = context.Nodes.Offsets;
+                var map = context.Relationships.Offsets;
                 double Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing, double edgeSpacing)
                 {
                     double width = 0.0;
@@ -156,9 +156,9 @@ namespace SimpleCircuit.Components
                 height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
 
                 if (width < MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Nodes.Offsets[_parent.X], context.Nodes.Offsets[Right], MinWidth, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Relationships.Offsets[_parent.X], context.Relationships.Offsets[Right], MinWidth, 100.0);
                 if (height < MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Nodes.Offsets[_parent.Y], context.Nodes.Offsets[Bottom], MinHeight, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Relationships.Offsets[_parent.Y], context.Relationships.Offsets[Bottom], MinHeight, 100.0);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
@@ -167,7 +167,7 @@ namespace SimpleCircuit.Components
             private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
 
             /// <inheritdoc />
-            public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            public bool DiscoverNodeRelationships(IRelationshipContext context)
             {
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
@@ -179,7 +179,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
                                     return false;
                                 }
                             }
@@ -187,7 +187,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
                                     return false;
                                 }
                             }
@@ -195,7 +195,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
                                     return false;
                                 }
                             }
@@ -203,7 +203,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Right, pin.X, 0.0))
                                 {
-                                    diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
                                     return false;
                                 }
                             }
@@ -220,7 +220,7 @@ namespace SimpleCircuit.Components
                 return true;
             }
 
-            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, NodeContext context, double spacing, double edgeSpacing)
+            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, IRelationshipContext context, double spacing, double edgeSpacing)
             {
                 var lastCoordinate = context.Offsets[first];
                 double s = edgeSpacing;

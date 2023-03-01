@@ -1,7 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
-using System;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -51,9 +49,9 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IDiagnosticHandler diagnostics)
+            public override bool Reset(IResetContext context)
             {
-                if (!base.Reset(diagnostics))
+                if (!base.Reset(context))
                     return false;
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
@@ -58,10 +59,10 @@ namespace SimpleCircuit.Components.Constraints
         }
 
         /// <inheritdoc />
-        public bool Reset(IDiagnosticHandler diagnostics) => true;
+        public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
+        public PresenceResult Prepare(IPrepareContext context)
         {
             // Get the drawable
             var drawable = Pin.Component.Component;
@@ -80,9 +81,9 @@ namespace SimpleCircuit.Components.Constraints
             {
                 if (!drawable.Pins.TryGetValue(Pin.Pin.Content.ToString(), out pin))
                 {
-                    if (mode == PresenceMode.Fix)
+                    if (context.Mode == PresenceMode.Fix)
                     {
-                        diagnostics?.Post(Pin.Pin, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, Pin.Component.Fullname);
+                        context.Diagnostics?.Post(Pin.Pin, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, Pin.Component.Fullname);
                         return PresenceResult.GiveUp;
                     }
                 }
@@ -100,7 +101,7 @@ namespace SimpleCircuit.Components.Constraints
 
                 // If there is no orientation, ignore constraining the pin (it may be that
                 // the segment copies the orientation from the pin instead)
-                op.ResolveOrientation(orientation, Segment.Source, diagnostics);
+                op.ResolveOrientation(orientation, Segment.Source, context.Diagnostics);
             }
             return PresenceResult.Success;
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
@@ -141,39 +142,42 @@ namespace SimpleCircuit
         /// <summary>
         /// Solves the unknowns in this circuit.
         /// </summary>
-        public bool Solve(IDiagnosticHandler diagnostics)
+        public bool Solve(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
         {
-            var context = new CircuitSolverContext();
-            void Log(object sender, SpiceSharp.WarningEventArgs e)
-            {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
-            }
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
             _extra.Clear();
 
             // Prepare all the presences
-            if (!Reset(presences, diagnostics))
+            var resetContext = new ResetContext(diagnostics, formatter);
+            if (!Reset(presences, resetContext))
                 return false;
 
             // Prepare the circuit
-            if (!Prepare(presences, diagnostics))
+            var prepareContext = new PrepareContext(this, diagnostics);
+            if (!Prepare(presences, prepareContext))
                 return false;
 
             // Solver presences
-            if (!DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), context.Nodes, diagnostics))
+            var relationshipContext = new NodeContext(diagnostics);
+            if (!DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), relationshipContext))
                 return false;
 
             // Space loose blocks next to each other to avoid overlaps
-            if (!Space(context))
+            var registerContext = new RegisterContext(diagnostics, relationshipContext);
+            void Log(object sender, SpiceSharp.WarningEventArgs e)
+            {
+                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
+            }
+            if (!Space(registerContext))
                 return false;
             presences.AddRange(_extra);
 
             // Register any solvable presences in the circuit
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                c.Register(context, diagnostics);
+                c.Register(registerContext);
 
             // If there are no circuit components to solve, let's stop here
-            if (context.Circuit.Count == 0)
+            if (registerContext.Circuit.Count == 0)
             {
                 diagnostics?.Post(ErrorCodes.NoUnknownsToSolve);
                 return false;
@@ -186,21 +190,21 @@ namespace SimpleCircuit
             {
                 do
                 {
-                    context.Recalculate = false;
+                    registerContext.Recalculate = false;
                     int fixResistors = 0, previousFixResistors;
                     do
                     {
                         previousFixResistors = fixResistors;
                         try
                         {
-                            op.Run(context.Circuit);
+                            op.Run(registerContext.Circuit);
                         }
                         catch (ValidationFailedException ex)
                         {
                             // Let's fix floating nodes
                             var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
                             if (violation != null)
-                                context.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
+                                registerContext.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
                             else
                                 throw ex;
                         }
@@ -209,11 +213,11 @@ namespace SimpleCircuit
 
                     // Extract the information
                     var state = op.GetState<IBiasingSimulationState>();
-                    context.WireSegments.Clear();
+                    var updateContext = new UpdateContext(diagnostics, state, relationshipContext);
                     foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                        c.Update(state, context, diagnostics);
+                        c.Update(updateContext);
                 }
-                while (context.Recalculate);
+                while (registerContext.Recalculate);
             }
             finally
             {
@@ -222,17 +226,17 @@ namespace SimpleCircuit
             return true;
         }
 
-        private bool Reset(IEnumerable<ICircuitPresence> presences, IDiagnosticHandler diagnostics)
+        private bool Reset(IEnumerable<ICircuitPresence> presences, ResetContext context)
         {
             foreach (var c in presences)
             {
-                if (!c.Reset(diagnostics))
+                if (!c.Reset(context))
                     return false;
             }
             return true;
         }
 
-        private bool Prepare(IEnumerable<ICircuitPresence> presences, IDiagnosticHandler diagnostics)
+        private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
             bool success = true;
 
@@ -240,7 +244,7 @@ namespace SimpleCircuit
             List<ICircuitPresence> _todo = new();
             foreach (var c in presences)
             {
-                var result = c.Prepare(this, PresenceMode.Normal, diagnostics);
+                var result = c.Prepare(context);
                 if (result == PresenceResult.Incomplete)
                     _todo.Add(c);
                 if (result == PresenceResult.GiveUp)
@@ -254,9 +258,10 @@ namespace SimpleCircuit
                 int index = 0;
 
                 // Redo the todo-list after doing everything else
+                context.Mode = PresenceMode.Normal;
                 while (index < _todo.Count)
                 {
-                    switch (_todo[index].Prepare(this, PresenceMode.Normal, diagnostics))
+                    switch (_todo[index].Prepare(context))
                     {
                         case PresenceResult.Success:
                             _todo.RemoveAt(index);
@@ -280,7 +285,8 @@ namespace SimpleCircuit
                     index = 0;
                     while (index < _todo.Count)
                     {
-                        switch (_todo[index].Prepare(this, PresenceMode.Fix, diagnostics))
+                        context.Mode = PresenceMode.Fix;
+                        switch (_todo[index].Prepare(context))
                         {
                             case PresenceResult.Success:
                                 _todo.RemoveAt(index);
@@ -302,8 +308,9 @@ namespace SimpleCircuit
                     if (!success)
                     {
                         // Give a chance to all presences left to raise some errors
+                        context.Mode = PresenceMode.GiveUp;
                         for (int i = 0; i < _todo.Count; i++)
-                            _todo[i].Prepare(this, PresenceMode.GiveUp, diagnostics);
+                            _todo[i].Prepare(context);
                         break;
                     }
                     else
@@ -313,13 +320,13 @@ namespace SimpleCircuit
             return success;
         }
 
-        private bool DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context, IDiagnosticHandler diagnostics)
+        private bool DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context)
         {
             // First deal with shorts to reduce the number of variables as much as possible
             context.Mode = NodeRelationMode.Offsets;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
             {
-                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                if (!c.DiscoverNodeRelationships(context))
                     return false;
             }
             context.Offsets.ComputeBounds();
@@ -328,7 +335,7 @@ namespace SimpleCircuit
             context.Mode = NodeRelationMode.Links;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
             {
-                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                if (!c.DiscoverNodeRelationships(context))
                     return false;
             }
 
@@ -336,38 +343,38 @@ namespace SimpleCircuit
             context.Mode = NodeRelationMode.Groups;
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
             {
-                if (!c.DiscoverNodeRelationships(context, diagnostics))
+                if (!c.DiscoverNodeRelationships(context))
                     return false;
             }
             return true;
         }
 
-        private bool Space(CircuitSolverContext context)
+        private bool Space(RegisterContext context)
         {
             // Make a map of representatives and their extremes
             var dict = new Dictionary<string, (List<string> Minima, List<string> Maxima)>(StringComparer.OrdinalIgnoreCase);
-            foreach (var node in context.Nodes.Extremes.Linked.Representatives)
+            foreach (var node in context.Relationships.Extremes.Linked.Representatives)
                 dict.Add(node, (new List<string>(), new List<string>()));
 
             // Map all minima
-            foreach (var node in context.Nodes.Extremes.Minimum.Extremes)
+            foreach (var node in context.Relationships.Extremes.Minimum.Extremes)
             {
-                string representative = context.Nodes.Extremes.Linked[node];
+                string representative = context.Relationships.Extremes.Linked[node];
                 if (dict.TryGetValue(representative, out var extremes))
                     extremes.Minima.Add(node);
             }
 
             // Map all maxima
-            foreach (var node in context.Nodes.Extremes.Maximum.Extremes)
+            foreach (var node in context.Relationships.Extremes.Maximum.Extremes)
             {
-                string representative = context.Nodes.Extremes.Linked[node];
+                string representative = context.Relationships.Extremes.Linked[node];
                 if (dict.TryGetValue(representative, out var extremes))
                     extremes.Maxima.Add(node);
             }
 
             // Use the XY sets to make a vertical stack of graphical blocks
             Dictionary<string, HashSet<string>> stacked = new();
-            foreach (var set in context.Nodes.XYSets)
+            foreach (var set in context.Relationships.XYSets)
             {
                 if (!stacked.TryGetValue(set.NodeY, out var horiz))
                 {

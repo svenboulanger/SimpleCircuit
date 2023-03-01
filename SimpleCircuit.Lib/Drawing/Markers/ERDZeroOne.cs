@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Drawing.Markers
+﻿namespace SimpleCircuit.Drawing.Markers
 {
     /// <summary>
     /// An entity-relation diagram marker for "zero or one".

@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
 
@@ -49,9 +49,9 @@ namespace SimpleCircuit.Components.Modeling
             => ((FixedOrientedPin)Pins[index]).Offset = offset;
 
         /// <inheritdoc />
-        public override bool Reset(IDiagnosticHandler diagnostics)
+        public override bool Reset(IResetContext context)
         {
-            if (!base.Reset(diagnostics))
+            if (!base.Reset(context))
                 return false;
 
             double s = Size * 0.5;

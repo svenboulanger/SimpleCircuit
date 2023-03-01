@@ -1,7 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Components;
-using SpiceSharp.Entities;
-using SpiceSharp.Simulations;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components
@@ -64,23 +62,20 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool Reset(IDiagnosticHandler diagnostics) => true;
+        public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
-        {
-            return PresenceResult.Success;
-        }
+        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(IRelationshipContext context)
         {
             switch (context.Mode)
             {
                 case NodeRelationMode.Offsets:
                     if (!context.Offsets.Group(Lowest, Highest, Offset))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
+                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
                         return false;
                     }
                     break;
@@ -89,12 +84,12 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Register(IRegisterContext context)
         {
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Update(IUpdateContext context)
         {
         }
     }

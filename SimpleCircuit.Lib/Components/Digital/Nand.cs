@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -93,9 +93,9 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            public override bool Reset(IDiagnosticHandler diagnostics)
+            public override bool Reset(IResetContext context)
             {
-                if (!base.Reset(diagnostics))
+                if (!base.Reset(context))
                     return false;
 
                 double r = Width * 0.5;

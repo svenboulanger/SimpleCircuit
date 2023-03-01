@@ -1,9 +1,6 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 
 namespace SimpleCircuit.Components.EntityRelationshipDiagrams
 {
@@ -46,9 +43,9 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
             }
 
             /// <inheritdoc />
-            public override bool Reset(IDiagnosticHandler diagnostics)
+            public override bool Reset(IResetContext context)
             {
-                if (!base.Reset(diagnostics))
+                if (!base.Reset(context))
                     return false;
 
                 Pins.Clear();

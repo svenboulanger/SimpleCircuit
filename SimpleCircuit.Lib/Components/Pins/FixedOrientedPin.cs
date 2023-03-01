@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
 
@@ -90,12 +91,12 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public override void Register(IRegisterContext context)
         {
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(IRelationshipContext context)
         {
             var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
             switch (context.Mode)
@@ -103,12 +104,12 @@ namespace SimpleCircuit.Components.Pins
                 case NodeRelationMode.Offsets:
                     if (!context.Offsets.Group(_origin.X, X, offset.X))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.X, Name);
+                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.X, Name);
                         return false;
                     }
                     if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
                     {
-                        diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.Y, Name);
+                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.Y, Name);
                         return false;
                     }
                     break;

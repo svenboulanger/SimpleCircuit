@@ -1,8 +1,8 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SpiceSharp.Simulations;
 using System;
 
 namespace SimpleCircuit.Components
@@ -94,18 +94,18 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public bool Reset(IDiagnosticHandler diagnostics)
+            public bool Reset(IResetContext context)
             {
                 foreach (var pin in _pins)
                 {
-                    if (!pin.Reset(diagnostics))
+                    if (!pin.Reset(context))
                         return false;
                 }
                 return true;
             }
 
             /// <inheritdoc />
-            public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
+            public PresenceResult Prepare(IPrepareContext context)
             {
                 return PresenceResult.Success;
             }
@@ -128,9 +128,9 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+            public bool DiscoverNodeRelationships(IRelationshipContext context)
             {
-                if (!_pins.DiscoverNodeRelationships(context, diagnostics))
+                if (!_pins.DiscoverNodeRelationships(context))
                     return false;
 
                 switch (context.Mode)
@@ -143,21 +143,21 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+            public void Register(IRegisterContext context)
             {
                 _pins.Register(context);
             }
 
             /// <inheritdoc />
-            public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+            public void Update(IUpdateContext context)
             {
-                Location = context.Nodes.GetValue(state, X, Y);
-                EndLocation = context.Nodes.GetValue(state, _pins.Right, _pins.Bottom);
+                Location = context.GetValue(X, Y);
+                EndLocation = context.GetValue(_pins.Right, _pins.Bottom);
 
                 // Update all pin locations as well
                 // We ignore pin 0, because that is a dummy pin
                 for (int i = 1; i < _pins.Count; i++)
-                    _pins[i].Update(state, context, diagnostics);
+                    _pins[i].Update(context);
             }
         }
     }

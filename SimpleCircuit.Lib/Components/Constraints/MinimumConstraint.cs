@@ -1,8 +1,6 @@
-﻿using SimpleCircuit.Circuits;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
 using SpiceSharp.Components;
 using SpiceSharp.Entities;
-using SpiceSharp.Simulations;
 using System;
 
 namespace SimpleCircuit.Components
@@ -118,7 +116,7 @@ namespace SimpleCircuit.Components
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The minimum.</param>
-        public static bool MinimumLink(NodeContext context, RelativeItem lowest, RelativeItem highest, double minimum)
+        public static bool MinimumLink(IRelationshipContext context, RelativeItem lowest, RelativeItem highest, double minimum)
         {
             double offset = lowest.Offset - highest.Offset + minimum;
             if (lowest.Representative != highest.Representative)
@@ -147,7 +145,7 @@ namespace SimpleCircuit.Components
         /// <param name="start">The start node.</param>
         /// <param name="end">The end node.</param>
         /// <param name="minimum">The minimum.</param>
-        public static bool MinimumDirectionalLink(NodeContext context, RelativeItem start, RelativeItem end, double minimum)
+        public static bool MinimumDirectionalLink(IRelationshipContext context, RelativeItem start, RelativeItem end, double minimum)
         {
             if (minimum > 0)
                 return MinimumLink(context, start, end, minimum);
@@ -221,16 +219,13 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool Reset(IDiagnosticHandler diagnostics) => true;
+        public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
-        {
-            return PresenceResult.Success;
-        }
+        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public bool DiscoverNodeRelationships(IRelationshipContext context)
         {
             switch (context.Mode)
             {
@@ -244,16 +239,16 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Register(IRegisterContext context)
         {
-            var lowest = context.Nodes.Offsets[Lowest];
-            var highest = context.Nodes.Offsets[Highest];
+            var lowest = context.Relationships.Offsets[Lowest];
+            var highest = context.Relationships.Offsets[Highest];
             if (lowest.Representative != highest.Representative)
                 AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
         }
 
         /// <inheritdoc />
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public void Update(IUpdateContext context)
         {
         }
     }

@@ -1,8 +1,7 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
-using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SpiceSharp.Simulations;
 using System;
 using System.Collections.Generic;
 
@@ -54,21 +53,18 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual bool Reset(IDiagnosticHandler diagnostics)
+        public virtual bool Reset(IResetContext context)
         {
             foreach (var pin in Pins)
             {
-                if (!pin.Reset(diagnostics))
+                if (!pin.Reset(context))
                     return false;
             }
             return true;
         }
 
         /// <inheritdoc />
-        public virtual PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics)
-        {
-            return PresenceResult.Success;
-        }
+        public virtual PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
         /// <summary>
         /// Creates a transform.
@@ -108,14 +104,13 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
-            => true;
+        public virtual bool DiscoverNodeRelationships(IRelationshipContext context) => true;
 
         /// <inheritdoc />
-        public abstract void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
+        public abstract void Register(IRegisterContext context);
 
         /// <inheritdoc />
-        public abstract void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics);
+        public abstract void Update(IUpdateContext context);
 
         /// <summary>
         /// Converts the drawable to a string.

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
@@ -72,9 +73,9 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public override bool Reset(IDiagnosticHandler diagnostics)
+            public override bool Reset(IResetContext context)
             {
-                if (!base.Reset(diagnostics))
+                if (!base.Reset(context))
                     return false;
 
                 // Calculate the positions of the pins
@@ -87,10 +88,10 @@ namespace SimpleCircuit.Components
                     pinNames.Clear();
 
                     // Find the ports
-                    var pin = pinInfo.Find(diagnostics, -1);
+                    var pin = pinInfo.Find(context.Diagnostics, -1);
                     if (pin == null)
                     {
-                        diagnostics?.Post(pinInfo.Pin, ErrorCodes.CouldNotFindPin, pinInfo.Pin.Content, pinInfo.Component.Fullname);
+                        context.Diagnostics?.Post(pinInfo.Pin, ErrorCodes.CouldNotFindPin, pinInfo.Pin.Content, pinInfo.Component.Fullname);
                         return false;
                     }
 

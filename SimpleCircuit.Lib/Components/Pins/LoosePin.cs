@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Pins
@@ -30,20 +31,20 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override bool Reset(IDiagnosticHandler diagnostics)
+        public override bool Reset(IResetContext context)
         {
-            if (!base.Reset(diagnostics))
+            if (!base.Reset(context))
                 return false;
             HasFixedOrientation = false;
             return true;
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(IRelationshipContext context)
             => true;
 
         /// <inheritdoc />
-        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public override void Register(IRegisterContext context)
         {
             // Left to whoever owns this pin...
         }

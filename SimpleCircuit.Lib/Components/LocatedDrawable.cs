@@ -1,6 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Drawing;
-using SpiceSharp.Simulations;
 
 namespace SimpleCircuit.Components
 {
@@ -34,32 +33,32 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override bool Reset(IDiagnosticHandler diagnostics)
+        public override bool Reset(IResetContext context)
         {
-            if (!base.Reset(diagnostics))
+            if (!base.Reset(context))
                 return false;
             Location = new();
             return true;
         }
 
         /// <inheritdoc />
-        public override void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public override void Update(IUpdateContext context)
         {
-            Location = context.Nodes.GetValue(state, X, Y);
+            Location = context.GetValue(X, Y);
 
             // Give the pins a chance to update as well
             for (int i = 0; i < Pins.Count; i++)
-                Pins[i].Update(state, context, diagnostics);
+                Pins[i].Update(context);
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics)
+        public override bool DiscoverNodeRelationships(IRelationshipContext context)
         {
-            if (!base.DiscoverNodeRelationships(context, diagnostics))
+            if (!base.DiscoverNodeRelationships(context))
                 return false;
             for (int i = 0; i < Pins.Count; i++)
             {
-                if (!Pins[i].DiscoverNodeRelationships(context, diagnostics))
+                if (!Pins[i].DiscoverNodeRelationships(context))
                     return false;
             }
 
@@ -73,10 +72,10 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics)
+        public override void Register(IRegisterContext context)
         {
             for (int i = 0; i < Pins.Count; i++)
-                Pins[i].Register(context, diagnostics);
+                Pins[i].Register(context);
         }
     }
 }

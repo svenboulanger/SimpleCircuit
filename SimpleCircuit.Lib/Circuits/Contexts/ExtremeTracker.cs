@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Circuits
+﻿namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
     /// A class for tracking extremes.

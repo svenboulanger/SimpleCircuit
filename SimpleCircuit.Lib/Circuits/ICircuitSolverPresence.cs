@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Diagnostics;
-using SpiceSharp.Simulations;
+﻿using SimpleCircuit.Circuits.Contexts;
 
 namespace SimpleCircuit.Components
 {
@@ -13,23 +12,19 @@ namespace SimpleCircuit.Components
         /// Allows the discovering of aliases. This can reduce the number of unknowns to solve.
         /// </summary>
         /// <param name="context">The context containing the node relationships.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>Returns <c>true</c> if the discovery is successful; or <c>false</c> if the solver should fail.</returns>
-        public bool DiscoverNodeRelationships(NodeContext context, IDiagnosticHandler diagnostics);
+        public bool DiscoverNodeRelationships(IRelationshipContext context);
 
         /// <summary>
         /// Registers the pin's presence in the circuit that will solve all coordinates.
         /// </summary>
-        /// <param name="context">The context for simulation the graphical elements of the circuit.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public void Register(CircuitSolverContext context, IDiagnosticHandler diagnostics);
+        /// <param name="context">The solver context.</param>
+        public void Register(IRegisterContext context);
 
         /// <summary>
         /// Updates the presence with the simulated results for the graphical elements.
         /// </summary>
-        /// <param name="state">The state containing the simulation results.</param>
-        /// <param name="context">The context previously used to build the simulation.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public void Update(IBiasingSimulationState state, CircuitSolverContext context, IDiagnosticHandler diagnostics);
+        /// <param name="context">The update context.</param>
+        public void Update(IUpdateContext context);
     }
 }

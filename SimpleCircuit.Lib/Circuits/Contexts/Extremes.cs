@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Circuits;
-
-namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
     /// A struct that tracks the bounds of nodes using relative specifications.

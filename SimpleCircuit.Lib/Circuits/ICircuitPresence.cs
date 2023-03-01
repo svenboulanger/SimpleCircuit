@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Contexts;
 
 namespace SimpleCircuit.Components
 {
@@ -21,19 +21,16 @@ namespace SimpleCircuit.Components
         /// Resets the circuit presence before resolving a graphical circuit.
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        public bool Reset(IDiagnosticHandler diagnostics);
+        public bool Reset(IResetContext diagnostics);
 
         /// <summary>
         /// Prepares the circuit presence for resolving a graphical circuit.
         /// </summary>
         /// <param name="circuit">The circuit.</param>
-        /// <param name="mode">The current mode of operation.</param>
-        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="context">The preparation context.</param>
         /// <returns>
-        ///     Returns <c>true</c> if the presence successfully prepared; otherwise, <c>false</c>,
-        ///     in which case the graphical circuit should prepare this circuit presence again after
-        ///     first preparing all other presences.
+        ///     Returns the result of the preparation.
         /// </returns>
-        public PresenceResult Prepare(GraphicalCircuit circuit, PresenceMode mode, IDiagnosticHandler diagnostics);
+        public PresenceResult Prepare(IPrepareContext context);
     }
 }
