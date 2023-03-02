@@ -21,6 +21,6 @@ namespace SimpleCircuit.Drawing
         /// <param name="start">The starting point.</param>
         /// <param name="end">The ending point.</param>
         /// <param name="options">The options.</param>
-        public void Line(Vector2 start, Vector2 end, PathOptions options);
+        public void Line(Vector2 start, Vector2 end, GraphicOptions options);
     }
 }

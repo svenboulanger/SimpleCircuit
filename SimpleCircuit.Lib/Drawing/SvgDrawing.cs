@@ -74,7 +74,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the amount to expand the bounds if <see cref="RenderBounds"/> is <c>true</c>.
         /// </summary>
-        public double ExpandBounds { get; set; } = 2.0;
+        public double ExpandBounds { get; set; } = 0.0;
 
         /// <summary>
         /// Creates a new SVG drawing instance.
@@ -167,7 +167,7 @@ namespace SimpleCircuit
                     case "group":
                     case "g":
                         // Parse options
-                        var options = ParsePathOptions(node);
+                        var options = ParseGraphicOptions(node);
                         StartGroup(options);
                         DrawXmlActions(node, diagnostics);
                         EndGroup();
@@ -188,14 +188,14 @@ namespace SimpleCircuit
             success &= node.ParseVector("x2", "y2", diagnostics, out var end);
             if (!success)
                 return;
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
 
             // Draw the line
             Line(start, end, options);
         }
         private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
             List<Vector2> points;
             string pointdata = node.Attributes["points"]?.Value;
             if (pointdata != null)
@@ -227,7 +227,7 @@ namespace SimpleCircuit
         }
         private void DrawXmlPolyline(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
             string pointdata = node.Attributes["points"]?.Value;
             List<Vector2> points;
             if (pointdata != null)
@@ -268,14 +268,14 @@ namespace SimpleCircuit
             success &= node.ParseCoordinate("r", diagnostics, out double r);
             if (!success)
                 return;
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
 
             // Draw the circle
             Circle(center, r, options);
         }
         private void DrawXmlPath(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
             string d = node.Attributes["d"]?.Value;
             if (!string.IsNullOrWhiteSpace(d))
             {
@@ -412,7 +412,7 @@ namespace SimpleCircuit
         }
         private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
             if (!node.ParseVector("x", "y", diagnostics, out var location))
                 return;
             if (!node.ParseVector("width", "height", diagnostics, out var size))
@@ -452,7 +452,7 @@ namespace SimpleCircuit
         }
         private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParsePathOptions(node);
+            var options = ParseGraphicOptions(node);
             string label = node.Attributes["value"]?.Value;
             if (string.IsNullOrWhiteSpace(label))
                 return;
@@ -463,13 +463,13 @@ namespace SimpleCircuit
             node.TryParseVector("nx", "ny", diagnostics, new(), out Vector2 expand);
             Text(label, location, expand, options);
         }
-        private PathOptions ParsePathOptions(XmlNode parent)
+        private GraphicOptions ParseGraphicOptions(XmlNode parent)
         {
             if (parent == null)
                 return null;
             if (parent.Attributes == null)
                 return null;
-            var options = new PathOptions();
+            var options = new GraphicOptions();
 
             // Read some styling
             var attribute = parent.Attributes?["style"];
@@ -678,7 +678,7 @@ namespace SimpleCircuit
         /// <param name="radius">The radius of the arc.</param>
         /// <param name="options">The path options.</param>
         /// <param name="intermediatePoints">The number of intermediate points.</param>
-        public void Arc(Vector2 center, double startAngle, double endAngle, double radius, PathOptions options = null, int intermediatePoints = 0)
+        public void Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
         {
             if (endAngle < startAngle)
                 endAngle += 2 * Math.PI;
@@ -767,15 +767,15 @@ namespace SimpleCircuit
             }
 
             // Determine the bounds of the lines, which will then determine their position
-            var formattedLines = new Bounds[elements.Count];
+            var lineBounds = new Bounds[elements.Count];
             double width = 0, height = 0;
             for (int i = 0; i < elements.Count; i++)
             {
-                formattedLines[i] = formatter.Format(this, elements[i]);
-                width = Math.Max(formattedLines[i].Width, width);
+                lineBounds[i] = formatter.Measure(elements[i]);
+                width = Math.Max(lineBounds[i].Width, width);
                 if (i > 0)
                     height += LineSpacing;
-                height += formattedLines[i].Height;
+                height += lineBounds[i].Height;
 
                 // Expand the X-direction
                 if (expand.X.IsZero())
@@ -821,10 +821,10 @@ namespace SimpleCircuit
 
             for (int i = 0; i < elements.Count; i++)
             {
-                y -= formattedLines[i].Top;
+                y -= lineBounds[i].Top;
                 elements[i].SetAttribute("x", Convert(location.X));
                 elements[i].SetAttribute("y", Convert(location.Y + y));
-                y += formattedLines[i].Bottom + LineSpacing;
+                y += lineBounds[i].Bottom + LineSpacing;
             }
 
             txt.SetAttribute("x", Convert(location.X));
@@ -836,7 +836,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="action">The actions.</param>
         /// <param name="options">The path options.</param>
-        public void Path(Action<PathBuilder> action, PathOptions options = null)
+        public void Path(Action<PathBuilder> action, GraphicOptions options = null)
         {
             if (action == null)
                 return;
@@ -940,7 +940,7 @@ namespace SimpleCircuit
             }
 
             // Try to get the bounds of this
-            var bounds = ElementFormatter?.Format(this, svg) ?? _bounds.Peek().Bounds;
+            var bounds = ElementFormatter?.Measure(svg) ?? _bounds.Peek().Bounds;
 
             // Apply a margin along the edges
             bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);

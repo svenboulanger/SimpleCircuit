@@ -10,9 +10,8 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Formats an XML element. The element can be changed if needed.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        /// <param name="element">The text element.</param>
+        /// <param name="element">The element to be measured.</param>
         /// <returns>The computed bounds of the formatted element.</returns>
-        public Bounds Format(SvgDrawing drawing, XmlElement element);
+        public Bounds Measure(XmlElement element);
     }
 }

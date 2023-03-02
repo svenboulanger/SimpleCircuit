@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <style>
+            text {
+                font-family: Tahoma, Verdana, Segoe, sans-serif;
+                font-size: 4pt;
+            }
+            text tspan {
+                fill: black;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <svg viewBox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+                <text>
+                    <tspan id="measure">AAAA</tspan>
+                </text>
+            </svg>
+        </div>
+        <div id="output">
+
+        </div>
+
+        <script>
+            function round(number) {
+                return Math.round(number / 4 * 1000) / 1000;
+            }
+            var text = "";
+            var tspan = document.getElementById("measure");
+            function check(n) {
+                var c = String.fromCharCode(n);
+                tspan.innerHTML = c.repeat(10);
+                var b = tspan.getBBox()
+                // console.log(c, ' -> ', round(b.x), ', ', round(b.y), ' : ', round(b.width / 10), ', ', round(b.height));
+                if (b.x != 0)
+                   text += "case '" + c + "': return " + round(b.x) + ";<br />\n";
+                // text += "'" + c + "' => " + round(b.width / 10) + ",<br />\n";
+            }
+            for (var n = 0; n < 1024; n++)
+                check(n);
+
+            document.getElementById("output").innerHTML = text;
+        </script>
+    </body>
+</html>

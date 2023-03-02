@@ -10,20 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"BB1[Input1] <l>
-BB1[Input2] <l>
-BB1[Output1] <r>
-BB1[Output2] <r>
-BB1[VDD] <u> POW
-BB1[VSS] <d> GND
-
-// The distance between pins can vary, but they cannot change order
-// Notice how the two pins are spaced further apart because of the following statement
-BB1[Output1] <r d> R <d l> [Output2]BB1
-
-// The black box can stretch in any direction
-(x BB1[Input1] <r +80> [Output1]BB1)
-
+            var script = @"T(""hello\_world_123"")
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
@@ -37,6 +24,7 @@ BB1[Output1] <r d> R <d l> [Output2]BB1
             // Draw the component
             if (context.Circuit.Count > 0 && logger.ErrorCount == 0)
             {
+                context.Circuit.RenderBounds = false;
                 var doc = context.Circuit.Render(logger);
                 if (doc == null)
                     return;

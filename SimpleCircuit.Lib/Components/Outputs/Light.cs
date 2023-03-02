@@ -87,7 +87,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDirectional(SvgDrawing drawing, bool diverging)
             {
-                var options = new PathOptions("direction");
+                var options = new GraphicOptions("direction");
                 if (diverging)
                 {
                     drawing.Arrow(new(-2, 6), new(-6, 12), options);

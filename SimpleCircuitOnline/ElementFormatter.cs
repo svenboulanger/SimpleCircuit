@@ -25,7 +25,7 @@ namespace SimpleCircuitOnline
         }
 
         /// <inheritdoc />
-        public Bounds Format(SvgDrawing drawing, XmlElement element)
+        public Bounds Measure(XmlElement element)
         {
             string text = null;
             using (var sw = new StringWriter())

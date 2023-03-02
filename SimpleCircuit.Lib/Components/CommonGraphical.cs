@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components
         /// <param name="height">The height, default is 6.</param>
         /// <param name="center">The center of the rectangle, default is the origin.</param>
         /// <param name="options">Path options.</param>
-        public static void Rectangle(this SvgDrawing drawing, double width = 12.0, double height = 6.0, Vector2 center = new(), PathOptions options = null)
+        public static void Rectangle(this SvgDrawing drawing, double width = 12.0, double height = 6.0, Vector2 center = new(), GraphicOptions options = null)
         {
             width *= 0.5;
             height *= 0.5;
@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components
         /// <param name="size">The size.</param>
         /// <param name="center">The center of the rectangle, default is the origin.</param>
         /// <param name="options">Path options.</param>
-        public static void Rectangle(this SvgDrawing drawing, Vector2 size, Vector2 center = new(), PathOptions options = null)
+        public static void Rectangle(this SvgDrawing drawing, Vector2 size, Vector2 center = new(), GraphicOptions options = null)
         {
             size *= 0.5;
             drawing.Polygon(new Vector2[]
@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components
         /// <param name="drawing">The drawing.</param>
         /// <param name="start">The starting point of the arrow.</param>
         /// <param name="end">The ending point of the arrow.</param>
-        public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, PathOptions options = null)
+        public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             drawing.StartGroup(options);
             drawing.Line(start, end);
@@ -100,7 +100,7 @@ namespace SimpleCircuit.Components
         /// <param name="center">The center.</param>
         /// <param name="size">The size.</param>
         /// <param name="options">The options.</param>
-        public static void Cross(this SvgDrawing drawing, Vector2 center, double size, PathOptions options = null)
+        public static void Cross(this SvgDrawing drawing, Vector2 center, double size, GraphicOptions options = null)
         {
             drawing.Path(b =>
                 b

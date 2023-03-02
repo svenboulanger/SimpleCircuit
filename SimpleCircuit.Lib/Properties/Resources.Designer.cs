@@ -72,11 +72,11 @@ namespace SimpleCircuit.Properties {
         ///.battery .neg { stroke-width: 0.75pt; }
         ///text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         ///.small tspan { font-size: 0.8em; }
-        ///.super, .sub { font-size: 0.75em; }
         ///.text-stroke { stroke-width: 0.025em; }
         ///.text-symbol { fill: black; stroke: none; }
         ///.marker { fill: black; }
-        ///.marker.erd { fi [rest of string was truncated]&quot;;.
+        ///.marker.erd { fill: white; }
+        ///.dotted { stroke-dashar [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DefaultStyle {
             get {
