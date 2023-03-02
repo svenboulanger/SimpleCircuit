@@ -105,10 +105,7 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public PresenceResult Prepare(IPrepareContext context)
-            {
-                return PresenceResult.Success;
-            }
+            public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
             /// <inheritdoc />
             public void Render(SvgDrawing drawing)

@@ -3,7 +3,7 @@
     /// <summary>
     /// The possible modes for presences to run in.
     /// </summary>
-    public enum PresenceMode
+    public enum DesperatenessLevel
     {
         /// <summary>
         /// The presence is run for the first time.

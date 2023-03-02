@@ -63,12 +63,6 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _inputCommon, new(-1, 0)), "i", "in", "inp", "pi", "p");
-                Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _inputCommon, new(-1, 0)), "inn", "ni", "n");
-                Pins.Add(new FixedOrientedPin("positivepower", "The positive power supply.", this, _supplyPos, new(0, -1)), "vpos", "vp");
-                Pins.Add(new FixedOrientedPin("negativepower", "The negative power supply.", this, _supplyNeg, new(0, 1)), "vneg", "vn");
-                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputCommon, new(1, 0)), "outn", "no");
-                Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
             }
 
             /// <inheritdoc />
@@ -76,43 +70,46 @@ namespace SimpleCircuit.Components.Analog
             {
                 if (!base.Reset(context))
                     return false;
+
+                Pins.Clear();
+
+                // Add input pins
                 if (Variants.Contains(_differentialInput))
                 {
                     if (Variants.Contains(_swapInput))
                     {
-                        SetPinOffset(0, _inputNeg);
-                        SetPinOffset(1, _inputPos);
+                        Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _inputNeg, new(-1, 0)), "i", "in", "inp", "pi", "p");
+                        Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _inputPos, new(-1, 0)), "inn", "ni", "n");
                     }
                     else
                     {
-                        SetPinOffset(0, _inputPos);
-                        SetPinOffset(1, _inputNeg);
+                        Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input.", this, _inputPos, new(-1, 0)), "i", "in", "inp", "pi", "p");
+                        Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, _inputNeg, new(-1, 0)), "inn", "ni", "n");
                     }
                 }
                 else
-                {
-                    SetPinOffset(0, _inputCommon);
-                    SetPinOffset(1, _inputCommon);
-                }
+                    Pins.Add(new FixedOrientedPin("input", "The input.", this, _inputCommon, new(-1, 0)), "i", "in", "inp", "pi", "p");
 
+                // Add power supply pins
+                Pins.Add(new FixedOrientedPin("positivepower", "The positive power supply.", this, _supplyPos, new(0, -1)), "vpos", "vp");
+                Pins.Add(new FixedOrientedPin("negativepower", "The negative power supply.", this, _supplyNeg, new(0, 1)), "vneg", "vn");
+
+                // Add output pins
                 if (Variants.Contains(_differentialOutput))
                 {
                     if (Variants.Contains(_differentialInput))
                     {
-                        SetPinOffset(4, _outputPos);
-                        SetPinOffset(5, _outputNeg);
+                        Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputPos, new(1, 0)), "outn", "no");
+                        Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputNeg, new(1, 0)), "o", "out", "outp", "po");
                     }
                     else
                     {
-                        SetPinOffset(4, _outputNeg);
-                        SetPinOffset(5, _outputPos);
+                        Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputNeg, new(1, 0)), "outn", "no");
+                        Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputPos, new(1, 0)), "o", "out", "outp", "po");
                     }
                 }
                 else
-                {
-                    SetPinOffset(4, _outputCommon);
-                    SetPinOffset(5, _outputCommon);
-                }
+                    Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
                 return true;
             }
 

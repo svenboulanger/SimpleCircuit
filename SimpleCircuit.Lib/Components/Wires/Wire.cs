@@ -88,110 +88,113 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
-            // Find the pins
-            _p2w = _pinToWire.Find(context.Diagnostics, -1);
-            _w2p = _wireToPin.Find(context.Diagnostics, 0);
-
-            // Make sure these pins know they are being connected to
-            if (_p2w != null)
-                _p2w.Connections++;
-            if (_w2p != null)
-                _w2p.Connections++;
-
-            var p1 = _p2w as IOrientedPin;
-            var p2 = _w2p as IOrientedPin;
-
-            if (_info.Segments.Count == 1 && _info.Segments[0].Orientation.X.IsZero() && _info.Segments[0].Orientation.Y.IsZero() && !_info.Segments[0].IsUnconstrained)
+            if (context.Mode == PreparationMode.Offsets)
             {
-                // We have a wire that connects two pins but does not have a defined orientation yet
-                // This piece of code will pass this orientation to other nodes if they can be resolved
-                if (p1 == null && p2 == null)
+                // Find the pins
+                _p2w = _pinToWire.Find(context.Diagnostics, -1);
+                _w2p = _wireToPin.Find(context.Diagnostics, 0);
+
+                // Make sure these pins know they are being connected to
+                if (_p2w != null)
+                    _p2w.Connections++;
+                if (_w2p != null)
+                    _w2p.Connections++;
+
+                var p1 = _p2w as IOrientedPin;
+                var p2 = _w2p as IOrientedPin;
+
+                if (_info.Segments.Count == 1 && _info.Segments[0].Orientation.X.IsZero() && _info.Segments[0].Orientation.Y.IsZero() && !_info.Segments[0].IsUnconstrained)
                 {
-                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
-                    return PresenceResult.GiveUp;
-                }
-                else if (p1 != null && p2 != null)
-                {
-                    // We might need to point it towards each other
-                    bool p1f = p1.HasFixedOrientation, p2f = p2.HasFixedOrientation;
-                    if (p1f && p2f)
-                        // Everything has been fixed already!
-                        return PresenceResult.Success;
-                    else if (p1f)
-                        // The first pin is fixed, so let's use its orientation to set the second one
-                        p2.ResolveOrientation(-p1.Orientation, _info.Segments[0].Source, context.Diagnostics);
-                    else if (p2f)
-                        // The second pin is fixed, so let's use its orientation to set the first one
-                        p1.ResolveOrientation(-p2.Orientation, _info.Segments[0].Source, context.Diagnostics);
-                    else
-                    {
-                        // Both aren't fixed, so we might just not have enough information...
-                        if (context.Mode == PresenceMode.GiveUp)
-                        {
-                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
-                            return PresenceResult.GiveUp;
-                        }
-                        return PresenceResult.Incomplete;
-                    }
-                }
-                else if (p1 != null)
-                {
-                    // We can only try to derive from the first pin!
-                    if (p1.HasFixedOrientation)
-                        return PresenceResult.Success; // We can derive the orientation
-                    if (context.Mode == PresenceMode.GiveUp)
+                    // We have a wire that connects two pins but does not have a defined orientation yet
+                    // This piece of code will pass this orientation to other nodes if they can be resolved
+                    if (p1 == null && p2 == null)
                     {
                         GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
                         return PresenceResult.GiveUp;
                     }
-                    else
-                        return PresenceResult.Incomplete;
-                }
-                else
-                {
-                    // We can only try to derive from the second pin!
-                    if (p2.HasFixedOrientation)
-                        return PresenceResult.Success;
-                    if (context.Mode == PresenceMode.GiveUp)
+                    else if (p1 != null && p2 != null)
                     {
-                        GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
-                        return PresenceResult.GiveUp;
-                    }
-                    else
-                        return PresenceResult.Incomplete;
-                }
-            }
-            else
-            {
-                // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
-                for (int i = 0; i < _info.Segments.Count; i++)
-                {
-                    var segment = _info.Segments[i];
-                    if (segment.IsUnconstrained)
-                        continue;
-                    else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
-                    {
-                        if (i == 0)
+                        // We might need to point it towards each other
+                        bool p1f = p1.HasFixedOrientation, p2f = p2.HasFixedOrientation;
+                        if (p1f && p2f)
+                            // Everything has been fixed already!
+                            return PresenceResult.Success;
+                        else if (p1f)
+                            // The first pin is fixed, so let's use its orientation to set the second one
+                            p2.ResolveOrientation(-p1.Orientation, _info.Segments[0].Source, context.Diagnostics);
+                        else if (p2f)
+                            // The second pin is fixed, so let's use its orientation to set the first one
+                            p1.ResolveOrientation(-p2.Orientation, _info.Segments[0].Source, context.Diagnostics);
+                        else
                         {
-                            // Check with first pin, and only with first pin...
-                            if (p1 == null)
+                            // Both aren't fixed, so we might just not have enough information...
+                            if (context.Desparateness == DesperatenessLevel.GiveUp)
                             {
                                 GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
                                 return PresenceResult.GiveUp;
                             }
+                            return PresenceResult.Incomplete;
                         }
-                        else if (i == _info.Segments.Count - 1)
+                    }
+                    else if (p1 != null)
+                    {
+                        // We can only try to derive from the first pin!
+                        if (p1.HasFixedOrientation)
+                            return PresenceResult.Success; // We can derive the orientation
+                        if (context.Desparateness == DesperatenessLevel.GiveUp)
                         {
-                            if (p2 == null)
-                            {
-                                GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
-                                return PresenceResult.GiveUp;
-                            }
+                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                            return PresenceResult.GiveUp;
                         }
                         else
+                            return PresenceResult.Incomplete;
+                    }
+                    else
+                    {
+                        // We can only try to derive from the second pin!
+                        if (p2.HasFixedOrientation)
+                            return PresenceResult.Success;
+                        if (context.Desparateness == DesperatenessLevel.GiveUp)
                         {
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.UndefinedWireSegment);
+                            GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
                             return PresenceResult.GiveUp;
+                        }
+                        else
+                            return PresenceResult.Incomplete;
+                    }
+                }
+                else
+                {
+                    // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
+                    for (int i = 0; i < _info.Segments.Count; i++)
+                    {
+                        var segment = _info.Segments[i];
+                        if (segment.IsUnconstrained)
+                            continue;
+                        else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                        {
+                            if (i == 0)
+                            {
+                                // Check with first pin, and only with first pin...
+                                if (p1 == null)
+                                {
+                                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                    return PresenceResult.GiveUp;
+                                }
+                            }
+                            else if (i == _info.Segments.Count - 1)
+                            {
+                                if (p2 == null)
+                                {
+                                    GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                    return PresenceResult.GiveUp;
+                                }
+                            }
+                            else
+                            {
+                                context.Diagnostics?.Post(segment.Source, ErrorCodes.UndefinedWireSegment);
+                                return PresenceResult.GiveUp;
+                            }
                         }
                     }
                 }

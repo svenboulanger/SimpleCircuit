@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Circuits.Contexts
@@ -15,18 +16,25 @@ namespace SimpleCircuit.Circuits.Contexts
         public IDiagnosticHandler Diagnostics { get; }
 
         /// <inheritdoc />
-        public PresenceMode Mode { get; set; }
+        public DesperatenessLevel Desparateness { get; set; }
+
+        /// <inheritdoc />
+        public PreparationMode Mode { get; set; }
+
+        /// <inheritdoc />
+        public IElementFormatter Formatter { get; }
 
         /// <summary>
         /// Creates a new <see cref="PrepareContext"/>.
         /// </summary>
         /// <param name="circuit">The circuit.</param>
         /// <param name="diagnostics">The diagnostics.</param>
-        public PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        public PrepareContext(GraphicalCircuit circuit, IElementFormatter formatter, IDiagnosticHandler diagnostics)
         {
             _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
             Diagnostics = diagnostics;
-            Mode = PresenceMode.Normal;
+            Formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
+            Desparateness = DesperatenessLevel.Normal;
         }
 
         /// <inheritdoc />

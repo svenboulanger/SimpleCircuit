@@ -64,44 +64,47 @@ namespace SimpleCircuit.Components.Constraints
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
-            // Get the drawable
-            var drawable = Pin.Component.Component;
-            if (drawable == null)
-                return PresenceResult.Success;
-
-            // Get the pin
-            IPin pin;
-            if (Pin.Pin.Content.Length == 0)
+            if (context.Mode == PreparationMode.Orientation)
             {
-                // Use pin index
-                int index = DefaultIndex >= 0 ? DefaultIndex : drawable.Pins.Count + DefaultIndex;
-                pin = drawable.Pins[index];
-            }
-            else
-            {
-                if (!drawable.Pins.TryGetValue(Pin.Pin.Content.ToString(), out pin))
-                {
-                    if (context.Mode == PresenceMode.Fix)
-                    {
-                        context.Diagnostics?.Post(Pin.Pin, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, Pin.Component.Fullname);
-                        return PresenceResult.GiveUp;
-                    }
-                }
-            }
-
-            // Resolve the orientation of the found pin
-            if (pin is IOrientedPin op)
-            {
-                var orientation = Segment.Orientation;
-                if (orientation.X.IsZero() && orientation.Y.IsZero())
+                // Get the drawable
+                var drawable = Pin.Component.Component;
+                if (drawable == null)
                     return PresenceResult.Success;
 
-                if (Invert)
-                    orientation = -orientation;
+                // Get the pin
+                IPin pin;
+                if (Pin.Pin.Content.Length == 0)
+                {
+                    // Use pin index
+                    int index = DefaultIndex >= 0 ? DefaultIndex : drawable.Pins.Count + DefaultIndex;
+                    pin = drawable.Pins[index];
+                }
+                else
+                {
+                    if (!drawable.Pins.TryGetValue(Pin.Pin.Content.ToString(), out pin))
+                    {
+                        if (context.Desparateness == DesperatenessLevel.Fix)
+                        {
+                            context.Diagnostics?.Post(Pin.Pin, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, Pin.Component.Fullname);
+                            return PresenceResult.GiveUp;
+                        }
+                    }
+                }
 
-                // If there is no orientation, ignore constraining the pin (it may be that
-                // the segment copies the orientation from the pin instead)
-                op.ResolveOrientation(orientation, Segment.Source, context.Diagnostics);
+                // Resolve the orientation of the found pin
+                if (pin is IOrientedPin op)
+                {
+                    var orientation = Segment.Orientation;
+                    if (orientation.X.IsZero() && orientation.Y.IsZero())
+                        return PresenceResult.Success;
+
+                    if (Invert)
+                        orientation = -orientation;
+
+                    // If there is no orientation, ignore constraining the pin (it may be that
+                    // the segment copies the orientation from the pin instead)
+                    op.ResolveOrientation(orientation, Segment.Source, context.Diagnostics);
+                }
             }
             return PresenceResult.Success;
         }

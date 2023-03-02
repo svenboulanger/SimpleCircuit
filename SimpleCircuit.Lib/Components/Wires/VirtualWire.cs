@@ -66,41 +66,43 @@ namespace SimpleCircuit.Components.Wires
             return true;
         }
 
+        private ILocatedPresence FindPin(IPrepareContext context, PinInfo pin, int defaultIndex)
+        {
+            if (context.Find(pin.Component.Fullname) is not ILocatedDrawable p)
+            {
+                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.ComponentWithoutLocation, pin.Component.Name.Content);
+                return null;
+            }
+            if (pin.Pin.Content.Length == 0)
+                return p;
+            else
+                return pin.Find(p, context.Diagnostics, defaultIndex);
+        }
+
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
-            // Find the start and end locations
-            if (context.Find(_startInfo.Component.Fullname) is not ILocatedDrawable sp)
+            if (context.Mode == PreparationMode.Offsets)
             {
-                context.Diagnostics?.Post(_startInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, _startInfo.Component.Name.Content);
-                return PresenceResult.GiveUp;
-            }
-            if (_startInfo.Pin.Content.Length == 0)
-                _start = sp;
-            else
-                _start = _startInfo.Find(sp, context.Diagnostics, -1);
-            if (context.Find(_endInfo.Component.Fullname) is not ILocatedDrawable ep)
-            {
-                context.Diagnostics?.Post(_endInfo.Component.Name, ErrorCodes.ComponentWithoutLocation, _endInfo.Component.Name.Content);
-                return PresenceResult.GiveUp;
-            }
-            if (_endInfo.Pin.Content.Length == 0)
-                _end = ep;
-            else
-                _end = _endInfo.Find(ep, context.Diagnostics, 0);
+                // Find the start and end locations
+                _start = FindPin(context, _startInfo, -1);
+                _end = FindPin(context, _endInfo, 0);
+                if (_start == null || _end == null)
+                    return PresenceResult.GiveUp;
 
-            for (int i = 0; i < _info.Segments.Count; i++)
-            {
-                var segment = _info.Segments[i];
-                if (segment.IsUnconstrained)
+                for (int i = 0; i < _info.Segments.Count; i++)
                 {
-                    context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
-                    return PresenceResult.GiveUp;
-                }
-                else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
-                {
-                    context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
-                    return PresenceResult.GiveUp;
+                    var segment = _info.Segments[i];
+                    if (segment.IsUnconstrained)
+                    {
+                        context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
+                        return PresenceResult.GiveUp;
+                    }
+                    else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                    {
+                        context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
+                        return PresenceResult.GiveUp;
+                    }
                 }
             }
             return PresenceResult.Success;

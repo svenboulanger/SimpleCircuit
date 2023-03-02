@@ -144,16 +144,17 @@ namespace SimpleCircuit
         /// </summary>
         public bool Solve(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
         {
+            formatter ??= new ElementFormatter();
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
             _extra.Clear();
 
             // Prepare all the presences
-            var resetContext = new ResetContext(diagnostics, formatter);
+            var resetContext = new ResetContext(diagnostics);
             if (!Reset(presences, resetContext))
                 return false;
 
-            // Prepare the circuit
-            var prepareContext = new PrepareContext(this, diagnostics);
+            // Prepare the circuit (first constrain orientations, then prepare offsets)
+            var prepareContext = new PrepareContext(this, formatter, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 
@@ -238,6 +239,21 @@ namespace SimpleCircuit
 
         private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
+            // Prepare orientations
+            context.Mode = PreparationMode.Orientation;
+            if (!PrepareCycle(presences, context))
+                return false;
+
+            // Prepare offsets
+            context.Mode = PreparationMode.Offsets;
+            if (!PrepareCycle(presences, context))
+                return false;
+
+            return true;
+        }
+        private bool PrepareCycle(IEnumerable<ICircuitPresence> presences, PrepareContext context)
+        {
+            context.Desparateness = DesperatenessLevel.Normal;
             bool success = true;
 
             // Preparation presences
@@ -258,7 +274,7 @@ namespace SimpleCircuit
                 int index = 0;
 
                 // Redo the todo-list after doing everything else
-                context.Mode = PresenceMode.Normal;
+                context.Desparateness = DesperatenessLevel.Normal;
                 while (index < _todo.Count)
                 {
                     switch (_todo[index].Prepare(context))
@@ -285,7 +301,7 @@ namespace SimpleCircuit
                     index = 0;
                     while (index < _todo.Count)
                     {
-                        context.Mode = PresenceMode.Fix;
+                        context.Desparateness = DesperatenessLevel.Fix;
                         switch (_todo[index].Prepare(context))
                         {
                             case PresenceResult.Success:
@@ -308,7 +324,7 @@ namespace SimpleCircuit
                     if (!success)
                     {
                         // Give a chance to all presences left to raise some errors
-                        context.Mode = PresenceMode.GiveUp;
+                        context.Desparateness = DesperatenessLevel.GiveUp;
                         for (int i = 0; i < _todo.Count; i++)
                             _todo[i].Prepare(context);
                         break;

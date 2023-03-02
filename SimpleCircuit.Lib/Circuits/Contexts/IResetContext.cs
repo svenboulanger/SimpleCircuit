@@ -12,10 +12,5 @@ namespace SimpleCircuit.Circuits.Contexts
         /// Gets the diagnostic handler.
         /// </summary>
         public IDiagnosticHandler Diagnostics { get; }
-
-        /// <summary>
-        /// Gets the formatter that can be used to measure/format strings.
-        /// </summary>
-        public IElementFormatter Formatter { get; }
     }
 }
