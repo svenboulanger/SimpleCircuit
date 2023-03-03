@@ -1,11 +1,11 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Xml;
 
 namespace SimpleCircuit
@@ -44,9 +44,9 @@ namespace SimpleCircuit
         public string Style { get; set; }
 
         /// <summary>
-        /// Gets or sets the text formatter.
+        /// Gets the formatter.
         /// </summary>
-        public IElementFormatter ElementFormatter { get; set; }
+        public ITextFormatter Formatter { get; }
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -77,9 +77,14 @@ namespace SimpleCircuit
         public double ExpandBounds { get; set; } = 0.0;
 
         /// <summary>
+        /// Gets the diagnostic handler.
+        /// </summary>
+        public IDiagnosticHandler Diagnostics { get; }
+
+        /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgDrawing()
+        public SvgDrawing(ITextFormatter formatter = null, IDiagnosticHandler diagnostics = null)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
@@ -89,21 +94,10 @@ namespace SimpleCircuit
             // Make sure we can track the bounds of our vector image
             _bounds = new();
             _bounds.Push(new());
-        }
 
-        /// <summary>
-        /// Creates a new SVG drawing instance.
-        /// </summary>
-        /// <param name="options">The options.</param>
-        public SvgDrawing(Options options)
-            : this()
-        {
-            if (options != null)
-            {
-                Margin = options.Margin;
-                RemoveEmptyGroups = options.RemoveEmptyGroups;
-                LineSpacing = options.LineSpacing;
-            }
+            // Create a formatter
+            Formatter = formatter ?? new ElementFormatter();
+            Diagnostics = diagnostics;
         }
 
         /// <summary>
@@ -116,7 +110,7 @@ namespace SimpleCircuit
         }
 
         /// <summary>
-        /// Ends the last transform transform.
+        /// Ends the last transform.
         /// </summary>
         public void EndTransform()
         {
@@ -168,7 +162,7 @@ namespace SimpleCircuit
                     case "g":
                         // Parse options
                         var options = ParseGraphicOptions(node);
-                        StartGroup(options);
+                        BeginGroup(options);
                         DrawXmlActions(node, diagnostics);
                         EndGroup();
                         break;
@@ -493,31 +487,12 @@ namespace SimpleCircuit
         public void Expand(Vector2 point)
             => _bounds.Peek().Expand(CurrentTransform.Apply(point));
 
-        /// <summary>
-        /// Expands the drawing to include the specified points.
-        /// </summary>
-        /// <param name="points">The points to expand.</param>
-        public void Expand(params Vector2[] points)
-            => _bounds.Peek().Expand(CurrentTransform.Apply(points));
-
-        /// <summary>
-        /// Expands the drawing to include the specified points.
-        /// </summary>
-        /// <param name="points">The points to expand.</param>
-        public void Expand(IEnumerable<Vector2> points)
-            => _bounds.Peek().Expand(CurrentTransform.Apply(points));
-
-        /// <summary>
-        /// Draws a line.
-        /// </summary>
-        /// <param name="start">The start.</param>
-        /// <param name="end">The end.</param>
-        /// <param name="options">Optional options.</param>
-        public void Line(Vector2 start, Vector2 end, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Line(Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
-            _bounds.Peek().Expand(start, end);
+            var bounds = new Bounds(start, end);
 
             // Create the line
             var line = _document.CreateElement("line", Namespace);
@@ -527,19 +502,17 @@ namespace SimpleCircuit
             line.SetAttribute("y2", Convert(end.Y));
             options?.Apply(line);
             _current.AppendChild(line);
+
+            _bounds.Peek().Expand(bounds);
+            return bounds;
         }
 
-        /// <summary>
-        /// Draws a circle.
-        /// </summary>
-        /// <param name="position">The position.</param>
-        /// <param name="radius">The radius.</param>
-        /// <param name="options">The options.</param>
-        public void Circle(Vector2 position, double radius, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Circle(Vector2 position, double radius, GraphicOptions options = null)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
-            _bounds.Peek().Expand(position - new Vector2(radius, radius), position + new Vector2(radius, radius));
+            var bounds = new Bounds(position - new Vector2(radius, radius), position + new Vector2(radius, radius));
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
@@ -548,137 +521,162 @@ namespace SimpleCircuit
             circle.SetAttribute("r", Convert(radius));
             options?.Apply(circle);
             _current.AppendChild(circle);
+
+            _bounds.Peek().Expand(bounds);
+            return bounds;
         }
 
-        /// <summary>
-        /// Draws a polyline (connected lines).
-        /// </summary>
-        /// <param name="points">The points.</param>
-        /// <param name="options">The path options.</param>
-        public void Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            points = CurrentTransform.Apply(points);
-            _bounds.Peek().Expand(points);
+            var bounds = new ExpandableBounds();
+            StringBuilder sb = new();
+            foreach (var pt in points)
+            {
+                var tpt = CurrentTransform.Apply(pt);
+                bounds.Expand(tpt);
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                sb.Append($"{Convert(tpt.X)},{Convert(tpt.Y)}");
+            }
 
             // Creates the poly
             var poly = _document.CreateElement("polyline", Namespace);
             options?.Apply(poly);
             _current.AppendChild(poly);
-            poly.SetAttribute("points", string.Join(" ", points.Select(p => $"{Convert(p.X)},{Convert(p.Y)}")));
+            poly.SetAttribute("points", sb.ToString());
+
+            _bounds.Peek().Expand(bounds);
+            return bounds.Bounds;
         }
 
-        /// <summary>
-        /// Draws a polygon (a closed shape of straight lines).
-        /// </summary>
-        /// <param name="points">The points.</param>
-        /// <param name="options">The options.</param>
-        public void Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            points = CurrentTransform.Apply(points);
-            _bounds.Peek().Expand(points);
+            var bounds = new ExpandableBounds();
+            StringBuilder sb = new();
+            foreach (var pt in points)
+            {
+                var tpt = CurrentTransform.Apply(pt);
+                bounds.Expand(tpt);
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                sb.Append($"{Convert(tpt.X)},{Convert(tpt.Y)}");
+            }
 
             // Create the element
             var poly = _document.CreateElement("polygon", Namespace);
             options?.Apply(poly);
             _current.AppendChild(poly);
-            poly.SetAttribute("points", string.Join(" ", points.Select(p => $"{Convert(p.X)},{Convert(p.Y)}")));
+            poly.SetAttribute("points", sb.ToString());
+
+            _bounds.Peek().Expand(bounds);
+            return bounds.Bounds;
         }
 
-        /// <summary>
-        /// Draws a smooth bezier curve.
-        /// </summary>
-        /// <param name="points">The points.</param>
-        /// <param name="classes">The classes.</param>
-        public void SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            points = CurrentTransform.Apply(points);
-            _bounds.Peek().Expand(points);
-
-            // Create the path element
-            var path = _document.CreateElement("path", Namespace);
-            options?.Apply(path);
-            _current.AppendChild(path);
-
+            var bounds = new ExpandableBounds();
+            StringBuilder sb = new();
             int index = -1;
-            var d = points.GroupBy(p => { index++; return index < 1 ? 0 : (index < 4) ? 1 : 1 + index / 4; }).Select(g =>
+            foreach (IGrouping<int, Vector2> group in points.GroupBy(p => { index++; return index < 1 ? 0 : (index < 4) ? 1 : 1 + index / 4; }))
             {
-                var v = g.ToArray();
-                return v.Length switch
+                var v = group.ToArray();
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                for (int i = 0; i < v.Length; i++)
                 {
-                    1 => $"M{Convert(v[0])}",
-                    3 => $"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}",
-                    _ => $"S{Convert(v[0])} {Convert(v[1])} {Convert(v[2])} {Convert(v[3])}",
-                };
-            });
-            path.SetAttribute("d", string.Join(" ", d));
-        }
-
-        /// <summary>
-        /// Closed bezier curve.
-        /// </summary>
-        /// <param name="points">The points and handles.</param>
-        /// <param name="options">The options.</param>
-        public void ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
-        {
-            points = CurrentTransform.Apply(points);
-            _bounds.Peek().Expand(points);
+                    v[i] = CurrentTransform.Apply(v[i]);
+                    bounds.Expand(v[i]);
+                }
+                switch (v.Length)
+                {
+                    case 1: sb.Append($"M{Convert(v[0])}"); break;
+                    case 3: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
+                    default: sb.Append($"S{Convert(v[0])} {Convert(v[1])} {Convert(v[2])} {Convert(v[3])}"); break;
+                }
+            }
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
             options?.Apply(path);
             _current.AppendChild(path);
+            path.SetAttribute("d", sb.ToString());
 
-            int index = 2;
-            var d = points.GroupBy(p => (index++) / 3).Select(g =>
-            {
-                var v = g.ToArray();
-                return v.Length switch
-                {
-                    1 => $"M{Convert(v[0])}",
-                    _ => $"C{Convert(v[0])}, {Convert(v[1])}, {Convert(v[2])}"
-                };
-            });
-            path.SetAttribute("d", string.Join(" ", d) + "Z");
+            _bounds.Peek().Expand(bounds);
+            return bounds.Bounds;
         }
 
-        /// <summary>
-        /// Open bezier curve.
-        /// </summary>
-        /// <param name="points">The points and handles.</param>
-        /// <param name="options">The options.</param>
-        public void OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            points = CurrentTransform.Apply(points);
-            _bounds.Peek().Expand(points);
+            var bounds = new ExpandableBounds();
+            var sb = new StringBuilder();
+            int index = 2;
+            foreach (var group in points.GroupBy(p => (index++) / 3))
+            {
+                var v = group.ToArray();
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                for (int i = 0; i < v.Length; i++)
+                {
+                    v[i] = CurrentTransform.Apply(v[i]);
+                    bounds.Expand(v[i]);
+                }
+                switch (v.Length)
+                {
+                    case 1: sb.Append($"M{Convert(v[0])}"); break;
+                    default: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
+                }
+            }
+            sb.Append("Z");
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
             options?.Apply(path);
             _current.AppendChild(path);
+            path.SetAttribute("d", sb.ToString());
 
-            int index = 2;
-            var d = points.GroupBy(p => (index++) / 3).Select(g =>
-            {
-                var v = g.ToArray();
-                return v.Length switch
-                {
-                    1 => $"M{Convert(v[0])}",
-                    _ => $"C{Convert(v[0])}, {Convert(v[1])}, {Convert(v[2])}"
-                };
-            });
-            path.SetAttribute("d", string.Join(" ", d));
+            _bounds.Peek().Expand(bounds);
+            return bounds.Bounds;
         }
 
-        /// <summary>
-        /// Draw an arc clockwise from the starting point to the ending point with a given radius.
-        /// </summary>
-        /// <param name="center">The center point of the arc.</param>
-        /// <param name="startAngle">The starting angle of the arc.</param>
-        /// <param name="endAngle">The end angle of the arc.</param>
-        /// <param name="radius">The radius of the arc.</param>
-        /// <param name="options">The path options.</param>
-        /// <param name="intermediatePoints">The number of intermediate points.</param>
-        public void Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
+        /// <inheritdoc />
+        public Bounds OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        {
+            var bounds = new ExpandableBounds();
+            var sb = new StringBuilder();
+            int index = 2;
+            foreach (var group in points.GroupBy(p => (index++) / 3))
+            {
+                var v = group.ToArray();
+                for (int i = 0; i < v.Length; i++)
+                {
+                    v[i] = CurrentTransform.Apply(v[i]);
+                    bounds.Expand(v[i]);
+                }
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                switch (v.Length)
+                {
+                    case 1: sb.Append($"M{Convert(v[0])}"); break;
+                    default: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
+                }
+            }
+
+            // Create the path element
+            var path = _document.CreateElement("path", Namespace);
+            options?.Apply(path);
+            _current.AppendChild(path);
+            path.SetAttribute("d", sb.ToString());
+
+            _bounds.Peek().Expand(bounds);
+            return bounds.Bounds;
+        }
+
+        /// <inheritdoc />
+        public Bounds Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
         {
             if (endAngle < startAngle)
                 endAngle += 2 * Math.PI;
@@ -698,21 +696,15 @@ namespace SimpleCircuit
                 pts.Add(p - Vector2.Normal(alpha + Math.PI / 2) * hl);
                 pts.Add(p);
             }
-            OpenBezier(pts, options);
+            return OpenBezier(pts, options);
         }
 
-        /// <summary>
-        /// Draws an ellipse.
-        /// </summary>
-        /// <param name="center">The center of the ellipse.</param>
-        /// <param name="rx">The radius along the horizontal axis.</param>
-        /// <param name="ry">The radius along the vertical axis.</param>
-        /// <param name="options">The options.</param>
-        public void Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
-            ClosedBezier(new Vector2[]
+            return ClosedBezier(new Vector2[]
             {
                 new(-rx, 0),
                 new(-rx, -ky), new(-kx, -ry), new(0, -ry),
@@ -722,150 +714,40 @@ namespace SimpleCircuit
             }.Select(v => v + center), options);
         }
 
-        /// <summary>
-        /// Draws text.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="location">The location.</param>
-        /// <param name="expand">The direction of the quadrant that the text can expand to.</param>
-        /// <param name="options">The options.</param>
-        public void Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null, bool transformText = true)
+        /// <inheritdoc />
+        public Bounds Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
-            // Don't bother with text that is null or just whitespaces.
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-
-            var formatter = ElementFormatter ?? new ElementFormatter();
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
+            var bounds = Formatter.Format(_current, value, location, expand, options, Diagnostics);
 
-            // Create the DOM elements and a span element for each 
-            var txt = _document.CreateElement("text", Namespace);
-            options?.Apply(txt);
-            _current.AppendChild(txt);
-
-            // Apply text
-            IEnumerable<string> lines;
-            if (transformText)
-            {
-                var lexer = new SimpleTextLexer(value);
-                var context = new SimpleTextContext();
-                SimpleTextParser.Parse(lexer, context);
-                lines = context.Lines;
-            }
-            else
-            {
-                lines = value.Split('\n');
-            }
-            List<XmlElement> elements = new();
-            foreach (var line in lines)
-            {
-                var tspan = _document.CreateElement("tspan", Namespace);
-                PopulateText(tspan, line);
-                txt.AppendChild(tspan);
-                elements.Add(tspan);
-            }
-
-            // Determine the bounds of the lines, which will then determine their position
-            var lineBounds = new Bounds[elements.Count];
-            double width = 0, height = 0;
-            for (int i = 0; i < elements.Count; i++)
-            {
-                lineBounds[i] = formatter.Measure(elements[i]);
-                width = Math.Max(lineBounds[i].Width, width);
-                if (i > 0)
-                    height += LineSpacing;
-                height += lineBounds[i].Height;
-
-                // Expand the X-direction
-                if (expand.X.IsZero())
-                {
-                    elements[i].SetAttribute("text-anchor", "middle");
-                    _bounds.Peek().Expand(location - new Vector2(width / 2, 0));
-                    _bounds.Peek().Expand(location + new Vector2(width / 2, 0));
-                }
-                else if (expand.X > 0)
-                {
-                    elements[i].SetAttribute("text-anchor", "start");
-                    _bounds.Peek().Expand(location);
-                    _bounds.Peek().Expand(location + new Vector2(width, 0));
-                }
-                else
-                {
-                    elements[i].SetAttribute("text-anchor", "end");
-                    _bounds.Peek().Expand(location - new Vector2(width, 0));
-                    _bounds.Peek().Expand(location);
-                }
-            }
-
-            // Draw the text lines with multiple lines
-            double y;
-            if (expand.Y.IsZero())
-            {
-                _bounds.Peek().Expand(location - new Vector2(0, height / 2));
-                _bounds.Peek().Expand(location + new Vector2(0, height / 2));
-                y = -height / 2;
-            }
-            else if (expand.Y > 0)
-            {
-                _bounds.Peek().Expand(location);
-                _bounds.Peek().Expand(location + new Vector2(0, height));
-                y = 0.0;
-            }
-            else
-            {
-                _bounds.Peek().Expand(location - new Vector2(0, height));
-                _bounds.Peek().Expand(location);
-                y = -height;
-            }
-
-            for (int i = 0; i < elements.Count; i++)
-            {
-                y -= lineBounds[i].Top;
-                elements[i].SetAttribute("x", Convert(location.X));
-                elements[i].SetAttribute("y", Convert(location.Y + y));
-                y += lineBounds[i].Bottom + LineSpacing;
-            }
-
-            txt.SetAttribute("x", Convert(location.X));
-            txt.SetAttribute("y", Convert(location.Y));
+            _bounds.Peek().Expand(bounds);
+            return bounds;
         }
 
-        /// <summary>
-        /// Draws a path.
-        /// </summary>
-        /// <param name="action">The actions.</param>
-        /// <param name="options">The path options.</param>
-        public void Path(Action<PathBuilder> action, GraphicOptions options = null)
+        /// <inheritdoc />
+        public Bounds Path(Action<PathBuilder> action, GraphicOptions options = null)
         {
             if (action == null)
-                return;
-            var builder = new PathBuilder(_bounds.Peek(), CurrentTransform);
+                return default;
+            var builder = new PathBuilder(CurrentTransform);
             action(builder);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
             options?.Apply(path);
-
             _current.AppendChild(path);
             path.SetAttribute("d", builder.ToString());
-        }
 
-        private void PopulateText(XmlNode element, string line)
-        {
-            var fragment = _document.CreateDocumentFragment();
-            fragment.InnerXml = $"<root xmlns=\"{Namespace}\">{line}</root>";
-
-            var nodes = fragment.ChildNodes[0].ChildNodes;
-            while (nodes.Count > 0)
-                element.AppendChild(nodes[0]);
+            _bounds.Peek().Expand(builder.Bounds);
+            return builder.Bounds;
         }
 
         /// <summary>
-        /// Starts a group.
+        /// Begins a new group.
         /// </summary>
         /// <param name="options">The options.</param>
-        public void StartGroup(GraphicOptions options = null)
+        public void BeginGroup(GraphicOptions options = null)
         {
             var elt = _document.CreateElement("g", Namespace);
             options?.Apply(elt);
@@ -879,7 +761,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Ends the last opened group.
         /// </summary>
-        public void EndGroup()
+        public Bounds EndGroup()
         {
             var group = _current;
             var parent = _current.ParentNode;
@@ -908,7 +790,8 @@ namespace SimpleCircuit
                         double left = b.Left - ExpandBounds, right = b.Right + ExpandBounds;
                         double top = b.Top - ExpandBounds, bottom = b.Bottom + ExpandBounds;
 
-                        StartGroup(new("bounds"));
+                        RenderBounds = false;
+                        BeginGroup(new("bounds"));
                         Polygon(new Vector2[]
                         {
                             new(left, top), new(right, top),
@@ -916,11 +799,14 @@ namespace SimpleCircuit
                         });
 
                         // Show the ID in the middle of the box
-                        Text(id, center, new(), transformText: false);
+                        Text(id, center, new());
                         EndGroup();
+                        RenderBounds = true;
                     }
                 }
+                return bounds.Bounds;
             }
+            return _bounds.Peek().Bounds;
         }
 
         /// <summary>
@@ -940,7 +826,7 @@ namespace SimpleCircuit
             }
 
             // Try to get the bounds of this
-            var bounds = ElementFormatter?.Measure(svg) ?? _bounds.Peek().Bounds;
+            var bounds = _bounds.Peek().Bounds;
 
             // Apply a margin along the edges
             bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);

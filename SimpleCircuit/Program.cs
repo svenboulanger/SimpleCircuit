@@ -53,8 +53,8 @@ namespace SimpleCircuit
                 return;
 
             // Let's try to do as much as possible in parallel here
-            ChromiumElementFormatter formatter = null;
-            var formatterTask = Task.Run(() => formatter = new ChromiumElementFormatter());
+            ChromiumTextFormatter formatter = null;
+            var formatterTask = Task.Run(() => formatter = new ChromiumTextFormatter());
             try
             {
                 var tasks = new Task[jobs.Count];

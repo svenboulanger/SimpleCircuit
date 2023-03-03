@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components
             {
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
                 go.Classes.Add("blackbox");
-                drawing.StartGroup(go);
+                drawing.BeginGroup(go);
                 var center = 0.5 * (Location + EndLocation);
                 drawing.Rectangle(EndLocation - Location, center);
 

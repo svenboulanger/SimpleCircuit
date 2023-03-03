@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using System.Xml;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
@@ -8,10 +9,15 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// </summary>
     public class SimpleTextContext
     {
+        private readonly XmlDocument _document;
+        private XmlElement _current, _line;
         private readonly StringBuilder _sb = new();
-        private readonly List<string> _lines = new();
-        private readonly Stack<string> _tags = new();
         private double _dy = 0.0;
+
+        /// <summary>
+        /// Gets the current node to add spans to.
+        /// </summary>
+        public XmlNode Parent { get; }
 
         /// <summary>
         /// Gets the base line y.
@@ -24,25 +30,16 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public double RelativeFontWeight { get; set; } = 1.0;
 
         /// <summary>
-        /// Gets all the lines.
-        /// </summary>
-        public IEnumerable<string> Lines
-        {
-            get
-            {
-                foreach (string line in _lines)
-                    yield return line;
-                if (_sb.Length > 0)
-                    yield return _sb.ToString() + "</tspan>";
-            }
-        }
-
-        /// <summary>
         /// Creates a new <see cref="SimpleTextContext"/>.
         /// </summary>
-        public SimpleTextContext()
+        public SimpleTextContext(XmlNode parent)
         {
-            _sb.Append("<tspan>");
+            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            _document = parent.OwnerDocument;
+            _line = _document.CreateElement("tspan", SvgDrawing.Namespace);
+            _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
+            parent.AppendChild(_line);
+            _line.AppendChild(_current);
         }
 
         /// <summary>
@@ -69,12 +66,16 @@ namespace SimpleCircuit.Parser.SimpleTexts
         {
             if (_dy != BaselineY)
             {
-                // Stop the old tspan
-                _sb.Append("</tspan>");
+                // Stop the last tspan and start a new one with the new settings
+                _current.InnerXml = _sb.ToString();
+                _sb.Clear();
 
                 // The font size is important here...
                 double dy = (BaselineY - _dy) / RelativeFontWeight;
-                _sb.Append($"<tspan dy=\"{dy:G3}em\"{(RelativeFontWeight != 1.0 ? $" style=\"font-size: {RelativeFontWeight:G3}em\"" : "")}>");
+                _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
+                _current.SetAttribute("dy", $"{dy:G3}em");
+                if (RelativeFontWeight != 1.0)
+                    _current.SetAttribute("style", $"font-size: {RelativeFontWeight:G3}em");
                 _dy = BaselineY;
             }
         }
@@ -85,12 +86,26 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public void Newline()
         {
             // Stop the current tspan
-            Append("</tspan>");
-            _lines.Add(_sb.ToString());
+            _current.InnerXml = _sb.ToString();
+            _sb.Clear();
 
             // Start fresh
-            _sb.Clear();
-            Append("<tspan>");
+            _line = _document.CreateElement("tspan", SvgDrawing.Namespace);
+            _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
+            Parent.AppendChild(_line);
+            _line.AppendChild(_current);
+            RelativeFontWeight = 1.0;
+            _dy = 0;
+        }
+
+        /// <summary>
+        /// Finishes the context.
+        /// </summary>
+        public void Finish()
+        {
+            _current.InnerXml = _sb.ToString();
+            _current = null;
+            _line = null;
         }
 
         /// <summary>
@@ -99,8 +114,6 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public void Clear()
         {
             _sb.Clear();
-            _lines.Clear();
-            _tags.Clear();
             _dy = BaselineY = 0.0;
             RelativeFontWeight = 1.0;
         }

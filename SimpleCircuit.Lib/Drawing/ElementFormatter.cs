@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit.Drawing
@@ -6,7 +7,7 @@ namespace SimpleCircuit.Drawing
     /// <summary>
     /// A simple text formatter.
     /// </summary>
-    public class ElementFormatter : IElementFormatter
+    public class ElementFormatter : BaseTextFormatter
     {
         private static readonly Regex _fontSize = new(@"font-size: (?<size>[0-9\.]+)em", RegexOptions.Compiled);
         private static readonly Regex _dy = new(@"(?<dy>[\+\-]?[0-9\.]+)em", RegexOptions.Compiled);
@@ -22,18 +23,72 @@ namespace SimpleCircuit.Drawing
         public double Size { get; set; } = 4.0;
 
         /// <inheritdoc />
-        public Bounds Measure(XmlElement element)
+        public override Bounds Measure(XmlElement element)
+        {
+            double l = double.MaxValue, t = double.MaxValue, r = double.MinValue, b = double.MinValue;
+            if (element.Name == "text")
+            {
+                // A text contains multiple lines
+                foreach (XmlElement line in element.ChildNodes)
+                {
+                    // Get the bounds of the line
+                    var lineBounds = MeasureLine(line);
+
+                    // Find the coordinates
+                    double x = 0, y = 0;
+                    string xc = line.Attributes["x"]?.Value;
+                    if (!string.IsNullOrWhiteSpace(xc))
+                        x = double.Parse(xc);
+                    string yc = line.Attributes["y"]?.Value;
+                    if (!string.IsNullOrWhiteSpace(yc))
+                        y = double.Parse(yc);
+                    string ta = line.Attributes["text-anchor"]?.Value;
+                    if (string.IsNullOrWhiteSpace(ta) || ta == "start")
+                    {
+                        l = Math.Min(l, x + lineBounds.Left);
+                        r = Math.Max(r, x + lineBounds.Right);
+                        t = Math.Min(t, y + lineBounds.Top);
+                        b = Math.Max(b, y + lineBounds.Bottom);
+                    }
+                    else if (ta == "middle")
+                    {
+                        l = Math.Min(l, x - lineBounds.Width * 0.5);
+                        r = Math.Max(r, x + lineBounds.Width * 0.5);
+                        t = Math.Min(t, y - lineBounds.Top);
+                        b = Math.Max(b, y + lineBounds.Bottom);
+                    }
+                    else
+                    {
+                        l = Math.Min(l, x - lineBounds.Width);
+                        r = Math.Max(r, x);
+                        t = Math.Min(t, y - lineBounds.Top);
+                        b = Math.Max(b, y + lineBounds.Bottom);
+                    }
+                }
+                return new(l, t, r, b);
+            }
+            else
+            {
+                // Simply measure the line
+                return MeasureLine(element);
+            }
+
+        }
+
+        private Bounds MeasureLine(XmlElement line)
         {
             bool isFirst = true;
-            double x = 0, y = -Size * MidLineFactor, h = Size, w = 0;
-            foreach (XmlElement e in element.GetElementsByTagName("tspan"))
+            double ox = 0, y = -Size * MidLineFactor, h = Size, w = 0;
+            foreach (XmlElement e in line.GetElementsByTagName("tspan"))
             {
+                // Try to figure out the font size
                 string style = e.Attributes["style"]?.Value ?? "";
                 var match = _fontSize.Match(style);
                 double f = 1;
                 if (match.Success)
                     f = double.Parse(match.Groups["size"].Value);
 
+                // Try to figure out the offset for the line
                 string dy = e.Attributes["dy"]?.Value ?? "";
                 match = _dy.Match(dy);
                 if (match.Success)
@@ -47,6 +102,7 @@ namespace SimpleCircuit.Drawing
                         h = ty;
                 }
 
+                // Measure the normalized with itself
                 if (e.InnerText.Length > 0)
                 {
                     foreach (char c in e.InnerText)
@@ -55,11 +111,12 @@ namespace SimpleCircuit.Drawing
                     if (isFirst)
                     {
                         isFirst = false;
-                        x = MeasureLeftCharacter(e.InnerText[0]);
+                        ox = MeasureLeftCharacter(e.InnerText[0]);
                     }
                 }
             }
-            return new(x, -h, w * Size, -y);
+
+            return new(ox, -h, w * Size, -y);
         }
 
         private double MeasureLeftCharacter(char c)

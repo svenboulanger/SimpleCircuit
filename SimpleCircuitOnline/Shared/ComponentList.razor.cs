@@ -67,7 +67,7 @@ namespace SimpleCircuitOnline.Shared
 
                         // Add our description
                         var drawable = factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options, context.Diagnostics);
-                        drawable.Reset(new ResetContext(context.Diagnostics));
+                        drawable.Reset(null);
                         drawable.Render(drawing);
                         var variants = drawable.Variants.Branches.ToHashSet(StringComparer.OrdinalIgnoreCase);
                         list.Add((metadata, drawable, variants));

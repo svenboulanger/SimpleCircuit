@@ -42,8 +42,20 @@ namespace SimpleCircuit.Drawing
         {
             _l = Math.Min(bounds._l, _l);
             _r = Math.Max(bounds._r, _r);
-            _b = Math.Max(bounds._b, _b);
             _t = Math.Min(bounds._t, _t);
+            _b = Math.Max(bounds._b, _b);
+        }
+
+        /// <summary>
+        /// Expands the bounds looking at the specified bounds.
+        /// </summary>
+        /// <param name="bounds"></param>
+        public void Expand(Bounds bounds)
+        {
+            _l = Math.Min(bounds.Left, _l);
+            _r = Math.Max(bounds.Right, _r);
+            _t = Math.Min(bounds.Top, _t);
+            _b = Math.Max(bounds.Bottom, _b);
         }
 
         /// <summary>

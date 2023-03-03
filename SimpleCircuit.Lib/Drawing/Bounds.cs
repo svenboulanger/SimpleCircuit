@@ -69,6 +69,35 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Creates new bounds.
+        /// </summary>
+        /// <param name="p1">One of the corners of the bounds.</param>
+        /// <param name="p2">The other corner of the bounds.</param>
+        public Bounds(Vector2 p1, Vector2 p2)
+        {
+            if (p1.X < p2.X)
+            {
+                Left = p1.X;
+                Right = p2.X;
+            }
+            else
+            {
+                Left = p2.X;
+                Right = p1.X;
+            }
+            if (p1.Y < p2.Y)
+            {
+                Top = p1.Y;
+                Bottom = p2.Y;
+            }
+            else
+            {
+                Top = p2.Y;
+                Bottom = p1.Y;
+            }
+        }
+
+        /// <summary>
         /// Checks equality with other bound.
         /// </summary>
         /// <param name="other">The other bounds.</param>

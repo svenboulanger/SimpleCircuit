@@ -38,13 +38,18 @@ namespace SimpleCircuit.Drawing
         public Vector2 EndNormal => _n2;
 
         /// <summary>
+        /// Gets the bounds of the path that was built.
+        /// </summary>
+        public Bounds Bounds => _bounds.Bounds;
+
+        /// <summary>
         /// Creates a new path builder.
         /// </summary>
         /// <param name="bounds">The bounds.</param>
         /// <param name="transform">The transform.</param>
-        public PathBuilder(ExpandableBounds bounds, Transform transform)
+        public PathBuilder(Transform transform)
         {
-            _bounds = bounds;
+            _bounds = new();
             _transform = transform;
         }
 

@@ -9,6 +9,7 @@
         {
             while (lexer.Type != TokenType.EndOfContent)
                 ParseToken(lexer, context);
+            context.Finish();
         }
 
         private static void ParseToken(SimpleTextLexer lexer, SimpleTextContext context)

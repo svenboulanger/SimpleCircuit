@@ -92,7 +92,7 @@ namespace SimpleCircuit.Components
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
             }
-            drawing.StartGroup(go);
+            drawing.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
             drawing.BeginTransform(CreateTransform());

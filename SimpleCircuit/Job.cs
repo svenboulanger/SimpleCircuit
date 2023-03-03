@@ -115,7 +115,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="textFormatter">The test formatter.</param>
         /// <param name="diagnostics">The diagnostic message handler.</param>
-        public async Task Render(ChromiumElementFormatter textFormatter, IDiagnosticHandler diagnostics)
+        public async Task Render(ChromiumTextFormatter textFormatter, IDiagnosticHandler diagnostics)
         {
             // Determine the output file
             string outputFilename = OutputFilename;

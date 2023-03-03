@@ -11,9 +11,9 @@ namespace SimpleCircuit
     /// <summary>
     /// A text formatter based on a Chromium browser.
     /// </summary>
-    public class ChromiumElementFormatter : IElementFormatter, IDisposable
+    public class ChromiumTextFormatter : BaseTextFormatter, IDisposable
     {
-        static ChromiumElementFormatter()
+        static ChromiumTextFormatter()
         {
             Cef.EnableWaitForBrowsersToClose();
             var settings = new CefSettings()
@@ -65,10 +65,10 @@ namespace SimpleCircuit
         private readonly RequestContext _requestContext;
 
         /// <summary>
-        /// Creates a new <see cref="ChromiumElementFormatter"/>.
+        /// Creates a new <see cref="ChromiumTextFormatter"/>.
         /// </summary>
         /// <param name="browser">The browser that will be used to format the text.</param>
-        public ChromiumElementFormatter()
+        public ChromiumTextFormatter()
         {
             // Start a browser that will be measuring all our text
             var browserSettings = new BrowserSettings()
@@ -105,7 +105,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public Bounds Measure(XmlElement element)
+        public override Bounds Measure(XmlElement element)
         {
             string text = null;
             using (var sw = new StringWriter())

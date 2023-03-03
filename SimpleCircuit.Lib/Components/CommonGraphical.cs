@@ -58,7 +58,7 @@ namespace SimpleCircuit.Components
         /// <param name="end">The ending point of the arrow.</param>
         public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, GraphicOptions options = null)
         {
-            drawing.StartGroup(options);
+            drawing.BeginGroup(options);
             drawing.Line(start, end);
             var normal = end - start;
             normal /= normal.Length;
@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
         public static void Signs(this SvgDrawing drawing, Vector2 plus, Vector2 minus, double size = 2, bool vertical = false)
         {
-            drawing.StartGroup(new("signs"));
+            drawing.BeginGroup(new("signs"));
 
             // Plus sign
             drawing.Path(b => b.MoveTo(plus.X, plus.Y - size * 0.5).Vertical(size).MoveTo(plus.X - size * 0.5, plus.Y).Horizontal(size), new("plus"));

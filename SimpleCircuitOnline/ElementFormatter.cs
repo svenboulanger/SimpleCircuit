@@ -11,21 +11,21 @@ namespace SimpleCircuitOnline
     /// <summary>
     /// An element formatter that uses javascript to talk to the methods in the index page.
     /// </summary>
-    public class ElementFormatter : IElementFormatter
+    public class TextFormatter : BaseTextFormatter
     {
         private readonly IJSRuntime _runtime;
 
         /// <summary>
-        /// Creates a new <see cref="ElementFormatter"/>.
+        /// Creates a new <see cref="TextFormatter"/>.
         /// </summary>
         /// <param name="runtime">The JavaScript runtime.</param>
-        public ElementFormatter(IJSRuntime runtime)
+        public TextFormatter(IJSRuntime runtime)
         {
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
         }
 
         /// <inheritdoc />
-        public Bounds Measure(XmlElement element)
+        public override Bounds Measure(XmlElement element)
         {
             string text = null;
             using (var sw = new StringWriter())

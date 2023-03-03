@@ -142,7 +142,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Solves the unknowns in this circuit.
         /// </summary>
-        public bool Solve(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
+        public bool Solve(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
         {
             formatter ??= new ElementFormatter();
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
@@ -490,7 +490,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, IElementFormatter formatter = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
         {
             if (!Solved)
             {
@@ -499,10 +499,9 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing
+            var drawing = new SvgDrawing(formatter)
             {
                 Style = Style,
-                ElementFormatter = formatter,
                 RenderBounds = RenderBounds
             };
 

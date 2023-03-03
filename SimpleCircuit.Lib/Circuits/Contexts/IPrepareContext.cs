@@ -30,7 +30,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Gets the formatter used for strings.
         /// </summary>
-        public IElementFormatter Formatter { get; }
+        public ITextFormatter Formatter { get; }
 
         /// <summary>
         /// Finds a circuit presence with the given name.

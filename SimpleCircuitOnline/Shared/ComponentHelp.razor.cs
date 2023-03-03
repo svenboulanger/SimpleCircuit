@@ -76,10 +76,9 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgDrawing
+            var drawing = new SvgDrawing(_jsTextFormatter)
             {
                 Style = GraphicalCircuit.DefaultStyle,
-                ElementFormatter = _jsTextFormatter
             };
             Drawable.Reset(null);
             Drawable.Render(drawing);
