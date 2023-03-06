@@ -391,7 +391,9 @@ namespace SimpleCircuit.Components.Wires
                     continue;
                 Vector2 intersection = last - tn / denom * d;
                 sd = intersection - last;
-                pts.Add(sd.X * sd.X + sd.Y * sd.Y, intersection);
+                double distance = sd.X * sd.X + sd.Y * sd.Y;
+                if (!pts.ContainsKey(distance))
+                    pts.Add(distance, intersection);
             }
             if (pts.Count > 0)
             {
