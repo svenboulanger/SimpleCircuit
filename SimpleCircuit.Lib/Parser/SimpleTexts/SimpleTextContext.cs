@@ -70,9 +70,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 _current.InnerXml = _sb.ToString();
                 _sb.Clear();
 
+                _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
+                _line.AppendChild(_current);
+
                 // The font size is important here...
                 double dy = (BaselineY - _dy) / RelativeFontWeight;
-                _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
                 _current.SetAttribute("dy", $"{dy:G3}em");
                 if (RelativeFontWeight != 1.0)
                     _current.SetAttribute("style", $"font-size: {RelativeFontWeight:G3}em");
@@ -91,9 +93,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
             // Start fresh
             _line = _document.CreateElement("tspan", SvgDrawing.Namespace);
-            _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
             Parent.AppendChild(_line);
+
+            _current = _document.CreateElement("tspan", SvgDrawing.Namespace);
             _line.AppendChild(_current);
+
             RelativeFontWeight = 1.0;
             _dy = 0;
         }
