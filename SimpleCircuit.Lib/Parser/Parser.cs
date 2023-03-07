@@ -37,7 +37,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Final check for queued anonymous points
-            context.StoreQueuedPoints();
+            context.CheckQueuedPoints(context.Diagnostics);
         }
 
         /// <summary>
@@ -88,9 +88,6 @@ namespace SimpleCircuit.Parser
         }
         private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
         {
-            // Make sure we use the latest set of queued points
-            context.StoreQueuedPoints();
-
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
             var component = ParseComponent(lexer, context);
             if (component == null)

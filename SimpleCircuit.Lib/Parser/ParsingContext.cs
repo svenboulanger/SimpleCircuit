@@ -22,7 +22,7 @@ namespace SimpleCircuit.Parser
             }
         }
         private readonly Stack<SectionInfo> _sections = new();
-        private Queue<ComponentInfo> _queuedPoints = new(), _nextQueuedPoints = new();
+        private readonly Queue<ComponentInfo> _queuedPoints = new();
 
         /// <summary>
         /// Gets the options.
@@ -141,7 +141,7 @@ namespace SimpleCircuit.Parser
         public ComponentInfo CreateQueuedPoint(Token source)
         {
             var component = new ComponentInfo(source, GetFullname($"X{DrawableFactoryDictionary.AnonymousSeparator}Q{++QueuedPointCount}"));
-            _nextQueuedPoints.Enqueue(component);
+            _queuedPoints.Enqueue(component);
             return component;
         }
 
@@ -161,15 +161,13 @@ namespace SimpleCircuit.Parser
         }
 
         /// <summary>
-        /// Stores the current set of queued points for use in the next statement.
+        /// Generates diagnostic messages for left-over queued points.
         /// </summary>
-        public void StoreQueuedPoints()
+        /// <param name="diagnostics">The diagnostic handler.</param>
+        public void CheckQueuedPoints(IDiagnosticHandler diagnostics)
         {
-            if (_queuedPoints.Count > 0)
-                Diagnostics?.Post(_queuedPoints.First().Name, ErrorCodes.LeftOverAnonymousPoints);
-
-            _queuedPoints.Clear();
-            (_queuedPoints, _nextQueuedPoints) = (_nextQueuedPoints, _queuedPoints);
+            foreach (var pt in _queuedPoints)
+                diagnostics?.Post(pt.Name, ErrorCodes.LeftOverAnonymousPoints);
         }
     }
 }
