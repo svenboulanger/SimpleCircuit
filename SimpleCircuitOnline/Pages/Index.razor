@@ -10,13 +10,13 @@
         <TabMenu @ref="_tabs">
             <Tab Title="Script">
                 <div class="content fixed">
-                    <MonacoEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" OnKeyUp="KeyUp" OnKeyDown="KeyDown" />
+                    <StandaloneCodeEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" ConstructionOptions="GetStyleOptions" OnDidChangeModelContent="Update" OnKeyUp="KeyUp" />
                     <div class="arrow-mode@(_arrowMode ? " active" : "")">&#10541;</div>
                 </div>
             </Tab>
             <Tab Title="Style">
                 <div class="content fixed">
-                    <MonacoEditor @ref="_styleEditor" Id="style-editor" CssClass="editor" OnDidChangeModelContent="Update" ConstructionOptions="GetStyleOptions" />
+                    <StandaloneCodeEditor @ref="_styleEditor" Id="style-editor" CssClass="editor" ConstructionOptions="GetStyleOptions" OnDidChangeModelContent="Update" OnKeyUp="KeyUp" />
                     <Button class="style-reset" Click=@(async () => await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle))>&#11118;</Button>
                 </div>
             </Tab>

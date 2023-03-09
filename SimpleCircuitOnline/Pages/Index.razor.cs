@@ -1,4 +1,4 @@
-﻿using BlazorMonaco;
+﻿using BlazorMonaco.Editor;
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Web;
 using System.Xml;
+using Position = BlazorMonaco.Position;
 
 namespace SimpleCircuitOnline.Pages
 {
@@ -26,7 +27,7 @@ namespace SimpleCircuitOnline.Pages
         private readonly object _lock = new();
         private int _updates = 0;
         private int _loading;
-        private MonacoEditor _scriptEditor, _styleEditor;
+        private StandaloneCodeEditor _scriptEditor, _styleEditor;
         private TabMenu _tabs;
         private Settings _settings = new();
         private bool _arrowMode = false, _viewMode = false;
@@ -143,8 +144,8 @@ namespace SimpleCircuitOnline.Pages
                 }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
                 var model = await _scriptEditor.GetModel();
-                await MonacoEditorBase.SetModelLanguage(model, "simpleCircuit");
-                await MonacoEditorBase.SetTheme("simpleCircuitTheme");
+                await Global.SetModelLanguage(model, "simpleCircuit");
+                await Global.SetTheme("simpleCircuitTheme");
 
                 // Try to find a script and/or style from the query parameters
                 var query = HttpUtility.ParseQueryString(new Uri(_navigation.Uri).Query);
@@ -413,7 +414,7 @@ namespace SimpleCircuitOnline.Pages
         }
         private async Task ReportMessageClicked(Token token)
         {
-            await _scriptEditor.SetPosition(new Position() { LineNumber = token.Location.Line, Column = token.Location.Column });
+            await _scriptEditor.SetPosition(new Position() { LineNumber = token.Location.Line, Column = token.Location.Column }, "warning");
             _tabs.Select(0);
             await _scriptEditor.Focus();
         }
@@ -440,12 +441,12 @@ namespace SimpleCircuitOnline.Pages
             lock (_lock)
                 _updates = 0;
         }
-        private static StandaloneEditorConstructionOptions GetStyleOptions(MonacoEditor editor)
+        private static StandaloneEditorConstructionOptions GetStyleOptions(StandaloneCodeEditor editor)
         {
             return new StandaloneEditorConstructionOptions
             {
                 AutomaticLayout = true,
-                Language = "text/css",
+                Language = "css",
                 WordWrap = "on",
                 Value = "",
                 WordBasedSuggestions = false,
@@ -624,108 +625,14 @@ namespace SimpleCircuitOnline.Pages
         private static partial Regex Utf8Encoded();
         [GeneratedRegex(@"^(\d+)\.(\d+)")]
         private static partial Regex MajorVersion();
-        private void KeyDown(KeyboardEvent e)
-        {
-            if (!_arrowMode)
-            {
-                if (e.CtrlKey && e.KeyCode == KeyCode.US_DOT)
-                    _arrowMode = true;
-            }
-            else
-            {
-                if (e.KeyCode == KeyCode.Escape)
-                    _arrowMode = false;
-            }
-        }
-        private async Task KeyUp(KeyboardEvent e)
+
+        private void KeyUp()
         {
             // Extend the updates
             lock(_lock)
             {
                 if (_updates > 0)
                     _updates++;
-            }
-
-            if (_arrowMode)
-            {
-                // Replace the last character
-                string insertCharacter = null;
-                switch (e.KeyCode)
-                {
-                    case KeyCode.Ctrl:
-                    case KeyCode.Shift:
-                    case KeyCode.Alt:
-                    case KeyCode.US_DOT:
-                        break;
-
-                    case KeyCode.KEY_L:
-                    case KeyCode.KEY_W:
-                    case KeyCode.NUMPAD_4:
-                        insertCharacter = "\u2190";
-                        break;
-
-                    case KeyCode.KEY_U:
-                    case KeyCode.KEY_N:
-                    case KeyCode.NUMPAD_8:
-                        insertCharacter = "\u2191";
-                        break;
-
-                    case KeyCode.KEY_R:
-                    case KeyCode.KEY_E:
-                    case KeyCode.NUMPAD_6:
-                        insertCharacter = "\u2192";
-                        break;
-
-                    case KeyCode.KEY_D:
-                    case KeyCode.KEY_S:
-                    case KeyCode.NUMPAD_2:
-                        insertCharacter = "\u2193";
-                        break;
-
-                    case KeyCode.NUMPAD_7:
-                        insertCharacter = "\u2196";
-                        break;
-
-                    case KeyCode.NUMPAD_9:
-                        insertCharacter = "\u2197";
-                        break;
-
-                    case KeyCode.NUMPAD_3:
-                        insertCharacter = "\u2198";
-                        break;
-
-                    case KeyCode.NUMPAD_1:
-                        insertCharacter = "\u2199";
-                        break;
-
-                    default:
-                        // Break off arrow mode and return to regular behavior
-                        _arrowMode = false;
-                        return;
-                }
-
-                // Insert the text character instead of the key character
-                if (insertCharacter != null)
-                {
-                    var selection = await _scriptEditor.GetSelection();
-                    var model = await _scriptEditor.GetModel();
-                    List<IdentifiedSingleEditOperation> edits = new()
-                    {
-                        new IdentifiedSingleEditOperation()
-                        {
-                            ForceMoveMarkers = true,
-                            Range = new Selection()
-                            {
-                                StartColumn = selection.StartColumn - 1,
-                                EndColumn = selection.EndColumn,
-                                StartLineNumber = selection.StartLineNumber,
-                                EndLineNumber = selection.EndLineNumber
-                            },
-                            Text = insertCharacter
-                        }
-                    };
-                    await model.ApplyEdits(edits);
-                }
             }
         }
     }

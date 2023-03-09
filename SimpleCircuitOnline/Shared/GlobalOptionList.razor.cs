@@ -1,10 +1,11 @@
-﻿using BlazorMonaco;
+﻿using BlazorMonaco.Editor;
 using Microsoft.AspNetCore.Components;
 using SimpleCircuit;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Selection = BlazorMonaco.Selection;
 
 namespace SimpleCircuitOnline.Shared
 {
@@ -14,7 +15,7 @@ namespace SimpleCircuitOnline.Shared
         private readonly Options _defaultOptions = new();
 
         [Parameter]
-        public MonacoEditor Editor { get; set; }
+        public StandaloneCodeEditor Editor { get; set; }
 
         protected async Task Insert(string name, object defValue)
         {
