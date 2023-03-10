@@ -20,10 +20,11 @@ namespace SimpleCircuitOnline.Pages
 {
     public partial class Index
     {
+        private Task _currentSolver = null;
         private readonly Logger _logger = new();
         private string _simpleCircuitVersion;
         private XmlDocument _svg;
-        private readonly Timer _timer = new(750) { Enabled = false, AutoReset = true };
+        private readonly Timer _timer = new(1500) { Enabled = false, AutoReset = true };
         private readonly object _lock = new();
         private int _updates = 0;
         private int _loading;
@@ -113,7 +114,7 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        UpdateNow();
+                        Task.Run(UpdateNow);
                     }
                     else
                         _timer.Stop();
@@ -436,7 +437,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                UpdateNow();
+                await UpdateNow();
             }
             lock (_lock)
                 _updates = 0;
@@ -470,14 +471,14 @@ namespace SimpleCircuitOnline.Pages
         {
             lock (_lock)
             {
-                if (_updates == 1)
+                if (_updates == 1 && (_currentSolver == null || _currentSolver.IsCompleted))
                 {
                     _updates = 0; // Restart tracking of updates made in the editor
 
                     // Updating happens asynchronously
                     _logger.Clear();
                     _viewMode = false;
-                    UpdateNow();
+                    _currentSolver = Task.Run(UpdateNow);
                 }
                 else if (_updates > 1)
                 {
@@ -487,15 +488,12 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private void UpdateNow()
+        private async Task UpdateNow()
         {
             _loading = 2;
-            Task.Run(async () => _svg = await ComputeXml(false, _settings.RenderBounds))
-                .ContinueWith(task =>
-                {
-                    _loading = 0;
-                    StateHasChanged();
-                });
+            _svg = await ComputeXml(false, _settings.RenderBounds);
+            _loading = 0;
+            StateHasChanged();
         }
         private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
         {

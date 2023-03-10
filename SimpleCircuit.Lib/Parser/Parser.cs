@@ -377,7 +377,7 @@ namespace SimpleCircuit.Parser
                             else
                                 AddWireSegment(directionToken, new());
                         }
-                        else if (lexer.Check(TokenType.Newline))
+                        else if (lexer.Type == TokenType.Newline || lexer.Type == TokenType.EndOfContent)
                         {
                             context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfLine);
                             return null;
@@ -386,6 +386,7 @@ namespace SimpleCircuit.Parser
                         {
                             context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeDirection, lexer.Token.Content);
                             lexer.Skip(~TokenType.Newline & ~TokenType.CloseBeak);
+                            return null;
                         }
                     }
 
