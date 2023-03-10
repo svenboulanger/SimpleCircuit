@@ -170,12 +170,6 @@ namespace SimpleCircuitOnline
                 "A Charge Transimpedance Amplifier.",
                 "// Input section\r\n.section Input\r\n    X1 <l d> I(\"I_in\") <d> GND1\r\n    X1 <d> C(\"C_in\") <d> GND2\r\n    (xy GND1 <r +25> GND2)\r\n.endsection\r\n\r\n// Link to the next section\r\nInput/X1 <r> CTIA/Xin\r\n\r\n// Charge Transimpedance Amplifier\r\n.section CTIA\r\n    Xin <r> A1 <r> Xout\r\n    Xin <u r> C1(\"C_fb\") <r d> Xout\r\n    - A1.Gain = \"-A\"\r\n    (y A1 <u +20> C1)\r\n.endsection\r\n\r\n// Link CTIA to output circuit\r\nCTIA/Xout <r> Output/Xout\r\n\r\n// Output circuit\r\n.section Output\r\n    Xout <d> C1(\"C_L\") <d> GND1\r\n    Xout <r> Xout2 <d> R1(\"R_L\") <d> GND2\r\n    Xout2 <r> T(\"V_out\")\r\n    (xy GND1 <r +20> GND2)\r\n.endsection\r\n\r\n// We can still enforce alignment between elements\r\n// This would not be possible with subcircuits\r\n(y Input/GND1 <r> Output/GND1)\r\n"),
 
-            // Shorthand notation characters
-            new Demo(
-                "Example: Unicode arrows",
-                "Demonstration of shorthand unicode arrow notation for wires.",
-                "// Arrow unicode characters can be used as shorthand notation for simple wires\r\nGND ↑ V ↑ Xin\r\n\r\n// A dash '-' character is shorthand for <?>\r\nXin - R →↘<d +20> C - GND\r\n\r\n(y GND)\r\n\r\n// To enter the \"arrow\" mode in this editor,\r\n// press CTRL+'.' (some configs CTRL+SHIFT+'.')\r\n// In this mode, there should be an arrows icon in the bottom-left corner\r\n\r\n// In \"arrow\" mode:\r\n// 'u', 'n' or numpad 8 turns into ↑ (<u>)\r\n// 'l', 'w' or numpad 4 turns into ← (<l>)\r\n// 'd', 's' or numpad 2 turns into ↓ (<d>)\r\n// 'r', 'e' or numpad 6 turns into → (<r>)\r\n// numpad 7 turns into ↖ (<nw>)\r\n// numpad 9 turns into ↗ (<ne>)\r\n// numpad 1 turns into ↙ (<sw>)\r\n// numpad 3 turns into ↘ (<se>)\r\n// Any other key will exit the mode.\r\n"),
-
             // CSS styling example
             new Demo(
                 "Example: CSS styling",

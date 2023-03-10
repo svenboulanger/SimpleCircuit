@@ -24,7 +24,7 @@ namespace SimpleCircuitOnline.Pages
         private readonly Logger _logger = new();
         private string _simpleCircuitVersion;
         private XmlDocument _svg;
-        private readonly Timer _timer = new(1500) { Enabled = false, AutoReset = true };
+        private readonly Timer _timer = new(750) { Enabled = false, AutoReset = true };
         private readonly object _lock = new();
         private int _updates = 0;
         private int _loading;
