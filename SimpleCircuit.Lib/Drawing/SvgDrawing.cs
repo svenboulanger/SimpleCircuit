@@ -1,11 +1,8 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
-using SpiceSharp.Algebra.Solve;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Xml;
