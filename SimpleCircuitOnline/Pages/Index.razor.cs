@@ -448,7 +448,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 AutomaticLayout = true,
                 Language = "css",
-                WordWrap = "on",
+                WordWrap = "off",
                 Value = "",
                 WordBasedSuggestions = false,
             };

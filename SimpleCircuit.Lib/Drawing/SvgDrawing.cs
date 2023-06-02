@@ -158,6 +158,7 @@ namespace SimpleCircuit
                 // Depending on the node type, let's draw something!
                 switch (node.Name)
                 {
+                    case "#comment": break;
                     case "line": DrawXmlLine(node, diagnostics); break;
                     case "circle": DrawXmlCircle(node, diagnostics); break;
                     case "path": DrawXmlPath(node, diagnostics); break;
