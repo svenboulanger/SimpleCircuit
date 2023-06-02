@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components.General
             public Vector2 Location { get; set; }
             public Vector2 Direction { get; set; }
         }
-        private class Instance : ScaledOrientedDrawable
+        private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private readonly XmlNode _drawing;
             private readonly double _scale;
@@ -119,6 +119,17 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             public override string Type { get; }
 
+            /// <inheritdoc />
+            public Labels Labels { get; } = new();
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>
+            /// </summary>
+            /// <param name="type">The instance type.</param>
+            /// <param name="name">The instance name.</param>
+            /// <param name="drawing">The XML data describing the node.</param>
+            /// <param name="scale">The scale of the instance.</param>
+            /// <param name="pins">The pins of the instance.</param>
             public Instance(string type, string name, XmlNode drawing, double scale, IEnumerable<PinDescription> pins)
                 : base(name)
             {
@@ -134,12 +145,16 @@ namespace SimpleCircuit.Components.General
                 _drawing = drawing;
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (!_scale.Equals(1.0))
                     drawing.BeginTransform(new Transform(new(), Matrix2.Scale(_scale)));
                 if (_drawing != null)
-                    drawing.DrawXml(_drawing, drawing.Diagnostics);
+                {
+                    var context = new XmlDrawingContext(Labels);
+                    drawing.DrawXml(_drawing, context, drawing.Diagnostics);
+                }
                 if (!_scale.Equals(1.0))
                     drawing.EndTransform();
             }

@@ -10,16 +10,16 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".option jumpoverwires = true
+            var script = @".symbol cross
+    <pin name=""a"" nx=""-1"" />
+    <pin name=""b"" nx=""1"" />
+    <drawing>
+        <polyline points=""-3 -3 3 3 -3 3 3 -3"" />
+        <text x=""0"" y=""4"" ny=""1"" value=""\0"" />
+    </drawing>
+.ends
 
-GND <u> V1(""2V"") <u r> X1
-X1 <u r> V(""V1"") <r> T1
-X1 <d r> V(""1V"") <r> X2 <r> T2
-
-X2 <d> V(""-1V"") <d r> T3
-X2 <u +50 l +60 d> V(""1V"") <d l> T4(""out"")
-
-";
+R <r> cross(""H"") <r> R";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

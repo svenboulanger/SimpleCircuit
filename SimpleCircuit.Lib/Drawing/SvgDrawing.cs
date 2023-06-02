@@ -119,7 +119,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public void DrawXml(XmlNode description, IDiagnosticHandler diagnostics)
+        public void DrawXml(XmlNode description, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
             // Apply some scale if necessary
             double scale = 1.0, rotate = 0.0;
@@ -144,11 +144,11 @@ namespace SimpleCircuit
 
             if (transform)
                 BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
-            DrawXmlActions(description, diagnostics);
+            DrawXmlActions(description, context, diagnostics);
             if (transform)
                 EndTransform();
         }
-        private void DrawXmlActions(XmlNode parent, IDiagnosticHandler diagnostics)
+        private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
             foreach (XmlNode node in parent.ChildNodes)
             {
@@ -162,7 +162,7 @@ namespace SimpleCircuit
                     case "polygon": DrawXmlPolygon(node, diagnostics); break;
                     case "polyline": DrawXmlPolyline(node, diagnostics); break;
                     case "rect": DrawXmlRectangle(node, diagnostics); break;
-                    case "text": DrawXmlText(node, diagnostics); break;
+                    case "text": DrawXmlText(node, context, diagnostics); break;
                     case "group":
                     case "g":
                         // Parse options
@@ -182,7 +182,7 @@ namespace SimpleCircuit
                                 return;
                         }
                         BeginGroup(options);
-                        DrawXmlActions(node, diagnostics);
+                        DrawXmlActions(node, context,diagnostics);
                         EndGroup();
                         break;
                     default:
@@ -412,7 +412,7 @@ namespace SimpleCircuit
                 b.Close();
             }, options);
         }
-        private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlText(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
             if (node.Attributes == null)
                 return;
@@ -441,6 +441,8 @@ namespace SimpleCircuit
             }
             if (!success)
                 return;
+            if (value != null && context != null)
+                value = context.TransformText(value);
             Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
         }
         private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute)
