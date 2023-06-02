@@ -3,7 +3,9 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -78,6 +80,9 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
+            /// <inheritdoc />
+            public IEnumerable<string> Properties => Drawable.GetProperties(this);
+
             /// <summary>
             /// Creates a new black box.
             /// </summary>
@@ -92,6 +97,10 @@ namespace SimpleCircuit.Components
                 Y = $"{Name}.y";
                 EndLocation = new(20, 20);
             }
+
+            /// <inheritdoc />
+            public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
+                => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
             /// <inheritdoc />
             public bool Reset(IResetContext context)

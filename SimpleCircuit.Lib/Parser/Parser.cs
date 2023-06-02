@@ -969,7 +969,7 @@ namespace SimpleCircuit.Parser
                     lexer.Skip(~TokenType.Newline);
                     return false;
                 }
-                result &= context.Options.SetProperty(context.Diagnostics, component, propertyToken, value);
+                result &= component.SetProperty(propertyToken, value, context.Diagnostics);
             }
             return result;
         }

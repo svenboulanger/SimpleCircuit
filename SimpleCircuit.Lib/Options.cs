@@ -3,8 +3,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace SimpleCircuit
 {
@@ -125,91 +123,8 @@ namespace SimpleCircuit
                 _properties.Add(key, list);
             }
 
-            var action = new Action<IDrawable, IDiagnosticHandler>((drawable, diagnostics) => SetProperty(diagnostics, drawable, propertyToken, value));
+            var action = new Action<IDrawable, IDiagnosticHandler>((drawable, diagnostics) => drawable.SetProperty(propertyToken, value, diagnostics));
             list.Add(action);
-        }
-
-        /// <summary>
-        /// Sets a property on a drawable.
-        /// </summary>
-        /// <param name="diagnostics">The diagnostics.</param>
-        /// <param name="drawable">The drawable.</param>
-        /// <param name="propertyToken">The property token.</param>
-        /// <param name="value">The parsed value.</param>
-        public bool SetProperty(IDiagnosticHandler diagnostics, IDrawable drawable, Token propertyToken, object value)
-        {
-            if (drawable == null)
-                throw new ArgumentNullException(nameof(drawable));
-
-            string property = propertyToken.Content.ToString();
-            var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            if (info == null)
-            {
-                if (drawable is ILabeled labeled && value is string label)
-                {
-                    var match = Regex.Match(property, @"^label(?<index>\w+)?$", RegexOptions.IgnoreCase);
-                    if (match.Success)
-                    {
-                        if (match.Groups["index"].Success)
-                        {
-                            int index = int.Parse(match.Groups["index"].Value);
-                            if (index < 1 || index > labeled.Labels.Count)
-                                diagnostics?.Post(propertyToken, ErrorCodes.TooManyLabels);
-                            else
-                                labeled.Labels[index - 1] = label;
-                        }
-                        else
-                            labeled.Labels[0] = label;
-                        return true;
-                    }
-                    else
-                    {
-                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
-                        return false;
-                    }
-                }
-
-                // No property or label, if the value is a boolean, we can instead add a variant instead
-                if (value is bool b)
-                {
-                    // Just add the variant with the given property
-                    if (b)
-                        drawable.Variants.Add(property);
-                    else
-                        drawable.Variants.Remove(property);
-                    return true;
-                }
-                else
-                {
-                    // No idea what to do with this
-                    diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
-                    return false;
-                }
-            }
-            else
-            {
-                // We have the property
-                var type = value.GetType();
-                if (info.PropertyType == type)
-                {
-                    info.SetValue(drawable, value);
-                    return true;
-                }
-                else
-                {
-                    // Some implicit type conversion here
-                    if (info.PropertyType == typeof(int) && type == typeof(double))
-                        info.SetValue(drawable, (int)(double)value);
-                    else if (info.PropertyType == typeof(double) && type == typeof(int))
-                        info.SetValue(drawable, (double)(int)value);
-                    else
-                    {
-                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
-                        return false;
-                    }
-                    return true;
-                }
-            }
         }
 
         /// <summary>

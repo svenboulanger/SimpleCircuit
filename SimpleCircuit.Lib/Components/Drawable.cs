@@ -1,9 +1,13 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components
 {
@@ -41,6 +45,9 @@ namespace SimpleCircuit.Components
         /// </summary>
         protected virtual IEnumerable<string> GroupClasses { get; }
 
+        /// <inheritdoc />
+        public IEnumerable<string> Properties => GetProperties(this);
+
         /// <summary>
         /// Creates a new component.
         /// </summary>
@@ -50,6 +57,100 @@ namespace SimpleCircuit.Components
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Name = name;
+        }
+
+        /// <inheritdoc />
+        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
+            => SetProperty(this, propertyToken, value, diagnostics);
+
+        /// <inheritdoc />
+        public static bool SetProperty(IDrawable drawable, Token propertyToken, object value, IDiagnosticHandler diagnostics)
+        {
+            if (drawable == null)
+                throw new ArgumentNullException(nameof(drawable));
+
+            // Find the property
+            string property = propertyToken.Content.ToString();
+            var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (info == null)
+            {
+                // Labels are a special case
+                if (drawable is ILabeled labeled && value is string label)
+                {
+                    var match = Regex.Match(property, @"^label(?<index>\w+)?$", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        if (match.Groups["index"].Success)
+                        {
+                            int index = int.Parse(match.Groups["index"].Value);
+                            if (index < 1 || index > labeled.Labels.Count)
+                                diagnostics?.Post(propertyToken, ErrorCodes.TooManyLabels);
+                            else
+                                labeled.Labels[index - 1] = label;
+                        }
+                        else
+                            labeled.Labels[0] = label;
+                        return true;
+                    }
+                    else
+                    {
+                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
+                        return false;
+                    }
+                }
+
+                // No property or label, if the value is a boolean, we can add a variant instead
+                if (value is bool b)
+                {
+                    if (b)
+                        drawable.Variants.Add(property);
+                    else
+                        drawable.Variants.Remove(property);
+                    return true;
+                }
+                else
+                {
+                    // No idea what to do with this
+                    diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
+                    return false;
+                }
+            }
+            else
+            {
+                var type = value.GetType();
+                if (info.PropertyType == type)
+                {
+                    info.SetValue(drawable, value);
+                    return true;
+                }
+                else
+                {
+                    // Some implicit type conversion here
+                    if (info.PropertyType == typeof(int) && type == typeof(double))
+                        info.SetValue(drawable, (int)(double)value);
+                    else if (info.PropertyType == typeof(double) && type == typeof(int))
+                        info.SetValue(drawable, (double)(int)value);
+                    else
+                    {
+                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public static IEnumerable<string> GetProperties(IDrawable drawable)
+        {
+            if (drawable == null)
+                throw new ArgumentNullException(nameof(drawable));
+            foreach (var property in drawable.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (!property.CanWrite)
+                    continue;
+                yield return property.Name;
+            }
         }
 
         /// <inheritdoc />

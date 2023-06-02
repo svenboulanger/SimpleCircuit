@@ -1,5 +1,8 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -17,6 +20,20 @@ namespace SimpleCircuit.Components
         /// Gets the pins.
         /// </summary>
         public IPinCollection Pins { get; }
+
+        /// <summary>
+        /// Gets the properties available for the drawable.
+        /// </summary>
+        public IEnumerable<string> Properties { get; }
+
+        /// <summary>
+        /// Sets a property.
+        /// </summary>
+        /// <param name="propertyToken">A token that contains the property name.</param>
+        /// <param name="value">The property value.</param>
+        /// <param name="diagnostics">The diagnostic handler.</param>
+        /// <returns>Returns <c>true</c> if the property was set; otherwise, <c>false</c>.</returns>
+        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics);
 
         /// <summary>
         /// Renders the component in the specified drawing.
