@@ -1,8 +1,10 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
+using SpiceSharp.Algebra.Solve;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -123,25 +125,30 @@ namespace SimpleCircuit
         public void DrawXml(XmlNode description, IDiagnosticHandler diagnostics)
         {
             // Apply some scale if necessary
-            var scale = description.Attributes?["scale"];
-            var offset = description.Attributes?["offset"];
-            var rotate = description.Attributes?["rotate"];
-            if (scale != null || offset != null || rotate != null)
+            double scale = 1.0, rotate = 0.0;
+            Vector2 offset = new();
+            bool transform = false;
+            foreach (XmlAttribute attribute in description.Attributes)
             {
-                double s = scale != null ? double.Parse(scale.Value, NumberStyles.Float, CultureInfo.InvariantCulture) : 1.0;
-                Vector2 o = new();
-                if (offset != null)
+                switch (attribute.Name)
                 {
-                    var lexer = new SvgPathDataLexer(offset.Value.AsMemory());
-                    lexer.ParseVector(diagnostics, out o);
+                    case "scale": attribute.ParseScalar(diagnostics, out scale, ErrorCodes.InvalidXmlScale); transform = true; break;
+                    case "offset":
+                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
+                        lexer.ParseVector(diagnostics, out offset);
+                        transform = true;
+                        break;
+                    case "rotate": attribute.ParseScalar(diagnostics, out rotate, ErrorCodes.InvalidXmlRotation); transform = true; break;
+                    default:
+                        diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
+                        break;
                 }
-                double a = rotate != null ? -double.Parse(rotate.Value, NumberStyles.Float, CultureInfo.InvariantCulture) * Math.PI / 180.0 : 0.0;
-                BeginTransform(new Transform(o, Matrix2.Rotate(a) * s));
             }
 
+            if (transform)
+                BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
             DrawXmlActions(description, diagnostics);
-
-            if (scale != null || offset != null || rotate != null)
+            if (transform)
                 EndTransform();
         }
         private void DrawXmlActions(XmlNode parent, IDiagnosticHandler diagnostics)
@@ -161,7 +168,21 @@ namespace SimpleCircuit
                     case "group":
                     case "g":
                         // Parse options
-                        var options = ParseGraphicOptions(node);
+                        GraphicOptions options = new();
+                        if (node.Attributes != null)
+                        {
+                            bool success = true;
+                            foreach (XmlAttribute attribute in node.Attributes)
+                            {
+                                if (!ParseGraphicOption(options, attribute))
+                                {
+                                    diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
+                                    success = false;
+                                }
+                            }
+                            if (!success)
+                                return;
+                        }
                         BeginGroup(options);
                         DrawXmlActions(node, diagnostics);
                         EndGroup();
@@ -177,76 +198,92 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
+            double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
             bool success = true;
-            success &= node.ParseVector("x1", "y1", diagnostics, out var start);
-            success &= node.ParseVector("x2", "y2", diagnostics, out var end);
+            GraphicOptions options = new();
+            foreach (XmlAttribute attribute in node.Attributes)
+            {
+                switch (attribute.Name)
+                {
+                    case "x1": success &= attribute.ParseScalar(diagnostics, out x1); break;
+                    case "y1": success &= attribute.ParseScalar(diagnostics, out y1); break;
+                    case "x2": success &= attribute.ParseScalar(diagnostics, out x2); break;
+                    case "y2": success &= attribute.ParseScalar(diagnostics, out y2); break;
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
+                            success = false;
+                        }
+                        break;
+                }
+            }
             if (!success)
                 return;
-            var options = ParseGraphicOptions(node);
 
             // Draw the line
-            Line(start, end, options);
+            Line(new(x1, y1), new(x2, y2), options);
         }
         private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParseGraphicOptions(node);
-            List<Vector2> points;
-            string pointdata = node.Attributes["points"]?.Value;
-            if (pointdata != null)
+            if (node.Attributes == null)
+                return;
+
+            GraphicOptions options = new();
+            List<Vector2> points = null;
+            bool success = true;
+            foreach (XmlAttribute attribute in node.Attributes)
             {
-                var lexer = new SvgPathDataLexer(pointdata.AsMemory());
-                points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
-            }
-            else if (node.HasChildNodes)
-            {
-                points = new(node.ChildNodes.Count);
-                foreach (XmlNode child in node.ChildNodes)
+                switch (attribute.Name)
                 {
-                    if (child.Name == "p")
-                    {
-                        if (!child.ParseVector("x", "y", diagnostics, out var result))
-                            continue;
-                        points.Add(result);
-                    }
+                    case "points":
+                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
+                        points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+                        break;
+
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
+                            success = false;
+                        }
+                        break;
                 }
             }
-            else
-            {
-                diagnostics?.Post(ErrorCodes.NoPolygonData);
+            if (!success)
                 return;
-            }
 
             // Draw the polygon
             Polygon(points, options);
         }
         private void DrawXmlPolyline(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParseGraphicOptions(node);
-            string pointdata = node.Attributes["points"]?.Value;
-            List<Vector2> points;
-            if (pointdata != null)
+            if (node.Attributes == null)
+                return;
+
+            GraphicOptions options = new();
+            List<Vector2> points = null;
+            bool success = true;
+            foreach (XmlAttribute attribute in node.Attributes)
             {
-                var lexer = new SvgPathDataLexer(pointdata.AsMemory());
-                points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
-            }
-            else if (node.HasChildNodes)
-            {
-                points = new(node.ChildNodes.Count);
-                foreach (XmlNode child in node.ChildNodes)
+                switch (attribute.Name)
                 {
-                    if (child.Name == "p" || child.Name == "point")
-                    {
-                        if (!child.ParseVector("x", "y", diagnostics, out var result))
-                            continue;
-                        points.Add(result);
-                    }
+                    case "points":
+                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
+                        points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+                        break;
+
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
+                            success = false;
+                        }
+                        break;
                 }
             }
-            else
-            {
-                diagnostics?.Post(ErrorCodes.NoPolylineData);
+            if (!success)
                 return;
-            }
 
             // Draw the polyline
             Polyline(points, options);
@@ -256,163 +293,96 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            // Get the coordinates
+            GraphicOptions options = new();
             bool success = true;
-            success &= node.ParseVector("cx", "cy", diagnostics, out Vector2 center);
-            success &= node.ParseCoordinate("r", diagnostics, out double r);
+            double cx = 0, cy = 0, r = 0;
+            foreach (XmlAttribute attribute in node.Attributes)
+            {
+                switch (attribute.Name)
+                {
+                    case "cx": success &= attribute.ParseScalar(diagnostics, out cx); break;
+                    case "cy": success &= attribute.ParseScalar(diagnostics, out cy); break;
+                    case "r": success &= attribute.ParseScalar(diagnostics, out r); break;
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Value);
+                            success = false;
+                        }
+                        break;
+                }
+            }
             if (!success)
                 return;
-            var options = ParseGraphicOptions(node);
 
             // Draw the circle
-            Circle(center, r, options);
+            Circle(new(cx, cy), r, options);
         }
         private void DrawXmlPath(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParseGraphicOptions(node);
-            string d = node.Attributes["d"]?.Value;
-            if (!string.IsNullOrWhiteSpace(d))
+            if (node.Attributes == null)
+                return;
+
+            GraphicOptions options = new();
+            string pathData = null;
+            bool success = true;
+            foreach (XmlAttribute attribute in node.Attributes)
+            {
+                switch (attribute.Name)
+                {
+                    case "d": pathData = attribute.Value; break;
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
+                            success = false;
+                        }
+                        break;
+                }
+            }
+            if (!success)
+                return;
+
+            if (!string.IsNullOrWhiteSpace(pathData))
             {
                 Path(b =>
                 {
-                    var lexer = new SvgPathDataLexer(d.AsMemory());
+                    var lexer = new SvgPathDataLexer(pathData.AsMemory());
                     SvgPathDataParser.Parse(lexer, b, diagnostics);
                 }, options);
-            }
-            else if (node.HasChildNodes)
-            {
-                Path(b =>
-                {
-                    foreach (XmlNode cmd in node.ChildNodes)
-                    {
-                        string action = cmd.Name;
-                        bool result = true;
-                        Vector2 h1, h2, p;
-                        double d;
-                        switch (action)
-                        {
-                            case "M":
-                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                    continue;
-                                b.MoveTo(p);
-                                break;
-                            case "m":
-                                if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
-                                    !cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                    continue;
-                                b.Move(p);
-                                break;
-                            case "L":
-                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                    continue;
-                                b.LineTo(p);
-                                break;
-                            case "l":
-                                if (!cmd.TryParseVector("x", "y", diagnostics, new(), out p) &&
-                                    !cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                    continue;
-                                b.Line(p);
-                                break;
-                            case "H":
-                                if (!cmd.ParseCoordinate("x", diagnostics, out d))
-                                    continue;
-                                b.HorizontalTo(d);
-                                break;
-                            case "h":
-                                if (!cmd.ParseCoordinate("dx", diagnostics, out d))
-                                    continue;
-                                b.Horizontal(d);
-                                break;
-                            case "V":
-                                if (!cmd.ParseCoordinate("y", diagnostics, out d))
-                                    continue;
-                                b.VerticalTo(d);
-                                break;
-                            case "v":
-                                if (!cmd.ParseCoordinate("dy", diagnostics, out d))
-                                    continue;
-                                b.Vertical(d);
-                                break;
-                            case "C":
-                                result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
-                                result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
-                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.CurveTo(h1, h2, p);
-                                break;
-                            case "c":
-                                result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
-                                result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
-                                result &= cmd.ParseVector("dx", "dy", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.Curve(h1, h2, p);
-                                break;
-                            case "S":
-                                result &= cmd.ParseVector("x2", "y2", diagnostics, out h2);
-                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.SmoothTo(h2, p);
-                                break;
-                            case "s":
-                                result &= cmd.ParseVector("dx2", "dy2", diagnostics, out h2);
-                                result &= cmd.ParseVector("x2", "y2", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.Smooth(h2, p);
-                                break;
-                            case "Q":
-                                result &= cmd.ParseVector("x1", "y1", diagnostics, out h1);
-                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.QuadCurveTo(h1, p);
-                                break;
-                            case "q":
-                                result &= cmd.ParseVector("dx1", "dy1", diagnostics, out h1);
-                                result &= cmd.ParseVector("x", "y", diagnostics, out p);
-                                if (!result)
-                                    continue;
-                                b.QuadCurve(h1, p);
-                                break;
-                            case "T":
-                                if (!cmd.ParseVector("x", "y", diagnostics, out p))
-                                    continue;
-                                b.SmoothQuadTo(p);
-                                break;
-                            case "t":
-                                if (!cmd.ParseVector("dx", "dy", diagnostics, out p))
-                                    continue;
-                                b.SmoothQuad(p);
-                                break;
-                            case "z":
-                            case "Z":
-                                b.Close();
-                                break;
-
-                            default:
-                                diagnostics?.Post(ErrorCodes.CouldNotRecognizePathCommand, cmd);
-                                break;
-                        }
-                    }
-                }, options);
-            }
-            else
-            {
-                diagnostics?.Post(ErrorCodes.NoPathData);
             }
         }
         private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParseGraphicOptions(node);
-            if (!node.ParseVector("x", "y", diagnostics, out var location))
+            if (node.Attributes == null)
                 return;
-            if (!node.ParseVector("width", "height", diagnostics, out var size))
+
+            GraphicOptions options = new();
+            bool success = true;
+            double x = 0, y = 0, width = 0, height = 0, rx = double.NaN, ry = double.NaN;
+            foreach (XmlAttribute attribute in node.Attributes)
+            {
+                switch (attribute.Name)
+                {
+                    case "x": success &= attribute.ParseScalar(diagnostics, out x); break;
+                    case "y": success &= attribute.ParseScalar(diagnostics, out y); break;
+                    case "width": success &= attribute.ParseScalar(diagnostics, out width); break;
+                    case "height": success &= attribute.ParseScalar(diagnostics, out height); break;
+                    case "rx": success &= attribute.ParseScalar(diagnostics, out rx); break;
+                    case "ry": success &= attribute.ParseScalar(diagnostics, out ry); break;
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
+                            success = false;
+                        }
+                        break;
+                }
+            }
+            if (!success)
                 return;
-            node.TryParseCoordinate("rx", diagnostics, double.NaN, out double rx);
-            node.TryParseCoordinate("ry", diagnostics, double.NaN, out double ry);
+
+            // Deal with rounded corners
             if (double.IsNaN(rx) && !double.IsNaN(ry))
                 rx = ry;
             else if (double.IsNaN(ry) && !double.IsNaN(rx))
@@ -428,17 +398,17 @@ namespace SimpleCircuit
             double ky = 0.55191502449351057 * ry;
             Path(b =>
             {
-                b.MoveTo(location + new Vector2(rx, 0));
-                b.Horizontal(size.X - 2 * rx);
+                b.MoveTo(new Vector2(x, y) + new Vector2(rx, 0));
+                b.Horizontal(width - 2 * rx);
                 if (rx != 0.0)
                     b.Curve(new(kx, 0), new(rx, ry - ky), new(rx, ry));
-                b.Vertical(size.Y - 2 * ry);
+                b.Vertical(height - 2 * ry);
                 if (ry != 0.0)
                     b.Curve(new(0, ky), new(-rx + kx, ry), new(-rx, ry));
-                b.Horizontal(2 * rx - size.X);
+                b.Horizontal(2 * rx - width);
                 if (rx != 0.0)
                     b.Curve(new(-kx, 0), new(-rx, ky - ry), new(-rx, -ry));
-                b.Vertical(2 * ry - size.Y);
+                b.Vertical(2 * ry - height);
                 if (ry != 0)
                     b.Curve(new(0, -ky), new(rx - kx, -ry), new(rx, -ry));
                 b.Close();
@@ -446,38 +416,52 @@ namespace SimpleCircuit
         }
         private void DrawXmlText(XmlNode node, IDiagnosticHandler diagnostics)
         {
-            var options = ParseGraphicOptions(node);
-            string label = node.Attributes["value"]?.Value;
-            if (string.IsNullOrWhiteSpace(label))
+            if (node.Attributes == null)
                 return;
 
-            // Get the coordinates
-            if (!node.ParseVector("x", "y", diagnostics, out Vector2 location))
-                return;
-            node.TryParseVector("nx", "ny", diagnostics, new(), out Vector2 expand);
-            Text(label, location, expand, options);
-        }
-        private GraphicOptions ParseGraphicOptions(XmlNode parent)
-        {
-            if (parent == null)
-                return null;
-            if (parent.Attributes == null)
-                return null;
-            var options = new GraphicOptions();
-
-            // Read some styling
-            var attribute = parent.Attributes?["style"];
-            if (attribute != null)
-                options.Style = attribute.Value;
-
-            // Read the class
-            attribute = parent.Attributes?["class"];
-            if (attribute != null)
+            GraphicOptions options = new();
+            bool success = true;
+            double x = 0, y = 0, nx = 0, ny = 0;
+            string value = null;
+            foreach (XmlAttribute attribute in node.Attributes)
             {
-                foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-                    options.Classes.Add(name);
+                switch (attribute.Name)
+                {
+                    case "x": success &= attribute.ParseScalar(diagnostics, out x); break;
+                    case "y": success &= attribute.ParseScalar(diagnostics, out y); break;
+                    case "nx": success &= attribute.ParseScalar(diagnostics, out nx); break;
+                    case "ny": success &= attribute.ParseScalar(diagnostics, out ny); break;
+                    case "value": value = attribute.Value; break;
+                    default:
+                        if (!ParseGraphicOption(options, attribute))
+                        {
+                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
+                            success = false;
+                        }
+                        break;
+                }
             }
-            return options;
+            if (!success)
+                return;
+            Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
+        }
+        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute)
+        {
+            switch (attribute.Name)
+            {
+                case "style":
+                    options.Style = attribute.Value;
+                    break;
+
+                case "class":
+                    foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                        options.Classes.Add(name);
+                    break;
+
+                default:
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>

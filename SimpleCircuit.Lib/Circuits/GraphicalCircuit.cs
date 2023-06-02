@@ -499,7 +499,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing(formatter)
+            var drawing = new SvgDrawing(formatter, diagnostics)
             {
                 Style = Style,
                 RenderBounds = RenderBounds

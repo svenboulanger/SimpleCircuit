@@ -35,6 +35,29 @@ namespace SimpleCircuit
         public static bool IsZero(this Vector2 vector) => vector.X.IsZero() && vector.Y.IsZero();
 
         /// <summary>
+        /// Parses a scalar attribute of an XML ndoe.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the parsing was successful; otherwise, <c>false</c>.</returns>
+        public static bool ParseScalar(this XmlAttribute attribute, IDiagnosticHandler diagnostics, out double result, ErrorCodes errorCode = ErrorCodes.InvalidXmlCoordinate)
+        {
+            if (attribute == null)
+            {
+                result = 0.0;
+                return false;
+            }
+            if (!double.TryParse(attribute.Value, NumberStyles.Float, Culture, out result))
+            {
+                diagnostics?.Post(errorCode, attribute.Value, attribute.ParentNode.Name);
+                result = 0.0;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Parse a coordinate attribute on an XML node.
         /// </summary>
         /// <param name="node">The XML node.</param>

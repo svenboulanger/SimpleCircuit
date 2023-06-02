@@ -184,6 +184,21 @@
         [Diagnostic(SeverityLevel.Error, "DE005", "No path data given")]
         NoPathData,
 
+        [Diagnostic(SeverityLevel.Error, "DE006", "Invalid scale '{0}' for XML tag {1}.")]
+        InvalidXmlScale,
+
+        [Diagnostic(SeverityLevel.Error, "DE007", "Invalid rotation '{0}' for XML tag {1}.")]
+        InvalidXmlRotation,
+
+        [Diagnostic(SeverityLevel.Error, "DE008", "Unrecognized attribute '{0}' for XML tag {1}.")]
+        UnrecognizedXmlAttribute,
+
+        [Diagnostic(SeverityLevel.Error, "DE009", "Invalid coordinate '{0}' for XML tag {1}.")]
+        InvalidXmlCoordinate,
+
+        [Diagnostic(SeverityLevel.Error, "DE010", "Duplicate pin name '{0}' for symbol {1}.")]
+        DuplicateSymbolPinName,
+
         [Diagnostic(SeverityLevel.Error, "PE053", "Could not recognize start of statement '{0}'")]
         CouldNotRecognizeStatementStart,
 
