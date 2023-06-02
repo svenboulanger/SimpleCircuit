@@ -139,9 +139,14 @@ function registerLanguage(keywords) {
                 [/\+/, { token: 'operator.$S0' }],
             ],
             command: [
-                [ '@lineComment', 'comment', '@pop' ],
+                ['@lineComment', 'comment', '@pop'],
+                [/^[\s\t]*\./, { token: 'dot.command' }],
+                [/\b(symbol|SYMBOL)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word', bracket: '@open', next: '@command_symbol', nextEmbedded: 'xml' }]],
                 [/\b\w+\b/, { token: 'word' }],
                 [/\n/, { token: 'newline', next: '@pop' }],
+            ],
+            command_symbol: [
+                [/^\.ends/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
             ],
             pin_block: [
                 [ '@lineComment', 'comment', '@popall' ],
@@ -210,6 +215,11 @@ function registerLanguage(keywords) {
             { token: 'equals.assignment', foreground: '666666' },
             { token: 'boolean', foreground: 'a0a0a0' },
             { token: 'separator', foreground: '0000ff' },
+
+            { token: 'tag.xml', foreground: '990000' },
+            { token: 'delimiter.xml', foreground: '990000' },
+            { token: 'tag.attribute', foreground: 'AA0000' },
+            { token: 'attribute.value.xml', foreground: 'a633f2' },
         ]
     });
 
