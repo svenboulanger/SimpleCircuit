@@ -412,8 +412,10 @@ namespace SimpleCircuitOnline.Pages
                 _viewMode = false;
 
                 // Allow loading an initial script if none was stored
-                style ??= GraphicalCircuit.DefaultStyle;
-                script ??= Demo.Demos[0].Code;
+                if (string.IsNullOrWhiteSpace(style))
+                    style = GraphicalCircuit.DefaultStyle;
+                if (string.IsNullOrWhiteSpace(script))
+                    script = Demo.Demos[0].Code;
 
                 await SetCurrentScript(new(script, style));
             }
