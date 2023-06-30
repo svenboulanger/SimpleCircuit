@@ -218,6 +218,9 @@ namespace SimpleCircuitOnline.Pages
                 _timer.Elapsed += OnTimerElapsed;
                 if (_settings.AutoUpdate)
                     _timer.Start();
+
+                // Apply the plitter
+                await _js.InvokeVoidAsync("apply_splitter");
             }
         }
 

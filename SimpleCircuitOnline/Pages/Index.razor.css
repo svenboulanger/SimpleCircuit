@@ -1,11 +1,18 @@
 ﻿.split-screen {
     display: grid;
-    grid-template-columns: 10px minmax(400px, 35%) 10px 1fr 10px;
+    grid-template-columns: 10px 1fr 10px 2fr 10px;
     grid-template-rows: 10px 1fr 10px;
-    grid-template-areas: ". . . . ." ". sidebar . output ." ". . . . .";
+    grid-template-areas: ". . . . ." ". sidebar gutter output ." ". . . . .";
     height: 100%;
     width: 100%;
     overflow: hidden;
+}
+.gutter-col {
+    grid-area: gutter;
+    cursor: col-resize;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    background-repeat: no-repeat;
+    background-position: center center;
 }
 .sidebar
 {
