@@ -61,7 +61,7 @@ namespace SimpleCircuit.Drawing
                     bounds.Expand(location - new Vector2(b.Width, 0));
                     bounds.Expand(location);
                 }
-                line.SetAttribute("x", $"{location.X:G3}");
+                line.SetAttribute("x", Convert(location.X));
 
                 // format along Y-axis: first determine the height of all lines
                 if (height > 0)
@@ -86,7 +86,7 @@ namespace SimpleCircuit.Drawing
             {
                 // Format along Y-axis: 
                 y -= lineBounds[index].Top;
-                line.SetAttribute("y", $"{y:G3}");
+                line.SetAttribute("y", Convert(y));
                 y += lineBounds[index].Bottom + LineSpacing;
                 index++;
             }
@@ -96,5 +96,15 @@ namespace SimpleCircuit.Drawing
 
         /// <inheritdoc />
         public abstract Bounds Measure(XmlElement element);
+
+        /// <summary>
+        /// Converts a double to a rounded value for an svg-document.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The formatted value.</returns>
+        protected static string Convert(double value)
+        {
+            return Math.Round(value, 5).ToString("G4", System.Globalization.CultureInfo.InvariantCulture);
+        }
     }
 }

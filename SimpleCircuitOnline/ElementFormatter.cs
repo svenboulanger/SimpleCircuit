@@ -1,5 +1,4 @@
 ﻿using Microsoft.JSInterop;
-using SimpleCircuit;
 using SimpleCircuit.Drawing;
 using System;
 using System.IO;
