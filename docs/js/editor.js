@@ -261,3 +261,13 @@ function stopEventPropagation(e) {
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
 }
+
+function apply_splitter() {
+    window.Split({
+        columnGutters: [{
+            track: 2,
+            element: document.querySelector('.gutter-col'),
+        }],
+    })
+    console.log("Done")
+}
