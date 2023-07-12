@@ -62,7 +62,6 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
                 {
                     // We have a header and attributes
                     Height = LineHeight * Labels.Count;
-                    double h = Height * 0.5;
                     Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-w, 0), new(-1, 0)), "l", "w", "left");
                     Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(0, -LineHeight * 0.5), new(0, -1)), "t", "n", "top");
                     Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(0, -LineHeight * 0.5 + Height), new(0, 1)), "b", "s", "bottom");
@@ -79,6 +78,7 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
                 return true;
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 if (Labels.Count <= 1)

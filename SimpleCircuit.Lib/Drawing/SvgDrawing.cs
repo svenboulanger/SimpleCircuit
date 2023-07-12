@@ -694,7 +694,7 @@ namespace SimpleCircuit
                 new(-rx, -ky), new(-kx, -ry), new(0, -ry),
                 new(kx, -ry), new(rx, -ky), new(rx, 0),
                 new(rx, ky), new(kx, ry), new(0, ry),
-                new(-kx, ry), new(0, ky), new(-rx, 0)
+                new(-kx, ry), new(-rx, ky), new(-rx, 0)
             }.Select(v => v + center), options);
         }
 
