@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 
@@ -9,6 +10,8 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class ComponentInfo
     {
+        private IDrawable _component;
+
         /// <summary>
         /// Gets the token that describes the component name.
         /// </summary>
@@ -32,7 +35,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the component if it has been created.
         /// </summary>
-        public IDrawable Component { get; private set; }
+        public IDrawable Component => _component;
 
         /// <summary>
         /// Creates a new component information.
@@ -43,26 +46,27 @@ namespace SimpleCircuit.Parser
         {
             Name = name;
             Fullname = fullname;
+            _component = null;
         }
 
         /// <summary>
         /// Gets or creates a component.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <returns>Returns the component, or <c>null</c> if no component could be created.</returns>
+        /// <returns>Returns the component, or <c>null</c> if no component could be found or created.</returns>
         public IDrawable GetOrCreate(ParsingContext context)
         {
-            if (Component == null)
+            if (_component == null)
             {
-                Component = context.GetOrCreate(Fullname, context.Options, context.Diagnostics);
-                if (Component == null)
+                _component = context.GetOrCreate(Fullname, context.Options, context.Diagnostics);
+                if (_component == null)
                 {
                     context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
                     return null;
                 }
 
                 // Handle the label
-                if (Labels.Count > 0 && Component is ILabeled labeled)
+                if (Labels.Count > 0 && _component is ILabeled labeled)
                 {
                     if (Labels.Count > labeled.Labels.Maximum)
                     {
@@ -81,12 +85,31 @@ namespace SimpleCircuit.Parser
                 foreach (var variant in Variants)
                 {
                     if (variant.Include)
-                        Component.Variants.Add(variant.Name);
+                        _component.Variants.Add(variant.Name);
                     else
-                        Component.Variants.Remove(variant.Name);
+                        _component.Variants.Remove(variant.Name);
                 }
             }
-            return Component;
+            return _component;
         }
+
+        /// <summary>
+        /// Gets or creates a component.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns>Returns the component; or <c>null</c> if no component could be found.</returns>
+        public IDrawable Get(IPrepareContext context)
+        {
+            if (_component == null)
+            {
+                _component = context.Find(Fullname) as IDrawable;
+                if (_component == null)
+                    context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Name.Content);
+            }
+            return _component;
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => Fullname;
     }
 }

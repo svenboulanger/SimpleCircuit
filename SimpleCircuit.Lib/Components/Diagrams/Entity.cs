@@ -2,7 +2,7 @@
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 
-namespace SimpleCircuit.Components.EntityRelationshipDiagrams
+namespace SimpleCircuit.Components.Diagrams
 {
     [Drawable("ENT", "An entity-relationship diagram entity.", "ERD")]
     public class Entity : DrawableFactory

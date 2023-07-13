@@ -16,14 +16,14 @@ namespace SimpleCircuit.Components.Pins
         /// Gets the pin by name.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns>The pin.</returns>
+        /// <returns>The pin; or <c>null</c> if the pin doesn't exist.</returns>
         public IPin this[string name] { get; }
 
         /// <summary>
         /// Gets the pin by its index.
         /// </summary>
         /// <param name="index">The index.</param>
-        /// <returns>The pin index.</returns>
+        /// <returns>The pin; or <c>null</c> if the pin doesn't exist.</returns>
         public IPin this[int index] { get; }
 
         /// <summary>

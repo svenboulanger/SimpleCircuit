@@ -91,8 +91,8 @@ namespace SimpleCircuit.Components.Wires
             if (context.Mode == PreparationMode.Offsets)
             {
                 // Find the pins
-                _p2w = _pinToWire.Find(context.Diagnostics, -1);
-                _w2p = _wireToPin.Find(context.Diagnostics, 0);
+                _p2w = _pinToWire?.GetOrCreate(context.Diagnostics, -1);
+                _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
 
                 // Make sure these pins know they are being connected to
                 if (_p2w != null)
@@ -594,8 +594,8 @@ namespace SimpleCircuit.Components.Wires
         private string GetYName(int index) => $"{Name}.{index + 1}.y";
         private void GenerateError(IDiagnosticHandler diagnostics, PinInfo pin, ErrorCodes code, params object[] arguments)
         {
-            if (pin.Pin.Content.Length > 0)
-                diagnostics?.Post(pin.Pin, code, arguments);
+            if (pin.Name.Content.Length > 0)
+                diagnostics?.Post(pin.Name, code, arguments);
             else
                 diagnostics?.Post(pin.Component.Name, code, arguments);
         }

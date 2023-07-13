@@ -72,24 +72,9 @@ namespace SimpleCircuit.Components.Constraints
                     return PresenceResult.Success;
 
                 // Get the pin
-                IPin pin;
-                if (Pin.Pin.Content.Length == 0)
-                {
-                    // Use pin index
-                    int index = DefaultIndex >= 0 ? DefaultIndex : drawable.Pins.Count + DefaultIndex;
-                    pin = drawable.Pins[index];
-                }
-                else
-                {
-                    if (!drawable.Pins.TryGetValue(Pin.Pin.Content.ToString(), out pin))
-                    {
-                        if (context.Desparateness == DesperatenessLevel.Fix)
-                        {
-                            context.Diagnostics?.Post(Pin.Pin, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, Pin.Component.Fullname);
-                            return PresenceResult.GiveUp;
-                        }
-                    }
-                }
+                var pin = Pin.GetOrCreate(context.Diagnostics, DefaultIndex);
+                if (pin == null)
+                    return PresenceResult.GiveUp;
 
                 // Resolve the orientation of the found pin
                 if (pin is IOrientedPin op)
@@ -116,10 +101,10 @@ namespace SimpleCircuit.Components.Constraints
             if (drawable == null)
                 return;
 
-            if (Pin.Pin.Content.Length > 0)
+            if (Pin.Name.Content.Length > 0)
             {
-                if (!drawable.Pins.TryGetValue(Pin.Pin.Content.ToString(), out _))
-                    diagnostics?.Post(Pin.Component.Name, ErrorCodes.CouldNotFindPin, Pin.Pin.Content, drawable.Name);
+                if (!drawable.Pins.TryGetValue(Pin.Name.Content.ToString(), out _))
+                    diagnostics?.Post(Pin.Component.Name, ErrorCodes.CouldNotFindPin, Pin.Name.Content, drawable.Name);
             }
         }
     }

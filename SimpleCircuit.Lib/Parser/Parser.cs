@@ -130,7 +130,7 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-            if (wireToPinInfo.Component != null && wireToPinInfo.Component.Fullname.ToString().Contains('*'))
+            if (wireToPinInfo?.Component != null && wireToPinInfo.Component.Fullname.ToString().Contains('*'))
             {
                 context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
@@ -138,7 +138,7 @@ namespace SimpleCircuit.Parser
 
             // Create the components
             pinToWireInfo.Component.GetOrCreate(context);
-            wireToPinInfo.Component?.GetOrCreate(context);
+            wireToPinInfo?.Component?.GetOrCreate(context);
 
             // Create the wire
             if (wireInfo != null && wireInfo.Segments.Count > 0)
@@ -146,7 +146,7 @@ namespace SimpleCircuit.Parser
                 string fullname = context.GetWireFullname();
                 context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
                 context.Circuit.Add(new Wire(fullname, pinToWireInfo, wireInfo, wireToPinInfo));
-                if (wireToPinInfo.Component != null)
+                if (wireToPinInfo?.Component != null)
                     context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
             }
         }

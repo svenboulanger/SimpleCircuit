@@ -88,10 +88,10 @@ namespace SimpleCircuit.Components
                     pinNames.Clear();
 
                     // Find the ports
-                    var pin = pinInfo.Find(context.Diagnostics, -1);
+                    var pin = pinInfo.GetOrCreate(context.Diagnostics, -1);
                     if (pin == null)
                     {
-                        context.Diagnostics?.Post(pinInfo.Pin, ErrorCodes.CouldNotFindPin, pinInfo.Pin.Content, pinInfo.Component.Fullname);
+                        context.Diagnostics?.Post(pinInfo.Name, ErrorCodes.CouldNotFindPin, pinInfo.Name.Content, pinInfo.Component.Fullname);
                         return false;
                     }
 

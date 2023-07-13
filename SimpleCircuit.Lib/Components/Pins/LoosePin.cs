@@ -17,7 +17,7 @@ namespace SimpleCircuit.Components.Pins
         public Vector2 Orientation { get; private set; }
 
         /// <inheritdoc />
-        public bool HasFreeOrientation => HasFixedOrientation;
+        public bool HasFreeOrientation => !HasFixedOrientation;
 
         /// <summary>
         /// Creates a loose pin. This means that any constrains need to be applied manually!

@@ -68,15 +68,26 @@ namespace SimpleCircuit.Components.Wires
 
         private ILocatedPresence FindPin(IPrepareContext context, PinInfo pin, int defaultIndex)
         {
-            if (context.Find(pin.Component.Fullname) is not ILocatedDrawable p)
-            {
-                context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.ComponentWithoutLocation, pin.Component.Name.Content);
+            // Finding a pin for virtual wires works slightly different than normal:
+            // If a pin is not named, then we actually want to refer to the origin of the component!
+            var drawable = pin.Component.Get(context);
+            if (drawable == null)
                 return null;
+
+            if (pin.Name.Content.Length == 0)
+            {
+                // We are referring to the origin of the component, not a pin
+                if (drawable is not ILocatedDrawable ld)
+                {
+                    context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.ComponentWithoutLocation, pin.Component.Name.Content);
+                    return null;
+                }
+                return ld;
             }
-            if (pin.Pin.Content.Length == 0)
-                return p;
             else
-                return pin.Find(p, context.Diagnostics, defaultIndex);
+            {
+                return pin.GetOrCreate(context.Diagnostics, defaultIndex);
+            }
         }
 
         /// <inheritdoc />

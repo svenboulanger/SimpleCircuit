@@ -1,7 +1,10 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Diagnostics;
+using System;
+using System.Collections.Generic;
 
-namespace SimpleCircuit.Components.EntityRelationshipDiagrams
+namespace SimpleCircuit.Components.Diagrams
 {
     [Drawable("ACT", "An entity-relationship diagram action.", "ERD")]
     public class Action : DrawableFactory
@@ -10,7 +13,7 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : LocatedDrawable, ILabeled
+        private class Instance : DiagramBlockInstance, ILabeled
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -35,25 +38,6 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
             public Instance(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(), new(-1, 0)), "l", "w", "left");
-                Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(), new(0, -1)), "t", "n", "top");
-                Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(), new(0, 1)), "b", "s", "bottom");
-                Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(), new(1, 0)), "r", "e", "right");
-            }
-
-            /// <inheritdoc />
-            public override bool Reset(IResetContext context)
-            {
-                if (!base.Reset(context))
-                    return false;
-
-                // Reset pin locations
-                void SetPinLocation(int index, Vector2 pos) => ((FixedOrientedPin)Pins[index]).Offset = pos;
-                SetPinLocation(0, new(-0.5 * Width, 0));
-                SetPinLocation(1, new(0, -0.5 * Height));
-                SetPinLocation(2, new(0, 0.5 * Height));
-                SetPinLocation(3, new(0.5 * Width, 0));
-                return true;
             }
 
             /// <inheritdoc />
@@ -69,6 +53,45 @@ namespace SimpleCircuit.Components.EntityRelationshipDiagrams
                 });
 
                 drawing.Text(Labels[0], new(), new());
+            }
+
+            /// <inheritdoc />
+            protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
+            {
+                double a = 0.5 * Width;
+                double b = 0.5 * Height;
+
+                foreach (var pin in pins)
+                {
+                    double x = pin.Orientation.X;
+                    double y = pin.Orientation.Y;
+                    double k = 0.0;
+                    if (x.IsZero())
+                    {
+                        if (y.IsZero())
+                            pin.Offset = new();
+                        else
+                            k = b;
+                    }
+                    else if (x < 0)
+                    {
+                        if (y < 0)
+                            k = 1.0 / (-x / a - y / b);
+                        else
+                            k = 1.0 / (-x / a + y / b);
+                    }
+                    else
+                    {
+                        if (y < 0)
+                            k = 1.0 / (x / a - y / b);
+                        else
+                            k = 1.0 / (x / a + y / b);
+                    }
+                    if (k.IsZero())
+                        pin.Offset = new();
+                    else
+                        pin.Offset = pin.Orientation * k;
+                }
             }
         }
     }

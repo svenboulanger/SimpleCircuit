@@ -10,16 +10,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".symbol cross
-    <pin name=""a"" nx=""-1"" />
-    <pin name=""b"" nx=""1"" />
-    <drawing>
-        <polyline points=""-3 -3 3 3 -3 3 3 -3"" />
-        <text x=""0"" y=""4"" ny=""1"" value=""\0"" />
-    </drawing>
-.ends
-
-R <r> cross(""H"") <r> R";
+            var script = @"ACT <nw> R
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext
