@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("MIX", "A mixer", "Modeling")]
-    public class Mixer : DrawableFactory
+    [Drawable("OSC", "An oscillator", "Modeling")]
+    public class Oscillator : DrawableFactory
     {
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -11,6 +9,11 @@ namespace SimpleCircuit.Components.Modeling
 
         private class Instance : ModelingDrawable
         {
+            protected override double Size => 10;
+
+            /// <inheritdoc />
+            public override string Type => "oscillator";
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -23,12 +26,7 @@ namespace SimpleCircuit.Components.Modeling
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-
-                double s = Size * 0.5;
-                if (!Variants.Contains(Square))
-                    s /= Math.Sqrt(2.0);
-                drawing.Line(new(-s, -s), new(s, s));
-                drawing.Line(new(-s, s), new(s, -s));
+                drawing.AC(new(), Size * 0.25);
             }
         }
     }

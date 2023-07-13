@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"ACT <nw> R
+            var script = @"Xout <d +20 ? arrow> BLOCKfb(""&#946;"")
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

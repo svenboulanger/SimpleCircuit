@@ -1,10 +1,7 @@
-﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Diagnostics;
-using System;
+﻿using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Components.Diagrams
+namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
     [Drawable("ACT", "An entity-relationship diagram action.", "ERD")]
     public class Action : DrawableFactory

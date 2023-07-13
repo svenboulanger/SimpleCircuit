@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("FILT", "A filter", "Modeling")]
     public class Filter : DrawableFactory
@@ -22,6 +22,9 @@
 
             /// <inheritdoc />
             protected override double Size => 12;
+
+            /// <inheritdoc />
+            public override string Type => "filter";
 
             /// <summary>
             /// Creats a new <see cref="Instance"/>.
@@ -50,7 +53,7 @@
             private void DrawGraphs(SvgDrawing drawing)
             {
                 double s = Size * 0.25;
-                    
+
                 switch (Variants.Select(_lp, _bp, _hp, _lp2, _hp2))
                 {
                     default:

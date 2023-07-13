@@ -189,7 +189,10 @@ namespace SimpleCircuit.Drawing
             _h2 = location;
 
             _n1 = _p2 - _p1;
-            _n1 /= _n1.Length;
+            if (_n1.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 /= _n1.Length;
             _n2 = _n1;
 
             AppendLine(location - _p1);
@@ -221,7 +224,10 @@ namespace SimpleCircuit.Drawing
             _p2 += delta;
             _h2 = _p1;
 
-            _n1 = delta / delta.Length;
+            if (delta.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 = delta / delta.Length;
             _n2 = _n1;
 
             AppendLine(delta);
@@ -271,7 +277,10 @@ namespace SimpleCircuit.Drawing
             _p2 += delta;
             _h2 = _p2;
 
-            _n1 = delta / delta.Length;
+            if (delta.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 = delta / delta.Length;
             _n2 = _n1;
 
             _bounds.Expand(_p2);
@@ -295,7 +304,10 @@ namespace SimpleCircuit.Drawing
             _p2 += delta;
             _h2 = _p2;
 
-            _n1 = delta / delta.Length;
+            if (delta.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 = delta / delta.Length;
             _n2 = delta;
 
             _bounds.Expand(_p2);
@@ -336,7 +348,10 @@ namespace SimpleCircuit.Drawing
             _p2 += delta;
             _h2 = _p2;
 
-            _n1 = delta / delta.Length;
+            if (delta.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 = delta / delta.Length;
             _n2 = _n1;
 
             _bounds.Expand(_p2);
@@ -360,7 +375,10 @@ namespace SimpleCircuit.Drawing
             _p2 += delta;
             _h2 = _p2;
 
-            _n1 = delta / delta.Length;
+            if (_n1.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 = delta / delta.Length;
             _n2 = _n1;
 
             _bounds.Expand(_p2);
@@ -373,11 +391,20 @@ namespace SimpleCircuit.Drawing
             _n1 = _h1 - _p1;
             if (_n1.X.IsZero() && _n1.Y.IsZero())
                 _n1 = _h2 - _p1;
-            _n1 /= _n1.Length;
+
+            if (_n1.IsZero())
+                _n1 = new(1, 0);
+            else
+                _n1 /= _n1.Length;
+
             _n2 = _p2 - _h1;
             if (_n2.X.IsZero() && _n2.Y.IsZero())
                 _n2 = _p2 - _h1;
-            _n2 /= _n2.Length;
+
+            if (_n2.IsZero())
+                _n2 = new(1, 0);
+            else
+                _n2 /= _n2.Length;
         }
 
         /// <summary>
@@ -569,6 +596,7 @@ namespace SimpleCircuit.Drawing
             _h1 = h;
             _p2 = _p1 + dend;
             _h2 = h;
+            CalculateBezierNormals();
 
             _bounds.Expand(new[] { _h2, _p2 });
             Append($"{Action('t')}{Convert(dend)}");

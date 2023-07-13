@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace SimpleCircuit.Components.Diagrams
 {
-    public abstract class DiagramBlockInstance : ILocatedDrawable
+    public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
     {
         private readonly PinCollection _pins;
 
@@ -31,6 +31,9 @@ namespace SimpleCircuit.Components.Diagrams
         public int Order => 0;
 
         /// <inheritdoc />
+        public double Scale { get; set; } = 1.0;
+
+        /// <inheritdoc />
         IPinCollection IDrawable.Pins => _pins;
 
         /// <inheritdoc />
@@ -47,6 +50,10 @@ namespace SimpleCircuit.Components.Diagrams
 
         /// <inheritdoc />
         public IEnumerable<string> Properties => Drawable.GetProperties(this);
+
+        /// <inheritdoc />
+        /// <remarks>Diagram blocks cannot be oriented.</remarks>
+        public int OrientationDegreesOfFreedom => 0;
 
         /// <summary>
         /// Creates a new instance for a block diagram.
@@ -103,7 +110,7 @@ namespace SimpleCircuit.Components.Diagrams
             drawing.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
-            drawing.BeginTransform(new(Location, Matrix2.Identity));
+            drawing.BeginTransform(new(Location, Matrix2.Scale(Scale)));
             Draw(drawing);
             drawing.EndTransform();
 
@@ -155,5 +162,11 @@ namespace SimpleCircuit.Components.Diagrams
             foreach (var pin in _pins)
                 pin.Update(context);
         }
+
+        /// <inheritdoc />
+        public Vector2 TransformOffset(Vector2 local) => local * Scale;
+
+        /// <inheritdoc />
+        public Vector2 TransformNormal(Vector2 local) => local;
     }
 }

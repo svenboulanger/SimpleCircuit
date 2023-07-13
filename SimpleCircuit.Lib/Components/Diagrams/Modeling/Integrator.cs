@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Parser.SvgPathData;
 using System;
 
-namespace SimpleCircuit.Components.Modeling
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("INT", "An integrator.", "Modeling")]
     public class Integrator : DrawableFactory
@@ -53,7 +53,8 @@ namespace SimpleCircuit.Components.Modeling
 
                     default:
                         // Draw an integral sign
-                        drawing.Path(b => {
+                        drawing.Path(b =>
+                        {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
                             b.WithRelativeModifier(v => v / 11.0 * Size * 0.3).WithAbsoluteModifier(v => v / 11.0 * Size * 0.3);
                             SvgPathDataParser.Parse(lexer, b, null);

@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("SUB", "Subtraction", "Modeling")]
     internal class Subtraction : DrawableFactory
@@ -9,6 +9,9 @@
 
         private class Instance : ModelingDrawable
         {
+            /// <inheritdoc />
+            public override string Type => "subtraction";
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>
             /// </summary>

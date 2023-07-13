@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Parser.SvgPathData;
 using System;
 
-namespace SimpleCircuit.Components.Modeling
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("ADD", "Addition", "Modeling")]
     public class Addition : DrawableFactory
@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Modeling
             private const string _pathData = @"M0.75 -1 l-1.5 0 1 1 -1 1 1.5 0";
 
             /// <inheritdoc />
-            public override string Type => "add";
+            public override string Type => "addition";
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -35,7 +35,8 @@ namespace SimpleCircuit.Components.Modeling
                 {
                     case 0:
                         // Draw a sigma
-                        drawing.Path(b => {
+                        drawing.Path(b =>
+                        {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
                             b.WithRelativeModifier(v => v * 0.2 * Size).WithAbsoluteModifier(v => v * 0.2 * Size);
                             SvgPathDataParser.Parse(lexer, b, null);

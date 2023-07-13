@@ -1,12 +1,11 @@
-﻿namespace SimpleCircuit.Components.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     /// <summary>
-    /// A modeling block.
+    /// A split block.
     /// </summary>
-    [Drawable("BLOCK", "A generic block with text", "Modeling")]
-    public class Block : DrawableFactory
+    [Drawable("SPLIT", "A block with a split line", "Modeling")]
+    public class SplitBlock : DrawableFactory
     {
-        /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
         {
             var result = new Instance(name);
@@ -17,13 +16,13 @@
         private class Instance : ModelingDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new();
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             protected override double Size => 12;
 
             /// <inheritdoc />
-            public override string Type => "block";
+            public override string Type => "split";
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -38,7 +37,10 @@
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-                drawing.Text(Labels[0], new(), new());
+                double s = Size * 0.5;
+                drawing.Line(new(-s, s), new(s, -s));
+                drawing.Text(Labels[0], new(-s * 0.5, -s * 0.5), new());
+                drawing.Text(Labels[1], new(s * 0.5, s * 0.5), new());
             }
         }
     }

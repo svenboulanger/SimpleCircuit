@@ -3,7 +3,7 @@ using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 using System;
 
-namespace SimpleCircuit.Components.Diagrams
+namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
     [Drawable("ATTR", "An entity-relationship diagram attribute.", "ERD")]
     public class Attribute : DrawableFactory
