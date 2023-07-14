@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Parser.SvgPathData;
+﻿using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SvgPathData;
 using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
@@ -56,7 +57,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.Path(b =>
                         {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
-                            b.WithRelativeModifier(v => v / 11.0 * Size * 0.3).WithAbsoluteModifier(v => v / 11.0 * Size * 0.3);
+                            b.WithTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
                             SvgPathDataParser.Parse(lexer, b, null);
                         });
                         break;

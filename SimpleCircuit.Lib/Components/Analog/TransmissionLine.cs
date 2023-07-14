@@ -29,17 +29,20 @@ namespace SimpleCircuit.Components.Analog
             /// Draws the transmission line shape.
             /// </summary>
             /// <param name="builder">The path builder.</param>
-            private static void DrawShape(PathBuilder builder)
+            private void DrawShape(PathBuilder builder)
             {
+                double offset = 0.5 * (Length - _width);
+                double inner = _inner + offset;
+                double width = _width + offset;
                 builder
-                    .MoveTo(new(-_inner, _height)).LineTo(new(_inner, _height))
-                    .CurveTo(new(_inner + _kx, _height), new(_width, _ky), new(_width, 0))
-                    .SmoothTo(new(_inner + _kx, -_height), new(_inner, -_height))
-                    .LineTo(new(-_inner, -_height))
-                    .CurveTo(new(-_inner - _kx, -_height), new(-_width, -_ky), new(-_width, 0))
-                    .SmoothTo(new(-_inner - _kx, _height), new(-_inner, _height))
-                    .SmoothTo(new(-_inner + _rx, _ky), new(-_inner + _rx, 0))
-                    .SmoothTo(new(-_inner + _kx, -_height), new(-_inner, -_height));
+                    .MoveTo(new(-inner, _height)).LineTo(new(inner, _height))
+                    .CurveTo(new(inner + _kx, _height), new(width, _ky), new(width, 0))
+                    .SmoothTo(new(inner + _kx, -_height), new(inner, -_height))
+                    .LineTo(new(-inner, -_height))
+                    .CurveTo(new(-inner - _kx, -_height), new(-width, -_ky), new(-width, 0))
+                    .SmoothTo(new(-inner - _kx, _height), new(-inner, _height))
+                    .SmoothTo(new(-inner + _rx, _ky), new(-inner + _rx, 0))
+                    .SmoothTo(new(-inner + _kx, -_height), new(-inner, -_height));
             }
 
             /// <inheritdoc />
@@ -91,19 +94,13 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                double offset = 0.5 * (Length - _width);
+                
 
                 // Wire
                 drawing.ExtendPins(Pins, 2, "a", "b");
 
                 // Transmission line
-                drawing.Path(builder => DrawShape(builder.WithAbsoluteModifier(v =>
-                {
-                    if (v.X < 0)
-                        return new(v.X - offset, v.Y);
-                    else
-                        return new(v.X + offset, v.Y);
-                })));
+                drawing.Path(DrawShape);
 
                 // Label
                 drawing.Text(Labels[0], new(), new());

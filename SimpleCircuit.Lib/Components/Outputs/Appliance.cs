@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -227,7 +228,8 @@ namespace SimpleCircuit.Components.Outputs
                 s /= 2.0;
                 double f = 3.0 / Math.Sqrt(2.0);
                 var mod = (Vector2 v) => v + new Vector2(cx, cy);
-                drawing.Path(b => b.WithAbsoluteModifier(mod).MoveTo(-s, -s).LineTo(-f, -f)
+                drawing.Path(b => b.WithTransform(new Transform(new(cx, cy), Matrix2.Identity))
+                    .MoveTo(-s, -s).LineTo(-f, -f)
                     .MoveTo(s, -s).LineTo(f, -f)
                     .MoveTo(s, s).LineTo(f, f)
                     .MoveTo(-s, s).LineTo(-f, f));
@@ -249,8 +251,7 @@ namespace SimpleCircuit.Components.Outputs
 
                 drawing.Path(b =>
                 {
-                    b.WithAbsoluteModifier(v => v * scale + new Vector2(cx, cy));
-                    // b.WithRelativeModifier(v => v * scale);
+                    b.WithTransform(new Transform(new(cx, cy), Matrix2.Scale(scale)));
                     int index = 0;
                     foreach (var g in pts.GroupBy(p => (index++) / 2))
                     {

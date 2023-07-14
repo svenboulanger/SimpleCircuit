@@ -10,7 +10,18 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"Xout <d +20 ? arrow> BLOCKfb(""&#946;"")
+            var script = @"// For more tutorials, go to Help > Demo's.
+
+// A component chain is a series of components seperated by <wires>.
+// The type of component is defined by the first letter(s), which have to be capital letters.
+// Wires can be defined between '<' and '>', using their direction: u, d, l, r for up, down, left or right.
+// Most components also have labels, which are specified as quoted strings between parenthesis.
+GND1 <u> V1(""1V"") <u r> R(""1k"") <r d> C1(""1uF"") <d> GND2
+
+// Virtual chains act like component chains but are not drawn.
+// They can be used to align components.
+// Virtual chains are always between brackets.
+(GND1 <r> GND2)
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
