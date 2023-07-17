@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Pins;
+using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
@@ -42,13 +43,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 drawing.Path(builder =>
                 {
-                    builder.MoveTo(-Width * 0.5, 0)
-                        .LineTo(0, -Height * 0.5)
-                        .LineTo(Width * 0.5, 0)
-                        .LineTo(0, Height * 0.5)
+                    double a = Width * 0.5, b = Height * 0.5;
+                    builder.MoveTo(-a, 0)
+                        .LineTo(0, -b)
+                        .LineTo(a, 0)
+                        .LineTo(0, b)
                         .Close();
                 });
-
                 drawing.Text(Labels[0], new(), new());
             }
 
@@ -58,36 +59,23 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 double a = 0.5 * Width;
                 double b = 0.5 * Height;
 
+                Vector2 Interp(Vector2 a, Vector2 b, double ka)
+                {
+                    double k = ka / (Math.PI * 0.5);
+                    return (1 - k) * a + k * b;
+                }
+
                 foreach (var pin in pins)
                 {
-                    double x = pin.Orientation.X;
-                    double y = pin.Orientation.Y;
-                    double k = 0.0;
-                    if (x.IsZero())
-                    {
-                        if (y.IsZero())
-                            pin.Offset = new();
-                        else
-                            k = b;
-                    }
-                    else if (x < 0)
-                    {
-                        if (y < 0)
-                            k = 1.0 / (-x / a - y / b);
-                        else
-                            k = 1.0 / (-x / a + y / b);
-                    }
+                    double alpha = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
+                    if (alpha < -Math.PI * 0.5)
+                        pin.Offset = Interp(new(-a, 0), new(0, -b), alpha + Math.PI);
+                    else if (alpha < 0)
+                        pin.Offset = Interp(new(0, -b), new(a, 0), alpha + Math.PI * 0.5);
+                    else if (alpha < 0.5 * Math.PI)
+                        pin.Offset = Interp(new(a, 0), new(0, b), alpha);
                     else
-                    {
-                        if (y < 0)
-                            k = 1.0 / (x / a - y / b);
-                        else
-                            k = 1.0 / (x / a + y / b);
-                    }
-                    if (k.IsZero())
-                        pin.Offset = new();
-                    else
-                        pin.Offset = pin.Orientation * k;
+                        pin.Offset = Interp(new(0, b), new(-a, 0), alpha - Math.PI * 0.5);
                 }
             }
         }

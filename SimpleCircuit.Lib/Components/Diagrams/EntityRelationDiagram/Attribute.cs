@@ -57,20 +57,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         pin.Offset = new();
                     else
                     {
-                        double x = pin.Orientation.X;
-                        double y = pin.Orientation.Y;
-                        double iksq = x * x / (a * a) + y * y / (b * b);
-                        if (iksq.IsZero())
-                        {
-                            // This is only possible if the normal is not normalized, don't do anything then
-                            pin.Offset = new();
-                        }
-                        else
-                        {
-                            // We can extend the orientation to fit
-                            iksq = 1.0 / Math.Sqrt(iksq);
-                            pin.Offset = pin.Orientation * iksq;
-                        }
+                        double nx = pin.Orientation.X;
+                        double ny = pin.Orientation.Y;
+                        double k = 1.0 / Math.Sqrt(nx * nx / b / b + ny * ny / a / a);
+
+                        pin.Offset = new(
+                            a * nx * k / b,
+                            b * ny * k / a);
                     }
                 }
             }

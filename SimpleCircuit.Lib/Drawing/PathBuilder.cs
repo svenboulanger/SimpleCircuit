@@ -170,7 +170,7 @@ namespace SimpleCircuit.Drawing
             // Global coordinate space
             delta = Transform.ApplyDirection(delta);
             AppendLine(delta);
-            _last = location;
+            _last += delta;
             _bounds.Expand(_last);
             return this;
         }
@@ -236,7 +236,7 @@ namespace SimpleCircuit.Drawing
             if (delta.IsZero())
                 _n1 = new();
             else
-                _n1 = delta / delta.Length;
+                _n1 = new(Math.Sign(delta.X), 0);
             _n2 = _n1;
 
             // Draw in global coordinate space
@@ -263,7 +263,7 @@ namespace SimpleCircuit.Drawing
             if (delta.IsZero())
                 _n1 = new();
             else
-                _n1 = delta / delta.Length;
+                _n1 = new(Math.Sign(delta.X), 0);
             _n2 = delta;
 
             // Draw in global coordinate space
@@ -290,7 +290,7 @@ namespace SimpleCircuit.Drawing
             if (delta.IsZero())
                 _n1 = new();
             else
-                _n1 = delta / delta.Length;
+                _n1 = new(0, Math.Sign(delta.Y));
             _n2 = _n1;
 
             // Draw in global coordinate space
@@ -317,7 +317,7 @@ namespace SimpleCircuit.Drawing
             if (_n1.IsZero())
                 _n1 = new();
             else
-                _n1 = delta / delta.Length;
+                _n1 = new(0, Math.Sign(delta.Y));
             _n2 = _n1;
 
             // Draw in global coordinate space
