@@ -44,6 +44,34 @@ namespace SimpleCircuit.Parser.SvgPathData
                 }
                 switch (cmd.Content.Span[0])
                 {
+                    case 'A':
+                        if (!lexer.ParseCoordinate(diagnostics, out double rx) ||
+                            !lexer.ParseCoordinate(diagnostics, out double ry) ||
+                            !lexer.ParseCoordinate(diagnostics, out double angle) ||
+                            !lexer.ParseCoordinate(diagnostics, out double largeArc) ||
+                            !lexer.ParseCoordinate(diagnostics, out double sweepFlag) ||
+                            !lexer.ParseVector(diagnostics, out p))
+                        {
+                            lexer.Skip(~TokenType.Command);
+                            continue;
+                        }
+                        b.ArcTo(rx, ry, angle, largeArc != 0, sweepFlag != 0, p);
+                        break;
+
+                    case 'a':
+                        if (!lexer.ParseCoordinate(diagnostics, out rx) ||
+                            !lexer.ParseCoordinate(diagnostics, out ry) ||
+                            !lexer.ParseCoordinate(diagnostics, out angle) ||
+                            !lexer.ParseCoordinate(diagnostics, out largeArc) ||
+                            !lexer.ParseCoordinate(diagnostics, out sweepFlag) ||
+                            !lexer.ParseVector(diagnostics, out p))
+                        {
+                            lexer.Skip(~TokenType.Command);
+                            continue;
+                        }
+                        b.Arc(rx, ry, angle, largeArc != 0, sweepFlag != 0, p);
+                        break;
+
                     case 'M':
                         if (!lexer.ParseVector(diagnostics, out p))
                         {

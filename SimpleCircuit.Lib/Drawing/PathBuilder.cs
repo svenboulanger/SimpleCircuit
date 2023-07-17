@@ -538,6 +538,185 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Draws an arc.
+        /// </summary>
+        /// <param name="rx">The radius in X-direction.</param>
+        /// <param name="ry">The radius in Y-direction.</param>
+        /// <param name="angle">The angle of the X-axis.</param>
+        /// <param name="largeArc">The large-arc argument. If <c>true</c>, the arc that is greater than 180deg is chosen.</param>
+        /// <param name="sweepFlag">The sweep direction. If <c>true</c>, the sweep is through increasing angles.</param>
+        /// <param name="end">The end point of the arc.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder ArcTo(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 end)
+        {
+            if (rx.IsZero() || ry.IsZero())
+            {
+                // Treat as a straight line
+                LineTo(end);
+                return this;
+            }
+            rx = Math.Abs(rx);
+            ry = Math.Abs(ry);
+            angle *= Math.PI / 180.0;
+
+            Matrix2 rot = Matrix2.Rotate(angle);
+            Matrix2 irot = rot.Transposed; // Possible because transformation is orthonormal
+
+            Vector2 p1 = irot * (_p2 - end) * 0.5;
+            Vector2 p12 = new(p1.X * p1.X, p1.Y * p1.Y);
+            Vector2 r2 = new(rx * rx, ry * ry);
+            double cr = p12.X / r2.X + p12.Y / r2.Y;
+            if (cr > 1)
+            {
+                cr = Math.Sqrt(cr);
+                rx *= cr;
+                ry *= cr;
+                r2 = new(rx * rx, ry * ry);
+            }
+
+            double dq = r2.X * p12.Y + r2.Y * p12.X;
+            double pq = (r2.X * r2.Y - dq) / dq;
+            double sc = Math.Sqrt(Math.Max(0.0, pq));
+            if (largeArc == sweepFlag)
+                sc = -sc;
+
+            Vector2 cp = new(rx * sc * p1.Y / ry, -ry * sc * p1.X / rx);
+            Vector2 v = new((p1.X - cp.X) / rx, (p1.Y - cp.Y) / ry);
+            double theta1 = Angle(new(1, 0), v);
+            double dtheta = Angle(v, new((-p1.X - cp.X) / rx, (-p1.Y - cp.Y) / ry));
+            if (sweepFlag)
+            {
+                if (dtheta < 0)
+                    dtheta += 2 * Math.PI;
+            }
+            else
+            {
+                if (dtheta > 0)
+                    dtheta -= 2 * Math.PI;
+            }
+
+            // Approximate using bezier curves
+            int segments = (int)Math.Ceiling(Math.Abs(dtheta) / (Math.PI / 2));
+            double da = dtheta / segments;
+            var hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
+            double pid2 = Math.Sign(da) * Math.PI * 0.5;
+            double currentA = theta1;
+            Transform toOriginal = new(0.5 * (_p2 + end), rot);
+            Vector2 lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
+            Vector2 lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
+            for (int i = 1; i <= segments; i++)
+            {
+                currentA += da;
+                Vector2 nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
+                Vector2 nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
+                CurveTo(
+                    toOriginal.Apply(lastPoint + lastTangent),
+                    toOriginal.Apply(nextPoint - nextTangent),
+                    toOriginal.Apply(nextPoint)
+                    );
+                lastPoint = nextPoint;
+                lastTangent = nextTangent;
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Draws an arc.
+        /// </summary>
+        /// <param name="rx">The radius in X-direction.</param>
+        /// <param name="ry">The radius in Y-direction.</param>
+        /// <param name="angle">The angle of the X-axis.</param>
+        /// <param name="largeArc">The large-arc argument. If <c>true</c>, the arc that is greater than 180deg is chosen.</param>
+        /// <param name="sweepFlag">The sweep direction. If <c>true</c>, the sweep is through increasing angles.</param>
+        /// <param name="dend">The end point of the arc relative to the current point.</param>
+        /// <returns>The path builder.</returns>
+        public PathBuilder Arc(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 dend)
+        {
+            if (rx.IsZero() || ry.IsZero())
+            {
+                // Treat as a straight line
+                Line(dend);
+                return this;
+            }
+            rx = Math.Abs(rx);
+            ry = Math.Abs(ry);
+            angle *= Math.PI / 180.0;
+
+            Matrix2 rot = Matrix2.Rotate(angle);
+            Matrix2 irot = rot.Transposed; // Possible because transformation is orthonormal
+
+            Vector2 p1 = irot * -dend * 0.5;
+            Vector2 p12 = new(p1.X * p1.X, p1.Y * p1.Y);
+            Vector2 r2 = new(rx * rx, ry * ry);
+            double cr = p12.X / r2.X + p12.Y / r2.Y;
+            if (cr > 1)
+            {
+                cr = Math.Sqrt(cr);
+                rx *= cr;
+                ry *= cr;
+                r2 = new(rx * rx, ry * ry);
+            }
+
+            double dq = r2.X * p12.Y + r2.Y * p12.X;
+            double pq = (r2.X * r2.Y - dq) / dq;
+            double sc = Math.Sqrt(Math.Max(0.0, pq));
+            if (largeArc == sweepFlag)
+                sc = -sc;
+
+            Vector2 cp = new(rx * sc * p1.Y / ry, -ry * sc * p1.X / rx);
+            Vector2 v = new((p1.X - cp.X) / rx, (p1.Y - cp.Y) / ry);
+            double theta1 = Angle(new(1, 0), v);
+            double dtheta = Angle(v, new((-p1.X - cp.X) / rx, (-p1.Y - cp.Y) / ry));
+            if (sweepFlag)
+            {
+                if (dtheta < 0)
+                    dtheta += 2 * Math.PI;
+            }
+            else
+            {
+                if (dtheta > 0)
+                    dtheta -= 2 * Math.PI;
+            }
+
+            // Approximate using bezier curves
+            int segments = (int)Math.Ceiling(Math.Abs(dtheta) / (Math.PI / 2));
+            double da = dtheta / segments;
+            var hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
+            double pid2 = Math.Sign(da) * Math.PI * 0.5;
+            double currentA = theta1;
+            Transform toOriginal = new(_p2 + dend * 0.5, rot);
+            Vector2 lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
+            Vector2 lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
+            for (int i = 1; i <= segments; i++)
+            {
+                currentA += da;
+                Vector2 nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
+                Vector2 nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
+                CurveTo(
+                    toOriginal.Apply(lastPoint + lastTangent),
+                    toOriginal.Apply(nextPoint - nextTangent),
+                    toOriginal.Apply(nextPoint)
+                    );
+                lastPoint = nextPoint;
+                lastTangent = nextTangent;
+            }
+            return this;
+        }
+
+        private static double Angle(Vector2 u, Vector2 v)
+        {
+            double ac = (u.X * v.X + u.Y * v.Y) / (u.Length * v.Length);
+            if (ac > 1)
+                ac = 1;
+            else if (ac < -1)
+                ac = -1;
+            ac = Math.Acos(ac);
+            if (u.X * v.Y < u.Y * v.X)
+                return -ac;
+            return ac;
+        }
+
+        /// <summary>
         /// Closes the path.
         /// </summary>
         /// <returns>The path builder.</returns>

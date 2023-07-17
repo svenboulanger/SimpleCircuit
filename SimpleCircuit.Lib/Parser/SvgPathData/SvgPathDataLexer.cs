@@ -33,6 +33,8 @@ namespace SimpleCircuit.Parser.SvgPathData
                     Type = TokenType.EndOfContent;
                     break;
 
+                case 'A':
+                case 'a':
                 case 'M':
                 case 'm':
                 case 'L':
