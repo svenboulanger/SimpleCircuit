@@ -10,14 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".symbol TEST
-    <drawing>
-        <path d=""M5 0 a10 5 0 0 1 10 5 l10 10"" />
-    </drawing>
-.ends
-
-TEST
-
+            var script = @"X <r d r u> X
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

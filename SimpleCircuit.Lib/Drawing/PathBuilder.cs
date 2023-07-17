@@ -557,10 +557,20 @@ namespace SimpleCircuit.Drawing
             }
             rx = Math.Abs(rx);
             ry = Math.Abs(ry);
-            angle *= Math.PI / 180.0;
 
-            Matrix2 rot = Matrix2.Rotate(angle);
-            Matrix2 irot = rot.Transposed; // Possible because transformation is orthonormal
+            Matrix2 rot, irot;
+            angle %= 360.0;
+            if (angle.IsZero())
+                rot = Matrix2.Identity;
+            else if ((angle - 90.0).IsZero())
+                rot = new(0, -1, 1, 0);
+            else if ((angle + 90.0).IsZero())
+                rot = new(0, 1, -1, 0);
+            else if ((angle + 180).IsZero() || (angle - 180).IsZero())
+                rot = new(-1, 0, 0, -1);
+            else
+                rot = Matrix2.Rotate(angle / 180.0 * Math.PI);
+            irot = rot.Transposed; // Possible because transformation is orthonormal
 
             Vector2 p1 = irot * (_p2 - end) * 0.5;
             Vector2 p12 = new(p1.X * p1.X, p1.Y * p1.Y);

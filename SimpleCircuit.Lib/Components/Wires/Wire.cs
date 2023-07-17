@@ -485,24 +485,23 @@ namespace SimpleCircuit.Components.Wires
             List<Marker> markers = new();
             if (_info.IsVisible && _vectors.Count > 0)
             {
-                WirePoint point = _vectors[0];
                 drawing.Path(builder =>
                 {
-                    builder.MoveTo(point.Location);
+                    builder.MoveTo(_vectors[0].Location);
                     int segment = 0;
                     var startMarkers = _info.Segments[0].StartMarkers;
+                    Vector2 last = _vectors[0].Location;
                     for (int i = 1; i < _vectors.Count; i++)
                     {
-                        point = _vectors[i];
+                        Vector2 current = _vectors[i].Location;
 
                         // Draw a small half circle for crossing over this point
                         if (_vectors[i].IsJumpOver)
                         {
-                            GetNewAxes(_vectors[i - 1].Location, _vectors[i].Location, out var nx, out var ny);
-                            Vector2 o = _vectors[i].Location;
-                            Vector2 s = o - nx * _jumpOverRadius;
-                            Vector2 e = o + _jumpOverRadius * nx;
-                            Vector2 m = o + ny * _jumpOverRadius;
+                            GetNewAxes(last, current, out var nx, out var ny);
+                            Vector2 s = current - nx * _jumpOverRadius;
+                            Vector2 e = current + _jumpOverRadius * nx;
+                            Vector2 m = current + ny * _jumpOverRadius;
 
                             builder.LineTo(s);
 
@@ -525,7 +524,36 @@ namespace SimpleCircuit.Components.Wires
                         }
                         else
                         {
-                            builder.LineTo(_vectors[i].Location);
+                            if (_info.RoundRadius.IsZero() || i >= _vectors.Count - 1)
+                                builder.LineTo(current);
+                            else
+                            {
+                                Vector2 nu = last - current;
+                                double lu = nu.Length;
+                                Vector2 nv = _vectors[i + 1].Location - current;
+                                double lv = nv.Length;
+                                nu /= lu;
+                                nv /= lv;
+                                double dot = nu.Dot(nv);
+                                if (dot > 0.999 || dot < -0.999)
+                                    builder.LineTo(current);
+                                else
+                                {
+                                    // Rounded corner
+                                    double x = _info.RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                    if (x > lu * 0.5 || x > lv * 0.5)
+                                    {
+                                        // No place, just do straight line again
+                                        builder.LineTo(current);
+                                    }
+                                    else
+                                    {
+                                        // Segments
+                                        builder.LineTo(current + nu * x);
+                                        builder.ArcTo(_info.RoundRadius, _info.RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                    }
+                                }
+                            }
 
                             // Deal with the start marker
                             if (startMarkers != null)
@@ -556,6 +584,8 @@ namespace SimpleCircuit.Components.Wires
                             if (segment < _info.Segments.Count)
                                 startMarkers = _info.Segments[segment].StartMarkers;
                         }
+
+                        last = current;
                     }
                 }, _info.Options);
 

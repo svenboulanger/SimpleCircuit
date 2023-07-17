@@ -29,6 +29,11 @@ namespace SimpleCircuit.Components.Wires
         public bool IsVisible { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the radius for rounding corners.
+        /// </summary>
+        public double RoundRadius { get; set; } = 3.0;
+
+        /// <summary>
         /// Simplifies the wire information.
         /// </summary>
         public void Simplify()

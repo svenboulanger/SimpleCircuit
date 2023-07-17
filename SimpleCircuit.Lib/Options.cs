@@ -71,6 +71,9 @@ namespace SimpleCircuit
         [Description("If true, wires will draw small arcs indicating jumping over another wire.")]
         public bool JumpOverWires { get; set; } = false;
 
+        [Description("If non-zero, subsequent wires will be rounded when cornering.")]
+        public double RoundWires { get; set; } = 0.0;
+
         [Description("The spacing in X-direction between two unconnected diagrams.")]
         public double SpacingX
         {

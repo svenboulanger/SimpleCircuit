@@ -238,7 +238,8 @@ namespace SimpleCircuit.Parser
             // Read the direction of the wire
             var wireInfo = new WireInfo()
             {
-                JumpOverWires = context.Options.JumpOverWires
+                JumpOverWires = context.Options.JumpOverWires,
+                RoundRadius = context.Options.RoundWires
             };
 
             // Chain together multiple wire definitions
