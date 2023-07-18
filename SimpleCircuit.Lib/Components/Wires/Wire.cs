@@ -532,27 +532,32 @@ namespace SimpleCircuit.Components.Wires
                                 double lu = nu.Length;
                                 Vector2 nv = _vectors[i + 1].Location - current;
                                 double lv = nv.Length;
-                                nu /= lu;
-                                nv /= lv;
-                                double dot = nu.Dot(nv);
-                                if (dot > 0.999 || dot < -0.999)
-                                    builder.LineTo(current);
-                                else
+                                if (lu > 0 && lv > 0.0)
                                 {
-                                    // Rounded corner
-                                    double x = _info.RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
-                                    if (x > lu * 0.5 || x > lv * 0.5)
-                                    {
-                                        // No place, just do straight line again
+                                    nu /= lu;
+                                    nv /= lv;
+                                    double dot = nu.Dot(nv);
+                                    if (dot > 0.999 || dot < -0.999)
                                         builder.LineTo(current);
-                                    }
                                     else
                                     {
-                                        // Segments
-                                        builder.LineTo(current + nu * x);
-                                        builder.ArcTo(_info.RoundRadius, _info.RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                        // Rounded corner
+                                        double x = _info.RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                        if (x > lu * 0.5 || x > lv * 0.5)
+                                        {
+                                            // No place, just do straight line again
+                                            builder.LineTo(current);
+                                        }
+                                        else
+                                        {
+                                            // Segments
+                                            builder.LineTo(current + nu * x);
+                                            builder.ArcTo(_info.RoundRadius, _info.RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                        }
                                     }
                                 }
+                                else 
+                                    builder.LineTo(current); // We can't fit a curve
                             }
 
                             // Deal with the start marker

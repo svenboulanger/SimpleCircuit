@@ -147,7 +147,7 @@ namespace SimpleCircuit.Components
         /// <param name="minimum">The minimum.</param>
         public static bool MinimumDirectionalLink(IRelationshipContext context, RelativeItem start, RelativeItem end, double minimum)
         {
-            if (minimum > 0)
+            if (minimum >= 0)
                 return MinimumLink(context, start, end, minimum);
             else
                 return MinimumLink(context, end, start, -minimum);
