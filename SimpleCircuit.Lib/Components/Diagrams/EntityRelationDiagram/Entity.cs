@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -18,6 +19,9 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
             /// <inheritdoc />
             public override string Type => "entity";
+
+            /// <inheritdoc />
+            protected override IEnumerable<string> GroupClasses => new[] { "diagram" };
 
             /// <summary>
             /// Gets or sets the width of the entity block.

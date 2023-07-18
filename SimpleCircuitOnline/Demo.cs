@@ -190,9 +190,9 @@ namespace SimpleCircuitOnline
 
             // Modeling demo
             new Demo(
-                "Example: modeling",
+                "Example: Modeling",
                 "Demonstration on using the modeling block components.",
-                "// Input to adder\r\nT(in, \"input\") <r arrow plus> ADD1\r\n\r\n// Adder to gain block\r\nADD1 <r> DIR(\"e\", flip) <r arrow> BLOCK1(\"G\")\r\n\r\n// Gain block and output\r\nBLOCK1 <r> Xout(\"y\") <r> T(out, \"output\")\r\n- Xout.angle = 90\r\n\r\n// Feedback branch\r\n// BLOCK components cannot be oriented, they are always upright\r\n// So the pins need to be specified\r\nXout <d +20 l arrow> [r]BLOCKfb(\"&#946;\")[l] <l u arrow minus> [s]ADD1\r\n"),
+                "// Input to adder\r\nT(in, \"input\") <r arrow plus> ADD1\r\n\r\n// Adder to gain block\r\nADD1 <r> DIR(\"e\", flip) <r arrow> BLOCK1(\"G\")\r\n\r\n// Gain block and output\r\nBLOCK1 <r> Xout(\"y\") <r> T(out, \"output\")\r\n- Xout.angle = 90\r\n\r\n// Feedback branch\r\n// Note that the direction of the wire determines\r\n// on which side the symbol is connected\r\nXout <d +20 l arrow> BLOCKfb(\"&#946;\") <l u arrow minus> ADD1\r\n"),
         };
     }
 }

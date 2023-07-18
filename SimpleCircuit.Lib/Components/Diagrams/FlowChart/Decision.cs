@@ -1,11 +1,12 @@
 ﻿using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
+namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
-    [Drawable("ACT", "An entity-relationship diagram action.", "ERD")]
-    public class Action : DrawableFactory
+    [Drawable("FD", "A Flowchart Decision.", "Flowchart")]
+    public class Decision : DrawableFactory
     {
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -17,7 +18,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public Labels Labels { get; } = new Labels();
 
             /// <inheritdoc />
-            public override string Type => "action";
+            public override string Type => "decision";
 
             /// <summary>
             /// Gets or sets the width of the action block.

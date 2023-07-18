@@ -337,7 +337,11 @@ namespace SimpleCircuit.Parser
                                     stringTogether?.Invoke(pinToWire, wireInfo, new(component, default), context);
 
                                     // Start a new wire
-                                    wireInfo = new() { JumpOverWires = context.Options.JumpOverWires };
+                                    wireInfo = new()
+                                    {
+                                        JumpOverWires = context.Options.JumpOverWires,
+                                        RoundRadius = context.Options.RoundWires
+                                    };
                                     pinToWire = new(component, default);
                                     markers.Clear();
                                     break;

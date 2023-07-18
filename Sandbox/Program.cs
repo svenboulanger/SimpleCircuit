@@ -10,7 +10,18 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"
+            var script = @"// For more tutorials, go to Help > Demo's.
+
+// Queued anonymous points are anonymous points (X components) that are specified between wire segments.
+// You can specify them using an x or X in a wire.
+T(""a"") <r x r> R <r x r> T(""b"")
+
+// If you then use anonymous points in the next statement, it will first try to match them to the queued anonymous points of the previous chain.
+X <u r x r> C <r x r d> X
+
+// This is useful if you want to make parallel branches.
+X <u x r> L <r x d> X
+X <u r> S <r d> X
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

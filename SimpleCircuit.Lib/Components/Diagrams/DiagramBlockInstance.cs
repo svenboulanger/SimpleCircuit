@@ -31,6 +31,7 @@ namespace SimpleCircuit.Components.Diagrams
         public int Order => 0;
 
         /// <inheritdoc />
+        [Description("The scale of the block.")]
         public double Scale { get; set; } = 1.0;
 
         /// <inheritdoc />
@@ -68,6 +69,7 @@ namespace SimpleCircuit.Components.Diagrams
             _pins = new(this);
             X = $"{Name}.x";
             Y = $"{Name}.y";
+            GroupClasses = new List<string>() { "diagram" };
         }
 
         /// <inheritdoc />

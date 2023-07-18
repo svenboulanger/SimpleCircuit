@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Wires
         /// <summary>
         /// Gets or sets the radius for rounding corners.
         /// </summary>
-        public double RoundRadius { get; set; } = 3.0;
+        public double RoundRadius { get; set; } = 0.0;
 
         /// <summary>
         /// Simplifies the wire information.
