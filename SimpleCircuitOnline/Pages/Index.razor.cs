@@ -33,6 +33,8 @@ namespace SimpleCircuitOnline.Pages
         private Settings _settings = new();
         private bool _arrowMode = false, _viewMode = false;
 
+        private const string StandardStyle = "/* #STDSTYLE# */";
+
         /// <summary>
         /// Gets or sets the filename.
         /// </summary>
@@ -364,13 +366,10 @@ namespace SimpleCircuitOnline.Pages
                             query.Add("script", Convert.ToBase64String(output.ToArray()));
                         }
 
-                        // Extract the style
+                        // Extract the style (we will try to replace the default style to reduce size)
                         string style = await _styleEditor.GetValue();
-                        style = style.Trim('\r', '\n', '\t', ' ');
-                        if (style.StartsWith(GraphicalCircuit.DefaultStyle))
-                            style = style[GraphicalCircuit.DefaultStyle.Length..];
-                        style = style.Trim('\r', '\n', '\t', ' ');
-                        if (!string.IsNullOrWhiteSpace(style))
+                        style = style.Replace(GraphicalCircuit.DefaultStyle, StandardStyle).Trim('\r', '\n', '\t', ' ');
+                        if (!string.IsNullOrWhiteSpace(style) && !StringComparer.Ordinal.Equals(style, StandardStyle))
                         {
                             using MemoryStream output = new();
                             using (System.IO.Compression.GZipStream gzip = new(output, System.IO.Compression.CompressionLevel.SmallestSize))
@@ -578,7 +577,7 @@ namespace SimpleCircuitOnline.Pages
                 // Convert the resulting ASCI character
                 int value = int.Parse(match.Groups["value"].Value);
                 return ((char)value).ToString();
-            });
+            }).Replace(StandardStyle, GraphicalCircuit.DefaultStyle); // Put the default style back
             return script;
         }
         private static string ModifyCSS(string style)
