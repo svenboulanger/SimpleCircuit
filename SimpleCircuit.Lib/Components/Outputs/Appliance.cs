@@ -108,9 +108,9 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawCooking(SvgDrawing drawing)
             {
                 DrawBox(drawing, 8, 0, 16, 16);
-                drawing.Circle(new(4, -4), 2, new("dot"));
-                drawing.Circle(new(12, -4), 2, new("dot"));
-                drawing.Circle(new(12, 4), 2, new("dot"));
+                drawing.Circle(new(4, -4), 2, new("marker"));
+                drawing.Circle(new(12, -4), 2, new("marker"));
+                drawing.Circle(new(12, 4), 2, new("marker"));
             }
             private void DrawMicroWave(SvgDrawing drawing)
             {
@@ -121,19 +121,19 @@ namespace SimpleCircuit.Components.Outputs
             {
                 DrawBox(drawing, 8, 0, 16, 16);
                 drawing.Line(new(0, -5), new(16, -5));
-                drawing.Circle(new(8, 1.5), 2, new("dot"));
+                drawing.Circle(new(8, 1.5), 2, new("marker"));
             }
             private void DrawWasher(SvgDrawing drawing)
             {
                 DrawBox(drawing, 8, 0, 16, 16);
                 drawing.Circle(new(8, 0), 6);
-                drawing.Circle(new(8, 0), 1.5, new("dot"));
+                drawing.Circle(new(8, 0), 1.5, new("marker"));
             }
             private void DrawDryer(SvgDrawing drawing)
             {
                 DrawBox(drawing, 8, 0, 16, 16);
                 DrawVentilator(drawing, 8, -3);
-                drawing.Circle(new(8, 3), 1.5, new("dot"));
+                drawing.Circle(new(8, 3), 1.5, new("marker"));
             }
             private void DrawDishwasher(SvgDrawing drawing)
             {
@@ -227,13 +227,14 @@ namespace SimpleCircuit.Components.Outputs
             {
                 s /= 2.0;
                 double f = 3.0 / Math.Sqrt(2.0);
-                var mod = (Vector2 v) => v + new Vector2(cx, cy);
-                drawing.Path(b => b.WithTransform(new Transform(new(cx, cy), Matrix2.Identity))
+                drawing.BeginTransform(new Transform(new(cx, cy), Matrix2.Identity));
+                drawing.Path(b => b
                     .MoveTo(-s, -s).LineTo(-f, -f)
                     .MoveTo(s, -s).LineTo(f, -f)
                     .MoveTo(s, s).LineTo(f, f)
                     .MoveTo(-s, s).LineTo(-f, f));
-                drawing.Circle(new(cx, cy), 3);
+                drawing.Circle(new(), 3);
+                drawing.EndTransform();
             }
             private void DrawIce(SvgDrawing drawing, double cx, double cy, double scale = 6.0)
             {

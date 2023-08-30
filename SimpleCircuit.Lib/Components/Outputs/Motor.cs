@@ -36,7 +36,8 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.ExtendPins(Pins);
+                if (!Variants.Contains(Options.Arei))
+                    drawing.ExtendPins(Pins);
                 drawing.Circle(new(), 5);
                 drawing.Text("M", new(), new());
 

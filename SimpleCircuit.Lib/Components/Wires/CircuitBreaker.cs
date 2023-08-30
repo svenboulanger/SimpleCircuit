@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Wires
                 {
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
-                }, new("dot"));
+                }, new("marker"));
 
                 drawing.Text(Labels[0], new(0, 3), new(0, 1));
             }
