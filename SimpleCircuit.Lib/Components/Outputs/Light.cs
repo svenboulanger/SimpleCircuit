@@ -15,6 +15,7 @@ namespace SimpleCircuit.Components.Outputs
         private const string _diverging = "diverging";
         private const string _projector = "projector";
         private const string _emergency = "emergency";
+        private const string _wall = "wall";
 
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
@@ -69,18 +70,26 @@ namespace SimpleCircuit.Components.Outputs
 
                 if (!Variants.Contains(Options.Arei))
                     drawing.Circle(new Vector2(), 4);
-
-                if (Variants.Contains(_projector))
-                    DrawProjector(drawing);
-                if (Variants.Contains(_direction))
-                    DrawDirectional(drawing, Variants.Contains(_diverging));
-                if (Variants.Contains(_emergency))
-                    DrawEmergency(drawing);
+                else
+                {
+                    if (Variants.Contains(_wall))
+                        DrawWall(drawing);
+                    if (Variants.Contains(_projector))
+                        DrawProjector(drawing);
+                    if (Variants.Contains(_direction))
+                        DrawDirectional(drawing, Variants.Contains(_diverging));
+                    if (Variants.Contains(_emergency))
+                        DrawEmergency(drawing);
+                }
 
                 // Label
                 drawing.Text(Labels[0], new Vector2(0, -5), new Vector2(0, -1));
             }
 
+            private void DrawWall(SvgDrawing drawing)
+            {
+                drawing.Line(new Vector2(-3, 5), new Vector2(3, 5));
+            }
             private void DrawProjector(SvgDrawing drawing)
             {
                 drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
