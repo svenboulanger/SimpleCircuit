@@ -83,7 +83,7 @@ namespace SimpleCircuitOnline
             new Demo(
                 "4. Variants and properties (basic)",
                 "Tutorial explaining variants for changing appearances.",
-                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Variants allow changing the appearance of certain components\r\n// For example, a resistor can have the \"programmable\" variant:\r\nT1(\"in\") <r> R1(programmable) <r> T2(\"out\")\r\n\r\n// Many components also have properties that can be specified as well\r\n- R1.scale = 2\r\n\r\n// The property syntax can also be used to specify variants\r\n- T1.input = true\r\n- T2.output = true\r\n\r\n// Variants can be removed again by adding a '-' before them\r\nT2(-output, +pad)\r\n"
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Variants allow changing the appearance of certain components\r\n// For example, a resistor can have the \"programmable\" variant:\r\nT1(\"in\") <r> R1(programmable) <r> T2(\"out\")\r\n\r\n// Many components also have properties that can be specified as well\r\n- R1.scale = 2\r\n\r\n// The property syntax can also be used to specify variants\r\n- T1.input = true\r\n- T2.output = true\r\n\r\n// Variants can be removed again by adding a '-' before them\r\nT2(-output, +pad)\r\n\r\n// Properties can also be specified inline\r\nR1(zigs=7)\r\n"
                 ),
 
             // Wheatstone bridge

@@ -132,7 +132,7 @@ function registerLanguage(keywords) {
             wire: [
                 [ '@lineComment', 'comment', '@pop' ],
                 { include: '@whitespace' },
-                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plusb?|minusb?|one|onlyone|many|zeroone|onemany|zeromany)\b/, { token: 'pindirection.$S0' }],
+                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plusb?|minusb?|one|onlyone|many|zeroone|onemany|zeromany)\b|\?/, { token: 'pindirection.$S0' }],
                 [/\b[xX]\b/, { token: 'queuedpoint.$S0', }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                 { include: '@number' },
@@ -155,10 +155,15 @@ function registerLanguage(keywords) {
                 [/\]/, { token: 'bracket.pin', bracket: '@close', next: '@pop' }],
             ],
             label_block: [
+                [/(\w+)(\s*)(=)/, [{ token: 'word.$S0' }, { token: 'white' }, { token: 'equals.assignment.$S0' }]],
+                [/\w+/, { token: 'variant' }],
+                [/[\+\-]/, { token: 'operator.$S0' }],
+                { include: '@number' },
+                { include: '@boolean' },
+                { include: '@string' },
                 [ '@lineComment', 'comment', '@popall'],
                 { include: '@whitespace' },
                 [/\)/, { token: 'bracket.label', bracket: '@close', next: '@pop' }],
-                { include: '@string' },
             ],
             string: [
                 [/"([^"]|\\.)*"/, 'string'],
@@ -215,7 +220,10 @@ function registerLanguage(keywords) {
             { token: 'equals.assignment', foreground: '666666' },
             { token: 'boolean', foreground: 'a0a0a0' },
             { token: 'separator', foreground: '0000ff' },
-
+            { token: 'variant', foreground: 'cc9999' },
+            { token: 'word.label-block', foreground: '9999cc' },
+            { token: 'equals.assignment.label-block', foreground: 'cccccc' },
+            { token: 'operator.label-block', foreground: 'cc9999' },
             { token: 'tag.xml', foreground: '990000' },
             { token: 'delimiter.xml', foreground: '990000' },
             { token: 'tag.attribute', foreground: 'AA0000' },

@@ -33,6 +33,11 @@ namespace SimpleCircuit.Parser
         public List<VariantInfo> Variants { get; } = new();
 
         /// <summary>
+        /// Gets the properties of the component.
+        /// </summary>
+        public Dictionary<Token, object> Properties { get; } = new();
+
+        /// <summary>
         /// Gets the component if it has been created.
         /// </summary>
         public IDrawable Component => _component;
@@ -89,12 +94,18 @@ namespace SimpleCircuit.Parser
                     else
                         _component.Variants.Remove(variant.Name);
                 }
+
+                // Handle properties
+                foreach (var property in Properties)
+                {
+                    _component.SetProperty(property.Key, property.Value, context.Diagnostics);
+                }
             }
             return _component;
         }
 
         /// <summary>
-        /// Gets or creates a component.
+        /// Gets a component, potentially using a context.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>Returns the component; or <c>null</c> if no component could be found.</returns>
