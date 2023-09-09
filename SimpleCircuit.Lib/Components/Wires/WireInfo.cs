@@ -1,4 +1,7 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires
@@ -8,15 +11,37 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class WireInfo
     {
+        private Wire _wire;
+
+        /// <summary>
+        /// Gets the source.
+        /// </summary>
+        public Token Source { get; }
+
+        /// <summary>
+        /// Gets the full name of the wire.
+        /// </summary>
+        public string Fullname { get; }
+
+        /// <summary>
+        /// Gets the pin where the wire starts.
+        /// </summary>
+        public PinInfo PinToWire { get; set; }
+
         /// <summary>
         /// The segments for the wire.
         /// </summary>
-        public List<WireSegmentInfo> Segments { get; } = new List<WireSegmentInfo>();
+        public List<WireSegmentInfo> Segments { get; set; }
+
+        /// <summary>
+        /// Gets the pin where the wire ends.
+        /// </summary>
+        public PinInfo WireToPin { get; set; }
 
         /// <summary>
         /// Gets the path options for the wire.
         /// </summary>
-        public GraphicOptions Options { get; } = new GraphicOptions("wire");
+        public GraphicOptions Options { get; set; }
 
         /// <summary>
         /// Gets or sets whether the wire should jump over other wires.
@@ -32,6 +57,17 @@ namespace SimpleCircuit.Components.Wires
         /// Gets or sets the radius for rounding corners.
         /// </summary>
         public double RoundRadius { get; set; } = 0.0;
+
+        /// <summary>
+        /// Creates a new <see cref="WireInfo"/>.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="fullname">The full name.</param>
+        public WireInfo(Token source, string fullname)
+        {
+            Source = source;
+            Fullname = fullname;
+        }
 
         /// <summary>
         /// Simplifies the wire information.
@@ -83,5 +119,50 @@ namespace SimpleCircuit.Components.Wires
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or creates a wire.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns>Returns the wire, or <c>null</c> if the wire could not be found or created.</returns>
+        public Wire GetOrCreate(ParsingContext context)
+        {
+            if (_wire != null)
+                return _wire;
+
+            if (context.Circuit.TryGetValue(Fullname, out var presence) && presence is Wire wire)
+                _wire = wire;
+            else
+            {
+                _wire = new Wire(Fullname, PinToWire, Segments, WireToPin)
+                {
+                    JumpOverWires = JumpOverWires,
+                    IsVisible = IsVisible,
+                    RoundRadius = RoundRadius,
+                    Options = Options
+                };
+                context.Circuit.Add(_wire);
+            }
+            return _wire;
+        }
+
+        /// <summary>
+        /// Gets a wire, potentially using a context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns>Returns the wire; or <c>null</c> if the wire doesn't exist.</returns>
+        public Wire Get(IPrepareContext context)
+        {
+            if (_wire != null)
+                return _wire;
+
+            _wire = context.Find(Fullname) as Wire;
+            if (_wire == null)
+                context.Diagnostics?.Post(Source, ErrorCodes.CouldNotFindWire, Source.Content);
+            return _wire;
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => Fullname;
     }
 }

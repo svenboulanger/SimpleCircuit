@@ -127,6 +127,9 @@
         [Diagnostic(SeverityLevel.Error, "PE040", "Cannot find the component '{0}'")]
         CouldNotFindDrawable,
 
+        [Diagnostic(SeverityLevel.Error, "PE040", "Cannot find the wire '{0}'")]
+        CouldNotFindWire,
+
         [Diagnostic(SeverityLevel.Error, "PE041", "Cannot find the pin '{0}' on component {1}")]
         CouldNotFindPin,
 

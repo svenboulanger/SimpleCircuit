@@ -4,6 +4,7 @@ using SimpleCircuit.Components.Diagrams.Modeling;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using System;
 using System.Collections.Generic;
@@ -88,7 +89,7 @@ namespace SimpleCircuit.Parser
                     return false;
             }
         }
-        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
+        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<WireInfo, ParsingContext> stringTogether)
         {
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
             var component = ParseComponent(lexer, context);
@@ -119,45 +120,45 @@ namespace SimpleCircuit.Parser
             }
 
             if (isFirst)
-                stringTogether?.Invoke(new(component, pinToWire), null, default, context);
+            {
+                // There is no wire specified, only the pin
+                var wireInfo = new WireInfo(default, null);
+                wireInfo.PinToWire = new PinInfo(component, pinToWire);
+                stringTogether?.Invoke(wireInfo, context);
+            }
             return true;
         }
         private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
             => ParseChainStatement(lexer, context, ComponentChainWire);
-        private static void ComponentChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context)
+        private static void ComponentChainWire(WireInfo wireInfo, ParsingContext context)
         {
             // We just want to make sure here that the name isn't bogus
-            if (pinToWireInfo.Component.Fullname.Contains('*'))
+            if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.Fullname.Contains('*'))
             {
-                context.Diagnostics?.Post(pinToWireInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
+                context.Diagnostics?.Post(wireInfo.PinToWire.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
-            if (wireToPinInfo?.Component != null && wireToPinInfo.Component.Fullname.ToString().Contains('*'))
+            if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.Fullname.ToString().Contains('*'))
             {
-                context.Diagnostics?.Post(wireToPinInfo.Component.Name, ErrorCodes.NoWildcardCharacter);
+                context.Diagnostics?.Post(wireInfo.WireToPin.Component.Name, ErrorCodes.NoWildcardCharacter);
                 return;
             }
+            if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.GetOrCreate(context) == null)
+                return;
+            if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.GetOrCreate(context) == null)
+                return;
 
-            foreach (var a in context.Annotations)
-            {
-                a.Add(pinToWireInfo.Component);
-                if (wireToPinInfo != null && wireToPinInfo.Component != null)
-                    a.Add(wireToPinInfo.Component);
-            }
-
-            // Create the components
-            pinToWireInfo.Component.GetOrCreate(context);
-            wireToPinInfo?.Component?.GetOrCreate(context);
+            if (wireInfo.Segments == null || wireInfo.Segments.Count == 0)
+                return;
 
             // Create the wire
-            if (wireInfo != null && wireInfo.Segments.Count > 0)
-            {
-                string fullname = context.GetWireFullname();
-                context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p1", pinToWireInfo, -1, wireInfo.Segments[0], false));
-                context.Circuit.Add(new Wire(fullname, pinToWireInfo, wireInfo, wireToPinInfo));
-                if (wireToPinInfo?.Component != null)
-                    context.Circuit.Add(new PinOrientationConstraint($"{fullname}.p2", wireToPinInfo, 0, wireInfo.Segments[^1], true));
-            }
+            var wire = wireInfo.GetOrCreate(context);
+            if (wire == null)
+                return;
+            if (wireInfo.PinToWire != null)
+                context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p1", wireInfo.PinToWire, -1, wireInfo.Segments[0], false));
+            if (wireInfo.WireToPin != null)
+                context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
         }
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
@@ -249,23 +250,20 @@ namespace SimpleCircuit.Parser
 
             return info;
         }
-        private static ComponentInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context, PinInfo pinToWire, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
+        private static ComponentInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context, PinInfo pinToWire, Action<WireInfo, ParsingContext> stringTogether)
         {
             if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedWire);
                 return null;
             }
-
-            // Read the direction of the wire
-            var wireInfo = new WireInfo()
-            {
-                JumpOverWires = context.Options.JumpOverWires,
-                RoundRadius = context.Options.RoundWires
-            };
+            var start = lexer.Track();
 
             // Chain together multiple wire definitions
-            List<Marker> markers = new();
+            bool isVisible = true, jumpOverWires = context.Options.JumpOverWires;
+            var options = new GraphicOptions("wire");
+            var markers = new List<Marker>();
+            var segments = new List<WireSegmentInfo>();
             Token wireToPin;
             ComponentInfo nextComponent = null;
             void AddWireSegment(Token token, Vector2 orientation)
@@ -278,13 +276,13 @@ namespace SimpleCircuit.Parser
                 };
                 if (markers.Count > 0)
                 {
-                    if (wireInfo.Segments.Count == 0)
+                    if (segments.Count == 0)
                         segment.StartMarkers = markers.ToArray();
                     else
-                        wireInfo.Segments[^1].EndMarkers = markers.ToArray();
+                        segments[^1].EndMarkers = markers.ToArray();
                     markers.Clear();
                 }
-                wireInfo.Segments.Add(segment);
+                segments.Add(segment);
             }
             while (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
@@ -321,15 +319,15 @@ namespace SimpleCircuit.Parser
                                     AddWireSegment(directionToken, Vector2.Normal(-angle * Math.PI / 180.0));
                                     break;
 
-                                case "hidden": wireInfo.IsVisible = false; break;
-                                case "visible": wireInfo.IsVisible = true; break;
+                                case "hidden": isVisible = false; break;
+                                case "visible": isVisible = true; break;
                                 case "nojump":
                                 case "nojmp":
-                                case "njmp": wireInfo.JumpOverWires = false; break;
+                                case "njmp": jumpOverWires = false; break;
                                 case "jump":
-                                case "jmp": wireInfo.JumpOverWires = true; break;
-                                case "dotted": wireInfo.Options.Classes.Add("dotted"); break;
-                                case "dashed": wireInfo.Options.Classes.Add("dashed"); break;
+                                case "jmp": jumpOverWires = true; break;
+                                case "dotted": options.Classes.Add("dotted"); break;
+                                case "dashed": options.Classes.Add("dashed"); break;
 
                                 case "arrow": markers.Add(new Arrow()); break;
                                 case "rarrow": markers.Add(new ReverseArrow()); break;
@@ -348,24 +346,35 @@ namespace SimpleCircuit.Parser
 
                                 case "X":
                                 case "x":
-                                    // Add a forward anonymous point reference
-                                    var component = context.CreateQueuedPoint(directionToken);
-
-                                    // Finish the wire
-                                    if (markers.Count > 0 && wireInfo.Segments.Count > 0)
-                                        wireInfo.Segments[^1].EndMarkers = markers.ToArray();
-                                    markers.Clear();
-                                    wireInfo.Simplify();
-                                    stringTogether?.Invoke(pinToWire, wireInfo, new(component, default), context);
-
-                                    // Start a new wire
-                                    wireInfo = new()
                                     {
-                                        JumpOverWires = context.Options.JumpOverWires,
-                                        RoundRadius = context.Options.RoundWires
-                                    };
-                                    pinToWire = new(component, default);
-                                    markers.Clear();
+                                        // Add a forward anonymous point reference
+                                        var component = context.CreateQueuedPoint(directionToken);
+
+                                        // Finish the wire
+                                        if (markers.Count > 0 && segments.Count > 0)
+                                            segments[^1].EndMarkers = markers.ToArray();
+                                        markers.Clear();
+
+                                        // Create the wire info
+                                        var subWireInfo = new WireInfo(lexer.GetTracked(start), context.GetWireFullname())
+                                        {
+                                            IsVisible = isVisible,
+                                            JumpOverWires = jumpOverWires,
+                                            RoundRadius = context.Options.RoundWires,
+                                            Options = options,
+                                            PinToWire = pinToWire,
+                                            Segments = segments,
+                                            WireToPin = new PinInfo(component, default),
+                                        };
+                                        subWireInfo.Simplify();
+                                        stringTogether?.Invoke(subWireInfo, context);
+
+                                        // Start a new wire
+                                        start = lexer.Track();
+                                        segments = new List<WireSegmentInfo>();
+                                        pinToWire = new PinInfo(component, default);
+                                        markers.Clear();
+                                    }
                                     break;
 
                                 default:
@@ -378,19 +387,19 @@ namespace SimpleCircuit.Parser
                         else if (lexer.Branch(TokenType.Plus))
                         {
                             double l = ParseDouble(lexer, context);
-                            if (wireInfo.Segments.Count > 0)
+                            if (segments.Count > 0)
                             {
-                                wireInfo.Segments[^1].IsFixed = false;
-                                wireInfo.Segments[^1].Length = l;
+                                segments[^1].IsFixed = false;
+                                segments[^1].Length = l;
                             }
                         }
                         else if (lexer.Check(TokenType.Number | TokenType.Integer))
                         {
                             double l = ParseDouble(lexer, context);
-                            if (wireInfo.Segments.Count > 0)
+                            if (segments.Count > 0)
                             {
-                                wireInfo.Segments[^1].IsFixed = true;
-                                wireInfo.Segments[^1].Length = l;
+                                segments[^1].IsFixed = true;
+                                segments[^1].Length = l;
                             }
                         }
                         else if (lexer.Branch(TokenType.Question))
@@ -398,8 +407,8 @@ namespace SimpleCircuit.Parser
                             if (!lexer.HasTrivia && lexer.Branch(TokenType.Question))
                             {
                                 AddWireSegment(directionToken, new());
-                                wireInfo.Segments[^1].IsUnconstrained = true;
-                                wireInfo.Segments[^1].Length = 0.0;
+                                segments[^1].IsUnconstrained = true;
+                                segments[^1].Length = 0.0;
                             }
                             else
                                 AddWireSegment(directionToken, new());
@@ -424,12 +433,21 @@ namespace SimpleCircuit.Parser
                         return null;
                     }
 
-                    if (markers.Count > 0 && wireInfo.Segments.Count > 0)
-                        wireInfo.Segments[^1].EndMarkers = markers.ToArray();
+                    if (markers.Count > 0 && segments.Count > 0)
+                        segments[^1].EndMarkers = markers.ToArray();
                 }
             }
 
-            // Simplify the wire as much as possible
+            // Create the wire info
+            var wireInfo = new WireInfo(lexer.GetTracked(start), context.GetWireFullname())
+            {
+                IsVisible = isVisible,
+                JumpOverWires = jumpOverWires,
+                RoundRadius = context.Options.RoundWires,
+                Options = options,
+                PinToWire = pinToWire,
+                Segments = segments,
+            };
             wireInfo.Simplify();
 
             // Try finding the result
@@ -444,21 +462,28 @@ namespace SimpleCircuit.Parser
                     nextComponent = ParseComponent(lexer, context);
                     if (nextComponent == null)
                         return null;
-                    stringTogether?.Invoke(pinToWire, wireInfo, new(nextComponent, wireToPin), context);
+                    wireInfo.WireToPin = new PinInfo(nextComponent, wireToPin);
+                    stringTogether?.Invoke(wireInfo, context);
                     return nextComponent;
 
                 case TokenType.Word:
+
                     // Optional end component
                     nextComponent = ParseComponent(lexer, context);
                     if (nextComponent == null)
                         return null;
-                    stringTogether?.Invoke(pinToWire, wireInfo, new(nextComponent, default), context);
+
+                    // Create the wire info
+                    wireInfo.WireToPin = new PinInfo(nextComponent, default);
+                    wireInfo.Simplify();
+                    stringTogether?.Invoke(wireInfo, context);
                     return nextComponent;
 
                 case TokenType.EndOfContent:
                 case TokenType.Newline:
+
                     // End at a wire definition
-                    stringTogether?.Invoke(pinToWire, wireInfo, default, context);
+                    stringTogether?.Invoke(wireInfo, context);
                     return nextComponent;
 
                 default:
@@ -500,8 +525,8 @@ namespace SimpleCircuit.Parser
                 case "section":
                     return ParseSectionDefinition(lexer, context);
 
-                case "annotate":
-                    return ParseAnnotateDefinition(lexer, context);
+                case "box":
+                    return ParseBoxAnnotateDefinition(lexer, context);
 
                 case "option":
                 case "options":
@@ -727,7 +752,7 @@ namespace SimpleCircuit.Parser
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
             return false;
         }
-        private static bool ParseAnnotateDefinition(SimpleCircuitLexer lexer, ParsingContext context)
+        private static bool ParseBoxAnnotateDefinition(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // Read the type of annotation
             if (!lexer.Branch(TokenType.Word, out var annotationTypeToken))
@@ -937,7 +962,7 @@ namespace SimpleCircuit.Parser
             // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
             // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
             ParseChainStatement(lexer, context,
-                (p2w, wi, w2p, c) => VirtualChainWire(p2w, wi, w2p, c, axis));
+                (wi, c) => VirtualChainWire(wi, c, axis));
 
             if (!lexer.Branch(TokenType.CloseParenthesis))
             {
@@ -948,17 +973,17 @@ namespace SimpleCircuit.Parser
             return true;
         }
 
-        private static void VirtualChainWire(PinInfo pinToWireInfo, WireInfo wireInfo, PinInfo wireToPinInfo, ParsingContext context, Axis axis)
+        private static void VirtualChainWire(WireInfo wireInfo, ParsingContext context, Axis axis)
         {
             if (axis == Axis.None)
                 return;
 
-            if (wireInfo != null)
-                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", pinToWireInfo, wireInfo, wireToPinInfo, axis));
+            if (wireInfo.Segments != null && wireInfo.Segments.Count > 0 && wireInfo.WireToPin != null)
+                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", wireInfo.PinToWire, wireInfo.Segments, wireInfo.WireToPin, axis));
             else
             {
                 // Rules for filtering
-                string filter = pinToWireInfo.Component.Fullname;
+                string filter = wireInfo.PinToWire.Component.Fullname;
                 filter = filter.Replace(".", "\\.");
                 if (context.Factory.IsAnonymous(filter))
                     filter += DrawableFactoryDictionary.AnonymousSeparator + ".+";

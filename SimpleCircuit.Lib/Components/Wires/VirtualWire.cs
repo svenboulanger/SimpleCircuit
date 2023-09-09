@@ -3,6 +3,8 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -13,7 +15,7 @@ namespace SimpleCircuit.Components.Wires
     {
         private ILocatedPresence _start, _end;
         private readonly PinInfo _startInfo, _endInfo;
-        private readonly WireInfo _info;
+        private readonly List<WireSegmentInfo> _segments;
         private readonly Axis _direction;
 
         /// <inheritdoc />
@@ -35,24 +37,25 @@ namespace SimpleCircuit.Components.Wires
         /// <summary>
         /// Gets the X-coordinate name of the last point of the wire.
         /// </summary>
-        public string EndX => GetXName(_info.Segments.Count - 1);
+        public string EndX => GetXName(_segments.Count - 1);
 
         /// <summary>
         /// Gets the Y-coordinate name of the last point of the wire.
         /// </summary>
-        public string EndY => GetYName(_info.Segments.Count - 1);
+        public string EndY => GetYName(_segments.Count - 1);
 
         /// <summary>
         /// Creates a new <see cref="VirtualWire"/>.
         /// </summary>
         /// <param name="name">The name of the virtual wire.</param>
         /// <param name="pinToWire">The pin starting the virtual wire.</param>
-        /// <param name="info">The wire information.</param>
+        /// <param name="segments">The wire segments.</param>
         /// <param name="wireToPin">The pin ending the virtual wire.</param>
-        public VirtualWire(string name, PinInfo pinToWire, WireInfo info, PinInfo wireToPin, Axis axis)
+        /// <param name="axis">The axis along which to align the items.</param>
+        public VirtualWire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin, Axis axis)
         {
             Name = name;
-            _info = info;
+            _segments = segments?.ToList() ?? new List<WireSegmentInfo>();
             _startInfo = pinToWire;
             _endInfo = wireToPin;
             _direction = axis;
@@ -101,9 +104,9 @@ namespace SimpleCircuit.Components.Wires
                 if (_start == null || _end == null)
                     return PresenceResult.GiveUp;
 
-                for (int i = 0; i < _info.Segments.Count; i++)
+                for (int i = 0; i < _segments.Count; i++)
                 {
-                    var segment = _info.Segments[i];
+                    var segment = _segments[i];
                     if (segment.IsUnconstrained)
                     {
                         context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
@@ -135,7 +138,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.X, StartX, 0.0))
                             {
-                                context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _start.X, StartX);
+                                context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongX, _start.X, StartX);
                                 return false;
                             }
                         }
@@ -143,7 +146,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_start.Y, StartY, 0.0))
                             {
-                                context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
+                                context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongY, _start.Y, StartY);
                                 return false;
                             }
                         }
@@ -154,7 +157,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.X, EndX, 0.0))
                             {
-                                context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _end.X, EndX);
+                                context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongX, _end.X, EndX);
                                 return false;
                             }
                         }
@@ -162,7 +165,7 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (!context.Offsets.Group(_end.Y, EndY, 0.0))
                             {
-                                context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
+                                context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongY, _end.Y, EndY);
                                 return false;
                             }
                         }
@@ -171,11 +174,11 @@ namespace SimpleCircuit.Components.Wires
                     // Deal with the horizontal and vertical segments
                     x = StartX;
                     y = StartY;
-                    for (int i = 0; i < _info.Segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                     {
                         string tx = GetXName(i);
                         string ty = GetYName(i);
-                        var segment = _info.Segments[i];
+                        var segment = _segments[i];
                         if (segment.IsFixed)
                         {
                             if (doX)
@@ -222,11 +225,11 @@ namespace SimpleCircuit.Components.Wires
                 case NodeRelationMode.Links:
                     var offsetX = context.Offsets[StartX];
                     var offsetY = context.Offsets[StartY];
-                    for (int i = 0; i < _info.Segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                     {
                         var toOffsetX = context.Offsets[GetXName(i)];
                         var toOffsetY = context.Offsets[GetYName(i)];
-                        var segment = _info.Segments[i];
+                        var segment = _segments[i];
                         if (!segment.IsFixed)
                         {
                             if (doX && !segment.Orientation.X.IsZero())
@@ -260,13 +263,13 @@ namespace SimpleCircuit.Components.Wires
             var map = context.Relationships.Offsets;
             var fromX = map[StartX];
             var fromY = map[StartY];
-            for (int i = 0; i < _info.Segments.Count; i++)
+            for (int i = 0; i < _segments.Count; i++)
             {
                 string x = GetXName(i);
                 string y = GetYName(i);
                 var toX = map[x];
                 var toY = map[y];
-                var segment = _info.Segments[i];
+                var segment = _segments[i];
                 if (!segment.IsFixed)
                 {
                     if (doY && segment.Orientation.X.IsZero() && fromY.Representative != toY.Representative)

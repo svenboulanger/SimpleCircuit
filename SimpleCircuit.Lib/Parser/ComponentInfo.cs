@@ -62,53 +62,53 @@ namespace SimpleCircuit.Parser
         /// <returns>Returns the component, or <c>null</c> if no component could be found or created.</returns>
         public IDrawable GetOrCreate(ParsingContext context)
         {
+            if (_component != null)
+                return _component;
+
+            if (context.Circuit.TryGetValue(Fullname, out var presence) && presence is IDrawable drawable)
+                _component = drawable;
+            else
+            {
+                _component = context.Factory.Create(Fullname, context.Options, context.Diagnostics);
+                if (_component != null)
+                    context.Circuit.Add(_component);
+            }
+
             if (_component == null)
             {
-                if (context.Circuit.TryGetValue(Fullname, out var presence) && presence is IDrawable drawable)
-                    _component = drawable;
+                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
+                return null;
+            }
+
+            // Handle the label
+            if (Labels.Count > 0 && _component is ILabeled labeled)
+            {
+                if (Labels.Count > labeled.Labels.Maximum)
+                {
+                    context.Diagnostics?.Post(Labels[labeled.Labels.Count], ErrorCodes.TooManyLabels);
+                    for (int i = 0; i < labeled.Labels.Maximum; i++)
+                        labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
+                }
                 else
                 {
-                    _component = context.Factory.Create(Fullname, context.Options, context.Diagnostics);
-                    if (_component != null)
-                        context.Circuit.Add(_component);
+                    for (int i = 0; i < Labels.Count; i++)
+                        labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
                 }
+            }
 
-                if (_component == null)
-                {
-                    context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
-                    return null;
-                }
+            // Handle variants
+            foreach (var variant in Variants)
+            {
+                if (variant.Include)
+                    _component.Variants.Add(variant.Name);
+                else
+                    _component.Variants.Remove(variant.Name);
+            }
 
-                // Handle the label
-                if (Labels.Count > 0 && _component is ILabeled labeled)
-                {
-                    if (Labels.Count > labeled.Labels.Maximum)
-                    {
-                        context.Diagnostics?.Post(Labels[labeled.Labels.Count], ErrorCodes.TooManyLabels);
-                        for (int i = 0; i < labeled.Labels.Maximum; i++)
-                            labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
-                    }
-                    else
-                    {
-                        for (int i = 0; i < Labels.Count; i++)
-                            labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
-                    }    
-                }
-                
-                // Handle variants
-                foreach (var variant in Variants)
-                {
-                    if (variant.Include)
-                        _component.Variants.Add(variant.Name);
-                    else
-                        _component.Variants.Remove(variant.Name);
-                }
-
-                // Handle properties
-                foreach (var property in Properties)
-                {
-                    _component.SetProperty(property.Key, property.Value, context.Diagnostics);
-                }
+            // Handle properties
+            foreach (var property in Properties)
+            {
+                _component.SetProperty(property.Key, property.Value, context.Diagnostics);
             }
             return _component;
         }
@@ -120,12 +120,12 @@ namespace SimpleCircuit.Parser
         /// <returns>Returns the component; or <c>null</c> if no component could be found.</returns>
         public IDrawable Get(IPrepareContext context)
         {
+            if (_component != null)
+                return _component;
+
+            _component = context.Find(Fullname) as IDrawable;
             if (_component == null)
-            {
-                _component = context.Find(Fullname) as IDrawable;
-                if (_component == null)
-                    context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Name.Content);
-            }
+                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Name.Content);
             return _component;
         }
 

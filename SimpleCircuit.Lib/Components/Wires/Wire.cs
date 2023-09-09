@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser;
 using SpiceSharp.Components;
@@ -29,7 +30,7 @@ namespace SimpleCircuit.Components.Wires
 
         private IPin _w2p, _p2w;
         private readonly PinInfo _wireToPin, _pinToWire;
-        private readonly WireInfo _info;
+        private readonly List<WireSegmentInfo> _segments;
         private readonly List<WirePoint> _vectors = new();
         private const double _jumpOverRadius = 1.5;
 
@@ -52,25 +53,46 @@ namespace SimpleCircuit.Components.Wires
         /// <summary>
         /// Gets the X-coordinate name of the last point of the wire.
         /// </summary>
-        public string EndX => GetXName(_info.Segments.Count - 1);
+        public string EndX => GetXName(_segments.Count - 1);
 
         /// <summary>
         /// Gets the Y-coordinate name of the last point of the wire.
         /// </summary>
-        public string EndY => GetYName(_info.Segments.Count - 1);
+        public string EndY => GetYName(_segments.Count - 1);
+
+        /// <summary>
+        /// Gets or sets whether the wire needs to jump over previous wires
+        /// with a little arc.
+        /// </summary>
+        public bool JumpOverWires { get; set; } = false;
+
+        /// <summary>
+        /// Gets whether the wire is visible or hidden.
+        /// </summary>
+        public bool IsVisible { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the round radius for corners of the wire.
+        /// </summary>
+        public double RoundRadius { get; set; } = 0.0;
+
+        /// <summary>
+        /// Gets or sets the graphic options for the wire.
+        /// </summary>
+        public GraphicOptions Options { get; set; }
 
         /// <summary>
         /// Creates a new wire.
         /// </summary>
         /// <param name="name">The name of the wire.</param>
         /// <param name="pinToWire">The pin that will start the wire.</param>
-        /// <param name="info">The wire information.</param>
+        /// <param name="segments">The wire segments.</param>
         /// <param name="wireToPin">The pin that will end the wire.</param>
-        public Wire(string name, PinInfo pinToWire, WireInfo info, PinInfo wireToPin)
+        public Wire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin)
             : base(name)
         {
             _pinToWire = pinToWire;
-            _info = info ?? throw new ArgumentNullException(nameof(info));
+            _segments = segments?.ToList() ?? throw new ArgumentNullException(nameof(segments)); ;
             _wireToPin = wireToPin;
         }
 
@@ -103,7 +125,7 @@ namespace SimpleCircuit.Components.Wires
                 var p1 = _p2w as IOrientedPin;
                 var p2 = _w2p as IOrientedPin;
 
-                if (_info.Segments.Count == 1 && _info.Segments[0].Orientation.X.IsZero() && _info.Segments[0].Orientation.Y.IsZero() && !_info.Segments[0].IsUnconstrained)
+                if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero() && !_segments[0].IsUnconstrained)
                 {
                     // We have a wire that connects two pins but does not have a defined orientation yet
                     // This piece of code will pass this orientation to other nodes if they can be resolved
@@ -121,10 +143,10 @@ namespace SimpleCircuit.Components.Wires
                             return PresenceResult.Success;
                         else if (p1f)
                             // The first pin is fixed, so let's use its orientation to set the second one
-                            p2.ResolveOrientation(-p1.Orientation, _info.Segments[0].Source, context.Diagnostics);
+                            p2.ResolveOrientation(-p1.Orientation, _segments[0].Source, context.Diagnostics);
                         else if (p2f)
                             // The second pin is fixed, so let's use its orientation to set the first one
-                            p1.ResolveOrientation(-p2.Orientation, _info.Segments[0].Source, context.Diagnostics);
+                            p1.ResolveOrientation(-p2.Orientation, _segments[0].Source, context.Diagnostics);
                         else
                         {
                             // Both aren't fixed, so we might just not have enough information...
@@ -166,9 +188,9 @@ namespace SimpleCircuit.Components.Wires
                 else
                 {
                     // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
-                    for (int i = 0; i < _info.Segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                     {
-                        var segment = _info.Segments[i];
+                        var segment = _segments[i];
                         if (segment.IsUnconstrained)
                             continue;
                         else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
@@ -182,7 +204,7 @@ namespace SimpleCircuit.Components.Wires
                                     return PresenceResult.GiveUp;
                                 }
                             }
-                            else if (i == _info.Segments.Count - 1)
+                            else if (i == _segments.Count - 1)
                             {
                                 if (p2 == null)
                                 {
@@ -215,12 +237,12 @@ namespace SimpleCircuit.Components.Wires
                     {
                         if (!context.Offsets.Group(_p2w.X, StartX, 0.0))
                         {
-                            context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
+                            context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
                             return false;
                         }
                         if (!context.Offsets.Group(_p2w.Y, StartY, 0.0))
                         {
-                            context.Diagnostics?.Post(_info.Segments[0].Source, ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
+                            context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
                             return false;
                         }
                     }
@@ -228,12 +250,12 @@ namespace SimpleCircuit.Components.Wires
                     {
                         if (!context.Offsets.Group(_w2p.X, EndX, 0.0))
                         {
-                            context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
+                            context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
                             return false;
                         }
                         if (!context.Offsets.Group(_w2p.Y, EndY, 0.0))
                         {
-                            context.Diagnostics?.Post(_info.Segments[^1].Source, ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
+                            context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
                             return false;
                         }
                     }
@@ -241,11 +263,11 @@ namespace SimpleCircuit.Components.Wires
                     // Deal with horizontal and vertical segments
                     x = StartX;
                     y = StartY;
-                    for (int i = 0; i < _info.Segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                     {
                         string tx = GetXName(i);
                         string ty = GetYName(i);
-                        var segment = _info.Segments[i];
+                        var segment = _segments[i];
 
                         // Ignore unconstrained wires
                         if (!segment.IsUnconstrained)
@@ -296,11 +318,11 @@ namespace SimpleCircuit.Components.Wires
                     // Go through all segments and determine the order of coordinates
                     var offsetX = context.Offsets[StartX];
                     var offsetY = context.Offsets[StartY];
-                    for (int i = 0; i < _info.Segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                     {
                         var toOffsetX = context.Offsets[GetXName(i)];
                         var toOffsetY = context.Offsets[GetYName(i)];
-                        var segment = _info.Segments[i];
+                        var segment = _segments[i];
                         if (!segment.IsUnconstrained && !segment.IsFixed)
                         {
                             var orientation = GetOrientation(i);
@@ -327,13 +349,13 @@ namespace SimpleCircuit.Components.Wires
 
         private Vector2 GetOrientation(int index)
         {
-            var orientation = _info.Segments[index].Orientation;
+            var orientation = _segments[index].Orientation;
             if (orientation.X.IsZero() && orientation.Y.IsZero())
             {
                 // Take the pin orientation instead
                 if (index == 0 && _p2w is IOrientedPin p1)
                     orientation = p1.Orientation;
-                else if (index == _info.Segments.Count - 1 && _w2p is IOrientedPin p2)
+                else if (index == _segments.Count - 1 && _w2p is IOrientedPin p2)
                     orientation = -p2.Orientation;
                 else
                     orientation = new(1, 0);
@@ -348,12 +370,12 @@ namespace SimpleCircuit.Components.Wires
             var last = context.GetValue(StartX, StartY);
             int count = context.WireSegments.Count;
             _vectors.Add(new(last, false));
-            for (int i = 0; i < _info.Segments.Count; i++)
+            for (int i = 0; i < _segments.Count; i++)
             {
                 var next = context.GetValue(GetXName(i), GetYName(i));
 
                 // Add jump-over points if specified
-                if (_info.JumpOverWires)
+                if (JumpOverWires)
                     AddJumpOverWires(last, next, context.WireSegments.Take(count));
 
                 _vectors.Add(new(next, false));
@@ -420,13 +442,13 @@ namespace SimpleCircuit.Components.Wires
             var map = context.Relationships.Offsets;
             var fromX = map[StartX];
             var fromY = map[StartY];
-            for (int i = 0; i < _info.Segments.Count; i++)
+            for (int i = 0; i < _segments.Count; i++)
             {
                 string x = GetXName(i);
                 string y = GetYName(i);
                 var toX = map[x];
                 var toY = map[y];
-                var segment = _info.Segments[i];
+                var segment = _segments[i];
                 if (!segment.IsUnconstrained && !segment.IsFixed)
                 {
                     var orientation = GetOrientation(i);
@@ -483,13 +505,13 @@ namespace SimpleCircuit.Components.Wires
         protected override void Draw(SvgDrawing drawing)
         {
             List<Marker> markers = new();
-            if (_info.IsVisible && _vectors.Count > 0)
+            if (IsVisible && _vectors.Count > 0)
             {
                 drawing.Path(builder =>
                 {
                     builder.MoveTo(_vectors[0].Location);
                     int segment = 0;
-                    var startMarkers = _info.Segments[0].StartMarkers;
+                    var startMarkers = _segments[0].StartMarkers;
                     Vector2 last = _vectors[0].Location;
                     for (int i = 1; i < _vectors.Count; i++)
                     {
@@ -524,7 +546,7 @@ namespace SimpleCircuit.Components.Wires
                         }
                         else
                         {
-                            if (_info.RoundRadius.IsZero() || i >= _vectors.Count - 1)
+                            if (RoundRadius.IsZero() || i >= _vectors.Count - 1)
                                 builder.LineTo(current);
                             else
                             {
@@ -542,7 +564,7 @@ namespace SimpleCircuit.Components.Wires
                                     else
                                     {
                                         // Rounded corner
-                                        double x = _info.RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                        double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
                                         if (x > lu * 0.5 || x > lv * 0.5)
                                         {
                                             // No place, just do straight line again
@@ -552,7 +574,7 @@ namespace SimpleCircuit.Components.Wires
                                         {
                                             // Segments
                                             builder.LineTo(current + nu * x);
-                                            builder.ArcTo(_info.RoundRadius, _info.RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                            builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
                                         }
                                     }
                                 }
@@ -573,7 +595,7 @@ namespace SimpleCircuit.Components.Wires
                             }
 
                             // Deal with the end marker
-                            var endMarkers = _info.Segments[segment].EndMarkers;
+                            var endMarkers = _segments[segment].EndMarkers;
                             if (endMarkers != null)
                             {
                                 foreach (var marker in endMarkers)
@@ -586,13 +608,13 @@ namespace SimpleCircuit.Components.Wires
                             segment++;
 
                             // Prepare for the next start marker
-                            if (segment < _info.Segments.Count)
-                                startMarkers = _info.Segments[segment].StartMarkers;
+                            if (segment < _segments.Count)
+                                startMarkers = _segments[segment].StartMarkers;
                         }
 
                         last = current;
                     }
-                }, _info.Options);
+                }, Options);
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)
