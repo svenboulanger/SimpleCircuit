@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
+using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
@@ -12,9 +13,10 @@ namespace SimpleCircuit.Components.Annotations
     /// <summary>
     /// An annotation box.
     /// </summary>
-    public class Box : IDrawable, ILabeled
+    public class Box : IDrawable, ILabeled, IAnnotation
     {
         private readonly HashSet<ComponentInfo> _components = new();
+        private readonly HashSet<WireInfo> _wires = new();
         private readonly HashSet<IDrawable> _drawables = new();
 
         /// <inheritdoc />
@@ -72,15 +74,20 @@ namespace SimpleCircuit.Components.Annotations
             Pins = new PinCollection();
         }
 
-        /// <summary>
-        /// Adds a 
-        /// </summary>
-        /// <param name="info"></param>
+        /// <inheritdoc />
         public void Add(ComponentInfo info)
         {
             if (info == null)
                 throw new ArgumentNullException(nameof(info));
             _components.Add(info);
+        }
+
+        /// <inheritdoc />
+        public void Add(WireInfo info)
+        {
+            if (info == null)
+                throw new ArgumentNullException(nameof(info));
+            _wires.Add(info);
         }
 
         /// <inheritdoc />
@@ -134,6 +141,13 @@ namespace SimpleCircuit.Components.Annotations
         {
             // Find all component info items
             foreach (var info in _components)
+            {
+                var drawable = info.Get(context);
+                if (drawable == null)
+                    return PresenceResult.GiveUp;
+                _drawables.Add(drawable);
+            }
+            foreach (var info in _wires)
             {
                 var drawable = info.Get(context);
                 if (drawable == null)

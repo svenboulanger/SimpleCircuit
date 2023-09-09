@@ -10,8 +10,11 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"GND <u> V1 <u r> R <r d> C <d> GND
+            var script = @".box A ""Test""
+GND <u> V1 <u r> R <r d> C <d> GND
 (y GND)
+.endb
+- A.radius = 2
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

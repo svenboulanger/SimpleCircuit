@@ -11,8 +11,18 @@ namespace SimpleCircuit
     /// </summary>
     public class Options
     {
+        private struct DefaultProperty
+        {
+            public Token Property { get; }
+            public object Value { get; }
+            public DefaultProperty(Token property, object value)
+            {
+                Property = property;
+                Value = value;
+            }
+        }
         private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
-        private readonly Dictionary<string, List<Action<IDrawable, IDiagnosticHandler>>> _properties = new();
+        private readonly Dictionary<string, List<DefaultProperty>> _properties = new();
         private double _spacingX = 20.0, _spacingY = 20.0;
 
         /// <summary>
@@ -125,9 +135,7 @@ namespace SimpleCircuit
                 list = new();
                 _properties.Add(key, list);
             }
-
-            var action = new Action<IDrawable, IDiagnosticHandler>((drawable, diagnostics) => drawable.SetProperty(propertyToken, value, diagnostics));
-            list.Add(action);
+            list.Add(new DefaultProperty(propertyToken, value));
         }
 
         /// <summary>
@@ -181,6 +189,7 @@ namespace SimpleCircuit
         /// <param name="drawable">The drawable.</param>
         public void Apply(string key, IDrawable drawable, IDiagnosticHandler diagnostics)
         {
+            // Handle default variants
             if (_includes.TryGetValue(key, out var set))
             {
                 foreach (string variant in set)
@@ -191,10 +200,12 @@ namespace SimpleCircuit
                 foreach (string variant in set)
                     drawable.Variants.Remove(variant);
             }
+
+            // Handle default properties
             if (_properties.TryGetValue(key, out var list))
             {
-                foreach (var action in list)
-                    action(drawable, diagnostics);
+                foreach (var defaultProperty in list)
+                    drawable.SetProperty(defaultProperty.Property, defaultProperty.Value, diagnostics);
             }
         }
     }

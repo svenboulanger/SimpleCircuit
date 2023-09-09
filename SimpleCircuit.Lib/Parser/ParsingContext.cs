@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the current annotations.
         /// </summary>
-        public HashSet<Components.Annotations.Box> Annotations { get; } = new();
+        public HashSet<IAnnotation> Annotations { get; } = new();
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.

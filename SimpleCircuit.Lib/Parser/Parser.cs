@@ -23,7 +23,7 @@ namespace SimpleCircuit.Parser
         private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
         private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
         private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
-        private static readonly string[] _annotateEnd = new[] { "enda", "endannotate" };
+        private static readonly string[] _boxEnd = new[] { "endb", "endbox" };
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -159,6 +159,16 @@ namespace SimpleCircuit.Parser
                 context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p1", wireInfo.PinToWire, -1, wireInfo.Segments[0], false));
             if (wireInfo.WireToPin != null)
                 context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
+
+            // Register the wires for annotation
+            foreach (var annotation in context.Annotations)
+            {
+                annotation.Add(wireInfo);
+                if (wireInfo.PinToWire?.Component != null)
+                    annotation.Add(wireInfo.PinToWire.Component);
+                if (wireInfo.WireToPin?.Component != null)
+                    annotation.Add(wireInfo.WireToPin.Component);
+            }
         }
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
@@ -526,7 +536,7 @@ namespace SimpleCircuit.Parser
                     return ParseSectionDefinition(lexer, context);
 
                 case "box":
-                    return ParseBoxAnnotateDefinition(lexer, context);
+                    return ParseBoxAnnotation(lexer, context);
 
                 case "option":
                 case "options":
@@ -752,15 +762,8 @@ namespace SimpleCircuit.Parser
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
             return false;
         }
-        private static bool ParseBoxAnnotateDefinition(SimpleCircuitLexer lexer, ParsingContext context)
+        private static bool ParseBoxAnnotation(SimpleCircuitLexer lexer, ParsingContext context)
         {
-            // Read the type of annotation
-            if (!lexer.Branch(TokenType.Word, out var annotationTypeToken))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAnnotationType);
-                return false;
-            }
-
             // Read the identifier of the annotation
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
@@ -780,27 +783,31 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.Branch(TokenType.Dot))
                 {
-                    if (BranchControlWord(lexer, _annotateEnd))
+                    if (BranchControlWord(lexer, _boxEnd))
                     {
                         lexer.Skip(~TokenType.Newline);
+                        context.Annotations.Remove(annotation);
                         context.Circuit.Add(annotation);
                         return true;
                     }
                     else if (!ParseControlStatement(lexer, context))
                     {
-                        SkipToControlWord(lexer, _annotateEnd);
+                        SkipToControlWord(lexer, _boxEnd);
+                        context.Annotations.Remove(annotation);
                         return false;
                     }
                 }
                 else if (!ParseNonControlStatement(lexer, context))
                 {
-                    SkipToControlWord(lexer, _annotateEnd);
+                    SkipToControlWord(lexer, _boxEnd);
+                    context.Annotations.Remove(annotation);
                     return false;
                 }
             }
 
             // Check if we reached the end of
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
+            context.Annotations.Remove(annotation);
             return false;
         }
         private static bool ParseOptions(SimpleCircuitLexer lexer, ParsingContext context)
