@@ -68,9 +68,9 @@ namespace SimpleCircuit.Components.Analog
                 drawing.ExtendPins(Pins);
 
                 // The rectangle
-                CommonGraphical.Rectangle(drawing, Length, Width);
-
                 double w = Width * 0.5;
+                drawing.Rectangle(-Length * 0.5, -w, Length, Width);
+
                 if (Variants.Contains(_programmable))
                 {
                     drawing.Arrow(new(-5, w + 1), new(6, -w - 4));

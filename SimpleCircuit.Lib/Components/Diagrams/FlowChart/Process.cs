@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Rectangle(Width, Height);
+                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
 
                 if (Variants.Contains(Predefined))
                 {

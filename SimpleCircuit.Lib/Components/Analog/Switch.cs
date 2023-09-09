@@ -187,7 +187,7 @@ namespace SimpleCircuit.Components.Analog
                            new(-4, -6), new(1, -3), new(1, -2), new(2, 1)
                         });
 
-                        marker = new Arrow(new(2, 1), new(0.31622777, 0.94868330));
+                        marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
                         marker.Draw(drawing);
                         break;
                 }
@@ -205,10 +205,10 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
+                    drawing.Text(Labels[0], new Vector2(0, 7), new Vector2(0, 1));
                 }
-
-                // Label
-                drawing.Text(Labels[0], new Vector2(0, 3), new Vector2(0, 1));
+                else
+                    drawing.Text(Labels[0], new Vector2(0, 3), new Vector2(0, 1));
             }
             private void DrawPushSwitch(SvgDrawing drawing)
             {

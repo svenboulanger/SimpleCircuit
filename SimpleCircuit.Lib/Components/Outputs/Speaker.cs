@@ -37,7 +37,7 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-                drawing.Rectangle(4, 8, new());
+                drawing.Rectangle(-2, -4, 4, 8);
                 drawing.Polygon(new Vector2[]
                 {
                     new(2, -4), new(6, -9),

@@ -38,6 +38,8 @@
             {
                 base.Draw(drawing);
                 double s = Size * 0.5;
+                if (!Variants.Contains(Square))
+                    s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
                 drawing.Text(Labels[0], new(-s * 0.5, -s * 0.5), new());
                 drawing.Text(Labels[1], new(s * 0.5, s * 0.5), new());

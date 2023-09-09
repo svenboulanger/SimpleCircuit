@@ -34,7 +34,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.ExtendPins(Pins);
 
                 // The crystal
-                drawing.Rectangle(5, 10, options: new("body"));
+                drawing.Rectangle(-2.5, -5, 5, 10, options: new("body"));
                 drawing.Path(b => b.MoveTo(-4.5, -3.5).Line(0, 7).MoveTo(4.5, -3.5).Line(0, 7));
 
                 // Label

@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using SpiceSharp;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser
@@ -63,7 +64,15 @@ namespace SimpleCircuit.Parser
         {
             if (_component == null)
             {
-                _component = context.GetOrCreate(Fullname, context.Options, context.Diagnostics);
+                if (context.Circuit.TryGetValue(Fullname, out var presence) && presence is IDrawable drawable)
+                    _component = drawable;
+                else
+                {
+                    _component = context.Factory.Create(Fullname, context.Options, context.Diagnostics);
+                    if (_component != null)
+                        context.Circuit.Add(_component);
+                }
+
                 if (_component == null)
                 {
                     context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);

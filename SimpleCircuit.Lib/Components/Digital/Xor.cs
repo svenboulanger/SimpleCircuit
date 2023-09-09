@@ -161,7 +161,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawXorIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-                drawing.Rectangle(Width, Height);
+                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("=1", new(), new());
                 drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
             }

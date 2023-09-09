@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.ExtendPins(Pins, 2, "s", "r", "q");
 
                 // Body
-                drawing.Rectangle(18, 24, new());
+                drawing.Rectangle(-9, -12, 18, 24, new());
 
                 // Labels
                 drawing.Text("S", new Vector2(-8, -6), new Vector2(1, 0));

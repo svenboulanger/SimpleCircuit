@@ -17,18 +17,57 @@ namespace SimpleCircuit.Components
         /// <param name="width">The width, default is 12.</param>
         /// <param name="height">The height, default is 6.</param>
         /// <param name="center">The center of the rectangle, default is the origin.</param>
+        /// <param name="rx">The radius along the x-axis.</param>
+        /// <param name="ry">The radius along the y-axis.</param>
         /// <param name="options">Path options.</param>
-        public static void Rectangle(this SvgDrawing drawing, double width = 12.0, double height = 6.0, Vector2 center = new(), GraphicOptions options = null)
+        public static void Rectangle(this SvgDrawing drawing, double x, double y, double width, double height,
+            double rx = double.NaN, double ry = double.NaN, GraphicOptions options = null)
         {
-            width *= 0.5;
-            height *= 0.5;
-            drawing.Polygon(new Vector2[]
+            // Deal with rounded corners
+            if (double.IsNaN(rx) && double.IsNaN(ry))
             {
-                new Vector2(-width, height) + center,
-                new Vector2(width, height) + center,
-                new Vector2(width, -height) + center,
-                new Vector2(-width, -height) + center
-            }, options);
+                rx = 0.0;
+                ry = 0.0;
+            }
+            else if (double.IsNaN(rx))
+                rx = ry;
+            else if (double.IsNaN(ry))
+                ry = rx;
+
+            if (rx == 0.0)
+            {
+                // Simple version
+                drawing.Polygon(new Vector2[]
+                {
+                    new Vector2(x, y),
+                    new Vector2(x + width, y),
+                    new Vector2(x + width, y + height),
+                    new Vector2(x, y + height)
+                }, options);
+            }
+            else
+            {
+                // Draw the rectangle
+                double kx = 0.55191502449351057 * rx;
+                double ky = 0.55191502449351057 * ry;
+                drawing.Path(b =>
+                {
+                    b.MoveTo(x + rx, y);
+                    b.Horizontal(width - 2 * rx);
+                    if (rx != 0.0)
+                        b.Curve(new(kx, 0), new(rx, ry - ky), new(rx, ry));
+                    b.Vertical(height - 2 * ry);
+                    if (ry != 0.0)
+                        b.Curve(new(0, ky), new(-rx + kx, ry), new(-rx, ry));
+                    b.Horizontal(2 * rx - width);
+                    if (rx != 0.0)
+                        b.Curve(new(-kx, 0), new(-rx, ky - ry), new(-rx, -ry));
+                    b.Vertical(2 * ry - height);
+                    if (ry != 0)
+                        b.Curve(new(0, -ky), new(rx - kx, -ry), new(rx, -ry));
+                    b.Close();
+                }, options);
+            }
         }
 
         /// <summary>

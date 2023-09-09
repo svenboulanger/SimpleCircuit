@@ -85,9 +85,9 @@ namespace SimpleCircuit.Components.Digital
             {
                 drawing.ExtendPins(Pins, 2, "in", "out");
 
-                drawing.Rectangle(10, 10, new());
+                drawing.Rectangle(-5, -5, 10, 10);
                 drawing.Circle(new(6.5, 0), 1.5);
-                drawing.Text("1", new(), new());
+                drawing.Text("1", new Vector2(), new Vector2());
 
                 drawing.Text(Labels[0], new(0, -6), new(0, -1));
             }

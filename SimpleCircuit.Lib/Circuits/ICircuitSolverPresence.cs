@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components
         public bool DiscoverNodeRelationships(IRelationshipContext context);
 
         /// <summary>
-        /// Registers the pin's presence in the circuit that will solve all coordinates.
+        /// Registers the presence in the circuit that will solve all coordinates.
         /// </summary>
         /// <param name="context">The solver context.</param>
         public void Register(IRegisterContext context);

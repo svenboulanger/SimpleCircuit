@@ -56,6 +56,9 @@ namespace SimpleCircuit.Components.Diagrams
         /// <remarks>Diagram blocks cannot be oriented.</remarks>
         public int OrientationDegreesOfFreedom => 0;
 
+        /// <inheritdoc />
+        public Bounds Bounds { get; private set; }
+
         /// <summary>
         /// Creates a new instance for a block diagram.
         /// </summary>
@@ -117,7 +120,7 @@ namespace SimpleCircuit.Components.Diagrams
             drawing.EndTransform();
 
             // Stop grouping elements
-            drawing.EndGroup();
+            Bounds = drawing.EndGroup();
         }
 
         /// <summary>

@@ -186,7 +186,7 @@ namespace SimpleCircuit.Components.Analog
                 double l = Length * 0.5;
 
                 // The rectangle
-                drawing.Rectangle(Length, Width);
+                drawing.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width);
                 if (Variants.Contains(_x))
                 {
                     drawing.Line(new(-l, -w), new(l, w));
@@ -218,11 +218,12 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     case 3: // Assymmetric
-                        drawing.Rectangle(Width * 0.15, Width, new(l * 0.85, 0), new("dot"));
+                        drawing.Rectangle(l * 0.85 - Width * 0.15 * 0.5, -Width * 0.5,
+                            l * 0.85 + Width * 0.15 * 0.5, Width * 0.5, options: new("marker"));
                         break;
 
                     case 4: // Memristor
-                        drawing.Rectangle(Length * 0.15, Width, new(Length * 0.425, 0), new("dot"));
+                        drawing.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -Width * 0.5, Length * 0.15, Width, options: new("marker"));
                         double t = Length * 0.85 / 13;
                         drawing.Polyline(new Vector2[]
                         {

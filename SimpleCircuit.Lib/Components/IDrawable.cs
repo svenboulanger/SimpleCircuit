@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 using System.Collections.Generic;
 
@@ -26,6 +27,11 @@ namespace SimpleCircuit.Components
         /// </summary>
         public IEnumerable<string> Properties { get; }
 
+        /// <summary>
+        /// Gets the bounds of the drawable.
+        /// </summary>
+        public Bounds Bounds { get; }
+        
         /// <summary>
         /// Sets a property.
         /// </summary>

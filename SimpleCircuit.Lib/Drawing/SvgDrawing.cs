@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
@@ -380,37 +381,8 @@ namespace SimpleCircuit
             if (!success)
                 return;
 
-            // Deal with rounded corners
-            if (double.IsNaN(rx) && !double.IsNaN(ry))
-                rx = ry;
-            else if (double.IsNaN(ry) && !double.IsNaN(rx))
-                ry = rx;
-            else if (double.IsNaN(rx) && double.IsNaN(ry))
-            {
-                rx = 0.0;
-                ry = 0.0;
-            }
-
             // Draw the rectangle
-            double kx = 0.55191502449351057 * rx;
-            double ky = 0.55191502449351057 * ry;
-            Path(b =>
-            {
-                b.MoveTo(new Vector2(x, y) + new Vector2(rx, 0));
-                b.Horizontal(width - 2 * rx);
-                if (rx != 0.0)
-                    b.Curve(new(kx, 0), new(rx, ry - ky), new(rx, ry));
-                b.Vertical(height - 2 * ry);
-                if (ry != 0.0)
-                    b.Curve(new(0, ky), new(-rx + kx, ry), new(-rx, ry));
-                b.Horizontal(2 * rx - width);
-                if (rx != 0.0)
-                    b.Curve(new(-kx, 0), new(-rx, ky - ry), new(-rx, -ry));
-                b.Vertical(2 * ry - height);
-                if (ry != 0)
-                    b.Curve(new(0, -ky), new(rx - kx, -ry), new(rx, -ry));
-                b.Close();
-            }, options);
+            this.Rectangle(x, y, x + width, y + height, rx, ry, options);
         }
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
@@ -701,6 +673,9 @@ namespace SimpleCircuit
         /// <inheritdoc />
         public Bounds Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
+            if (string.IsNullOrWhiteSpace(value))
+                return default;
+
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
             var bounds = Formatter.Format(_current, value, location, expand, options, Diagnostics);

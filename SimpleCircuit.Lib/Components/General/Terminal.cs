@@ -80,14 +80,14 @@ namespace SimpleCircuit.Components
 
                     case 6:
                         // pad
-                        drawing.Rectangle(4, 4, new(-2, 0));
+                        drawing.Rectangle(-4, -2, 4, 4);
                         drawing.Cross(new(-2, 0), 4);
                         drawing.Text(Labels[0], new(-5, 0), new(-1, 0));
                         break;
 
                     case 7:
                         // square
-                        drawing.Rectangle(4, 4, new(-2, 0));
+                        drawing.Rectangle(-4, -2, 4, 4);
                         drawing.Text(Labels[0], new(-5, 0), new(-1, 0));
                         break;
 

@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.ExtendPins(Pins);
 
-                drawing.Rectangle(12, 6, new());
+                drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
 
                 drawing.Text(Labels[0], new(0, -4), new(0, -1));
@@ -65,7 +65,7 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.ExtendPins(Pins);
 
-                drawing.Rectangle(12, 6, new());
+                drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Line(new(-6, 0), new(6, 0));
 
                 drawing.Text(Labels[0], new(0, -4), new(0, -1));

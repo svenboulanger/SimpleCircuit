@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Components.Constraints;
+using SimpleCircuit.Components.Diagrams.Modeling;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
@@ -21,6 +22,7 @@ namespace SimpleCircuit.Parser
         private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
         private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
         private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
+        private static readonly string[] _annotateEnd = new[] { "enda", "endannotate" };
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -136,6 +138,13 @@ namespace SimpleCircuit.Parser
                 return;
             }
 
+            foreach (var a in context.Annotations)
+            {
+                a.Add(pinToWireInfo.Component);
+                if (wireToPinInfo != null && wireToPinInfo.Component != null)
+                    a.Add(wireToPinInfo.Component);
+            }
+
             // Create the components
             pinToWireInfo.Component.GetOrCreate(context);
             wireToPinInfo?.Component?.GetOrCreate(context);
@@ -237,6 +246,7 @@ namespace SimpleCircuit.Parser
                 if (!lexer.Branch(TokenType.CloseParenthesis))
                     context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
             }
+
             return info;
         }
         private static ComponentInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context, PinInfo pinToWire, Action<PinInfo, WireInfo, PinInfo, ParsingContext> stringTogether)
@@ -490,6 +500,9 @@ namespace SimpleCircuit.Parser
                 case "section":
                     return ParseSectionDefinition(lexer, context);
 
+                case "annotate":
+                    return ParseAnnotateDefinition(lexer, context);
+
                 case "option":
                 case "options":
                     return ParseOptions(lexer, context);
@@ -707,6 +720,57 @@ namespace SimpleCircuit.Parser
                         SkipToControlWord(lexer, _sectionEnd);
                         return false;
                     }
+                }
+            }
+
+            // Check if we reached the end of
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
+            return false;
+        }
+        private static bool ParseAnnotateDefinition(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            // Read the type of annotation
+            if (!lexer.Branch(TokenType.Word, out var annotationTypeToken))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAnnotationType);
+                return false;
+            }
+
+            // Read the identifier of the annotation
+            if (!lexer.Branch(TokenType.Word, out var nameToken))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAnnotationName);
+                return false;
+            }
+
+            // Notify the parsing context to start tracking component info's that are inside the annotation
+            var annotation = new Components.Annotations.Box(nameToken.Content.ToString());
+            context.Annotations.Add(annotation);
+
+            if (lexer.Branch(TokenType.String, out var labelToken))
+                annotation.Labels[0] = labelToken.Content[1..^1].ToString();
+
+            // Parse the netlist contents
+            while (lexer.Type != TokenType.EndOfContent)
+            {
+                if (lexer.Branch(TokenType.Dot))
+                {
+                    if (BranchControlWord(lexer, _annotateEnd))
+                    {
+                        lexer.Skip(~TokenType.Newline);
+                        context.Circuit.Add(annotation);
+                        return true;
+                    }
+                    else if (!ParseControlStatement(lexer, context))
+                    {
+                        SkipToControlWord(lexer, _annotateEnd);
+                        return false;
+                    }
+                }
+                else if (!ParseNonControlStatement(lexer, context))
+                {
+                    SkipToControlWord(lexer, _annotateEnd);
+                    return false;
                 }
             }
 

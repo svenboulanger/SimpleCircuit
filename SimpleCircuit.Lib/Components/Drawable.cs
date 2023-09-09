@@ -48,6 +48,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public IEnumerable<string> Properties => GetProperties(this);
 
+        /// <inheritdoc />
+        public Bounds Bounds { get; private set; }
+
         /// <summary>
         /// Creates a new component.
         /// </summary>
@@ -193,6 +196,7 @@ namespace SimpleCircuit.Components
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
             }
+
             drawing.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
@@ -201,7 +205,7 @@ namespace SimpleCircuit.Components
             drawing.EndTransform();
 
             // Stop grouping elements
-            drawing.EndGroup();
+            Bounds = drawing.EndGroup();
         }
 
         /// <inheritdoc />

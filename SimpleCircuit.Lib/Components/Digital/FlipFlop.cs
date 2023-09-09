@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.ExtendPins(Pins, 2, "d", "c", "q");
 
                 // Body
-                drawing.Rectangle(18, 24, new());
+                drawing.Rectangle(-9, -12, 18, 24, new());
 
                 // Clock thingy
                 drawing.Polyline(new[]

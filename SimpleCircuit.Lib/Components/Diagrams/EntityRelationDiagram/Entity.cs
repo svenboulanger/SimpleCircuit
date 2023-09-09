@@ -87,13 +87,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 if (Labels.Count <= 1)
                 {
-                    drawing.Rectangle(Width, Height, new(), new("erd"));
+                    drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: new("erd"));
                     drawing.Text(Labels[0], new(), new(), new("header"));
                 }
                 else
                 {
                     double w = Width * 0.5;
-                    drawing.Rectangle(Width, Height, new(0, (Height - LineHeight) * 0.5));
+                    drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height);
                     drawing.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
 
                     drawing.Text(Labels[0], new(), new(), new("header"));

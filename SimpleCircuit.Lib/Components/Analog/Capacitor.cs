@@ -77,8 +77,8 @@ namespace SimpleCircuit.Components.Analog
 
                     case 1:
                         // Assymetric plates
-                        drawing.Rectangle(1.5, 8, new(-1.5, 0), new("pos"));
-                        drawing.Rectangle(1.5, 8, new(1.5, 0), new("neg", "dot"));
+                        drawing.Rectangle(-2.25, -4, 1.5, 8, options: new("pos"));
+                        drawing.Rectangle(0.75, -4, 1.5, 8, options: new("neg", "marker"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-5, 3), new(5, 3), vertical: true);
                         y = Math.Min(y, -6);

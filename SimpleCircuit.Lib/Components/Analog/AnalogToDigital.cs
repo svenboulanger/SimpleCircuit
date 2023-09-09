@@ -102,7 +102,10 @@ namespace SimpleCircuit.Components.Analog
                     drawing.ExtendPins(Pins, 2, "inp", "inn");
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
-                    drawing.Signs(new(x, -y), new(x, y));
+                    if (Variants.Contains(_swapInput))
+                        drawing.Signs(new(x, y), new(x, -y));
+                    else
+                        drawing.Signs(new(x, -y), new(x, y));
                 }
                 else
                     drawing.ExtendPin(Pins["in"]);
@@ -111,8 +114,11 @@ namespace SimpleCircuit.Components.Analog
                 {
                     drawing.ExtendPins(Pins, 4, "outp", "outn");
                     double x = Width / 2 - Height / 4 + 2;
-                    double y = Height / 4 + 1.5;
-                    drawing.Signs(new(x, -y), new(x, y));
+                    double y = Height / 4 + 2.0;
+                    if (Variants.Contains(_swapOutput))
+                        drawing.Signs(new(x, y), new(x, -y));
+                    else
+                        drawing.Signs(new(x, -y), new(x, y));
                 }
                 else
                     drawing.ExtendPin(Pins["out"]);

@@ -236,6 +236,12 @@
         NotEnoughAnonymousPoints,
 
         [Diagnostic(SeverityLevel.Warning, "PW063", "The anonymous queued point is not being used")]
-        LeftOverAnonymousPoints
+        LeftOverAnonymousPoints,
+
+        [Diagnostic(SeverityLevel.Error, "PE064", "Expected an annotation type")]
+        ExpectedAnnotationType,
+
+        [Diagnostic(SeverityLevel.Error, "PE065", "Expected an annotation name")]
+        ExpectedAnnotationName
     }
 }

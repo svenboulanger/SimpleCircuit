@@ -86,7 +86,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    drawing.Rectangle(8, 1.5, new(0, 3.25), new("dot"));
+                    drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -190,7 +190,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    drawing.Rectangle(8, 1.5, new(0, 3.25), new("dot"));
+                    drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
                 if (Pins["b"].Connections > 0)

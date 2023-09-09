@@ -83,6 +83,9 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public IEnumerable<string> Properties => Drawable.GetProperties(this);
 
+            /// <inheritdoc />
+            public Bounds Bounds { get; private set; }
+
             /// <summary>
             /// Creates a new black box.
             /// </summary>
@@ -130,7 +133,7 @@ namespace SimpleCircuit.Components
 
                 // Draw the port names
                 _pins.Render(drawing);
-                drawing.EndGroup();
+                Bounds = drawing.EndGroup();
             }
 
             /// <inheritdoc />

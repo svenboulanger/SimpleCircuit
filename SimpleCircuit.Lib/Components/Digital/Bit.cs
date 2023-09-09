@@ -89,7 +89,7 @@ namespace SimpleCircuit.Components.Digital
                 double x = -hw * (_bits.Length - 1);
                 for (int i = 0; i < _bits.Length; i++)
                 {
-                    drawing.Rectangle(BlockSize, BlockSize, new(x, 0));
+                    drawing.Rectangle(x - hw, -hw, BlockSize, BlockSize);
                     drawing.Text(_bits[i], new(x, 0), new());
                     x += BlockSize;
                 }

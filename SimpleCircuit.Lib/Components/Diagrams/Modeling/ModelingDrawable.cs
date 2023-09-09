@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override void Draw(SvgDrawing drawing)
         {
             if (Variants.Contains(Square))
-                drawing.Rectangle(Size, Size);
+                drawing.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size);
             else
                 drawing.Circle(new(), Size * 0.5);
         }
