@@ -147,8 +147,8 @@ namespace SimpleCircuitOnline.Pages
                 }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
                 var model = await _scriptEditor.GetModel();
-                await Global.SetModelLanguage(model, "simpleCircuit");
-                await Global.SetTheme("simpleCircuitTheme");
+                await Global.SetModelLanguage(_js, model, "simpleCircuit");
+                await Global.SetTheme(_js, "simpleCircuitTheme");
 
                 // Try to find a script and/or style from the query parameters
                 var query = HttpUtility.ParseQueryString(new Uri(_navigation.Uri).Query);

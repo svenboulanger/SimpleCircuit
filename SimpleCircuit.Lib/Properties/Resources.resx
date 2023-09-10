@@ -135,6 +135,8 @@ text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
 .marker { fill: black; }
 .marker.erd { fill: white; }
 .dotted { stroke-dasharray: 0.5 2; }
-.dashed { stroke-dasharray: 2 2; }</value>
+.dashed { stroke-dasharray: 2 2; }
+.annotation path { stroke: #6600cc; }
+.annotation text { fill: #6600cc; }</value>
   </data>
 </root>

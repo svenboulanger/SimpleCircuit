@@ -28,7 +28,6 @@ namespace SimpleCircuit.Components.Annotations
         private static readonly string _center = "center";
         private static readonly string _right = "right";
         private static readonly string _inside = "inside";
-        private static readonly string _outside = "outside";
 
         /// <inheritdoc />
         public string Name { get; }
