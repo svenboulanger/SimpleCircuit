@@ -18,6 +18,15 @@ namespace SimpleCircuit.Components.Annotations
         private readonly HashSet<WireInfo> _wires = new();
         private readonly HashSet<IDrawable> _drawables = new();
 
+        private static readonly string _top = "top";
+        private static readonly string _middle = "middle";
+        private static readonly string _bottom = "bottom";
+        private static readonly string _left = "left";
+        private static readonly string _center = "center";
+        private static readonly string _right = "right";
+        private static readonly string _inside = "inside";
+        private static readonly string _outside = "outside";
+
         /// <inheritdoc />
         public string Name { get; }
 
@@ -25,7 +34,7 @@ namespace SimpleCircuit.Components.Annotations
         public int Order => 100;
 
         /// <inheritdoc />
-        public VariantSet Variants { get; }
+        public VariantSet Variants { get; } = new VariantSet();
 
         /// <inheritdoc />
         public IPinCollection Pins => null;
@@ -164,22 +173,127 @@ namespace SimpleCircuit.Components.Annotations
             // All components should have been rendered by now
             if (_drawables.Count > 0)
             {
-                var bounds = new ExpandableBounds();
-                foreach (var drawable in _drawables)
-                    bounds.Expand(drawable.Bounds);
-
                 // Expand the bounds by the margins
                 drawing.BeginGroup(new("annotation") { Id = Name });
-
-                var total = bounds.Bounds;
-                double x = total.Left - MarginLeft;
-                double y = total.Top - MarginTop;
-                double width = total.Width + MarginLeft + MarginRight;
-                double height = total.Height + MarginTop + MarginBottom;
-                drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
-
-                drawing.Text(Labels[0], new(x, y - 1), new(1, -1));
+                switch (Variants.Select())
+                {
+                    default:
+                        DrawBox(drawing);
+                        break;
+                }
                 Bounds = drawing.EndGroup();
+            }
+        }
+
+        private void DrawBox(SvgDrawing drawing)
+        {
+            // Compute the boxes
+            var bounds = new ExpandableBounds();
+            foreach (var drawable in _drawables)
+                bounds.Expand(drawable.Bounds);
+
+            // Draw the rectangle that encompasses them all
+            var total = bounds.Bounds;
+            double x = total.Left - MarginLeft;
+            double y = total.Top - MarginTop;
+            double width = total.Width + MarginLeft + MarginRight;
+            double height = total.Height + MarginTop + MarginBottom;
+            drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
+            double radius_offset = RoundRadius * 0.29289321881;
+
+            switch (Variants.Select(_left, _center, _right))
+            {
+                default:
+                case 0:
+                    // Left
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        default:
+                        case 0:
+                            // Top
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + radius_offset + 1, y + radius_offset + 1), new Vector2(1, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
+                            break;
+
+                        case 1:
+                            // Middle
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * height), new Vector2(1, 0));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * height), new Vector2(-1, 0));
+                            break;
+
+                        case 2:
+                            // Bottom
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + radius_offset + 1, y + height - radius_offset - 1), new Vector2(1, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y + height + 1), new Vector2(1, 1));
+                            break;
+                    }
+                    break;
+
+                case 1:
+                    // Center
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        case 0:
+                            // Top
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + 1), new Vector2(0, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y - 1), new Vector2(0, -1));
+                            break;
+
+                        default:
+                        case 1:
+                            drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + 0.5 * height), new Vector2());
+                            break;
+
+                        case 2:
+                            // Bottom
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + height - 1), new Vector2(0, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + height + 1), new Vector2(0, 1));
+                            break;
+
+                    }
+                    break;
+
+                case 2:
+                    // Right
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        default:
+                        case 0:
+                            // Top
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + width - radius_offset - 1, y + radius_offset + 1), new Vector2(-1, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y - 1), new Vector2(-1, -1));
+                            break;
+
+                        case 1:
+                            // Middle
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + width - 1, y + 0.5 * height), new Vector2(-1, 0));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + width + 1, y + 0.5 * height), new Vector2(1, 0));
+                            break;
+
+                        case 2:
+                            // Bottom
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + width - radius_offset - 1, y + height - radius_offset - 1), new Vector2(-1, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y + 1), new Vector2(-1, 1));
+                            break;
+
+                    }
+                    break;
             }
         }
 
