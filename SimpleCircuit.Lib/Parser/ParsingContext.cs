@@ -155,7 +155,7 @@ namespace SimpleCircuit.Parser
         public void CheckQueuedPoints(IDiagnosticHandler diagnostics)
         {
             foreach (var pt in _queuedPoints)
-                diagnostics?.Post(pt.Name, ErrorCodes.LeftOverAnonymousPoints);
+                diagnostics?.Post(pt.Source, ErrorCodes.LeftOverAnonymousPoints);
         }
     }
 }

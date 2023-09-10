@@ -203,12 +203,12 @@ namespace SimpleCircuit.Parser
             // We just want to make sure here that the name isn't bogus
             if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.Fullname.Contains('*'))
             {
-                context.Diagnostics?.Post(wireInfo.PinToWire.Component.Name, ErrorCodes.NoWildcardCharacter);
+                context.Diagnostics?.Post(wireInfo.PinToWire.Component.Source, ErrorCodes.NoWildcardCharacter);
                 return;
             }
             if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.Fullname.ToString().Contains('*'))
             {
-                context.Diagnostics?.Post(wireInfo.WireToPin.Component.Name, ErrorCodes.NoWildcardCharacter);
+                context.Diagnostics?.Post(wireInfo.WireToPin.Component.Source, ErrorCodes.NoWildcardCharacter);
                 return;
             }
             if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.GetOrCreate(context) == null)
@@ -335,71 +335,11 @@ namespace SimpleCircuit.Parser
             else
                 info = new(nameToken, context.GetFullname(nameToken.Content.ToString()));
 
-            // Labels
+            // Variants and properties
             if (lexer.Branch(TokenType.OpenParenthesis))
             {
-                do
-                {
-                    // Parse in-line variants and properties
-                    switch (lexer.Type)
-                    {
-                        case TokenType.String:
-                            info.Labels.Add(lexer.Token);
-                            lexer.Next();
-                            break;
-
-                        case TokenType.Dash:
-                            lexer.Next();
-                            if (lexer.Branch(TokenType.Word, out Token token))
-                                info.Variants.Add(new(false, token.Content.ToString()));
-                            else
-                            {
-                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
-                                lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
-                            }
-                            break;
-
-                        case TokenType.Plus:
-                            lexer.Next();
-                            if (lexer.Check(TokenType.Word))
-                                goto case TokenType.Word;
-                            else
-                            {
-                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
-                                lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
-                            }
-                            break;
-
-                        case TokenType.Word:
-                            var word = lexer.Token;
-                            lexer.Next();
-                            if (lexer.Branch(TokenType.Equals))
-                            {
-                                // This is a parameter
-                                object value = ParsePropertyValue(lexer, context);
-                                if (value == null)
-                                {
-                                    lexer.Skip(~TokenType.Newline & ~TokenType.CloseParenthesis);
-                                    break;
-                                }
-                                else
-                                    info.Properties.Add(word, value);
-                            }
-                            else
-                                info.Variants.Add(new(true, word.Content.ToString()));
-                            break;
-
-                        case TokenType.Newline:
-                            break;
-
-                        default:
-                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedLabelOrVariant, info.Fullname);
-                            lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
-                            break;
-                    }
-                }
-                while (lexer.Branch(TokenType.Comma));
-
+                if (!ParseVariantsAndProperties(info, lexer, context))
+                    lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Newline);
                 if (!lexer.Branch(TokenType.CloseParenthesis))
                     context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
             }
@@ -880,13 +820,22 @@ namespace SimpleCircuit.Parser
             }
 
             // Notify the parsing context to start tracking component info's that are inside the annotation
-            var annotation = new Components.Annotations.Box(nameToken.Content.ToString());
-            string fullname = context.GetFullname(nameToken.Content.ToString());
-            context.Annotations.Add(annotation);
+            var annotationInfo = new AnnotationInfo(nameToken, context.GetFullname(nameToken.Content.ToString()));
 
-            // Label (optional)
-            if (lexer.Branch(TokenType.String, out var labelToken))
-                annotation.Labels[0] = labelToken.Content[1..^1].ToString();
+            // Variants and properties
+            if (lexer.Branch(TokenType.OpenParenthesis))
+            {
+                if (!ParseVariantsAndProperties(annotationInfo, lexer, context))
+                    lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Newline);
+                if (!lexer.Branch(TokenType.CloseParenthesis))
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
+            }
+
+            // Create the annotation
+            var annotation = annotationInfo.GetOrCreate(context);
+            if (annotation == null)
+                return false;
+            context.Annotations.Add(annotation);
 
             // Parse the netlist contents
             while (lexer.Type != TokenType.EndOfContent)
@@ -897,13 +846,6 @@ namespace SimpleCircuit.Parser
                     {
                         lexer.Skip(~TokenType.Newline);
                         context.Annotations.Remove(annotation);
-                        if (!context.Circuit.ContainsKey(annotation.Name))
-                            context.Circuit.Add(annotation);
-                        else
-                        {
-                            context.Diagnostics?.Post(nameToken, ErrorCodes.AnnotationComponentAlreadyExists, fullname);
-                            return false;
-                        }
                         return true;
                     }
                     else if (!ParseControlStatement(lexer, context))
@@ -1015,6 +957,70 @@ namespace SimpleCircuit.Parser
                 }
             }
 
+            return true;
+        }
+        private static bool ParseVariantsAndProperties(IDrawableInfo info, SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            do
+            {
+                // Parse in-line variants and properties
+                switch (lexer.Type)
+                {
+                    case TokenType.String:
+                        info.Labels.Add(lexer.Token);
+                        lexer.Next();
+                        break;
+
+                    case TokenType.Dash:
+                        lexer.Next();
+                        if (lexer.Branch(TokenType.Word, out Token token))
+                            info.Variants.Add(new(false, token.Content.ToString()));
+                        else
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
+                            lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
+                        }
+                        break;
+
+                    case TokenType.Plus:
+                        lexer.Next();
+                        if (lexer.Check(TokenType.Word))
+                            goto case TokenType.Word;
+                        else
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariant);
+                            lexer.Skip(~TokenType.CloseParenthesis & ~TokenType.Comma & ~TokenType.Newline);
+                        }
+                        break;
+
+                    case TokenType.Word:
+                        var word = lexer.Token;
+                        lexer.Next();
+                        if (lexer.Branch(TokenType.Equals))
+                        {
+                            // This is a parameter
+                            object value = ParsePropertyValue(lexer, context);
+                            if (value == null)
+                            {
+                                lexer.Skip(~TokenType.Newline & ~TokenType.CloseParenthesis);
+                                break;
+                            }
+                            else
+                                info.Properties.Add(word, value);
+                        }
+                        else
+                            info.Variants.Add(new(true, word.Content.ToString()));
+                        break;
+
+                    case TokenType.Newline:
+                        break;
+
+                    default:
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedLabelOrVariant, info.Fullname);
+                        return false;
+                }
+            }
+            while (lexer.Branch(TokenType.Comma));
             return true;
         }
         private static bool ParseProperties(SimpleCircuitLexer lexer, ParsingContext context)

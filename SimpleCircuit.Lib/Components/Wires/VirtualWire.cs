@@ -82,7 +82,7 @@ namespace SimpleCircuit.Components.Wires
                 // We are referring to the origin of the component, not a pin
                 if (drawable is not ILocatedDrawable ld)
                 {
-                    context.Diagnostics?.Post(pin.Component.Name, ErrorCodes.ComponentWithoutLocation, pin.Component.Name.Content);
+                    context.Diagnostics?.Post(pin.Component.Source, ErrorCodes.ComponentWithoutLocation, pin.Component.Source.Content);
                     return null;
                 }
                 return ld;

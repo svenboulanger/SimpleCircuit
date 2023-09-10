@@ -654,7 +654,7 @@ namespace SimpleCircuit.Components.Wires
             if (pin.Name.Content.Length > 0)
                 diagnostics?.Post(pin.Name, code, arguments);
             else
-                diagnostics?.Post(pin.Component.Name, code, arguments);
+                diagnostics?.Post(pin.Component.Source, code, arguments);
         }
     }
 }

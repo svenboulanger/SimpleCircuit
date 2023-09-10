@@ -6,36 +6,26 @@ using System.Collections.Generic;
 namespace SimpleCircuit.Parser
 {
     /// <summary>
-    /// Represents component information.
+    /// Information for components.
     /// </summary>
-    public class ComponentInfo
+    public class ComponentInfo : IDrawableInfo
     {
         private IDrawable _component;
 
-        /// <summary>
-        /// Gets the token that describes the component name.
-        /// </summary>
-        public Token Name { get; }
+        /// <inheritdoc />
+        public Token Source { get; }
 
-        /// <summary>
-        /// Gets the full name of the component.
-        /// </summary>
+        /// <inheritdoc />
         public string Fullname { get; }
 
-        /// <summary>
-        /// Gets the label of the component.
-        /// </summary>
-        public List<Token> Labels { get; } = new(2);
+        /// <inheritdoc />
+        public IList<Token> Labels { get; } = new List<Token>(2);
 
-        /// <summary>
-        /// Gets the variants of the component.
-        /// </summary>
-        public List<VariantInfo> Variants { get; } = new();
+        /// <inheritdoc />
+        public IList<VariantInfo> Variants { get; } = new List<VariantInfo>();
 
-        /// <summary>
-        /// Gets the properties of the component.
-        /// </summary>
-        public Dictionary<Token, object> Properties { get; } = new();
+        /// <inheritdoc />
+        public IDictionary<Token, object> Properties { get; } = new Dictionary<Token, object>();
 
         /// <summary>
         /// Gets the component if it has been created.
@@ -49,7 +39,7 @@ namespace SimpleCircuit.Parser
         /// <param name="fullname">The full name of the component.</param>
         public ComponentInfo(Token name, string fullname)
         {
-            Name = name;
+            Source = name;
             Fullname = fullname;
             _component = null;
         }
@@ -75,7 +65,7 @@ namespace SimpleCircuit.Parser
 
             if (_component == null)
             {
-                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
+                context.Diagnostics?.Post(Source, ErrorCodes.CouldNotRecognizeOrCreateComponent, Fullname);
                 return null;
             }
 
@@ -84,7 +74,7 @@ namespace SimpleCircuit.Parser
             {
                 if (Labels.Count > labeled.Labels.Maximum)
                 {
-                    context.Diagnostics?.Post(Labels[labeled.Labels.Count], ErrorCodes.TooManyLabels);
+                    context.Diagnostics?.Post(Labels[labeled.Labels.Maximum - 1], ErrorCodes.TooManyLabels);
                     for (int i = 0; i < labeled.Labels.Maximum; i++)
                         labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
                 }
@@ -122,7 +112,7 @@ namespace SimpleCircuit.Parser
 
             _component = context.Find(Fullname) as IDrawable;
             if (_component == null)
-                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Fullname);
+                context.Diagnostics?.Post(Source, ErrorCodes.CouldNotFindDrawable, Fullname);
             return _component;
         }
 

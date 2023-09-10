@@ -96,8 +96,8 @@ namespace SimpleCircuit.Components
                     }
 
                     // Component name as pin name
-                    if (takenNames.Add(pinInfo.Component.Name.Content.ToString()))
-                        pinNames.Add(pinInfo.Component.Name.Content.ToString());
+                    if (takenNames.Add(pinInfo.Component.Source.Content.ToString()))
+                        pinNames.Add(pinInfo.Component.Source.Content.ToString());
 
                     // Shorthand notation for DIR
                     if (pin.Name.StartsWith("DIR") && pin.Name.Length > 3)

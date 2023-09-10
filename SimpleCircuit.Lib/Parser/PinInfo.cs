@@ -63,7 +63,7 @@ namespace SimpleCircuit.Parser
                             _pin = drawable.Pins[drawable.Pins.Count + defaultIndex];
                     }
                     if (_pin == null)
-                        diagnostics?.Post(Component.Name, ErrorCodes.DoesNotHavePins, Component.Fullname);
+                        diagnostics?.Post(Component.Source, ErrorCodes.DoesNotHavePins, Component.Fullname);
                 }
                 else
                 {

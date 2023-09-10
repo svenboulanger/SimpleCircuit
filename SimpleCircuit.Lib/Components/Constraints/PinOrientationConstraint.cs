@@ -104,7 +104,7 @@ namespace SimpleCircuit.Components.Constraints
             if (Pin.Name.Content.Length > 0)
             {
                 if (!drawable.Pins.TryGetValue(Pin.Name.Content.ToString(), out _))
-                    diagnostics?.Post(Pin.Component.Name, ErrorCodes.CouldNotFindPin, Pin.Name.Content, drawable.Name);
+                    diagnostics?.Post(Pin.Component.Source, ErrorCodes.CouldNotFindPin, Pin.Name.Content, drawable.Name);
             }
         }
     }
