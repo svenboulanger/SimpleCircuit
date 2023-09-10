@@ -10,11 +10,16 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @".box A ""Test""
-GND <u> V1 <u r> R <r d> C <d> GND
-(y GND)
+            var script = @"
+// Feedback branch
+// Note that the direction of the wire determines
+// on which side the symbol is connected
+Xout <d +20 l arrow> BLOCKfb(""&#946;"") <l u arrow minus> ADD1
+
+.box b1 ""Analog""
+    BLOCK1
+    BLOCKfb
 .endb
-- A.radius = 2
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

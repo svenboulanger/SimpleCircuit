@@ -1,12 +1,11 @@
-﻿using SimpleCircuit.Components.Wires;
-using SimpleCircuit.Parser;
+﻿using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Annotations
 {
     /// <summary>
     /// Describes an annotation for other components.
     /// </summary>
-    public interface IAnnotation
+    public interface IAnnotation : ICircuitPresence
     {
         /// <summary>
         /// Adds a drawable to the annotation.

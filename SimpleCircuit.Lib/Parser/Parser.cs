@@ -59,16 +59,13 @@ namespace SimpleCircuit.Parser
             else
                 return ParseNonControlStatement(lexer, context);
         }
+        
         private static bool ParseNonControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
         {
             switch (lexer.Type)
             {
                 case TokenType.Word:
                     return ParseComponentChainStatement(lexer, context);
-
-                case TokenType.Dot:
-                    lexer.Next();
-                    return ParseControlStatement(lexer, context);
 
                 case TokenType.OpenParenthesis:
                     return ParseVirtualChainStatement(lexer, context);
@@ -88,6 +85,79 @@ namespace SimpleCircuit.Parser
                     lexer.Skip(~TokenType.Newline);
                     return false;
             }
+        }
+        private static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.Word, out var typeToken))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedControlStatementType);
+                return false;
+            }
+
+            switch (typeToken.Content.ToString().ToLower())
+            {
+                case "subckt":
+                    return ParseSubcircuitDefinition(lexer, context);
+
+                case "symbol":
+                    return ParseSymbolDefinition(lexer, context);
+
+                case "section":
+                    return ParseSectionDefinition(lexer, context);
+
+                case "box":
+                    return ParseBoxAnnotation(lexer, context);
+
+                case "option":
+                case "options":
+                    return ParseOptions(lexer, context);
+
+                case "variant":
+                case "variants":
+                    return ParseVariants(lexer, context);
+
+                case "property":
+                case "properties":
+                    return ParseProperties(lexer, context);
+
+                default:
+                    context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
+                    return false;
+            }
+        }
+
+        private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
+            => ParseChainStatement(lexer, context, ComponentChainWire);
+        private static bool ParseVirtualChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.OpenParenthesis))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVirtualChain);
+                return false;
+            }
+
+            // Determine the virtual wire alignment
+            Axis axis = Axis.XY;
+            if (lexer.Branch(TokenType.Word, "x"))
+                axis = Axis.X;
+            else if (lexer.Branch(TokenType.Word, "y"))
+                axis = Axis.Y;
+            else if (lexer.Branch(TokenType.Word, "xy") ||
+                lexer.Branch(TokenType.Word, "yx"))
+                axis = Axis.XY;
+
+            // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
+            // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
+            ParseChainStatement(lexer, context,
+                (wi, c) => VirtualChainWire(wi, c, axis));
+
+            if (!lexer.Branch(TokenType.CloseParenthesis))
+            {
+                context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
+            return true;
         }
         private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<WireInfo, ParsingContext> stringTogether)
         {
@@ -128,8 +198,6 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
-            => ParseChainStatement(lexer, context, ComponentChainWire);
         private static void ComponentChainWire(WireInfo wireInfo, ParsingContext context)
         {
             // We just want to make sure here that the name isn't bogus
@@ -148,6 +216,16 @@ namespace SimpleCircuit.Parser
             if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.GetOrCreate(context) == null)
                 return;
 
+            // Add the components to annotations if they appeared in the chain
+            foreach (var annotation in context.Annotations)
+            {
+                if (wireInfo.PinToWire?.Component != null)
+                    annotation.Add(wireInfo.PinToWire.Component);
+                if (wireInfo.WireToPin?.Component != null)
+                    annotation.Add(wireInfo.WireToPin.Component);
+            }
+
+            // If there are no segments, skip creating the wire
             if (wireInfo.Segments == null || wireInfo.Segments.Count == 0)
                 return;
 
@@ -160,16 +238,84 @@ namespace SimpleCircuit.Parser
             if (wireInfo.WireToPin != null)
                 context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
 
-            // Register the wires for annotation
+            // Add the wire to annotations
             foreach (var annotation in context.Annotations)
-            {
                 annotation.Add(wireInfo);
-                if (wireInfo.PinToWire?.Component != null)
-                    annotation.Add(wireInfo.PinToWire.Component);
-                if (wireInfo.WireToPin?.Component != null)
-                    annotation.Add(wireInfo.WireToPin.Component);
+        }
+        private static void VirtualChainWire(WireInfo wireInfo, ParsingContext context, Axis axis)
+        {
+            if (axis == Axis.None)
+                return;
+
+            if (wireInfo.Segments != null && wireInfo.Segments.Count > 0 && wireInfo.WireToPin != null)
+                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", wireInfo.PinToWire, wireInfo.Segments, wireInfo.WireToPin, axis));
+            else
+            {
+                // Rules for filtering
+                string filter = wireInfo.PinToWire.Component.Fullname;
+                filter = filter.Replace(".", "\\.");
+                if (context.Factory.IsAnonymous(filter))
+                    filter += DrawableFactoryDictionary.AnonymousSeparator + ".+";
+                filter = "^" + filter + "$";
+                filter = filter.Replace("*", "[a-zA-Z0-9_]*");
+                var regex = new Regex(filter, RegexOptions.IgnoreCase);
+                var presences = context.Circuit.OfType<ILocatedPresence>().Where(p => regex.IsMatch(p.Name));
+                context.Circuit.Add(new AlignedWire($"virtual.{context.VirtualCoordinateCount++}", presences, axis));
             }
         }
+
+        private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.Dash))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
+                return false;
+            }
+
+            bool result = true;
+            while (lexer.Check(~TokenType.Newline))
+            {
+                // Parse the component
+                var component = ParseComponent(lexer, context)?.GetOrCreate(context);
+                if (component == null)
+                {
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
+
+                // Property
+                if (!lexer.Branch(TokenType.Dot))
+                {
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedDot);
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
+                if (!lexer.Branch(TokenType.Word, out var propertyToken))
+                {
+                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedProperty);
+                    return false;
+                }
+
+                // Equals
+                if (!lexer.Branch(TokenType.Equals))
+                {
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
+
+                // The value
+                object value = ParsePropertyValue(lexer, context);
+                if (value == null)
+                {
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
+                }
+                result &= component.SetProperty(propertyToken, value, context.Diagnostics);
+            }
+            return result;
+        }
+                
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Check(TokenType.Word | TokenType.Times))
@@ -516,45 +662,7 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, "]");
             return token;
         }
-        private static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context)
-        {
-            if (!lexer.Branch(TokenType.Word, out var typeToken))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedControlStatementType);
-                return false;
-            }
-
-            switch (typeToken.Content.ToString().ToLower())
-            {
-                case "subckt":
-                    return ParseSubcircuitDefinition(lexer, context);
-
-                case "symbol":
-                    return ParseSymbolDefinition(lexer, context);
-
-                case "section":
-                    return ParseSectionDefinition(lexer, context);
-
-                case "box":
-                    return ParseBoxAnnotation(lexer, context);
-
-                case "option":
-                case "options":
-                    return ParseOptions(lexer, context);
-
-                case "variant":
-                case "variants":
-                    return ParseVariants(lexer, context);
-
-                case "property":
-                case "properties":
-                    return ParseProperties(lexer, context);
-
-                default:
-                    context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
-                    return false;
-            }
-        }
+        
         private static bool ParseSubcircuitDefinition(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // Read the name of the subcircuit
@@ -773,8 +881,10 @@ namespace SimpleCircuit.Parser
 
             // Notify the parsing context to start tracking component info's that are inside the annotation
             var annotation = new Components.Annotations.Box(nameToken.Content.ToString());
+            string fullname = context.GetFullname(nameToken.Content.ToString());
             context.Annotations.Add(annotation);
 
+            // Label (optional)
             if (lexer.Branch(TokenType.String, out var labelToken))
                 annotation.Labels[0] = labelToken.Content[1..^1].ToString();
 
@@ -787,7 +897,13 @@ namespace SimpleCircuit.Parser
                     {
                         lexer.Skip(~TokenType.Newline);
                         context.Annotations.Remove(annotation);
-                        context.Circuit.Add(annotation);
+                        if (!context.Circuit.ContainsKey(annotation.Name))
+                            context.Circuit.Add(annotation);
+                        else
+                        {
+                            context.Diagnostics?.Post(nameToken, ErrorCodes.AnnotationComponentAlreadyExists, fullname);
+                            return false;
+                        }
                         return true;
                     }
                     else if (!ParseControlStatement(lexer, context))
@@ -948,111 +1064,6 @@ namespace SimpleCircuit.Parser
             return true;
         }
         
-        private static bool ParseVirtualChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
-        {
-            if (!lexer.Branch(TokenType.OpenParenthesis))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVirtualChain);
-                return false;
-            }
-
-            // Determine the virtual wire alignment
-            Axis axis = Axis.XY;
-            if (lexer.Branch(TokenType.Word, "x"))
-                axis = Axis.X;
-            else if (lexer.Branch(TokenType.Word, "y"))
-                axis = Axis.Y;
-            else if (lexer.Branch(TokenType.Word, "xy") ||
-                lexer.Branch(TokenType.Word, "yx"))
-                axis = Axis.XY;
-
-            // Virtual chains not necessarily create components, they simply try to align previously created elements along the defined axis
-            // They achieve this by scheduling actions to be run at the end rather than taking effect immediately
-            ParseChainStatement(lexer, context,
-                (wi, c) => VirtualChainWire(wi, c, axis));
-
-            if (!lexer.Branch(TokenType.CloseParenthesis))
-            {
-                context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
-                lexer.Skip(~TokenType.Newline);
-                return false;
-            }
-            return true;
-        }
-
-        private static void VirtualChainWire(WireInfo wireInfo, ParsingContext context, Axis axis)
-        {
-            if (axis == Axis.None)
-                return;
-
-            if (wireInfo.Segments != null && wireInfo.Segments.Count > 0 && wireInfo.WireToPin != null)
-                context.Circuit.Add(new VirtualWire($"virtual.{context.VirtualCoordinateCount++}", wireInfo.PinToWire, wireInfo.Segments, wireInfo.WireToPin, axis));
-            else
-            {
-                // Rules for filtering
-                string filter = wireInfo.PinToWire.Component.Fullname;
-                filter = filter.Replace(".", "\\.");
-                if (context.Factory.IsAnonymous(filter))
-                    filter += DrawableFactoryDictionary.AnonymousSeparator + ".+";
-                filter = "^" + filter + "$";
-                filter = filter.Replace("*", "[a-zA-Z0-9_]*");
-                var regex = new Regex(filter, RegexOptions.IgnoreCase);
-                var presences = context.Circuit.OfType<ILocatedPresence>().Where(p => regex.IsMatch(p.Name));
-                context.Circuit.Add(new AlignedWire($"virtual.{context.VirtualCoordinateCount++}", presences, axis));
-            }
-        }
-        private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)
-        {
-            if (!lexer.Branch(TokenType.Dash))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
-                return false;
-            }
-
-            bool result = true;
-            while (lexer.Check(~TokenType.Newline))
-            {
-                // Parse the component
-                var component = ParseComponent(lexer, context)?.GetOrCreate(context);
-                if (component == null)
-                {
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-
-                // Property
-                if (!lexer.Branch(TokenType.Dot))
-                {
-                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedDot);
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-                if (!lexer.Branch(TokenType.Word, out var propertyToken))
-                {
-                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedProperty);
-                    return false;
-                }
-
-                // Equals
-                if (!lexer.Branch(TokenType.Equals))
-                {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-
-                // The value
-                object value = ParsePropertyValue(lexer, context);
-                if (value == null)
-                {
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-                result &= component.SetProperty(propertyToken, value, context.Diagnostics);
-            }
-            return result;
-        }
-
         private static object ParsePropertyValue(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // The value

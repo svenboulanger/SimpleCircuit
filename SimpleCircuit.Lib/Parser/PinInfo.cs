@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
 
@@ -56,10 +55,13 @@ namespace SimpleCircuit.Parser
                 if (Name.Content.Length == 0)
                 {
                     // Get the pin by its index
-                    if (defaultIndex >= 0)
-                        _pin = drawable.Pins[defaultIndex];
-                    else
-                        _pin = drawable.Pins[drawable.Pins.Count + defaultIndex];
+                    if (drawable.Pins != null)
+                    {
+                        if (defaultIndex >= 0)
+                            _pin = drawable.Pins[defaultIndex];
+                        else
+                            _pin = drawable.Pins[drawable.Pins.Count + defaultIndex];
+                    }
                     if (_pin == null)
                         diagnostics?.Post(Component.Name, ErrorCodes.DoesNotHavePins, Component.Fullname);
                 }

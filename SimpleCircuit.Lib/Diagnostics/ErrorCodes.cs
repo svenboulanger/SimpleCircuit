@@ -245,6 +245,9 @@
         ExpectedAnnotationType,
 
         [Diagnostic(SeverityLevel.Error, "PE065", "Expected an annotation name")]
-        ExpectedAnnotationName
+        ExpectedAnnotationName,
+
+        [Diagnostic(SeverityLevel.Error, "PE066", "Cannot create annotation with the name '{0}' as a component already exists with the same name")]
+        AnnotationComponentAlreadyExists,
     }
 }

@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
-using SpiceSharp;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser
@@ -107,9 +106,7 @@ namespace SimpleCircuit.Parser
 
             // Handle properties
             foreach (var property in Properties)
-            {
                 _component.SetProperty(property.Key, property.Value, context.Diagnostics);
-            }
             return _component;
         }
 
@@ -125,7 +122,7 @@ namespace SimpleCircuit.Parser
 
             _component = context.Find(Fullname) as IDrawable;
             if (_component == null)
-                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Name.Content);
+                context.Diagnostics?.Post(Name, ErrorCodes.CouldNotFindDrawable, Fullname);
             return _component;
         }
 

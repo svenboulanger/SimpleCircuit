@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
-using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
@@ -29,7 +28,7 @@ namespace SimpleCircuit.Components.Annotations
         public VariantSet Variants { get; }
 
         /// <inheritdoc />
-        public IPinCollection Pins { get; }
+        public IPinCollection Pins => null;
 
         /// <inheritdoc />
         public IEnumerable<string> Properties { get; }
@@ -71,7 +70,6 @@ namespace SimpleCircuit.Components.Annotations
         public Box(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Pins = new PinCollection();
         }
 
         /// <inheritdoc />
@@ -164,22 +162,25 @@ namespace SimpleCircuit.Components.Annotations
         public void Render(SvgDrawing drawing)
         {
             // All components should have been rendered by now
-            var bounds = new ExpandableBounds();
-            foreach (var drawable in _drawables)
-                bounds.Expand(drawable.Bounds);
+            if (_drawables.Count > 0)
+            {
+                var bounds = new ExpandableBounds();
+                foreach (var drawable in _drawables)
+                    bounds.Expand(drawable.Bounds);
 
-            // Expand the bounds by the margins
-            drawing.BeginGroup(new("annotation") { Id = Name });
+                // Expand the bounds by the margins
+                drawing.BeginGroup(new("annotation") { Id = Name });
 
-            var total = bounds.Bounds;
-            double x = total.Left - MarginLeft;
-            double y = total.Top - MarginTop;
-            double width = total.Width + MarginLeft + MarginRight;
-            double height = total.Height + MarginTop + MarginBottom;
-            drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
+                var total = bounds.Bounds;
+                double x = total.Left - MarginLeft;
+                double y = total.Top - MarginTop;
+                double width = total.Width + MarginLeft + MarginRight;
+                double height = total.Height + MarginTop + MarginBottom;
+                drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
 
-            drawing.Text(Labels[0], new(x, y - 1), new(1, -1));
-            Bounds = drawing.EndGroup();
+                drawing.Text(Labels[0], new(x, y - 1), new(1, -1));
+                Bounds = drawing.EndGroup();
+            }
         }
 
         /// <inheritdoc />

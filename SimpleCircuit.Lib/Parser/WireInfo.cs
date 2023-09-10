@@ -1,10 +1,10 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Parser;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Components.Wires
+namespace SimpleCircuit.Parser
 {
     /// <summary>
     /// Wire information.
