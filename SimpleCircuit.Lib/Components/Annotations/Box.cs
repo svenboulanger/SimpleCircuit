@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Outputs;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -6,6 +7,7 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Annotations
 {
@@ -18,6 +20,7 @@ namespace SimpleCircuit.Components.Annotations
         private readonly HashSet<WireInfo> _wires = new();
         private readonly HashSet<IDrawable> _drawables = new();
 
+        private static readonly string _poly = "poly";
         private static readonly string _top = "top";
         private static readonly string _middle = "middle";
         private static readonly string _bottom = "bottom";
@@ -74,6 +77,11 @@ namespace SimpleCircuit.Components.Annotations
         public double RoundRadius { get; set; }
 
         /// <summary>
+        /// Gets or sets the tolerance for detering an edge of the annotation box.
+        /// </summary>
+        public double Tolerance { get; set; } = 4.0;
+
+        /// <summary>
         /// Creates a new <see cref="Box"/>.
         /// </summary>
         public Box(string name)
@@ -103,34 +111,23 @@ namespace SimpleCircuit.Components.Annotations
             string key = propertyToken.Content.ToString().ToLower();
             switch (key)
             {
-                case "radius":
-                    RoundRadius = (double)value;
-                    break;
+                case "radius": RoundRadius = (double)value; break;
 
                 case "margin":
                     double margin = (double)value;
                     MarginLeft = MarginTop = MarginRight = MarginBottom = margin;
                     break;
 
-                case "marginleft":
-                case "margin-left":
-                    MarginLeft = (double)value;
-                    break;
+                case "marginleft": MarginLeft = (double)value; break;
 
-                case "margintop":
-                case "margin-top":
-                    MarginTop = (double)value;
-                    break;
+                case "margintop": MarginTop = (double)value; break;
 
-                case "marginright":
-                case "margin-right":
-                    MarginRight = (double)value;
-                    break;
+                case "marginright": MarginRight = (double)value; break;
 
-                case "marginbottom":
-                case "margin-bottom":
-                    MarginBottom = (double)value;
-                    break;
+                case "marginbottom": MarginBottom = (double)value; break;
+
+                case "tol":
+                case "tolerance": Tolerance = (double)value; break;
 
                 default:
                     diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, propertyToken.Content, Name);
@@ -175,16 +172,27 @@ namespace SimpleCircuit.Components.Annotations
             {
                 // Expand the bounds by the margins
                 drawing.BeginGroup(new("annotation") { Id = Name });
-                switch (Variants.Select())
+                var matrix = drawing.CurrentTransform.Matrix.Inverse;
+                drawing.BeginTransform(new Transform(-matrix * drawing.CurrentTransform.Offset, matrix));
+                switch (Variants.Select(_poly))
                 {
+                    case 0:
+                        DrawPolygon(drawing);
+                        break;
+
                     default:
                         DrawBox(drawing);
                         break;
                 }
+                drawing.EndTransform();
                 Bounds = drawing.EndGroup();
             }
         }
 
+        /// <summary>
+        /// Draws a simple box around what needs to be annotated.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
         private void DrawBox(SvgDrawing drawing)
         {
             // Compute the boxes
@@ -199,7 +207,7 @@ namespace SimpleCircuit.Components.Annotations
             double width = total.Width + MarginLeft + MarginRight;
             double height = total.Height + MarginTop + MarginBottom;
             drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
-            double radius_offset = RoundRadius * 0.29289321881;
+            double radiusOffset = RoundRadius * 0.29289321881;
 
             switch (Variants.Select(_left, _center, _right))
             {
@@ -212,7 +220,7 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radius_offset + 1, y + radius_offset + 1), new Vector2(1, 1));
+                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
                             else
                                 drawing.Text(Labels[0], new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
                             break;
@@ -228,7 +236,7 @@ namespace SimpleCircuit.Components.Annotations
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radius_offset + 1, y + height - radius_offset - 1), new Vector2(1, -1));
+                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + height - radiusOffset - 1), new Vector2(1, -1));
                             else
                                 drawing.Text(Labels[0], new Vector2(x + RoundRadius, y + height + 1), new Vector2(1, 1));
                             break;
@@ -271,7 +279,7 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + width - radius_offset - 1, y + radius_offset + 1), new Vector2(-1, 1));
+                                drawing.Text(Labels[0], new Vector2(x + width - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
                             else
                                 drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y - 1), new Vector2(-1, -1));
                             break;
@@ -287,7 +295,7 @@ namespace SimpleCircuit.Components.Annotations
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + width - radius_offset - 1, y + height - radius_offset - 1), new Vector2(-1, -1));
+                                drawing.Text(Labels[0], new Vector2(x + width - radiusOffset - 1, y + height - radiusOffset - 1), new Vector2(-1, -1));
                             else
                                 drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y + 1), new Vector2(-1, 1));
                             break;
@@ -295,6 +303,438 @@ namespace SimpleCircuit.Components.Annotations
                     }
                     break;
             }
+        }
+
+        /// <summary>
+        /// Draws a concave polygon around what needs to be annotated.
+        /// </summary>
+        /// <param name="drawing"></param>
+        private void DrawPolygon(SvgDrawing drawing)
+        {
+            // Track the point cloud
+            var sortedPoints = new SortedDictionary<double, ExpandableLine>();
+            var bounds = new ExpandableBounds();
+            void AddPoint(Vector2 point)
+            {
+                bounds.Expand(point);
+                if (!sortedPoints.TryGetValue(point.X, out var expandable))
+                {
+                    expandable = new ExpandableLine();
+                    sortedPoints.Add(point.X, expandable);
+                }
+                expandable.Expand(point.Y);
+            }
+            foreach (var drawable in _drawables)
+            {
+                var localBounds = drawable.Bounds;
+                AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Top - MarginTop));
+                AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Top - MarginTop));
+                AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Bottom + MarginBottom));
+                AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Bottom + MarginBottom));
+            }
+
+            // Build the polygon boundary lines top and bottom
+            var top = new LinkedList<Vector2>();
+            var bottom = new LinkedList<Vector2>();
+            foreach (var pair in sortedPoints)
+            {
+                var vline = pair.Value;
+
+                // Empty
+                if (top.Count == 0)
+                {
+                    if (vline.Minimum == vline.Maximum)
+                    {
+                        top.AddLast(new Vector2(pair.Key, vline.Minimum));
+                        bottom.AddLast(new Vector2(pair.Key, vline.Maximum));
+                    }
+                    else
+                    {
+                        top.AddLast(new Vector2(pair.Key, vline.Minimum));
+                        bottom.AddLast(new Vector2(pair.Key, vline.Minimum));
+                        bottom.AddLast(new Vector2(pair.Key, vline.Maximum));
+                    }
+                }
+                else
+                {
+                    // Add a new point to the top boundary line
+                    var newPoint = new Vector2(pair.Key, vline.Minimum);
+                    while (top.Count > 1)
+                    {
+                        var last = top.Last.Value;
+                        var secondLast = top.Last.Previous.Value;
+                        double vector = (newPoint.X - last.X) * (last.Y - secondLast.Y) - (last.X - secondLast.X) * (newPoint.Y - last.Y);
+                        if (vector.IsZero() || vector > 0.0)
+                            top.RemoveLast();
+                        else
+                            break;
+                    }
+                    top.AddLast(newPoint);
+
+                    // Add a new point to the bottom boundary line
+                    newPoint = new Vector2(pair.Key, vline.Maximum);
+                    while (top.Count > 1)
+                    {
+                        var last = bottom.Last.Value;
+                        var secondLast = bottom.Last.Previous.Value;
+                        double vector = (newPoint.X - last.X) * (last.Y - secondLast.Y) - (last.X - secondLast.X) * (newPoint.Y - last.Y);
+                        if (vector.IsZero() || vector < 0.0)
+                            bottom.RemoveLast();
+                        else
+                            break;
+                    }
+                    bottom.AddLast(newPoint);
+                }
+            }
+
+            // String the points together to make the polygon
+            var node = bottom.Last;
+            while (node != null)
+            {
+                top.AddLast(node.Value);
+                node = node.Previous;
+            }
+            bottom.Clear();
+            top.RemoveLast();
+
+            // Draw a polygon with rounded corners accordingly
+            drawing.Path(builder =>
+            {
+                if (RoundRadius.IsZero())
+                {
+                    var node = top.First;
+                    builder.MoveTo(node.Value);
+                    node = node.Next;
+                    while (node != null)
+                    {
+                        builder.LineTo(node.Value);
+                        node = node.Next;
+                    }
+                    builder.Close();
+                }
+                else
+                {
+                    // We will need to fit in rounded radius wherever possible
+                    // The first point should be a bit special
+                    var last = top.Last.Value;
+                    var node = top.First;
+                    var current = node.Value;
+
+                    Vector2 nu = last - current;
+                    double lu = nu.Length;
+                    Vector2 nv = node.Next.Value - current;
+                    double lv = nv.Length;
+                    if (lu > 0 && lv > 0)
+                    {
+                        nu /= lu;
+                        nv /= lv;
+                        double dot = nu.Dot(nv);
+                        if (dot > 0.999 || dot < -0.999)
+                            builder.MoveTo(current);
+                        else
+                        {
+                            // Rounded corner
+                            double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                            if (x > lu * 0.5 || x > lv * 0.5)
+                            {
+                                // We don't have space for an arc, just straight line
+                                builder.MoveTo(current);
+                            }
+                            else
+                            {
+                                // Segments
+                                builder.MoveTo(current + nu * x);
+                                builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                            }
+                        }
+                    }
+                    else
+                        builder.MoveTo(current);
+
+                    // Move to the next points
+                    last = current;
+                    node = node.Next;
+                    while (node != null)
+                    {
+                        current = node.Value;
+                        var next = node.Next?.Value ?? top.First.Value;
+
+                        nu = last - current;
+                        lu = nu.Length;
+                        nv = next - current;
+                        lv = nv.Length;
+                        if (lu > 0 && lv > 0)
+                        {
+                            nu /= lu;
+                            nv /= lv;
+                            double dot = nu.Dot(nv);
+                            if (dot > 0.999 || dot < -0.999)
+                                builder.LineTo(current);
+                            else
+                            {
+                                // Rounded corner
+                                double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                if (x > lu * 0.5 || x > lv * 0.5)
+                                {
+                                    // We don't have space for an arc, just straight line
+                                    builder.LineTo(current);
+                                }
+                                else
+                                {
+                                    // Segments
+                                    builder.LineTo(current + nu * x);
+                                    builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                }
+                            }
+                        }
+                        else
+                            builder.LineTo(current);
+                        last = current;
+                        node = node.Next;
+                    }
+                    builder.Close();
+                }
+            });
+
+            // Draw the label
+            if (string.IsNullOrWhiteSpace(Labels[0]))
+                return;
+            double radiusOffset = RoundRadius * 0.29289321881;
+            double x, y, length;
+
+
+            switch (Variants.Select(_left, _center, _right))
+            {
+                default:
+                case 0:
+                    // Left
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        default:
+                        case 0:
+                            // Top
+                            FindTop(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
+                            break;
+
+                        case 1:
+                            // Middle
+                            FindLeft(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
+                            break;
+
+                        case 2:
+                            // Bottom
+                            FindBottom(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y - radiusOffset - 1), new Vector2(1, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y + 1), new Vector2(1, 1));
+                            break;
+                    }
+                    break;
+
+                case 1:
+                    // Center
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        case 0:
+                            // Top
+                            FindTop(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
+                            break;
+
+                        default:
+                        case 1:
+                            FindCenter(sortedPoints, out x, out y);
+                            drawing.Text(Labels[0], new Vector2(x, y), new Vector2());
+                            break;
+
+                        case 2:
+                            // Bottom
+                            FindBottom(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
+                            break;
+
+                    }
+                    break;
+
+                case 2:
+                    // Right
+                    switch (Variants.Select(_top, _middle, _bottom))
+                    {
+                        default:
+                        case 0:
+                            // Top
+                            FindTop(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + length - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + length - RoundRadius, y - 1), new Vector2(-1, -1));
+                            break;
+
+                        case 1:
+                            // Middle
+                            FindRight(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
+                            break;
+
+                        case 2:
+                            // Bottom
+                            FindBottom(sortedPoints, bounds, out x, out y, out length);
+                            if (Variants.Contains(_inside))
+                                drawing.Text(Labels[0], new Vector2(x + length - radiusOffset - 1, y + length - radiusOffset - 1), new Vector2(-1, -1));
+                            else
+                                drawing.Text(Labels[0], new Vector2(x + length - RoundRadius, y + 1), new Vector2(-1, 1));
+                            break;
+
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Finds a section that represents the top of a point cloud.
+        /// </summary>
+        /// <param name="points">The point cloud.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="x">The result x.</param>
+        /// <param name="y">The result y.</param>
+        /// <param name="length">The length of the segment.</param>
+        void FindTop(SortedDictionary<double, ExpandableLine> points, ExpandableBounds bounds, out double x, out double y, out double length)
+        {
+            x = 0.0;
+            y = bounds.Bounds.Top;
+            length = -1.0;
+            foreach (var point in points)
+            {
+                if (Math.Abs(point.Value.Minimum - y) < Tolerance)
+                {
+                    if (length < 0.0)
+                    {
+                        x = point.Key;
+                        length = 0.0;
+                    }
+                    else
+                        length = point.Key - x;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds a section that represents the bottom of a point cloud.
+        /// </summary>
+        /// <param name="points">The point cloud.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="x">The result x.</param>
+        /// <param name="y">The result y.</param>
+        /// <param name="length">The length of the segment.</param>
+        void FindBottom(SortedDictionary<double, ExpandableLine> points, ExpandableBounds bounds, out double x, out double y, out double length)
+        {
+            x = 0.0;
+            y = bounds.Bounds.Bottom;
+            length = -1.0;
+            foreach (var point in points)
+            {
+                if (Math.Abs(point.Value.Maximum - y) < Tolerance)
+                {
+                    if (length < 0.0)
+                    {
+                        x = point.Key;
+                        length = 0.0;
+                    }
+                    else
+                        length = point.Key - x;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds a section that represents the left of a point cloud.
+        /// </summary>
+        /// <param name="points">The point cloud.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="x">The result x.</param>
+        /// <param name="y">The result y.</param>
+        /// <param name="length">The length of the segment.</param>
+        void FindLeft(SortedDictionary<double, ExpandableLine> points, ExpandableBounds bounds, out double x, out double y, out double length)
+        {
+            x = bounds.Bounds.Left;
+            y = double.PositiveInfinity;
+            length = double.NegativeInfinity;
+            foreach (var point in points)
+            {
+                if (Math.Abs(point.Key - x) < Tolerance)
+                {
+                    if (point.Value.Minimum < y)
+                        y = point.Value.Minimum;
+                    if (point.Value.Maximum > length)
+                        length = point.Value.Maximum;
+                }
+            }
+            length -= y;
+        }
+
+        /// <summary>
+        /// Finds a section that represents the right of a point cloud.
+        /// </summary>
+        /// <param name="points">The point cloud.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="x">The result x.</param>
+        /// <param name="y">The result y.</param>
+        /// <param name="length">The length of the segment.</param>
+        void FindRight(SortedDictionary<double, ExpandableLine> points, ExpandableBounds bounds, out double x, out double y, out double length)
+        {
+            x = bounds.Bounds.Right;
+            y = double.PositiveInfinity;
+            length = double.NegativeInfinity;
+            foreach (var point in points)
+            {
+                if (Math.Abs(point.Key - x) < Tolerance)
+                {
+                    if (point.Value.Minimum < y)
+                        y = point.Value.Minimum;
+                    if (point.Value.Maximum > length)
+                        length = point.Value.Maximum;
+                }
+            }
+            length -= y;
+        }
+
+        /// <summary>
+        /// Finds the center of a point cloud.
+        /// </summary>
+        /// <param name="points">The point cloud.</param>
+        /// <param name="x">The center X-coordinate.</param>
+        /// <param name="y">The center Y-coordinate.</param>
+        void FindCenter(SortedDictionary<double, ExpandableLine> points, out double x, out double y)
+        {
+            var avg = new Vector2();
+            int count = 0;
+            foreach (var point in points)
+            {
+                avg += new Vector2(point.Key, point.Value.Minimum);
+                avg += new Vector2(point.Key, point.Value.Maximum);
+                count += 2;
+            }
+            avg /= count;
+            x = avg.X;
+            y = avg.Y;
         }
 
         /// <inheritdoc />
