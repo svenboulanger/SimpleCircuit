@@ -16,22 +16,11 @@ namespace SimpleCircuit.Components.Wires
     /// </summary>
     public class Wire : Drawable
     {
-        private readonly struct WirePoint
-        {
-            public bool IsJumpOver { get; }
-            public Vector2 Location { get; }
-            public WirePoint(Vector2 location, bool isJumpOver)
-            {
-                Location = location;
-                IsJumpOver = isJumpOver;
-            }
-            public override string ToString() => Location.ToString();
-        }
-
         private IPin _w2p, _p2w;
         private readonly PinInfo _wireToPin, _pinToWire;
         private readonly List<WireSegmentInfo> _segments;
-        private readonly List<WirePoint> _vectors = new();
+        private readonly List<WirePoint> _localPoints = new();
+        private readonly List<Vector2> _points = new();
         private const double _jumpOverRadius = 1.5;
 
         /// <inheritdoc />
@@ -82,6 +71,11 @@ namespace SimpleCircuit.Components.Wires
         public GraphicOptions Options { get; set; }
 
         /// <summary>
+        /// Gets the global coordinates of the points of the wire.
+        /// </summary>
+        public IReadOnlyList<Vector2> Points => _points.AsReadOnly();
+
+        /// <summary>
         /// Creates a new wire.
         /// </summary>
         /// <param name="name">The name of the wire.</param>
@@ -101,7 +95,7 @@ namespace SimpleCircuit.Components.Wires
         {
             if (!base.Reset(context))
                 return false;
-            _vectors.Clear();
+            _localPoints.Clear();
             _p2w = null;
             _w2p = null;
             return true;
@@ -369,7 +363,7 @@ namespace SimpleCircuit.Components.Wires
             // Extract the first node
             var last = context.GetValue(StartX, StartY);
             int count = context.WireSegments.Count;
-            _vectors.Add(new(last, false));
+            _localPoints.Add(new(last, false));
             for (int i = 0; i < _segments.Count; i++)
             {
                 var next = context.GetValue(GetXName(i), GetYName(i));
@@ -378,9 +372,9 @@ namespace SimpleCircuit.Components.Wires
                 if (JumpOverWires)
                     AddJumpOverWires(last, next, context.WireSegments.Take(count));
 
-                _vectors.Add(new(next, false));
+                _localPoints.Add(new(next, false));
                 context.WireSegments.Add(new(last, next));
-                if (_vectors.Count > 2)
+                if (_localPoints.Count > 2)
                     count++;
                 last = next;
             }
@@ -428,7 +422,7 @@ namespace SimpleCircuit.Components.Wires
                     {
                         if (pair.Key >= lastDist + 2 * _jumpOverRadius)
                         {
-                            _vectors.Add(new(pair.Value, true));
+                            _localPoints.Add(new(pair.Value, true));
                             lastDist = pair.Key;
                         }
                     }
@@ -505,20 +499,22 @@ namespace SimpleCircuit.Components.Wires
         protected override void Draw(SvgDrawing drawing)
         {
             List<Marker> markers = new();
-            if (IsVisible && _vectors.Count > 0)
+            if (IsVisible && _localPoints.Count > 0)
             {
+                var tf = drawing.CurrentTransform;
                 drawing.Path(builder =>
                 {
-                    builder.MoveTo(_vectors[0].Location);
+                    builder.MoveTo(_localPoints[0].Location);
+                    _points.Add(tf.Apply(_localPoints[0].Location));
                     int segment = 0;
                     var startMarkers = _segments[0].StartMarkers;
-                    Vector2 last = _vectors[0].Location;
-                    for (int i = 1; i < _vectors.Count; i++)
+                    Vector2 last = _localPoints[0].Location;
+                    for (int i = 1; i < _localPoints.Count; i++)
                     {
-                        Vector2 current = _vectors[i].Location;
+                        Vector2 current = _localPoints[i].Location;
 
                         // Draw a small half circle for crossing over this point
-                        if (_vectors[i].IsJumpOver)
+                        if (_localPoints[i].IsJumpOver)
                         {
                             GetNewAxes(last, current, out var nx, out var ny);
                             Vector2 s = current - nx * _jumpOverRadius;
@@ -546,13 +542,14 @@ namespace SimpleCircuit.Components.Wires
                         }
                         else
                         {
-                            if (RoundRadius.IsZero() || i >= _vectors.Count - 1)
+                            _points.Add(tf.Apply(_localPoints[i].Location));
+                            if (RoundRadius.IsZero() || i >= _localPoints.Count - 1)
                                 builder.LineTo(current);
                             else
                             {
                                 Vector2 nu = last - current;
                                 double lu = nu.Length;
-                                Vector2 nv = _vectors[i + 1].Location - current;
+                                Vector2 nv = _localPoints[i + 1].Location - current;
                                 double lv = nv.Length;
                                 if (lu > 0 && lv > 0.0)
                                 {

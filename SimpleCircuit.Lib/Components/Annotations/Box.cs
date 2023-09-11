@@ -1,24 +1,24 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Outputs;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
+using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuit.Components.Annotations
 {
     /// <summary>
     /// An annotation box.
     /// </summary>
-    public class Box : IDrawable, ILabeled, IAnnotation
+    public class Box : IAnnotation, ILabeled
     {
-        private readonly HashSet<ComponentInfo> _components = new();
-        private readonly HashSet<WireInfo> _wires = new();
-        private readonly HashSet<IDrawable> _drawables = new();
+        private readonly HashSet<ComponentInfo> _componentInfos = new();
+        private readonly HashSet<WireInfo> _wireInfos = new();
+        private readonly HashSet<IDrawable> _components = new();
+        private readonly HashSet<Wire> _wires = new();
 
         private static readonly string _poly = "poly";
         private static readonly string _top = "top";
@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Annotations
         {
             if (info == null)
                 throw new ArgumentNullException(nameof(info));
-            _components.Add(info);
+            _componentInfos.Add(info);
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Annotations
         {
             if (info == null)
                 throw new ArgumentNullException(nameof(info));
-            _wires.Add(info);
+            _wireInfos.Add(info);
         }
 
         /// <inheritdoc />
@@ -143,19 +143,19 @@ namespace SimpleCircuit.Components.Annotations
         public PresenceResult Prepare(IPrepareContext context)
         {
             // Find all component info items
-            foreach (var info in _components)
+            foreach (var info in _componentInfos)
             {
                 var drawable = info.Get(context);
                 if (drawable == null)
                     return PresenceResult.GiveUp;
-                _drawables.Add(drawable);
+                _components.Add(drawable);
             }
-            foreach (var info in _wires)
+            foreach (var info in _wireInfos)
             {
-                var drawable = info.Get(context);
-                if (drawable == null)
+                var wire = info.Get(context);
+                if (wire == null)
                     return PresenceResult.GiveUp;
-                _drawables.Add(drawable);
+                _wires.Add(wire);
             }
             return PresenceResult.Success;
         }
@@ -167,7 +167,7 @@ namespace SimpleCircuit.Components.Annotations
         public void Render(SvgDrawing drawing)
         {
             // All components should have been rendered by now
-            if (_drawables.Count > 0)
+            if (_components.Count + _wires.Count > 0)
             {
                 // Expand the bounds by the margins
                 drawing.BeginGroup(new("annotation") { Id = Name });
@@ -196,8 +196,10 @@ namespace SimpleCircuit.Components.Annotations
         {
             // Compute the boxes
             var bounds = new ExpandableBounds();
-            foreach (var drawable in _drawables)
+            foreach (var drawable in _components)
                 bounds.Expand(drawable.Bounds);
+            foreach (var wire in _wires)
+                bounds.Expand(wire.Bounds);
 
             // Draw the rectangle that encompasses them all
             var total = bounds.Bounds;
@@ -323,13 +325,23 @@ namespace SimpleCircuit.Components.Annotations
                 }
                 expandable.Expand(point.Y);
             }
-            foreach (var drawable in _drawables)
+            foreach (var drawable in _components)
             {
                 var localBounds = drawable.Bounds;
                 AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Top - MarginTop));
                 AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Top - MarginTop));
                 AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Bottom + MarginBottom));
                 AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Bottom + MarginBottom));
+            }
+            foreach (var drawable in _wires)
+            {
+                foreach (var point in drawable.Points)
+                {
+                    AddPoint(new Vector2(point.X - MarginLeft, point.Y - MarginTop));
+                    AddPoint(new Vector2(point.X + MarginRight, point.Y - MarginTop));
+                    AddPoint(new Vector2(point.X - MarginLeft, point.Y + MarginBottom));
+                    AddPoint(new Vector2(point.X + MarginRight, point.Y + MarginBottom));
+                }
             }
 
             // Build the polygon boundary lines top and bottom
@@ -372,7 +384,7 @@ namespace SimpleCircuit.Components.Annotations
 
                     // Add a new point to the bottom boundary line
                     newPoint = new Vector2(pair.Key, vline.Maximum);
-                    while (top.Count > 1)
+                    while (bottom.Count > 1)
                     {
                         var last = bottom.Last.Value;
                         var secondLast = bottom.Last.Previous.Value;
@@ -500,8 +512,6 @@ namespace SimpleCircuit.Components.Annotations
                 return;
             double radiusOffset = RoundRadius * 0.29289321881;
             double x, y, length;
-
-
             switch (Variants.Select(_left, _center, _right))
             {
                 default:
@@ -739,7 +749,8 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         public bool Reset(IResetContext diagnostics)
         {
-            _drawables.Clear();
+            _components.Clear();
+            _wires.Clear();
             return true;
         }
 

@@ -143,7 +143,7 @@ function registerLanguage(keywords) {
                 [/^[\s\t]*\./, { token: 'dot.command' }],
                 [/\b(symbol|SYMBOL)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word', bracket: '@open', next: '@command_symbol', nextEmbedded: 'xml' }]],
                 [/\b(box|BOX)(\s+)(\w+)(\()/, [{ token: 'word' }, { token: 'white' }, { token: 'word.annotate' }, { token: 'bracket.label.$S0', bracket: '@open', next: '@label_block' }]],
-                [/\b(box|BOX)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word.annotate' }, { token: 'bracket.label.$S0', bracket: '@open' }]],
+                [/\b(box|BOX)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word.annotate' }]],
                 [/\b\w+\b/, { token: 'word' }],
                 [/\n/, { token: 'newline', next: '@pop' }],
             ],

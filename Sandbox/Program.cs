@@ -10,26 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"
-// Input to adder
-T(in, ""input"") <r arrow plus> ADD1
-
-// Adder to gain block
-ADD1 <r> DIR(""e"", flip) <r arrow> BLOCK1(""G"")
-
-// Gain block and output
-BLOCK1 <r> Xout(""y"") <r> T(out, ""output"")
-- Xout.angle = 90
-
-// Feedback branch
-// Note that the direction of the wire determines
-// on which side the symbol is connected
-Xout <d +20 l arrow> BLOCKfb(""&#946;"") <l u arrow minus> ADD1
-
-.box b1(""Analog"", radius=3, margin=3, poly)
-    BLOCK1
-    BLOCKfb
-.endb
+            var script = @"R1 <r> R2
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
