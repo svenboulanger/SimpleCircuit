@@ -77,6 +77,16 @@ namespace SimpleCircuit.Components.Annotations
         public double WireMargin { get; set; } = 5.0;
 
         /// <summary>
+        /// Gets or sets the margin at the start of a wire.
+        /// </summary>
+        public double WireStartMargin { get; set; } = 5.0;
+
+        /// <summary>
+        /// Gets or sets the margin at the end of a wire.
+        /// </summary>
+        public double WireEndMargin { get; set; } = 5.0;
+
+        /// <summary>
         /// Gets or sets the radius of the corners.
         /// </summary>
         public double RoundRadius { get; set; }
@@ -121,15 +131,30 @@ namespace SimpleCircuit.Components.Annotations
                 case "margin":
                     double margin = (double)value;
                     MarginLeft = MarginTop = MarginRight = MarginBottom = margin;
+                    WireStartMargin = WireEndMargin = WireMargin = margin;
                     break;
 
+                case "ml":
+                case "leftmargin":
                 case "marginleft": MarginLeft = (double)value; break;
-
+                case "mt":
+                case "topmargin":
                 case "margintop": MarginTop = (double)value; break;
-
+                case "mr":
+                case "rightmargin":
                 case "marginright": MarginRight = (double)value; break;
-
+                case "mb":
+                case "bottommargin":
                 case "marginbottom": MarginBottom = (double)value; break;
+                case "mw":
+                case "marginwire":
+                case "wiremargin": WireMargin = (double)value; break;
+                case "mws":
+                case "marginwirestart":
+                case "wiremarginstart": WireStartMargin = (double)value; break;
+                case "mwe":
+                case "marginwireend":
+                case "wiremarginend": WireEndMargin = (double)value; break;
 
                 case "tol":
                 case "tolerance": Tolerance = (double)value; break;
@@ -365,8 +390,8 @@ namespace SimpleCircuit.Components.Annotations
                             isFirst = false;
 
                             // Add the two starting points now that we know the normal
-                            AddPoint(last + (-normal + perpendicular) * WireMargin);
-                            AddPoint(last + (-normal - perpendicular) * WireMargin);
+                            AddPoint(last - normal * WireStartMargin + perpendicular * WireMargin);
+                            AddPoint(last - normal * WireStartMargin - perpendicular * WireMargin);
                         }
                         else
                         {
@@ -399,8 +424,8 @@ namespace SimpleCircuit.Components.Annotations
                     }
 
                     // Complete the last two points
-                    AddPoint(last + (lastNormal + lastPerpendicular) * WireMargin);
-                    AddPoint(last + (lastNormal - lastPerpendicular) * WireMargin);
+                    AddPoint(last + lastNormal * WireEndMargin + lastPerpendicular * WireMargin);
+                    AddPoint(last + lastNormal * WireEndMargin - lastPerpendicular * WireMargin);
                 }
                 else if (drawable.Points.Count == 1)
                 {

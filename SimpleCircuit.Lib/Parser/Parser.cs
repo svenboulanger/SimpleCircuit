@@ -208,87 +208,88 @@ namespace SimpleCircuit.Parser
                     currentWire = ParseWire(lexer, context);
                     if (currentWire == null)
                         return false;
-                }
-                currentWire.PinToWire = new PinInfo(component, pinToWire);
-                if (useAnnotations)
-                {
-                    foreach (var annotation in context.Annotations)
-                        annotation.Add(currentWire);
-                }
 
-                // Optionally, one can inline a box annotation start statement
-                if (useAnnotations)
-                {
-                    var changes = ParseBoxAnnotation(lexer, context);
-                    if (changes != null && changes.Count > 0)
+                    currentWire.PinToWire = new PinInfo(component, pinToWire);
+                    if (useAnnotations)
                     {
-                        if (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
+                        foreach (var annotation in context.Annotations)
+                            annotation.Add(currentWire);
+                    }
+
+                    // Optionally, one can inline a box annotation start statement
+                    if (useAnnotations)
+                    {
+                        var changes = ParseBoxAnnotation(lexer, context);
+                        if (changes != null && changes.Count > 0)
                         {
-                            // Insert an anonymous point here before going to the next wire to
-                            // make sure that the annotations are only using part of the wire
-                            component = context.GetOrCreateAnonymousPoint(currentWire.Source);
-                            if (component == null)
-                                return false;
-                            currentWire.WireToPin = new PinInfo(component, default);
-                            foreach (var annotation in context.Annotations)
-                                annotation.Add(currentWire);
-                            stringTogether?.Invoke(currentWire, context);
+                            if (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
+                            {
+                                // Insert an anonymous point here before going to the next wire to
+                                // make sure that the annotations are only using part of the wire
+                                component = context.GetOrCreateAnonymousPoint(currentWire.Source);
+                                if (component == null)
+                                    return false;
+                                currentWire.WireToPin = new PinInfo(component, default);
+                                foreach (var annotation in context.Annotations)
+                                    annotation.Add(currentWire);
+                                stringTogether?.Invoke(currentWire, context);
+                                if (!changes.Apply(context))
+                                    return false;
+                                continue;
+                            }
                             if (!changes.Apply(context))
                                 return false;
-                            continue;
                         }
-                        if (!changes.Apply(context))
+                    }
+
+                    // Read the end of the wire definition
+                    switch (lexer.Type)
+                    {
+                        case TokenType.OpenIndex:
+                            // Read the ending pin [ ... ]
+                            var wireToPin = ParsePin(lexer, context);
+                            if (wireToPin.Content.Length == 0)
+                                return false;
+
+                            // We really need a component now that we have a pin
+                            component = ParseComponent(lexer, context);
+                            if (component == null)
+                                return false;
+                            if (useAnnotations)
+                            {
+                                foreach (var annotation in context.Annotations)
+                                    annotation.Add(component);
+                            }
+                            currentWire.WireToPin = new PinInfo(component, wireToPin);
+                            stringTogether?.Invoke(currentWire, context);
+                            break;
+
+                        case TokenType.Word:
+
+                            // Read the end component
+                            component = ParseComponent(lexer, context);
+                            if (component == null)
+                                return false;
+                            if (useAnnotations)
+                            {
+                                foreach (var annotation in context.Annotations)
+                                    annotation.Add(component);
+                            }
+                            currentWire.WireToPin = new PinInfo(component, default);
+                            stringTogether?.Invoke(currentWire, context);
+                            break;
+
+                        case TokenType.EndOfContent:
+                        case TokenType.Newline:
+
+                            // End at a wire definition
+                            stringTogether?.Invoke(currentWire, context);
+                            break;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
                             return false;
                     }
-                }
-
-                // Read the end of the wire definition
-                switch (lexer.Type)
-                {
-                    case TokenType.OpenIndex:
-                        // Read the ending pin [ ... ]
-                        var wireToPin = ParsePin(lexer, context);
-                        if (wireToPin.Content.Length == 0)
-                            return false;
-
-                        // We really need a component now that we have a pin
-                        component = ParseComponent(lexer, context);
-                        if (component == null)
-                            return false;
-                        if (useAnnotations)
-                        {
-                            foreach (var annotation in context.Annotations)
-                                annotation.Add(component);
-                        }
-                        currentWire.WireToPin = new PinInfo(component, wireToPin);
-                        stringTogether?.Invoke(currentWire, context);
-                        break;
-
-                    case TokenType.Word:
-
-                        // Read the end component
-                        component = ParseComponent(lexer, context);
-                        if (component == null)
-                            return false;
-                        if (useAnnotations)
-                        {
-                            foreach (var annotation in context.Annotations)
-                                annotation.Add(component);
-                        }
-                        currentWire.WireToPin = new PinInfo(component, default);
-                        stringTogether?.Invoke(currentWire, context);
-                        break;
-
-                    case TokenType.EndOfContent:
-                    case TokenType.Newline:
-
-                        // End at a wire definition
-                        stringTogether?.Invoke(currentWire, context);
-                        break;
-
-                    default:
-                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComponentName);
-                        return false;
                 }
             }
 
@@ -1058,6 +1059,9 @@ namespace SimpleCircuit.Parser
                     default:
                         return true;
                 }
+
+                // Optional comma
+                lexer.Branch(TokenType.Comma);
             }
         }
         private static bool ParseProperties(SimpleCircuitLexer lexer, ParsingContext context)
