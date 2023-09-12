@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Components.Constraints;
-using SimpleCircuit.Components.Diagrams.Modeling;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
@@ -23,7 +22,6 @@ namespace SimpleCircuit.Parser
         private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
         private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
         private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
-        private static readonly string[] _boxEnd = new[] { "endb", "endbox" };
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -64,6 +62,12 @@ namespace SimpleCircuit.Parser
         {
             switch (lexer.Type)
             {
+                case TokenType.Pipe:
+                    return ParseBoxAnnotationStart(lexer, context);
+
+                case TokenType.DoublePipe:
+                    return ParseBoxAnnotationEnd(lexer, context);
+
                 case TokenType.Word:
                     return ParseComponentChainStatement(lexer, context);
 
@@ -104,9 +108,6 @@ namespace SimpleCircuit.Parser
 
                 case "section":
                     return ParseSectionDefinition(lexer, context);
-
-                case "box":
-                    return ParseBoxAnnotation(lexer, context);
 
                 case "option":
                 case "options":
@@ -166,6 +167,13 @@ namespace SimpleCircuit.Parser
             if (component == null)
                 return false;
 
+            // Optionally, one can inline a box annotation start statement
+            if (!ParseBoxAnnotationControl(lexer, context))
+            {
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
+
             // Parse wires
             bool isFirst = true;
             Token pinToWire = default;
@@ -186,6 +194,13 @@ namespace SimpleCircuit.Parser
                     component = ParseWire(lexer, context, new(component, pinToWire), stringTogether);
                     if (component == null)
                         return false;
+                }
+
+                // Optionally, one can inline a box annotation start statement
+                if (!ParseBoxAnnotationControl(lexer, context))
+                {
+                    lexer.Skip(~TokenType.Newline);
+                    return false;
                 }
             }
 
@@ -215,15 +230,6 @@ namespace SimpleCircuit.Parser
                 return;
             if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.GetOrCreate(context) == null)
                 return;
-
-            // Add the components to annotations if they appeared in the chain
-            foreach (var annotation in context.Annotations)
-            {
-                if (wireInfo.PinToWire?.Component != null)
-                    annotation.Add(wireInfo.PinToWire.Component);
-                if (wireInfo.WireToPin?.Component != null)
-                    annotation.Add(wireInfo.WireToPin.Component);
-            }
 
             // If there are no segments, skip creating the wire
             if (wireInfo.Segments == null || wireInfo.Segments.Count == 0)
@@ -344,6 +350,9 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
             }
 
+            // Add to active annotations
+            foreach (var annotation in context.Annotations)
+                annotation.Add(info);
             return info;
         }
         private static ComponentInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context, PinInfo pinToWire, Action<WireInfo, ParsingContext> stringTogether)
@@ -810,8 +819,35 @@ namespace SimpleCircuit.Parser
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
             return false;
         }
-        private static bool ParseBoxAnnotation(SimpleCircuitLexer lexer, ParsingContext context)
+        private static bool ParseBoxAnnotationControl(SimpleCircuitLexer lexer, ParsingContext context)
         {
+            while (true)
+            {
+                switch (lexer.Type)
+                {
+                    case TokenType.Pipe:
+                        if (!ParseBoxAnnotationStart(lexer, context))
+                            return false;
+                        break;
+
+                    case TokenType.DoublePipe:
+                        if (!ParseBoxAnnotationEnd(lexer, context))
+                            return false;
+                        break;
+
+                    default:
+                        return true;
+                }
+            }
+        }
+        private static bool ParseBoxAnnotationStart(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.Pipe))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAnnotationStart);
+                return false;
+            }
+
             // Read the identifier of the annotation
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
@@ -830,42 +866,38 @@ namespace SimpleCircuit.Parser
                 if (!lexer.Branch(TokenType.CloseParenthesis))
                     context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.BracketMismatch, ")");
             }
+            else if (lexer.Type != TokenType.Pipe)
+            {
+                if (!ParseVariantsAndProperties(annotationInfo, lexer, context))
+                    lexer.Skip(~TokenType.Newline);
+            }
+            if (!lexer.Branch(TokenType.Pipe))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPipe);
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
 
             // Create the annotation
             var annotation = annotationInfo.GetOrCreate(context);
             if (annotation == null)
                 return false;
-            context.Annotations.Add(annotation);
-
-            // Parse the netlist contents
-            while (lexer.Type != TokenType.EndOfContent)
+            context.PushAnnotation(annotation);
+            return true;
+        }
+        private static bool ParseBoxAnnotationEnd(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (lexer.Branch(TokenType.DoublePipe, out var doublePipeToken))
             {
-                if (lexer.Branch(TokenType.Dot))
+                if (context.PopAnnotation() == null)
                 {
-                    if (BranchControlWord(lexer, _boxEnd))
-                    {
-                        lexer.Skip(~TokenType.Newline);
-                        context.Annotations.Remove(annotation);
-                        return true;
-                    }
-                    else if (!ParseControlStatement(lexer, context))
-                    {
-                        SkipToControlWord(lexer, _boxEnd);
-                        context.Annotations.Remove(annotation);
-                        return false;
-                    }
-                }
-                else if (!ParseNonControlStatement(lexer, context))
-                {
-                    SkipToControlWord(lexer, _boxEnd);
-                    context.Annotations.Remove(annotation);
+                    context.Diagnostics?.Post(doublePipeToken, ErrorCodes.AnnotationMismatch);
                     return false;
                 }
+                return true;
             }
 
-            // Check if we reached the end of
-            context.Diagnostics?.Post(lexer.Token, ErrorCodes.UnexpectedEndOfCode);
-            context.Annotations.Remove(annotation);
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAnnotationEnd);
             return false;
         }
         private static bool ParseOptions(SimpleCircuitLexer lexer, ParsingContext context)
@@ -1020,7 +1052,7 @@ namespace SimpleCircuit.Parser
                         return false;
                 }
             }
-            while (lexer.Branch(TokenType.Comma));
+            while (lexer.Branch(TokenType.Comma | TokenType.Word | TokenType.String | TokenType.Plus | TokenType.Dash));
             return true;
         }
         private static bool ParseProperties(SimpleCircuitLexer lexer, ParsingContext context)

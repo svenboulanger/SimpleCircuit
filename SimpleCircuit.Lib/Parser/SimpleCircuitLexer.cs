@@ -210,6 +210,16 @@ namespace SimpleCircuit.Parser
                         ContinueToken();
                         break;
 
+                    case '|':
+                        Type = TokenType.Pipe;
+                        ContinueToken();
+                        if (Char == '|')
+                        {
+                            Type = TokenType.DoublePipe;
+                            ContinueToken();
+                        }
+                        break;
+
                     case char w when char.IsLetter(w):
                         Type = TokenType.Word;
                         ContinueWord();

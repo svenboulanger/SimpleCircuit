@@ -249,5 +249,18 @@
 
         [Diagnostic(SeverityLevel.Error, "PE066", "Cannot create annotation with the name '{0}' as a component already exists with the same name")]
         AnnotationComponentAlreadyExists,
+
+        [Diagnostic(SeverityLevel.Error, "PE067", "Expected a pipe '|' character")]
+        ExpectedPipe,
+
+        [Diagnostic(SeverityLevel.Error, "PE068", "Annotation marker mismatch. Could not find matching annotation start")]
+        AnnotationMismatch,
+
+        [Diagnostic(SeverityLevel.Error, "PE069", "expected start of annotation")]
+        ExpectedAnnotationStart,
+
+        [Diagnostic(SeverityLevel.Error, "PE070", "Expected end of annotation")]
+        ExpectedAnnotationEnd,
+
     }
 }

@@ -24,6 +24,7 @@ namespace SimpleCircuit.Parser
         }
         private readonly Stack<SectionInfo> _sections = new();
         private readonly Queue<ComponentInfo> _queuedPoints = new();
+        private readonly Stack<IAnnotation> _annotations = new();
 
         /// <summary>
         /// Gets the options.
@@ -66,9 +67,9 @@ namespace SimpleCircuit.Parser
         public Dictionary<string, Token> SectionTemplates { get; } = new();
 
         /// <summary>
-        /// Gets the current annotations.
+        /// Gets the currently active annotations.
         /// </summary>
-        public HashSet<IAnnotation> Annotations { get; } = new();
+        public IEnumerable<IAnnotation> Annotations => _annotations.AsEnumerable();
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
@@ -104,6 +105,24 @@ namespace SimpleCircuit.Parser
                 return section.Name;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Pushes a new annotation.
+        /// </summary>
+        /// <param name="annotation">The annotation.</param>
+        public void PushAnnotation(IAnnotation annotation)
+            => _annotations.Push(annotation);
+
+        /// <summary>
+        /// Pops the last annotation.
+        /// </summary>
+        /// <returns>The top annotation that got popped; or <c>null</c> if there was no annotation.</returns>
+        public IAnnotation PopAnnotation()
+        {
+            if (_annotations.Count == 0)
+                return null;
+            return _annotations.Pop();
         }
 
         /// <summary>

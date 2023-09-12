@@ -11,6 +11,9 @@ namespace Sandbox
         static void Main()
         {
             var script = @"R1 <r> R2
+|name|
+R1 R2
+||
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
