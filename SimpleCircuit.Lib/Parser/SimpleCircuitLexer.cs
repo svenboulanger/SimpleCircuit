@@ -213,11 +213,6 @@ namespace SimpleCircuit.Parser
                     case '|':
                         Type = TokenType.Pipe;
                         ContinueToken();
-                        if (Char == '|')
-                        {
-                            Type = TokenType.DoublePipe;
-                            ContinueToken();
-                        }
                         break;
 
                     case char w when char.IsLetter(w):

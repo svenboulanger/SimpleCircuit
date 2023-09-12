@@ -706,11 +706,14 @@ namespace SimpleCircuit
         /// Begins a new group.
         /// </summary>
         /// <param name="options">The options.</param>
-        public void BeginGroup(GraphicOptions options = null)
+        public void BeginGroup(GraphicOptions options = null, bool atStart = false)
         {
             var elt = _document.CreateElement("g", Namespace);
             options?.Apply(elt);
-            _current.AppendChild(elt);
+            if (atStart)
+                _current.PrependChild(elt);
+            else
+                _current.AppendChild(elt);
             _current = elt;
 
             // Track the bounds of the group
@@ -728,9 +731,6 @@ namespace SimpleCircuit
             if (RemoveEmptyGroups && group.ChildNodes.Count == 0)
                 parent.RemoveChild(group);
 
-            if (parent != null)
-                _current = parent;
-
             // Go to the parent bounds
             if (_bounds.Count > 1)
             {
@@ -739,7 +739,7 @@ namespace SimpleCircuit
                 cBounds.Expand(bounds);
 
                 // Draw a rectangle on top of the group to show
-                if (RenderBounds)
+                if (RenderBounds && group.ParentNode != null)
                 {
                     string id = group.Attributes["id"]?.Value;
                     if (!string.IsNullOrWhiteSpace(id))
@@ -749,22 +749,25 @@ namespace SimpleCircuit
                         double left = b.Left - ExpandBounds, right = b.Right + ExpandBounds;
                         double top = b.Top - ExpandBounds, bottom = b.Bottom + ExpandBounds;
 
-                        RenderBounds = false;
-                        BeginGroup(new("bounds"));
+                        var g = _document.CreateElement("g", Namespace);
+                        _current = g;
+                        g.SetAttribute("id", group.Attributes["id"]?.Value);
+                        g.SetAttribute("class", "bounds");
+                        group.ParentNode.InsertAfter(_current, group);
                         Polygon(new Vector2[]
                         {
                             new(left, top), new(right, top),
                             new(right, bottom), new(left, bottom)
                         });
-
+                        
                         // Show the ID in the middle of the box
                         Text(id, center, new());
-                        EndGroup();
-                        RenderBounds = true;
                     }
                 }
+                _current = parent ?? group;
                 return bounds.Bounds;
             }
+            _current = parent ?? group;
             return _bounds.Peek().Bounds;
         }
 

@@ -10,11 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"R1 <r> R2
-|name|
-R1 R2
-||
-";
+            var script = @"X |a poly| <se n +30 se> || X";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

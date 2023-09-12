@@ -129,14 +129,9 @@ namespace SimpleCircuit.Parser
         Pipe = 0x400000,
 
         /// <summary>
-        /// A double pipe sequence.
-        /// </summary>
-        DoublePipe = 0x800000,
-
-        /// <summary>
         /// An unknown character.
         /// </summary>
-        Unknown = 0x1000000,
+        Unknown = 0x800000,
 
         /// <summary>
         /// All characters
