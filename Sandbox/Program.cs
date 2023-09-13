@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"R1 |a| <r> R2 ||";
+            var script = @"X4o <u> BUS(""2"") <u x r> X1(""sync"", angle=90)";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

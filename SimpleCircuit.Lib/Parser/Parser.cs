@@ -164,7 +164,7 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<WireInfo, ParsingContext> stringTogether, bool useAnnotations)
+        private static bool ParseChainStatement(SimpleCircuitLexer lexer, ParsingContext context, Action<WireInfoList, ParsingContext> stringTogether, bool useAnnotations)
         {
             // component[pin] '<' wires '>' [pin]component[pin] '<' wires '>' ... '>' [pin]component
             var component = ParseComponent(lexer, context);
@@ -179,7 +179,7 @@ namespace SimpleCircuit.Parser
             // Parse wires
             bool isFirst = true;
             Token pinToWire = default;
-            WireInfo currentWire = null;
+            WireInfoList currentWires = null;
             while (lexer.Check(TokenType.OpenIndex | TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow | TokenType.Pipe))
             {
                 // Read the starting pin [ ... ]
@@ -205,15 +205,21 @@ namespace SimpleCircuit.Parser
                 // Parse the wire itself < ... >
                 if (lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
                 {
-                    currentWire = ParseWire(lexer, context);
-                    if (currentWire == null)
+                    currentWires = ParseWire(lexer, context);
+                    if (currentWires == null || currentWires.Count == 0)
                         return false;
 
-                    currentWire.PinToWire = new PinInfo(component, pinToWire);
+                    // Fix the starting point and anonymous queued points of the wires
+                    currentWires[0].PinToWire = new PinInfo(component, pinToWire);
+
+                    // Use annotations
                     if (useAnnotations)
                     {
                         foreach (var annotation in context.Annotations)
-                            annotation.Add(currentWire);
+                        {
+                            foreach (var wire in currentWires)
+                                annotation.Add(wire);
+                        }
                     }
 
                     // Optionally, one can inline a box annotation start statement
@@ -226,13 +232,16 @@ namespace SimpleCircuit.Parser
                             {
                                 // Insert an anonymous point here before going to the next wire to
                                 // make sure that the annotations are only using part of the wire
-                                component = context.GetOrCreateAnonymousPoint(currentWire.Source);
+                                component = context.GetOrCreateAnonymousPoint(currentWires[0].Source);
                                 if (component == null)
                                     return false;
-                                currentWire.WireToPin = new PinInfo(component, default);
+                                currentWires[^1].WireToPin = new PinInfo(component, default);
                                 foreach (var annotation in context.Annotations)
-                                    annotation.Add(currentWire);
-                                stringTogether?.Invoke(currentWire, context);
+                                {
+                                    foreach (var wire in currentWires)
+                                        annotation.Add(wire);
+                                }
+                                stringTogether?.Invoke(currentWires, context);
                                 if (!changes.Apply(context))
                                     return false;
                                 continue;
@@ -260,8 +269,8 @@ namespace SimpleCircuit.Parser
                                 foreach (var annotation in context.Annotations)
                                     annotation.Add(component);
                             }
-                            currentWire.WireToPin = new PinInfo(component, wireToPin);
-                            stringTogether?.Invoke(currentWire, context);
+                            currentWires[^1].WireToPin = new PinInfo(component, wireToPin);
+                            stringTogether?.Invoke(currentWires, context);
                             break;
 
                         case TokenType.Word:
@@ -275,15 +284,15 @@ namespace SimpleCircuit.Parser
                                 foreach (var annotation in context.Annotations)
                                     annotation.Add(component);
                             }
-                            currentWire.WireToPin = new PinInfo(component, default);
-                            stringTogether?.Invoke(currentWire, context);
+                            currentWires[^1].WireToPin = new PinInfo(component, default);
+                            stringTogether?.Invoke(currentWires, context);
                             break;
 
                         case TokenType.EndOfContent:
                         case TokenType.Newline:
 
                             // End at a wire definition
-                            stringTogether?.Invoke(currentWire, context);
+                            stringTogether?.Invoke(currentWires, context);
                             break;
 
                         default:
@@ -296,49 +305,64 @@ namespace SimpleCircuit.Parser
             if (isFirst)
             {
                 // There is no wire specified, only the pin
-                var wireInfo = new WireInfo(default, null);
-                wireInfo.PinToWire = new PinInfo(component, pinToWire);
+                var wireInfo = new WireInfoList
+                {
+                    { new WireInfo(default, null)
+                    {
+                        PinToWire = new PinInfo(component, pinToWire)
+                    }, default, context }
+                };
                 stringTogether?.Invoke(wireInfo, context);
             }
             return true;
         }
-        private static void ComponentChainWire(WireInfo wireInfo, ParsingContext context)
+        private static void ComponentChainWire(WireInfoList wireInfoList, ParsingContext context)
         {
-            // We just want to make sure here that the name isn't bogus
-            if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.Fullname.Contains('*'))
+            foreach (var wireInfo in wireInfoList)
             {
-                context.Diagnostics?.Post(wireInfo.PinToWire.Component.Source, ErrorCodes.NoWildcardCharacter);
-                return;
+                // We just want to make sure here that the name isn't bogus
+                if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.Fullname.Contains('*'))
+                {
+                    context.Diagnostics?.Post(wireInfo.PinToWire.Component.Source, ErrorCodes.NoWildcardCharacter);
+                    return;
+                }
+                if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.Fullname.ToString().Contains('*'))
+                {
+                    context.Diagnostics?.Post(wireInfo.WireToPin.Component.Source, ErrorCodes.NoWildcardCharacter);
+                    return;
+                }
+                if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.GetOrCreate(context) == null)
+                    return;
+                if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.GetOrCreate(context) == null)
+                    return;
+
+                // If there are no segments, skip creating the wire
+                if (wireInfo.Segments == null || wireInfo.Segments.Count == 0)
+                    return;
+
+                // Create the wire
+                var wire = wireInfo.GetOrCreate(context);
+                if (wire == null)
+                    return;
+                if (wireInfo.PinToWire != null)
+                    context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p1", wireInfo.PinToWire, -1, wireInfo.Segments[0], false));
+                if (wireInfo.WireToPin != null)
+                    context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
+
+                // Add the wire to annotations
+                foreach (var annotation in context.Annotations)
+                    annotation.Add(wireInfo);
             }
-            if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.Fullname.ToString().Contains('*'))
-            {
-                context.Diagnostics?.Post(wireInfo.WireToPin.Component.Source, ErrorCodes.NoWildcardCharacter);
-                return;
-            }
-            if (wireInfo.PinToWire?.Component != null && wireInfo.PinToWire.Component.GetOrCreate(context) == null)
-                return;
-            if (wireInfo.WireToPin?.Component != null && wireInfo.WireToPin.Component.GetOrCreate(context) == null)
-                return;
-
-            // If there are no segments, skip creating the wire
-            if (wireInfo.Segments == null || wireInfo.Segments.Count == 0)
-                return;
-
-            // Create the wire
-            var wire = wireInfo.GetOrCreate(context);
-            if (wire == null)
-                return;
-            if (wireInfo.PinToWire != null)
-                context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p1", wireInfo.PinToWire, -1, wireInfo.Segments[0], false));
-            if (wireInfo.WireToPin != null)
-                context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
-
-            // Add the wire to annotations
-            foreach (var annotation in context.Annotations)
-                annotation.Add(wireInfo);
         }
-        private static void VirtualChainWire(WireInfo wireInfo, ParsingContext context, Axis axis)
+        private static void VirtualChainWire(WireInfoList wireInfoList, ParsingContext context, Axis axis)
         {
+            if (wireInfoList.Count > 1)
+            {
+                context.Diagnostics?.Post(wireInfoList[0].WireToPin.Name, ErrorCodes.VirtualChainAnonymousPoints);
+                return;
+            }
+            var wireInfo = wireInfoList[0];
+
             if (axis == Axis.None)
                 return;
 
@@ -444,7 +468,7 @@ namespace SimpleCircuit.Parser
                 annotation.Add(info);
             return info;
         }
-        private static WireInfo ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
+        private static WireInfoList ParseWire(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Check(TokenType.OpenBeak | TokenType.Dash | TokenType.Arrow))
             {
@@ -452,6 +476,8 @@ namespace SimpleCircuit.Parser
                 return null;
             }
             var start = lexer.Track();
+
+            var result = new WireInfoList();
 
             // Chain together multiple wire definitions
             bool isVisible = true, jumpOverWires = context.Options.JumpOverWires;
@@ -558,6 +584,7 @@ namespace SimpleCircuit.Parser
                                             WireToPin = new PinInfo(component, default),
                                         };
                                         subWireInfo.Simplify();
+                                        result.Add(subWireInfo, directionToken, context);
 
                                         // Start a new wire
                                         start = lexer.Track();
@@ -637,7 +664,8 @@ namespace SimpleCircuit.Parser
                 Segments = segments,
             };
             wireInfo.Simplify();
-            return wireInfo;
+            result.Add(wireInfo, default, context);
+            return result;
         }
         private static Token ParsePin(SimpleCircuitLexer lexer, ParsingContext context)
         {

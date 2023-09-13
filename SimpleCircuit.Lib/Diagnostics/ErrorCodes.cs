@@ -262,5 +262,7 @@
         [Diagnostic(SeverityLevel.Error, "PE070", "Expected end of annotation")]
         ExpectedAnnotationEnd,
 
+        [Diagnostic(SeverityLevel.Error, "PE071", "Queued anonymous points are not allowed inside virtual chains")]
+        VirtualChainAnonymousPoints,
     }
 }
