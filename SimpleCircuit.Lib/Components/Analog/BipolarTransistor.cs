@@ -38,36 +38,14 @@ namespace SimpleCircuit.Components.Analog
             public Npn(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-8, 0), new(-1, 0)), "e", "emitter");
-                Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 6), new(0, 1)), "b", "base");
-                Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(8, 0), new(1, 0)), "c", "collector");
-            }
-
-            /// <inheritdoc />
-            public override bool Reset(IResetContext context)
-            {
-                if (!base.Reset(context))
-                    return false;
-                SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
-                return true;
+                Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
+                Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
+                Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
             }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                {
-                    if (Variants.Contains(_packaged))
-                        drawing.Line(new(0, 4), new(0, 8), new("wire"));
-                    else
-                        drawing.Line(new(0, 4), new(0, 6), new("wire"));
-                }
-                if (Pins[2].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
-
                 // Transistor
                 drawing.Arrow(new(-3, 4), new(-6, 0), new("emitter"));
                 drawing.Line(new(3, 4), new(6, 0), new("collector"));
@@ -75,11 +53,12 @@ namespace SimpleCircuit.Components.Analog
 
                 // Package
                 if (Variants.Contains(_packaged))
+                {
                     drawing.Circle(new(), 8.0);
-
-                // Label
-                drawing.Text(Labels[0], new Vector2(0, -3), new Vector2(0, -1));
-
+                    drawing.Text(Labels[0], new Vector2(0, -9), new Vector2(0, -1));
+                }
+                else
+                    drawing.Text(Labels[0], new Vector2(0, -3), new Vector2(0, -1));
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
@@ -103,30 +82,8 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
-            {
-                if (!base.Reset(context))
-                    return false;
-                SetPinOffset(1, new(0, Variants.Contains(_packaged) ? 8 : 6));
-                return true;
-            }
-
-            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.Line(new(-6, 0), new(-8, 0), new("wire"));
-                if (Pins[1].Connections == 0)
-                {
-                    if (Variants.Contains(_packaged))
-                        drawing.Line(new(0, 4), new(0, 8), new("wire"));
-                    else
-                        drawing.Line(new(0, 4), new(0, 6), new("wire"));
-                }
-                if (Pins[2].Connections == 0)
-                    drawing.Line(new(6, 0), new(8, 0), new("wire"));
-
                 // Transistor
                 drawing.Arrow(new(6, 0), new(3, 4), new("emitter"));
                 drawing.Line(new(-3, 4), new(-6, 0), new("collector"));
@@ -134,10 +91,12 @@ namespace SimpleCircuit.Components.Analog
 
                 // Package
                 if (Variants.Contains(_packaged))
+                {
                     drawing.Circle(new(), 8.0);
-
-                // Label
-                drawing.Text(Labels[0], new(0, -3), new(0, -1));
+                    drawing.Text(Labels[0], new Vector2(0, -9), new Vector2(0, -1));
+                }
+                else
+                    drawing.Text(Labels[0], new Vector2(0, -3), new Vector2(0, -1));
             }
         }
     }

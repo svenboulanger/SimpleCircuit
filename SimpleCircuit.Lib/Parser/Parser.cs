@@ -348,10 +348,6 @@ namespace SimpleCircuit.Parser
                     context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p1", wireInfo.PinToWire, -1, wireInfo.Segments[0], false));
                 if (wireInfo.WireToPin != null)
                     context.Circuit.Add(new PinOrientationConstraint($"{wireInfo.Fullname}.p2", wireInfo.WireToPin, 0, wireInfo.Segments[^1], true));
-
-                // Add the wire to annotations
-                foreach (var annotation in context.Annotations)
-                    annotation.Add(wireInfo);
             }
         }
         private static void VirtualChainWire(WireInfoList wireInfoList, ParsingContext context, Axis axis)

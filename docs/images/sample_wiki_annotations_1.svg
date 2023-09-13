@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><svg xmlns:sc="https://github.com/svenboulanger/SimpleCircuit" width="220" height="230" viewBox="-7 -10 44.98 46.98" xmlns="http://www.w3.org/2000/svg"><style>path, polyline, line, circle, polygon {
+    stroke: black;
+    stroke-width: 0.5pt;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.diagram path, .diagram circle, .diagram polygon { fill: white; }
+.plane { stroke-width: 1pt; }
+.battery .neg { stroke-width: 0.75pt; }
+text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
+.small tspan { font-size: 0.8em; }
+.text-stroke { stroke-width: 0.025em; }
+.text-symbol { fill: black; stroke: none; }
+.marker { fill: black; }
+.marker.erd { fill: white; }
+.dotted { stroke-dasharray: 0.5 2; }
+.dashed { stroke-dasharray: 2 2; }
+.annotation path, .annotation polygon { stroke: #6600cc; }
+.annotation text { fill: #6600cc; }
+</style><metadata><sc:version>1.4.2.0</sc:version></metadata><metadata><sc:script><![CDATA[
+GND <u> V1 <u r> R1 <r d> R2 <d> GND
+(y GND)
+
+|ann1|
+R1
+||
+]]></sc:script></metadata><g class="annotation" id="ann1"><polygon points="4.99,-9 26.99,-9 26.99,9 4.99,9" /></g><g class="wire" id="w-1"><path class="wire" d="M0 31.98 v-9.99" /></g><g class="wire" id="w-2"><path class="wire" d="M0 9.99 v-9.99 h9.99" /></g><g class="wire" id="w-3"><path class="wire" d="M21.99 0 h9.99 v9.99" /></g><g class="wire" id="w-4"><path class="wire" d="M31.98 21.99 v9.99" /></g><g class="ground" id="GND-1"><path d="M-5 31.98 h10 M-3 33.98 h6 M-1 35.98 h2" /></g><g class="vs" id="V1"><circle cx="0" cy="15.99" r="6" /><g class="signs"><path class="plus" d="M-1 12.99 h2 M0 13.99 v-2" /><line x1="-1" y1="18.99" x2="1" y2="18.99" class="minus" /></g></g><g class="resistor" id="R1"><polyline points="9.99,0 10.99,-4 12.99,4 14.99,-4 16.99,4 18.99,-4 20.99,4 21.99,0" /></g><g class="resistor" id="R2"><polyline points="31.98,9.99 35.98,10.99 27.98,12.99 35.98,14.99 27.98,16.99 35.98,18.99 27.98,20.99 31.98,21.99" /></g><g class="ground" id="GND-2"><path d="M26.98 31.98 h10 M28.98 33.98 h6 M30.98 35.98 h2" /></g></svg>
