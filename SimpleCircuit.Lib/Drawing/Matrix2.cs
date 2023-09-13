@@ -38,12 +38,12 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets the determinant of the matrix.
         /// </summary>
-        public double Determinant => A11 * A22 - A12 * A21;
+        public readonly double Determinant => A11 * A22 - A12 * A21;
 
         /// <summary>
         /// Gets the inverse of the matrix.
         /// </summary>
-        public Matrix2 Inverse
+        public readonly Matrix2 Inverse
         {
             get
             {
@@ -56,13 +56,13 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets the transposed matrix.
         /// </summary>
-        public Matrix2 Transposed => new(A11, A21, A12, A22);
+        public readonly Matrix2 Transposed => new(A11, A21, A12, A22);
 
         /// <summary>
         /// Gets whether the matrix is orthonormal. This means that the column vectors
         /// are all orthonormal to each other.
         /// </summary>
-        public bool IsOrthonormal
+        public readonly bool IsOrthonormal
         {
             get
             {
@@ -97,7 +97,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             int hash = Math.Round(A11, _precision).GetHashCode();
             hash = hash * 13 ^ Math.Round(A12, _precision).GetHashCode();
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>
         ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is Matrix2 mat)
                 return Equals(mat);
@@ -127,7 +127,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>
         /// true if the current object is equal to the <paramref name="other">other</paramref> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(Matrix2 other)
+        public readonly bool Equals(Matrix2 other)
         {
             if (Math.Abs(A11 - other.A11) > _dblPrecision)
                 return false;
@@ -145,7 +145,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="inversion">The inverted matrix.</param>
         /// <returns>Returns <c>true</c> if the matrix could be inverted; otherwise, <c>false</c>.</returns>
-        public bool TryInvert(out Matrix2 inversion)
+        public readonly bool TryInvert(out Matrix2 inversion)
         {
             double determinant = Determinant;
             if (determinant.IsZero())
@@ -196,7 +196,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>
         /// A <see cref="string" /> that represents this instance.
         /// </returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"({A11:G4}, {A12:G4}; {A21:G4}, {A22:G4})";
         }

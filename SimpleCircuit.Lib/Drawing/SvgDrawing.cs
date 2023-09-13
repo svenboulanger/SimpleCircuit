@@ -751,7 +751,6 @@ namespace SimpleCircuit
 
                         var g = _document.CreateElement("g", Namespace);
                         _current = g;
-                        g.SetAttribute("id", group.Attributes["id"]?.Value);
                         g.SetAttribute("class", "bounds");
                         group.ParentNode.InsertAfter(_current, group);
                         Polygon(new Vector2[]

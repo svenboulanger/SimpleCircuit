@@ -20,7 +20,8 @@ namespace SimpleCircuit.Components.Annotations
         private readonly HashSet<IDrawable> _components = new();
         private readonly HashSet<Wire> _wires = new();
 
-        private static readonly string _poly = "poly";
+        public static readonly string Poly = "poly";
+
         private static readonly string _top = "top";
         private static readonly string _middle = "middle";
         private static readonly string _bottom = "bottom";
@@ -204,7 +205,7 @@ namespace SimpleCircuit.Components.Annotations
                 drawing.BeginGroup(new("annotation") { Id = Name }, !Variants.Contains(_over));
                 var matrix = drawing.CurrentTransform.Matrix.Inverse;
                 drawing.BeginTransform(new Transform(-matrix * drawing.CurrentTransform.Offset, matrix));
-                switch (Variants.Select(_poly))
+                switch (Variants.Select(Poly))
                 {
                     case 0:
                         DrawPolygon(drawing);

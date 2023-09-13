@@ -31,7 +31,7 @@ namespace SimpleCircuitOnline.Pages
         private StandaloneCodeEditor _scriptEditor, _styleEditor;
         private TabMenu _tabs;
         private Settings _settings = new();
-        private bool _arrowMode = false, _viewMode = false;
+        private bool _viewMode = false;
 
         private const string StandardStyle = "/* #STDSTYLE# */";
 

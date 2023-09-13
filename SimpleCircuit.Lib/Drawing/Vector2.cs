@@ -32,7 +32,7 @@ namespace SimpleCircuit
         /// <value>
         /// The perpendicular vector.
         /// </value>
-        public Vector2 Perpendicular => new(-Y, X);
+        public readonly Vector2 Perpendicular => new(-Y, X);
 
         /// <summary>
         /// Gets the length of the vector.
@@ -40,7 +40,7 @@ namespace SimpleCircuit
         /// <value>
         /// The length.
         /// </value>
-        public double Length => Math.Sqrt(X * X + Y * Y);
+        public readonly double Length => Math.Sqrt(X * X + Y * Y);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector2"/> struct.
@@ -59,7 +59,7 @@ namespace SimpleCircuit
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             int hash = Math.Round(X, _precision).GetHashCode();
             hash = (hash * 13) ^ Math.Round(Y, _precision).GetHashCode();
@@ -87,7 +87,7 @@ namespace SimpleCircuit
         /// <returns>
         /// true if the current object is equal to the <paramref name="other">other</paramref> parameter; otherwise, false.
         /// </returns>
-        public bool Equals(Vector2 other)
+        public readonly bool Equals(Vector2 other)
         {
             if (Math.Abs(other.X - X) > _dblPrecision)
                 return false;
@@ -101,14 +101,14 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="other">The other vector.</param>
         /// <returns>The dot product.</returns>
-        public double Dot(Vector2 other) => X * other.X + Y * other.Y;
+        public readonly double Dot(Vector2 other) => X * other.X + Y * other.Y;
 
         /// <summary>
         /// Rotates the vector.
         /// </summary>
         /// <param name="angle">The angle.</param>
         /// <returns>The rotated vector.</returns>
-        public Vector2 Rotate(double angle)
+        public readonly Vector2 Rotate(double angle)
         {
             double c = Math.Cos(angle);
             double s = Math.Sin(angle);
@@ -121,7 +121,7 @@ namespace SimpleCircuit
         /// <param name="sx">The scaling along the x-axis.</param>
         /// <param name="sy">The scaling along the y-axis.</param>
         /// <returns>The scaled vector.</returns>
-        public Vector2 Scale(double sx, double sy)
+        public readonly Vector2 Scale(double sx, double sy)
         {
             return new Vector2(X * sx, Y * sy);
         }
@@ -142,7 +142,7 @@ namespace SimpleCircuit
         /// <param name="lowestY">The lowest node Y.</param>
         /// <param name="highestY">The highest node Y.</param>
         /// <returns>The vector in the first quadrant.</returns>
-        public Vector2 Order<T>(ref T lowestX, ref T highestX, ref T lowestY, ref T highestY)
+        public readonly Vector2 Order<T>(ref T lowestX, ref T highestX, ref T lowestY, ref T highestY)
         {
             T tmp;
             double rx, ry;
@@ -173,7 +173,7 @@ namespace SimpleCircuit
         /// <returns>
         /// A <see cref="string" /> that represents this instance.
         /// </returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"({X:G4}, {Y:G4})";
         }

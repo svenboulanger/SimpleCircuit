@@ -62,7 +62,19 @@ namespace SimpleCircuit.Parser
             }
             else
             {
-                _annotation = new Box(Fullname);
+                _annotation = new Box(Fullname)
+                {
+                    RoundRadius = context.Options.AnnotationRadius,
+                    MarginLeft = context.Options.AnnotationMargin,
+                    MarginTop = context.Options.AnnotationMargin,
+                    MarginRight = context.Options.AnnotationMargin,
+                    MarginBottom = context.Options.AnnotationMargin,
+                    WireMargin = context.Options.AnnotationWireMargin,
+                    WireStartMargin = context.Options.AnnotationWireMarginEnds,
+                    WireEndMargin = context.Options.AnnotationWireMarginEnds,
+                };
+                if (context.Options.AnnotationPoly)
+                    _annotation.Variants.Add(Box.Poly);
                 context.Circuit.Add(_annotation);
             }
 

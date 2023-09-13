@@ -11,7 +11,7 @@ namespace SimpleCircuit
     /// </summary>
     public class Options
     {
-        private struct DefaultProperty
+        private readonly struct DefaultProperty
         {
             public Token Property { get; }
             public object Value { get; }
@@ -84,7 +84,22 @@ namespace SimpleCircuit
         [Description("If non-zero, subsequent wires will be rounded when cornering.")]
         public double RoundWires { get; set; } = 0.0;
 
-        [Description("The spacing in X-direction between two unconnected diagrams.")]
+        [Description("If non-zero, subsequent annotation boxes will be rounded.")]
+        public double AnnotationRadius { get; set; } = 0.0;
+
+        [Description("If \"true\", subsequent annotation boxes will be polygons.")]
+        public bool AnnotationPoly { get; set; } = false;
+
+        [Description("The default margin for annotation boxes to components.")]
+        public double AnnotationMargin { get; set; } = 5.0;
+
+        [Description("The default margin for annotation boxes to wires.")]
+        public double AnnotationWireMargin { get; set; } = 5.0;
+
+        [Description("The default margin for annotation boxes at wire ends when using polygon annotation boxes.")]
+        public double AnnotationWireMarginEnds { get; set; } = 2.5;
+
+        [Description("The spacing in X-direction between two unconnected circuit diagrams.")]
         public double SpacingX
         {
             get => _spacingX;
@@ -103,7 +118,7 @@ namespace SimpleCircuit
         /// </summary>
         public event EventHandler<EventArgs> SpacingXChanged;
 
-        [Description("The spacing in Y-direction between two unconnected diagrams.")]
+        [Description("The spacing in Y-direction between two unconnected circuit diagrams.")]
         public double SpacingY
         {
             get => _spacingY;
