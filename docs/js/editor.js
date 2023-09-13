@@ -89,7 +89,14 @@ function registerLanguage(keywords) {
     monaco.languages.register({ id: 'simpleCircuit' });
 
     // Register a tokens provider for the language
-    keywordRegex = new RegExp('\\b(?:' + keywords.join("|") + ')[\\w\\d]*\\b(?![\\.\\/])');
+    fmt = '\\b(?:';
+    for (let i = 0; i < keywords.length; i++) {
+        if (i > 0)
+            fmt += '|';
+        fmt += keywords[i][0];
+    }
+    fmt += ')[\\w\\d]*\\b(?![\\.\\/])'
+    keywordRegex = new RegExp(fmt);
     sectionRegex = new RegExp('\\b\\w[\\w\\d]*\\b(?!/)');
     monaco.languages.setMonarchTokensProvider('simpleCircuit', {
         defaultToken: 'invalid',
@@ -112,6 +119,8 @@ function registerLanguage(keywords) {
                 [/\</, { token: 'bracket.wire.$S0', bracket: '@open', next: '@wire.$S0' }],
                 [/\[/, { token: 'bracket.pin.$S0', bracket: '@open', next: '@pin_block' }],
                 [/\(/, { token: 'bracket.label.$S0', bracket: '@open', next: '@label_block' }],
+                [/(\|)([\s\t]*)(\w+)/, [{ token: 'pipe.boxannotation' }, { token: 'white' }, { token: 'word.boxannotation.$S0', bracket: '@open', next: '@boxannotation' }]],
+                [/(\|)([^\|]*)(\|)/, [{ token: 'pipe.boxannotation' }, { token: 'pipe.comment' }, { token: 'pipe.boxannotation' }]],
             ],
             virtual: [
                 [ '@lineComment', 'comment', '@pop'],
@@ -148,6 +157,10 @@ function registerLanguage(keywords) {
             command_symbol: [
                 [/^\.ends/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
             ],
+            boxannotation: [
+                { include: '@variants_and_properties' },
+                [/\|/, { token: 'pipe.boxannotation', bracket: '@close', next: '@pop' }],
+            ],
             pin_block: [
                 [ '@lineComment', 'comment', '@popall' ],
                 { include: '@whitespace' },
@@ -155,19 +168,23 @@ function registerLanguage(keywords) {
                 [/\]/, { token: 'bracket.pin', bracket: '@close', next: '@pop' }],
             ],
             label_block: [
-                [/(\w+)(\s*)(=)/, [{ token: 'word.$S0' }, { token: 'white' }, { token: 'equals.assignment.$S0' }]],
-                [/\w+/, { token: 'variant' }],
+                { include: '@variants_and_properties' },
+                [/\)/, { token: 'bracket.label', bracket: '@close', next: '@pop' }],
+            ],
+            variants_and_properties: [
+                [/(\w+)(\s*)(=)/, [{ token: 'word.property.$S0' }, { token: 'white' }, { token: 'equals.assignment.$S0' }]],
+                [/\w+/, { token: 'variant.$S0' }],
                 [/[\+\-]/, { token: 'operator.$S0' }],
                 { include: '@number' },
                 { include: '@boolean' },
                 { include: '@string' },
                 [ '@lineComment', 'comment', '@popall'],
                 { include: '@whitespace' },
-                [/\)/, { token: 'bracket.label', bracket: '@close', next: '@pop' }],
+                [/,/, { token: 'comma.$S0' }],
             ],
             string: [
-                [/"([^"]|\\.)*"/, 'string'],
-                [/'([^']|\\.)*'/, 'string'],
+                [/"([^"]|\\.)*"/, { token: 'string.$S0' }],
+                [/'([^']|\\.)*'/, { token: 'string.$S0' }],
             ],
             whitespace: [
                 [/[ \t]+/, 'white'],
@@ -191,6 +208,7 @@ function registerLanguage(keywords) {
             },
         rules: [
             { token: 'word', foreground: '0000ff', fontStyle: 'bold' },
+            { token: 'word.property', foreground: '0033ff', fontStyle: 'bold' },
             { token: 'word.virtual', foreground: '9999ff' },
             { token: 'word.pin', foreground: '7a92cf' },
             { token: 'bracket', foreground: 'ff0000' },
@@ -203,8 +221,8 @@ function registerLanguage(keywords) {
             { token: 'number.wire', foreground: 'cc6666' },
             { token: 'number.wire.virtual', foreground: 'cc9999' },
             { token: 'comment', foreground: '00a000' },
-            { token: 'component', foreground: '9a47ff', fontStyle: 'bold' },
-            { token: 'component.virtual', foreground: 'c799ff' },
+            { token: 'component', foreground: '0000aa', fontStyle: 'bold' },
+            { token: 'component.virtual', foreground: '6666cc' },
             { token: 'pindirection', foreground: 'cc9966' },
             { token: 'queued', foreground: '6699cc' },
             { token: 'pindirection.wire.virtual', foreground: 'cc9966' },
@@ -213,8 +231,8 @@ function registerLanguage(keywords) {
             { token: 'operator.wire', foreground: 'cc0000' },
             { token: 'operator.wire.virtual', foreground: '996666' },
             { token: 'equals', foreground: 'cc0000', fontStyle: 'bold' },
-            { token: 'dot', foreground: '0000cc' },
-            { token: 'dash', foreground: '0000cc', fontStyle: 'bold' },
+            { token: 'dot', foreground: '0000aa' },
+            { token: 'dash', foreground: '0000aa', fontStyle: 'bold' },
             { token: 'word.assignment', foreground: '6666ff', fontStyle: 'bold' },
             { token: 'dot.assignment', foreground: '666666' },
             { token: 'equals.assignment', foreground: '666666' },
@@ -228,6 +246,14 @@ function registerLanguage(keywords) {
             { token: 'delimiter.xml', foreground: '990000' },
             { token: 'tag.attribute', foreground: 'AA0000' },
             { token: 'attribute.value.xml', foreground: 'a633f2' },
+            { token: 'pipe.boxannotation', foreground: 'ff6633' },
+            { token: 'pipe.comment', foreground: 'ee9966' },
+            { token: 'word.boxannotation', foreground: 'ff6633' },
+            { token: 'word.property.boxannotation', foreground: 'ee9966' },
+            { token: 'equals.assignment.boxannotation', foreground: 'ee9966' },
+            { token: 'comma.boxannotation', foreground: 'ee9966' },
+            { token: 'string.boxannotation', foreground: 'ee6666' },
+            { token: 'variant.boxannotation', foreground: 'ee9966' },
         ]
     });
 
