@@ -264,5 +264,8 @@
 
         [Diagnostic(SeverityLevel.Error, "PE071", "Queued anonymous points are not allowed inside virtual chains")]
         VirtualChainAnonymousPoints,
+
+        [Diagnostic(SeverityLevel.Error, "PE072", "Expected a comma vector separator")]
+        ExpectedComma,
     }
 }

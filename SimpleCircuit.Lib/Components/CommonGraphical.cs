@@ -1,7 +1,9 @@
 ﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using System;
+using System.ComponentModel.Design;
 
 namespace SimpleCircuit.Components
 {
@@ -10,6 +12,46 @@ namespace SimpleCircuit.Components
     /// </summary>
     public static class CommonGraphical
     {
+        /// <summary>
+        /// Variant name for placing a label left.
+        /// </summary>
+        public const string Left = "left";
+
+        /// <summary>
+        /// Variant name for placing a label in the center horizontally.
+        /// </summary>
+        public const string Center = "center";
+
+        /// <summary>
+        /// Variant name for placing a label on the right.
+        /// </summary>
+        public const string Right = "right";
+
+        /// <summary>
+        /// Variant name for placing a label at the top.
+        /// </summary>
+        public const string Top = "top";
+
+        /// <summary>
+        /// Variant name for placing a label in the middle vertically.
+        /// </summary>
+        public const string Middle = "middle";
+
+        /// <summary>
+        /// Variant name for placing a label at the bottom.
+        /// </summary>
+        public const string Bottom = "bottom";
+
+        /// <summary>
+        /// Variant name for placing a label on the inside of the box.
+        /// </summary>
+        public const string Inside = "inside";
+
+        /// <summary>
+        /// Variant name for placing the label on the outside of the box.
+        /// </summary>
+        public const string Outside = "outside";
+
         /// <summary>
         /// Draws a rectangle centered around the given point.
         /// </summary>
@@ -215,6 +257,105 @@ namespace SimpleCircuit.Components
         {
             foreach (string name in names)
                 drawing.ExtendPin(pins[name], length);
+        }
+
+        /// <summary>
+        /// Draws a label around or inside a box, depending on variants.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="label">The label.</param>
+        /// <param name="variants">The variants.</param>
+        /// <param name="topLeft">The top-left corner of the box.</param>
+        /// <param name="bottomRight">The bottom-right corner of the box.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="defaultLocation">The default location if no variants are given.</param>
+        /// <param name="defaultOrientation">The default orientation if no variants are given.</param>
+        /// <param name="margin">The margin from the edge inside or outside.</param>
+        /// <param name="options">The graphic options.</param>
+        public static void BoxedLabel(this SvgDrawing drawing, string label, VariantSet variants,
+            Vector2 topLeft,
+            Vector2 bottomRight,
+            Vector2 offset,
+            int defaultHorizontal = 1,
+            int defaultVertical = 1,
+            int defaultInside = 0,
+            double margin = 1.0,
+            GraphicOptions options = null)
+        {
+            // No need to deal with all this if there is no label to draw
+            if (string.IsNullOrWhiteSpace(label))
+                return;
+
+            // Get horizontal alignment
+            int horizontal = variants.Select(Left, Center, Right);
+            if (horizontal < 0)
+                horizontal = defaultHorizontal;
+
+            // Get vertical alignment
+            int vertical = variants.Select(Top, Middle, Bottom);
+            if (vertical < 0)
+                vertical = defaultVertical;
+
+            // Short out for centered text
+            if (horizontal == 1 && vertical == 1)
+            {
+                // Centered text
+                drawing.Text(label, 0.5 * (topLeft + bottomRight), new Vector2(), options);
+                return;
+            }
+
+            // Determine whether the label should be in- or outside the box
+            int inout = variants.Select(Inside, Outside);
+            if (inout < 0)
+                inout = defaultInside;
+
+            // Determine the location and expansion vector
+            Vector2 loc, n;
+            if (inout == 0)
+            {
+                // Inside the box
+                if (horizontal == 1)
+                {
+                    loc = new Vector2(0.5 * (topLeft.X + bottomRight.X), vertical == 0 ? topLeft.Y + margin : bottomRight.Y - margin);
+                    n = new Vector2(0, vertical == 0 ? 1 : -1);
+                }
+                else if (vertical == 1)
+                {
+                    loc = new Vector2(horizontal == 0 ? topLeft.X + margin : bottomRight.X - margin, 0.5 * (topLeft.Y + bottomRight.Y));
+                    n = new Vector2(horizontal == 0 ? 1 : -1, 0);
+                }
+                else
+                {
+                    loc = new Vector2(
+                        horizontal == 0 ? topLeft.X + margin : bottomRight.X - margin,
+                        vertical == 0 ? topLeft.Y + margin : bottomRight.Y - margin);
+                    n = new Vector2(horizontal == 0 ? 1 : -1, vertical == 0 ? 1 : -1);
+                }
+            }
+            else
+            {
+                // Outside the box
+                if (horizontal == 1)
+                {
+                    loc = new Vector2(0.5 * (topLeft.X + bottomRight.X), vertical == 0 ? topLeft.Y - margin : bottomRight.Y + margin);
+                    n = new Vector2(0, vertical == 0 ? -1 : 1);
+                }
+                else if (vertical == 1)
+                {
+                    loc = new Vector2(horizontal == 0 ? topLeft.X - margin : bottomRight.X + margin, 0.5 * (topLeft.Y + bottomRight.Y));
+                    n = new Vector2(horizontal == 0 ? -1 : 1, 0);
+                }
+                else
+                {
+                    loc = new Vector2(
+                        horizontal == 0 ? topLeft.X : bottomRight.X,
+                        vertical == 0 ? topLeft.Y - margin : bottomRight.Y + margin);
+                    n = new Vector2(horizontal == 0 ? 1 : -1, vertical == 0 ? -1 : 1);
+                }
+            }
+
+            // Draw the label
+            drawing.Text(label, loc + offset, n, options);
         }
     }
 }

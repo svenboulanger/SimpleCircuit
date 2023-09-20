@@ -1138,29 +1138,40 @@ namespace SimpleCircuit.Parser
         private static object ParsePropertyValue(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // The value
-            object value;
             switch (lexer.Type)
             {
                 case TokenType.Dash:
                 case TokenType.Number:
                 case TokenType.Integer:
-                    value = ParseDouble(lexer, context);
-                    break;
+                    return ParseDouble(lexer, context);
 
                 case TokenType.String:
-                    value = ParseString(lexer, context);
-                    break;
+                    return ParseString(lexer, context);
 
                 case TokenType.Word:
-                    value = ParseBoolean(lexer, context);
-                    break;
+                    return ParseBoolean(lexer, context);
+
+                case TokenType.OpenParenthesis:
+                    lexer.Next();
+                    var value1 = ParseDouble(lexer, context);
+                    if (!lexer.Branch(TokenType.Comma))
+                    {
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedComma);
+                        return null;
+                    }
+                    var value2 = ParseDouble(lexer, context);
+                    if (!lexer.Branch(TokenType.CloseParenthesis))
+                    {
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.BracketMismatch, ")");
+                        return null;
+                    }
+                    return new Vector2(value1, value2);
 
                 default:
                     context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedPropertyValue);
                     lexer.Skip(~TokenType.Newline);
                     return null;
             }
-            return value;
         }
         private static bool? ParseBoolean(SimpleCircuitLexer lexer, ParsingContext context)
         {
