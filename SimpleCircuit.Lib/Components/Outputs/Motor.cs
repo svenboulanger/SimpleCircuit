@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Line(new(5, -4), new(7, -4), new("minus"));
                 }
 
-                drawing.Label(Labels, 0, new(0, 6), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, 6), new(0, 1));
             }
         }
     }

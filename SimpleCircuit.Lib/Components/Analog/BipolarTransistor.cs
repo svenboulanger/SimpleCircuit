@@ -55,10 +55,10 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    drawing.Label(Labels, 0, new Vector2(0, -9), new Vector2(0, -1));
+                    Labels.Draw(drawing, 0, new Vector2(0, -9), new Vector2(0, -1));
                 }
                 else
-                    drawing.Label(Labels, 0, new Vector2(0, -3), new Vector2(0, -1));
+                    Labels.Draw(drawing, 0, new Vector2(0, -3), new Vector2(0, -1));
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
@@ -93,10 +93,10 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    drawing.Label(Labels, 0, new Vector2(0, -9), new Vector2(0, -1));
+                    Labels.Draw(drawing, 0, new Vector2(0, -9), new Vector2(0, -1));
                 }
                 else
-                    drawing.Label(Labels, 0, new Vector2(0, -3), new Vector2(0, -1));
+                    Labels.Draw(drawing, 0, new Vector2(0, -3), new Vector2(0, -1));
             }
         }
     }

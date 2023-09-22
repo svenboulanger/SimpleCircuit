@@ -38,7 +38,7 @@
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-                drawing.Label(Labels, 0, new(), new());
+                Labels.Draw(drawing, 0, new(), new());
             }
         }
     }

@@ -53,31 +53,6 @@ namespace SimpleCircuit.Components
         public const string Outside = "outside";
 
         /// <summary>
-        /// Class name for labels.
-        /// </summary>
-        public const string LabelClass = "lbl";
-
-        /// <summary>
-        /// Draws a label.
-        /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        /// <param name="labels">The labels object.</param>
-        /// <param name="index">The index of the labels object.</param>
-        /// <param name="location">The location of the label.</param>
-        /// <param name="expand">The direction the text can expand.</param>
-        public static void Label(this SvgDrawing drawing, Labels labels, int index, Vector2 location, Vector2 expand)
-        {
-            string lbl = labels?[index];
-            if (string.IsNullOrWhiteSpace(lbl))
-                return;
-
-            if (index == 0)
-                drawing.Text(lbl, location, expand, new GraphicOptions(LabelClass));
-            else
-                drawing.Text(lbl, location, expand, new GraphicOptions($"{LabelClass}{index + 1}"));
-        }
-
-        /// <summary>
         /// Draws a rectangle centered around the given point.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
@@ -330,7 +305,7 @@ namespace SimpleCircuit.Components
             if (horizontal == 1 && vertical == 1)
             {
                 // Centered text
-                Label(drawing, labels, index, 0.5 * (topLeft + bottomRight) + offset, new Vector2());
+                labels.Draw(drawing, index, 0.5 * (topLeft + bottomRight) + offset, new Vector2());
                 return;
             }
 
@@ -385,7 +360,7 @@ namespace SimpleCircuit.Components
             }
 
             // Draw the label
-            Label(drawing, labels, index, loc + offset, n);
+            labels.Draw(drawing, index, loc + offset, n);
         }
     }
 }

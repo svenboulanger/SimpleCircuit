@@ -37,8 +37,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Label(Labels, 0, new(0, Length), new(0, 1));
-                drawing.Label(Labels, 1, new(0, -Length), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, Length), new(0, 1));
+                Labels.Draw(drawing, 1, new(0, -Length), new(0, -1));
             }
         }
     }

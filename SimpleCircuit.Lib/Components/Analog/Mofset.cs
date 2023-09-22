@@ -90,9 +90,9 @@ namespace SimpleCircuit.Components.Analog
 
                 // Label
                 if (Pins["b"].Connections > 0)
-                    drawing.Label(Labels, 0, new(-3, -3), new(-1, -1));
+                    Labels.Draw(drawing, 0, new(-3, -3), new(-1, -1));
                 else
-                    drawing.Label(Labels, 0, new(0, -3), new(0, -1));
+                    Labels.Draw(drawing, 0, new(0, -3), new(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -117,7 +117,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                drawing.Label(Labels, 0, new(3, -10), new(1, 1));
+                Labels.Draw(drawing, 0, new(3, -10), new(1, 1));
             }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
@@ -195,10 +195,10 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    drawing.Label(Labels, 0, new Vector2(-3, -3), new Vector2(-1, -1));
+                    Labels.Draw(drawing, 0, new Vector2(-3, -3), new Vector2(-1, -1));
                 }
                 else
-                    drawing.Label(Labels, 0, new Vector2(0, -3), new Vector2(0, -1));
+                    Labels.Draw(drawing, 0, new Vector2(0, -3), new Vector2(0, -1));
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -226,7 +226,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                drawing.Label(Labels, 0, new(3, -10), new(1, 1));
+                Labels.Draw(drawing, 0, new(3, -10), new(1, 1));
             }
         }
     }

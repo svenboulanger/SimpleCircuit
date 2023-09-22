@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components.Inputs
                     });
                 }
 
-                drawing.Label(Labels, 0, new(5, -5), new(1, 0));
+                Labels.Draw(drawing, 0, new(5, -5), new(1, 0));
             }
         }
     }

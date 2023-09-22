@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components
                     drawing.Expand(new Vector2());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                drawing.Label(Labels, 0, n * Distance, n);
+                Labels.Draw(drawing, 0, n * Distance, n);
             }
         }
     }

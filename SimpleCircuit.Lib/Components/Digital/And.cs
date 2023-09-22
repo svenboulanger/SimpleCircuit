@@ -143,14 +143,14 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close()
                 );
-                drawing.Label(Labels, 0, new(0, -h - 1), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, -h - 1), new(0, -1));
             }
             private void DrawAndIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("&amp;", new(), new());
-                drawing.Label(Labels, 0, new(0, -Height * 0.5 - 1), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

@@ -178,9 +178,9 @@ namespace SimpleCircuit.Components.Analog
 
                 // Labels
                 if (Variants.Contains(_differentialOutput))
-                    drawing.Label(Labels, 0, new(2, 7), new(1, 1));
+                    Labels.Draw(drawing, 0, new(2, 7), new(1, 1));
                 else
-                    drawing.Label(Labels, 0, new(2, 5), new(1, 1));
+                    Labels.Draw(drawing, 0, new(2, 5), new(1, 1));
                 drawing.Text(Gain, new(-2.5, 0), new());
             }
         }

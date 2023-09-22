@@ -130,7 +130,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Arrow(new(-7, 10), new(6, -12));
 
                 // Label
-                drawing.Label(Labels, 0, new(2, 8), new(1, 1));
+                Labels.Draw(drawing, 0, new(2, 8), new(1, 1));
             }
         }
     }

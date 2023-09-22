@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         .LineTo(0, b)
                         .Close();
                 });
-                drawing.Label(Labels, 0, new(), new());
+                Labels.Draw(drawing, 0, new(), new());
             }
 
             /// <inheritdoc />

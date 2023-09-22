@@ -153,15 +153,15 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 2));
-                        drawing.Label(Labels, 0, new(0, -w - 3), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, w + 2), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 3), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, w + 2), new(0, 1));
                         break;
 
                     case 1:
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        drawing.Label(Labels, 0, new(0, -w - 1), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, w + 6), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 1), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, w + 6), new(0, 1));
                         break;
 
                     case 2:
@@ -169,13 +169,13 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
                         });
-                        drawing.Label(Labels, 0, new(0, -w - 4), new(0, -1));
-                        drawing.Label(Labels, 1, new(-3, w + 3), new(1, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 4), new(0, -1));
+                        Labels.Draw(drawing, 1, new(-3, w + 3), new(1, 1));
                         break;
 
                     default:
-                        drawing.Label(Labels, 0, new(0, -w - 2), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, w + 2), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 2), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, w + 2), new(0, 1));
                         break;
                 }
             }
@@ -197,15 +197,15 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0: // Programmable
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 3));
-                        drawing.Label(Labels, 0, new(0, -w - 3), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, w + 2), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 3), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, w + 2), new(0, 1));
                         break;
 
                     case 1: // Photoresistor
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        drawing.Label(Labels, 0, new(0, -w - 1), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, w + 6), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 1), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, w + 6), new(0, 1));
                         break;
 
                     case 2: // Thermistor
@@ -213,8 +213,8 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
                         });
-                        drawing.Label(Labels, 0, new(0, -w - 4), new(0, -1));
-                        drawing.Label(Labels, 1, new(-l * 0.85 + 2, w + 2), new(1, 1));
+                        Labels.Draw(drawing, 0, new(0, -w - 4), new(0, -1));
+                        Labels.Draw(drawing, 1, new(-l * 0.85 + 2, w + 2), new(1, 1));
                         break;
 
                     case 3: // Assymmetric
@@ -235,8 +235,8 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     default:
-                        drawing.Label(Labels, 0, new(0, -4), new(0, -1));
-                        drawing.Label(Labels, 1, new(0, 4), new(0, 1));
+                        Labels.Draw(drawing, 0, new(0, -4), new(0, -1));
+                        Labels.Draw(drawing, 1, new(0, 4), new(0, 1));
                         break;
                 }
             }

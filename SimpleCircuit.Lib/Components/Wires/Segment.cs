@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Wires
                     case 4: DrawOnWall(drawing); break;
                 }
 
-                drawing.Label(Labels, 0, new(0, _textY - 2), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, _textY - 2), new(0, -1));
             }
             private void DrawUnderground(SvgDrawing drawing)
             {

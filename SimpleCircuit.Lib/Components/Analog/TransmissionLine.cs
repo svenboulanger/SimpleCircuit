@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(DrawShape);
 
                 // Label
-                drawing.Label(Labels, 0, new(), new());
+                Labels.Draw(drawing, 0, new(), new());
             }
         }
     }

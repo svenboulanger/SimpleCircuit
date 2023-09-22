@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close();
                 });
 
-                drawing.Label(Labels, 0, new(), new());
+                Labels.Draw(drawing, 0, new(), new());
             }
 
             /// <inheritdoc />

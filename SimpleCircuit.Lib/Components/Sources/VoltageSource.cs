@@ -133,16 +133,16 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Label
-                drawing.Label(Labels, 0, new(0, -8), new(0, -1));
-                drawing.Label(Labels, 1, new(0, 8), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, -8), new(0, -1));
+                Labels.Draw(drawing, 1, new(0, 8), new(0, 1));
             }
 
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, 0), 4);
                 drawing.Line(new(-4, 0), new(4, 0));
-                drawing.Label(Labels, 0, new(0, -6), new(0, -1));
-                drawing.Label(Labels, 1, new(0, 6), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
+                Labels.Draw(drawing, 1, new(0, 6), new(0, 1));
             }
         }
     }

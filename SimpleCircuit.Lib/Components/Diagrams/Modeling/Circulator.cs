@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 {
                     new(x + s, y + s * 1.8), new(x, y), new(x + s * 1.8, y)
                 });
-                drawing.Label(Labels, 0, new Vector2(Size + 1, -Size - 1), new(1, -1));
+                Labels.Draw(drawing, 0, new Vector2(Size + 1, -Size - 1), new(1, -1));
             }
 
         }

@@ -73,7 +73,36 @@ namespace SimpleCircuit.Components
                 throw new ArgumentNullException(nameof(drawable));
 
             // Find the property
-            string property = propertyToken.Content.ToString();
+            string property = propertyToken.Content.ToString().ToLower();
+
+            // If the drawable is a labeled drawable, and the value is an offset, and the property name starts with "offset"
+            // use it to define an offset on the labels.
+            {
+                if (drawable is ILabeled labeled && value is Vector2 vector && property.StartsWith("offset"))
+                {
+                    bool success = true;
+                    int index = 0;
+                    for (int i = 6; i < property.Length; i++)
+                    {
+                        if (char.IsDigit(property[i]))
+                            index = index * 10 + (property[i] - '0');
+                        else
+                        {
+                            success = false;
+                            break;
+                        }
+                    }
+                    if (success)
+                    {
+                        if (index > 0)
+                            index--;
+                        labeled.Labels.SetOffset(index, vector);
+                        return true;
+                    }
+                }
+            }
+
+            // Search using reflection
             var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (info == null)
             {

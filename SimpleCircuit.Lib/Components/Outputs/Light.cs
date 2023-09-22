@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Outputs
                 }
 
                 // Label
-                drawing.Label(Labels, 0, new Vector2(0, -5), new Vector2(0, -1));
+                Labels.Draw(drawing, 0, new Vector2(0, -5), new Vector2(0, -1));
             }
 
             private void DrawWall(SvgDrawing drawing)

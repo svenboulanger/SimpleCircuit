@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-6, 6), new(6, 0), new(-6, -6)
                 });
 
-                drawing.Label(Labels, 0, new(0, -4), new(1, -1));
+                Labels.Draw(drawing, 0, new(0, -4), new(1, -1));
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -87,7 +87,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-5, -5, 10, 10, new());
                 drawing.Text("1", new(), new());
 
-                drawing.Label(Labels, 0, new(0, -6), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
             }
         }
     }

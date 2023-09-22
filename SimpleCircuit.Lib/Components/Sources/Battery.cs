@@ -79,8 +79,8 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                drawing.Label(Labels, 0, new Vector2(0, -8), new Vector2(0, -1));
-                drawing.Label(Labels, 1, new Vector2(0, 8), new Vector2(0, 1));
+                Labels.Draw(drawing, 0, new Vector2(0, -8), new Vector2(0, -1));
+                Labels.Draw(drawing, 1, new Vector2(0, 8), new Vector2(0, 1));
             }
         }
     }

@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 4);
                 drawing.Circle(new(4, 0), 1, new("dot"));
 
-                drawing.Label(Labels, 0, new(-6, 0), new(-1, 0));
+                Labels.Draw(drawing, 0, new(-6, 0), new(-1, 0));
             }
         }
     }

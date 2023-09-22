@@ -155,7 +155,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-w * 1.3, h), new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)
                 });
                 drawing.Circle(new(w + 1.5, 0), 1.5);
-                drawing.Label(Labels, 0, new(0, -h - 1), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, -h - 1), new(0, -1));
             }
 
             private void DrawXnorIEC(SvgDrawing drawing)
@@ -164,7 +164,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("=1", new(), new());
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
-                drawing.Label(Labels, 0, new(0, -Height * 0.5 - 1), new(0, -1));
+                Labels.Draw(drawing, 0, new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

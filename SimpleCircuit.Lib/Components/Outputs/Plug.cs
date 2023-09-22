@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                drawing.Label(Labels, 0, new(6, -1), new(1, -1));
+                Labels.Draw(drawing, 0, new(6, -1), new(1, -1));
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

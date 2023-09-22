@@ -146,7 +146,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                drawing.Label(Labels, 0, new(0, 3), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing)
             {
@@ -205,10 +205,10 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
-                    drawing.Label(Labels, 0, new Vector2(0, 7), new Vector2(0, 1));
+                    Labels.Draw(drawing, 0, new Vector2(0, 7), new Vector2(0, 1));
                 }
                 else
-                    drawing.Label(Labels, 0, new Vector2(0, 3), new Vector2(0, 1));
+                    Labels.Draw(drawing, 0, new Vector2(0, 3), new Vector2(0, 1));
             }
             private void DrawPushSwitch(SvgDrawing drawing)
             {
@@ -237,7 +237,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Label(Labels, 0, new Vector2(0, 6), new Vector2(0, 1));
+                Labels.Draw(drawing, 0, new Vector2(0, 6), new Vector2(0, 1));
             }
 
             private void DrawAreiSwitch(SvgDrawing drawing)
@@ -268,7 +268,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Label(Labels, 0, new Vector2(0, -5), new Vector2(0, -1));
+                Labels.Draw(drawing, 0, new Vector2(0, -5), new Vector2(0, -1));
             }
             private void DrawAreiRegularSwitch(SvgDrawing drawing)
             {
@@ -287,7 +287,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Label(Labels, 0, new Vector2(0, -length), new Vector2(0, -1));
+                Labels.Draw(drawing, 0, new Vector2(0, -length), new Vector2(0, -1));
 
                 // Small cross for illuminator lamps
                 if (Variants.Contains(_lamp))

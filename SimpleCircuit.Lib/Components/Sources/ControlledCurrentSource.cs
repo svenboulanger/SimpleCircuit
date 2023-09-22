@@ -83,8 +83,8 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
 
                 // Depending on the orientation, let's anchor the text differently
-                drawing.Label(Labels, 0, new(0, -8), new(0, -1));
-                drawing.Label(Labels, 1, new(0, 8), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, -8), new(0, -1));
+                Labels.Draw(drawing, 1, new(0, 8), new(0, 1));
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -93,8 +93,8 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 });
                 drawing.Line(new(0, -4), new(0, 4));
-                drawing.Label(Labels, 0, new(0, -6), new(0, -1));
-                drawing.Label(Labels, 1, new(0, 6), new(0, 1));
+                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
+                Labels.Draw(drawing, 1, new(0, 6), new(0, 1));
             }
         }
     }
