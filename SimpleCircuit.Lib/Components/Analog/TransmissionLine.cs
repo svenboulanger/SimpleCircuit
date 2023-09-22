@@ -94,8 +94,6 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                
-
                 // Wire
                 drawing.ExtendPins(Pins, 2, "a", "b");
 
@@ -103,7 +101,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(DrawShape);
 
                 // Label
-                drawing.Text(Labels[0], new(), new());
+                drawing.Label(Labels, 0, new(), new());
             }
         }
     }

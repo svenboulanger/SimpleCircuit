@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Sources
             private double Length => _cells * 4 - 2;
 
             /// <inheritdoc />
-            public Labels Labels { get; } = new();
+            public Labels Labels { get; } = new(2);
 
             [Description("The number of cells.")]
             public int Cells
@@ -79,7 +79,8 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                drawing.Text(Labels[0], new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Label(Labels, 0, new Vector2(0, -8), new Vector2(0, -1));
+                drawing.Label(Labels, 1, new Vector2(0, 8), new Vector2(0, 1));
             }
         }
     }

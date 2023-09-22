@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
 
-                drawing.Text(Labels[0], new(-6, 0), new(-1, 0));
+                drawing.Label(Labels, 0, new(-6, 0), new(-1, 0));
             }
         }
     }

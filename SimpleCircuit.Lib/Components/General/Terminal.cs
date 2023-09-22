@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components
                             new(-5, -2), new(-2, -2), new(),
                             new(-2, 2), new(-5, 2)
                         });
-                        drawing.Text(Labels[0], new(-6, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-6, 0), new(-1, 0));
                         break;
 
                     case 2:
@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components
                             new(-5, 0), new(-3, -2), new(0, -2),
                             new(0, 2), new(-3, 2)
                         });
-                        drawing.Text(Labels[0], new(-6, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-6, 0), new(-1, 0));
                         break;
 
                     case 4:
@@ -66,7 +66,7 @@ namespace SimpleCircuit.Components
                             new(-7, 0), new(-5, -2), new(-2, -2), new(),
                             new(-2, 2), new(-5, 2)
                         });
-                        drawing.Text(Labels[0], new(-8, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-8, 0), new(-1, 0));
                         break;
 
                     case 5:
@@ -75,30 +75,30 @@ namespace SimpleCircuit.Components
                         {
                             new(-5, -2), new(0, -2), new(0, 2), new(-5, 2)
                         });
-                        drawing.Text(Labels[0], new(-6, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-6, 0), new(-1, 0));
                         break;
 
                     case 6:
                         // pad
                         drawing.Rectangle(-4, -2, 4, 4);
                         drawing.Cross(new(-2, 0), 4);
-                        drawing.Text(Labels[0], new(-5, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-5, 0), new(-1, 0));
                         break;
 
                     case 7:
                         // square
                         drawing.Rectangle(-4, -2, 4, 4);
-                        drawing.Text(Labels[0], new(-5, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-5, 0), new(-1, 0));
                         break;
 
                     case 8:
                         // None
-                        drawing.Text(Labels[0], new(-1, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-1, 0), new(-1, 0));
                         break;
 
                     default:
                         drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
-                        drawing.Text(Labels[0], new(-4, 0), new(-1, 0));
+                        drawing.Label(Labels, 0, new(-4, 0), new(-1, 0));
                         break;
                 }
             }

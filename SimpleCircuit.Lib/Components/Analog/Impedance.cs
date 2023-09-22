@@ -74,13 +74,13 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                 {
                     drawing.Arrow(new(-5, w + 1), new(6, -w - 4));
-                    drawing.Text(Labels[0], new(0, -w - 4), new(0, -1), new("lbl"));
+                    drawing.Label(Labels, 0, new(0, -w - 4), new(0, -1));
                 }
                 else
-                    drawing.Text(Labels[0], new(0, -w - 1), new(0, -1), new("lbl"));
+                    drawing.Label(Labels, 0, new(0, -w - 1), new(0, -1));
 
                 // The label
-                drawing.Text(Labels[1], new(0, w + 1), new(0, 1), new("lbl2"));
+                drawing.Label(Labels, 1, new(0, w + 1), new(0, 1));
             }
         }
     }

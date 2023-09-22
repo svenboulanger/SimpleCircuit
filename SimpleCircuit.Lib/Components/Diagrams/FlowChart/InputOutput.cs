@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             .LineTo(-a, b)
                             .Close();
                     });
-                    drawing.Text(Labels[0], new(0, 0.5 * (b - c)), new());
+                    drawing.Label(Labels, 0, new(0, 0.5 * (b - c)), new());
                 }
                 else
                 {
@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             .LineTo(-a, b)
                             .Close();
                     });
-                    drawing.Text(Labels[0], new(), new());
+                    drawing.Label(Labels, 0, new(), new());
                 }
             }
 

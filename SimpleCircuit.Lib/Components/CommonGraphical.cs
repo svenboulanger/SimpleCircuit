@@ -53,12 +53,38 @@ namespace SimpleCircuit.Components
         public const string Outside = "outside";
 
         /// <summary>
+        /// Class name for labels.
+        /// </summary>
+        public const string LabelClass = "lbl";
+
+        /// <summary>
+        /// Draws a label.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="labels">The labels object.</param>
+        /// <param name="index">The index of the labels object.</param>
+        /// <param name="location">The location of the label.</param>
+        /// <param name="expand">The direction the text can expand.</param>
+        public static void Label(this SvgDrawing drawing, Labels labels, int index, Vector2 location, Vector2 expand)
+        {
+            string lbl = labels?[index];
+            if (string.IsNullOrWhiteSpace(lbl))
+                return;
+
+            if (index == 0)
+                drawing.Text(lbl, location, expand, new GraphicOptions(LabelClass));
+            else
+                drawing.Text(lbl, location, expand, new GraphicOptions($"{LabelClass}{index + 1}"));
+        }
+
+        /// <summary>
         /// Draws a rectangle centered around the given point.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
-        /// <param name="width">The width, default is 12.</param>
-        /// <param name="height">The height, default is 6.</param>
-        /// <param name="center">The center of the rectangle, default is the origin.</param>
+        /// <param name="x">The left coordinate.</param>
+        /// <param name="y">The top coordinate.</param>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
         /// <param name="rx">The radius along the x-axis.</param>
         /// <param name="ry">The radius along the y-axis.</param>
         /// <param name="options">Path options.</param>
@@ -263,44 +289,48 @@ namespace SimpleCircuit.Components
         /// Draws a label around or inside a box, depending on variants.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
-        /// <param name="label">The label.</param>
+        /// <param name="labels">The labels.</param>
         /// <param name="variants">The variants.</param>
         /// <param name="topLeft">The top-left corner of the box.</param>
         /// <param name="bottomRight">The bottom-right corner of the box.</param>
+        /// <param name="index">The label index.</param>
         /// <param name="offset">The offset.</param>
-        /// <param name="defaultLocation">The default location if no variants are given.</param>
-        /// <param name="defaultOrientation">The default orientation if no variants are given.</param>
+        /// <param name="defaultHorizontal">The default horizontal location. -1 for left, 0 for center or 1 for right.</param>
+        /// <param name="defaultVertical">The default vertical location. -1 for top, 0 for middle or 1 for bottom.</param>
+        /// <param name="defaultInside">The default location inside/outside. 0 for inside, 1 for outside.</param>
         /// <param name="margin">The margin from the edge inside or outside.</param>
         /// <param name="options">The graphic options.</param>
-        public static void BoxedLabel(this SvgDrawing drawing, string label, VariantSet variants,
+        public static void BoxedLabel(this SvgDrawing drawing,
+            Labels labels,
+            int index,
+            VariantSet variants,
             Vector2 topLeft,
             Vector2 bottomRight,
-            Vector2 offset,
-            int defaultHorizontal = 1,
-            int defaultVertical = 1,
+            Vector2 offset = default,
+            int defaultHorizontal = 0,
+            int defaultVertical = 0,
             int defaultInside = 0,
-            double margin = 1.0,
-            GraphicOptions options = null)
+            double margin = 1.0)
         {
             // No need to deal with all this if there is no label to draw
-            if (string.IsNullOrWhiteSpace(label))
+            if (string.IsNullOrWhiteSpace(labels[index]))
                 return;
 
             // Get horizontal alignment
             int horizontal = variants.Select(Left, Center, Right);
             if (horizontal < 0)
-                horizontal = defaultHorizontal;
+                horizontal = defaultHorizontal + 1;
 
             // Get vertical alignment
             int vertical = variants.Select(Top, Middle, Bottom);
             if (vertical < 0)
-                vertical = defaultVertical;
+                vertical = defaultVertical + 1;
 
             // Short out for centered text
             if (horizontal == 1 && vertical == 1)
             {
                 // Centered text
-                drawing.Text(label, 0.5 * (topLeft + bottomRight), new Vector2(), options);
+                Label(drawing, labels, index, 0.5 * (topLeft + bottomRight) + offset, new Vector2());
                 return;
             }
 
@@ -355,7 +385,7 @@ namespace SimpleCircuit.Components
             }
 
             // Draw the label
-            drawing.Text(label, loc + offset, n, options);
+            Label(drawing, labels, index, loc + offset, n);
         }
     }
 }

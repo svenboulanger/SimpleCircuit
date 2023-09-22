@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                 );
                 drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
-                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -h - 1), new(0, -1));
             }
             private void DrawNandIEC(SvgDrawing drawing)
             {
@@ -149,7 +149,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
-                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

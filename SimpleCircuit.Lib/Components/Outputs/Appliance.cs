@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawLabel(SvgDrawing drawing)
             {
-                drawing.Text(Labels[0], new(0, -10), new(1, -1));
+                drawing.Label(Labels, 0, new(0, -10), new(1, -1));
             }
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

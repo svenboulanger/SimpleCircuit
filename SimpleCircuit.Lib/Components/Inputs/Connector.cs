@@ -82,9 +82,9 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-4, 4), new(), new(-4, -4)
                                 });
                                 if (Pins["p"].Connections > 0)
-                                    drawing.Text(Labels[0], new(1, 1), new(1, 1));
+                                    drawing.Label(Labels, 0, new(1, 1), new(1, 1));
                                 else
-                                    drawing.Text(Labels[0], new(1, 0), new(1, 0));
+                                    drawing.Label(Labels, 0, new(1, 0), new(1, 0));
                                 break;
 
                             case 1:
@@ -94,9 +94,9 @@ namespace SimpleCircuit.Components.Inputs
                                     new(4, 4), new(), new(4, -4)
                                 });
                                 if (Pins["p"].Connections > 0)
-                                    drawing.Text(Labels[0], new(5, 1), new(1, 1));
+                                    drawing.Label(Labels, 0, new(5, 1), new(1, 1));
                                 else
-                                    drawing.Text(Labels[0], new(5, 0), new(1, 0));
+                                    drawing.Label(Labels, 0, new(5, 0), new(1, 0));
                                 break;
 
                             default:
@@ -109,7 +109,7 @@ namespace SimpleCircuit.Components.Inputs
                                 {
                                     new(-2, 4), new(2, 0), new(-2, -4)
                                 });
-                                drawing.Text(Labels[0], new(0, -5), new(0, -1));
+                                drawing.Label(Labels, 0, new(0, -5), new(0, -1));
                                 break;
                         }
                         break;
@@ -120,7 +120,7 @@ namespace SimpleCircuit.Components.Inputs
                         drawing.Circle(new(), 1.5);
                         drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
 
-                        drawing.Text(Labels[0], new(0, -5), new(0, -1));
+                        drawing.Label(Labels, 0, new(0, -5), new(0, -1));
                         break;
                 }
             }

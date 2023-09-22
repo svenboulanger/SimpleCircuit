@@ -203,9 +203,8 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Label
-                        drawing.Text(Labels[0], new(0, ty1), new(0, -1), new("lbl"));
-                        drawing.Text(Labels[1], new(0, ty2), new(0, 1), new("lbl2"));
-
+                        drawing.Label(Labels, 0, new(0, ty1), new(0, -1));
+                        drawing.Label(Labels, 1, new(0, ty2), new(0, 1));
                         break;
                 }
             }

@@ -77,8 +77,11 @@ namespace SimpleCircuit.Components
             [Description("The minimum height.")]
             public double MinHeight { get => _pins.MinHeight; set => _pins.MinHeight = value; }
 
-            [Description("The offset for the label relative to the center")]
+            [Description("The offset for the label relative to the center.")]
             public Vector2 Offset { get; set; }
+
+            [Description("The margin of labels to the edge of the black box.")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -132,7 +135,7 @@ namespace SimpleCircuit.Components
                 drawing.Rectangle(EndLocation - Location, center);
 
                 // Draw the label
-                drawing.BoxedLabel(Labels[0], Variants, Location, EndLocation, Offset);
+                drawing.BoxedLabel(Labels, 0, Variants, Location, EndLocation, offset: Offset, margin: LabelMargin);
 
                 // Draw the port names
                 _pins.Render(drawing);

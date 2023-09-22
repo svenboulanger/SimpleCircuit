@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components.Digital
 
                 if (Pins["nq"].Connections > 0)
                     drawing.Text("Q'", new Vector2(8, 6), new Vector2(-1, 0));
-                drawing.Text(Labels[0], new Vector2(10, 12), new Vector2(1, -1));
+                drawing.Label(Labels, 0, new Vector2(10, 12), new Vector2(1, -1));
             }
         }
     }

@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Wires
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new();
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -59,7 +59,8 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
 
-                drawing.Text(Labels[0], new(0, -4), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -4), new(0, -1));
+                drawing.Label(Labels, 1, new(0, 4), new(0, 1));
             }
             private void DrawANSI(SvgDrawing drawing)
             {
@@ -68,7 +69,8 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Line(new(-6, 0), new(6, 0));
 
-                drawing.Text(Labels[0], new(0, -4), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -4), new(0, -1));
+                drawing.Label(Labels, 1, new(0, 4), new(0, 1));
             }
             private void DrawANSIalt(SvgDrawing drawing)
             {
@@ -81,7 +83,8 @@ namespace SimpleCircuit.Components.Wires
                     new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
 
-                drawing.Text(Labels[0], new(0, -4), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -4), new(0, -1));
+                drawing.Label(Labels, 1, new(0, 4), new(0, 1));
             }
         }
     }

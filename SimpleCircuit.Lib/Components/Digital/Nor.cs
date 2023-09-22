@@ -149,7 +149,7 @@ namespace SimpleCircuit.Components.Digital
                     b.CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h));
                 });
                 drawing.Circle(new(w + 1.5, 0), 1.5);
-                drawing.Text(Labels[0], new(0, -h - 1), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -h - 1), new(0, -1));
             }
             private void DrawNorIEC(SvgDrawing drawing)
             {
@@ -157,7 +157,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
                 drawing.Text("&#8805;1", new(), new());
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
-                drawing.Text(Labels[0], new(0, -Height * 0.5 - 1), new(0, -1));
+                drawing.Label(Labels, 0, new(0, -Height * 0.5 - 1), new(0, -1));
             }
         }
     }

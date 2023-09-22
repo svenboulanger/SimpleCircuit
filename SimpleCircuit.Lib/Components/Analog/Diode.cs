@@ -141,8 +141,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                drawing.Text(Labels[0], new(0, _ty1), new(0, -1));
-                drawing.Text(Labels[1], new(0, _ty2), new(0, 1));
+                drawing.Label(Labels, 0, new(0, _ty1), new(0, -1));
+                drawing.Label(Labels, 1, new(0, _ty2), new(0, 1));
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing)

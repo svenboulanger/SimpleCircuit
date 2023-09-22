@@ -84,8 +84,8 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
 
                 // Label
-                drawing.Text(Labels[0], new(0, -8), new(0, -1));
-                drawing.Text(Labels[1], new(0, 8), new(0, 1));
+                drawing.Label(Labels, 0, new(0, -8), new(0, -1));
+                drawing.Label(Labels, 1, new(0, 8), new(0, 1));
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -94,8 +94,8 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 });
                 drawing.Line(new(-4, 0), new(4, 0));
-                drawing.Text(Labels[0], new(0, -6), new(0, -1));
-                drawing.Text(Labels[1], new(0, 6), new(0, 1));
+                drawing.Label(Labels, 0, new(0, -6), new(0, -1));
+                drawing.Label(Labels, 1, new(0, 6), new(0, 1));
             }
         }
     }

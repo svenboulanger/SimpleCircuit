@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         .LineTo(0, b)
                         .Close();
                 });
-                drawing.Text(Labels[0], new(), new());
+                drawing.Label(Labels, 0, new(), new());
             }
 
             /// <inheritdoc />

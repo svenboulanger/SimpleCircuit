@@ -13,7 +13,7 @@ namespace SimpleCircuit.Components.Wires
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new();
+            public Labels Labels { get; } = new(2);
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.AREI | Standards.European | Standards.American;
@@ -76,7 +76,8 @@ namespace SimpleCircuit.Components.Wires
                     new(4, -2)
                 });
 
-                drawing.Text(Labels[0], new(0, 3), new(0, 1));
+                drawing.Label(Labels, 0, new(0, 2), new(0, 1));
+                drawing.Label(Labels, 1, new(0, -5.5), new(0, -1)); 
             }
 
             private void DrawCircuitBreakerIec(SvgDrawing drawing)
@@ -87,7 +88,8 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Line(new(-4, 0), new(4, -4));
                 drawing.Cross(new(4, 0), 2);
 
-                drawing.Text(Labels[0], new(0, 3), new(0, 1));
+                drawing.Label(Labels, 0, new(0, 2), new(0, 1));
+                drawing.Label(Labels, 1, new(0, -4), new(0, -1));
             }
 
             private void DrawCircuitBreakerArei(SvgDrawing drawing)
@@ -103,7 +105,8 @@ namespace SimpleCircuit.Components.Wires
                     new(1.25, -4.5), new(2, -3)
                 }, new("marker"));
 
-                drawing.Text(Labels[0], new(0, 3), new(0, 1));
+                drawing.Label(Labels, 0, new(0, 2), new(0, 1));
+                drawing.Label(Labels, 1, new(0, -5.5), new(0, -1));
             }
         }
     }

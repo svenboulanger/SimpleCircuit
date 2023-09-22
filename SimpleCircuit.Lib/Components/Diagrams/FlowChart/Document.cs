@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 }
 
                 drawing.Path(DrawPath);
-                drawing.Text(Labels[0], new(), new());
+                drawing.Label(Labels, 0, new(), new());
             }
 
             /// <inheritdoc />

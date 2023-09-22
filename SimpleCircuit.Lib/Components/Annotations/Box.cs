@@ -98,6 +98,11 @@ namespace SimpleCircuit.Components.Annotations
         public double Tolerance { get; set; } = 4.0;
 
         /// <summary>
+        /// The offset of the label.
+        /// </summary>
+        public Vector2 Offset { get; set; }
+
+        /// <summary>
         /// Creates a new <see cref="Box"/>.
         /// </summary>
         public Box(string name)
@@ -259,25 +264,25 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
                             break;
 
                         case 1:
                             // Middle
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * height), new Vector2(1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x + 1, y + 0.5 * height), new Vector2(1, 0));
                             else
-                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * height), new Vector2(-1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x - 1, y + 0.5 * height), new Vector2(-1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + height - radiusOffset - 1), new Vector2(1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + radiusOffset + 1, y + height - radiusOffset - 1), new Vector2(1, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y + height + 1), new Vector2(1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + RoundRadius, y + height + 1), new Vector2(1, 1));
                             break;
                     }
                     break;
@@ -289,22 +294,22 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + 1), new Vector2(0, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * width, y + 1), new Vector2(0, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y - 1), new Vector2(0, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * width, y - 1), new Vector2(0, -1));
                             break;
 
                         default:
                         case 1:
-                            drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + 0.5 * height), new Vector2());
+                            drawing.Label(Labels, 0, new Vector2(x + 0.5 * width, y + 0.5 * height), new Vector2());
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + height - 1), new Vector2(0, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * width, y + height - 1), new Vector2(0, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * width, y + height + 1), new Vector2(0, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * width, y + height + 1), new Vector2(0, 1));
                             break;
 
                     }
@@ -318,25 +323,25 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + width - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + width - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y - 1), new Vector2(-1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + width - RoundRadius, y - 1), new Vector2(-1, -1));
                             break;
 
                         case 1:
                             // Middle
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + width - 1, y + 0.5 * height), new Vector2(-1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x + width - 1, y + 0.5 * height), new Vector2(-1, 0));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + width + 1, y + 0.5 * height), new Vector2(1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x + width + 1, y + 0.5 * height), new Vector2(1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + width - radiusOffset - 1, y + height - radiusOffset - 1), new Vector2(-1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + width - radiusOffset - 1, y + height - radiusOffset - 1), new Vector2(-1, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + width - RoundRadius, y + 1), new Vector2(-1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + width - RoundRadius, y + 1), new Vector2(-1, 1));
                             break;
 
                     }
@@ -618,27 +623,27 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + radiusOffset + 1, y + radiusOffset + 1), new Vector2(1, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + RoundRadius, y - 1), new Vector2(1, -1));
                             break;
 
                         case 1:
                             // Middle
                             FindLeft(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
                             else
-                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + radiusOffset + 1, y - radiusOffset - 1), new Vector2(1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + radiusOffset + 1, y - radiusOffset - 1), new Vector2(1, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + RoundRadius, y + 1), new Vector2(1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + RoundRadius, y + 1), new Vector2(1, 1));
                             break;
                     }
                     break;
@@ -651,24 +656,24 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
                             break;
 
                         default:
                         case 1:
                             FindCenter(sortedPoints, out x, out y);
-                            drawing.Text(Labels[0], new Vector2(x, y), new Vector2());
+                            drawing.Label(Labels, 0, new Vector2(x, y), new Vector2());
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * length, y - 1), new Vector2(0, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + 0.5 * length, y + 1), new Vector2(0, 1));
                             break;
 
                     }
@@ -683,27 +688,27 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + length - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + length - radiusOffset - 1, y + radiusOffset + 1), new Vector2(-1, 1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + length - RoundRadius, y - 1), new Vector2(-1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + length - RoundRadius, y - 1), new Vector2(-1, -1));
                             break;
 
                         case 1:
                             // Middle
                             FindRight(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x - 1, y + 0.5 * length), new Vector2(-1, 0));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
+                                drawing.Label(Labels, 0, new Vector2(x + 1, y + 0.5 * length), new Vector2(1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                drawing.Text(Labels[0], new Vector2(x + length - radiusOffset - 1, y + length - radiusOffset - 1), new Vector2(-1, -1));
+                                drawing.Label(Labels, 0, new Vector2(x + length - radiusOffset - 1, y + length - radiusOffset - 1), new Vector2(-1, -1));
                             else
-                                drawing.Text(Labels[0], new Vector2(x + length - RoundRadius, y + 1), new Vector2(-1, 1));
+                                drawing.Label(Labels, 0, new Vector2(x + length - RoundRadius, y + 1), new Vector2(-1, 1));
                             break;
 
                     }
