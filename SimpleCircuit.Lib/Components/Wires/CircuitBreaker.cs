@@ -13,7 +13,7 @@ namespace SimpleCircuit.Components.Wires
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.AREI | Standards.European | Standards.American;
@@ -76,8 +76,9 @@ namespace SimpleCircuit.Components.Wires
                     new(4, -2)
                 });
 
-                Labels.Draw(drawing, 0, new(0, 2), new(0, 1));
-                Labels.Draw(drawing, 1, new(0, -5.5), new(0, -1)); 
+                Labels.SetDefaultPin(0, location: new(0, 2), expand: new(0, 1));
+                Labels.SetDefaultPin(1, location: new(0, -5.5), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
 
             private void DrawCircuitBreakerIec(SvgDrawing drawing)
@@ -88,8 +89,9 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Line(new(-4, 0), new(4, -4));
                 drawing.Cross(new(4, 0), 2);
 
-                Labels.Draw(drawing, 0, new(0, 2), new(0, 1));
-                Labels.Draw(drawing, 1, new(0, -4), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, 2), expand: new(0, 1));
+                Labels.SetDefaultPin(1, location: new(0, -4), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
 
             private void DrawCircuitBreakerArei(SvgDrawing drawing)
@@ -105,8 +107,9 @@ namespace SimpleCircuit.Components.Wires
                     new(1.25, -4.5), new(2, -3)
                 }, new("marker"));
 
-                Labels.Draw(drawing, 0, new(0, 2), new(0, 1));
-                Labels.Draw(drawing, 1, new(0, -5.5), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, 2), expand: new(0, 1));
+                Labels.SetDefaultPin(1, location: new(0, -5.5), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

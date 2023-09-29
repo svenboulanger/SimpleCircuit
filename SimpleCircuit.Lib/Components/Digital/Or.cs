@@ -149,14 +149,17 @@ namespace SimpleCircuit.Components.Digital
                     b.CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h));
                 });
 
-                Labels.Draw(drawing, 0, new(0, -h - 1), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, -h - 1), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
             private void DrawOrIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
                 drawing.Text("&#8805;1", new(), new());
-                Labels.Draw(drawing, 0, new(0, -Height * 0.5 - 1), new(0, -1));
+
+                Labels.SetDefaultPin(0, location: new(0, -Height * 0.5 - 1), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

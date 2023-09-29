@@ -24,7 +24,7 @@ namespace SimpleCircuit.Components.Analog
             private int _windings = 3;
 
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             [Description("The number of windings.")]
             public int Windings
@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
                 double l = Length * 0.5;
-                double ty1 = -5, ty2 = 5;
+                var locations = new Vector2[] { new(0, -5), new(0, 5) };
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
@@ -138,22 +138,22 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_choke))
                         {
                             drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
-                            ty1 = ty1 > -5.5 ? -5.5 : ty1;
+                            locations[0].ExpandUp(-5.5);
                             if (!Variants.Contains(_singleLine))
                             {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
-                                ty1 = ty1 > -7 ? -7 : ty1;
+                                locations[0].ExpandUp(-7);
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
-                                ty1 = ty1 > -11 ? -11 : ty1;
+                                locations[0].ExpandUp(-11);
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
-                            ty1 = ty1 > -8 ? -8 : ty1;
+                            locations[0].ExpandUp(-8);
                         }
                         break;
 
@@ -188,25 +188,26 @@ namespace SimpleCircuit.Components.Analog
                             if (!Variants.Contains(_singleLine))
                             {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
-                                ty1 = ty1 > -7 ? -7 : ty1;
+                                locations[0].ExpandUp(-7);
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 drawing.Arrow(new(-l + 1, 5), new(l, -10));
-                                ty1 = ty1 > -11 ? -11 : ty1;
+                                locations[0].ExpandUp(-11);
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             drawing.Arrow(new(-l + 1, 5), new(l, -7));
-                            ty1 = ty1 > -8 ? -8 : ty1;
+                            locations[0].ExpandUp(-8);
                         }
-
-                        // Label
-                        Labels.Draw(drawing, 0, new(0, ty1), new(0, -1));
-                        Labels.Draw(drawing, 1, new(0, ty2), new(0, 1));
                         break;
                 }
+
+                // Label
+                Labels.SetDefaultPin(0, location: locations[0], expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: locations[1], expand: new(0, 1));
+                Labels.Draw(drawing);
             }
         }
     }

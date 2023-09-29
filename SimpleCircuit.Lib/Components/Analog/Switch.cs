@@ -30,6 +30,9 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
+            private readonly Vector2[] _locations = new Vector2[2];
+            private readonly Vector2[] _expands = new Vector2[] { new(0, -1), new(0, 1) };
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -113,12 +116,22 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                _locations[0] = default;
+                _locations[1] = default;
+                _expands[0] = new(0, 1);
+                _expands[1] = new(0, -1);
+
                 switch (Variants.Select(Options.Arei, Options.American))
                 {
                     case 0: DrawAreiSwitch(drawing); break;
                     case 1:
                     default: DrawSwitch(drawing); break;
                 }
+
+                // Labels
+                Labels.SetDefaultPin(0, location: _locations[0], expand: _expands[0]);
+                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
+                Labels.Draw(drawing);
             }
 
             private void DrawSwitch(SvgDrawing drawing)
@@ -146,7 +159,9 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                Labels.Draw(drawing, 0, new(0, 3), new(0, 1));
+                _locations[0] = new Vector2(0, 3);
+                _locations[1] = new Vector2(3, -3);
+                _expands[1] = new Vector2(1, -1);
             }
             private void DrawRegularSwitch(SvgDrawing drawing)
             {
@@ -205,10 +220,10 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
-                    Labels.Draw(drawing, 0, new Vector2(0, 7), new Vector2(0, 1));
+                    _locations[0].ExpandDown(7);
                 }
                 else
-                    Labels.Draw(drawing, 0, new Vector2(0, 3), new Vector2(0, 1));
+                    _locations[0].ExpandDown(3);
             }
             private void DrawPushSwitch(SvgDrawing drawing)
             {
@@ -237,7 +252,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new Vector2(0, 6), new Vector2(0, 1));
+                _locations[0].ExpandDown(6);
             }
 
             private void DrawAreiSwitch(SvgDrawing drawing)
@@ -268,7 +283,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new Vector2(0, -5), new Vector2(0, -1));
+                _locations[0] = new Vector2(0, -5);
+                _expands[0] = new Vector2(0, -1);
             }
             private void DrawAreiRegularSwitch(SvgDrawing drawing)
             {
@@ -287,7 +303,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new Vector2(0, -length), new Vector2(0, -1));
+                _locations[0] = new Vector2(0, -length);
+                _expands[0] = new Vector2(0, -1);
 
                 // Small cross for illuminator lamps
                 if (Variants.Contains(_lamp))

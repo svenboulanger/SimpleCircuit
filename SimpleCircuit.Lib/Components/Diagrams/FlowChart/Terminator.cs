@@ -73,8 +73,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .LineTo(-a + b, b)
                     .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close();
                 });
-
-                Labels.Draw(drawing, 0, new(), new());
+                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.Draw(drawing);
             }
 
             /// <inheritdoc />

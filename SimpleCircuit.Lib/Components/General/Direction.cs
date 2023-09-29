@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.General
         private class Instance : OrientedDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             [Description("The distance of the text to the point.")]
             public double Length { get; set; } = 2.0;
@@ -37,8 +37,9 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                Labels.Draw(drawing, 0, new(0, Length), new(0, 1));
-                Labels.Draw(drawing, 1, new(0, -Length), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, Length), expand: new(0, 1));
+                Labels.SetDefaultPin(1, location: new(0, -Length), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

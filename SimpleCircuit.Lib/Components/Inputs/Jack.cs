@@ -38,9 +38,10 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.ExtendPin(Pins["n"]);
                 drawing.Circle(new(), 1.5);
                 drawing.Circle(new(), 4);
-                drawing.Circle(new(4, 0), 1, new("dot"));
+                drawing.Circle(new(4, 0), 1, new("marker"));
 
-                Labels.Draw(drawing, 0, new(-6, 0), new(-1, 0));
+                Labels.SetDefaultPin(0, location: new(-6, 0), expand: new(-1, 0));
+                Labels.Draw(drawing);
             }
         }
     }

@@ -90,7 +90,7 @@ namespace SimpleCircuit.Drawing
         {
             if (ReferenceEquals(left, right))
                 return true;
-            if (left == null || right == null)
+            if (left is null || right is null)
                 return false;
             return left.Equals(right);
         }

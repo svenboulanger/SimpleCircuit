@@ -49,7 +49,8 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                Labels.Draw(drawing, 0, new(6, -1), new(1, -1));
+                Labels.SetDefaultPin(0, location: new(6, -1), expand: new(1, -1));
+                Labels.Draw(drawing);
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

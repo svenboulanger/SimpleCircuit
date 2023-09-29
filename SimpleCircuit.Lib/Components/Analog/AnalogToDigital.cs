@@ -130,7 +130,9 @@ namespace SimpleCircuit.Components.Analog
                     new(-Width / 2, -Height / 2)
                 });
 
-                Labels.Draw(drawing, 0, new(-Height / 4, 0), new(0, 0));
+                // Draw the labels
+                Labels.SetDefaultPin(-1, location: new(-Height / 4, 0));
+                Labels.Draw(drawing);
             }
         }
     }

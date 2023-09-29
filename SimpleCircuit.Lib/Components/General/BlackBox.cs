@@ -135,7 +135,7 @@ namespace SimpleCircuit.Components
                 drawing.Rectangle(EndLocation - Location, center);
 
                 // Draw the label
-                drawing.BoxedLabel(Labels, 0, Variants, Location, EndLocation, offset: Offset, margin: LabelMargin);
+                Labels.BoxedLabel(Variants, Location, EndLocation, margin: LabelMargin);
 
                 // Draw the port names
                 _pins.Render(drawing);

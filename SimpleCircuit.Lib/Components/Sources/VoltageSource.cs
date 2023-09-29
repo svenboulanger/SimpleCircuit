@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Sources
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "vs";
@@ -133,16 +133,19 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new(0, -8), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 8), new(0, 1));
+                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
 
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, 0), 4);
                 drawing.Line(new(-4, 0), new(4, 0));
-                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 6), new(0, 1));
+
+                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
         }
     }

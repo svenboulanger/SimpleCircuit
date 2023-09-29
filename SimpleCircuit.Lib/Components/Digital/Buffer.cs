@@ -76,8 +76,8 @@ namespace SimpleCircuit.Components.Digital
                 {
                     new(-6, 6), new(6, 0), new(-6, -6)
                 });
-
-                Labels.Draw(drawing, 0, new(0, -4), new(1, -1));
+                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(1, -1));
+                Labels.Draw(drawing);
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -87,7 +87,8 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-5, -5, 10, 10, new());
                 drawing.Text("1", new(), new());
 
-                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

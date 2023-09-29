@@ -91,9 +91,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         drawing.EndTransform();
                     }
                 }
-
                 drawing.Path(DrawPath);
-                Labels.Draw(drawing, 0, new(), new());
+                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.Draw(drawing);
             }
 
             /// <inheritdoc />

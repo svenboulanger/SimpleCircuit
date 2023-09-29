@@ -16,7 +16,7 @@
         private class Instance : ModelingDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             protected override double Size => 12;
@@ -41,8 +41,10 @@
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
-                drawing.Text(Labels[0], new(-s * 0.5, -s * 0.5), new());
-                drawing.Text(Labels[1], new(s * 0.5, s * 0.5), new());
+
+                Labels.SetDefaultPin(0, location: new(-s * 0.5, -s * 0.5), new());
+                Labels.SetDefaultPin(1, location: new(s * 0.5, s * 0.5), new());
+                Labels.Draw(drawing);
             }
         }
     }

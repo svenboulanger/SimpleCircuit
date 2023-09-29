@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         private class Instance : LocatedDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new Labels(20);
+            public Labels Labels { get; } = new Labels();
 
             /// <inheritdoc />
             public override string Type => "entity";
@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 if (Labels.Count <= 1)
                 {
                     drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: new("erd"));
-                    drawing.Text(Labels[0], new(), new(), new("header"));
+                    Labels.SetDefaultPin(0, location: new(), expand: new(), options: new("header"));
                 }
                 else
                 {
@@ -96,10 +96,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height);
                     drawing.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
 
-                    drawing.Text(Labels[0], new(), new(), new("header"));
+                    Labels.SetDefaultPin(0, location: new(), expand: new(), options: new("header"));
                     for (int i = 1; i < Labels.Count; i++)
-                        drawing.Text(Labels[i], new(-w + 2.0, i * LineHeight), new(1, 0), new("attribute"));
+                        Labels.SetDefaultPin(i, location: new(-w + 2.0, i * LineHeight), expand: new(1, 0), options: new("attribute"));
                 }
+                Labels.Draw(drawing);
             }
         }
     }

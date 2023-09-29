@@ -29,10 +29,11 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private double _ty1, _ty2;
+            private readonly Vector2[] _locations = new Vector2[2];
+            private readonly Vector2[] _expands = new Vector2[] { new(0, -1), new(0, 1) };
 
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "diode";
@@ -90,8 +91,8 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-                _ty1 = 0;
-                _ty2 = 0;
+                _locations[0] = new Vector2(0, -5);
+                _locations[1] = new Vector2(0, 5);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -141,8 +142,9 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new(0, _ty1), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, _ty2), new(0, 1));
+                Labels.SetDefaultPin(0, location: _locations[0], expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: _locations[1], expand: new(0, 1));
+                Labels.Draw(drawing);
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing)
@@ -152,8 +154,6 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
-                _ty1 = -5;
-                _ty2 = 5;
             }
             private void DrawZenerDiode(SvgDrawing drawing)
             {
@@ -165,20 +165,16 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4) }, new("cathode"));
-                        _ty1 = -5;
-                        _ty2 = 5;
                         break;
 
                     case 1:
                         drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
-                        _ty1 = -6;
-                        _ty2 = 6;
+                        _locations[0].ExpandUp(-6);
+                        _locations[1].ExpandDown(6);
                         break;
 
                     default:
                         drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(6, 4) }, new("cathode"));
-                        _ty1 = -5;
-                        _ty2 = 5;
                         break;
                 }
             }
@@ -189,8 +185,6 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(2, 4) }, new("cathode"));
-                _ty1 = -5;
-                _ty2 = 5;
             }
             private void DrawSchottkyDiode(SvgDrawing drawing)
             {
@@ -199,8 +193,6 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), new(4, 0), new(-4, 4)
                 }, new("anode"));
                 drawing.Polyline(new Vector2[] { new(6, -3), new(6, -4), new(4, -4), new(4, 4), new(2, 4), new(2, 3) }, new("cathode"));
-                _ty1 = -5;
-                _ty2 = 5;
             }
             private void DrawShockleyDiode(SvgDrawing drawing)
             {
@@ -210,8 +202,6 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode"));
                 drawing.Line(new(-4, 0), new(-4, 4));
                 drawing.Line(new(4, -4), new(4, 4));
-                _ty1 = -5;
-                _ty2 = 5;
             }
             private void DrawVaractor(SvgDrawing drawing)
             {
@@ -221,20 +211,18 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode"));
                 drawing.Line(new(4, -4), new(4, 4), new("cathode"));
                 drawing.Line(new(6, -4), new(6, 4), new("cathode"));
-                _ty1 = -5;
-                _ty2 = 5;
             }
             private void DrawPhotodiode(SvgDrawing drawing)
             {
                 drawing.Arrow(new(2, 7.5), new(1, 3.5));
                 drawing.Arrow(new(-1, 9.5), new(-2, 5.5));
-                _ty2 = _ty2 < 10.5 ? 10.5 : _ty2;
+                _locations[1].ExpandDown(10.5);
             }
             private void DrawLed(SvgDrawing drawing)
             {
                 drawing.Arrow(new(1, 3.5), new(2, 7.5));
                 drawing.Arrow(new(-2, 5.5), new(-1, 9.5));
-                _ty2 = _ty2 < 10.5 ? 10.5 : _ty2;
+                _locations[1].ExpandDown(10.5);
 
             }
             private void DrawLaser(SvgDrawing drawing)
@@ -242,7 +230,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(0, -4), new(0, 4));
                 drawing.Arrow(new(-2, 5), new(-2, 10));
                 drawing.Arrow(new(2, 5), new(2, 10));
-                _ty2 = _ty2 < 11 ? 11 : _ty2;
+                _locations[1].ExpandDown(11);
             }
             private void DrawTVSDiode(SvgDrawing drawing)
             {
@@ -254,8 +242,7 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 0), new(12, -4), new(12, 4)
                 }, new("anode2"));
                 drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
-                _ty1 = -5;
-                _ty2 = 6;
+                _locations[1].ExpandDown(6);
             }
             private void DrawBidirectional(SvgDrawing drawing)
             {
@@ -269,8 +256,7 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode2"));
                 drawing.Line(new(-4, -4), new(-4, -12));
                 drawing.Line(new(4, -4), new(4, 4));
-                _ty1 = -13;
-                _ty2 = 5;
+                _locations[0].ExpandUp(-13);
             }
         }
     }

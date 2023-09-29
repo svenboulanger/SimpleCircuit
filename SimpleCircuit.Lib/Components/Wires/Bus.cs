@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Wires
             public int Crossings { get; set; } = 1;
 
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "bus";
@@ -54,8 +54,9 @@ namespace SimpleCircuit.Components.Wires
                 }
 
                 // The label
-                Labels.Draw(drawing, 0, new(0, -4), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 4), new(0, 1));
+                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
         }
     }

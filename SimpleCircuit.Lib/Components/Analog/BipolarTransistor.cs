@@ -46,6 +46,8 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
+
                 // Transistor
                 drawing.Arrow(new(-3, 4), new(-6, 0), new("emitter"));
                 drawing.Line(new(3, 4), new(6, 0), new("collector"));
@@ -55,10 +57,11 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    Labels.Draw(drawing, 0, new Vector2(0, -9), new Vector2(0, -1));
+                    Labels.SetDefaultPin(0, location: new(0, -9), expand: new(0, -1));
                 }
                 else
-                    Labels.Draw(drawing, 0, new Vector2(0, -3), new Vector2(0, -1));
+                    Labels.SetDefaultPin(0, location: new(0, -3), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
@@ -84,6 +87,8 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                drawing.ExtendPins(Pins);
+
                 // Transistor
                 drawing.Arrow(new(6, 0), new(3, 4), new("emitter"));
                 drawing.Line(new(-3, 4), new(-6, 0), new("collector"));
@@ -93,10 +98,11 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    Labels.Draw(drawing, 0, new Vector2(0, -9), new Vector2(0, -1));
+                    Labels.SetDefaultPin(0, location: new(0, -9), expand: new(0, -1));
                 }
                 else
-                    Labels.Draw(drawing, 0, new Vector2(0, -3), new Vector2(0, -1));
+                    Labels.SetDefaultPin(0, location: new(0, -3), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

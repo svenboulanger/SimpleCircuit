@@ -84,8 +84,9 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
 
                 // Label
-                Labels.Draw(drawing, 0, new(0, -8), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 8), new(0, 1));
+                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -94,8 +95,10 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 });
                 drawing.Line(new(-4, 0), new(4, 0));
-                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 6), new(0, 1));
+
+                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
         }
     }

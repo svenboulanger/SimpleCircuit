@@ -159,7 +159,8 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawLabel(SvgDrawing drawing)
             {
-                Labels.Draw(drawing, 0, new(0, -10), new(1, -1));
+                Labels.SetDefaultPin(0, location: new(0, -10), expand: new(1, -1));
+                Labels.Draw(drawing);
             }
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

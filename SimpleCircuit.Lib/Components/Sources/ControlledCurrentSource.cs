@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Sources
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             /// <inheritdoc />
-            public Labels Labels { get; } = new(2);
+            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "ccs";
@@ -83,8 +83,9 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
 
                 // Depending on the orientation, let's anchor the text differently
-                Labels.Draw(drawing, 0, new(0, -8), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 8), new(0, 1));
+                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -93,8 +94,10 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 });
                 drawing.Line(new(0, -4), new(0, 4));
-                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
-                Labels.Draw(drawing, 1, new(0, 6), new(0, 1));
+
+                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
+                Labels.Draw(drawing);
             }
         }
     }

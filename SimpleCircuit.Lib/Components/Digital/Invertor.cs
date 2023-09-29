@@ -78,7 +78,8 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(7.5, 0), 1.5);
 
-                Labels.Draw(drawing, 0, new(0, -4), new(1, -1));
+                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(1, -1));
+                Labels.Draw(drawing);
             }
 
             private void DrawInverterIEC(SvgDrawing drawing)
@@ -89,7 +90,8 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(6.5, 0), 1.5);
                 drawing.Text("1", new Vector2(), new Vector2());
 
-                Labels.Draw(drawing, 0, new(0, -6), new(0, -1));
+                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.Draw(drawing);
             }
         }
     }

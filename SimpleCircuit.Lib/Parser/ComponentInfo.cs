@@ -72,17 +72,8 @@ namespace SimpleCircuit.Parser
             // Handle the label
             if (Labels.Count > 0 && _component is ILabeled labeled)
             {
-                if (Labels.Count > labeled.Labels.Maximum)
-                {
-                    context.Diagnostics?.Post(Labels[labeled.Labels.Maximum - 1], ErrorCodes.TooManyLabels);
-                    for (int i = 0; i < labeled.Labels.Maximum; i++)
-                        labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
-                }
-                else
-                {
-                    for (int i = 0; i < Labels.Count; i++)
-                        labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
-                }
+                for (int i = 0; i < Labels.Count; i++)
+                    labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
             }
 
             // Handle variants

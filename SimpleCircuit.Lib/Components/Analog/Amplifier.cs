@@ -178,10 +178,11 @@ namespace SimpleCircuit.Components.Analog
 
                 // Labels
                 if (Variants.Contains(_differentialOutput))
-                    Labels.Draw(drawing, 0, new(2, 7), new(1, 1));
+                    Labels.SetDefaultPin(0, location: new(2, 7), expand: new(1, 1));
                 else
-                    Labels.Draw(drawing, 0, new(2, 5), new(1, 1));
-                drawing.Text(Gain, new(-2.5, 0), new());
+                    Labels.SetDefaultPin(0, location: new(2, 5), expand: new(1, 1));
+                Labels.SetDefaultPin(-1, location: new Vector2(-2.5, 0));
+                Labels.Draw(drawing);
             }
         }
     }

@@ -85,7 +85,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.Draw(drawing, 0, new(-6, 6), new(-1, 1));
+                Labels.SetDefaultPin(0, location: new(-6, 6), expand: new(-1, 1));
+                Labels.Draw(drawing);
             }
         }
     }

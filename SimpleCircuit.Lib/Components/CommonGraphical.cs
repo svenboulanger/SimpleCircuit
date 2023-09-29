@@ -263,34 +263,24 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Draws a label around or inside a box, depending on variants.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
         /// <param name="labels">The labels.</param>
         /// <param name="variants">The variants.</param>
         /// <param name="topLeft">The top-left corner of the box.</param>
         /// <param name="bottomRight">The bottom-right corner of the box.</param>
-        /// <param name="index">The label index.</param>
-        /// <param name="offset">The offset.</param>
         /// <param name="defaultHorizontal">The default horizontal location. -1 for left, 0 for center or 1 for right.</param>
         /// <param name="defaultVertical">The default vertical location. -1 for top, 0 for middle or 1 for bottom.</param>
         /// <param name="defaultInside">The default location inside/outside. 0 for inside, 1 for outside.</param>
         /// <param name="margin">The margin from the edge inside or outside.</param>
-        /// <param name="options">The graphic options.</param>
-        public static void BoxedLabel(this SvgDrawing drawing,
-            Labels labels,
-            int index,
+        public static void BoxedLabel(
+            this Labels labels,
             VariantSet variants,
             Vector2 topLeft,
             Vector2 bottomRight,
-            Vector2 offset = default,
             int defaultHorizontal = 0,
             int defaultVertical = 0,
             int defaultInside = 0,
             double margin = 1.0)
         {
-            // No need to deal with all this if there is no label to draw
-            if (string.IsNullOrWhiteSpace(labels[index]))
-                return;
-
             // Get horizontal alignment
             int horizontal = variants.Select(Left, Center, Right);
             if (horizontal < 0)
@@ -305,7 +295,7 @@ namespace SimpleCircuit.Components
             if (horizontal == 1 && vertical == 1)
             {
                 // Centered text
-                labels.Draw(drawing, index, 0.5 * (topLeft + bottomRight) + offset, new Vector2());
+                labels.SetDefaultPin(-1, location: 0.5 * (topLeft + bottomRight), expand: new());
                 return;
             }
 
@@ -360,7 +350,31 @@ namespace SimpleCircuit.Components
             }
 
             // Draw the label
-            labels.Draw(drawing, index, loc + offset, n);
+            labels.SetDefaultPin(-1, location: loc, expand: n);
+        }
+
+        /// <summary>
+        /// Expands a vector in the downward direction. If the y-coordinate of the vector
+        /// is below <paramref name="y"/>, then the vector is modified to have that y-coordinate.
+        /// </summary>
+        /// <param name="vector">The vector.</param>
+        /// <param name="y">The y-coordinate.</param>
+        public static void ExpandDown(ref this Vector2 vector, double y)
+        {
+            if (vector.Y < y)
+                vector = new Vector2(vector.X, y);
+        }
+
+        /// <summary>
+        /// Expands a vector in the upward direction. If the y-coordinate of the vector
+        /// is above <paramref name="y"/>, then the vector is modified to have that y-coordinate.
+        /// </summary>
+        /// <param name="vector">The vector.</param>
+        /// <param name="y">The y-coordinate.</param>
+        public static void ExpandUp(ref this Vector2 vector, double y)
+        {
+            if (vector.Y > y)
+                vector = new Vector2(vector.X, y);
         }
     }
 }

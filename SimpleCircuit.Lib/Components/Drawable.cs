@@ -7,7 +7,6 @@ using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components
 {
@@ -75,59 +74,36 @@ namespace SimpleCircuit.Components
             // Find the property
             string property = propertyToken.Content.ToString().ToLower();
 
-            // If the drawable is a labeled drawable, and the value is an offset, and the property name starts with "offset"
-            // use it to define an offset on the labels.
-            {
-                if (drawable is ILabeled labeled && value is Vector2 vector && property.StartsWith("offset"))
-                {
-                    bool success = true;
-                    int index = 0;
-                    for (int i = 6; i < property.Length; i++)
-                    {
-                        if (char.IsDigit(property[i]))
-                            index = index * 10 + (property[i] - '0');
-                        else
-                        {
-                            success = false;
-                            break;
-                        }
-                    }
-                    if (success)
-                    {
-                        if (index > 0)
-                            index--;
-                        labeled.Labels.SetOffset(index, vector);
-                        return true;
-                    }
-                }
-            }
-
             // Search using reflection
             var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (info == null)
             {
-                // Labels are a special case
-                if (drawable is ILabeled labeled && value is string label)
+                if (drawable is ILabeled labeled)
                 {
-                    var match = Regex.Match(property, @"^label(?<index>\w+)?$", RegexOptions.IgnoreCase);
-                    if (match.Success)
+                    // Let's expose some special properties if there are labels at play
+                    int index;
+                    if (value is Vector2 vector)
                     {
-                        if (match.Groups["index"].Success)
+                        if (TryMatchIndexedProperty(property, "offset", out index))
                         {
-                            int index = int.Parse(match.Groups["index"].Value);
-                            if (index < 1 || index > labeled.Labels.Count)
-                                diagnostics?.Post(propertyToken, ErrorCodes.TooManyLabels);
-                            else
-                                labeled.Labels[index - 1] = label;
+                            labeled.Labels.SetPin(index, offset: vector);
+                            return true;
                         }
-                        else
-                            labeled.Labels[0] = label;
-                        return true;
+                        if (TryMatchIndexedProperty(property, "expand", out index))
+                        {
+                            labeled.Labels.SetPin(index, expand: vector);
+                            return true;
+                        }
+                        if (TryMatchIndexedProperty(property, "location", out index))
+                        {
+                            labeled.Labels.SetPin(index, location: vector);
+                            return true;
+                        }
                     }
-                    else
+                    if (value is string label && TryMatchIndexedProperty(property, "label", out index))
                     {
-                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
-                        return false;
+                        labeled.Labels[index] = label;
+                        return true;
                     }
                 }
 
@@ -170,6 +146,37 @@ namespace SimpleCircuit.Components
                     return true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Matches a property with an index.
+        /// </summary>
+        /// <param name="property">The property.</param>
+        /// <param name="prefix">The prefix.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>Returns <c>true</c> if the indexed property was matched successfully; otherwise, <c>false</c>.</returns>
+        private static bool TryMatchIndexedProperty(string property, string prefix, out int index)
+        {
+            index = 0;
+
+            // Try to read the prefix
+            if (!property.StartsWith(property))
+                return false;
+
+            // Try to read the index
+            for (int i = prefix.Length; i < property.Length; i++)
+            {
+                char c = property[i];
+                if (c >= '0' && c <= '9')
+                    index = (index * 10) + (c - '0');
+                else
+                    return false;
+            }
+
+            // Make index 1-based.
+            if (index > 0)
+                index--;
+            return true;
         }
 
         /// <inheritdoc />
