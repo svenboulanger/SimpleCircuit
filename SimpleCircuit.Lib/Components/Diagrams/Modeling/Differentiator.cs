@@ -11,11 +11,18 @@
             return inst;
         }
 
-        private class Instance : ModelingDrawable
+        private class Instance : ModelingDrawable, ILabeled
         {
+            /// <inheritdoc />
             public override string Type => "differentiator";
 
+            /// <summary>
+            /// The size.
+            /// </summary>
             protected override double Size => 12;
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -45,6 +52,9 @@
                         drawing.Text("dt", new(), new(0, 1), new("small"));
                         break;
                 }
+
+                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
+                Labels.Draw(drawing);
             }
         }
     }

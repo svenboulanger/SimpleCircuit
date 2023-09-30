@@ -11,12 +11,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ModelingDrawable
+        private class Instance : ModelingDrawable, ILabeled
         {
             private const string _pathData = @"M0.75 -1 l-1.5 0 1 1 -1 1 1.5 0";
 
             /// <inheritdoc />
             public override string Type => "addition";
+
+            /// <inheritdoc />
+            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -36,12 +39,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 {
                     case 0:
                         // Draw a sigma
+                        drawing.BeginTransform(new Transform(new(), Matrix2.Scale(0.2 * Size)));
                         drawing.Path(b =>
                         {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
-                            b.WithTransform(new Transform(new(), Matrix2.Scale(0.2 * Size)));
                             SvgPathDataParser.Parse(lexer, b, null);
                         });
+                        drawing.EndTransform();
                         break;
 
                     default:
@@ -50,6 +54,9 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.Line(new(0, -s), new(0, s));
                         break;
                 }
+
+                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
+                Labels.Draw(drawing);
             }
         }
     }

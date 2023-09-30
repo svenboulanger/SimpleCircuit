@@ -21,7 +21,8 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private double _textY = 0;
+            private readonly Vector2[] _locations = new Vector2[2];
+            private readonly Vector2[] _expands = new Vector2[2];
 
             /// <inheritdoc />
             public override string Type => "segment";
@@ -45,7 +46,10 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.ExtendPins(Pins, 4);
 
-                _textY = 0.0;
+                _locations[0] = new(0, -1);
+                _locations[1] = new(0, 1);
+                _expands[0] = new(0, -1);
+                _expands[1] = new(0, 1);
                 switch (Variants.Select(_underground, _air, _tube, _inwall, _onwall))
                 {
                     case 0: DrawUnderground(drawing); break;
@@ -55,35 +59,41 @@ namespace SimpleCircuit.Components.Wires
                     case 4: DrawOnWall(drawing); break;
                 }
 
-                Labels.SetDefaultPin(-1, location: new(0, _textY - 2), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
+                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
                 Labels.Draw(drawing);
             }
             private void DrawUnderground(SvgDrawing drawing)
             {
                 drawing.Path(b => b.MoveTo(-4, -5).Line(8, 0).MoveTo(-2.5, -3.5).Line(5, 0).MoveTo(-1, -2).Line(2, 0));
-                _textY = Math.Min(_textY, -5);
+                _locations[0].ExpandUp(-6);
+                _locations[1].ExpandDown(1);
             }
             private void DrawAir(SvgDrawing drawing)
             {
                 drawing.Circle(new(), 2);
-                _textY = Math.Min(_textY, -2);
+                _locations[0].ExpandUp(-3);
+                _locations[1].ExpandDown(3);
             }
             private void DrawTube(SvgDrawing drawing)
             {
                 drawing.Circle(new(0, -3.5), 1.5);
-                _textY = Math.Min(_textY, -5);
+                _locations[0].ExpandUp(-6);
+                _locations[1].ExpandDown(-1);
             }
             private void DrawInWall(SvgDrawing drawing)
             {
                 drawing.Polyline(new Vector2[] { new(-3, -2), new(-3, -5), new(3, -5), new(3, -2) });
                 drawing.Line(new(0, -2), new(0, -5));
-                _textY = Math.Min(_textY, -5);
+                _locations[0].ExpandUp(-6);
+                _locations[1].ExpandDown(-1);
             }
             private void DrawOnWall(SvgDrawing drawing)
             {
                 drawing.Polyline(new Vector2[] { new(-3, 5), new(-3, 2), new(3, 2), new(3, 5) });
                 drawing.Line(new(0, 5), new(0, 2));
-                _textY = Math.Min(_textY, 0);
+                _locations[0].ExpandUp(-1);
+                _locations[1].ExpandDown(6);
             }
         }
     }

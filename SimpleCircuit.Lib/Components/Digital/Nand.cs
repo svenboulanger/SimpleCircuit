@@ -141,7 +141,9 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                 );
                 drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
+
                 Labels.SetDefaultPin(-1, location: new(0, -h - 1), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, h + 1), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
             private void DrawNandIEC(SvgDrawing drawing)
@@ -151,7 +153,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
 
-                Labels.SetDefaultPin(-1, location: new(0, -Height * 0.5 - 1), expand: new(0, -1));
+                Labels.BoxedLabel(Variants, new(-Width * 0.5, -Height * 0.5), new(Width * 0.5, Height * 0.5), -1, 1, 1);
                 Labels.Draw(drawing);
             }
         }

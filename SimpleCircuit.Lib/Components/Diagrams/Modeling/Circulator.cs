@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     new(x + s, y + s * 1.8), new(x, y), new(x + s * 1.8, y)
                 });
 
-                Labels.SetDefaultPin(-1, location: new(Size * 0.5 + 1, Size * 0.5 - 1), expand: new(1, -1));
+                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
                 Labels.Draw(drawing);
             }
 

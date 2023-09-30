@@ -156,6 +156,7 @@ namespace SimpleCircuit.Components.Digital
                 });
 
                 Labels.SetDefaultPin(-1, location: new(0, -h - 1), expand: new(0, -1));
+                Labels.SetDefaultPin(1, location: new(0, h + 1), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
 
@@ -165,7 +166,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("=1", new(), new());
 
-                Labels.SetDefaultPin(-1, location: new(0, -Height * 0.5 - 1), expand: new(0, -1));
+                Labels.BoxedLabel(Variants, new(-Width * 0.5, -Height * 0.5), new(Width * 0.5, Height * 0.5), -1, 1, 1);
                 Labels.Draw(drawing);
             }
         }

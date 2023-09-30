@@ -45,7 +45,7 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets or sets the transform for the path builder.
         /// </summary>
-        public Transform Transform { get; set; } = Transform.Identity;
+        public Transform Transform { get; } = Transform.Identity;
 
         /// <summary>
         /// Creates a new path builder.
@@ -56,17 +56,6 @@ namespace SimpleCircuit.Drawing
         {
             _bounds = new();
             Transform = transform;
-        }
-
-        /// <summary>
-        /// Adds another transform on top of the current one.
-        /// </summary>
-        /// <param name="transform">The transform.</param>
-        /// <returns>The path builder.</returns>
-        public PathBuilder WithTransform(Transform transform)
-        {
-            Transform = Transform.Apply(transform);
-            return this;
         }
 
         /// <summary>
@@ -756,7 +745,7 @@ namespace SimpleCircuit.Drawing
         /// <returns>The formatted value.</returns>
         private static string Convert(double value)
         {
-            return Math.Round(value, 5).ToString("G4", System.Globalization.CultureInfo.InvariantCulture);
+            return Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         /// <summary>

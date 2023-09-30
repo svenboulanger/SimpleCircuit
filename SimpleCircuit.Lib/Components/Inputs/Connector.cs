@@ -82,7 +82,10 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-4, 4), new(), new(-4, -4)
                                 });
                                 if (Pins["p"].Connections > 0)
+                                {
                                     Labels.SetDefaultPin(-1, location: new(1, 1), expand: new(1, 1));
+                                    Labels.SetDefaultPin(1, location: new(1, -1), expand: new(1, -1));
+                                }
                                 else
                                     Labels.SetDefaultPin(-1, location: new(1, 0), expand: new(1, 0));
                                 break;
@@ -94,7 +97,10 @@ namespace SimpleCircuit.Components.Inputs
                                     new(4, 4), new(), new(4, -4)
                                 });
                                 if (Pins["p"].Connections > 0)
+                                {
                                     Labels.SetDefaultPin(-1, location: new(5, 1), expand: new(1, 1));
+                                    Labels.SetDefaultPin(1, location: new(5, -1), expand: new(1, -1));
+                                }
                                 else
                                     Labels.SetDefaultPin(-1, location: new(5, 0), expand: new(1, 0));
                                 break;
@@ -110,6 +116,7 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-2, 4), new(2, 0), new(-2, -4)
                                 });
                                 Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
+                                Labels.SetDefaultPin(1, location: new(0, 5), expand: new(0, 1));
                                 break;
                         }
                         break;
@@ -120,6 +127,7 @@ namespace SimpleCircuit.Components.Inputs
                         drawing.Circle(new(), 1.5);
                         drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
                         Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
+                        Labels.SetDefaultPin(1, location: new(0, 5), expand: new(0, 1));
                         break;
                 }
                 Labels.Draw(drawing);

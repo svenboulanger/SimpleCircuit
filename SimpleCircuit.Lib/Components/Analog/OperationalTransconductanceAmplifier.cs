@@ -132,6 +132,7 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 Labels.SetDefaultPin(-1, location: new(2, 8), expand: new(1, 1));
                 Labels.SetDefaultPin(1, location: new(), expand: new());
+                Labels.SetDefaultPin(2, location: new(2, -8), expand: new(1, -1));
                 Labels.Draw(drawing);
             }
         }

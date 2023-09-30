@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawLabel(SvgDrawing drawing)
             {
-                Labels.SetDefaultPin(-1, location: new(0, -10), expand: new(1, -1));
+                Labels.BoxedLabel(Variants, new(0, -8), new(16, 8), -1, -1, 1);
                 Labels.Draw(drawing);
             }
 
@@ -251,9 +251,9 @@ namespace SimpleCircuit.Components.Outputs
                     new(), new(fx, -fy)
                 }, Math.PI / 6.0);
 
+                drawing.BeginTransform(new Transform(new(cx, cy), Matrix2.Scale(scale)));
                 drawing.Path(b =>
                 {
-                    b.WithTransform(new Transform(new(cx, cy), Matrix2.Scale(scale)));
                     int index = 0;
                     foreach (var g in pts.GroupBy(p => (index++) / 2))
                     {
@@ -261,6 +261,7 @@ namespace SimpleCircuit.Components.Outputs
                         b.MoveTo(p[0]).LineTo(p[1]);
                     }
                 }, new("ice"));
+                drawing.EndTransform();
             }
             private IEnumerable<Vector2> IceFractal(IEnumerable<Vector2> points, double angle)
             {

@@ -136,6 +136,7 @@ namespace SimpleCircuit.Components
 
                 // Draw the label
                 Labels.BoxedLabel(Variants, Location, EndLocation, margin: LabelMargin);
+                Labels.Draw(drawing);
 
                 // Draw the port names
                 _pins.Render(drawing);

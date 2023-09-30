@@ -39,6 +39,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
 
                 Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
+                Labels.SetDefaultPin(1, location: new(6, 0), expand: new(1, 0));
                 Labels.Draw(drawing);
             }
         }

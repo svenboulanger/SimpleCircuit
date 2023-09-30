@@ -24,6 +24,8 @@ namespace SimpleCircuit.Components.Outputs
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
             private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
+            private readonly Vector2[] _locations = new Vector2[2];
+            private readonly Vector2[] _expands = new Vector2[2];
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -50,6 +52,7 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (!base.Reset(context))
                     return false;
+
                 if (Variants.Contains(Options.Arei))
                 {
                     SetPinOffset(0, new());
@@ -68,6 +71,11 @@ namespace SimpleCircuit.Components.Outputs
             {
                 drawing.Cross(new(), _sqrt2);
 
+                _locations[0] = new(0, -5);
+                _locations[1] = new(0, 5);
+                _expands[0] = new(0, -1);
+                _expands[1] = new(0, 1);
+
                 if (!Variants.Contains(Options.Arei))
                     drawing.Circle(new Vector2(), 4);
                 else
@@ -83,17 +91,20 @@ namespace SimpleCircuit.Components.Outputs
                 }
 
                 // Label
-                Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
+                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
                 Labels.Draw(drawing);
             }
 
             private void DrawWall(SvgDrawing drawing)
             {
                 drawing.Line(new Vector2(-3, 5), new Vector2(3, 5));
+                _locations[1].ExpandDown(6);
             }
             private void DrawProjector(SvgDrawing drawing)
             {
                 drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
+                _locations[1].ExpandDown(7);
             }
             private void DrawDirectional(SvgDrawing drawing, bool diverging)
             {
@@ -108,6 +119,7 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Arrow(new(-2, 6), new(-2, 12), options);
                     drawing.Arrow(new(2, 6), new(2, 12), options);
                 }
+                _locations[1].ExpandDown(13);
             }
             private void DrawEmergency(SvgDrawing drawing)
             {

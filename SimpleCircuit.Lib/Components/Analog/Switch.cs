@@ -170,18 +170,27 @@ namespace SimpleCircuit.Components.Analog
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
+                _locations[0].ExpandDown(1.5);
+                _locations[1].ExpandUp(-1.5);
 
                 if (Variants.Contains(_closed))
                 {
                     if (Variants.Contains(_invert))
+                    {
                         drawing.Circle(new(0, -1), 1);
+                        _locations[1].ExpandUp(-2.5);
+                    }
                     drawing.Line(new(-4, 0), new(4, 0), new("wire"));
                 }
                 else
                 {
                     if (Variants.Contains(_invert))
+                    {
                         drawing.Circle(new(0, -3.25), 1);
+                        _locations[1].ExpandUp(-4.75);
+                    }
                     drawing.Line(new(-4, 0), new(4, -4), new("wire"));
+                    _locations[1].ExpandUp(-5);
                 }
 
                 switch (Variants.Select(_closing, _opening))
@@ -191,7 +200,8 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-3, -5), new(1, -3), new(1, -2), new(2, 2)
                         });
-
+                        _locations[0].ExpandDown(3);
+                        _locations[1].ExpandUp(-6);
                         var marker = new Arrow(new(2, 2), new(0.24253562503, 0.97014250014));
                         marker.Draw(drawing);
                         break;
@@ -201,7 +211,8 @@ namespace SimpleCircuit.Components.Analog
                         {
                            new(-4, -6), new(1, -3), new(1, -2), new(2, 1)
                         });
-
+                        _locations[0].ExpandDown(2);
+                        _locations[1].ExpandUp(-7);
                         marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
                         marker.Draw(drawing);
                         break;
@@ -220,10 +231,9 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
+                    _locations[1].ExpandUp(-7);
                     _locations[0].ExpandDown(7);
                 }
-                else
-                    _locations[0].ExpandDown(3);
             }
             private void DrawPushSwitch(SvgDrawing drawing)
             {
@@ -246,7 +256,10 @@ namespace SimpleCircuit.Components.Analog
                 {
                     drawing.Line(new(-5, -4), new(5, -4));
                     if (Variants.Contains(_invert))
+                    {
                         drawing.Circle(new(0, -5), 1);
+                        _locations[1].ExpandUp(-6);
+                    }
                     else
                         drawing.Line(new(0, -4), new(0, -6), new("wire"));
                 }

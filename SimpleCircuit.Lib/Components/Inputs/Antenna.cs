@@ -57,6 +57,7 @@ namespace SimpleCircuit.Components.Inputs
                 }
 
                 Labels.SetDefaultPin(-1, location: new(5, -5), expand: new(1, 0));
+                Labels.SetDefaultPin(1, location: new(-5, -5), expand: new(-1, 0));
                 Labels.Draw(drawing);
             }
         }
