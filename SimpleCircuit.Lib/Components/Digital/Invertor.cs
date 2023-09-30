@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(7.5, 0), 1.5);
 
-                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(1, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(1, -1));
                 Labels.Draw(drawing);
             }
 
@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(6.5, 0), 1.5);
                 drawing.Text("1", new Vector2(), new Vector2());
 
-                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
                 Labels.Draw(drawing);
             }
         }

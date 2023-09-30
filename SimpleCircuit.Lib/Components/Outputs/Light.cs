@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Outputs
                 }
 
                 // Label
-                Labels.SetDefaultPin(0, location: new(0, -5), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
                 Labels.Draw(drawing);
             }
 

@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Analog
         private const string _programmable = "programmable";
         private const string _choke = "choke";
         private const string _singleLine = "single";
-
+        
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
@@ -205,7 +205,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                Labels.SetDefaultPin(0, location: locations[0], expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: locations[0], expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: locations[1], expand: new(0, 1));
                 Labels.Draw(drawing);
             }

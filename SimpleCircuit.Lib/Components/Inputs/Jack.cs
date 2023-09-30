@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.Circle(new(), 4);
                 drawing.Circle(new(4, 0), 1, new("marker"));
 
-                Labels.SetDefaultPin(0, location: new(-6, 0), expand: new(-1, 0));
+                Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
                 Labels.Draw(drawing);
             }
         }

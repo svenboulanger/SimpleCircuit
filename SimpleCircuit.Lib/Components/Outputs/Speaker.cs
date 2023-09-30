@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (!Variants.Contains(_off))
                     DrawOn(drawing);
 
-                Labels.SetDefaultPin(0, location: new(8, 10), expand: new(1, 1));
+                Labels.SetDefaultPin(-1, location: new(8, 10), expand: new(1, 1));
                 Labels.Draw(drawing);
             }
             private void DrawOn(SvgDrawing drawing)

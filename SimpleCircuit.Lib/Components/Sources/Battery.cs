@@ -79,7 +79,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
             }
         }

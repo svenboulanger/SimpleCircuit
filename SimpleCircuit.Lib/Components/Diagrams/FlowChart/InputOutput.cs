@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             .LineTo(-a, b)
                             .Close();
                     });
-                    Labels.SetDefaultPin(0, location: new(0, 0.5 * (b - c)), expand: new());
+                    Labels.SetDefaultPin(-1, location: new(0, 0.5 * (b - c)), expand: new());
                 }
                 else
                 {
@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             .LineTo(-a, b)
                             .Close();
                     });
-                    Labels.SetDefaultPin(0, location: new(), expand: new());
+                    Labels.SetDefaultPin(-1, location: new(), expand: new());
                 }
                 Labels.Draw(drawing);
             }

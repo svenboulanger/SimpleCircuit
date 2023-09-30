@@ -42,7 +42,7 @@
                     s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
 
-                Labels.SetDefaultPin(0, location: new(-s * 0.5, -s * 0.5), new());
+                Labels.SetDefaultPin(-1, location: new(-s * 0.5, -s * 0.5), new());
                 Labels.SetDefaultPin(1, location: new(s * 0.5, s * 0.5), new());
                 Labels.Draw(drawing);
             }

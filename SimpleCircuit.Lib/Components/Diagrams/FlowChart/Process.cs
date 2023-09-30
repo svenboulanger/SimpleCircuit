@@ -54,7 +54,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     drawing.Line(new(-a + 3, -b), new(-a + 3, b));
                     drawing.Line(new(a - 3, -b), new(a - 3, b));
                 }
-                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.SetDefaultPin(-1, location: new(), expand: new());
                 Labels.Draw(drawing);
             }
 

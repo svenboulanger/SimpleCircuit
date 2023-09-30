@@ -264,25 +264,25 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
                             break;
 
                         case 1:
                             // Middle
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 1, y + 0.5 * height), expand: new(1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * height), expand: new(1, 0));
                             else
-                                Labels.SetDefaultPin(0, location: new(x - 1, y + 0.5 * height), expand: new(-1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * height), expand: new(-1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + radiusOffset + 1, y + height - radiusOffset - 1), expand: new(1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + height - radiusOffset - 1), expand: new(1, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + RoundRadius, y + height + 1), expand: new(1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y + height + 1), expand: new(1, 1));
                             break;
                     }
                     break;
@@ -294,22 +294,22 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * width, y + 1), expand: new(0, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + 1), expand: new(0, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * width, y - 1), expand: new(0, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y - 1), expand: new(0, -1));
                             break;
 
                         default:
                         case 1:
-                            Labels.SetDefaultPin(0, location: new(x + 0.5 * width, y + 0.5 * height), expand: new());
+                            Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + 0.5 * height), expand: new());
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * width, y + height - 1), expand: new(0, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + height - 1), expand: new(0, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * width, y + height + 1), expand: new(0, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + height + 1), expand: new(0, 1));
                             break;
 
                     }
@@ -323,25 +323,25 @@ namespace SimpleCircuit.Components.Annotations
                         case 0:
                             // Top
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + width - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + width - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + width - RoundRadius, y - 1), expand: new(-1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + width - RoundRadius, y - 1), expand: new(-1, -1));
                             break;
 
                         case 1:
                             // Middle
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + width - 1, y + 0.5 * height), expand: new(-1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x + width - 1, y + 0.5 * height), expand: new(-1, 0));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + width + 1, y + 0.5 * height), expand: new(1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x + width + 1, y + 0.5 * height), expand: new(1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + width - radiusOffset - 1, y + height - radiusOffset - 1), expand: new(-1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + width - radiusOffset - 1, y + height - radiusOffset - 1), expand: new(-1, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + width - RoundRadius, y + 1), expand: new(-1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + width - RoundRadius, y + 1), expand: new(-1, 1));
                             break;
 
                     }
@@ -623,27 +623,27 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
                             break;
 
                         case 1:
                             // Middle
                             FindLeft(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
                             else
-                                Labels.SetDefaultPin(0, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + radiusOffset + 1, y - radiusOffset - 1), expand: new(1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y - radiusOffset - 1), expand: new(1, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + RoundRadius, y + 1), expand: new(1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y + 1), expand: new(1, 1));
                             break;
                     }
                     break;
@@ -656,24 +656,24 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
                             break;
 
                         default:
                         case 1:
                             FindCenter(sortedPoints, out x, out y);
-                            Labels.SetDefaultPin(0, location: new(x, y), expand: new());
+                            Labels.SetDefaultPin(-1, location: new(x, y), expand: new());
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
                             break;
 
                     }
@@ -688,29 +688,28 @@ namespace SimpleCircuit.Components.Annotations
                             // Top
                             FindTop(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + length - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + length - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + length - RoundRadius, y - 1), expand: new(-1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + length - RoundRadius, y - 1), expand: new(-1, -1));
                             break;
 
                         case 1:
                             // Middle
                             FindRight(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
+                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
                             break;
 
                         case 2:
                             // Bottom
                             FindBottom(sortedPoints, bounds, out x, out y, out length);
                             if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(0, location: new(x + length - radiusOffset - 1, y + length - radiusOffset - 1), expand: new(-1, -1));
+                                Labels.SetDefaultPin(-1, location: new(x + length - radiusOffset - 1, y + length - radiusOffset - 1), expand: new(-1, -1));
                             else
-                                Labels.SetDefaultPin(0, location: new(x + length - RoundRadius, y + 1), expand: new(-1, 1));
+                                Labels.SetDefaultPin(-1, location: new(x + length - RoundRadius, y + 1), expand: new(-1, 1));
                             break;
-
                     }
                     break;
             }

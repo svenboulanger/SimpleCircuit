@@ -128,7 +128,7 @@ namespace SimpleCircuit.Components.Analog
                         DrawAmericanResistor(drawing);
                         break;
                 }
-                Labels.SetDefaultPin(0, location: _locations[0], expand: _expands[0]);
+                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
                 Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
                 Labels.Draw(drawing);
             }

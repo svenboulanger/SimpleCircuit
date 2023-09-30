@@ -38,7 +38,7 @@
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.SetDefaultPin(-1, location: new(), expand: new());
                 Labels.Draw(drawing);
             }
         }

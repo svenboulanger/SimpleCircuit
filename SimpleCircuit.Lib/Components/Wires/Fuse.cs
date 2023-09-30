@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
 
-                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
@@ -70,7 +70,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Line(new(-6, 0), new(6, 0));
 
-                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Wires
                     new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
 
-                Labels.SetDefaultPin(0, location: new(0, -4), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
                 Labels.Draw(drawing);
             }

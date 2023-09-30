@@ -129,7 +129,7 @@ namespace SimpleCircuit.Components
         /// <param name="expand">The expansion direction.</param>
         /// <param name="offset">The pin offset from its location.</param>
         /// <param name="options">The options for the pin.</param>
-        public void SetDefaultPin(int index, Vector2 location = default, Vector2 expand = default, Vector2 offset = default, GraphicOptions options = null)
+        public void SetDefaultPin(int index, Vector2? location = null, Vector2? expand = null, Vector2? offset = null, GraphicOptions options = null)
         {
             if (index < 0)
             {
@@ -140,9 +140,12 @@ namespace SimpleCircuit.Components
                 for (int i = 0; i < _placements.Count; i++)
                 {
                     var placement = _placements[i];
-                    placement.DefaultLocation = location;
-                    placement.DefaultExpand = expand;
-                    placement.DefaultOffset = offset;
+                    if (location != null)
+                        placement.DefaultLocation = location.Value;
+                    if (expand != null)
+                        placement.DefaultExpand = expand.Value;
+                    if (offset != null)
+                        placement.DefaultOffset = offset.Value;
                     if (options != null)
                         placement.DefaultOptions = options;
                 }
@@ -153,9 +156,12 @@ namespace SimpleCircuit.Components
                     _placements.Add(new Placement());
 
                 var placement = _placements[index];
-                placement.DefaultLocation = location;
-                placement.DefaultExpand = expand;
-                placement.DefaultOffset = offset;
+                if (location != null)
+                    placement.DefaultLocation = location.Value;
+                if (expand != null)
+                    placement.DefaultExpand = expand.Value;
+                if (offset != null)
+                    placement.DefaultOffset = offset.Value;
                 if (options != null)
                     placement.DefaultOptions = options;
             }

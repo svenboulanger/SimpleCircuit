@@ -133,7 +133,7 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Label
-                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Circle(new(0, 0), 4);
                 drawing.Line(new(-4, 0), new(4, 0));
 
-                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
                 Labels.Draw(drawing);
             }

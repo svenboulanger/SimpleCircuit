@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components
                 else
                     drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
 
-                Labels.SetDefaultPin(0, location: new(0, -1.5), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -1.5), expand: new(0, -1));
                 Labels.Draw(drawing);
             }
         }

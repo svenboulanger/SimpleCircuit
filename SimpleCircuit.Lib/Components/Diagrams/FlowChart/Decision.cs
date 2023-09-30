@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         .LineTo(0, b)
                         .Close();
                 });
-                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.SetDefaultPin(-1, location: new(), expand: new());
                 Labels.Draw(drawing);
             }
 

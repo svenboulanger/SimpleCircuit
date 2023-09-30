@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
                 drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
 
-                Labels.SetDefaultPin(0, location: new(4, 6), expand: new(1, 1));
+                Labels.SetDefaultPin(-1, location: new(4, 6), expand: new(1, 1));
                 Labels.Draw(drawing);
             }
         }

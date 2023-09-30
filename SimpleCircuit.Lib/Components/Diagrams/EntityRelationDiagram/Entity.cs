@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 if (Labels.Count <= 1)
                 {
                     drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: new("erd"));
-                    Labels.SetDefaultPin(0, location: new(), expand: new(), options: new("header"));
+                    Labels.SetDefaultPin(-1, location: new(), expand: new(), options: new("header"));
                 }
                 else
                 {

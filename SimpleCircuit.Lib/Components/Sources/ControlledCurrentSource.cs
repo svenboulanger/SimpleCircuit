@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
 
                 // Depending on the orientation, let's anchor the text differently
-                Labels.SetDefaultPin(0, location: new(0, -8), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
                 Labels.Draw(drawing);
             }
@@ -95,7 +95,7 @@ namespace SimpleCircuit.Components.Sources
                 });
                 drawing.Line(new(0, -4), new(0, 4));
 
-                Labels.SetDefaultPin(0, location: new(0, -6), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
                 Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
                 Labels.Draw(drawing);
             }

@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["r"].Connections > 0)
                     drawing.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), new("small"));
 
-                Labels.SetDefaultPin(0, location: new(10, 12), expand: new(1, -1));
+                Labels.SetDefaultPin(-1, location: new(10, 12), expand: new(1, -1));
                 Labels.Draw(drawing);
             }
         }

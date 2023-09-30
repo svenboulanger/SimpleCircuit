@@ -94,13 +94,13 @@ namespace SimpleCircuit.Components.Analog
                 if (Pins["b"].Connections > 0)
                 {
                     // Draw the labels around the bulk contact
-                    Labels.SetDefaultPin(0, location: new(-3, -3), new(-1, -1));
-                    Labels.SetDefaultPin(1, location: new(3, -3), new(1, -1));
+                    Labels.SetDefaultPin(-1, location: new(-3, -3), expand: new(-1, -1));
+                    Labels.SetDefaultPin(1, location: new(3, -3), expand: new(1, -1));
                 }
                 else
                 {
-                    Labels.SetDefaultPin(0, location: new(0, -3), new(0, -1));
-                    Labels.SetDefaultPin(1, location: new(0, -3), new(0, -1));
+                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
+                    Labels.SetDefaultPin(1, location: new(0, -3), expand: new(0, -1));
                 }
                 Labels.Draw(drawing);
             }
@@ -127,7 +127,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                Labels.SetDefaultPin(0, location: new(3, -10), expand: new(1, 1));
+                Labels.SetDefaultPin(-1, location: new(3, -10), expand: new(1, 1));
                 Labels.SetDefaultPin(1, location: new(-3, -10), expand: new(-1, 1));
                 Labels.Draw(drawing);
             }
@@ -208,12 +208,12 @@ namespace SimpleCircuit.Components.Analog
                 if (Pins["b"].Connections > 0)
                 {
                     // Draw the labels around the bulk contact
-                    Labels.SetDefaultPin(0, location: new(-3, -3), expand: new(-1, -1));
+                    Labels.SetDefaultPin(-1, location: new(-3, -3), expand: new(-1, -1));
                     Labels.SetDefaultPin(1, location: new(3, -3), expand: new(1, -1));
                 }
                 else
                 {
-                    Labels.SetDefaultPin(0, location: new(0, -3), expand: new(0, -1));
+                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
                     Labels.SetDefaultPin(1, location: new(0, -3), expand: new(0, -1));
                 }
                 Labels.Draw(drawing);
@@ -244,7 +244,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                Labels.SetDefaultPin(0, location: new(3, -10), expand: new(1, -1));
+                Labels.SetDefaultPin(-1, location: new(3, -10), expand: new(1, -1));
                 Labels.SetDefaultPin(1, location: new(-3, -10), expand: new(-1, -1));
                 Labels.Draw(drawing);
             }

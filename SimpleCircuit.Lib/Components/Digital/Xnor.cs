@@ -156,7 +156,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(w + 1.5, 0), 1.5);
                 
-                Labels.SetDefaultPin(0, location: new(0, -h - 1), expand: new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -h - 1), expand: new(0, -1));
                 Labels.Draw(drawing);
             }
 
@@ -167,7 +167,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("=1", new(), new());
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
 
-                Labels.SetDefaultPin(0, location: new(0, -Height * 0.5 - 1), new(0, -1));
+                Labels.SetDefaultPin(-1, location: new(0, -Height * 0.5 - 1), new(0, -1));
                 Labels.Draw(drawing);
             }
         }

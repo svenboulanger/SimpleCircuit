@@ -44,7 +44,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.Ellipse(new(), Width * 0.5, Height * 0.5);
-                Labels.SetDefaultPin(0, location: new(), expand: new());
+                Labels.SetDefaultPin(-1, location: new(), expand: new());
                 Labels.Draw(drawing);
             }
 
