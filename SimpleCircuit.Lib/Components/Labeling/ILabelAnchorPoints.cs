@@ -15,9 +15,10 @@
         /// Calculates the anchor point at the given index for the subject.
         /// </summary>
         /// <param name="subject">The subject.</param>
-        /// <param name="index">The index.</param>
-        /// <returns>The label anchor point.</returns>
-        public LabelAnchorPoint Calculate(T subject, int index);
+        /// <param name="name">The anchor name.</param>
+        /// <param name="value">the anchor point value.</param>
+        /// <returns>Returns <c>true</c> if the anchor point exists.</returns>
+        public bool TryCalculate(T subject, string name, out LabelAnchorPoint value);
 
         /// <summary>
         /// Draws labels using the current set of label anchor points.

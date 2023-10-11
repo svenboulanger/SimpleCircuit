@@ -10,7 +10,7 @@
         public abstract int Count { get; }
 
         /// <inheritdoc />
-        public abstract LabelAnchorPoint Calculate(T subject, int index);
+        public abstract bool TryCalculate(T subject, string name, out LabelAnchorPoint value);
 
         /// <inheritdoc />
         public void Draw(SvgDrawing drawing, T subject)
@@ -23,7 +23,8 @@
                     continue;
 
                 // Get the anchor point
-                var anchor = Calculate(subject, label.Location ?? i);
+                if (!TryCalculate(subject, label.Location ?? i.ToString(), out var anchor))
+                    TryCalculate(subject, "0", out anchor); // Default to index 0
 
                 // Determine the final values
                 var location = anchor.Location + label.Offset;

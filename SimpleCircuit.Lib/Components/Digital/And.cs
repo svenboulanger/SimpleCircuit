@@ -152,14 +152,14 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                 );
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
             private void DrawAndIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("&amp;", new(), new());
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
         }
     }

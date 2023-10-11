@@ -11,9 +11,9 @@
         public string Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the location index of the label that is used as the reference.
+        /// Gets or sets the location description of the label that is used as the reference.
         /// </summary>
-        public int? Location { get; set; }
+        public string Location { get; set; }
 
         /// <summary>
         /// Gets or sets the offset of the label compared to the default location.

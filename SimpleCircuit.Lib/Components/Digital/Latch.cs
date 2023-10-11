@@ -57,7 +57,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["nq"].Connections > 0)
                     drawing.Text("Q'", new Vector2(8, 6), new Vector2(-1, 0));
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
         }
     }

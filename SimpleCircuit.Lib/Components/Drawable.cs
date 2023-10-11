@@ -100,14 +100,22 @@ namespace SimpleCircuit.Components
                     {
                         if (TryMatchIndexedProperty(property, "anchor", out index))
                         {
-                            labeled.Labels[index].Location = (int)Math.Round(number);
+                            labeled.Labels[index].Location = ((int)Math.Round(number)).ToString();
                             return true;
                         }
                     }
-                    if (value is string label && TryMatchIndexedProperty(property, "label", out index))
+                    if (value is string label)
                     {
-                        labeled.Labels[index].Value = label;
-                        return true;
+                        if (TryMatchIndexedProperty(property, "label", out index))
+                        {
+                            labeled.Labels[index].Value = label;
+                            return true;
+                        }
+                        if (TryMatchIndexedProperty(property, "anchor", out index))
+                        {
+                            labeled.Labels[index].Location = label;
+                            return true;
+                        }
                     }
                 }
 

@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Labeling
+﻿using System.Linq;
+
+namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// The aggregate of two lists of label anchor points.
@@ -22,16 +24,22 @@
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint Calculate(T subject, int index)
+        public override bool TryCalculate(T subject, string name, out LabelAnchorPoint value)
         {
-            index %= Count;
-            if (index < 0)
-                index += Count;
+            if (name.All(char.IsDigit))
+            {
+                int index = int.Parse(name);
+                index %= Count;
+                if (index < 0)
+                    index += Count;
+                if (index < _a.Count)
+                    return _a.TryCalculate(subject, index.ToString(), out value);
+                else
+                    return _b.TryCalculate(subject, (index - _a.Count).ToString(), out value);
+            }
 
-            if (index < _a.Count)
-                return _a.Calculate(subject, index);
-            else
-                return _b.Calculate(subject, index - _a.Count);
+            // Just try in order
+            return _a.TryCalculate(subject, name, out value) || _b.TryCalculate(subject, name, out value);
         }
     }
 }

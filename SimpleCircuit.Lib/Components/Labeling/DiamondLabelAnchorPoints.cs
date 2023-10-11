@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -23,23 +24,26 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint Calculate(IBoxLabeled subject, int index)
+        public override bool TryCalculate(IBoxLabeled subject, string name, out LabelAnchorPoint value)
         {
-            index %= Count;
-            if (index < 0)
-                index += Count;
-
-            switch (index)
+            switch (name.ToLower())
             {
-                case 0:
-                    return new(0.5 * (subject.TopLeft + subject.BottomRight), new()); // Center
+                case "0":
+                case "c":
+                    value = new(0.5 * (subject.TopLeft + subject.BottomRight), new());
+                    return true; // Center
 
-                case 1:
+                case "1":
+                case "nw":
                     Vector2 pt = 0.75 * subject.TopLeft + 0.25 * subject.BottomRight;
                     Vector2 n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), -(subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
-                    return new(pt + subject.LabelMargin * n, n); // Top-left outside
-                case 2:
+                    value = new(pt + subject.LabelMargin * n, n);
+                    return true; // Top-left outside
+
+                case "2":
+                case "n":
+                case "u":
                     double f = 0.0;
                     if (!subject.CornerRadius.IsZero())
                     {
@@ -47,30 +51,65 @@ namespace SimpleCircuit.Components.Labeling
                         n /= n.Length;
                         f = subject.CornerRadius * (1 - Math.Sqrt(2 / (1 - n.X * n.X + n.Y * n.Y)));
                     }
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin + f), new(0, -1)); // Top
-                case 3:
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin + f), new(0, -1));
+                    return true; // Top
+
+                case "3":
+                case "ne":
                     pt = new(0.25 * subject.TopLeft.X + 0.75 * subject.BottomRight.X, 0.75 * subject.TopLeft.Y + 0.25 * subject.BottomRight.Y);
                     n = new(subject.BottomRight.Y - subject.TopLeft.Y, -(subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
-                    return new(pt + subject.LabelMargin * n, n); // Top-right outside
-                case 4:
-                    return new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0)); // Right
-                case 5:
+                    value = new(pt + subject.LabelMargin * n, n);
+                    return true; // Top-right outside
+
+                case "4":
+                case "e":
+                case "r":
+                    value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    return true; // Right
+
+                case "5":
+                case "se":
                     pt = 0.25 * subject.TopLeft + 0.75 * subject.BottomRight;
                     n = new((subject.BottomRight.Y - subject.TopLeft.Y), (subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
-                    return new(pt + subject.LabelMargin * n, n); // Bottom-right outside
-                case 6:
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1)); // Bottom
-                case 7:
+                    value = new(pt + subject.LabelMargin * n, n);
+                    return true; // Bottom-right outside
+
+                case "6":
+                case "s":
+                case "d":
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
+                    return true; // Bottom
+
+                case "7":
+                case "sw":
                     pt = new(0.75 * subject.TopLeft.X + 0.25 * subject.BottomRight.X, 0.25 * subject.TopLeft.Y + 0.75 * subject.BottomRight.Y);
                     n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), subject.BottomRight.X - subject.TopLeft.X);
                     n /= n.Length;
-                    return new(pt + subject.LabelMargin * n, n); // Bottom-left outside
-                case 8:
-                    return new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0)); // Left
+                    value = new(pt + subject.LabelMargin * n, n);
+                    return true; // Bottom-left outside
+
+                case "8":
+                case "w":
+                case "l":
+                    value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    return true; // Left
+
+                default:
+                    if (name.All(char.IsDigit))
+                    {
+                        int index = int.Parse(name);
+                        index %= Count;
+                        if (index < 0)
+                            index += Count;
+                        return TryCalculate(subject, index.ToString(), out value);
+                    }
+                    break;
             }
-            return new();
+
+            value = default;
+            return false;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -33,12 +34,20 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint Calculate(ILabeled subject, int index)
+        public override bool TryCalculate(ILabeled subject, string name, out LabelAnchorPoint value)
         {
-            index %= Count;
-            if (index < 0)
-                index += Count;
-            return _points[index];
+            if (name.All(char.IsDigit))
+            {
+                int index = int.Parse(name);
+                index %= Count;
+                if (index < 0)
+                    index += Count;
+                value = _points[index];
+                return true;
+            }
+
+            value = default;
+            return false;
         }
     }
 }

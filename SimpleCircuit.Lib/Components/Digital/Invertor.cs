@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(6.5, 0), 1.5);
                 drawing.Text("1", new Vector2(), new Vector2());
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
         }
     }

@@ -168,13 +168,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(w + 1.5, 0), 1.5);
 
-                if (Labels.Count > 0)
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(-w, -h - 1), new(1, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(), new());
-                    _anchors[2] = new LabelAnchorPoint(new(-w, h + 1), new(1, 1));
-                    _anchors.Draw(drawing, this);
-                }
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
 
             private void DrawXnorIEC(SvgDrawing drawing)
@@ -184,7 +178,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("=1", new(), new());
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
         }
     }
