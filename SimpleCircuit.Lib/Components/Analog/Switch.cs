@@ -257,11 +257,15 @@ namespace SimpleCircuit.Components.Analog
                             _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                     }
                     else
+                    {
                         drawing.Line(new(0, -4), new(0, -6), new("wire"));
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                    }
                 }
 
-                if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                if (_anchors[1].Location.Y < 2)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
             }
 
             private void DrawAreiSwitch(SvgDrawing drawing)
