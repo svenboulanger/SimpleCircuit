@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleCircuit;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Labeling;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,8 +62,8 @@ namespace SimpleCircuitOnline.Shared
 
                 // Show where the primary label is
                 Drawable = drawable;
-                if (drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]))
-                    labeled.Labels[0] = "label";
+                if (drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]?.Value))
+                    labeled.Labels[0].Value = "label";
                 CreateSvg();
             }
             await base.SetParametersAsync(parameters);

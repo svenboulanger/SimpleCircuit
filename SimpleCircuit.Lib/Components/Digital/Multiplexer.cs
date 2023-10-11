@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -12,13 +13,20 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             /// <inheritdoc />
             public override string Type => "mux";
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; }
+
+            double IBoxLabeled.CornerRadius => 0.0;
+            Vector2 IBoxLabeled.TopLeft => new(-5, -8);
+            Vector2 IBoxLabeled.BottomRight => new(5, 8);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -47,8 +55,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
                 drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
 
-                Labels.SetDefaultPin(-1, location: new(4, 6), expand: new(1, 1));
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

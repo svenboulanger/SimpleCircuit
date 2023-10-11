@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("OSC", "An oscillator", "Modeling")]
     public class Oscillator : DrawableFactory
@@ -7,15 +11,12 @@
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
             protected override double Size => 10;
 
             /// <inheritdoc />
             public override string Type => "oscillator";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -30,9 +31,6 @@
             {
                 base.Draw(drawing);
                 drawing.AC(new(), Size * 0.25);
-
-                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
-                Labels.Draw(drawing);
             }
         }
     }

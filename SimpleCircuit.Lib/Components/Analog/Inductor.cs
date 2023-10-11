@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Markers;
 
@@ -21,6 +22,9 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
             private int _windings = 3;
 
             /// <inheritdoc />
@@ -74,6 +78,9 @@ namespace SimpleCircuit.Components.Analog
                 if (!base.Reset(context))
                     return false;
 
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+
                 // Let's clear the pins and re-add them correctly
                 Pins.Clear();
 
@@ -112,8 +119,6 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
                 double l = Length * 0.5;
-                var locations = new Vector2[] { new(0, -5), new(0, 5) };
-
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 0:
@@ -138,22 +143,26 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_choke))
                         {
                             drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
-                            locations[0].ExpandUp(-5.5);
+                            if (_anchors[0].Location.Y > -5.5)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                             if (!Variants.Contains(_singleLine))
                             {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
-                                locations[0].ExpandUp(-7);
+                                if (_anchors[0].Location.Y > -7)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
-                                locations[0].ExpandUp(-11);
+                                if (_anchors[0].Location.Y > -11)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
-                            locations[0].ExpandUp(-8);
+                            if (_anchors[0].Location.Y > -8)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }
                         break;
 
@@ -188,26 +197,26 @@ namespace SimpleCircuit.Components.Analog
                             if (!Variants.Contains(_singleLine))
                             {
                                 drawing.Line(new(-l, -6), new(l, -6), new("choke"));
-                                locations[0].ExpandUp(-7);
+                                if (_anchors[0].Location.Y > -7)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 drawing.Arrow(new(-l + 1, 5), new(l, -10));
-                                locations[0].ExpandUp(-11);
+                                if (_anchors[0].Location.Y > -11)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             drawing.Arrow(new(-l + 1, 5), new(l, -7));
-                            locations[0].ExpandUp(-8);
+                            if (_anchors[0].Location.Y > -8)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }
                         break;
                 }
 
-                // Label
-                Labels.SetDefaultPin(-1, location: locations[0], expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: locations[1], expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

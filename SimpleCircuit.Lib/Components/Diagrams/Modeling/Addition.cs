@@ -1,6 +1,9 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -11,15 +14,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
             private const string _pathData = @"M0.75 -1 l-1.5 0 1 1 -1 1 1.5 0";
 
             /// <inheritdoc />
             public override string Type => "addition";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -54,9 +54,6 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.Line(new(0, -s), new(0, s));
                         break;
                 }
-
-                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
-                Labels.Draw(drawing);
             }
         }
     }

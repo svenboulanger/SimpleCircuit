@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("FILT", "A filter", "Modeling")]
     public class Filter : DrawableFactory
@@ -11,7 +15,7 @@
             return result;
         }
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
             private const string _graph = "graph";
             private const string _lp = "lowpass";
@@ -25,9 +29,6 @@
 
             /// <inheritdoc />
             public override string Type => "filter";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creats a new <see cref="Instance"/>.
@@ -51,9 +52,6 @@
                         DrawSquigglies(drawing);
                         break;
                 }
-
-                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
-                Labels.Draw(drawing);
             }
 
             private void DrawGraphs(SvgDrawing drawing)

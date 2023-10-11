@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Markers;
 using System;
 
@@ -16,6 +17,8 @@ namespace SimpleCircuit.Components
 
         private class Instance : LocatedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
+
             [Description("The angle along which the label should extend. 0 degrees will put the text on the right.")]
             public double Angle { get; set; }
             [Description("The label distance from the point. The default is 3.")]
@@ -56,8 +59,8 @@ namespace SimpleCircuit.Components
                     drawing.Expand(new Vector2());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                Labels.SetDefaultPin(-1, location: n * Distance, expand: n);
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(n * Distance, n);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

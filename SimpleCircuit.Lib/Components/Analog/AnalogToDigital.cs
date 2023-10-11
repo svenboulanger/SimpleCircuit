@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
@@ -13,12 +14,19 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
             private const string _differentialOutput = "diffout";
             private const string _swapOutput = "swapout";
+
+            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            double IBoxLabeled.CornerRadius => 0.0;
+
+            [Description("The margin for labels when placed next to the ADC.")]
+            public double LabelMargin { get; set; } = 1.0;
 
             [Description("The width of the ADC.")]
             public double Width { get; set; } = 18;
@@ -130,11 +138,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-Width / 2, -Height / 2)
                 });
 
-                // Draw the labels
-                Labels.SetDefaultPin(-1, location: new(-Height / 4, 0), expand: new());
-                Labels.SetDefaultPin(1, location: new(-Width * 0.5, -Height * 0.5 - 1), expand: new(1, -1));
-                Labels.SetDefaultPin(2, location: new(-Width * 0.5, Height * 0.5 + 1), expand: new(1, 1));
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
@@ -44,6 +45,11 @@ namespace SimpleCircuit.Components.Analog
                 _outputPos = new(0, 4),
                 _outputNeg = new(0, -4),
                 _outputCommon = new(8, 0);
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(2, 5), new(1, 1)),
+                new LabelAnchorPoint(new(-2.5, 0), new()),
+                new LabelAnchorPoint(new(2, -5), new(1, -1))
+                );
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -116,6 +122,9 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
+                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
+
                 // Differential input?
                 if (Variants.Contains(_differentialInput))
                 {
@@ -136,6 +145,10 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Signs(new(6, -7), new(6, 7));
                     else
                         drawing.Signs(new(6, 7), new(6, -7));
+
+                    // Give more breathing room to the labels
+                    _anchors[0] = new LabelAnchorPoint(new(2, 7), new(1, 1));
+                    _anchors[2] = new LabelAnchorPoint(new(2, -7), new(1, -1));
                 }
                 else
                     drawing.ExtendPin(Pins["out"]);
@@ -175,20 +188,7 @@ namespace SimpleCircuit.Components.Analog
                             .LineTo(1, -2);
                     });
                 }
-
-                // Labels
-                if (Variants.Contains(_differentialOutput))
-                {
-                    Labels.SetDefaultPin(-1, location: new(2, 7), expand: new(1, 1));
-                    Labels.SetDefaultPin(2, location: new(2, -7), expand: new(1, -1));
-                }
-                else
-                {
-                    Labels.SetDefaultPin(-1, location: new(2, 5), expand: new(1, 1));
-                    Labels.SetDefaultPin(2, location: new(2, -5), expand: new(1, -1));
-                }
-                Labels.SetDefaultPin(1, location: new Vector2(-2.5, 0), expand: new());
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

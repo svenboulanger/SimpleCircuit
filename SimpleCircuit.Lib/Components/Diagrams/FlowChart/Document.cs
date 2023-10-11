@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled
         {
             private double _width = 30.0, _height = 15.0;
 
@@ -47,6 +48,13 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 get => _height;
                 set => _height = value;
             }
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new instance.
@@ -92,8 +100,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     }
                 }
                 drawing.Path(DrawPath);
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
 
             /// <inheritdoc />

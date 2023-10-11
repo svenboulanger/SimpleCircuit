@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("DIFF", "A differentiator.", "Modeling")]
     public class Differentiator : DrawableFactory
@@ -11,7 +15,7 @@
             return inst;
         }
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
             /// <inheritdoc />
             public override string Type => "differentiator";
@@ -21,9 +25,6 @@
             /// </summary>
             protected override double Size => 12;
 
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
-
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -32,6 +33,7 @@
             {
             }
 
+            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
@@ -52,9 +54,6 @@
                         drawing.Text("dt", new(), new(0, 1), new("small"));
                         break;
                 }
-
-                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
-                Labels.Draw(drawing);
             }
         }
     }

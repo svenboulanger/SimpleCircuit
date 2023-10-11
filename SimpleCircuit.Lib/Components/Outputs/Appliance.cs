@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             private const double _k = 0.5522847498;
 
@@ -39,6 +40,14 @@ namespace SimpleCircuit.Components.Outputs
 
             /// <inheritdoc />
             public override string Type => "appliance";
+
+
+            Vector2 IBoxLabeled.TopLeft => new(0, -8);
+            Vector2 IBoxLabeled.BottomRight => new(16, 8);
+            double IBoxLabeled.CornerRadius => 0.0;
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -69,7 +78,7 @@ namespace SimpleCircuit.Components.Outputs
                     case 11: DrawFreezer(drawing); break;
                     default: DrawDefault(drawing); break;
                 }
-                DrawLabel(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
             private void DrawVentilator(SvgDrawing drawing)
             {
@@ -156,11 +165,6 @@ namespace SimpleCircuit.Components.Outputs
             {
                 drawing.ExtendPins(Pins);
                 DrawBox(drawing, 8, 0, 16, 16);
-            }
-            private void DrawLabel(SvgDrawing drawing)
-            {
-                Labels.BoxedLabel(Variants, new(0, -8), new(16, 8), -1, -1, 1);
-                Labels.Draw(drawing);
             }
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)

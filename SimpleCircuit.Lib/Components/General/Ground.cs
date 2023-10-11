@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using System;
 
 namespace SimpleCircuit.Components
@@ -27,6 +28,9 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private static readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
+                new LabelAnchorPoint(new(6, 0), new(1, 0)));
             /// <inheritdoc />
             public override string Type => "ground";
 
@@ -53,6 +57,8 @@ namespace SimpleCircuit.Components
                     case 2: DrawSignalGround(drawing); break;
                     default: DrawGround(drawing); break;
                 }
+
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawGround(SvgDrawing drawing)
             {
@@ -73,10 +79,6 @@ namespace SimpleCircuit.Components
                     drawing.ExtendPins(Pins, 3);
                 }
                 drawing.Path(b => b.MoveTo(-5, 0).LineTo(5, 0).MoveTo(-3, 2).LineTo(3, 2).MoveTo(-1, 4).LineTo(1, 4));
-
-                Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
-                Labels.SetDefaultPin(1, location: new(6, 0), expand: new(1, 0));
-                Labels.Draw(drawing);
             }
             private void DrawEarth(SvgDrawing drawing)
             {
@@ -87,10 +89,6 @@ namespace SimpleCircuit.Components
                     .MoveTo(-5, 0).Line(-2, 4)
                     .MoveTo(0, 0).Line(-2, 4)
                     .MoveTo(5, 0).Line(-2, 4));
-
-                Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
-                Labels.SetDefaultPin(1, location: new(6, 0), expand: new(1, 0));
-                Labels.Draw(drawing);
             }
             private void DrawSignalGround(SvgDrawing drawing)
             {
@@ -101,10 +99,6 @@ namespace SimpleCircuit.Components
                 {
                     new(-5, 0), new(5, 0), new(0, 4)
                 });
-
-                Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
-                Labels.SetDefaultPin(1, location: new(6, 0), expand: new(1, 0));
-                Labels.Draw(drawing);
             }
         }
     }

@@ -1,6 +1,9 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -15,7 +18,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             return inst;
         }
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
             private const string _pathData = @"M3 -8 c0 -2 -1 -3 -2 -3 c-1.5 0 -2 1 -2 3 S1 6 1 8 s-0.5 3 -2 3 c-1 0 -2 -1 -2 -3";
 
@@ -24,9 +27,6 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
 
             /// <inheritdoc />
             protected override double Size => 12;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -67,9 +67,6 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.EndTransform();
                         break;
                 }
-
-                Labels.BoxedLabel(Variants, new(-Size * 0.5, -Size * 0.5), new(Size * 0.5, Size * 0.5), 1, -1, 1);
-                Labels.Draw(drawing);
             }
         }
     }

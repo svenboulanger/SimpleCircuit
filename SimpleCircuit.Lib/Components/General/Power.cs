@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components
 {
@@ -14,6 +15,8 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1)));
+
             private const string _anchor = "anchor";
 
             /// <inheritdoc />
@@ -41,9 +44,7 @@ namespace SimpleCircuit.Components
                     drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
                 else
                     drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
-
-                Labels.SetDefaultPin(-1, location: new(0, -1.5), expand: new(0, -1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

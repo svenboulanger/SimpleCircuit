@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     /// <summary>
     /// A modeling block.
@@ -14,11 +18,8 @@
             return result;
         }
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
-
             /// <inheritdoc />
             protected override double Size => 12;
 
@@ -32,14 +33,6 @@
             public Instance(string name)
                 : base(name)
             {
-            }
-
-            /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
-            {
-                base.Draw(drawing);
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
             }
         }
     }

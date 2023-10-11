@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Markers;
 
@@ -16,6 +17,10 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -90,18 +95,18 @@ namespace SimpleCircuit.Components.Sources
                         break;
                 }
 
-                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
                 drawing.Circle(new(), 4);
                 drawing.Line(new(0, -4), new(0, 4));
 
-                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

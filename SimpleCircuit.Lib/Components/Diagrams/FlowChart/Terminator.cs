@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +14,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
 
         private class Instance : DiagramBlockInstance, ILabeled
         {
+            private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
             private double _width = 30.0, _height = 20.0;
 
             /// <inheritdoc />
@@ -73,8 +75,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .LineTo(-a + b, b)
                     .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close();
                 });
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
 
             /// <inheritdoc />

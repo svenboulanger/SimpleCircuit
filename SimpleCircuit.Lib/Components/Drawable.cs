@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -86,23 +87,26 @@ namespace SimpleCircuit.Components
                     {
                         if (TryMatchIndexedProperty(property, "offset", out index))
                         {
-                            labeled.Labels.SetPin(index, offset: vector);
+                            labeled.Labels[index].Offset = vector;
                             return true;
                         }
                         if (TryMatchIndexedProperty(property, "expand", out index))
                         {
-                            labeled.Labels.SetPin(index, expand: vector);
+                            labeled.Labels[index].Expand = vector;
                             return true;
                         }
-                        if (TryMatchIndexedProperty(property, "location", out index))
+                    }
+                    else if (value is double number && (number - Math.Round(number)).IsZero())
+                    {
+                        if (TryMatchIndexedProperty(property, "anchor", out index))
                         {
-                            labeled.Labels.SetPin(index, location: vector);
+                            labeled.Labels[index].Location = (int)Math.Round(number);
                             return true;
                         }
                     }
                     if (value is string label && TryMatchIndexedProperty(property, "label", out index))
                     {
-                        labeled.Labels[index] = label;
+                        labeled.Labels[index].Value = label;
                         return true;
                     }
                 }

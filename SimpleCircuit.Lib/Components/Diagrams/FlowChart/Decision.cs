@@ -1,7 +1,7 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -31,6 +31,13 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// </summary>
             [Description("The height of the block.")]
             public double Height { get; set; } = 20;
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new action.
@@ -53,8 +60,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         .LineTo(0, b)
                         .Close();
                 });
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
+                DiamondLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
 
             /// <inheritdoc />

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Markers;
 using System;
@@ -30,8 +31,9 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
-            private readonly Vector2[] _locations = new Vector2[2];
-            private readonly Vector2[] _expands = new Vector2[] { new(0, -1), new(0, 1) };
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -63,6 +65,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 if (!base.Reset(context))
                     return false;
+
                 switch (Variants.Select(Options.Arei))
                 {
                     case 0:
@@ -116,11 +119,6 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                _locations[0] = default;
-                _locations[1] = default;
-                _expands[0] = new(0, 1);
-                _expands[1] = new(0, -1);
-
                 switch (Variants.Select(Options.Arei, Options.American))
                 {
                     case 0: DrawAreiSwitch(drawing); break;
@@ -128,10 +126,7 @@ namespace SimpleCircuit.Components.Analog
                     default: DrawSwitch(drawing); break;
                 }
 
-                // Labels
-                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
-                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
 
             private void DrawSwitch(SvgDrawing drawing)
@@ -159,9 +154,8 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                _locations[0] = new Vector2(0, 3);
-                _locations[1] = new Vector2(3, -3);
-                _expands[1] = new Vector2(1, -1);
+                _anchors[0] = new LabelAnchorPoint(new(3, -3), new(1, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(SvgDrawing drawing)
             {
@@ -170,27 +164,24 @@ namespace SimpleCircuit.Components.Analog
                 // Switch terminals
                 drawing.Circle(new Vector2(-5, 0), 1);
                 drawing.Circle(new Vector2(5, 0), 1);
-                _locations[0].ExpandDown(1.5);
-                _locations[1].ExpandUp(-1.5);
+                _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1));
 
                 if (Variants.Contains(_closed))
                 {
                     if (Variants.Contains(_invert))
                     {
                         drawing.Circle(new(0, -1), 1);
-                        _locations[1].ExpandUp(-2.5);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1));
                     }
                     drawing.Line(new(-4, 0), new(4, 0), new("wire"));
                 }
                 else
                 {
                     if (Variants.Contains(_invert))
-                    {
                         drawing.Circle(new(0, -3.25), 1);
-                        _locations[1].ExpandUp(-4.75);
-                    }
                     drawing.Line(new(-4, 0), new(4, -4), new("wire"));
-                    _locations[1].ExpandUp(-5);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 }
 
                 switch (Variants.Select(_closing, _opening))
@@ -200,8 +191,10 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-3, -5), new(1, -3), new(1, -2), new(2, 2)
                         });
-                        _locations[0].ExpandDown(3);
-                        _locations[1].ExpandUp(-6);
+                        if (_anchors[0].Location.Y > -6)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                        if (_anchors[1].Location.Y < 3)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
                         var marker = new Arrow(new(2, 2), new(0.24253562503, 0.97014250014));
                         marker.Draw(drawing);
                         break;
@@ -211,8 +204,10 @@ namespace SimpleCircuit.Components.Analog
                         {
                            new(-4, -6), new(1, -3), new(1, -2), new(2, 1)
                         });
-                        _locations[0].ExpandDown(2);
-                        _locations[1].ExpandUp(-7);
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        if (_anchors[1].Location.Y < 2)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
                         marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
                         marker.Draw(drawing);
                         break;
@@ -231,8 +226,8 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
-                    _locations[1].ExpandUp(-7);
-                    _locations[0].ExpandDown(7);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
             }
             private void DrawPushSwitch(SvgDrawing drawing)
@@ -258,14 +253,15 @@ namespace SimpleCircuit.Components.Analog
                     if (Variants.Contains(_invert))
                     {
                         drawing.Circle(new(0, -5), 1);
-                        _locations[1].ExpandUp(-6);
+                        if (_anchors[0].Location.Y > -6)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                     }
                     else
                         drawing.Line(new(0, -4), new(0, -6), new("wire"));
                 }
 
-                // Label
-                _locations[0].ExpandDown(6);
+                if (_anchors[1].Location.Y < 6)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
 
             private void DrawAreiSwitch(SvgDrawing drawing)
@@ -281,6 +277,9 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(), 4);
                 drawing.Circle(new(), 2);
 
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+
                 if (Variants.Contains(_lamp))
                 {
                     double x = 2 / Math.Sqrt(2);
@@ -293,11 +292,9 @@ namespace SimpleCircuit.Components.Analog
                     {
                         new(-6.5, 2.5), new(-4.5, 2.5), new(-4.5, 6), new(4.5, 6), new(4.5, 2.5), new(6.5, 2.5)
                     }, new("window"));
+                    if (_anchors[1].Location.Y < 7)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
-
-                // Label
-                _locations[0] = new Vector2(0, -5);
-                _expands[0] = new Vector2(0, -1);
             }
             private void DrawAreiRegularSwitch(SvgDrawing drawing)
             {
@@ -316,8 +313,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                _locations[0] = new Vector2(0, -length);
-                _expands[0] = new Vector2(0, -1);
+                _anchors[0] = new LabelAnchorPoint(new(0, -length), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, length), new(0, 1));
 
                 // Small cross for illuminator lamps
                 if (Variants.Contains(_lamp))

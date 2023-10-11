@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Markers;
 using System;
@@ -28,6 +29,10 @@ namespace SimpleCircuit.Components.Analog
 
         private class Nmos : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -89,20 +94,17 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
-                var locations = new Vector2[] { new(0, -3), new(0, 3) };
-                var expands = new Vector2[] { new(0, -1), new(0, -1) };
                 if (Pins["b"].Connections > 0)
                 {
-                    // Draw the labels around the bulk contact
-                    Labels.SetDefaultPin(-1, location: new(-3, -3), expand: new(-1, -1));
-                    Labels.SetDefaultPin(1, location: new(3, -3), expand: new(1, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
                 }
                 else
                 {
-                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
-                    Labels.SetDefaultPin(1, location: new(0, -3), expand: new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -127,13 +129,17 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                Labels.SetDefaultPin(-1, location: new(3, -10), expand: new(1, 1));
-                Labels.SetDefaultPin(1, location: new(-3, -10), expand: new(-1, 1));
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(new(3, -10), new(1, 1));
+                _anchors[1] = new LabelAnchorPoint(new(-3, -10), new(-1, 1));
+                _anchors.Draw(drawing, Labels, this);
             }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -205,18 +211,18 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
+                // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    // Draw the labels around the bulk contact
-                    Labels.SetDefaultPin(-1, location: new(-3, -3), expand: new(-1, -1));
-                    Labels.SetDefaultPin(1, location: new(3, -3), expand: new(1, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
                 }
                 else
                 {
-                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
-                    Labels.SetDefaultPin(1, location: new(0, -3), expand: new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -244,9 +250,9 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Circle(new(0, 3), 8.0);
 
                 // Label
-                Labels.SetDefaultPin(-1, location: new(3, -10), expand: new(1, -1));
-                Labels.SetDefaultPin(1, location: new(-3, -10), expand: new(-1, -1));
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(new(3, -10), new(1, 1));
+                _anchors[1] = new LabelAnchorPoint(new(-3, -10), new(-1, 1));
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

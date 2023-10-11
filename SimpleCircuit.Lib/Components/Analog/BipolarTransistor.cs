@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Circuits.Contexts;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 
@@ -25,6 +25,9 @@ namespace SimpleCircuit.Components.Analog
 
         private class Npn : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -3), new(0, -1)));
+
             /// <inheritdoc />
             public override string Type => "npn";
 
@@ -54,18 +57,20 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
+                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    Labels.SetDefaultPin(-1, location: new(0, -9), expand: new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                else
-                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -3), new(0, -1)));
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -95,14 +100,13 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
+                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (Variants.Contains(_packaged))
                 {
                     drawing.Circle(new(), 8.0);
-                    Labels.SetDefaultPin(-1, location: new(0, -9), expand: new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                else
-                    Labels.SetDefaultPin(-1, location: new(0, -3), expand: new(0, -1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

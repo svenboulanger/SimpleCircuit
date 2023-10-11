@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -13,8 +14,12 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
         {
+            private readonly static CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
             private int _inputs = 2;
             private double _spacing = 5;
 
@@ -80,6 +85,13 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; }
+
+            double IBoxLabeled.CornerRadius => 0.0;
+            Vector2 IBoxLabeled.TopLeft => 0.5 * new Vector2(-Width, -Height);
+            Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
+
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
 
@@ -142,9 +154,13 @@ namespace SimpleCircuit.Components.Digital
                 );
                 drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
 
-                Labels.SetDefaultPin(-1, location: new(0, -h - 1), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, h + 1), expand: new(0, 1));
-                Labels.Draw(drawing);
+                if (Labels.Count > 0)
+                {
+                    _anchors[0] = new LabelAnchorPoint(new(-w, -h - 1), new(1, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(), new());
+                    _anchors[2] = new LabelAnchorPoint(new(-w, h + 1), new(1, 1));
+                    _anchors.Draw(drawing, Labels, this);
+                }
             }
             private void DrawNandIEC(SvgDrawing drawing)
             {
@@ -153,8 +169,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
 
-                Labels.BoxedLabel(Variants, new(-Width * 0.5, -Height * 0.5), new(Width * 0.5, Height * 0.5), -1, 1, 1);
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

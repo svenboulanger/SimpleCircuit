@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
@@ -23,9 +24,10 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
             private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
-            private readonly Vector2[] _locations = new Vector2[2];
-            private readonly Vector2[] _expands = new Vector2[2];
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -71,10 +73,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 drawing.Cross(new(), _sqrt2);
 
-                _locations[0] = new(0, -5);
-                _locations[1] = new(0, 5);
-                _expands[0] = new(0, -1);
-                _expands[1] = new(0, 1);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (!Variants.Contains(Options.Arei))
                     drawing.Circle(new Vector2(), 4);
@@ -90,21 +90,20 @@ namespace SimpleCircuit.Components.Outputs
                         DrawEmergency(drawing);
                 }
 
-                // Label
-                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
-                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
 
             private void DrawWall(SvgDrawing drawing)
             {
                 drawing.Line(new Vector2(-3, 5), new Vector2(3, 5));
-                _locations[1].ExpandDown(6);
+                if (_anchors[1].Location.Y < 6)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
             private void DrawProjector(SvgDrawing drawing)
             {
                 drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
-                _locations[1].ExpandDown(7);
+                if (_anchors[1].Location.Y < 7)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
             }
             private void DrawDirectional(SvgDrawing drawing, bool diverging)
             {
@@ -119,7 +118,8 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Arrow(new(-2, 6), new(-2, 12), options);
                     drawing.Arrow(new(2, 6), new(2, 12), options);
                 }
-                _locations[1].ExpandDown(13);
+                if (_anchors[1].Location.Y < 13)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1));
             }
             private void DrawEmergency(SvgDrawing drawing)
             {

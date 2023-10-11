@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -31,7 +32,7 @@ namespace SimpleCircuit.Components
             return instance;
         }
 
-        protected class Instance : ILocatedDrawable, ILabeled
+        protected class Instance : ILocatedDrawable, ILabeled, IBoxLabeled
         {
             private readonly PinCollection _pins;
 
@@ -82,6 +83,10 @@ namespace SimpleCircuit.Components
 
             [Description("The margin of labels to the edge of the black box.")]
             public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IBoxLabeled.TopLeft => new(Location.X, Location.Y);
+            Vector2 IBoxLabeled.BottomRight => new(EndLocation.X, EndLocation.Y);
+            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -135,8 +140,7 @@ namespace SimpleCircuit.Components
                 drawing.Rectangle(EndLocation - Location, center);
 
                 // Draw the label
-                Labels.BoxedLabel(Variants, Location, EndLocation, margin: LabelMargin);
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
 
                 // Draw the port names
                 _pins.Render(drawing);

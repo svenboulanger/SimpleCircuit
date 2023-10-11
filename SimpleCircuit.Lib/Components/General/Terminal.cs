@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components
 {
@@ -14,6 +15,8 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -45,7 +48,7 @@ namespace SimpleCircuit.Components
                             new(-5, -2), new(-2, -2), new(),
                             new(-2, 2), new(-5, 2)
                         });
-                        Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 2:
@@ -56,7 +59,7 @@ namespace SimpleCircuit.Components
                             new(-5, 0), new(-3, -2), new(0, -2),
                             new(0, 2), new(-3, 2)
                         });
-                        Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 4:
@@ -66,7 +69,7 @@ namespace SimpleCircuit.Components
                             new(-7, 0), new(-5, -2), new(-2, -2), new(),
                             new(-2, 2), new(-5, 2)
                         });
-                        Labels.SetDefaultPin(-1, location: new(-8, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-8, 0), new(-1, 0));
                         break;
 
                     case 5:
@@ -75,33 +78,33 @@ namespace SimpleCircuit.Components
                         {
                             new(-5, -2), new(0, -2), new(0, 2), new(-5, 2)
                         });
-                        Labels.SetDefaultPin(-1, location: new(-6, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 6:
                         // pad
                         drawing.Rectangle(-4, -2, 4, 4);
                         drawing.Cross(new(-2, 0), 4);
-                        Labels.SetDefaultPin(-1, location: new(-5, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
                         break;
 
                     case 7:
                         // square
                         drawing.Rectangle(-4, -2, 4, 4);
-                        Labels.SetDefaultPin(-1, location: new(-5, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
                         break;
 
                     case 8:
                         // None
-                        Labels.SetDefaultPin(-1, location: new(-1, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-1, 0), new(-1, 0));
                         break;
 
                     default:
                         drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
-                        Labels.SetDefaultPin(-1, location: new(-4, 0), expand: new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-4, 0), new(-1, 0));
                         break;
                 }
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

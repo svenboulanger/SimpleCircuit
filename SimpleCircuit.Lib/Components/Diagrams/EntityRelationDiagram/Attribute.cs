@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 using System;
+using SimpleCircuit.Components.Labeling;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -11,7 +12,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        private class Instance : DiagramBlockInstance, ILabeled, IEllipseLabeled
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -31,6 +32,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Description("The height of the block.")]
             public double Height { get; set; } = 20;
 
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IEllipseLabeled.Center => new();
+            double IEllipseLabeled.RadiusX => Width * 0.5;
+            double IEllipseLabeled.RadiusY => Height * 0.5;
+
             /// <summary>
             /// Creates a new attribute.
             /// </summary>
@@ -44,8 +52,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.Ellipse(new(), Width * 0.5, Height * 0.5);
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
+                EllipseLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
 
             /// <inheritdoc />

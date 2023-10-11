@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Components.Wires;
@@ -13,22 +14,15 @@ namespace SimpleCircuit.Components.Annotations
     /// <summary>
     /// An annotation box.
     /// </summary>
-    public class Box : IAnnotation, ILabeled
+    public class Box : IAnnotation, ILabeled, IBoxLabeled
     {
         private readonly HashSet<ComponentInfo> _componentInfos = new();
         private readonly HashSet<WireInfo> _wireInfos = new();
         private readonly HashSet<IDrawable> _components = new();
         private readonly HashSet<Wire> _wires = new();
+        private Vector2 _topLeft, _bottomRight;
 
         public static readonly string Poly = "poly";
-
-        private static readonly string _top = "top";
-        private static readonly string _middle = "middle";
-        private static readonly string _bottom = "bottom";
-        private static readonly string _left = "left";
-        private static readonly string _center = "center";
-        private static readonly string _right = "right";
-        private static readonly string _inside = "inside";
         private static readonly string _over = "over";
 
         /// <inheritdoc />
@@ -44,7 +38,7 @@ namespace SimpleCircuit.Components.Annotations
         public IPinCollection Pins => null;
 
         /// <inheritdoc />
-        public IEnumerable<string> Properties { get; }
+        public IEnumerable<string> Properties => Drawable.GetProperties(this);
 
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
@@ -90,17 +84,18 @@ namespace SimpleCircuit.Components.Annotations
         /// <summary>
         /// Gets or sets the radius of the corners.
         /// </summary>
-        public double RoundRadius { get; set; }
+        public double CornerRadius { get; set; }
 
         /// <summary>
         /// Gets or sets the tolerance for detering an edge of the annotation box.
         /// </summary>
         public double Tolerance { get; set; } = 4.0;
 
-        /// <summary>
-        /// The offset of the label.
-        /// </summary>
-        public Vector2 Offset { get; set; }
+        /// <inheritdoc />
+        public double LabelMargin { get; set; } = 1.0;
+
+        Vector2 IBoxLabeled.TopLeft => _topLeft;
+        Vector2 IBoxLabeled.BottomRight => _bottomRight;
 
         /// <summary>
         /// Creates a new <see cref="Box"/>.
@@ -132,7 +127,7 @@ namespace SimpleCircuit.Components.Annotations
             string key = propertyToken.Content.ToString().ToLower();
             switch (key)
             {
-                case "radius": RoundRadius = (double)value; break;
+                case "radius": CornerRadius = (double)value; break;
 
                 case "margin":
                     double margin = (double)value;
@@ -250,103 +245,11 @@ namespace SimpleCircuit.Components.Annotations
             double y = total.Top;
             double width = total.Width;
             double height = total.Height;
-            drawing.Rectangle(x, y, width, height, RoundRadius, RoundRadius);
-            double radiusOffset = RoundRadius * 0.29289321881;
+            drawing.Rectangle(x, y, width, height, CornerRadius, CornerRadius);
 
-            switch (Variants.Select(_left, _center, _right))
-            {
-                default:
-                case 0:
-                    // Left
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        default:
-                        case 0:
-                            // Top
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
-                            break;
-
-                        case 1:
-                            // Middle
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * height), expand: new(1, 0));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * height), expand: new(-1, 0));
-                            break;
-
-                        case 2:
-                            // Bottom
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + height - radiusOffset - 1), expand: new(1, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y + height + 1), expand: new(1, 1));
-                            break;
-                    }
-                    break;
-
-                case 1:
-                    // Center
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        case 0:
-                            // Top
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + 1), expand: new(0, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y - 1), expand: new(0, -1));
-                            break;
-
-                        default:
-                        case 1:
-                            Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + 0.5 * height), expand: new());
-                            break;
-
-                        case 2:
-                            // Bottom
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + height - 1), expand: new(0, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * width, y + height + 1), expand: new(0, 1));
-                            break;
-
-                    }
-                    break;
-
-                case 2:
-                    // Right
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        default:
-                        case 0:
-                            // Top
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + width - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + width - RoundRadius, y - 1), expand: new(-1, -1));
-                            break;
-
-                        case 1:
-                            // Middle
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + width - 1, y + 0.5 * height), expand: new(-1, 0));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + width + 1, y + 0.5 * height), expand: new(1, 0));
-                            break;
-
-                        case 2:
-                            // Bottom
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + width - radiusOffset - 1, y + height - radiusOffset - 1), expand: new(-1, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + width - RoundRadius, y + 1), expand: new(-1, 1));
-                            break;
-
-                    }
-                    break;
-            }
+            _topLeft = new Vector2(total.Left, total.Top);
+            _bottomRight = new Vector2(total.Right, total.Bottom);
+            BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
         }
 
         /// <summary>
@@ -510,7 +413,7 @@ namespace SimpleCircuit.Components.Annotations
             // Draw a polygon with rounded corners accordingly
             drawing.Path(builder =>
             {
-                if (RoundRadius.IsZero())
+                if (CornerRadius.IsZero())
                 {
                     var node = top.First;
                     builder.MoveTo(node.Value);
@@ -544,7 +447,7 @@ namespace SimpleCircuit.Components.Annotations
                         else
                         {
                             // Rounded corner
-                            double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                            double x = CornerRadius / Math.Tan(Math.Acos(dot) * 0.5);
                             if (x > lu * 0.5 || x > lv * 0.5)
                             {
                                 // We don't have space for an arc, just straight line
@@ -554,7 +457,7 @@ namespace SimpleCircuit.Components.Annotations
                             {
                                 // Segments
                                 builder.MoveTo(current + nu * x);
-                                builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                builder.ArcTo(CornerRadius, CornerRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
                             }
                         }
                     }
@@ -583,7 +486,7 @@ namespace SimpleCircuit.Components.Annotations
                             else
                             {
                                 // Rounded corner
-                                double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                double x = CornerRadius / Math.Tan(Math.Acos(dot) * 0.5);
                                 if (x > lu * 0.5 || x > lv * 0.5)
                                 {
                                     // We don't have space for an arc, just straight line
@@ -593,7 +496,7 @@ namespace SimpleCircuit.Components.Annotations
                                 {
                                     // Segments
                                     builder.LineTo(current + nu * x);
-                                    builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                    builder.ArcTo(CornerRadius, CornerRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
                                 }
                             }
                         }
@@ -606,113 +509,48 @@ namespace SimpleCircuit.Components.Annotations
                 }
             });
 
-            // Draw the label
-            if (string.IsNullOrWhiteSpace(Labels[0]))
+            // Draw the labels
+            if (Labels.Count == 0)
                 return;
-            double radiusOffset = RoundRadius * 0.29289321881;
-            double x, y, length;
-            switch (Variants.Select(_left, _center, _right))
-            {
-                default:
-                case 0:
-                    // Left
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        default:
-                        case 0:
-                            // Top
-                            FindTop(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y + radiusOffset + 1), expand: new(1, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y - 1), expand: new(1, -1));
-                            break;
 
-                        case 1:
-                            // Middle
-                            FindLeft(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
-                            break;
+            var anchors = new LabelAnchorPoint[25];
+            double radiusOffset = CornerRadius * 0.29289321881;
 
-                        case 2:
-                            // Bottom
-                            FindBottom(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + radiusOffset + 1, y - radiusOffset - 1), expand: new(1, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + RoundRadius, y + 1), expand: new(1, 1));
-                            break;
-                    }
-                    break;
+            // Points 0-11 are the outside points, add them here
+            FindCenter(sortedPoints, out double xCenter, out double yCenter);
+            anchors[0] = new LabelAnchorPoint(new(xCenter, yCenter), new());
+            FindTop(sortedPoints, bounds, out double xTop, out double yTop, out double lengthTop);
+            anchors[1] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop - MarginTop), new(1, -1));
+            anchors[2] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop - MarginTop), new(0, -1));
+            anchors[3] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop - MarginTop), new(-1, -1));
+            FindRight(sortedPoints, bounds, out double xRight, out double yRight, out double lengthRight);
+            anchors[4] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + CornerRadius), new(1, 1));
+            anchors[5] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + 0.5 * lengthRight), new(1, 0));
+            anchors[6] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + lengthRight - CornerRadius), new(1, -1));
+            FindBottom(sortedPoints, bounds, out double xBottom, out double yBottom, out double lengthBottom);
+            anchors[7] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + MarginBottom), new(-1, 1));
+            anchors[8] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + MarginBottom), new(0, 1));
+            anchors[9] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + MarginBottom), new(1, 1));
+            FindLeft(sortedPoints, bounds, out double xLeft, out double yLeft, out double lengthLeft);
+            anchors[10] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + lengthLeft - CornerRadius), new(-1, -1));
+            anchors[11] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + 0.5 * lengthLeft), new(-1, 0));
+            anchors[12] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + CornerRadius), new(-1, 1));
 
-                case 1:
-                    // Center
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        case 0:
-                            // Top
-                            FindTop(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
-                            break;
+            // Points 12-23 are the inside points, add them here
+            anchors[13] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop + MarginTop), new(1, -1));
+            anchors[14] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop + MarginTop), new(0, -1));
+            anchors[15] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop + MarginTop), new(-1, -1));
+            anchors[16] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + CornerRadius), new(1, 1));
+            anchors[17] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + 0.5 * lengthRight), new(1, 0));
+            anchors[18] = new LabelAnchorPoint(new(xRight + MarginRight, yRight + lengthRight - CornerRadius), new(1, -1));
+            anchors[19] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + MarginBottom), new(-1, 1));
+            anchors[20] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + MarginBottom), new(0, 1));
+            anchors[21] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + MarginBottom), new(1, 1));
+            anchors[22] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + lengthLeft - CornerRadius), new(-1, -1));
+            anchors[23] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + 0.5 * lengthLeft), new(-1, 0));
+            anchors[24] = new LabelAnchorPoint(new(xLeft - MarginLeft, yLeft + CornerRadius), new(-1, 1));
 
-                        default:
-                        case 1:
-                            FindCenter(sortedPoints, out x, out y);
-                            Labels.SetDefaultPin(-1, location: new(x, y), expand: new());
-                            break;
-
-                        case 2:
-                            // Bottom
-                            FindBottom(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y - 1), expand: new(0, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + 0.5 * length, y + 1), expand: new(0, 1));
-                            break;
-
-                    }
-                    break;
-
-                case 2:
-                    // Right
-                    switch (Variants.Select(_top, _middle, _bottom))
-                    {
-                        default:
-                        case 0:
-                            // Top
-                            FindTop(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + length - radiusOffset - 1, y + radiusOffset + 1), expand: new(-1, 1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + length - RoundRadius, y - 1), expand: new(-1, -1));
-                            break;
-
-                        case 1:
-                            // Middle
-                            FindRight(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x - 1, y + 0.5 * length), expand: new(-1, 0));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + 1, y + 0.5 * length), expand: new(1, 0));
-                            break;
-
-                        case 2:
-                            // Bottom
-                            FindBottom(sortedPoints, bounds, out x, out y, out length);
-                            if (Variants.Contains(_inside))
-                                Labels.SetDefaultPin(-1, location: new(x + length - radiusOffset - 1, y + length - radiusOffset - 1), expand: new(-1, -1));
-                            else
-                                Labels.SetDefaultPin(-1, location: new(x + length - RoundRadius, y + 1), expand: new(-1, 1));
-                            break;
-                    }
-                    break;
-            }
+            new CustomLabelAnchorPoints(anchors).Draw(drawing, Labels, this);
         }
 
         /// <summary>

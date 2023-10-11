@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,7 +28,7 @@ namespace SimpleCircuit.Components.General
             return Regex.Replace(input, @"(?!<\\)\\(\d+)", match =>
             {
                 int index = int.Parse(match.Groups[1].Value);
-                return _labels[index] ?? "";
+                return _labels[index]?.Value ?? "";
             });
         }
     }

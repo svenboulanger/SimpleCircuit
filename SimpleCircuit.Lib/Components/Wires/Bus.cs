@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -16,6 +17,10 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly static CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+
             [Description("The number of crossings. Can be used to indicate a bus.")]
             public int Crossings { get; set; } = 1;
 
@@ -53,10 +58,7 @@ namespace SimpleCircuit.Components.Wires
                     });
                 }
 
-                // The label
-                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

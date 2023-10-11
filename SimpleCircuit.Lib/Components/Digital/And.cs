@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -13,7 +14,7 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
         {
             private int _inputs = 2;
             private double _spacing = 5;
@@ -86,6 +87,13 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
+            [Description("The label margint to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);
+            Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
+            double IBoxLabeled.CornerRadius => 0.0;
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -143,18 +151,15 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close()
                 );
-                Labels.SetDefaultPin(-1, location: new(0, -h - 1), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, h + 1), expand: new(0, 1));
-                Labels.Draw(drawing);
+
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
             private void DrawAndIEC(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 drawing.Text("&amp;", new(), new());
-
-                Labels.BoxedLabel(Variants, new(-Width * 0.5, -Height * 0.5), new(Width * 0.5, Height * 0.5), -1, 1, 1);
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

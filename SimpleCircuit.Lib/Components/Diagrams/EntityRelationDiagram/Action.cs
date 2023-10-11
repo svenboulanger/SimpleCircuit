@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -19,17 +20,18 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             public override string Type => "action";
 
-            /// <summary>
-            /// Gets or sets the width of the action block.
-            /// </summary>
             [Description("The width of the block.")]
             public double Width { get; set; } = 40;
 
-            /// <summary>
-            /// Gets or sets the height of the action block.
-            /// </summary>
             [Description("The height of the block.")]
             public double Height { get; set; } = 20;
+
+            [Description("The margin of the label to the edge.")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new action.
@@ -52,8 +54,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         .LineTo(0, b)
                         .Close();
                 });
-                Labels.SetDefaultPin(-1, location: new(), expand: new());
-                Labels.Draw(drawing);
+                DiamondLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
 
             /// <inheritdoc />

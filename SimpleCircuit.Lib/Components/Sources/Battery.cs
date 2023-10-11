@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Sources
@@ -15,6 +16,10 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly static CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -8), new(0, -1)),
+                new LabelAnchorPoint(new(0, 8), new(0, 1)));
+
             private int _cells = 1;
             private double Length => _cells * 4 - 2;
 
@@ -79,9 +84,7 @@ namespace SimpleCircuit.Components.Sources
                 drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 8), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

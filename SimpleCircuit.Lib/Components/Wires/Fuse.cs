@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -17,6 +18,10 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
         {
+            private readonly static CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -59,9 +64,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
 
-                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawANSI(SvgDrawing drawing)
             {
@@ -70,9 +73,7 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Rectangle(-6, -3, 12, 6);
                 drawing.Line(new(-6, 0), new(6, 0));
 
-                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawANSIalt(SvgDrawing drawing)
             {
@@ -85,9 +86,7 @@ namespace SimpleCircuit.Components.Wires
                     new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
                 });
 
-                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

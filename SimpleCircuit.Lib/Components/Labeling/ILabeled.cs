@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// An instance that is labeled.

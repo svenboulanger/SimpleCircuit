@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 using System;
 
 namespace SimpleCircuit.Components.Outputs
@@ -19,6 +20,9 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly static CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(6, -1), new(1, -1)));
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -49,8 +53,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                Labels.SetDefaultPin(-1, location: new(6, -1), expand: new(1, -1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

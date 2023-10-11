@@ -1,4 +1,6 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Outputs;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -12,13 +14,20 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             /// <inheritdoc />
             public override string Type => "flipflop";
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; }
+
+            double IBoxLabeled.CornerRadius => 0.0;
+            Vector2 IBoxLabeled.TopLeft => new(-9, -12);
+            Vector2 IBoxLabeled.BottomRight => new(9, 12);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -59,8 +68,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["r"].Connections > 0)
                     drawing.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), new("small"));
 
-                Labels.BoxedLabel(Variants, new(-9, -12), new(9, 12), -1, 1, 1);
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

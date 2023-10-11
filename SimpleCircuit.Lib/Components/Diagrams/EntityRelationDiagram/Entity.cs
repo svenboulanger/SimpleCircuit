@@ -1,6 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
@@ -78,17 +80,18 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     }
                     Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(w, 0), new(1, 0)), "r", "e", "right");
                 }
-
                 return true;
             }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                int count = Math.Max(Labels.Count, 1);
+                var anchors = new CustomLabelAnchorPoints(new LabelAnchorPoint[count]);
+                anchors[0] = new LabelAnchorPoint(new(), new(), new("header"));
                 if (Labels.Count <= 1)
                 {
                     drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: new("erd"));
-                    Labels.SetDefaultPin(-1, location: new(), expand: new(), options: new("header"));
                 }
                 else
                 {
@@ -96,11 +99,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height);
                     drawing.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
 
-                    Labels.SetDefaultPin(0, location: new(), expand: new(), options: new("header"));
                     for (int i = 1; i < Labels.Count; i++)
-                        Labels.SetDefaultPin(i, location: new(-w + 2.0, i * LineHeight), expand: new(1, 0), options: new("attribute"));
+                        anchors[i] = new LabelAnchorPoint(new(-w + 2.0, i * LineHeight), new(1, 0), new("attribute"));
                 }
-                Labels.Draw(drawing);
+                anchors.Draw(drawing, Labels, this);
             }
         }
     }

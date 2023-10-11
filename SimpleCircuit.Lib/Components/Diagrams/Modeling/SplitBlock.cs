@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     /// <summary>
     /// A split block.
@@ -13,11 +17,8 @@
             return result;
         }
 
-        private class Instance : ModelingDrawable, ILabeled
+        private class Instance : ModelingDrawable
         {
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
-
             /// <inheritdoc />
             protected override double Size => 12;
 
@@ -41,10 +42,6 @@
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
-
-                Labels.SetDefaultPin(-1, location: new(-s * 0.5, -s * 0.5), new());
-                Labels.SetDefaultPin(1, location: new(s * 0.5, s * 0.5), new());
-                Labels.Draw(drawing);
             }
         }
     }

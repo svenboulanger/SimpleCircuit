@@ -1,4 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Outputs;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -13,8 +15,12 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+
             /// <inheritdoc />
             public override string Type => "buffer";
 
@@ -23,6 +29,13 @@ namespace SimpleCircuit.Components.Digital
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
+
+            [Description("The label margin to the edge.")]
+            public double LabelMargin { get; set; }
+
+            double IBoxLabeled.CornerRadius => 0.0;
+            Vector2 IBoxLabeled.TopLeft => new(-5, -5);
+            Vector2 IBoxLabeled.BottomRight => new(5, 5);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -76,9 +89,7 @@ namespace SimpleCircuit.Components.Digital
                 {
                     new(-6, 6), new(6, 0), new(-6, -6)
                 });
-                Labels.SetDefaultPin(-1, location: new(0, -4), expand: new(1, -1));
-                Labels.SetDefaultPin(1, location: new(0, 4), expand: new(1, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -88,8 +99,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-5, -5, 10, 10, new());
                 drawing.Text("1", new(), new());
 
-                Labels.BoxedLabel(Variants, new(-5, -5), new(5, 5), -1, 1, 1);
-                Labels.Draw(drawing);
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
             }
         }
     }

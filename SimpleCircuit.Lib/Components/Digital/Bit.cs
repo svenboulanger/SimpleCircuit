@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
@@ -68,7 +69,7 @@ namespace SimpleCircuit.Components.Digital
                 _maxWidth = 0;
                 for (int i = 0; i < Labels.Count; i++)
                 {
-                    string label = Labels[i];
+                    string label = Labels[i].Value;
                     if (Separator == null)
                         _bits.Add(new[] { "0" });
                     else if (Separator.Length == 0)

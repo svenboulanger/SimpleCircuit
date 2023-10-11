@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 
@@ -73,7 +74,7 @@ namespace SimpleCircuit.Parser
             if (Labels.Count > 0 && _component is ILabeled labeled)
             {
                 for (int i = 0; i < Labels.Count; i++)
-                    labeled.Labels[i] = Labels[i].Content[1..^1].ToString();
+                    labeled.Labels[i].Value = Labels[i].Content[1..^1].ToString();
             }
 
             // Handle variants

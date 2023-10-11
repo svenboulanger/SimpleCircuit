@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 
@@ -19,6 +20,10 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -83,11 +88,13 @@ namespace SimpleCircuit.Components.Inputs
                                 });
                                 if (Pins["p"].Connections > 0)
                                 {
-                                    Labels.SetDefaultPin(-1, location: new(1, 1), expand: new(1, 1));
-                                    Labels.SetDefaultPin(1, location: new(1, -1), expand: new(1, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1));
+                                    _anchors[1] = new LabelAnchorPoint(new(1, -1), new(1, -1));
                                 }
                                 else
-                                    Labels.SetDefaultPin(-1, location: new(1, 0), expand: new(1, 0));
+                                {
+                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(1, 0), new(1, 0));
+                                }
                                 break;
 
                             case 1:
@@ -98,11 +105,13 @@ namespace SimpleCircuit.Components.Inputs
                                 });
                                 if (Pins["p"].Connections > 0)
                                 {
-                                    Labels.SetDefaultPin(-1, location: new(5, 1), expand: new(1, 1));
-                                    Labels.SetDefaultPin(1, location: new(5, -1), expand: new(1, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1));
+                                    _anchors[1] = new LabelAnchorPoint(new(5, -1), new(1, -1));
                                 }
                                 else
-                                    Labels.SetDefaultPin(-1, location: new(5, 0), expand: new(1, 0));
+                                {
+                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(5, 0), new(1, 0));
+                                }
                                 break;
 
                             default:
@@ -115,8 +124,8 @@ namespace SimpleCircuit.Components.Inputs
                                 {
                                     new(-2, 4), new(2, 0), new(-2, -4)
                                 });
-                                Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
-                                Labels.SetDefaultPin(1, location: new(0, 5), expand: new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                                 break;
                         }
                         break;
@@ -126,11 +135,12 @@ namespace SimpleCircuit.Components.Inputs
                         drawing.ExtendPin(Pins["p"], 4);
                         drawing.Circle(new(), 1.5);
                         drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
-                        Labels.SetDefaultPin(-1, location: new(0, -5), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 5), expand: new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                         break;
                 }
-                Labels.Draw(drawing);
+
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

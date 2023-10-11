@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
@@ -29,8 +30,9 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private readonly Vector2[] _locations = new Vector2[2];
-            private readonly Vector2[] _expands = new Vector2[] { new(0, -1), new(0, 1) };
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(new(0, -5), new(0, -1)),
+                new LabelAnchorPoint(new(0, 5), new(0, 1)));
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -54,6 +56,9 @@ namespace SimpleCircuit.Components.Analog
             {
                 if (!base.Reset(context))
                     return false;
+
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -84,6 +89,13 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(4, 0));
                         break;
                 }
+
+                switch (Variants.Select(_photodiode, _led, _laser))
+                {
+                    case 0:
+                    case 1:  break;
+                    case 2:  break;
+                }
                 return true;
             }
 
@@ -91,8 +103,6 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.ExtendPins(Pins);
-                _locations[0] = new Vector2(0, -5);
-                _locations[1] = new Vector2(0, 5);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -141,10 +151,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(p1.Offset, p2.Offset, new("stroke"));
                 }
 
-                // Label
-                Labels.SetDefaultPin(-1, location: _locations[0], expand: new(0, -1));
-                Labels.SetDefaultPin(1, location: _locations[1], expand: new(0, 1));
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing)
@@ -169,8 +176,10 @@ namespace SimpleCircuit.Components.Analog
 
                     case 1:
                         drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
-                        _locations[0].ExpandUp(-6);
-                        _locations[1].ExpandDown(6);
+                        if (_anchors[0].Location.Y > -6)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                        if (_anchors[1].Location.Y < 6)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
                         break;
 
                     default:
@@ -216,21 +225,23 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.Arrow(new(2, 7.5), new(1, 3.5));
                 drawing.Arrow(new(-1, 9.5), new(-2, 5.5));
-                _locations[1].ExpandDown(10.5);
+                if (_anchors[1].Location.Y < 10.5)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
             private void DrawLed(SvgDrawing drawing)
             {
                 drawing.Arrow(new(1, 3.5), new(2, 7.5));
                 drawing.Arrow(new(-2, 5.5), new(-1, 9.5));
-                _locations[1].ExpandDown(10.5);
-
+                if (_anchors[1].Location.Y < 10.5)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
             private void DrawLaser(SvgDrawing drawing)
             {
                 drawing.Line(new(0, -4), new(0, 4));
                 drawing.Arrow(new(-2, 5), new(-2, 10));
                 drawing.Arrow(new(2, 5), new(2, 10));
-                _locations[1].ExpandDown(11);
+                if (_anchors[1].Location.Y < 11)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
             }
             private void DrawTVSDiode(SvgDrawing drawing)
             {
@@ -242,7 +253,8 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 0), new(12, -4), new(12, 4)
                 }, new("anode2"));
                 drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
-                _locations[1].ExpandDown(6);
+                if (_anchors[1].Location.Y < 6)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
             private void DrawBidirectional(SvgDrawing drawing)
             {
@@ -256,7 +268,8 @@ namespace SimpleCircuit.Components.Analog
                 }, new("anode2"));
                 drawing.Line(new(-4, -4), new(-4, -12));
                 drawing.Line(new(4, -4), new(4, 4));
-                _locations[0].ExpandUp(-13);
+                if (_anchors[0].Location.Y > -13)
+                    _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1));
             }
         }
     }

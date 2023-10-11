@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 
@@ -23,10 +24,11 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
             private double _wiper = 0.5, _length = 12, _width = 8;
             private bool _isSet = false;
-            private readonly Vector2[] _locations = new Vector2[2];
-            private readonly Vector2[] _expands = new Vector2[] { new(0, -1), new(0, 1) };
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -106,6 +108,10 @@ namespace SimpleCircuit.Components.Analog
                     else
                         _width = 8;
                 }
+
+                double w = Width * 0.5;
+                _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
                 return true;
             }
 
@@ -114,10 +120,6 @@ namespace SimpleCircuit.Components.Analog
             {
                 drawing.ExtendPins(Pins, 2, "a", "b");
 
-                _locations[0] = default;
-                _locations[1] = default;
-                _expands[0] = new(0, -1);
-                _expands[1] = new(0, 1);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
@@ -128,9 +130,7 @@ namespace SimpleCircuit.Components.Analog
                         DrawAmericanResistor(drawing);
                         break;
                 }
-                Labels.SetDefaultPin(-1, location: _locations[0], expand: _expands[0]);
-                Labels.SetDefaultPin(1, location: _locations[1], expand: _expands[1]);
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
             private void DrawAmericanResistor(SvgDrawing drawing)
             {
@@ -161,15 +161,14 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 2));
-                        _locations[0].ExpandUp(-w - 3);
-                        _locations[1].ExpandDown(w + 2);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1:
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        _locations[0].ExpandUp(-w - 1);
-                        _locations[1].ExpandDown(w + 6);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2:
@@ -177,14 +176,8 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
                         });
-                        _locations[0].ExpandUp(-w - 4);
-                        _locations[1] = new Vector2(-3, w + 3);
-                        _expands[1] = new Vector2(1, 1);
-                        break;
-
-                    default:
-                        _locations[0].ExpandUp(-w - 2);
-                        _locations[1].ExpandDown(w + 2);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 3), new(1, 1));
                         break;
                 }
             }
@@ -206,15 +199,14 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0: // Programmable
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 3));
-                        _locations[0].ExpandUp(-w - 3);
-                        _locations[1].ExpandDown(w + 2);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1: // Photoresistor
                         drawing.Arrow(new(-4, w + 5), new(-2, w + 1));
                         drawing.Arrow(new(0, w + 5), new(2, w + 1));
-                        _locations[0].ExpandUp(-w - 1);
-                        _locations[1].ExpandDown(w + 6);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2: // Thermistor
@@ -222,16 +214,13 @@ namespace SimpleCircuit.Components.Analog
                         {
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
                         });
-                        _locations[0].ExpandUp(-w - 4);
-                        _locations[1] = new Vector2(-l * 0.85 + 2, w + 2);
-                        _expands[1] = new Vector2(1, 1);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 2), new(1, 1));
                         break;
 
                     case 3: // Assymmetric
                         drawing.Rectangle(l * 0.85 - Width * 0.15 * 0.5, -w,
                             l * 0.85 + Width * 0.15 * 0.5, w, options: new("marker"));
-                        _locations[0].ExpandUp(-w - 1);
-                        _locations[1].ExpandDown(w + 1);
                         break;
 
                     case 4: // Memristor
@@ -244,13 +233,6 @@ namespace SimpleCircuit.Components.Analog
                             new(-l + 8 * t, w * 0.5), new(-l + 8 * t, -w * 0.5),
                             new(-l + 11 * t, -w * 0.5), new(-l + 11 * t, 0), new(-l + t * 13, 0)
                         });
-                        _locations[0].ExpandUp(-w - 1);
-                        _locations[1].ExpandDown(w + 1);
-                        break;
-
-                    default:
-                        _locations[0].ExpandUp(-4);
-                        _locations[1].ExpandDown(4);
                         break;
                 }
             }

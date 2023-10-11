@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -22,6 +22,10 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new CustomLabelAnchorPoints(
+                new LabelAnchorPoint(new(0, -5), new(0, -1)),
+                new LabelAnchorPoint(new(0, 5), new(0, 1)));
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -69,8 +73,6 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), new("neg"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-4, 3), new(5, 3), vertical: true);
-                        Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
                         break;
 
                     case 1:
@@ -79,8 +81,6 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Rectangle(0.75, -4, 1.5, 8, options: new("neg", "marker"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-5, 3), new(5, 3), vertical: true);
-                        Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
                         break;
 
                     default:
@@ -89,26 +89,25 @@ namespace SimpleCircuit.Components.Analog
                         drawing.Line(new(1.5, -4), new(1.5, 4), new("neg", "plane"));
                         if (Variants.Contains(_signs))
                             drawing.Signs(new(-4, 3), new(4, 3), vertical: true);
-                        Labels.SetDefaultPin(-1, location: new(0, -6), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
                         break;
                 }
 
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
                         drawing.Arrow(new(-4, 4), new(6, -5));
-                        Labels.SetDefaultPin(-1, location: new(0, -7), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                         break;
 
                     case 1:
                         drawing.Polyline(new Vector2[] { new(-6, 6), new(-4, 6), new(4, -6) });
-                        Labels.SetDefaultPin(-1, location: new(0, -8), expand: new(0, -1));
-                        Labels.SetDefaultPin(1, location: new(0, 6), expand: new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                         break;
                 }
-                Labels.Draw(drawing);
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }

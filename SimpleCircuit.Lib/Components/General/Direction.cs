@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.General
 {
@@ -14,6 +15,10 @@ namespace SimpleCircuit.Components.General
 
         private class Instance : OrientedDrawable, ILabeled
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -37,9 +42,9 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                Labels.SetDefaultPin(-1, location: new(0, Length), expand: new(0, 1));
-                Labels.SetDefaultPin(1, location: new(0, -Length), expand: new(0, -1));
-                Labels.Draw(drawing);
+                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
+                _anchors.Draw(drawing, Labels, this);
             }
         }
     }
