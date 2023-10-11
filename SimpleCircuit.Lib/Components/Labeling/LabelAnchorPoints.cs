@@ -27,7 +27,9 @@
                     TryCalculate(subject, "0", out anchor); // Default to index 0
 
                 // Determine the final values
-                var location = anchor.Location + label.Offset;
+                var location = anchor.Location;
+                if (!label.Offset.IsZero())
+                    location += drawing.CurrentTransform.Matrix.Inverse * label.Offset;
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label

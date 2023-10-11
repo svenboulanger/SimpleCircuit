@@ -92,7 +92,7 @@ namespace SimpleCircuit.Components
                         }
                         if (TryMatchIndexedProperty(property, "expand", out index))
                         {
-                            labeled.Labels[index].Expand = vector;
+                            labeled.Labels[index].Expand = vector / vector.Length;
                             return true;
                         }
                     }
@@ -172,7 +172,7 @@ namespace SimpleCircuit.Components
             index = 0;
 
             // Try to read the prefix
-            if (!property.StartsWith(property))
+            if (!property.StartsWith(prefix))
                 return false;
 
             // Try to read the index
