@@ -39,7 +39,11 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(SvgDrawing drawing)
             {
                 base.Draw(drawing);
-                DrawLabels(drawing);
+
+                if (Variants.Contains(Square))
+                    BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                else
+                    EllipseLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

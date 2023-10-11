@@ -44,6 +44,8 @@ namespace SimpleCircuit.Components.Labeling
                 case "2":
                 case "n":
                 case "no":
+                case "u":
+                case "up":
                     value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1));
                     return true; // Top center above box
 
@@ -64,6 +66,8 @@ namespace SimpleCircuit.Components.Labeling
                 case "5":
                 case "e":
                 case "eo":
+                case "r":
+                case "right":
                     value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
                     return true; // Middle-right right of box
 
@@ -84,6 +88,8 @@ namespace SimpleCircuit.Components.Labeling
                 case "8":
                 case "s":
                 case "so":
+                case "d":
+                case "down":
                     value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
                     return true; // Bottom-center below box
 
@@ -104,6 +110,8 @@ namespace SimpleCircuit.Components.Labeling
                 case "11":
                 case "w":
                 case "wo":
+                case "l":
+                case "left":
                     value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
                     return true; // Middle-left left of box
 

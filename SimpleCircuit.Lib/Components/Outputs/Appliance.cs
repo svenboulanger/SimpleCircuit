@@ -34,6 +34,7 @@ namespace SimpleCircuit.Components.Outputs
         private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             private const double _k = 0.5522847498;
+            private static readonly ILabelAnchorPoints<IBoxLabeled> _anchors = new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1);
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -78,7 +79,7 @@ namespace SimpleCircuit.Components.Outputs
                     case 11: DrawFreezer(drawing); break;
                     default: DrawDefault(drawing); break;
                 }
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawVentilator(SvgDrawing drawing)
             {

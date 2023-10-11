@@ -30,11 +30,17 @@ namespace SimpleCircuit.Components.Labeling
             {
                 case "0":
                 case "c":
+                case "ci":
                     value = new(0.5 * (subject.TopLeft + subject.BottomRight), new());
                     return true; // Center
 
                 case "1":
                 case "nw":
+                case "nwo":
+                case "nnw":
+                case "nnwo":
+                case "wnw":
+                case "wnwo":
                     Vector2 pt = 0.75 * subject.TopLeft + 0.25 * subject.BottomRight;
                     Vector2 n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), -(subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
@@ -43,7 +49,9 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "2":
                 case "n":
+                case "no":
                 case "u":
+                case "up":
                     double f = 0.0;
                     if (!subject.CornerRadius.IsZero())
                     {
@@ -56,6 +64,11 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "3":
                 case "ne":
+                case "neo":
+                case "ene":
+                case "eneo":
+                case "nne":
+                case "nneo":
                     pt = new(0.25 * subject.TopLeft.X + 0.75 * subject.BottomRight.X, 0.75 * subject.TopLeft.Y + 0.25 * subject.BottomRight.Y);
                     n = new(subject.BottomRight.Y - subject.TopLeft.Y, -(subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
@@ -64,12 +77,19 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "4":
                 case "e":
+                case "eo":
                 case "r":
+                case "right":
                     value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
                     return true; // Right
 
                 case "5":
                 case "se":
+                case "seo":
+                case "sse":
+                case "sseo":
+                case "ese":
+                case "eseo":
                     pt = 0.25 * subject.TopLeft + 0.75 * subject.BottomRight;
                     n = new((subject.BottomRight.Y - subject.TopLeft.Y), (subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
@@ -78,12 +98,19 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "6":
                 case "s":
+                case "so":
                 case "d":
+                case "down":
                     value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
                     return true; // Bottom
 
                 case "7":
                 case "sw":
+                case "swo":
+                case "ssw":
+                case "sswo":
+                case "wsw":
+                case "wswo":
                     pt = new(0.75 * subject.TopLeft.X + 0.25 * subject.BottomRight.X, 0.25 * subject.TopLeft.Y + 0.75 * subject.BottomRight.Y);
                     n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), subject.BottomRight.X - subject.TopLeft.X);
                     n /= n.Length;
@@ -92,7 +119,9 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "8":
                 case "w":
+                case "wo":
                 case "l":
+                case "left":
                     value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
                     return true; // Left
 
