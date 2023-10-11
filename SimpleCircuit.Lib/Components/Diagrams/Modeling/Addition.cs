@@ -54,6 +54,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.Line(new(0, -s), new(0, s));
                         break;
                 }
+
+                DrawLabels(drawing);
             }
         }
     }

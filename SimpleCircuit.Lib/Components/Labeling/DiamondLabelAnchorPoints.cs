@@ -56,14 +56,14 @@ namespace SimpleCircuit.Components.Labeling
                 case 4:
                     return new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0)); // Right
                 case 5:
-                    pt = 0.75 * subject.TopLeft + 0.25 * subject.BottomRight;
+                    pt = 0.25 * subject.TopLeft + 0.75 * subject.BottomRight;
                     n = new((subject.BottomRight.Y - subject.TopLeft.Y), (subject.BottomRight.X - subject.TopLeft.X));
                     n /= n.Length;
                     return new(pt + subject.LabelMargin * n, n); // Bottom-right outside
                 case 6:
                     return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1)); // Bottom
                 case 7:
-                    pt = 0.75 * subject.TopLeft + 0.25 * subject.BottomRight;
+                    pt = new(0.75 * subject.TopLeft.X + 0.25 * subject.BottomRight.X, 0.25 * subject.TopLeft.Y + 0.75 * subject.BottomRight.Y);
                     n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), subject.BottomRight.X - subject.TopLeft.X);
                     n /= n.Length;
                     return new(pt + subject.LabelMargin * n, n); // Bottom-left outside

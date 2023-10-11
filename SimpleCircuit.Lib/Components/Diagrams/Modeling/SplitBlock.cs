@@ -42,6 +42,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
+                DrawLabels(drawing);
             }
         }
     }

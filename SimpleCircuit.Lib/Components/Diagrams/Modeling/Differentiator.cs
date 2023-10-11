@@ -1,8 +1,4 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
-
-namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("DIFF", "A differentiator.", "Modeling")]
     public class Differentiator : DrawableFactory
@@ -54,6 +50,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.Text("dt", new(), new(0, 1), new("small"));
                         break;
                 }
+                DrawLabels(drawing);
             }
         }
     }

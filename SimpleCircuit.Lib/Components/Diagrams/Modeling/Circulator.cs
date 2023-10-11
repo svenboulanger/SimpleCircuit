@@ -36,6 +36,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 {
                     new(x + s, y + s * 1.8), new(x, y), new(x + s * 1.8, y)
                 });
+                DrawLabels(drawing);
             }
         }
     }

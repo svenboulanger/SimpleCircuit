@@ -35,6 +35,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     s /= Math.Sqrt(2.0);
                 drawing.Line(new(-s, -s), new(s, s));
                 drawing.Line(new(-s, s), new(s, -s));
+
+                DrawLabels(drawing);
             }
         }
     }

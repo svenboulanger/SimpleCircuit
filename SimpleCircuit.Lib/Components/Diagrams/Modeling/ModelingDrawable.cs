@@ -44,15 +44,21 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override void Draw(SvgDrawing drawing)
         {
             if (Variants.Contains(Square))
-            {
                 drawing.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size);
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
-            }
             else
-            {
                 drawing.Circle(new(), Size * 0.5);
+        }
+
+        /// <summary>
+        /// Draws the labels for the drawable.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        protected void DrawLabels(SvgDrawing drawing)
+        {
+            if (Variants.Contains(Square))
+                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+            else
                 EllipseLabelAnchorPoints.Default.Draw(drawing, Labels, this);
-            }
         }
 
         protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)

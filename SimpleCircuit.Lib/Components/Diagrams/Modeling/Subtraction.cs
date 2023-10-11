@@ -29,6 +29,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 base.Draw(drawing);
                 double s = Size * 0.3;
                 drawing.Line(new(-s, 0), new(s, 0));
+                DrawLabels(drawing);
             }
         }
     }

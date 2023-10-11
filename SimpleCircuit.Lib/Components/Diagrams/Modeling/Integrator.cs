@@ -67,6 +67,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         drawing.EndTransform();
                         break;
                 }
+                DrawLabels(drawing);
             }
         }
     }

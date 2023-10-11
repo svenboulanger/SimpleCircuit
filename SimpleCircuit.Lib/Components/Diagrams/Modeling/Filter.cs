@@ -52,6 +52,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         DrawSquigglies(drawing);
                         break;
                 }
+                DrawLabels(drawing);
             }
 
             private void DrawGraphs(SvgDrawing drawing)

@@ -34,6 +34,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 : base(name)
             {
             }
+
+            /// <inheritdoc />
+            protected override void Draw(SvgDrawing drawing)
+            {
+                base.Draw(drawing);
+                DrawLabels(drawing);
+            }
         }
     }
 }
