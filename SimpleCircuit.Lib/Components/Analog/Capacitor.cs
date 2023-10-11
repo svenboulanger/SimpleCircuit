@@ -107,7 +107,7 @@ namespace SimpleCircuit.Components.Analog
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                         break;
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

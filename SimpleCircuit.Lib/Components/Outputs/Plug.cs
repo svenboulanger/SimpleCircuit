@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
             {

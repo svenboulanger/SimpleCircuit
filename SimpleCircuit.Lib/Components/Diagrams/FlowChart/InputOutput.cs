@@ -102,7 +102,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     });
                     _anchors[0] = new LabelAnchorPoint(new(), new());
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             /// <inheritdoc />

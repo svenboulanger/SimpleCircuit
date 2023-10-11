@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components.Digital
                     _anchors[0] = new LabelAnchorPoint(new(-w, -h - 1), new(1, -1));
                     _anchors[1] = new LabelAnchorPoint(new(), new());
                     _anchors[2] = new LabelAnchorPoint(new(-w, h + 1), new(1, 1));
-                    _anchors.Draw(drawing, Labels, this);
+                    _anchors.Draw(drawing, this);
                 }
             }
             private void DrawNandIEC(SvgDrawing drawing)
@@ -169,7 +169,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 drawing.Text("&amp;", new(), new());
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

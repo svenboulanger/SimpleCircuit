@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes a boxed item with a width and height.
     /// </summary>
-    public interface IBoxLabeled
+    public interface IBoxLabeled : ILabeled
     {
         /// <summary>
         /// Gets the top-left coordinate of the box.

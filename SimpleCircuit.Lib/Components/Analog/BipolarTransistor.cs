@@ -63,7 +63,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.Sources
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
             {
@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Sources
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

@@ -135,7 +135,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                     drawing.Arrow(new(-7, 10), new(6, -12));
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

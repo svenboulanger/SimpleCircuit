@@ -104,7 +104,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -131,7 +131,7 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -10), new(1, 1));
                 _anchors[1] = new LabelAnchorPoint(new(-3, -10), new(-1, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
         private class Pmos : ScaledOrientedDrawable, ILabeled
@@ -222,7 +222,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
@@ -252,7 +252,7 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -10), new(1, 1));
                 _anchors[1] = new LabelAnchorPoint(new(-3, -10), new(-1, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

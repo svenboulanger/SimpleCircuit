@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (!Variants.Contains(_off))
                     DrawOn(drawing);
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawOn(SvgDrawing drawing)
             {

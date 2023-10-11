@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             protected override void Draw(SvgDrawing drawing)
             {
                 drawing.Ellipse(new(), Width * 0.5, Height * 0.5);
-                EllipseLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                EllipseLabelAnchorPoints.Default.Draw(drawing, this);
             }
 
             /// <inheritdoc />

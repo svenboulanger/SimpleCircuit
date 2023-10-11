@@ -249,7 +249,7 @@ namespace SimpleCircuit.Components.Annotations
 
             _topLeft = new Vector2(total.Left, total.Top);
             _bottomRight = new Vector2(total.Right, total.Bottom);
-            BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+            BoxLabelAnchorPoints.Default.Draw(drawing, this);
         }
 
         /// <summary>
@@ -551,7 +551,7 @@ namespace SimpleCircuit.Components.Annotations
             anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0));
             anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1));
 
-            new CustomLabelAnchorPoints(anchors).Draw(drawing, Labels, this);
+            new CustomLabelAnchorPoints(anchors).Draw(drawing, this);
         }
 
         /// <summary>

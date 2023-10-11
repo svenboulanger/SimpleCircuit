@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -19,6 +17,10 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
 
         private class Instance : ModelingDrawable
         {
+            private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
+                new LabelAnchorPoint());
+
             /// <inheritdoc />
             protected override double Size => 12;
 
@@ -42,7 +44,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
                 drawing.Line(new(-s, s), new(s, -s));
-                DrawLabels(drawing);
+
+                _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new());
+                _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new());
+                if (Variants.Contains(Square))
+                    new AggregateAnchorPoints<IBoxLabeled>(_anchors,
+                        new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1)).Draw(drawing, this);
+                else
+                    new AggregateAnchorPoints<IEllipseLabeled>(_anchors, 
+                        new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1)).Draw(drawing, this);
             }
         }
     }

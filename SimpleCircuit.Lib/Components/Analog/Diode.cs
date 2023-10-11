@@ -151,7 +151,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(p1.Offset, p2.Offset, new("stroke"));
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawJunctionDiode(SvgDrawing drawing)

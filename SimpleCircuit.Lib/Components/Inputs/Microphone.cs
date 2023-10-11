@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components.Inputs
                 drawing.ExtendPins(Pins);
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

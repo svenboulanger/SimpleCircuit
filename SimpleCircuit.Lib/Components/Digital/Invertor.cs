@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Digital
                 });
                 drawing.Circle(new(7.5, 0), 1.5);
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawInverterIEC(SvgDrawing drawing)
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Circle(new(6.5, 0), 1.5);
                 drawing.Text("1", new Vector2(), new Vector2());
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

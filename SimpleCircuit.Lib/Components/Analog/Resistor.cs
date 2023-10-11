@@ -130,7 +130,7 @@ namespace SimpleCircuit.Components.Analog
                         DrawAmericanResistor(drawing);
                         break;
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawAmericanResistor(SvgDrawing drawing)
             {

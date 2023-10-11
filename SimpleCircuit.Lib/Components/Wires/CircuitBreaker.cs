@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Wires
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawCircuitBreakerIec(SvgDrawing drawing)
@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Wires
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawCircuitBreakerArei(SvgDrawing drawing)
@@ -114,7 +114,7 @@ namespace SimpleCircuit.Components.Wires
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

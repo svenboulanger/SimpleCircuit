@@ -68,7 +68,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["r"].Connections > 0)
                     drawing.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), new("small"));
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

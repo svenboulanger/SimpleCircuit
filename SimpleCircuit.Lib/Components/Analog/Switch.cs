@@ -126,7 +126,7 @@ namespace SimpleCircuit.Components.Analog
                     default: DrawSwitch(drawing); break;
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawSwitch(SvgDrawing drawing)

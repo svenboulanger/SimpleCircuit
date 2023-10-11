@@ -58,7 +58,7 @@ namespace SimpleCircuit.Components.Wires
                     });
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

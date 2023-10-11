@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components.Outputs
                     case 11: DrawFreezer(drawing); break;
                     default: DrawDefault(drawing); break;
                 }
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
             private void DrawVentilator(SvgDrawing drawing)
             {

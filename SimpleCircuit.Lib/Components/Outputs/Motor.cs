@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components.Outputs
                     drawing.Line(new(5, -4), new(7, -4), new("minus"));
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

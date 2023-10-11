@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Wires
                     case 4: DrawOnWall(drawing); break;
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawUnderground(SvgDrawing drawing)
             {

@@ -89,7 +89,7 @@ namespace SimpleCircuit.Components.Digital
                 {
                     new(-6, 6), new(6, 0), new(-6, -6)
                 });
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawBufferIEC(SvgDrawing drawing)
@@ -99,7 +99,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Rectangle(-5, -5, 10, 10, new());
                 drawing.Text("1", new(), new());
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

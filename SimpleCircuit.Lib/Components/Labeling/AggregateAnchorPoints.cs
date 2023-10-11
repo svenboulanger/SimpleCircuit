@@ -3,9 +3,9 @@
     /// <summary>
     /// The aggregate of two lists of label anchor points.
     /// </summary>
-    public class AggregateAnchorPoints<T> : LabelAnchorPoints<T>
+    public class AggregateAnchorPoints<T> : LabelAnchorPoints<T> where T : ILabeled
     {
-        private readonly LabelAnchorPoints<T> _a, _b;
+        private readonly ILabelAnchorPoints<T> _a, _b;
 
         /// <inheritdoc />
         public override int Count => _a.Count + _b.Count;
@@ -15,7 +15,7 @@
         /// </summary>
         /// <param name="a">The first list.</param>
         /// <param name="b">The second list.</param>
-        public AggregateAnchorPoints(LabelAnchorPoints<T> a, LabelAnchorPoints<T> b)
+        public AggregateAnchorPoints(ILabelAnchorPoints<T> a, ILabelAnchorPoints<T> b)
         {
             _a = a;
             _b = b;

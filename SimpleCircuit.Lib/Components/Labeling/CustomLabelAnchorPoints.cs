@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A list of custom label anchor points.
     /// </summary>
-    public class CustomLabelAnchorPoints : LabelAnchorPoints<IDrawable>
+    public class CustomLabelAnchorPoints : LabelAnchorPoints<ILabeled>
     {
         private readonly LabelAnchorPoint[] _points;
 
@@ -33,7 +33,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint Calculate(IDrawable subject, int index)
+        public override LabelAnchorPoint Calculate(ILabeled subject, int index)
         {
             index %= Count;
             if (index < 0)

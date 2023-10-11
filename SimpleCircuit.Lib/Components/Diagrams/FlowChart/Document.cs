@@ -100,7 +100,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     }
                 }
                 drawing.Path(DrawPath);
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
 
             /// <inheritdoc />

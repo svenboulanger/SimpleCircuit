@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
     /// A generic drawable used for modeling block diagrams.
     /// These blocks don't have an orientation, but they can be square or circular and have 8 pins in all major directions.
     /// </summary>
-    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IEllipseLabeled, IBoxLabeled, ILabeled
+    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxLabeled, IEllipseLabeled
     {
         public const string Square = "square";
 
@@ -56,11 +56,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected void DrawLabels(SvgDrawing drawing)
         {
             if (Variants.Contains(Square))
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             else
-                EllipseLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1).Draw(drawing, this);
         }
 
+        /// <inheritdoc />
         protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
         {
             double s = Size * 0.5;

@@ -54,7 +54,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         .LineTo(0, b)
                         .Close();
                 });
-                DiamondLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                DiamondLabelAnchorPoints.Default.Draw(drawing, this);
             }
 
             /// <inheritdoc />

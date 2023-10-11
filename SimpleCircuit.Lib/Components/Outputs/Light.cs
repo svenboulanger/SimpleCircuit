@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Outputs
                         DrawEmergency(drawing);
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
 
             private void DrawWall(SvgDrawing drawing)

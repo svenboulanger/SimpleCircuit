@@ -188,7 +188,7 @@ namespace SimpleCircuit.Components.Analog
                             .LineTo(1, -2);
                     });
                 }
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

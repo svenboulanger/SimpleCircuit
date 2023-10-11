@@ -60,7 +60,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         .LineTo(0, b)
                         .Close();
                 });
-                DiamondLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                DiamondLabelAnchorPoints.Default.Draw(drawing, this);
             }
 
             /// <inheritdoc />

@@ -140,7 +140,7 @@ namespace SimpleCircuit.Components
                 drawing.Rectangle(EndLocation - Location, center);
 
                 // Draw the label
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
 
                 // Draw the port names
                 _pins.Render(drawing);

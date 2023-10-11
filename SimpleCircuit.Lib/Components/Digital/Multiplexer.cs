@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
                 drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
         }
     }

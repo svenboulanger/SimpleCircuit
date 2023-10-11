@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Analog
                 // Transmission line
                 drawing.Path(DrawShape);
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

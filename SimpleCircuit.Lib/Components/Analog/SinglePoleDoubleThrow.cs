@@ -21,7 +21,7 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(-6, 6), new(-1, 1)));
+                new LabelAnchorPoint(new(-3, 3), new(-1, 1)));
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -89,7 +89,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

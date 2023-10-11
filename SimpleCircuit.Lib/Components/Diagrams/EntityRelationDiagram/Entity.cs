@@ -102,7 +102,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     for (int i = 1; i < Labels.Count; i++)
                         anchors[i] = new LabelAnchorPoint(new(-w + 2.0, i * LineHeight), new(1, 0), new("attribute"));
                 }
-                anchors.Draw(drawing, Labels, this);
+                anchors.Draw(drawing, this);
             }
         }
     }

@@ -58,7 +58,7 @@ namespace SimpleCircuit.Components
                     default: DrawGround(drawing); break;
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
             private void DrawGround(SvgDrawing drawing)
             {

@@ -62,7 +62,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     drawing.Line(new(-a + 3, -b), new(-a + 3, b));
                     drawing.Line(new(a - 3, -b), new(a - 3, b));
                 }
-                BoxLabelAnchorPoints.Default.Draw(drawing, Labels, this);
+                BoxLabelAnchorPoints.Default.Draw(drawing, this);
             }
 
             /// <inheritdoc />

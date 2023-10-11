@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Rectangle(-2.5, -5, 5, 10, options: new("body"));
                 drawing.Path(b => b.MoveTo(-4.5, -3.5).Line(0, 7).MoveTo(4.5, -3.5).Line(0, 7));
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }

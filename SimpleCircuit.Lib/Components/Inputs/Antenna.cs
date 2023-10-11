@@ -61,7 +61,7 @@ namespace SimpleCircuit.Components.Inputs
                     });
                 }
 
-                _anchors.Draw(drawing, Labels, this);
+                _anchors.Draw(drawing, this);
             }
         }
     }
