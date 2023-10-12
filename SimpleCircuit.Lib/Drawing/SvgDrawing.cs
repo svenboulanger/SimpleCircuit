@@ -382,7 +382,7 @@ namespace SimpleCircuit
                 return;
 
             // Draw the rectangle
-            this.Rectangle(x, y, x + width, y + height, rx, ry, options);
+            this.Rectangle(x, y, width, height, rx, ry, options);
         }
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
