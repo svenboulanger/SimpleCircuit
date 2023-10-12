@@ -21,6 +21,8 @@ namespace SimpleCircuit.Components.Sources
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
 
+            private readonly string _programmable = "programmable";
+
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
@@ -78,14 +80,16 @@ namespace SimpleCircuit.Components.Sources
 
             private void DrawAmericanSource(SvgDrawing drawing)
             {
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 drawing.Circle(new(0, 0), 6);
                 switch (Variants.Select("arrow", "ac"))
                 {
-                    case 0:
-                        drawing.Line(new(-3, 0), new(3, 0), new("arrow"));
-                        var marker = new Arrow(new(-3, 0), new(-1, 0));
+                    case 1:
+                        drawing.Line(new(-3.5, 0), new(3.5, 0), new("arrow"));
+                        var marker = new Arrow(new(-3.5, 0), new(-1, 0));
                         marker.Draw(drawing);
-                        marker.Location = new(3, 0);
+                        marker.Location = new(3.5, 0);
                         marker.Orientation = new(1, 0);
                         marker.Draw(drawing);
                         break;
@@ -95,8 +99,14 @@ namespace SimpleCircuit.Components.Sources
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                if (Variants.Contains(_programmable))
+                {
+                    drawing.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
+                    if (_anchors[0].Location.Y > -7)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                    if (_anchors[1].Location.Y < 8.5)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
+                }
                 _anchors.Draw(drawing, this);
             }
             private void DrawEuropeanSource(SvgDrawing drawing)
@@ -106,6 +116,15 @@ namespace SimpleCircuit.Components.Sources
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+
+                if (Variants.Contains(_programmable))
+                {
+                    drawing.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
+                    if (_anchors[0].Location.Y > -5)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                    if (_anchors[1].Location.Y < 7)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                }
                 _anchors.Draw(drawing, this);
             }
         }

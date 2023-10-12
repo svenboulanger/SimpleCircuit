@@ -15,7 +15,6 @@ namespace SimpleCircuit.Components.Analog
         private const string _photoresistor = "photo";
         private const string _thermistor = "thermistor";
         private const string _x = "x";
-        private const string _assymmetric = "assymmetric";
         private const string _memristor = "memristor";
 
         /// <inheritdoc />
@@ -195,7 +194,7 @@ namespace SimpleCircuit.Components.Analog
                     drawing.Line(new(-l, w), new(l, -w));
                 }
 
-                switch (Variants.Select(_programmable, _photoresistor, _thermistor, _assymmetric, _memristor))
+                switch (Variants.Select(_programmable, _photoresistor, _thermistor, _memristor))
                 {
                     case 0: // Programmable
                         drawing.Arrow(new(-5, w + 1), new(6, -w - 3));
@@ -218,12 +217,7 @@ namespace SimpleCircuit.Components.Analog
                         _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 2), new(1, 1));
                         break;
 
-                    case 3: // Assymmetric
-                        drawing.Rectangle(l * 0.85 - Width * 0.15 * 0.5, -w,
-                            l * 0.85 + Width * 0.15 * 0.5, w, options: new("marker"));
-                        break;
-
-                    case 4: // Memristor
+                    case 3: // Memristor
                         drawing.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -w, Length * 0.15, Width, options: new("marker"));
                         double t = Length * 0.85 / 13;
                         drawing.Polyline(new Vector2[]

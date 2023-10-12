@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
-            private static readonly CustomLabelAnchorPoints _anchors = new(
+            private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
                 new LabelAnchorPoint(new(6, 0), new(1, 0)));
             /// <inheritdoc />
@@ -50,6 +50,8 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
+                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
@@ -68,11 +70,19 @@ namespace SimpleCircuit.Components
                 {
                     drawing.ExtendPins(Pins, 6);
                     drawing.Arc(new(0, 4), -Math.PI, 0, 8, new("shield"));
+                    if (_anchors[0].Location.X > -9)
+                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
+                    if (_anchors[0].Location.X < 9)
+                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
                 }
                 if (Variants.Contains(_protective))
                 {
                     drawing.ExtendPins(Pins, 7.5);
                     drawing.Circle(new(0, -1), 6.5, new("shield"));
+                    if (_anchors[0].Location.X > -7.5) 
+                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
+                    if (_anchors[1].Location.X < 7.5)
+                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
                 }
                 else
                 {
@@ -89,6 +99,9 @@ namespace SimpleCircuit.Components
                     .MoveTo(-5, 0).Line(-2, 4)
                     .MoveTo(0, 0).Line(-2, 4)
                     .MoveTo(5, 0).Line(-2, 4));
+
+                if (_anchors[0].Location.X > -7)
+                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
             }
             private void DrawSignalGround(SvgDrawing drawing)
             {

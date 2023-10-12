@@ -34,14 +34,13 @@ namespace SimpleCircuit.Components.Outputs
         private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
         {
             private const double _k = 0.5522847498;
-            private static readonly ILabelAnchorPoints<IBoxLabeled> _anchors = new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1);
+            private readonly static ILabelAnchorPoints<IBoxLabeled> _anchors = new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1);
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "appliance";
-
 
             Vector2 IBoxLabeled.TopLeft => new(0, -8);
             Vector2 IBoxLabeled.BottomRight => new(16, 8);
@@ -63,21 +62,25 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                switch (Variants.Select(_ventilator, _heater, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer))
+                if (Variants.Contains(_heater))
+                    DrawHeater(drawing, Variants.Contains(_ventilator), Variants.Contains(_accu));
+                else
                 {
-                    case 0: DrawVentilator(drawing); break;
-                    case 1: DrawHeater(drawing, Variants.Contains(_ventilator), Variants.Contains(_accu)); break;
-                    case 2: DrawBoiler(drawing, Variants.Contains(_accu)); break;
-                    case 3: DrawCooking(drawing); break;
-                    case 4: DrawMicroWave(drawing); break;
-                    case 5: DrawOven(drawing); break;
-                    case 6: DrawWasher(drawing); break;
-                    case 7: DrawDryer(drawing); break;
-                    case 8: DrawDishwasher(drawing); break;
-                    case 9:
-                    case 10: DrawRefrigerator(drawing); break;
-                    case 11: DrawFreezer(drawing); break;
-                    default: DrawDefault(drawing); break;
+                    switch (Variants.Select(_ventilator, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer))
+                    {
+                        case 0: DrawVentilator(drawing); break;
+                        case 1: DrawBoiler(drawing, Variants.Contains(_accu)); break;
+                        case 2: DrawCooking(drawing); break;
+                        case 3: DrawMicroWave(drawing); break;
+                        case 4: DrawOven(drawing); break;
+                        case 5: DrawWasher(drawing); break;
+                        case 6: DrawDryer(drawing); break;
+                        case 7: DrawDishwasher(drawing); break;
+                        case 8:
+                        case 9: DrawRefrigerator(drawing); break;
+                        case 10: DrawFreezer(drawing); break;
+                        default: DrawDefault(drawing); break;
+                    }
                 }
                 _anchors.Draw(drawing, this);
             }

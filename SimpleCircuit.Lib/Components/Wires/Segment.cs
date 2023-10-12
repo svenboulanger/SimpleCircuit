@@ -73,9 +73,9 @@ namespace SimpleCircuit.Components.Wires
             {
                 drawing.Circle(new(), 2);
                 if (_anchors[0].Location.Y > -3)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (_anchors[1].Location.Y < 3)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
             }
             private void DrawTube(SvgDrawing drawing)
             {
@@ -99,9 +99,9 @@ namespace SimpleCircuit.Components.Wires
                 drawing.Polyline(new Vector2[] { new(-3, 5), new(-3, 2), new(3, 2), new(3, 5) });
                 drawing.Line(new(0, 5), new(0, 2));
                 if (_anchors[0].Location.Y > -1)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
         }
     }

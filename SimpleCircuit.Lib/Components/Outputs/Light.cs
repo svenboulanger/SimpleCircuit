@@ -102,8 +102,8 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawProjector(SvgDrawing drawing)
             {
                 drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
-                if (_anchors[1].Location.Y < 7)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                if (_anchors[0].Location.Y > -7)
+                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
             }
             private void DrawDirectional(SvgDrawing drawing, bool diverging)
             {

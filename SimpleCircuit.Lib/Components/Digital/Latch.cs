@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Digital
             public Labels Labels { get; } = new();
 
             [Description("The label margin to the edge.")]
-            public double LabelMargin { get; set; }
+            public double LabelMargin { get; set; } = 1.0;
 
             double IBoxLabeled.CornerRadius => 0.0;
             Vector2 IBoxLabeled.TopLeft => new(-9, -12);
