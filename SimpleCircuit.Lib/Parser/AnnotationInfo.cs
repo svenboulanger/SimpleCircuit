@@ -65,10 +65,10 @@ namespace SimpleCircuit.Parser
                 _annotation = new Box(Fullname)
                 {
                     CornerRadius = context.Options.AnnotationRadius,
-                    MarginLeft = context.Options.AnnotationMargin,
-                    MarginTop = context.Options.AnnotationMargin,
-                    MarginRight = context.Options.AnnotationMargin,
-                    MarginBottom = context.Options.AnnotationMargin,
+                    LeftMargin = context.Options.AnnotationMargin,
+                    TopMargin = context.Options.AnnotationMargin,
+                    RightMargin = context.Options.AnnotationMargin,
+                    BottomMargin = context.Options.AnnotationMargin,
                     WireMargin = context.Options.AnnotationWireMargin,
                     WireStartMargin = context.Options.AnnotationWireMarginEnds,
                     WireEndMargin = context.Options.AnnotationWireMarginEnds,

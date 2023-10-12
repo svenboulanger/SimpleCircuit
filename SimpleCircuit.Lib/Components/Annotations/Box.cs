@@ -46,52 +46,34 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         public Labels Labels { get; } = new Labels();
 
-        /// <summary>
-        /// Gets or sets the margin at the left side.
-        /// </summary>
-        public double MarginLeft { get; set; } = 5.0;
+        [Description("The margin for the annotation box on the left side.")]
+        public double LeftMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Get sor sets the margin at the right side.
-        /// </summary>
-        public double MarginRight { get; set; } = 5.0;
+        [Description("The margin for the annotation box on the right side.")]
+        public double RightMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the margin at the top.
-        /// </summary>
-        public double MarginTop { get; set; } = 5.0;
+        [Description("The margin for the annotation box on the top side.")]
+        public double TopMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the margin at the bottom.
-        /// </summary>
-        public double MarginBottom { get; set; } = 5.0;
+        [Description("The margin for the annotation box on the bottom side.")]
+        public double BottomMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the margin for wires.
-        /// </summary>
+        [Description("The margin for the annotation box along wires.")]
         public double WireMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the margin at the start of a wire.
-        /// </summary>
+        [Description("The margin for the annotation box for the start of wires.")]
         public double WireStartMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the margin at the end of a wire.
-        /// </summary>
+        [Description("The margin for the annotation box for the end of wires.")]
         public double WireEndMargin { get; set; } = 5.0;
 
-        /// <summary>
-        /// Gets or sets the radius of the corners.
-        /// </summary>
+        [Description("The round-off corner for the annotation box.")]
         public double CornerRadius { get; set; }
 
-        /// <summary>
-        /// Gets or sets the tolerance for detering an edge of the annotation box.
-        /// </summary>
+        [Description("The tolerance to group points together as a side of the annotation box.")]
         public double Tolerance { get; set; } = 4.0;
 
-        /// <inheritdoc />
+        [Description("The label margin to the edge of the annotation box.")]
         public double LabelMargin { get; set; } = 1.0;
 
         Vector2 IBoxLabeled.TopLeft => _topLeft;
@@ -123,49 +105,7 @@ namespace SimpleCircuit.Components.Annotations
 
         /// <inheritdoc />
         public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
-        {
-            string key = propertyToken.Content.ToString().ToLower();
-            switch (key)
-            {
-                case "radius": CornerRadius = (double)value; break;
-
-                case "margin":
-                    double margin = (double)value;
-                    MarginLeft = MarginTop = MarginRight = MarginBottom = margin;
-                    WireStartMargin = WireEndMargin = WireMargin = margin;
-                    break;
-
-                case "ml":
-                case "leftmargin":
-                case "marginleft": MarginLeft = (double)value; break;
-                case "mt":
-                case "topmargin":
-                case "margintop": MarginTop = (double)value; break;
-                case "mr":
-                case "rightmargin":
-                case "marginright": MarginRight = (double)value; break;
-                case "mb":
-                case "bottommargin":
-                case "marginbottom": MarginBottom = (double)value; break;
-                case "mw":
-                case "marginwire":
-                case "wiremargin": WireMargin = (double)value; break;
-                case "mws":
-                case "marginwirestart":
-                case "wiremarginstart": WireStartMargin = (double)value; break;
-                case "mwe":
-                case "marginwireend":
-                case "wiremarginend": WireEndMargin = (double)value; break;
-
-                case "tol":
-                case "tolerance": Tolerance = (double)value; break;
-
-                default:
-                    diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, propertyToken.Content, Name);
-                    return false;
-            }
-            return true;
-        }
+            => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
         public bool DiscoverNodeRelationships(IRelationshipContext context)
@@ -230,8 +170,8 @@ namespace SimpleCircuit.Components.Annotations
             var bounds = new ExpandableBounds();
             foreach (var drawable in _components)
             {
-                bounds.Expand(drawable.Bounds.Left - MarginLeft, drawable.Bounds.Top - MarginTop);
-                bounds.Expand(drawable.Bounds.Right + MarginRight, drawable.Bounds.Bottom + MarginBottom);
+                bounds.Expand(drawable.Bounds.Left - LeftMargin, drawable.Bounds.Top - TopMargin);
+                bounds.Expand(drawable.Bounds.Right + RightMargin, drawable.Bounds.Bottom + BottomMargin);
             }
             foreach (var wire in _wires)
             {
@@ -274,10 +214,10 @@ namespace SimpleCircuit.Components.Annotations
             foreach (var drawable in _components)
             {
                 var localBounds = drawable.Bounds;
-                AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Top - MarginTop));
-                AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Top - MarginTop));
-                AddPoint(new Vector2(localBounds.Right + MarginRight, localBounds.Bottom + MarginBottom));
-                AddPoint(new Vector2(localBounds.Left - MarginLeft, localBounds.Bottom + MarginBottom));
+                AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Top - TopMargin));
+                AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Top - TopMargin));
+                AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Bottom + BottomMargin));
+                AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Bottom + BottomMargin));
             }
             foreach (var drawable in _wires)
             {
