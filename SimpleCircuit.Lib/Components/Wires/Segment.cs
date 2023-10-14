@@ -10,12 +10,6 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("SEG", "A wire segment.", "Wires")]
     public class Segment : DrawableFactory
     {
-        private const string _underground = "underground";
-        private const string _air = "air";
-        private const string _tube = "tube";
-        private const string _inwall = "inwall";
-        private const string _onwall = "onwall";
-
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
@@ -25,12 +19,20 @@ namespace SimpleCircuit.Components.Wires
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
+            private const string _underground = "underground";
+            private const string _air = "air";
+            private const string _tube = "tube";
+            private const string _inwall = "inwall";
+            private const string _onwall = "onwall";
 
             /// <inheritdoc />
             public override string Type => "segment";
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
+
+            [Description("The number of tubes.")]
+            public int Multiple { get; set; } = 1;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -84,6 +86,13 @@ namespace SimpleCircuit.Components.Wires
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
                     _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+
+                if (Multiple > 1)
+                {
+                    drawing.Line(new(0, -3.5), new(2.1, -5.6));
+                    drawing.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
+                }
             }
             private void DrawInWall(SvgDrawing drawing)
             {

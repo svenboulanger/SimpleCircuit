@@ -9,8 +9,6 @@ namespace SimpleCircuit.Components.Wires
     [Drawable("BUS", "A bus or wire segment.", "Wires")]
     public class Bus : DrawableFactory
     {
-        private const string _straight = "straight";
-
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
@@ -21,6 +19,8 @@ namespace SimpleCircuit.Components.Wires
                 new LabelAnchorPoint(new(0, -4), new(0, -1)),
                 new LabelAnchorPoint(new(0, 4), new(0, 1)));
 
+            private const string _straight = "straight";
+
             [Description("The number of crossings. Can be used to indicate a bus.")]
             public int Crossings { get; set; } = 1;
 
@@ -30,6 +30,10 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             public override string Type => "bus";
 
+            /// <summary>
+            /// Creates a new instance.
+            /// </summary>
+            /// <param name="name">The name.</param>
             public Instance(string name)
                 : base(name)
             {

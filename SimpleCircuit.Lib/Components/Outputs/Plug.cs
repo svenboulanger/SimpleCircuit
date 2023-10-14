@@ -29,6 +29,9 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             public override string Type => "plug";
 
+            [Description("The multiplicity of the wall plug.")]
+            public int Multiple { get; set; } = 1;
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -53,6 +56,12 @@ namespace SimpleCircuit.Components.Outputs
                 if (Variants.Contains(_child))
                     DrawChildProtection(drawing);
 
+                if (Multiple > 1)
+                {
+                    drawing.Line(new(2.6, -1.4), new(-0.2, -4.2));
+                    drawing.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1));
+                }
+
                 _anchors.Draw(drawing, this);
             }
             private void DrawProtectiveConnection(SvgDrawing drawing)
@@ -65,7 +74,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawSealed(SvgDrawing drawing)
             {
-                drawing.Text("h", new(0, -4), new(-1, -1));
+                drawing.Text("h", new(0.5, 3), new(-1, 1));
             }
         }
     }
