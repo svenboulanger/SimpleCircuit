@@ -832,7 +832,13 @@ namespace SimpleCircuit
         /// <returns>The formatted value.</returns>
         private static string Convert(double value)
         {
-            return Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            string result = Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            int length = result.Length - 1;
+            while (result[length] == '0')
+                length--;
+            if (result[length] == '.')
+                return result[..length];
+            return result[..(length + 1)];
         }
 
         /// <summary>

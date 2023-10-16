@@ -49,6 +49,14 @@ namespace SimpleCircuit.Drawing
             => _origin + _orientation * input;
 
         /// <summary>
+        /// Applies the inverse of the transform to a vector.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns>The transformed vector.</returns>
+        public Vector2 ApplyInverse(Vector2 input)
+            => _orientation.Inverse * (input - _origin);
+
+        /// <summary>
         /// Applies a transform to another transform, resulting in the combined transform.
         /// </summary>
         /// <param name="tf">The first transform.</param>

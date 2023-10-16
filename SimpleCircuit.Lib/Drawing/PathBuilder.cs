@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Transactions;
 
 namespace SimpleCircuit.Drawing
 {
@@ -50,12 +49,23 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Creates a new path builder.
         /// </summary>
-        /// <param name="bounds">The bounds.</param>
         /// <param name="transform">The transform.</param>
         public PathBuilder(Transform transform)
         {
             _bounds = new();
             Transform = transform;
+        }
+
+        /// <summary>
+        /// Initializes the path to the correct origin.
+        /// </summary>
+        private void InitializePath()
+        {
+            if (_isFirst && !Transform.Offset.IsZero())
+            {
+                Append($"M{Convert(Transform.Offset)}");
+                _last = Transform.Offset;
+            }
         }
 
         /// <summary>
@@ -66,12 +76,9 @@ namespace SimpleCircuit.Drawing
         public PathBuilder MoveTo(Vector2 location)
         {
             // Local coordinate space
-            _p1 = _p2;
-            _h1 = _p1;
-            _p2 = location;
-            _h2 = location;
-            _n1 = new();
-            _n2 = new();
+            _p1 = _h1 = _p2;
+            _p2 = _h2 = location;
+            _n1 = _n2 = new();
 
             // Draw in global coordinate space
             location = Transform.Apply(location);
@@ -97,10 +104,10 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Move(Vector2 delta)
         {
-            _p1 = _p2;
-            _h1 = _p1;
+            InitializePath();
+            _p1 = _h1 = _p2;
             _p2 += delta;
-            _h2 = _p1;
+            _h2 = _p2;
 
             _n1 = new();
             _n2 = new();
@@ -143,6 +150,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder LineTo(Vector2 location)
         {
+            InitializePath();
+
             // Local coordinate space
             _p1 = _p2;
             _h1 = _p1;
@@ -180,6 +189,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Line(Vector2 delta)
         {
+            InitializePath();
+
             // Local coordinate space
             _p1 = _p2;
             _h1 = _p1;
@@ -216,6 +227,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder HorizontalTo(double x)
         {
+            InitializePath();
+
             Vector2 delta = new(x - _p2.X, 0);
             _p1 = _p2;
             _h1 = _p1;
@@ -243,6 +256,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Horizontal(double dx)
         {
+            InitializePath();
+
             Vector2 delta = new(dx, 0);
             _p1 = _p2;
             _h1 = _p1;
@@ -270,6 +285,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder VerticalTo(double y)
         {
+            InitializePath();
+
             Vector2 delta = new(0, y - _p2.Y);
             _p1 = _p2;
             _h1 = _p1;
@@ -297,6 +314,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Vertical(double dy)
         {
+            InitializePath();
+
             Vector2 delta = new(0, dy);
             _p1 = _p2;
             _h1 = _p1;
@@ -347,6 +366,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder CurveTo(Vector2 h1, Vector2 h2, Vector2 end)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = h1;
             _p2 = end;
@@ -372,6 +393,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Curve(Vector2 dh1, Vector2 dh2, Vector2 dend)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = _p1 + dh1;
             _h2 = _p1 + dh2;
@@ -396,6 +419,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothTo(Vector2 h, Vector2 end)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = 2 * _p2 - _h2;
             _p2 = end;
@@ -420,6 +445,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Smooth(Vector2 dh, Vector2 dend)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = 2 * _p2 - _h2;
             _p2 = _p1 + dend;
@@ -444,6 +471,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurveTo(Vector2 h, Vector2 end)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = h;
             _h2 = h;
@@ -467,6 +496,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder QuadCurve(Vector2 dh, Vector2 dend)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = _p1 + dh;
             _p2 = _p1 + dend;
@@ -489,6 +520,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuadTo(Vector2 end)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = 2 * _p2 - _h2;
             _p2 = end;
@@ -511,6 +544,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder SmoothQuad(Vector2 dend)
         {
+            InitializePath();
+
             _p1 = _p2;
             _h1 = 2 * _p2 - _h2;
             _p2 = _p1 + dend;
@@ -538,6 +573,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder ArcTo(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 end)
         {
+            InitializePath();
+
             if (rx.IsZero() || ry.IsZero())
             {
                 // Treat as a straight line
@@ -631,6 +668,8 @@ namespace SimpleCircuit.Drawing
         /// <returns>The path builder.</returns>
         public PathBuilder Arc(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 dend)
         {
+            InitializePath();
+
             if (rx.IsZero() || ry.IsZero())
             {
                 // Treat as a straight line
@@ -745,7 +784,13 @@ namespace SimpleCircuit.Drawing
         /// <returns>The formatted value.</returns>
         private static string Convert(double value)
         {
-            return Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            string result = Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            int length = result.Length - 1;
+            while (result[length] == '0')
+                length--;
+            if (result[length] == '.')
+                return result[..length];
+            return result[..(length + 1)];
         }
 
         /// <summary>
