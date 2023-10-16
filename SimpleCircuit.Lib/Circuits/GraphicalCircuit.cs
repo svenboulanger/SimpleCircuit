@@ -478,11 +478,15 @@ namespace SimpleCircuit
                 throw new ArgumentNullException(nameof(drawing));
 
             drawing.Style = Style;
+            bool oldRenderBounds = drawing.RenderBounds;
             drawing.RenderBounds = RenderBounds;
 
             // Draw all components
             foreach (var c in _presences.Values.OfType<IDrawable>().OrderBy(d => d.Order))
                 c.Render(drawing);
+
+            // Restore original state
+            drawing.RenderBounds = oldRenderBounds;
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     public class MinimumConstraint : ICircuitSolverPresence
     {
         public const string DiodeModelName = "#MinimumOffsetPinModel";
-        private const double OnResistance = 1e-3;
+        private const double OnResistance = 1e-4;
         private const double OffResistance = 1e9;
         private const double Hysteresis = 0.01;
 
