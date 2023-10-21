@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace SimpleCircuit
 {
@@ -164,6 +165,7 @@ namespace SimpleCircuit
                     case "polyline": DrawXmlPolyline(node, diagnostics); break;
                     case "rect": DrawXmlRectangle(node, diagnostics); break;
                     case "text": DrawXmlText(node, context, diagnostics); break;
+                    case "variant": DrawXmlVariant(node, context, diagnostics); break;
                     case "group":
                     case "g":
                         // Parse options
@@ -416,6 +418,14 @@ namespace SimpleCircuit
             if (value != null && context != null)
                 value = context.TransformText(value);
             Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
+        }
+        private void DrawXmlVariant(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        {
+            string variant = node.Attributes["name"]?.Value;
+            if (string.IsNullOrWhiteSpace(variant))
+                return;
+            if (context.HasVariant(variant))
+                DrawXmlActions(node, context, diagnostics);
         }
         private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute)
         {

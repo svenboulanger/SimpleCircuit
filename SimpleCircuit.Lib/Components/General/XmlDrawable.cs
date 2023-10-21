@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.General
                     drawing.BeginTransform(new Transform(new(), Matrix2.Scale(_scale)));
                 if (_drawing != null)
                 {
-                    var context = new XmlDrawingContext(Labels);
+                    var context = new XmlDrawingContext(Labels, Variants);
                     drawing.DrawXml(_drawing, context, drawing.Diagnostics);
                 }
                 if (!_scale.Equals(1.0))

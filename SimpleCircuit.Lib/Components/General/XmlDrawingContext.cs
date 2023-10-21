@@ -1,24 +1,28 @@
 ﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Drawing;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components.General
 {
+    /// <summary>
+    /// A context for drawing XML drawables.
+    /// </summary>
     public class XmlDrawingContext : IXmlDrawingContext
     {
         private readonly Labels _labels;
+        private readonly VariantSet _variants;
 
         /// <summary>
         /// Creates a new <see cref="XmlDrawingContext"/>.
         /// </summary>
-        /// <param name="labels"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public XmlDrawingContext(Labels labels)
+        /// <param name="labels">The defined labels.</param>
+        /// <param name="variants">The defined variants.</param>
+        public XmlDrawingContext(Labels labels, VariantSet variants)
         {
             _labels = labels ?? throw new ArgumentNullException(nameof(labels));
+            _variants = variants;
         }
 
         /// <inheritdoc />
@@ -31,5 +35,8 @@ namespace SimpleCircuit.Components.General
                 return _labels[index]?.Value ?? "";
             });
         }
+
+        /// <inheritdoc />
+        public bool HasVariant(string variant) => _variants?.Contains(variant) ?? false;
     }
 }
