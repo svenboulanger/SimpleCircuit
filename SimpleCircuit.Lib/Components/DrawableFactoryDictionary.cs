@@ -1,8 +1,10 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.General;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 
 namespace SimpleCircuit.Components
 {
@@ -71,6 +73,24 @@ namespace SimpleCircuit.Components
                     elt = nelt;
                 }
                 elt.Factory = factory;
+            }
+        }
+
+        /// <summary>
+        /// Load XML.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        public void Load(XmlDocument xml, IDiagnosticHandler diagnostics)
+        {
+            // Select all symbol tags from the root element
+            foreach (XmlNode symbol in xml.DocumentElement.SelectNodes("symbol"))
+            {
+                string key = symbol.Attributes["key"]?.Value;
+
+                // Create an Xml Drawable from the XML node
+                var drawable = new XmlDrawable(key, symbol, diagnostics);
+                Register(drawable);
             }
         }
 

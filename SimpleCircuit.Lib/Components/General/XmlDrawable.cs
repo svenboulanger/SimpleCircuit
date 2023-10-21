@@ -36,19 +36,9 @@ namespace SimpleCircuit.Components.General
         public XmlDrawable(string key, XmlNode definition, IDiagnosticHandler diagnostics)
         {
             // Extract the metadata
-            string description = "";
             _scale = 1.0;
-            foreach (XmlAttribute attribute in definition.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "description": description = attribute.Value; break;
-                    case "scale": attribute.ParseScalar(diagnostics, out _scale, ErrorCodes.InvalidXmlScale); break;
-                    default:
-                        diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
-                        break;
-                }
-            }
+            string description = definition.Attributes["description"]?.Value ?? string.Empty;
+            definition.Attributes["scale"]?.ParseScalar(diagnostics, out _scale, ErrorCodes.InvalidXmlScale);
             _metadata = new(new[] { key }, description, new[] { "Symbol" });
             var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
