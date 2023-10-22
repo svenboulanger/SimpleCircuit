@@ -37,6 +37,6 @@ namespace SimpleCircuit.Components.General
         }
 
         /// <inheritdoc />
-        public bool HasVariant(string variant) => _variants?.Contains(variant) ?? false;
+        public bool Contains(string variant) => _variants?.Contains(variant) ?? false;
     }
 }

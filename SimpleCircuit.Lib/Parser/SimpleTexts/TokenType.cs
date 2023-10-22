@@ -1,5 +1,8 @@
 ﻿namespace SimpleCircuit.Parser.SimpleTexts
 {
+    /// <summary>
+    /// Token types for simple text/labels.
+    /// </summary>
     public enum TokenType
     {
         /// <summary>

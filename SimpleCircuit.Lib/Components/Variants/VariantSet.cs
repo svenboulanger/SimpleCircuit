@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Parser.Variants;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace SimpleCircuit.Components.Variants
     /// <summary>
     /// Describes a set of variants.
     /// </summary>
-    public class VariantSet : IEnumerable<string>
+    public class VariantSet : IEnumerable<string>, IVariantContext
     {
         private readonly HashSet<string> _set = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _checked = new(StringComparer.OrdinalIgnoreCase);

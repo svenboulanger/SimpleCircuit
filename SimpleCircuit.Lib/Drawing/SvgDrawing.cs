@@ -2,6 +2,7 @@
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
+using SimpleCircuit.Parser.Variants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -424,7 +425,8 @@ namespace SimpleCircuit
             string variant = node.Attributes["name"]?.Value;
             if (string.IsNullOrWhiteSpace(variant))
                 return;
-            if (context.HasVariant(variant))
+            var lexer = new VariantLexer(variant);
+            if (VariantParser.Parse(lexer, context))
                 DrawXmlActions(node, context, diagnostics);
         }
         private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute)
