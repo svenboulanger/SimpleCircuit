@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"A1 <r> A2(test)";
+            var script = @"A1 <r> A2(programmable)";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

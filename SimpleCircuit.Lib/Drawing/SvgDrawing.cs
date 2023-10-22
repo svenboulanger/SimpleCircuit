@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
 using System;
@@ -203,6 +204,7 @@ namespace SimpleCircuit
             double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
             bool success = true;
             GraphicOptions options = new();
+            HashSet<Marker> startMarkers = null, endMarkers = null;
             foreach (XmlAttribute attribute in node.Attributes)
             {
                 switch (attribute.Name)
@@ -212,7 +214,7 @@ namespace SimpleCircuit
                     case "x2": success &= attribute.ParseScalar(diagnostics, out x2); break;
                     case "y2": success &= attribute.ParseScalar(diagnostics, out y2); break;
                     default:
-                        if (!ParseGraphicOption(options, attribute))
+                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
                             success = false;
@@ -225,6 +227,8 @@ namespace SimpleCircuit
 
             // Draw the line
             Line(new(x1, y1), new(x2, y2), options);
+            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1));
+            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1));
         }
         private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
         {
@@ -252,7 +256,7 @@ namespace SimpleCircuit
                         break;
                 }
             }
-            if (!success)
+            if (!success || points == null || points.Count <= 1)
                 return;
 
             // Draw the polygon
@@ -266,6 +270,7 @@ namespace SimpleCircuit
             GraphicOptions options = new();
             List<Vector2> points = null;
             bool success = true;
+            HashSet<Marker> startMarkers = null, endMarkers = null;
             foreach (XmlAttribute attribute in node.Attributes)
             {
                 switch (attribute.Name)
@@ -276,7 +281,7 @@ namespace SimpleCircuit
                         break;
 
                     default:
-                        if (!ParseGraphicOption(options, attribute))
+                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
                             success = false;
@@ -284,11 +289,21 @@ namespace SimpleCircuit
                         break;
                 }
             }
-            if (!success)
+            if (!success || points == null || points.Count <= 1)
                 return;
 
             // Draw the polyline
             Polyline(points, options);
+            if (points.Count > 1)
+            {
+                DrawMarkers(startMarkers, points[0], points[1] - points[0]);
+                DrawMarkers(endMarkers, points[0], points[0] - points[^1]);
+            }
+            else
+            {
+                DrawMarkers(startMarkers, points[0], new(1, 0));
+                DrawMarkers(endMarkers, points[0], new(1, 0));
+            }
         }
         private void DrawXmlCircle(XmlNode node, IDiagnosticHandler diagnostics)
         {
@@ -328,13 +343,14 @@ namespace SimpleCircuit
             GraphicOptions options = new();
             string pathData = null;
             bool success = true;
+            HashSet<Marker> startMarkers = null, endMarkers = null;
             foreach (XmlAttribute attribute in node.Attributes)
             {
                 switch (attribute.Name)
                 {
                     case "d": pathData = attribute.Value; break;
                     default:
-                        if (!ParseGraphicOption(options, attribute))
+                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
                             success = false;
@@ -347,11 +363,15 @@ namespace SimpleCircuit
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
+                SvgPathDataParser.MarkerLocation start = default, end = default;
                 Path(b =>
                 {
                     var lexer = new SvgPathDataLexer(pathData.AsMemory());
-                    SvgPathDataParser.Parse(lexer, b, diagnostics);
+                    start = SvgPathDataParser.Parse(lexer, b, diagnostics);
+                    end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
                 }, options);
+                DrawMarkers(startMarkers, start.Location, start.Normal);
+                DrawMarkers(endMarkers, end.Location, end.Normal);
             }
         }
         private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
@@ -446,6 +466,75 @@ namespace SimpleCircuit
                     return false;
             }
             return true;
+        }
+        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        {
+            switch (attribute.Name)
+            {
+                case "style":
+                    options.Style = attribute.Value;
+                    break;
+
+                case "class":
+                    foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                        options.Classes.Add(name);
+                    break;
+
+                case "marker-start":
+                    startMarkers ??= new HashSet<Marker>();
+                    switch (attribute.Value)
+                    {
+                        case "arrow": startMarkers.Add(new Arrow()); break;
+                        case "rarrow": startMarkers.Add(new ReverseArrow()); break;
+                        case "erd-many": startMarkers.Add(new ERDMany()); break;
+                        case "erd-one": startMarkers.Add(new ERDOne()); break;
+                        case "erd-one-many": startMarkers.Add(new ERDOneMany()); break;
+                        case "erd-only-one": startMarkers.Add(new ERDOnlyOne()); break;
+                        case "erd-zero-many": startMarkers.Add(new ERDZeroMany()); break;
+                        case "erd-zero-one": startMarkers.Add(new ERDZeroOne()); break;
+                        case "plus": startMarkers.Add(new Plus()); break;
+                        case "minus": startMarkers.Add(new Minus()); break;
+                        case "slash": startMarkers.Add(new Slash()); break;
+                    }
+                    break;
+
+                case "marker-end":
+                    endMarkers ??= new HashSet<Marker>();
+                    switch (attribute.Value)
+                    {
+                        case "arrow": endMarkers.Add(new Arrow()); break;
+                        case "rarrow": endMarkers.Add(new ReverseArrow()); break;
+                        case "erd-many": endMarkers.Add(new ERDMany()); break;
+                        case "erd-one": endMarkers.Add(new ERDOne()); break;
+                        case "erd-one-many": endMarkers.Add(new ERDOneMany()); break;
+                        case "erd-only-one": endMarkers.Add(new ERDOnlyOne()); break;
+                        case "erd-zero-many": endMarkers.Add(new ERDZeroMany()); break;
+                        case "erd-zero-one": endMarkers.Add(new ERDZeroOne()); break;
+                        case "plus": endMarkers.Add(new Plus()); break;
+                        case "minus": endMarkers.Add(new Minus()); break;
+                        case "slash": endMarkers.Add(new Slash()); break;
+                    }
+                    break;
+
+                default:
+                    return false;
+            }
+            return true;
+        }
+        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation)
+        {
+            if (markers == null)
+                return;
+            if (orientation.IsZero())
+                orientation = new(1, 0);
+            else
+                orientation /= orientation.Length;
+            foreach (var marker in markers)
+            {
+                marker.Location = location;
+                marker.Orientation = orientation;
+                marker.Draw(this);
+            }
         }
 
         /// <summary>

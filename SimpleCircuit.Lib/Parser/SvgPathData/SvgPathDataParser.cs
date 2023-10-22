@@ -1,11 +1,26 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Markers;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SvgPathData
 {
+    /// <summary>
+    /// A parser for SVG path data.
+    /// </summary>
     public static class SvgPathDataParser
     {
+        public struct MarkerLocation
+        {
+            public Vector2 Location { get; }
+            public Vector2 Normal { get; }
+            public MarkerLocation(Vector2 location, Vector2 normal)
+            {
+                Location = location;
+                Normal = normal;
+            }
+        }
+
         /// <summary>
         /// Parses a series of points.
         /// </summary>
@@ -30,8 +45,19 @@ namespace SimpleCircuit.Parser.SvgPathData
         /// <param name="lexer">The lexer.</param>
         /// <param name="b">The path builder.</param>
         /// <param name="diagnostics">The diagnostics message handler.</param>
-        public static void Parse(SvgPathDataLexer lexer, PathBuilder b, IDiagnosticHandler diagnostics)
+        public static MarkerLocation Parse(SvgPathDataLexer lexer, PathBuilder b, IDiagnosticHandler diagnostics)
         {
+            bool isFirstDrawn = true;
+            Vector2 startLocation = new(), startNormal = new(1, 0);
+            void StoreStart()
+            {
+                if (isFirstDrawn)
+                {
+                    isFirstDrawn = false;
+                    startLocation = b.Start;
+                    startNormal = -b.StartNormal;
+                }
+            }
             while (lexer.Type != TokenType.EndOfContent)
             {
                 Vector2 h1, h2, p;
@@ -56,6 +82,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.ArcTo(rx, ry, angle, largeArc != 0, sweepFlag != 0, p);
+                        StoreStart();
                         break;
 
                     case 'a':
@@ -70,6 +97,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Arc(rx, ry, angle, largeArc != 0, sweepFlag != 0, p);
+                        StoreStart();
                         break;
 
                     case 'M':
@@ -80,7 +108,10 @@ namespace SimpleCircuit.Parser.SvgPathData
                         }
                         b.MoveTo(p);
                         while (lexer.TryParseVector(diagnostics, new(), out p))
+                        {
                             b.LineTo(p);
+                            StoreStart();
+                        }
                         break;
                     case 'm':
                         if (!lexer.ParseVector(diagnostics, out p))
@@ -90,7 +121,10 @@ namespace SimpleCircuit.Parser.SvgPathData
                         }
                         b.Move(p);
                         while (lexer.TryParseVector(diagnostics, new(), out p))
+                        {
                             b.Line(p);
+                            StoreStart();
+                        }
                         break;
                     case 'L':
                         if (!lexer.ParseVector(diagnostics, out p))
@@ -99,6 +133,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.LineTo(p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out p))
                             b.LineTo(p);
                         break;
@@ -109,6 +144,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Line(p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out p))
                             b.Line(p);
                         break;
@@ -119,6 +155,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.HorizontalTo(d);
+                        StoreStart();
                         while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
                             b.HorizontalTo(d);
                         break;
@@ -129,6 +166,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Horizontal(d);
+                        StoreStart();
                         while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
                             b.Horizontal(d);
                         break;
@@ -139,6 +177,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.VerticalTo(d);
+                        StoreStart();
                         while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
                             b.VerticalTo(d);
                         break;
@@ -149,6 +188,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Vertical(d);
+                        StoreStart();
                         while (lexer.TryParseCoordinate(diagnostics, 0.0, out d))
                             b.Vertical(d);
                         break;
@@ -162,6 +202,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.CurveTo(h1, h2, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h1) &&
                             lexer.ParseVector(diagnostics, out h2) &&
                             lexer.ParseVector(diagnostics, out p))
@@ -177,6 +218,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Curve(h1, h2, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h1) &&
                             lexer.ParseVector(diagnostics, out h2) &&
                             lexer.ParseVector(diagnostics, out p))
@@ -191,6 +233,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.SmoothTo(h2, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h2) &&
                             lexer.ParseVector(diagnostics, out p))
                             b.SmoothTo(h2, p);
@@ -204,6 +247,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.Smooth(h2, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h2) &&
                             lexer.ParseVector(diagnostics, out p))
                             b.Smooth(h2, p);
@@ -217,6 +261,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.QuadCurveTo(h1, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h1) &&
                             lexer.ParseVector(diagnostics, out p))
                             b.QuadCurveTo(h1, p);
@@ -230,6 +275,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.QuadCurve(h1, p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out h1) &&
                             lexer.ParseVector(diagnostics, out p))
                             b.QuadCurve(h1, p);
@@ -241,6 +287,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.SmoothQuadTo(p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out p))
                             b.SmoothQuadTo(p);
                         break;
@@ -251,6 +298,7 @@ namespace SimpleCircuit.Parser.SvgPathData
                             continue;
                         }
                         b.SmoothQuad(p);
+                        StoreStart();
                         while (lexer.TryParseVector(diagnostics, new(), out p))
                             b.SmoothQuad(p);
                         break;
@@ -263,6 +311,23 @@ namespace SimpleCircuit.Parser.SvgPathData
                         diagnostics?.Post(cmd, ErrorCodes.CouldNotRecognizePathCommand, cmd.Content.ToString());
                         break;
                 }
+            }
+            return new MarkerLocation(startLocation, startNormal);
+        }
+
+        private static void DrawMarkers(HashSet<Marker> markers, SvgDrawing drawing, Vector2 location, Vector2 normal)
+        {
+            if (markers == null)
+                return;
+            if (normal.IsZero())
+                normal = new(1, 0);
+            else
+                normal /= normal.Length;
+            foreach (var marker in markers)
+            {
+                marker.Location = location;
+                marker.Orientation = normal;
+                marker.Draw(drawing);
             }
         }
     }
