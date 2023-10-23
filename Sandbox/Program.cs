@@ -20,7 +20,7 @@ namespace Sandbox
 
             // Custom XML
             var refDoc = new XmlDocument();
-            using (var sr = new StreamReader(@"C:\Users\svenb\Documents\CSharp\Projects\SimpleCircuit\Sandbox\bin\Debug\net6.0\test.xml"))
+            using (var sr = new StreamReader(@"test.xml"))
             {
                 string content = sr.ReadToEnd();
                 refDoc.LoadXml(content);

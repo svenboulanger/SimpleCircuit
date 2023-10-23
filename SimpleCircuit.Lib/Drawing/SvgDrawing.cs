@@ -2,6 +2,7 @@
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
+using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
 using System;
@@ -9,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace SimpleCircuit
 {
@@ -214,7 +214,7 @@ namespace SimpleCircuit
                     case "x2": success &= attribute.ParseScalar(diagnostics, out x2); break;
                     case "y2": success &= attribute.ParseScalar(diagnostics, out y2); break;
                     default:
-                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
+                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
                             success = false;
@@ -281,7 +281,7 @@ namespace SimpleCircuit
                         break;
 
                     default:
-                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
+                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
                             success = false;
@@ -350,7 +350,7 @@ namespace SimpleCircuit
                 {
                     case "d": pathData = attribute.Value; break;
                     default:
-                        if (!ParseGraphicOption(options, attribute, ref startMarkers, ref endMarkers))
+                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
                         {
                             diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
                             success = false;
@@ -467,7 +467,7 @@ namespace SimpleCircuit
             }
             return true;
         }
-        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
             switch (attribute.Name)
             {
@@ -481,38 +481,20 @@ namespace SimpleCircuit
                     break;
 
                 case "marker-start":
-                    startMarkers ??= new HashSet<Marker>();
-                    switch (attribute.Value)
                     {
-                        case "arrow": startMarkers.Add(new Arrow()); break;
-                        case "rarrow": startMarkers.Add(new ReverseArrow()); break;
-                        case "erd-many": startMarkers.Add(new ERDMany()); break;
-                        case "erd-one": startMarkers.Add(new ERDOne()); break;
-                        case "erd-one-many": startMarkers.Add(new ERDOneMany()); break;
-                        case "erd-only-one": startMarkers.Add(new ERDOnlyOne()); break;
-                        case "erd-zero-many": startMarkers.Add(new ERDZeroMany()); break;
-                        case "erd-zero-one": startMarkers.Add(new ERDZeroOne()); break;
-                        case "plus": startMarkers.Add(new Plus()); break;
-                        case "minus": startMarkers.Add(new Minus()); break;
-                        case "slash": startMarkers.Add(new Slash()); break;
+                        startMarkers ??= new HashSet<Marker>();
+                        var lexer = new MarkerLexer(attribute.Value);
+                        while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
+                            AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
                     }
                     break;
 
                 case "marker-end":
-                    endMarkers ??= new HashSet<Marker>();
-                    switch (attribute.Value)
                     {
-                        case "arrow": endMarkers.Add(new Arrow()); break;
-                        case "rarrow": endMarkers.Add(new ReverseArrow()); break;
-                        case "erd-many": endMarkers.Add(new ERDMany()); break;
-                        case "erd-one": endMarkers.Add(new ERDOne()); break;
-                        case "erd-one-many": endMarkers.Add(new ERDOneMany()); break;
-                        case "erd-only-one": endMarkers.Add(new ERDOnlyOne()); break;
-                        case "erd-zero-many": endMarkers.Add(new ERDZeroMany()); break;
-                        case "erd-zero-one": endMarkers.Add(new ERDZeroOne()); break;
-                        case "plus": endMarkers.Add(new Plus()); break;
-                        case "minus": endMarkers.Add(new Minus()); break;
-                        case "slash": endMarkers.Add(new Slash()); break;
+                        endMarkers ??= new HashSet<Marker>();
+                        var lexer = new MarkerLexer(attribute.Value);
+                        while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
+                            AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
                     }
                     break;
 
@@ -520,6 +502,23 @@ namespace SimpleCircuit
                     return false;
             }
             return true;
+        }
+        private void AddMarker(HashSet<Marker> markers, string value, IDiagnosticHandler diagnostics)
+        {
+            switch (value)
+            {
+                case "arrow": markers.Add(new Arrow()); break;
+                case "rarrow": markers.Add(new ReverseArrow()); break;
+                case "erd-many": markers.Add(new ERDMany()); break;
+                case "erd-one": markers.Add(new ERDOne()); break;
+                case "erd-one-many": markers.Add(new ERDOneMany()); break;
+                case "erd-only-one": markers.Add(new ERDOnlyOne()); break;
+                case "erd-zero-many": markers.Add(new ERDZeroMany()); break;
+                case "erd-zero-one": markers.Add(new ERDZeroOne()); break;
+                case "plus": markers.Add(new Plus()); break;
+                case "minus": markers.Add(new Minus()); break;
+                case "slash": markers.Add(new Slash()); break;
+            }
         }
         private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation)
         {
