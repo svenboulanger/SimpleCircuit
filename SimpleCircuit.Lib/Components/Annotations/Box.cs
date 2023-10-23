@@ -58,6 +58,19 @@ namespace SimpleCircuit.Components.Annotations
         [Description("The margin for the annotation box on the bottom side.")]
         public double BottomMargin { get; set; } = 5.0;
 
+        [Description("The margin for the annotation box. Shorthand for setting all margins.")]
+        public double Margin
+        {
+            get => 0.25 * (LeftMargin + RightMargin + TopMargin + BottomMargin);
+            set
+            {
+                LeftMargin = value;
+                TopMargin = value;
+                RightMargin = value;
+                BottomMargin = value;
+            }
+        }
+
         [Description("The margin for the annotation box along wires.")]
         public double WireMargin { get; set; } = 5.0;
 
@@ -69,6 +82,9 @@ namespace SimpleCircuit.Components.Annotations
 
         [Description("The round-off corner for the annotation box.")]
         public double CornerRadius { get; set; }
+
+        [Description("The round-off corner for the annotation box.")]
+        public double Radius { get => CornerRadius; set => CornerRadius = value; }
 
         [Description("The tolerance to group points together as a side of the annotation box.")]
         public double Tolerance { get; set; } = 4.0;
