@@ -267,5 +267,11 @@
 
         [Diagnostic(SeverityLevel.Error, "PE072", "Expected a comma vector separator")]
         ExpectedComma,
+
+        [Diagnostic(SeverityLevel.Warning, "PW073", "Symbol '{0}' is missing a 'pins' tag")]
+        MissingSymbolPins,
+
+        [Diagnostic(SeverityLevel.Warning, "PW074", "Symbol '{0}' is missing a 'drawing' tag")]
+        MissingSymbolDrawing,
     }
 }
