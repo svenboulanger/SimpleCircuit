@@ -135,7 +135,7 @@ namespace SimpleCircuit.Components.General
                         case "variant":
                             {
                                 // Check if the variant matches
-                                var value = child.Attributes["expression"]?.Value;
+                                var value = child.Attributes["eval"]?.Value;
                                 if (value == null)
                                     continue;
                                 var lexer = new VariantLexer(value);

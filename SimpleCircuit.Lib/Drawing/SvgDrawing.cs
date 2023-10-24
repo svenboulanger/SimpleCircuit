@@ -442,7 +442,7 @@ namespace SimpleCircuit
         }
         private void DrawXmlVariant(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
-            string expression = node.Attributes["expression"]?.Value;
+            string expression = node.Attributes["eval"]?.Value;
             if (string.IsNullOrWhiteSpace(expression))
                 return;
             var lexer = new VariantLexer(expression);
