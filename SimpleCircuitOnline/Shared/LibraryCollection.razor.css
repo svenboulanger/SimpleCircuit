@@ -1,0 +1,20 @@
+﻿div.toggle {
+    display: inline-block;
+    margin-right: 0.25em;
+}
+div.remove {
+    display: inline-block;
+    float: right;
+}
+div.remove a {
+    color: white;
+    background-color: #dc3545;
+    padding: 0.25em 0.25em;
+    margin: 025em 0.125em;
+    border-radius: 0.375rem;
+    border: 1px solid #dc3545;
+}
+div.remove a:hover {
+    background-color: #b02a37;
+    border: 1px solid #b02a37;
+}

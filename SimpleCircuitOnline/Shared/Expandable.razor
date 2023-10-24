@@ -1,16 +1,14 @@
-﻿<div class="expandable">
+﻿@using SimpleCircuitOnline.Shared.Icons
+
+<div class="expandable">
     <a href="javascript:void(0);" @onclick="x => { _expanded = !_expanded; StateHasChanged(); }">
         @if (_expanded)
         {
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-chevron-down m-1" viewBox="0 0 16 16" style="width: 1rem; height: 1rem">
-              <path style="fill: black; stroke: none;" fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-            </svg>
+            <ArrowDownIcon />
         }
         else
         {
-            <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="currentColor" class="bi bi-chevron-right m-1" viewBox="0 0 16 16" style="width: 1rem; height: 1rem">
-              <path style="fill: black; stroke: none;" fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-            </svg>
+            <ArrowRightIcon />
         }
         @Title
     </a>

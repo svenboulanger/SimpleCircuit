@@ -36,6 +36,11 @@
                     </Expandable>
                 </div>
             </Tab>
+            <Tab Title="Libraries">
+                <div class="content scrollable">
+                    <LibraryCollection @ref="_libraries" LibrariesChanged="UpdateNow" />
+                </div>
+            </Tab>
         </TabMenu>
     </div>
     <div class="gutter-col"></div>

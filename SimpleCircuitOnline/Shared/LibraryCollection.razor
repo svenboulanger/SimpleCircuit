@@ -1,0 +1,31 @@
+﻿@using SimpleCircuitOnline.Shared.Icons
+@inject Blazored.LocalStorage.ILocalStorageService _localStore
+
+@if (Libraries != null)
+{
+    @foreach (var library in Libraries.OrderBy(lib => lib.Key))
+    {
+        <a href="javascript:void(0);" @onclick="x => Toggle(library.Key, library.Value)" class="bd-callout">
+            <div class="toggle">
+                @if (library.Value.IsLoaded)
+                {
+                    <ToggleOnIcon />
+                }
+                else
+                {
+                    <ToggleOffIcon />
+                }
+            </div>
+            @library.Key
+            <div class="remove">
+                <a href="javascript:void(0);" @onclick="x => Remove(library.Key)"><TrashIcon /></a>
+            </div>
+        </a>
+    }
+}
+<a href="javascript:void(0);" @onclick="Clear" class="bd-callout">
+    Clear all libraries
+    <div class="remove">
+        <a href="javascript:void(0);" @onclick="Clear"><TrashIcon /></a>
+    </div>
+</a>

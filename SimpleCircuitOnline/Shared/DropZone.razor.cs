@@ -138,15 +138,17 @@ namespace SimpleCircuitOnline.Shared
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
             string content = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+            UploadEventArgs result = null;
 
+            // Load the XML document
             var doc = new XmlDocument();
-            var args = new UploadEventArgs();
             try
             {
                 doc.LoadXml(content);
             }
             catch (XmlException ex)
             {
+                var args = new UploadSvgEventArgs();
                 args.Messages.Add(
                     new DiagnosticMessage(SeverityLevel.Error, null,
                     "Invalid XML data found in uploaded SVG file.<br />" + ex.Message));
@@ -154,47 +156,61 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            // Search for the script
-            StringWriter swScript = new();
-            foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("sc:script"))
+            if (doc.DocumentElement.Name.ToLower() == "svg")
             {
-                if (node.ChildNodes.Count == 1 && node.ChildNodes[0] is XmlCDataSection cdata)
-                    swScript.WriteLine(cdata.Data);
-                else
-                    swScript.WriteLine(node.InnerText);
+                var args = new UploadSvgEventArgs();
+
+                // Search for the script
+                StringWriter swScript = new();
+                foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("sc:script"))
+                {
+                    if (node.ChildNodes.Count == 1 && node.ChildNodes[0] is XmlCDataSection cdata)
+                        swScript.WriteLine(cdata.Data);
+                    else
+                        swScript.WriteLine(node.InnerText);
+                }
+
+                // Search for the style
+                StringWriter swStyle = new();
+                foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
+                    swStyle.WriteLine(node.InnerText);
+
+                // Search for the version
+                var nodes = doc.DocumentElement.GetElementsByTagName("sc:version");
+                if (nodes.Count > 0)
+                    args.Version = nodes[0].InnerText;
+
+                // Call the event
+                args.Script = swScript.ToString();
+                args.Style = swStyle.ToString();
+                if (args.Script.Length == 0)
+                {
+                    args.Messages.Add(
+                        new DiagnosticMessage(SeverityLevel.Error, null,
+                        "No SimpleCircuit script metadata found in uploaded SVG file."));
+                }
+                else if (args.Style.Length == 0)
+                {
+                    args.Messages.Add(
+                        new DiagnosticMessage(SeverityLevel.Error, null,
+                        "No styling information found in uploaded SVG file."));
+                }
+
+                result = args;
             }
-
-            // Search for the style
-            StringWriter swStyle = new();
-            foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
-                swStyle.WriteLine(node.InnerText);
-
-            // Search for the version
-            var nodes = doc.DocumentElement.GetElementsByTagName("sc:version");
-            if (nodes.Count > 0)
-                args.Version = nodes[0].InnerText;
+            else if (doc.DocumentElement.Name.ToLower() == "symbols")
+            {
+                var args = new UploadLibraryEventArgs
+                {
+                    Document = doc
+                };
+                result = args;
+            }
 
             // Search for the file name
-            args.Filename = Path.GetFileNameWithoutExtension(e.File.Name);
-
-            // Call the event
-            args.Script = swScript.ToString();
-            args.Style = swStyle.ToString();
-            if (args.Script.Length == 0)
-            {
-                args.Messages.Add(
-                    new DiagnosticMessage(SeverityLevel.Error, null,
-                    "No SimpleCircuit script metadata found in uploaded SVG file."));
-            }
-            else if (args.Style.Length == 0)
-            {
-                args.Messages.Add(
-                    new DiagnosticMessage(SeverityLevel.Error, null,
-                    "No styling information found in uploaded SVG file."));
-            }
-
-            InternalFilename = args.Filename;
-            await Upload.InvokeAsync(args);
+            result.Filename = Path.GetFileNameWithoutExtension(e.File.Name);
+            InternalFilename = result.Filename;
+            await Upload.InvokeAsync(result);
         }
 
         protected async Task DownloadSVG()
