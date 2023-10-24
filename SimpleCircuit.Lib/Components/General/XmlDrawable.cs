@@ -91,7 +91,8 @@ namespace SimpleCircuit.Components.General
                 // Add the pins
                 Pins.Clear();
                 _extend.Clear();
-                AddPins(_pins, context);
+                if (_pins != null)
+                    AddPins(_pins, context);
                 return true;
             }
 

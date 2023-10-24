@@ -28,7 +28,15 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public IPin this[int index] => _pinsByIndex[index];
+        public IPin this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _pinsByIndex.Count)
+                    return null;
+                return _pinsByIndex[index];
+            }
+        }
 
         /// <summary>
         /// Adds a pin to the collection.
