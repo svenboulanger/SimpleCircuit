@@ -273,5 +273,8 @@
 
         [Diagnostic(SeverityLevel.Warning, "PW074", "Symbol '{0}' is missing a 'drawing' tag")]
         MissingSymbolDrawing,
+
+        [Diagnostic(SeverityLevel.Warning, "PW075", "Invalid marker '{0}'")]
+        InvalidMarker,
     }
 }

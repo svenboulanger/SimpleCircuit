@@ -442,10 +442,10 @@ namespace SimpleCircuit
         }
         private void DrawXmlVariant(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
-            string variant = node.Attributes["name"]?.Value;
-            if (string.IsNullOrWhiteSpace(variant))
+            string expression = node.Attributes["expression"]?.Value;
+            if (string.IsNullOrWhiteSpace(expression))
                 return;
-            var lexer = new VariantLexer(variant);
+            var lexer = new VariantLexer(expression);
             if (VariantParser.Parse(lexer, context))
                 DrawXmlActions(node, context, diagnostics);
         }
@@ -518,6 +518,9 @@ namespace SimpleCircuit
                 case "plus": markers.Add(new Plus()); break;
                 case "minus": markers.Add(new Minus()); break;
                 case "slash": markers.Add(new Slash()); break;
+                default:
+                    diagnostics?.Post(ErrorCodes.InvalidMarker, value);
+                    break;
             }
         }
         private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation)
