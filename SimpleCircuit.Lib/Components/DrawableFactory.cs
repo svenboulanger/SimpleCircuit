@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components
         {
             // Populate the metadata
             foreach (var attribute in GetType().GetCustomAttributes(false).OfType<DrawableAttribute>())
-                _metadata.Add(attribute.Metadata);
+                _metadata.Add(new DrawableMetadata(attribute.Key, attribute.Description, attribute.Category));
         }
 
         /// <summary>

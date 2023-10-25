@@ -33,6 +33,7 @@ namespace SimpleCircuitOnline.Pages
         private TabMenu _tabs;
         private Settings _settings = new();
         private bool _viewMode = false;
+        private ComponentList _componentList;
 
         private const string StandardStyle = "/* #STDSTYLE# */";
 
@@ -142,8 +143,7 @@ namespace SimpleCircuitOnline.Pages
                 {
                     foreach (var metadata in factory.Metadata)
                     {
-                        foreach (string key in metadata.Keys)
-                            keys.Add(new string[] { key, metadata.Description });
+                        keys.Add(new string[] { metadata.Key, metadata.Description });
                     }
                 }
                 await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
@@ -412,6 +412,21 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
+        private ParsingContext CreateParsingContext()
+        {
+            var context = new ParsingContext
+            {
+                Diagnostics = _logger
+            };
+
+            // Add the necessary libraries
+            foreach (var library in _libraries.Libraries.Values)
+            {
+                if (library.IsLoaded)
+                    context.Factory.Load(library.Library, _logger);
+            }
+            return context;
+        }
         private async Task ReloadLastScript()
         {
             if (_localStore != null)
@@ -519,17 +534,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 var code = await _scriptEditor.GetValue();
                 var style = await _styleEditor.GetValue();
-                var context = new ParsingContext
-                {
-                    Diagnostics = _logger
-                };
-
-                // Add the necessary libraries
-                foreach (var library in _libraries.Libraries.Values)
-                {
-                    if (library.IsLoaded)
-                        context.Factory.Load(library.Library, _logger);
-                }
+                var context = CreateParsingContext();
 
                 if (!_viewMode)
                 {
@@ -639,6 +644,11 @@ namespace SimpleCircuitOnline.Pages
                     StateHasChanged();
                 }
             }
+        }
+        private async Task UpdateLibraries()
+        {
+            await UpdateNow();
+            _componentList.Update(CreateParsingContext());
         }
 
         [GeneratedRegex("[\u0100-\uffff]")]

@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the key of the drawable.
         /// </summary>
-        public string[] Keys { get; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the description of the attribute.
@@ -22,12 +22,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the category of the attribute.
         /// </summary>
-        public string[] Categories { get; }
-
-        /// <summary>
-        /// Gets the metadata for the attribute.
-        /// </summary>
-        public DrawableMetadata Metadata => new(Keys, Description, Categories);
+        public string Category { get; }
 
         /// <summary>
         /// Creates a new attribute.
@@ -37,22 +32,9 @@ namespace SimpleCircuit.Components
         /// <param name="category">The category.</param>
         public DrawableAttribute(string key, string description, string category)
         {
-            Keys = new[] { key };
+            Key = key;
             Description = description;
-            Categories = new[] { category };
-        }
-
-        /// <summary>
-        /// Creates a new attribute.
-        /// </summary>
-        /// <param name="keys">The keys.</param>
-        /// <param name="description">The description.</param>
-        /// <param name="categories">The categories.</param>
-        public DrawableAttribute(string[] keys, string description, string[] categories)
-        {
-            Keys = keys;
-            Description = description;
-            Categories = categories;
+            Category = category;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets a key describing a drawable.
         /// </summary>
-        public string[] Keys { get; }
+        public string Key { get; }
 
         /// <summary>
         /// Gets the description of the drawable.
@@ -20,19 +20,19 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the category of the drawable.
         /// </summary>
-        public string[] Categories { get; }
+        public string Category { get; }
 
         /// <summary>
         /// Creates a new metadata.
         /// </summary>
-        /// <param name="keys">The key.</param>
+        /// <param name="key">The key.</param>
         /// <param name="description">The description.</param>
-        /// <param name="categories">The category.</param>
-        public DrawableMetadata(string[] keys, string description, string[] categories = null)
+        /// <param name="category">The category.</param>
+        public DrawableMetadata(string key, string description, string category = null)
         {
-            Keys = keys ?? throw new ArgumentNullException(nameof(keys));
+            Key = key ?? throw new ArgumentNullException(nameof(key));
             Description = description ?? throw new ArgumentNullException(nameof(description));
-            Categories = categories ?? new[] { "General" };
+            Category = category ?? "General";
         }
     }
 }

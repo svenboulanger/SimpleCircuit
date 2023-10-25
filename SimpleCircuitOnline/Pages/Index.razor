@@ -32,13 +32,13 @@
                         <GlobalOptionList Editor="_scriptEditor" />
                     </Expandable>
                     <Expandable Title="Components" Class="mt-2">
-                        <ComponentList />
+                        <ComponentList @ref="_componentList" />
                     </Expandable>
                 </div>
             </Tab>
             <Tab Title="Libraries">
                 <div class="content scrollable">
-                    <LibraryCollection @ref="_libraries" LibrariesChanged="UpdateNow" />
+                    <LibraryCollection @ref="_libraries" LibrariesChanged="UpdateLibraries" />
                 </div>
             </Tab>
         </TabMenu>

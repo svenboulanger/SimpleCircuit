@@ -38,8 +38,9 @@ namespace SimpleCircuit.Components.General
             // Extract the metadata
             _scale = 1.0;
             string description = definition.Attributes["description"]?.Value ?? string.Empty;
+            string category = definition.Attributes["category"]?.Value ?? "Custom";
             definition.Attributes["scale"]?.ParseScalar(diagnostics, out _scale, ErrorCodes.InvalidXmlScale);
-            _metadata = new(new[] { key }, description, new[] { "Symbol" });
+            _metadata = new(key, description, category);
 
             _pins = definition.SelectSingleNode("pins");
             _drawing = definition.SelectSingleNode("drawing");
@@ -107,10 +108,10 @@ namespace SimpleCircuit.Components.General
                                 // Read the pin properties
                                 string name = child.Attributes["name"]?.Value;
                                 string description = child.Attributes["description"]?.Value ?? "";
-                                child.Attributes["x"].ParseScalar(context.Diagnostics, out double x);
-                                child.Attributes["y"].ParseScalar(context.Diagnostics, out double y);
-                                child.Attributes["nx"].ParseScalar(context.Diagnostics, out double nx);
-                                child.Attributes["ny"].ParseScalar(context.Diagnostics, out double ny);
+                                child.Attributes["x"].ParseScalar(context?.Diagnostics, out double x);
+                                child.Attributes["y"].ParseScalar(context?.Diagnostics, out double y);
+                                child.Attributes["nx"].ParseScalar(context?.Diagnostics, out double nx);
+                                child.Attributes["ny"].ParseScalar(context?.Diagnostics, out double ny);
                                 string extend = child.Attributes["extend"]?.Value ?? "false";
                                 if (name == null)
                                 {

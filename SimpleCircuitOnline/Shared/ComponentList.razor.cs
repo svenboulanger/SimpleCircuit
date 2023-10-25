@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using SimpleCircuit;
-using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Parser;
 using System;
@@ -22,7 +21,7 @@ namespace SimpleCircuitOnline.Shared
             foreach (var term in _searchTerms)
             {
                 if (argument.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-                    argument.Metadata.Keys.Any(key => key.Contains(term, StringComparison.CurrentCultureIgnoreCase)) ||
+                    StringComparer.CurrentCultureIgnoreCase.Equals(argument.Metadata.Key, term) ||
                     argument.Variants.Contains(term))
                     count++;
             }
@@ -45,35 +44,36 @@ namespace SimpleCircuitOnline.Shared
             StateHasChanged();
         }
 
-        protected override void OnInitialized()
+        /// <summary>
+        /// Updates the list with the given parsing context.
+        /// </summary>
+        /// <param name="context"></param>
+        public void Update(ParsingContext context)
         {
-            base.OnInitialized();
-
-            // Find all the different components
-            var context = new ParsingContext();
+            _categories.Clear();
             var drawing = new SvgDrawing();
             foreach (var factory in context.Factory.Factories)
             {
                 foreach (var metadata in factory.Metadata)
                 {
                     // Let's add the metadata and a component of it for each category
-                    foreach (string category in metadata.Categories)
+                    string category = metadata.Category;
+                    if (!_categories.TryGetValue(category, out var list))
                     {
-                        if (!_categories.TryGetValue(category, out var list))
-                        {
-                            list = new();
-                            _categories.Add(category, list);
-                        }
-
-                        // Add our description
-                        var drawable = factory.Create(metadata.Keys[0], metadata.Keys[0], context.Options, context.Diagnostics);
-                        drawable.Reset(null);
-                        drawable.Render(drawing);
-                        var variants = drawable.Variants.Branches.ToHashSet(StringComparer.OrdinalIgnoreCase);
-                        list.Add((metadata, drawable, variants));
+                        list = new();
+                        _categories.Add(category, list);
                     }
+
+                    // Add our description
+                    var drawable = factory.Create(metadata.Key, metadata.Key, context.Options, context.Diagnostics);
+                    drawable.Reset(null);
+                    drawable.Render(drawing);
+                    var variants = drawable.Variants.Branches.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    list.Add((metadata, drawable, variants));
                 }
             }
+
+            StateHasChanged();
         }
     }
 }

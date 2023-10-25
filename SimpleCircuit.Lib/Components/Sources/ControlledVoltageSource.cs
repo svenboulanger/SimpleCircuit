@@ -7,7 +7,8 @@ namespace SimpleCircuit.Components.Sources
     /// <summary>
     /// A controlled voltage source.
     /// </summary>
-    [Drawable(new[] { "E", "H" }, "A controlled voltage source.", new[] { "Sources" })]
+    [Drawable("E", "A controlled voltage source.", "Sources")]
+    [Drawable("H", "A controlled voltage source.", "Sources")]
     public class ControlledVoltageSource : DrawableFactory
     {
         /// <inheritdoc />

@@ -9,15 +9,7 @@
     <div class="content">
         @if (Metadata != null)
         {
-            <h5>@{
-                for(int i = 0; i < Metadata.Keys.Length; i++)
-                {
-                    if (i > 0)
-                        @(", ")
-                    @Metadata.Keys[i]<small class="text-muted">name</small>
-                }
-                }
-            </h5>
+            <h5>@Metadata.Key<small class="text-muted">name</small></h5>
             <p>@(Metadata.Description)</p>
         }
         @if (Drawable != null)

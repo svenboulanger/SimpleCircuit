@@ -7,7 +7,8 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// An invertor.
     /// </summary>
-    [Drawable(new[] { "INV", "NOT" }, "An invertor.", new[] { "Digital" })]
+    [Drawable("INV", "An invertor.", "Digital")]
+    [Drawable("NOT", "An invertor.", "Digital")]
     public class Invertor : DrawableFactory
     {
         /// <inheritdoc />

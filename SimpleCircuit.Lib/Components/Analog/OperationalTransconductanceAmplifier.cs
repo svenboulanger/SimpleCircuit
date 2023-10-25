@@ -7,7 +7,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An Operational Transconductance Amplifier (OTA).
     /// </summary>
-    [Drawable(new[] { "OTA", "TA" }, "A transconductance amplifier.", new[] { "Analog" })]
+    [Drawable("TA", "A transconductance amplifier.", "Analog")]
+    [Drawable("OTA", "A transconductance amplifier.", "Analog")]
     public class OperationalTransconductanceAmplifier : DrawableFactory
     {
         private const string _differentialInput = "diffin";

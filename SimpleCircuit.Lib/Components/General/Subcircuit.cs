@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components
         {
             get
             {
-                yield return new(new[] { _key }, $"A subcircuit of type '{_key}'", new[] { "Subcircuit" });
+                yield return new(_key, $"A subcircuit of type '{_key}'", "Subcircuit");
             }
         }
 

@@ -52,6 +52,24 @@ namespace SimpleCircuit.Components
                 factories.Add(node.Factory);
         }
 
+        private void GetFactoriesAndMetadata(KeyNode node, Dictionary<IDrawableFactory, List<DrawableMetadata>> metadata)
+        {
+            foreach (var child in node.Continuations.Values)
+                GetFactoriesAndMetadata(child, metadata);
+            if (node.Factory != null)
+            {
+                if (!metadata.TryGetValue(node.Factory, out var list))
+                {
+                    list = new List<DrawableMetadata>();
+                    metadata.Add(node.Factory, list);
+                }
+                foreach (var md in node.Factory.Metadata)
+                {
+                    // Only include metadata that talks about this key.
+                }
+            }
+        }
+
         /// <summary>
         /// Registers a factory for drawables.
         /// </summary>
@@ -60,8 +78,9 @@ namespace SimpleCircuit.Components
         {
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
-            foreach (string key in factory.Metadata.SelectMany(metadata => metadata.Keys))
+            foreach (var metadata in factory.Metadata)
             {
+                string key = metadata.Key;
                 var elt = _root;
                 for (int i = 0; i < key.Length; i++)
                 {
