@@ -167,7 +167,8 @@ namespace SimpleCircuit
                     case "polyline": DrawXmlPolyline(node, diagnostics); break;
                     case "rect": DrawXmlRectangle(node, diagnostics); break;
                     case "text": DrawXmlText(node, context, diagnostics); break;
-                    case "variant": DrawXmlVariant(node, context, diagnostics); break;
+                    case "variant":
+                    case "v": DrawXmlVariant(node, context, diagnostics); break;
                     case "group":
                     case "g":
                         // Parse options

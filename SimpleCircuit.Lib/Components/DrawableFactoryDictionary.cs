@@ -86,13 +86,44 @@ namespace SimpleCircuit.Components
         public void Load(XmlDocument xml, IDiagnosticHandler diagnostics)
         {
             // Select all symbol tags from the root element
+            bool missingKeys = false;
             foreach (XmlNode symbol in xml.DocumentElement.SelectNodes("symbol"))
             {
+                // Get the key of the symbol
                 string key = symbol.Attributes["key"]?.Value;
+                if (string.IsNullOrEmpty(key))
+                {
+                    missingKeys = true;
+                    continue;
+                }
 
-                // Create an Xml Drawable from the XML node
-                var drawable = new XmlDrawable(key, symbol, diagnostics);
-                Register(drawable);
+                // Check whether the key is a valid one
+                bool isValid = char.IsLetter(key[0]);
+                if (isValid)
+                {
+                    for (int i = 1; i < key.Length; i++)
+                    {
+                        if (!char.IsLetterOrDigit(key[i]))
+                        {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+                if (isValid)
+                {
+                    // Create an Xml Drawable from the XML node
+                    var drawable = new XmlDrawable(key, symbol, diagnostics);
+                    Register(drawable);
+                }
+                else
+                {
+                    diagnostics?.Post(ErrorCodes.InvalidSymbolKey, key);
+                }
+            }
+            if (missingKeys)
+            {
+                diagnostics?.Post(ErrorCodes.MissingSymbolKey);
             }
         }
 

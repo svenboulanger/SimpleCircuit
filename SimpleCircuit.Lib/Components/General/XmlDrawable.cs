@@ -152,6 +152,7 @@ namespace SimpleCircuit.Components.General
                             break;
 
                         case "variant":
+                        case "v":
                             {
                                 // Check if the variant matches
                                 var value = child.Attributes["eval"]?.Value;

@@ -276,5 +276,11 @@
 
         [Diagnostic(SeverityLevel.Warning, "PW075", "Invalid marker '{0}'")]
         InvalidMarker,
+
+        [Diagnostic(SeverityLevel.Warning, "PW076", "One or more symbol keys are missing from the library.")]
+        MissingSymbolKey,
+
+        [Diagnostic(SeverityLevel.Error, "PE077", "The symbol key '{0}' is invalid. Only words are allowed.")]
+        InvalidSymbolKey,
     }
 }
