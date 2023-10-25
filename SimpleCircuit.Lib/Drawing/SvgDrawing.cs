@@ -863,7 +863,7 @@ namespace SimpleCircuit
                         });
                         
                         // Show the ID in the middle of the box
-                        Text(id, center, new());
+                        Text(id.Replace("_", "\\_"), center, new());
                     }
                 }
                 _current = parent ?? group;
