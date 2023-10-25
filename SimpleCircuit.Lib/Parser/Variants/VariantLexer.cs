@@ -32,6 +32,16 @@ namespace SimpleCircuit.Parser.Variants
                     Type = TokenType.EndOfContent;
                     break;
 
+                case '(':
+                    Type = TokenType.OpenBracket;
+                    ContinueToken();
+                    break;
+
+                case ')':
+                    Type = TokenType.CloseBracket;
+                    ContinueToken();
+                    break;
+
                 case '|':
                     Type = TokenType.Or;
                     ContinueToken();
@@ -109,6 +119,11 @@ namespace SimpleCircuit.Parser.Variants
                     ContinueToken();
                     while (char.IsLetterOrDigit(c = Char) || c == '_' || c == '-')
                         ContinueToken();
+                    break;
+
+                default:
+                    Type = TokenType.Variant;
+                    ContinueToken();
                     break;
             }
         }

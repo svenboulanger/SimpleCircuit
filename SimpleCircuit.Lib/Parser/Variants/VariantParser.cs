@@ -13,38 +13,54 @@
         /// <returns>Returns <c>true</c> if the variant expression is valid; otherwise, <c>false</c>.</returns>
         public static bool Parse(VariantLexer lexer, IVariantContext context)
         {
-            return Or(lexer, context);
+            return Or(lexer, context, true);
         }
 
-        private static bool Or(VariantLexer lexer, IVariantContext context)
+        private static bool Or(VariantLexer lexer, IVariantContext context, bool relevant)
         {
-            bool result = And(lexer, context);
+            bool result = And(lexer, context, relevant);
             while (lexer.Branch(TokenType.Or))
-                result |= And(lexer, context);
+            {
+                if (result)
+                    And(lexer, context, false);
+                else
+                    result |= And(lexer, context, relevant);
+            }
             return result;
         }
-        private static bool And(VariantLexer lexer, IVariantContext context)
+        private static bool And(VariantLexer lexer, IVariantContext context, bool relevant)
         {
-            bool result = Not(lexer, context);
+            bool result = Not(lexer, context, relevant);
             while (lexer.Branch(TokenType.And))
-                result &= Not(lexer, context);
+            {
+                if (!result)
+                    Not(lexer, context, false);
+                else
+                    result &= Not(lexer, context, relevant);
+            }
             return result;
         }
 
-        private static bool Not(VariantLexer lexer, IVariantContext context)
+        private static bool Not(VariantLexer lexer, IVariantContext context, bool relevant)
         {
             if (lexer.Branch(TokenType.Not))
-                return !Not(lexer, context);
-            return Variant(lexer, context);
+                return !Not(lexer, context, relevant);
+            return Variant(lexer, context, relevant);
         }
 
-        private static bool Variant(VariantLexer lexer, IVariantContext context)
+        private static bool Variant(VariantLexer lexer, IVariantContext context, bool relevant)
         {
             if (lexer.Branch(TokenType.Variant, out var token))
-                return context.Contains(token.Content.ToString());
+            {
+                if (relevant)
+                    return context.Contains(token.Content.ToString());
+                else
+                    return false;
+            }
+
             else if (lexer.Branch(TokenType.OpenBracket))
             {
-                var result = Or(lexer, context);
+                var result = Or(lexer, context, relevant);
                 if (!lexer.Branch(TokenType.CloseBracket))
                 {
                     lexer.Skip(TokenType.All);

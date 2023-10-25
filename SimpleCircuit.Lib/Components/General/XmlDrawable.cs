@@ -6,6 +6,7 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.General
 {
@@ -119,18 +120,22 @@ namespace SimpleCircuit.Components.General
             {
                 foreach (XmlNode child in pins.ChildNodes)
                 {
+                    if (!EvaluateVariants(child.Attributes?["variant"]?.Value, Variants))
+                        continue;
+
                     switch (child.Name)
                     {
                         case "pin":
                             {
                                 // Read the pin properties
-                                string name = child.Attributes["name"]?.Value;
+                                string name = child.Attributes?["name"]?.Value;
                                 string description = child.Attributes["description"]?.Value ?? "";
-                                child.Attributes["x"].ParseScalar(context?.Diagnostics, out double x);
-                                child.Attributes["y"].ParseScalar(context?.Diagnostics, out double y);
-                                child.Attributes["nx"].ParseScalar(context?.Diagnostics, out double nx);
-                                child.Attributes["ny"].ParseScalar(context?.Diagnostics, out double ny);
-                                string extend = child.Attributes["extend"]?.Value ?? "false";
+                                child.Attributes.ParseOptionalScalar("x", context?.Diagnostics, 0.0, out double x);
+                                child.Attributes.ParseOptionalScalar("y", context?.Diagnostics, 0.0, out double y);
+                                child.Attributes.ParseOptionalScalar("nx", context?.Diagnostics, 0.0, out double nx);
+                                child.Attributes.ParseOptionalScalar("ny", context?.Diagnostics, 0.0, out double ny);
+                                string extend = child.Attributes?["extend"]?.Value;
+                                
                                 if (name == null)
                                 {
                                     int c = Pins.Count;
@@ -141,30 +146,36 @@ namespace SimpleCircuit.Components.General
                                         name = c.ToString();
                                     }
                                 }
+                                else if (Pins.TryGetValue(name, out _))
+                                {
+                                    context?.Diagnostics?.Post(ErrorCodes.DuplicateSymbolPinName, name, Type);
+                                    continue;
+                                }
                                 if (extend == "true")
                                     _extend.Add(Pins.Count);
                                 if (nx.IsZero() && ny.IsZero())
                                     Pins.Add(new FixedPin(name, description, this, new(x, y)), name);
                                 else
                                     Pins.Add(new FixedOrientedPin(name, description, this, new(x, y), new(nx, ny)), name);
-
                             }
                             break;
 
                         case "variant":
                         case "v":
-                            {
-                                // Check if the variant matches
-                                var value = child.Attributes["eval"]?.Value;
-                                if (value == null)
-                                    continue;
-                                var lexer = new VariantLexer(value);
-                                if (VariantParser.Parse(lexer, Variants))
-                                    AddPins(child, context);
-                            }
+                            AddPins(child, context);
                             break;
                     }
                 }
+            }
+
+            private bool EvaluateVariants(string value, IVariantContext context)
+            {
+                if (value is null)
+                    return true;
+                if (string.IsNullOrWhiteSpace(value))
+                    return false;
+                var lexer = new VariantLexer(value);
+                return VariantParser.Parse(lexer, context);
             }
 
             /// <inheritdoc />

@@ -1,10 +1,12 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Diagrams.EntityRelationDiagram;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
+using SpiceSharp.Simulations.IntegrationMethods;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,25 +128,20 @@ namespace SimpleCircuit
         public void DrawXml(XmlNode description, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
             // Apply some scale if necessary
-            double scale = 1.0, rotate = 0.0;
             Vector2 offset = new();
             bool transform = false;
-            foreach (XmlAttribute attribute in description.Attributes)
+            bool success = true;
+            success &= description.Attributes.ParseOptionalScalar("scale", diagnostics, 1.0, out double scale);
+            success &= description.Attributes.ParseOptionalScalar("rotate", diagnostics, 0.0, out double rotate);
+            string strOffset = description.Attributes?["offset"]?.Value;
+            if (strOffset != null)
             {
-                switch (attribute.Name)
-                {
-                    case "scale": attribute.ParseScalar(diagnostics, out scale, ErrorCodes.InvalidXmlScale); transform = true; break;
-                    case "offset":
-                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
-                        lexer.ParseVector(diagnostics, out offset);
-                        transform = true;
-                        break;
-                    case "rotate": attribute.ParseScalar(diagnostics, out rotate, ErrorCodes.InvalidXmlRotation); transform = true; break;
-                    default:
-                        diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
-                        break;
-                }
+                var lexer = new SvgPathDataLexer(strOffset.AsMemory());
+                success &= lexer.ParseVector(diagnostics, out offset);
+                transform = true;
             }
+            if (!success)
+                return;
 
             if (transform)
                 BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
@@ -156,6 +153,9 @@ namespace SimpleCircuit
         {
             foreach (XmlNode node in parent.ChildNodes)
             {
+                if (!EvaluateVariants(node.Attributes?["variant"]?.Value, context))
+                    continue;
+
                 // Depending on the node type, let's draw something!
                 switch (node.Name)
                 {
@@ -168,25 +168,15 @@ namespace SimpleCircuit
                     case "rect": DrawXmlRectangle(node, diagnostics); break;
                     case "text": DrawXmlText(node, context, diagnostics); break;
                     case "variant":
-                    case "v": DrawXmlVariant(node, context, diagnostics); break;
+                    case "v":
+                        // Just recursive thingy
+                        DrawXmlActions(node, context, diagnostics);
+                        break;
                     case "group":
                     case "g":
                         // Parse options
                         GraphicOptions options = new();
-                        if (node.Attributes != null)
-                        {
-                            bool success = true;
-                            foreach (XmlAttribute attribute in node.Attributes)
-                            {
-                                if (!ParseGraphicOption(options, attribute))
-                                {
-                                    diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
-                                    success = false;
-                                }
-                            }
-                            if (!success)
-                                return;
-                        }
+                        ParseGraphicOptions(options, node);
                         BeginGroup(options);
                         DrawXmlActions(node, context,diagnostics);
                         EndGroup();
@@ -201,32 +191,18 @@ namespace SimpleCircuit
         {
             if (node.Attributes == null)
                 return;
-
-            double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
             bool success = true;
             GraphicOptions options = new();
             HashSet<Marker> startMarkers = null, endMarkers = null;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "x1": success &= attribute.ParseScalar(diagnostics, out x1); break;
-                    case "y1": success &= attribute.ParseScalar(diagnostics, out y1); break;
-                    case "x2": success &= attribute.ParseScalar(diagnostics, out x2); break;
-                    case "y2": success &= attribute.ParseScalar(diagnostics, out y2); break;
-                    default:
-                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
+            success &= node.Attributes.ParseOptionalScalar("x1", diagnostics, 0.0, out double x1);
+            success &= node.Attributes.ParseOptionalScalar("y1", diagnostics, 0.0, out double y1);
+            success &= node.Attributes.ParseOptionalScalar("x2", diagnostics, 0.0, out double x2);
+            success &= node.Attributes.ParseOptionalScalar("y2", diagnostics, 0.0, out double y2);
             if (!success)
                 return;
 
             // Draw the line
+            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
             Line(new(x1, y1), new(x2, y2), options);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1));
             DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1));
@@ -236,29 +212,16 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
-            List<Vector2> points = null;
-            bool success = true;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "points":
-                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
-                        points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
-                        break;
-
-                    default:
-                        if (!ParseGraphicOption(options, attribute))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
-            if (!success || points == null || points.Count <= 1)
+            string attr = node.Attributes?["points"]?.Value;
+            if (attr == null)
                 return;
+            var lexer = new SvgPathDataLexer(attr.AsMemory());
+            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+            if (points == null || points.Count <= 1)
+                return;
+
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node);
 
             // Draw the polygon
             Polygon(points, options);
@@ -268,30 +231,19 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
-            List<Vector2> points = null;
-            bool success = true;
             HashSet<Marker> startMarkers = null, endMarkers = null;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "points":
-                        var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
-                        points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
-                        break;
-
-                    default:
-                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
-            if (!success || points == null || points.Count <= 1)
+            string attr = node.Attributes?["points"]?.Value;
+            if (attr == null)
                 return;
+            var lexer = new SvgPathDataLexer(attr.AsMemory());
+            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+            if (points == null || points.Count <= 1)
+                return;
+            if (points == null || points.Count <= 1)
+                return;
+
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
 
             // Draw the polyline
             Polyline(points, options);
@@ -311,27 +263,15 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
             bool success = true;
-            double cx = 0, cy = 0, r = 0;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "cx": success &= attribute.ParseScalar(diagnostics, out cx); break;
-                    case "cy": success &= attribute.ParseScalar(diagnostics, out cy); break;
-                    case "r": success &= attribute.ParseScalar(diagnostics, out r); break;
-                    default:
-                        if (!ParseGraphicOption(options, attribute))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Value);
-                            success = false;
-                        }
-                        break;
-                }
-            }
+            success &= node.Attributes.ParseOptionalScalar("cx", diagnostics, 0.0, out double cx);
+            success &= node.Attributes.ParseOptionalScalar("cy", diagnostics, 0.0, out double cy);
+            success &= node.Attributes.ParseOptionalScalar("r", diagnostics, 0.0, out double r);
             if (!success)
                 return;
+
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node);
 
             // Draw the circle
             Circle(new(cx, cy), r, options);
@@ -341,26 +281,13 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
-            string pathData = null;
-            bool success = true;
             HashSet<Marker> startMarkers = null, endMarkers = null;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "d": pathData = attribute.Value; break;
-                    default:
-                        if (!ParseGraphicOption(options, attribute, diagnostics, ref startMarkers, ref endMarkers))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
-            if (!success)
+            string pathData = node.Attributes?["d"]?.Value;
+            if (string.IsNullOrWhiteSpace(pathData))
                 return;
+
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
@@ -380,30 +307,18 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
             bool success = true;
-            double x = 0, y = 0, width = 0, height = 0, rx = double.NaN, ry = double.NaN;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "x": success &= attribute.ParseScalar(diagnostics, out x); break;
-                    case "y": success &= attribute.ParseScalar(diagnostics, out y); break;
-                    case "width": success &= attribute.ParseScalar(diagnostics, out width); break;
-                    case "height": success &= attribute.ParseScalar(diagnostics, out height); break;
-                    case "rx": success &= attribute.ParseScalar(diagnostics, out rx); break;
-                    case "ry": success &= attribute.ParseScalar(diagnostics, out ry); break;
-                    default:
-                        if (!ParseGraphicOption(options, attribute))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
+            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("width", diagnostics, 0.0, out double width);
+            success &= node.Attributes.ParseOptionalScalar("height", diagnostics, 0.0, out double height);
+            success &= node.Attributes.ParseOptionalScalar("rx", diagnostics, double.NaN, out double rx);
+            success &= node.Attributes.ParseOptionalScalar("ry", diagnostics, double.NaN, out double ry);
             if (!success)
                 return;
+
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node);
 
             // Draw the rectangle
             this.Rectangle(x, y, width, height, rx, ry, options);
@@ -413,96 +328,53 @@ namespace SimpleCircuit
             if (node.Attributes == null)
                 return;
 
-            GraphicOptions options = new();
             bool success = true;
-            double x = 0, y = 0, nx = 0, ny = 0;
-            string value = null;
-            foreach (XmlAttribute attribute in node.Attributes)
-            {
-                switch (attribute.Name)
-                {
-                    case "x": success &= attribute.ParseScalar(diagnostics, out x); break;
-                    case "y": success &= attribute.ParseScalar(diagnostics, out y); break;
-                    case "nx": success &= attribute.ParseScalar(diagnostics, out nx); break;
-                    case "ny": success &= attribute.ParseScalar(diagnostics, out ny); break;
-                    case "value": value = attribute.Value; break;
-                    default:
-                        if (!ParseGraphicOption(options, attribute))
-                        {
-                            diagnostics?.Post(ErrorCodes.UnrecognizedXmlAttribute, attribute.Name, node.Name);
-                            success = false;
-                        }
-                        break;
-                }
-            }
+            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
             if (!success)
                 return;
+
+            string value = node.Attributes?["value"]?.Value;
+            GraphicOptions options = new();
+            ParseGraphicOptions(options, node);
+
             if (value != null && context != null)
                 value = context.TransformText(value);
             Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
         }
-        private void DrawXmlVariant(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        private void ParseGraphicOptions(GraphicOptions options, XmlNode node)
         {
-            string expression = node.Attributes["eval"]?.Value;
-            if (string.IsNullOrWhiteSpace(expression))
-                return;
-            var lexer = new VariantLexer(expression);
-            if (VariantParser.Parse(lexer, context))
-                DrawXmlActions(node, context, diagnostics);
-        }
-        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute)
-        {
-            switch (attribute.Name)
+            options.Style = node.Attributes?["style"]?.Value;
+            string classes = node.Attributes?["class"]?.Value;
+            if (!string.IsNullOrWhiteSpace(classes))
             {
-                case "style":
-                    options.Style = attribute.Value;
-                    break;
-
-                case "class":
-                    foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-                        options.Classes.Add(name);
-                    break;
-
-                default:
-                    return false;
+                foreach (string name in classes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                    options.Classes.Add(name);
             }
-            return true;
         }
-        private bool ParseGraphicOption(GraphicOptions options, XmlAttribute attribute, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private void ParseGraphicOptions(GraphicOptions options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
-            switch (attribute.Name)
+            ParseGraphicOptions(options, node);
+
+            string markers = node.Attributes?["marker-start"]?.Value;
+            if (!string.IsNullOrWhiteSpace(markers))
             {
-                case "style":
-                    options.Style = attribute.Value;
-                    break;
-
-                case "class":
-                    foreach (string name in attribute.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-                        options.Classes.Add(name);
-                    break;
-
-                case "marker-start":
-                    {
-                        startMarkers ??= new HashSet<Marker>();
-                        var lexer = new MarkerLexer(attribute.Value);
-                        while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                            AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
-                    }
-                    break;
-
-                case "marker-end":
-                    {
-                        endMarkers ??= new HashSet<Marker>();
-                        var lexer = new MarkerLexer(attribute.Value);
-                        while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                            AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
-                    }
-                    break;
-
-                default:
-                    return false;
+                startMarkers ??= new HashSet<Marker>();
+                var lexer = new MarkerLexer(markers);
+                while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
+                    AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
             }
-            return true;
+
+            markers = node.Attributes?["marker-end"]?.Value;
+            if (!string.IsNullOrWhiteSpace(markers))
+            {
+                endMarkers ??= new HashSet<Marker>();
+                var lexer = new MarkerLexer(markers);
+                while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
+                    AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
+            }
         }
         private void AddMarker(HashSet<Marker> markers, string value, IDiagnosticHandler diagnostics)
         {
@@ -538,6 +410,15 @@ namespace SimpleCircuit
                 marker.Orientation = orientation;
                 marker.Draw(this);
             }
+        }
+        private bool EvaluateVariants(string value, IVariantContext context)
+        {
+            if (value is null)
+                return true;
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            var lexer = new VariantLexer(value);
+            return VariantParser.Parse(lexer, context);
         }
 
         /// <summary>
@@ -845,7 +726,7 @@ namespace SimpleCircuit
                 // Draw a rectangle on top of the group to show
                 if (RenderBounds && group.ParentNode != null)
                 {
-                    string id = group.Attributes["id"]?.Value;
+                    string id = group.Attributes?["id"]?.Value;
                     if (!string.IsNullOrWhiteSpace(id))
                     {
                         var b = bounds.Bounds;

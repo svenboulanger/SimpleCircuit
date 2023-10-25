@@ -58,6 +58,39 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Parses an optional scalar value.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="defValue">The default value.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="errorCode">An optional error code for invalid scalars.</param>
+        /// <returns>Returns <c>true</c> if the read was successful; otherwise, <c>false</c>.</returns>
+        public static bool ParseOptionalScalar(this XmlAttributeCollection attributes, string name, IDiagnosticHandler diagnostics, double defValue, out double result, ErrorCodes errorCode = ErrorCodes.InvalidXmlCoordinate)
+        {
+            if (attributes == null)
+            {
+                result = defValue;
+                return true;
+            }
+
+            var attribute = attributes[name];
+            if (attribute == null)
+            {
+                result = defValue;
+                return true;
+            }
+
+            if (!double.TryParse(attribute.Value, NumberStyles.Float, Culture, out result))
+            {
+                diagnostics?.Post(errorCode, attribute, attribute.ParentNode.Name);
+                result = 0.0;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Parse a coordinate attribute on an XML node.
         /// </summary>
         /// <param name="node">The XML node.</param>
