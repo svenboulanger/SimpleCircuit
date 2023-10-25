@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A light.
     /// </summary>
-    [Drawable("LIGHT", "A light point.", "Outputs")]
+    [Drawable("LIGHT", "A light point.", "Outputs", "direction directional diverging projector emergency wall arei")]
     public class Light : DrawableFactory
     {
         private const string _direction = "direction";

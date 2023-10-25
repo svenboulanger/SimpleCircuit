@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Inputs
     /// <summary>
     /// A connector.
     /// </summary>
-    [Drawable("CONN", "A connector or fastener.", "Inputs")]
+    [Drawable("CONN", "A connector or fastener.", "Inputs", "male female")]
     public class Connector : DrawableFactory
     {
         private const string _male = "male";

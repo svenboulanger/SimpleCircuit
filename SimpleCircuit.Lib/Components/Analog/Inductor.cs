@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An inductor.
     /// </summary>
-    [Drawable("L", "An inductor.", "Analog")]
+    [Drawable("L", "An inductor.", "Analog", "choke programmable")]
     public class Inductor : DrawableFactory
     {
         private const string _dot = "dot";

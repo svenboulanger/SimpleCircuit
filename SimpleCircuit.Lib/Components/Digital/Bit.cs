@@ -4,7 +4,6 @@ using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components.Digital
@@ -12,7 +11,7 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// A bit vector.
     /// </summary>
-    [Drawable("BIT", "A bit vector.", "Digital")]
+    [Drawable("BIT", "A bit vector.", "Digital", "bits literal binary bin")]
     public class Bit : DrawableFactory
     {
         /// <inheritdoc />

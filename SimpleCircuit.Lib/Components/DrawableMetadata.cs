@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -21,6 +22,11 @@ namespace SimpleCircuit.Components
         /// Gets the category of the drawable.
         /// </summary>
         public string Category { get; }
+
+        /// <summary>
+        /// Gets keywords associated with the drawable.
+        /// </summary>
+        public HashSet<string> Keywords { get; } = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Creates a new metadata.

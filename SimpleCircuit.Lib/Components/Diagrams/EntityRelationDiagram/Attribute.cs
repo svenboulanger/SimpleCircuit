@@ -6,7 +6,7 @@ using SimpleCircuit.Components.Labeling;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
-    [Drawable("ATTR", "An entity-relationship diagram attribute.", "ERD")]
+    [Drawable("ATTR", "An entity-relationship diagram attribute.", "ERD", "ellipse")]
     public class Attribute : DrawableFactory
     {
         protected override IDrawable Factory(string key, string name)

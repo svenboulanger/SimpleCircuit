@@ -9,10 +9,10 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An MOS transistor.
     /// </summary>
-    [Drawable("MN", "An n-type mosfet. The bulk connection is optional.", "Analog")]
-    [Drawable("NMOS", "An n-type mosfet. The bulk connection is optional.", "Analog")]
-    [Drawable("MP", "A p-type mosfet. The bulk connection is optional.", "Analog")]
-    [Drawable("PMOS", "A p-type mosfet. The bulk connection is optional.", "Analog")]
+    [Drawable("MN", "An n-type mosfet. The bulk connection is optional.", "Analog", "packaged depletion")]
+    [Drawable("NMOS", "An n-type mosfet. The bulk connection is optional.", "Analog", "packaged depletion")]
+    [Drawable("MP", "A p-type mosfet. The bulk connection is optional.", "Analog", "packaged depletion")]
+    [Drawable("PMOS", "A p-type mosfet. The bulk connection is optional.", "Analog", "packaged depletion")]
     public class Mofset : DrawableFactory
     {
         private const string _packaged = "packaged";

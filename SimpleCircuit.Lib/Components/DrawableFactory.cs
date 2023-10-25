@@ -23,7 +23,12 @@ namespace SimpleCircuit.Components
             // Populate the metadata
             foreach (var attribute in GetType().GetCustomAttributes(false).OfType<DrawableAttribute>())
             {
-                _metadata[attribute.Key] = new DrawableMetadata(attribute.Key, attribute.Description, attribute.Category);
+                var metadata = _metadata[attribute.Key] = new DrawableMetadata(attribute.Key, attribute.Description, attribute.Category);
+                if (!string.IsNullOrWhiteSpace(attribute.Keywords))
+                {
+                    foreach (string keyword in attribute.Keywords.Split(new[] { ' ', ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries))
+                        metadata.Keywords.Add(keyword);
+                }
             }
         }
 

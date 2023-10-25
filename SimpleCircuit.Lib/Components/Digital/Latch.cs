@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// A latch.
     /// </summary>
-    [Drawable("LATCH", "A general latch.", "Digital")]
+    [Drawable("LATCH", "A general latch.", "Digital", "level trigger")]
     public class Latch : DrawableFactory
     {
         /// <inheritdoc />

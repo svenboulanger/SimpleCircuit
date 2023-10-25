@@ -1,8 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
-
-namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("SUB", "Subtraction", "Modeling")]
+    [Drawable("SUB", "Subtraction.", "Modeling", "minus difference")]
     internal class Subtraction : DrawableFactory
     {
         /// <inheritdoc />

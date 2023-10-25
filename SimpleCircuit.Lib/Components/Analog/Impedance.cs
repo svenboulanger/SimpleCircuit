@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
@@ -7,8 +6,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An impedance/admittance.
     /// </summary>
-    [Drawable("Z", "An impedance.", "Analog")]
-    [Drawable("Y", "An admittance.", "Analog")]
+    [Drawable("Z", "An impedance.", "Analog", "programmable")]
+    [Drawable("Y", "An admittance.", "Analog", "programmable")]
     public class Impedance : DrawableFactory
     {
         private const string _programmable = "programmable";

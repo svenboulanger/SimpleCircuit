@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A resistor.
     /// </summary>
-    [Drawable("R", "A resistor, potentially programmable.", "Analog")]
+    [Drawable("R", "A resistor, potentially programmable.", "Analog", "programmable photo photoresistor thermistor memristor")]
     public class ResistorFactory : DrawableFactory
     {
         private const string _programmable = "programmable";

@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A speaker.
     /// </summary>
-    [Drawable("SPEAKER", "A speaker.", "Outputs")]
+    [Drawable("SPEAKER", "A speaker.", "Outputs", "sound music audio")]
     public class Speaker : DrawableFactory
     {
         private const string _off = "off";

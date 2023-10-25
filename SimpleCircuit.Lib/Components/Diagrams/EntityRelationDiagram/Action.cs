@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
-    [Drawable("ACT", "An entity-relationship diagram action.", "ERD")]
+    [Drawable("ACT", "An entity-relationship diagram action.", "ERD", "diamond")]
     public class Action : DrawableFactory
     {
         /// <inheritdoc />

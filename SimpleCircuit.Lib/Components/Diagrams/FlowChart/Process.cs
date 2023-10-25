@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
-    [Drawable("FP", "A Flowchart process.", "Flowchart")]
+    [Drawable("FP", "A Flowchart process.", "Flowchart", "box rectangle")]
     public class Process : DrawableFactory
     {
         /// <inheritdoc />

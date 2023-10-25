@@ -1,10 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
-
-namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("OSC", "An oscillator", "Modeling")]
+    [Drawable("OSC", "An oscillator.", "Modeling", "source generator")]
     public class Oscillator : DrawableFactory
     {
         /// <inheritdoc />

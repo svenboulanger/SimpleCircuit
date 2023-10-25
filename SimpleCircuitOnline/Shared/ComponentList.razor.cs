@@ -18,8 +18,9 @@ namespace SimpleCircuitOnline.Shared
             int count = 0;
             foreach (var term in _searchTerms)
             {
-                if (item.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-                    StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term))
+                if (StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term) ||
+                    item.Metadata.Keywords.Contains(term) ||
+                    item.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase))
                     count++;
             }
             return count == _searchTerms.Count;

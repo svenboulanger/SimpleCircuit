@@ -1,6 +1,6 @@
 ﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("DIFF", "A differentiator.", "Modeling")]
+    [Drawable("DIFF", "A differentiator.", "Modeling", "derivative")]
     public class Differentiator : DrawableFactory
     {
         /// <inheritdoc />

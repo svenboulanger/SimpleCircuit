@@ -7,8 +7,8 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A ground terminal.
     /// </summary>
-    [Drawable("GND", "A common ground symbol.", "General")]
-    [Drawable("SGND", "A signal ground symbol.", "General")]
+    [Drawable("GND", "A common ground symbol.", "General", "earth chassis vss vee")]
+    [Drawable("SGND", "A signal ground symbol.", "General", "earth chassis vss vee")]
     public class Ground : DrawableFactory
     {
         private const string _earth = "earth";

@@ -2,7 +2,7 @@
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("CIRC", "A circulator", "Modeling")]
+    [Drawable("CIRC", "A circulator.", "Modeling", "rotate")]
     public class Circulator : DrawableFactory
     {
         /// <inheritdoc />

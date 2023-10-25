@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A capacitor.
     /// </summary>
-    [Drawable("C", "A capacitor.", "Analog")]
+    [Drawable("C", "A capacitor.", "Analog", "electrolytic programmable sensor")]
     public class Capacitor : DrawableFactory
     {
         private const string _curved = "curved";

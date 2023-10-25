@@ -1,13 +1,11 @@
 ﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     /// <summary>
     /// A modeling block.
     /// </summary>
-    [Drawable("BLOCK", "A generic block with text", "Modeling")]
+    [Drawable("BLOCK", "A generic block with text.", "Modeling", "box rectangle")]
     public class Block : DrawableFactory
     {
         /// <inheritdoc />

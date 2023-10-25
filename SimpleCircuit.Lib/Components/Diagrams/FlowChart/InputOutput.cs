@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
-    [Drawable("FIO", "A Flowchart Input/Output.", "Flowchart")]
+    [Drawable("FIO", "A Flowchart Input/Output.", "Flowchart", "parallelogram")]
     public class InputOutput : DrawableFactory
     {
         /// <inheritdoc />

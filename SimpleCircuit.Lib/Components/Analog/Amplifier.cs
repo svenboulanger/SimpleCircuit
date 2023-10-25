@@ -7,8 +7,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A factory for amplifiers.
     /// </summary>
-    [Drawable("A", "A generic amplifier.", "Analog")]
-    [Drawable("OA", "An operational amplifier.", "Analog")]
+    [Drawable("A", "A generic amplifier.", "Analog", "schmitt trigger comparator programmable")]
+    [Drawable("OA", "An operational amplifier.", "Analog", "schmitt trigger comparator programmable")]
     public class Amplifier : DrawableFactory
     {
         private const string _differentialInput = "diffin";

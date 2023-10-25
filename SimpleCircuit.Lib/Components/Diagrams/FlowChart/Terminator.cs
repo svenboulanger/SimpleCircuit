@@ -1,11 +1,10 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
-    [Drawable("FT", "A Flowchart Terminator.", "Flowchart")]
+    [Drawable("FT", "A Flowchart Terminator.", "Flowchart", "pill")]
     public class Terminator : DrawableFactory
     {
         /// <inheritdoc />

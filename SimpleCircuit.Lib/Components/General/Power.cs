@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A factory for power planes.
     /// </summary>
-    [Drawable("POW", "A power plane.", "General")]
+    [Drawable("POW", "A power plane.", "General", "vdd vcc vss vee")]
     public class PowerFactory : DrawableFactory
     {
         /// <inheritdoc />

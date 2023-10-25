@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A wall plug.
     /// </summary>
-    [Drawable("WP", "A wall plug.", "Outputs")]
+    [Drawable("WP", "A wall plug.", "Outputs", "earth child proof sealed")]
     public class Plug : DrawableFactory
     {
         private const string _earth = "earth";

@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Outputs;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital

@@ -1,10 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
-
-namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("FILT", "A filter", "Modeling")]
+    [Drawable("FILT", "A filter", "Modeling", "lowpass highpass bandpass low high band")]
     public class Filter : DrawableFactory
     {
         /// <inheritdoc />

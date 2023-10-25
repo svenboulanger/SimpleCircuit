@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A factory for a terminal.
     /// </summary>
-    [Drawable("T", "A common terminal symbol.", "General")]
+    [Drawable("T", "A common terminal symbol.", "General", "in input out output other pad square")]
     public class TerminalFactory : DrawableFactory
     {
         /// <inheritdoc />

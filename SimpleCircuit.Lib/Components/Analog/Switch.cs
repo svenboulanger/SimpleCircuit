@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A switch.
     /// </summary>
-    [Drawable("S", "A switch. The controlling pin is optional.", "Analog")]
+    [Drawable("S", "A switch. The controlling pin is optional.", "Analog", "push lamp window toggle knife reed arei")]
     public class Switch : DrawableFactory
     {
         private const string _closed = "closed";

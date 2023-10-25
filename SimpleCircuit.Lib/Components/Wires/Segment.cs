@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Wires
     /// <summary>
     /// A wire segment that has a bit more information.
     /// </summary>
-    [Drawable("SEG", "A wire segment.", "Wires")]
+    [Drawable("SEG", "A wire segment.", "Wires", "underground air tube inwall onwall arei")]
     public class Segment : DrawableFactory
     {
         /// <inheritdoc />

@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A fixed household appliance.
     /// </summary>
-    [Drawable("APP", "A fixed household appliance.", "Outputs")]
+    [Drawable("APP", "A fixed household appliance.", "Outputs", "ventilator heater boiler cooking microwave overn washer dryer dishwasher refrigerator fridge freezer accu arei")]
     public class Appliance : DrawableFactory
     {
         private const string _ventilator = "ventilator";

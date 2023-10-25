@@ -4,7 +4,7 @@ using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
 {
-    [Drawable("CUT", "A wire cut.", "Wires")]
+    [Drawable("CUT", "A wire cut.", "Wires", "break arei")]
     public class Cut : DrawableFactory
     {
         /// <inheritdoc />

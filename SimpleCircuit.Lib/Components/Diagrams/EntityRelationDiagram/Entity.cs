@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
-    [Drawable("ENT", "An entity-relationship diagram entity.", "ERD")]
+    [Drawable("ENT", "An entity-relationship diagram entity. Any label after the first will be added as an attribute.", "ERD", "box rectangle")]
     public class Entity : DrawableFactory
     {
         /// <inheritdoc />

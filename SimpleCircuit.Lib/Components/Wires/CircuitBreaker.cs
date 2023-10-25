@@ -4,7 +4,7 @@ using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
 {
-    [Drawable("CB", "A circuit breaker.", "Wires")]
+    [Drawable("CB", "A circuit breaker.", "Wires", "automatic arei")]
     public class CircuitBreaker : DrawableFactory
     {
         /// <inheritdoc />

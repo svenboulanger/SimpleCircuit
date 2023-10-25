@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A diode.
     /// </summary>
-    [Drawable("D", "A diode.", "Analog")]
+    [Drawable("D", "A diode.", "Analog", "varactor zener tunnel schottky schockley photodiode led laser tvs")]
     public class Diode : DrawableFactory
     {
         private const string _varactor = "varactor";

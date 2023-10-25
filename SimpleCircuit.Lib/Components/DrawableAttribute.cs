@@ -25,16 +25,23 @@ namespace SimpleCircuit.Components
         public string Category { get; }
 
         /// <summary>
+        /// Gets the keywords of the attribute.
+        /// </summary>
+        public string Keywords { get; }
+
+        /// <summary>
         /// Creates a new attribute.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="description">The description.</param>
         /// <param name="category">The category.</param>
-        public DrawableAttribute(string key, string description, string category)
+        /// <param name="keywords">The keywords.</param>
+        public DrawableAttribute(string key, string description, string category, string keywords = null)
         {
             Key = key;
             Description = description;
             Category = category;
+            Keywords = keywords;
         }
     }
 }

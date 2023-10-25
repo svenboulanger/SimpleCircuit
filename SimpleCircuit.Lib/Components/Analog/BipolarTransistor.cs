@@ -7,10 +7,10 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A bipolar transistor.
     /// </summary>
-    [Drawable("QN", "An NPN bipolar transistor.", "Analog")]
-    [Drawable("NPN", "An NPN bipolar transistor.", "Analog")]
-    [Drawable("QP", "A PNP bipolar transistor.", "Analog")]
-    [Drawable("PNP", "A PNP bipolar transistor.", "Analog")]
+    [Drawable("QN", "An NPN bipolar transistor.", "Analog", "packaged")]
+    [Drawable("NPN", "An NPN bipolar transistor.", "Analog", "packaged")]
+    [Drawable("QP", "A PNP bipolar transistor.", "Analog", "packaged")]
+    [Drawable("PNP", "A PNP bipolar transistor.", "Analog", "packaged")]
     public class BipolarTransistor : DrawableFactory
     {
         private const string _packaged = "packaged";

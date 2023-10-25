@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Outputs;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -7,7 +6,7 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// A flip-flop.
     /// </summary>
-    [Drawable("FF", "A general flip-flop.", "Digital")]
+    [Drawable("FF", "A general flip-flop.", "Digital", "edge trigger")]
     public class FlipFlop : DrawableFactory
     {
         /// <inheritdoc />

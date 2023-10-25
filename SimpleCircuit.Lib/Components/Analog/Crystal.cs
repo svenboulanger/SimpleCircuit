@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog

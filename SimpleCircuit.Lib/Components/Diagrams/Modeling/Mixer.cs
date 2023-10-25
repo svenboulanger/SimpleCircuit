@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("MIX", "A mixer", "Modeling")]
+    [Drawable("MIX", "A mixer", "Modeling", "x")]
     public class Mixer : DrawableFactory
     {
         /// <inheritdoc />

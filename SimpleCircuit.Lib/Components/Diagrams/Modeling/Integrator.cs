@@ -1,13 +1,10 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
-    [Drawable("INT", "An integrator.", "Modeling")]
+    [Drawable("INT", "An integrator.", "Modeling", "sum")]
     public class Integrator : DrawableFactory
     {
         /// <inheritdoc />

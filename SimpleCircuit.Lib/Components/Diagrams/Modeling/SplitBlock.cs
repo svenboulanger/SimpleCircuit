@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
     /// <summary>
     /// A split block.
     /// </summary>
-    [Drawable("SPLIT", "A block with a split line", "Modeling")]
+    [Drawable("SPLIT", "A block with a split line.", "Modeling")]
     public class SplitBlock : DrawableFactory
     {
         protected override IDrawable Factory(string key, string name)
