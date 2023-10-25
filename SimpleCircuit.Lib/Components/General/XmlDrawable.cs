@@ -42,13 +42,20 @@ namespace SimpleCircuit.Components.General
             _scale = 1.0;
             string description = definition.Attributes["description"]?.Value ?? string.Empty;
             string category = definition.Attributes["category"]?.Value ?? "Custom";
+            string keywords = definition.Attributes["keywords"]?.Value ?? string.Empty;
             definition.Attributes["scale"]?.ParseScalar(diagnostics, out _scale, ErrorCodes.InvalidXmlScale);
-            _metadata = new(key, description, category);
 
+            _metadata = new(key, description, category);
+            foreach (string keyword in keywords.Split(new[] { ' ', ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries))
+                _metadata.Keywords.Add(keyword);
+
+            // Extract the pin definition
             _pins = definition.SelectSingleNode("pins");
-            _drawing = definition.SelectSingleNode("drawing");
             if (_pins == null)
                 diagnostics.Post(ErrorCodes.MissingSymbolPins, key);
+
+            // Extract the graphical definition
+            _drawing = definition.SelectSingleNode("drawing");
             if (_drawing == null)
                 diagnostics.Post(ErrorCodes.MissingSymbolDrawing, key);
         }
