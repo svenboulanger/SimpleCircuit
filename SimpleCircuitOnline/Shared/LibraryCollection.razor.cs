@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace SimpleCircuitOnline.Shared
@@ -10,15 +11,37 @@ namespace SimpleCircuitOnline.Shared
     public partial class LibraryCollection
     {
         public const string Storage = "libraries";
+        public const string LibraryPrefix = "lib:";
 
         public class LibraryItem
         {
-            public XmlDocument Library { get; }
+            private XmlDocument _doc = null;
+
+            public string Encoded { get; set; }
+
             public bool IsLoaded { get; set; }
-            public LibraryItem(bool isLoaded, XmlDocument library)
+
+            public XmlDocument Library
+            {
+                get
+                {
+                    if (_doc == null)
+                    {
+                        var bytes = Convert.FromBase64String(Encoded);
+                        _doc = new XmlDocument();
+                        using var inputStream = new MemoryStream(bytes);
+                        using System.IO.Compression.GZipStream gzip = new(inputStream, System.IO.Compression.CompressionMode.Decompress);
+                        _doc.Load(gzip);
+                    }
+                    return _doc;
+                }
+                set => _doc = value;
+            }
+            public LibraryItem(bool isLoaded, string encoded, XmlDocument document = null)
             {
                 IsLoaded = isLoaded;
-                Library = library;
+                Encoded = encoded;
+                _doc = document;
             }
         }
 
@@ -38,33 +61,16 @@ namespace SimpleCircuitOnline.Shared
         {
             base.OnInitialized();
 
-            string libraries = await _localStore.GetItemAsStringAsync(Storage);
-            if (!string.IsNullOrWhiteSpace(libraries))
+            // Get a list of libraries
+            string storage = await _localStore.GetItemAsStringAsync(Storage);
+            if (!string.IsNullOrWhiteSpace(storage))
             {
-                string[] entries = libraries.Split(';');
-                if (entries.Length % 3 == 0)
+                string[] libraries = storage.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                foreach (string name in libraries)
                 {
-                    for (int i = 0; i < entries.Length; i += 3)
-                    {
-                        if (string.IsNullOrWhiteSpace(entries[i]) ||
-                            string.IsNullOrWhiteSpace(entries[i + 1]) ||
-                            string.IsNullOrWhiteSpace(entries[i + 2]))
-                            continue;
-
-                        // Decode the library, and parse it as an XmlDocument
-                        // Use GZip decompression
-                        var bytes = Convert.FromBase64String(entries[i + 2]);
-                        var doc = new XmlDocument();
-                        using var inputStream = new MemoryStream(bytes);
-                        using (System.IO.Compression.GZipStream gzip = new(inputStream,
-                            System.IO.Compression.CompressionMode.Decompress))
-                        {
-                            doc.Load(gzip);
-                        }
-
-                        // Add the document
-                        Libraries.Add(entries[i], new LibraryItem(entries[i + 1] == "1", doc));
-                    }
+                    string encoded = await _localStore.GetItemAsStringAsync($"{name}:xml");
+                    bool loaded = await _localStore.GetItemAsStringAsync($"{name}:loaded") == "1";
+                    Libraries.Add(name, new LibraryItem(loaded, encoded));
                 }
                 StateHasChanged();
             }
@@ -74,23 +80,10 @@ namespace SimpleCircuitOnline.Shared
         /// Toggles the loaded status of the library item.
         /// </summary>
         /// <param name="item">The item.</param>
-        protected async void Toggle(string name, LibraryItem item)
+        protected async Task Toggle(string name, LibraryItem item)
         {
             item.IsLoaded = !item.IsLoaded;
-
-            string libraries = await _localStore.GetItemAsStringAsync(Storage);
-            if (!string.IsNullOrWhiteSpace(libraries))
-            {
-                string key = $"{name};";
-                int index = libraries.IndexOf($"{name};");
-                if (index >= 0)
-                {
-                    index += key.Length;
-                    libraries = libraries.Substring(0, index) + (item.IsLoaded ? "1" : "0") + libraries.Substring(index + 1);
-                    await _localStore.SetItemAsStringAsync(Storage, libraries);
-                }
-            }
-
+            await _localStore.SetItemAsStringAsync($"{name}:loaded", item.IsLoaded ? "1" : "0");
             StateHasChanged();
             await LibrariesChanged.InvokeAsync(this);
         }
@@ -98,13 +91,16 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Clears all libraries from the local memory.
         /// </summary>
-        public async void Clear()
+        public async Task Clear()
         {
-            if (Libraries.Count == 0)
-                return;
-
-            Libraries.Clear();
+            // We will clear any entries that end with ":xml" or ":loaded"
+            foreach (string key in await _localStore.KeysAsync())
+            {
+                if (key.EndsWith(":loaded") || key.EndsWith(":xml"))
+                    await _localStore.RemoveItemAsync(key);
+            }
             await _localStore.RemoveItemAsync(Storage);
+            Libraries.Clear();
             StateHasChanged();
             await LibrariesChanged.InvokeAsync(this);
         }
@@ -113,64 +109,49 @@ namespace SimpleCircuitOnline.Shared
         /// Adds a library to the local memory.
         /// </summary>
         /// <param name="name">The name of the library.</param>
-        /// <param name="doc">The library contents.</param>
+        /// <param name="doc">The library content document.</param>
         public async void Add(string name, XmlDocument doc)
         {
-            
-            // Append this library to the previously stored library
-            string libraries = await _localStore.GetItemAsStringAsync(Storage);
-            bool isLoaded = true;
-
-            if (Libraries.TryGetValue(name, out var existing))
-            {
-                isLoaded = existing.IsLoaded;
-                Remove(name);
-            }
-
-            // Add the library to our documents
-            Libraries.Add(name, new LibraryItem(isLoaded, doc));
-
-            // Store the library in local memory
+            // Compress the library contents for later use
             using MemoryStream output = new();
             using (System.IO.Compression.GZipStream gzip = new(output, System.IO.Compression.CompressionLevel.SmallestSize))
             {
                 doc.Save(gzip);
             }
-            if (string.IsNullOrWhiteSpace(libraries))
-                libraries = name + ";1;" + Convert.ToBase64String(output.ToArray());
-            else
-                libraries += ";" + name + ";1;" + Convert.ToBase64String(output.ToArray());
+            string encoded = Convert.ToBase64String(output.ToArray());
 
-            // Save
-            await _localStore.SetItemAsStringAsync(Storage, libraries);
+            // Store this information in the local storage memory
+            await _localStore.SetItemAsStringAsync($"{name}:loaded", "1");
+            await _localStore.SetItemAsStringAsync($"{name}:xml", encoded);
+
+            if (Libraries.TryGetValue(name, out var existing))
+            {
+                existing.IsLoaded = true;
+                existing.Encoded = encoded;
+                existing.Library = doc;
+            }
+            else
+            {
+                // Add it to the list of entries in our total storage
+                Libraries.Add(name, new LibraryItem(true, encoded, doc));
+                await _localStore.SetItemAsStringAsync(Storage, string.Join(";", Libraries.Keys));
+            }
             StateHasChanged();
             await LibrariesChanged.InvokeAsync(this);
         }
 
+        /// <summary>
+        /// Removes a library item from the list.
+        /// </summary>
+        /// <param name="name">The name of the library.</param>
         public async void Remove(string name)
         {
             if (Libraries.Remove(name))
             {
-                // Load the in-memory libraries
-                string libraries = await _localStore.GetItemAsStringAsync(Storage);
-                if (string.IsNullOrWhiteSpace(libraries))
-                    return;
-
-                // Cut out the deleted portion
-                var entries = libraries.Split(';').ToList();
-                for (int i = 0; i < entries.Count; i += 3)
-                {
-                    if (entries[i] == name)
-                    {
-                        entries.RemoveRange(i, 3);
-                        break;
-                    }
-                }
-
-                // Store back in memory
-                await _localStore.SetItemAsStringAsync(Storage, string.Join(";", entries));
+                await _localStore.RemoveItemAsync($"{name}:loaded");
+                await _localStore.RemoveItemAsync($"{name}:xml");
+                await _localStore.SetItemAsStringAsync(Storage, string.Join(";", Libraries.Keys));
                 StateHasChanged();
-
                 await LibrariesChanged.InvokeAsync(this);
             }
         }
