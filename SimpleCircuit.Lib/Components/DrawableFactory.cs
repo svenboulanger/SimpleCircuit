@@ -10,10 +10,10 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class DrawableFactory : IDrawableFactory
     {
-        private readonly List<DrawableMetadata> _metadata = new();
+        private readonly Dictionary<string, DrawableMetadata> _metadata = new();
 
         /// <inheritdoc />
-        public IEnumerable<DrawableMetadata> Metadata => _metadata;
+        public IEnumerable<string> Keys => _metadata.Keys;
 
         /// <summary>
         /// Creates a new drawable factory.
@@ -22,7 +22,17 @@ namespace SimpleCircuit.Components
         {
             // Populate the metadata
             foreach (var attribute in GetType().GetCustomAttributes(false).OfType<DrawableAttribute>())
-                _metadata.Add(new DrawableMetadata(attribute.Key, attribute.Description, attribute.Category));
+            {
+                _metadata[attribute.Key] = new DrawableMetadata(attribute.Key, attribute.Description, attribute.Category);
+            }
+        }
+
+        /// <inheritdoc />
+        public DrawableMetadata GetMetadata(string key)
+        {
+            if (_metadata.TryGetValue(key, out var metadata))
+                return metadata;
+            return null;
         }
 
         /// <summary>

@@ -12,14 +12,14 @@
             <h5>@Metadata.Key<small class="text-muted">name</small></h5>
             <p>@(Metadata.Description)</p>
         }
-        @if (Drawable != null)
+        @if (_drawable != null)
         {
             <HelpAccordion>
-                <HelpAccordionItem Title="Pins" Count="Drawable.Pins.Count">
+                <HelpAccordionItem Title="Pins" Count="_drawable.Pins.Count">
                     <dl>
-                        @foreach (var pin in Drawable.Pins)
+                        @foreach (var pin in _drawable.Pins)
                         {
-                            <dt><strong>@(string.Join(", ", Drawable.Pins.NamesOf(pin)))</strong></dt>
+                            <dt><strong>@(string.Join(", ", _drawable.Pins.NamesOf(pin)))</strong></dt>
                             <dd>@(pin.Description)</dd>
                         }
                     </dl>
@@ -33,14 +33,14 @@
                         }
                     </dl>
                 </HelpAccordionItem>
-                <HelpAccordionItem Title="Variants" Count="Drawable.Variants.BranchCount">
+                <HelpAccordionItem Title="Variants" Count="_drawable.Variants.BranchCount">
                     <p>
-                        @foreach (var variant in Drawable.Variants)
+                        @foreach (var variant in _drawable.Variants)
                         {
                             <a href="javascript:void(0);" class="shown" @onclick="x => ToggleVariant(variant)">@variant</a>
                         }
                         <br />
-                        @foreach (var variant in Drawable.Variants.Branches)
+                        @foreach (var variant in _drawable.Variants.Branches)
                         {
                             <a href="javascript:void(0);" @onclick="x => ToggleVariant(variant)">@variant</a>
                         }

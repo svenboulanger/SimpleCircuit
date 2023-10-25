@@ -18,13 +18,7 @@ namespace SimpleCircuit.Components
         private readonly IEnumerable<PinInfo> _pins;
 
         /// <inheritdoc />
-        public IEnumerable<DrawableMetadata> Metadata
-        {
-            get
-            {
-                yield return new(_key, $"A subcircuit of type '{_key}'", "Subcircuit");
-            }
-        }
+        public IEnumerable<string> Keys => new[] { _key };
 
         /// <summary>
         /// Creates a new subcircuit factory.
@@ -43,6 +37,14 @@ namespace SimpleCircuit.Components
             _pins = pins ?? throw new ArgumentNullException(nameof(pins));
             if (!_circuit.Solved)
                 _circuit.Solve(diagnostics);
+        }
+
+        /// <inheritdoc />
+        public DrawableMetadata GetMetadata(string key)
+        {
+            if (key == _key)
+                return new DrawableMetadata(_key, $"A subcircuit of type '{_key}'.", "Subcircuit");
+            return null;
         }
 
         /// <inheritdoc />

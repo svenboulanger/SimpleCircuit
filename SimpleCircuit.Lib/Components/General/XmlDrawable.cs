@@ -27,6 +27,9 @@ namespace SimpleCircuit.Components.General
             }
         }
 
+        /// <inheritdoc />
+        public IEnumerable<string> Keys => new string[] { _metadata.Key };
+
         /// <summary>
         /// Creates a new XML drawable.
         /// </summary>
@@ -48,6 +51,14 @@ namespace SimpleCircuit.Components.General
                 diagnostics.Post(ErrorCodes.MissingSymbolPins, key);
             if (_drawing == null)
                 diagnostics.Post(ErrorCodes.MissingSymbolDrawing, key);
+        }
+
+        /// <inheritdoc />
+        public DrawableMetadata GetMetadata(string key)
+        {
+            if (key == _metadata.Key)
+                return _metadata;
+            return null;
         }
 
         /// <inheritdoc />

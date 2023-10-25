@@ -118,7 +118,7 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        Task.Run(UpdateNow);
+                        Task.Run(() => UpdateNow(CreateParsingContext()));
                     }
                     else
                         _timer.Stop();
@@ -136,17 +136,11 @@ namespace SimpleCircuitOnline.Pages
                 // Determine the version
                 _simpleCircuitVersion = typeof(GraphicalCircuit).Assembly.GetName().Version?.ToString() ?? "?";
 
-                // Register our own language keywords
-                List<string[]> keys = new();
-                var context = new ParsingContext();
-                foreach (var factory in context.Factory.Factories)
-                {
-                    foreach (var metadata in factory.Metadata)
-                    {
-                        keys.Add(new string[] { metadata.Key, metadata.Description });
-                    }
-                }
-                await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
+                // Update documentation
+                var context = CreateParsingContext();
+                await UpdateKeywords(context);
+                _componentList.Update(context);
+
                 var model = await _scriptEditor.GetModel();
                 await Global.SetModelLanguage(_js, model, "simpleCircuit");
                 await Global.SetTheme(_js, "simpleCircuitTheme");
@@ -293,7 +287,7 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
                         
                         string result;
                         using (var sw = new Utf8StringWriter())
@@ -311,7 +305,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -335,7 +329,7 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        var doc = await ComputeXml(includeScript: true);
+                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -469,7 +463,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                await UpdateNow();
+                await UpdateNow(CreateParsingContext());
             }
             lock (_lock)
                 _updates = 0;
@@ -510,7 +504,7 @@ namespace SimpleCircuitOnline.Pages
                     // Updating happens asynchronously
                     _logger.Clear();
                     _viewMode = false;
-                    _currentSolver = Task.Run(UpdateNow);
+                    _currentSolver = Task.Run(() => UpdateNow(CreateParsingContext()));
                 }
                 else if (_updates > 1)
                 {
@@ -520,21 +514,20 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private async Task UpdateNow()
+        private async Task UpdateNow(ParsingContext context)
         {
             _loading = 2;
-            _svg = await ComputeXml(false, _settings.RenderBounds);
+            _svg = await ComputeXml(context, false, _settings.RenderBounds);
             _loading = 0;
             StateHasChanged();
         }
-        private async Task<XmlDocument> ComputeXml(bool includeScript, bool includeBounds = false)
+        private async Task<XmlDocument> ComputeXml(ParsingContext context, bool includeScript, bool includeBounds = false)
         {
             XmlDocument doc = null;
             try
             {
                 var code = await _scriptEditor.GetValue();
                 var style = await _styleEditor.GetValue();
-                var context = CreateParsingContext();
 
                 if (!_viewMode)
                 {
@@ -645,10 +638,25 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
+        private async Task UpdateKeywords(ParsingContext context)
+        {
+            List<string[]> keys = new();
+            foreach (var pair in context.Factory.Factories)
+            {
+                keys.Add(new string[] { pair.Key, pair.Value.GetMetadata(pair.Key)?.Description ?? "?" });
+            }
+            await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
+        }
         private async Task UpdateLibraries()
         {
-            await UpdateNow();
-            _componentList.Update(CreateParsingContext());
+            var context = CreateParsingContext();
+
+            // Update documentation
+            _componentList.Update(context);
+
+            // Reuse the context for updating
+            _logger.Clear();
+            await UpdateNow(context);
         }
 
         [GeneratedRegex("[\u0100-\uffff]")]

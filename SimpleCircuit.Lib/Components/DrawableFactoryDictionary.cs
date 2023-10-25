@@ -26,6 +26,7 @@ namespace SimpleCircuit.Components
         private class KeyNode
         {
             public IDrawableFactory Factory { get; set; }
+            public string Key { get; set; }
             public Dictionary<char, KeyNode> Continuations { get; } = new();
         }
         private readonly KeyNode _root = new();
@@ -34,53 +35,34 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets all factories.
         /// </summary>
-        public IEnumerable<IDrawableFactory> Factories
+        public IEnumerable<KeyValuePair<string, IDrawableFactory>> Factories
         {
             get
             {
-                var set = new HashSet<IDrawableFactory>();
-                GetFactories(_root, set);
-                return set;
+                var result = new Dictionary<string, IDrawableFactory>();
+                GetFactories(_root, result);
+                return result;
             }
         }
 
-        private void GetFactories(KeyNode node, HashSet<IDrawableFactory> factories)
+        private void GetFactories(KeyNode node, Dictionary<string, IDrawableFactory> factories)
         {
             foreach (var child in node.Continuations.Values)
                 GetFactories(child, factories);
             if (node.Factory != null)
-                factories.Add(node.Factory);
-        }
-
-        private void GetFactoriesAndMetadata(KeyNode node, Dictionary<IDrawableFactory, List<DrawableMetadata>> metadata)
-        {
-            foreach (var child in node.Continuations.Values)
-                GetFactoriesAndMetadata(child, metadata);
-            if (node.Factory != null)
-            {
-                if (!metadata.TryGetValue(node.Factory, out var list))
-                {
-                    list = new List<DrawableMetadata>();
-                    metadata.Add(node.Factory, list);
-                }
-                foreach (var md in node.Factory.Metadata)
-                {
-                    // Only include metadata that talks about this key.
-                }
-            }
+                factories[node.Key] = node.Factory;
         }
 
         /// <summary>
-        /// Registers a factory for drawables.
+        /// Registers a factory for the specified key.
         /// </summary>
         /// <param name="factory">The factory.</param>
         public void Register(IDrawableFactory factory)
         {
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
-            foreach (var metadata in factory.Metadata)
+            foreach (string key in factory.Keys)
             {
-                string key = metadata.Key;
                 var elt = _root;
                 for (int i = 0; i < key.Length; i++)
                 {
@@ -92,6 +74,7 @@ namespace SimpleCircuit.Components
                     elt = nelt;
                 }
                 elt.Factory = factory;
+                elt.Key = key;
             }
         }
 

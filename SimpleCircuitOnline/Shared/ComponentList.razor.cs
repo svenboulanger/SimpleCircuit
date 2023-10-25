@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
-using SimpleCircuit;
 using SimpleCircuit.Components;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuitOnline.Shared
 {
@@ -13,16 +11,15 @@ namespace SimpleCircuitOnline.Shared
         private string _filterString = string.Empty;
         private bool _expandAll = false;
         private readonly HashSet<string> _searchTerms = new();
-        private readonly Dictionary<string, List<(DrawableMetadata, IDrawable, HashSet<string>)>> _categories = new();
+        private readonly Dictionary<string, List<(DrawableMetadata, IDrawableFactory)>> _categories = new();
 
-        private bool IsFiltered((DrawableMetadata Metadata, IDrawable Drawable, HashSet<string> Variants) argument)
+        private bool IsFiltered((DrawableMetadata Metadata, IDrawableFactory Factory) item)
         {
             int count = 0;
             foreach (var term in _searchTerms)
             {
-                if (argument.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-                    StringComparer.CurrentCultureIgnoreCase.Equals(argument.Metadata.Key, term) ||
-                    argument.Variants.Contains(term))
+                if (item.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
+                    StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term))
                     count++;
             }
             return count == _searchTerms.Count;
@@ -51,28 +48,19 @@ namespace SimpleCircuitOnline.Shared
         public void Update(ParsingContext context)
         {
             _categories.Clear();
-            var drawing = new SvgDrawing();
-            foreach (var factory in context.Factory.Factories)
+            foreach (var pair in context.Factory.Factories)
             {
-                foreach (var metadata in factory.Metadata)
+                // Let's add the metadata and a component of it for each category
+                var metadata = pair.Value.GetMetadata(pair.Key);
+                if (!_categories.TryGetValue(metadata.Category, out var list))
                 {
-                    // Let's add the metadata and a component of it for each category
-                    string category = metadata.Category;
-                    if (!_categories.TryGetValue(category, out var list))
-                    {
-                        list = new();
-                        _categories.Add(category, list);
-                    }
-
-                    // Add our description
-                    var drawable = factory.Create(metadata.Key, metadata.Key, context.Options, context.Diagnostics);
-                    drawable.Reset(null);
-                    drawable.Render(drawing);
-                    var variants = drawable.Variants.Branches.ToHashSet(StringComparer.OrdinalIgnoreCase);
-                    list.Add((metadata, drawable, variants));
+                    list = new();
+                    _categories.Add(metadata.Category, list);
                 }
-            }
 
+                // Add our description
+                list.Add((metadata, pair.Value));
+            }
             StateHasChanged();
         }
     }
