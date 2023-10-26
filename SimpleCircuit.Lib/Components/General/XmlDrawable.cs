@@ -135,6 +135,11 @@ namespace SimpleCircuit.Components.General
                                 child.Attributes.ParseOptionalScalar("nx", context?.Diagnostics, 0.0, out double nx);
                                 child.Attributes.ParseOptionalScalar("ny", context?.Diagnostics, 0.0, out double ny);
                                 string extend = child.Attributes?["extend"]?.Value;
+                                string strAlias = child.Attributes?["alias"]?.Value;
+                                var aliases = new List<string> { name };
+
+                                if (!string.IsNullOrWhiteSpace(strAlias))
+                                    aliases.AddRange(strAlias.Split(new char[] { ' ', ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries));
                                 
                                 if (name == null)
                                 {
@@ -154,9 +159,9 @@ namespace SimpleCircuit.Components.General
                                 if (extend == "true")
                                     _extend.Add(Pins.Count);
                                 if (nx.IsZero() && ny.IsZero())
-                                    Pins.Add(new FixedPin(name, description, this, new(x, y)), name);
+                                    Pins.Add(new FixedPin(name, description, this, new(x, y)), aliases);
                                 else
-                                    Pins.Add(new FixedOrientedPin(name, description, this, new(x, y), new(nx, ny)), name);
+                                    Pins.Add(new FixedOrientedPin(name, description, this, new(x, y), new(nx, ny)), aliases);
                             }
                             break;
 
