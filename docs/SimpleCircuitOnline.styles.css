@@ -325,6 +325,35 @@ a.shown span[b-wz16flu3zu] {
     color: #fff;
     background-color: #17a2b8;
 }
+/* /Shared/Icons/UploadIcon.razor.rz.scp.css */
+.bi[b-wdry6w1asb] {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+/* /Shared/LibraryCollection.razor.rz.scp.css */
+div.toggle[b-lg2cpjthmi] {
+    display: inline-block;
+    margin-right: 0.25em;
+}
+div.remove[b-lg2cpjthmi] {
+    display: inline-block;
+    float: right;
+}
+div.remove a[b-lg2cpjthmi] {
+    color: white;
+    background-color: #dc3545;
+    padding: 0.25em 0.25em;
+    margin: 025em 0.125em;
+    border-radius: 0.375rem;
+    border: 1px solid #dc3545;
+}
+div.remove a:hover[b-lg2cpjthmi] {
+    background-color: #b02a37;
+    border: 1px solid #b02a37;
+}
 /* /Shared/Report.razor.rz.scp.css */
 div.container[b-kjgyb6b3hw] {
     width: 100%;
@@ -513,12 +542,4 @@ div.hidden[b-9kziwx16h8] {
     color: #fff;
     background-color: #007bff;
     border: 1px solid #0062cc;
-}
-/* /Shared/UploadIcon.razor.rz.scp.css */
-.bi[b-1qd3kdd8xi] {
-    width: 1em;
-    height: 1em;
-    display: inline-block;
-    vertical-align: -0.125em;
-    fill: currentColor;
 }
