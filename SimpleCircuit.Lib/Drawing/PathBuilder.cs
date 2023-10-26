@@ -303,7 +303,7 @@ namespace SimpleCircuit.Drawing
             delta = Transform.ApplyDirection(delta);
             AppendLine(delta);
             _last += delta;
-            _bounds.Expand(delta);
+            _bounds.Expand(_last);
             return this;
         }
 
