@@ -139,7 +139,6 @@ namespace SimpleCircuitOnline.Pages
                 // Update documentation
                 var context = CreateParsingContext();
                 await UpdateKeywords(context);
-                _componentList.Update(context);
 
                 var model = await _scriptEditor.GetModel();
                 await Global.SetModelLanguage(_js, model, "simpleCircuit");

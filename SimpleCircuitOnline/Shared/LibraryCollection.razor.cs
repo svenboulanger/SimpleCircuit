@@ -74,6 +74,7 @@ namespace SimpleCircuitOnline.Shared
                 }
                 StateHasChanged();
             }
+            await LibrariesChanged.InvokeAsync(this);
         }
 
         /// <summary>
