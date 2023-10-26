@@ -1,12 +1,10 @@
 ﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Diagrams.EntityRelationDiagram;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
-using SpiceSharp.Simulations.IntegrationMethods;
 using System;
 using System.Collections.Generic;
 using System.Linq;

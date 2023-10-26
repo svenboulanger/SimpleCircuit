@@ -6,7 +6,6 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.General
 {

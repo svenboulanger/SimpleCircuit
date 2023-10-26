@@ -1,10 +1,7 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Variants;
+﻿using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using System;
-using System.ComponentModel.Design;
 
 namespace SimpleCircuit.Components
 {

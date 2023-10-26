@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;

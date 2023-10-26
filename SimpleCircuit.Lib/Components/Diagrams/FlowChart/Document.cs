@@ -3,7 +3,6 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {

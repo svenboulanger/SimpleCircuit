@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Circuits.Contexts
 {

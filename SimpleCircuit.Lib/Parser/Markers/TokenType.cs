@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Parser.Markers
+﻿namespace SimpleCircuit.Parser.Markers
 {
     /// <summary>
     /// Token types for parsing markers.

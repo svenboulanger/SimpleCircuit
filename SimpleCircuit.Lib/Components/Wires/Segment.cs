@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components.Wires
 {
