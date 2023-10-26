@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Analog;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Globalization;
@@ -60,7 +61,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Parses an optional scalar value.
         /// </summary>
-        /// <param name="attribute">The attribute.</param>
+        /// <param name="attributes">The attributes.</param>
         /// <param name="diagnostics">The diagnostics.</param>
         /// <param name="defValue">The default value.</param>
         /// <param name="result">The result.</param>
@@ -84,7 +85,40 @@ namespace SimpleCircuit
             if (!double.TryParse(attribute.Value, NumberStyles.Float, Culture, out result))
             {
                 diagnostics?.Post(errorCode, attribute, attribute.ParentNode.Name);
-                result = 0.0;
+                result = defValue;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Parses an optional vector value.
+        /// </summary>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="name">The attribute name.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="defValue">The default value.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if the parsing was successful; otherwise, <c>false</c>.</returns>
+        public static bool ParseOptionalVector(this XmlAttributeCollection attributes, string name, IDiagnosticHandler diagnostics, Vector2 defValue, out Vector2 result)
+        {
+            if (attributes == null)
+            {
+                result = defValue;
+                return true;
+            }
+
+            var attribute = attributes[name];
+            if (attribute == null)
+            {
+                result = defValue;
+                return true;
+            }
+
+            var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
+            if (!lexer.ParseVector(diagnostics, out result))
+            {
+                result = defValue;
                 return false;
             }
             return true;

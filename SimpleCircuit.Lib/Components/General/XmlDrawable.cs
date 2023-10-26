@@ -5,6 +5,7 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace SimpleCircuit.Components.General
@@ -14,7 +15,6 @@ namespace SimpleCircuit.Components.General
     /// </summary>
     public class XmlDrawable : IDrawableFactory
     {
-        private readonly double _scale;
         private readonly DrawableMetadata _metadata;
         private readonly XmlNode _drawing, _pins;
 
@@ -39,11 +39,9 @@ namespace SimpleCircuit.Components.General
         public XmlDrawable(string key, XmlNode definition, IDiagnosticHandler diagnostics)
         {
             // Extract the metadata
-            _scale = 1.0;
             string description = definition.Attributes["description"]?.Value ?? string.Empty;
             string category = definition.Attributes["category"]?.Value ?? "Custom";
             string keywords = definition.Attributes["keywords"]?.Value ?? string.Empty;
-            definition.Attributes["scale"]?.ParseScalar(diagnostics, out _scale, ErrorCodes.InvalidXmlScale);
 
             _metadata = new(key, description, category);
             foreach (string keyword in keywords.Split(new[] { ' ', ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries))
@@ -70,13 +68,13 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
-            => new Instance(key, name, _pins, _drawing, _scale);
+            => new Instance(key, name, _pins, _drawing);
 
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private readonly XmlNode _drawing, _pins;
-            private readonly double _scale;
             private readonly List<int> _extend = new();
+            private readonly List<LabelAnchorPoint> _anchors = new();
 
             /// <inheritdoc />
             public override string Type { get; }
@@ -92,11 +90,10 @@ namespace SimpleCircuit.Components.General
             /// <param name="drawing">The XML data describing the node.</param>
             /// <param name="scale">The scale of the instance.</param>
             /// <param name="pins">The pins of the instance.</param>
-            public Instance(string type, string name, XmlNode pins, XmlNode drawing, double scale)
+            public Instance(string type, string name, XmlNode pins, XmlNode drawing)
                 : base(name)
             {
                 Type = type;
-                _scale = scale;
                 _drawing = drawing;
                 _pins = pins;
             }
@@ -185,8 +182,6 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                if (!_scale.Equals(1.0))
-                    drawing.BeginTransform(new Transform(new(), Matrix2.Scale(_scale)));
                 foreach (var pin in _extend)
                     drawing.ExtendPin(Pins[pin]);
                 if (_drawing != null)
@@ -194,8 +189,6 @@ namespace SimpleCircuit.Components.General
                     var context = new XmlDrawingContext(Labels, Variants);
                     drawing.DrawXml(_drawing, context, drawing.Diagnostics);
                 }
-                if (!_scale.Equals(1.0))
-                    drawing.EndTransform();
             }
         }
     }

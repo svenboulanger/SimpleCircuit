@@ -137,8 +137,10 @@ namespace SimpleCircuitOnline.Pages
                 _simpleCircuitVersion = typeof(GraphicalCircuit).Assembly.GetName().Version?.ToString() ?? "?";
 
                 // Update documentation
+                await _libraries.LoadLibraries();
                 var context = CreateParsingContext();
                 await UpdateKeywords(context);
+                _componentList.Update(context);
 
                 var model = await _scriptEditor.GetModel();
                 await Global.SetModelLanguage(_js, model, "simpleCircuit");

@@ -55,11 +55,12 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public EventCallback LibrariesChanged { get; set; }
 
-        /// <inheritdoc />
-        protected override async void OnInitialized()
+        /// <summary>
+        /// Loads the libraries from local storage.
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadLibraries()
         {
-            base.OnInitialized();
-
             // Get a list of libraries
             string storage = await _localStore.GetItemAsStringAsync(Storage);
             if (!string.IsNullOrWhiteSpace(storage))
@@ -73,7 +74,6 @@ namespace SimpleCircuitOnline.Shared
                 }
                 StateHasChanged();
             }
-            await LibrariesChanged.InvokeAsync(this);
         }
 
         /// <summary>

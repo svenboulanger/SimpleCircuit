@@ -34,7 +34,41 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
+        public void Draw(SvgDrawing drawing, Labels labels)
+        {
+            for (int i = 0; i < labels.Count; i++)
+            {
+                // Get the label
+                var label = labels[i];
+                if (label is null)
+                    continue;
+
+                // Get the anchor point
+                if (!TryCalculate(label.Location ?? i.ToString(), out var anchor))
+                    TryCalculate("0", out anchor); // Default to index 0
+
+                // Determine the final values
+                var location = anchor.Location;
+                if (!label.Offset.IsZero())
+                    location += drawing.CurrentTransform.Matrix.Inverse * label.Offset;
+                var expand = label.Expand ?? anchor.Expand;
+
+                // Draw the label
+                drawing.Text(label.Value, location, expand, anchor.Options);
+            }
+        }
+
+        /// <inheritdoc />
         public override bool TryCalculate(ILabeled subject, string name, out LabelAnchorPoint value)
+            => TryCalculate(name, out value);
+
+        /// <summary>
+        /// Tries to calculate the label anchor point just based on index.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Returns <c>true</c> if the label anchor point was found; otherwise, <c>false</c>.</returns>
+        protected bool TryCalculate(string name, out LabelAnchorPoint value)
         {
             if (name.All(char.IsDigit))
             {

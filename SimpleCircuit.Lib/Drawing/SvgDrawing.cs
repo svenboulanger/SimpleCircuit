@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
@@ -126,24 +127,22 @@ namespace SimpleCircuit
         public void DrawXml(XmlNode description, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
             // Apply some scale if necessary
-            Vector2 offset = new();
-            bool transform = false;
             bool success = true;
             success &= description.Attributes.ParseOptionalScalar("scale", diagnostics, 1.0, out double scale);
             success &= description.Attributes.ParseOptionalScalar("rotate", diagnostics, 0.0, out double rotate);
-            string strOffset = description.Attributes?["offset"]?.Value;
-            if (strOffset != null)
-            {
-                var lexer = new SvgPathDataLexer(strOffset.AsMemory());
-                success &= lexer.ParseVector(diagnostics, out offset);
-                transform = true;
-            }
+            success &= description.Attributes.ParseOptionalVector("offset", diagnostics, new(), out var offset);
             if (!success)
                 return;
 
+            bool transform = !rotate.IsZero() || !offset.IsZero() || !scale.Equals(1.0);
             if (transform)
                 BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
             DrawXmlActions(description, context, diagnostics);
+
+            // If labels were found, let's try drawing the labels
+            if (context.Anchors.Count > 0 && context.Labels != null && context.Labels.Count > 0)
+                new CustomLabelAnchorPoints(context.Anchors.ToArray()).Draw(this, context.Labels);
+
             if (transform)
                 EndTransform();
         }
@@ -170,6 +169,7 @@ namespace SimpleCircuit
                         // Just recursive thingy
                         DrawXmlActions(node, context, diagnostics);
                         break;
+                    case "label": DrawXmlLabelAnchor(node, context, diagnostics); break;
                     case "group":
                     case "g":
                         // Parse options
@@ -341,6 +341,20 @@ namespace SimpleCircuit
             if (value != null && context != null)
                 value = context.TransformText(value);
             Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
+        }
+        private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        {
+            bool success = true;
+            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
+            if (!success)
+                return;
+
+            var options = new GraphicOptions();
+            ParseGraphicOptions(options, node);
+            context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny), options));
         }
         private void ParseGraphicOptions(GraphicOptions options, XmlNode node)
         {
