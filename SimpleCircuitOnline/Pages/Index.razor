@@ -38,7 +38,7 @@
             </Tab>
             <Tab Title="Libraries">
                 <div class="content scrollable">
-                    <LibraryCollection @ref="_libraries" LibrariesChanged="UpdateLibraries" />
+                    <LibraryCollection @ref="_libraries" LibrariesChanged="LibrariesUpdated" />
                 </div>
             </Tab>
         </TabMenu>
@@ -51,7 +51,7 @@
             @bind-ShrinkY=@ShrinkY
             @bind-Bounds=@RenderBounds
             @bind-AutoUpdate=@AutoUpdate
-                  RefreshRequested=@(() => UpdateNow(CreateParsingContext()))>
+                  RefreshRequested=@(() => UpdateNow(_libraries.BuildContext(_logger)))>
             <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>

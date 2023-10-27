@@ -74,9 +74,10 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
-        public ParsingContext()
+        public ParsingContext(bool loadAssembly = true)
         {
-            Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+            if (loadAssembly)
+                Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
 
             // Link the circuit options to the actual circuit
             Options.SpacingXChanged += (sender, args) => Circuit.SpacingX = Options.SpacingX;

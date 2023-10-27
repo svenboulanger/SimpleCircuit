@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -11,6 +14,12 @@ namespace SimpleCircuitOnline.Shared
     {
         public const string Storage = "libraries";
         public const string LibraryPrefix = "lib:";
+        public const string DefaultLibraryLoadedKey = ":def:loaded";
+
+        /// <summary>
+        /// Gets or sets whether the default library should be included.
+        /// </summary>
+        public bool DefaultLibraryLoaded { get; set; } = true;
 
         public class LibraryItem
         {
@@ -56,11 +65,39 @@ namespace SimpleCircuitOnline.Shared
         public EventCallback LibrariesChanged { get; set; }
 
         /// <summary>
+        /// Builds a context with the current library collection.
+        /// </summary>
+        /// <param name="diagnostics">The diagnostics.</param>
+        /// <returns>Returns the parsing context.</returns>
+        public ParsingContext BuildContext(IDiagnosticHandler diagnostics)
+        {
+            var context = new ParsingContext(DefaultLibraryLoaded)
+            {
+                Diagnostics = diagnostics
+            };
+
+            // Add the necessary libraries
+            foreach (var library in Libraries.OrderBy(lib => lib.Key))
+            {
+                if (library.Value.IsLoaded)
+                    context.Factory.Load(library.Value.Library, diagnostics);
+            }
+            return context;
+        }
+
+        /// <summary>
         /// Loads the libraries from local storage.
         /// </summary>
         /// <returns></returns>
         public async Task LoadLibraries()
         {
+            // Get the state of the default library
+            string defLoaded = await _localStore.GetItemAsStringAsync(DefaultLibraryLoadedKey);
+            if (!string.IsNullOrEmpty(defLoaded))
+                DefaultLibraryLoaded = defLoaded == "1";
+            else
+                DefaultLibraryLoaded = true;
+
             // Get a list of libraries
             string storage = await _localStore.GetItemAsStringAsync(Storage);
             if (!string.IsNullOrWhiteSpace(storage))
@@ -69,11 +106,28 @@ namespace SimpleCircuitOnline.Shared
                 foreach (string name in libraries)
                 {
                     string encoded = await _localStore.GetItemAsStringAsync($"{name}:xml");
-                    bool loaded = await _localStore.GetItemAsStringAsync($"{name}:loaded") == "1";
+                    string strLoaded = await _localStore.GetItemAsStringAsync($"{name}:loaded");
+                    bool loaded;
+                    if (!string.IsNullOrEmpty(strLoaded))
+                        loaded = strLoaded == "1";
+                    else
+                        loaded = true;
                     Libraries.Add(name, new LibraryItem(loaded, encoded));
                 }
-                StateHasChanged();
             }
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// Toggles the loaded status of the default library.
+        /// </summary>
+        /// <returns></returns>
+        protected async Task ToggleDefault()
+        {
+            DefaultLibraryLoaded = !DefaultLibraryLoaded;
+            await _localStore.SetItemAsStringAsync(DefaultLibraryLoadedKey, DefaultLibraryLoaded ? "1" : "0");
+            StateHasChanged();
+            await LibrariesChanged.InvokeAsync(this);
         }
 
         /// <summary>

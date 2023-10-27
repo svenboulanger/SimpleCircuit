@@ -118,7 +118,7 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        Task.Run(() => UpdateNow(CreateParsingContext()));
+                        Task.Run(() => UpdateNow(_libraries.BuildContext(_logger)));
                     }
                     else
                         _timer.Stop();
@@ -138,7 +138,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Update documentation
                 await _libraries.LoadLibraries();
-                var context = CreateParsingContext();
+                var context = _libraries.BuildContext(_logger);
                 await UpdateKeywords(context);
                 _componentList.Update(context);
 
@@ -288,7 +288,8 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
+                        var context = _libraries.BuildContext(_logger);
+                        var doc = await ComputeXml(context, includeScript: true);
                         
                         string result;
                         using (var sw = new Utf8StringWriter())
@@ -306,7 +307,8 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
+                        var context = _libraries.BuildContext(_logger);
+                        var doc = await ComputeXml(context, includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -330,7 +332,8 @@ namespace SimpleCircuitOnline.Pages
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        var doc = await ComputeXml(CreateParsingContext(), includeScript: true);
+                        var context = _libraries.BuildContext(_logger);
+                        var doc = await ComputeXml(context, includeScript: true);
 
                         // Compute the width and height to compute the scale of the image
                         if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
@@ -407,21 +410,6 @@ namespace SimpleCircuitOnline.Pages
             }
         }
 
-        private ParsingContext CreateParsingContext()
-        {
-            var context = new ParsingContext
-            {
-                Diagnostics = _logger
-            };
-
-            // Add the necessary libraries
-            foreach (var library in _libraries.Libraries.Values)
-            {
-                if (library.IsLoaded)
-                    context.Factory.Load(library.Library, _logger);
-            }
-            return context;
-        }
         private async Task ReloadLastScript()
         {
             if (_localStore != null)
@@ -464,7 +452,7 @@ namespace SimpleCircuitOnline.Pages
                 await _scriptEditor.SetValue(script);
                 if (!string.IsNullOrWhiteSpace(style))
                     await _styleEditor.SetValue(style);
-                await UpdateNow(CreateParsingContext());
+                await UpdateNow(_libraries.BuildContext(_logger));
             }
             lock (_lock)
                 _updates = 0;
@@ -505,7 +493,7 @@ namespace SimpleCircuitOnline.Pages
                     // Updating happens asynchronously
                     _logger.Clear();
                     _viewMode = false;
-                    _currentSolver = Task.Run(() => UpdateNow(CreateParsingContext()));
+                    _currentSolver = Task.Run(() => UpdateNow(_libraries.BuildContext(_logger)));
                 }
                 else if (_updates > 1)
                 {
@@ -648,9 +636,9 @@ namespace SimpleCircuitOnline.Pages
             }
             await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
         }
-        private async Task UpdateLibraries()
+        private async Task LibrariesUpdated()
         {
-            var context = CreateParsingContext();
+            var context = _libraries.BuildContext(_logger);
 
             // Update documentation
             _componentList.Update(context);

@@ -1,6 +1,20 @@
 ﻿@using SimpleCircuitOnline.Shared.Icons
 @inject Blazored.LocalStorage.ILocalStorageService _localStore
 
+<a href="javascript:void(0);" @onclick="ToggleDefault" class="bd-callout">
+    <div class="toggle">
+        @if (DefaultLibraryLoaded)
+        {
+            <ToggleOnIcon />
+        }
+        else
+        {
+            <ToggleOffIcon />
+        }
+    </div>
+    Default library
+</a>
+
 @if (Libraries != null)
 {
     @foreach (var library in Libraries.OrderBy(lib => lib.Key))
