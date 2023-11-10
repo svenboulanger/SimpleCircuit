@@ -43,11 +43,6 @@ namespace SimpleCircuit
         public Transform CurrentTransform => _tf.Peek();
 
         /// <summary>
-        /// Gets or sets the style of the drawing.
-        /// </summary>
-        public string Style { get; set; }
-
-        /// <summary>
         /// Gets the formatter.
         /// </summary>
         public ITextFormatter Formatter { get; }
@@ -771,16 +766,16 @@ namespace SimpleCircuit
         /// Gets the SVG xml-document.
         /// </summary>
         /// <returns>The document.</returns>
-        public XmlDocument GetDocument()
+        public XmlDocument GetDocument(string style = null)
         {
             var svg = _document.DocumentElement;
 
             // Add stylesheet info if necessary
-            if (!string.IsNullOrWhiteSpace(Style))
+            if (!string.IsNullOrWhiteSpace(style))
             {
-                var style = _document.CreateElement("style", Namespace);
-                style.InnerText = Style;
-                svg.PrependChild(style);
+                var styleElt = _document.CreateElement("style", Namespace);
+                styleElt.InnerText = style;
+                svg.PrependChild(styleElt);
             }
 
             // Try to get the bounds of this

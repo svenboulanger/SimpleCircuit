@@ -81,13 +81,10 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgDrawing(_jsTextFormatter)
-            {
-                Style = GraphicalCircuit.DefaultStyle,
-            };
+            var drawing = new SvgDrawing(_jsTextFormatter);
             _drawable.Reset(null);
             _drawable.Render(drawing);
-            var doc = drawing.GetDocument();
+            var doc = drawing.GetDocument(GraphicalCircuit.DefaultStyle);
 
             // Try to resize the component
             if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))

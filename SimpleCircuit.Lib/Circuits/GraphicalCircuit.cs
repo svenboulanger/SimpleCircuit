@@ -477,7 +477,6 @@ namespace SimpleCircuit
             if (drawing == null)
                 throw new ArgumentNullException(nameof(drawing));
 
-            drawing.Style = Style;
             bool oldRenderBounds = drawing.RenderBounds;
             drawing.RenderBounds = RenderBounds;
 
@@ -505,7 +504,6 @@ namespace SimpleCircuit
             // Create our drawing
             var drawing = new SvgDrawing(formatter, diagnostics)
             {
-                Style = Style,
                 RenderBounds = RenderBounds
             };
 
@@ -517,7 +515,7 @@ namespace SimpleCircuit
                 drawing.AddMetadata(pair.Key, pair.Value);
 
             // Return the XML document
-            return drawing.GetDocument();
+            return drawing.GetDocument(Style);
         }
 
         /// <inheritdoc />
