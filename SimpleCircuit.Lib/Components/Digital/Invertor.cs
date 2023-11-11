@@ -30,7 +30,8 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
 
-            [Description("The label margin to the edge.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             double IBoxLabeled.CornerRadius => 0.0;

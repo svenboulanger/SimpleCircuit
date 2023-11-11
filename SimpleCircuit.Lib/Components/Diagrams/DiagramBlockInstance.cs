@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Diagrams
         public string Name { get; }
 
         /// <inheritdoc />
-        public IEnumerable<string> Properties => Drawable.GetProperties(this);
+        public IEnumerable<string[]> Properties => Drawable.GetProperties(this);
 
         /// <inheritdoc />
         /// <remarks>Diagram blocks cannot be oriented.</remarks>

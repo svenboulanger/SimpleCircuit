@@ -21,12 +21,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public override string Type => "action";
 
             [Description("The width of the block.")]
+            [Alias("w")]
             public double Width { get; set; } = 40;
 
             [Description("The height of the block.")]
+            [Alias("h")]
             public double Height { get; set; } = 20;
 
-            [Description("The margin of the label to the edge.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);

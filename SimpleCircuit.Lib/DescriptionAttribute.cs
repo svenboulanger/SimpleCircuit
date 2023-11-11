@@ -2,7 +2,10 @@
 
 namespace SimpleCircuit
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    /// <summary>
+    /// An attribute that indicates the description of a property.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class DescriptionAttribute : Attribute
     {
         /// <summary>
@@ -16,7 +19,7 @@ namespace SimpleCircuit
         /// <param name="description">The description.</param>
         public DescriptionAttribute(string description)
         {
-            Description = description ?? "";
+            Description = description ?? string.Empty;
         }
     }
 }

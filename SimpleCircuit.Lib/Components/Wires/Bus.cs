@@ -22,6 +22,7 @@ namespace SimpleCircuit.Components.Wires
             private const string _straight = "straight";
 
             [Description("The number of crossings. Can be used to indicate a bus.")]
+            [Alias("c")]
             public int Crossings { get; set; } = 1;
 
             /// <inheritdoc />

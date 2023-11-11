@@ -28,8 +28,8 @@
                     <dl>
                         @foreach (var property in Properties)
                         {
-                            <dt><strong>@(property.Item1.Name)</strong></dt>
-                            <dd>@(property.Item2)</dd>
+                            <dt><strong>@(string.Join(", ", property.Item2))</strong> <small class="text-muted">@(GetTypeName(property.Item1.PropertyType))</small></dt>
+                            <dd>@(property.Item3)</dd>
                         }
                     </dl>
                 </HelpAccordionItem>

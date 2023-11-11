@@ -30,6 +30,7 @@ namespace SimpleCircuit.Components.Analog
             public override string Type { get; }
 
             [Description("The length of the element")]
+            [Alias("l")]
             public double Length
             {
                 get => _length;
@@ -42,6 +43,7 @@ namespace SimpleCircuit.Components.Analog
             }
 
             [Description("The width of the element")]
+            [Alias("w")]
             public double Width
             {
                 get => _width;

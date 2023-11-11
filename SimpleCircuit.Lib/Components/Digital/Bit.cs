@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Digital
             public string Separator { get; set; } = "";
 
             [Description("The block size for a single bit.")]
-            public double BlockSize = 8;
+            public double BlockSize { get; set; } = 8;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.

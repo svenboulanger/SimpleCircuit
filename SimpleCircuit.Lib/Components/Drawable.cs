@@ -6,7 +6,9 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SimpleCircuit.Components
@@ -16,6 +18,8 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class Drawable : IDrawable
     {
+        private readonly static ConcurrentDictionary<Type, Dictionary<string, Func<IDrawable, Token, object, bool>>> _cacheSetters = new();
+
         /// <summary>
         /// Gets the variants of the drawable.
         /// </summary>
@@ -46,7 +50,7 @@ namespace SimpleCircuit.Components
         protected virtual IEnumerable<string> GroupClasses { get; }
 
         /// <inheritdoc />
-        public IEnumerable<string> Properties => GetProperties(this);
+        public IEnumerable<string[]> Properties => GetProperties(this);
 
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
@@ -75,9 +79,66 @@ namespace SimpleCircuit.Components
             // Find the property
             string property = propertyToken.Content.ToString().ToLower();
 
-            // Search using reflection
-            var info = drawable.GetType().GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            if (info == null)
+            // Gets the dictionary that describes the property setters
+            var result = _cacheSetters.GetOrAdd(drawable.GetType(), key =>
+            {
+                // Extract the property names for the type
+                var result = new Dictionary<string, Func<IDrawable, Token, object, bool>>(StringComparer.OrdinalIgnoreCase);
+                var properties = key.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+                var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var property in properties)
+                {
+                    names.Clear();
+                    if (!property.CanWrite)
+                        continue;
+                    string description = null;
+                    foreach (var attribute in property.GetCustomAttributes(true))
+                    {
+                        if (attribute is DescriptionAttribute descAttr)
+                            description = descAttr.Description;
+                        if (attribute is AliasAttribute aliasAttr)
+                            names.Add(aliasAttr.Alias);
+                    }
+                    if (string.IsNullOrEmpty(description))
+                        continue;
+                    names.Add(property.Name);
+
+                    // Add the information
+                    var p = property;
+                    var setter = new Func<IDrawable, Token, object, bool>((drawable, token, value) =>
+                    {
+                        if (value is null)
+                            return false;
+                        var type = value.GetType();
+                        if (p.PropertyType == type)
+                        {
+                            p.SetValue(drawable, value);
+                            return true;
+                        }
+                        else
+                        {
+                            // Some implicit type conversion here
+                            if (p.PropertyType == typeof(int) && type == typeof(double))
+                                p.SetValue(drawable, (int)(double)value);
+                            else if (p.PropertyType == typeof(double) && type == typeof(int))
+                                p.SetValue(drawable, (double)(int)value);
+                            else
+                            {
+                                diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariant, p, drawable.Name);
+                                return false;
+                            }
+                            return true;
+                        }
+                    });
+                    foreach (string name in names)
+                        result[name] = setter;
+                }
+                return result;
+            });
+
+            if (result.TryGetValue(property, out var setter))
+                return setter(drawable, propertyToken, value);
+            else
             {
                 if (drawable is ILabeled labeled)
                 {
@@ -135,29 +196,6 @@ namespace SimpleCircuit.Components
                     return false;
                 }
             }
-            else
-            {
-                var type = value.GetType();
-                if (info.PropertyType == type)
-                {
-                    info.SetValue(drawable, value);
-                    return true;
-                }
-                else
-                {
-                    // Some implicit type conversion here
-                    if (info.PropertyType == typeof(int) && type == typeof(double))
-                        info.SetValue(drawable, (int)(double)value);
-                    else if (info.PropertyType == typeof(double) && type == typeof(int))
-                        info.SetValue(drawable, (double)(int)value);
-                    else
-                    {
-                        diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
-                        return false;
-                    }
-                    return true;
-                }
-            }
         }
 
         /// <summary>
@@ -192,15 +230,23 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public static IEnumerable<string> GetProperties(IDrawable drawable)
+        public static IEnumerable<string[]> GetProperties(IDrawable drawable)
         {
             if (drawable == null)
                 throw new ArgumentNullException(nameof(drawable));
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var property in drawable.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (!property.CanWrite)
                     continue;
-                yield return property.Name;
+                set.Clear();
+                foreach (var attr in property.GetCustomAttributes(true))
+                {
+                    if (attr is AliasAttribute aliasAttr)
+                        set.Add(aliasAttr.Alias);
+                }
+                set.Add(property.Name);
+                yield return set.OrderBy(n => n).ToArray();
             }
         }
 

@@ -23,9 +23,11 @@ namespace SimpleCircuit.Components.Wires
             public Labels Labels { get; } = new();
 
             [Description("The gap between the wires. The default is 2.")]
+            [Alias("g")]
             public double Gap { get; set; } = 2.0;
 
             [Description("The height of the gap edges. The default is 8.")]
+            [Alias("h")]
             public double Height { get; set; } = 8.0;
 
             /// <summary>

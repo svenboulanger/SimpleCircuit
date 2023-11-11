@@ -33,6 +33,7 @@ namespace SimpleCircuit.Components.Analog
             public Labels Labels { get; } = new();
 
             [Description("The length of the resistor.")]
+            [Alias("l")]
             public double Length
             {
                 get => _length;
@@ -45,6 +46,7 @@ namespace SimpleCircuit.Components.Analog
             }
 
             [Description("The width of the resistor.")]
+            [Alias("w")]
             public double Width
             {
                 get => _width;

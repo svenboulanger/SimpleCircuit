@@ -25,13 +25,16 @@ namespace SimpleCircuit.Components.Analog
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
             double IBoxLabeled.CornerRadius => 0.0;
 
-            [Description("The margin for labels when placed next to the ADC.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             [Description("The width of the ADC.")]
+            [Alias("w")]
             public double Width { get; set; } = 18;
 
             [Description("The height of the ADC.")]
+            [Alias("h")]
             public double Height { get; set; } = 12;
 
             /// <inheritdoc />

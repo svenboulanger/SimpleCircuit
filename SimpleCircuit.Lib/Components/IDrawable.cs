@@ -25,7 +25,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the properties available for the drawable.
         /// </summary>
-        public IEnumerable<string> Properties { get; }
+        public IEnumerable<string[]> Properties { get; }
 
         /// <summary>
         /// Gets the bounds of the drawable.

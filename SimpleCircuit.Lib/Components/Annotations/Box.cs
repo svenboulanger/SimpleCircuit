@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components.Annotations
         public IPinCollection Pins => null;
 
         /// <inheritdoc />
-        public IEnumerable<string> Properties => Drawable.GetProperties(this);
+        public IEnumerable<string[]> Properties => Drawable.GetProperties(this);
 
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
@@ -47,18 +47,23 @@ namespace SimpleCircuit.Components.Annotations
         public Labels Labels { get; } = new Labels();
 
         [Description("The margin for the annotation box on the left side.")]
+        [Alias("ml")]
         public double LeftMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box on the right side.")]
+        [Alias("mr")]
         public double RightMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box on the top side.")]
+        [Alias("mt")]
         public double TopMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box on the bottom side.")]
+        [Alias("mb")]
         public double BottomMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box. Shorthand for setting all margins.")]
+        [Alias("m")]
         public double Margin
         {
             get => 0.25 * (LeftMargin + RightMargin + TopMargin + BottomMargin);
@@ -72,24 +77,28 @@ namespace SimpleCircuit.Components.Annotations
         }
 
         [Description("The margin for the annotation box along wires.")]
+        [Alias("wm")]
         public double WireMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box for the start of wires.")]
+        [Alias("wsm")]
         public double WireStartMargin { get; set; } = 5.0;
 
         [Description("The margin for the annotation box for the end of wires.")]
+        [Alias("wem")]
         public double WireEndMargin { get; set; } = 5.0;
 
-        [Description("The round-off corner for the annotation box.")]
+        [Description("The round-off corner radius.")]
+        [Alias("r")]
+        [Alias("radius")]
         public double CornerRadius { get; set; }
 
-        [Description("The round-off corner for the annotation box.")]
-        public double Radius { get => CornerRadius; set => CornerRadius = value; }
-
         [Description("The tolerance to group points together as a side of the annotation box.")]
+        [Alias("tol")]
         public double Tolerance { get; set; } = 4.0;
 
-        [Description("The label margin to the edge of the annotation box.")]
+        [Description("The margin for labels to the edge.")]
+        [Alias("lm")]
         public double LabelMargin { get; set; } = 1.0;
 
         Vector2 IBoxLabeled.TopLeft => _topLeft;

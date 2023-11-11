@@ -10,22 +10,13 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"A1 <r> A2(programmable)";
+            var script = @"A1 <r> |a r=2| A2 ||";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext
             {
                 Diagnostics = logger
             };
-
-            // Custom XML
-            var refDoc = new XmlDocument();
-            using (var sr = new StreamReader(@"test.xml"))
-            {
-                string content = sr.ReadToEnd();
-                refDoc.LoadXml(content);
-            }
-            context.Factory.Load(refDoc, logger);
             Parser.Parse(lexer, context);
             context.Circuit.Metadata.Add("script", script);
 

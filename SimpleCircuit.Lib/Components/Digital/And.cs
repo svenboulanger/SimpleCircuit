@@ -87,7 +87,8 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
-            [Description("The label margint to the edge.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);

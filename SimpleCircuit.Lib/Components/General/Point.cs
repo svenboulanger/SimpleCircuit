@@ -20,8 +20,12 @@ namespace SimpleCircuit.Components
             private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
 
             [Description("The angle along which the label should extend. 0 degrees will put the text on the right.")]
+            [Alias("a")]
             public double Angle { get; set; }
+
             [Description("The label distance from the point. The default is 3.")]
+            [Alias("d")]
+            [Alias("l")]
             public double Distance { get; set; } = 3.0;
 
             /// <inheritdoc />

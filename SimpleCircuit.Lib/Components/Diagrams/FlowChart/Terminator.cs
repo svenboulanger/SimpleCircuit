@@ -26,6 +26,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// Gets or sets the width of the terminator.
             /// </summary>
             [Description("The width of the block.")]
+            [Alias("w")]
             public double Width
             {
                 get => _width;
@@ -42,6 +43,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// Gets or sets the height of the terminator.
             /// </summary>
             [Description("The height of the block.")]
+            [Alias("h")]
             public double Height
             {
                 get => _height;

@@ -59,6 +59,11 @@ namespace SimpleCircuit.Components
             /// </summary>
             public string Bottom { get; }
 
+            /// <summary>
+            /// Gets or sets the corner radius (used for margins).
+            /// </summary>
+            public double CornerRadius { get; set; } = 0.0;
+
             /// <inheritdoc/>
             public IPin this[string name]
             {
@@ -150,10 +155,10 @@ namespace SimpleCircuit.Components
 
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 double width = 0, height = 0;
-                width = Math.Max(width, Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinSpaceX, MinEdgeX));
-                width = Math.Max(width, Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinSpaceX, MinEdgeX));
-                height = Math.Max(height, Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
-                height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY));
+                width = Math.Max(width, Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinSpaceX, MinEdgeX + CornerRadius));
+                width = Math.Max(width, Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinSpaceX, MinEdgeX + CornerRadius));
+                height = Math.Max(height, Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY + CornerRadius));
+                height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY + CornerRadius));
 
                 if (width < MinWidth)
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Relationships.Offsets[_parent.X], context.Relationships.Offsets[Right], MinWidth, 100.0);

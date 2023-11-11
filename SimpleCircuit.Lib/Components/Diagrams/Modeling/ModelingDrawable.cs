@@ -18,7 +18,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         /// </summary>
         protected virtual double Size => 8;
 
-        [Description("The label margin to the edge.")]
+        [Description("The margin for labels to the edge.")]
+        [Alias("lm")]
         public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />

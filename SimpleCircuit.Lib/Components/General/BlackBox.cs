@@ -61,38 +61,46 @@ namespace SimpleCircuit.Components
             public string Name { get; }
 
             [Description("The minimum horizontal space between two pins.")]
+            [Alias("msx")]
             public double MinSpaceX { get => _pins.MinSpaceX; set => _pins.MinSpaceX = value; }
 
             [Description("The minimum vertical space between two pins.")]
+            [Alias("msy")]
             public double MinSpaceY { get => _pins.MinSpaceY; set => _pins.MinSpaceY = value; }
 
             [Description("The minimum horizontal space between a pin and the edge of the black box.")]
+            [Alias("mex")]
             public double MinEdgeX { get => _pins.MinEdgeX; set => _pins.MinEdgeX = value; }
 
             [Description("The minimum vertical space between a pin and the edge of the black box.")]
+            [Alias("mey")]
             public double MinEdgeY { get => _pins.MinEdgeY; set => _pins.MinEdgeY = value; }
 
             [Description("The minimum width.")]
+            [Alias("minw")]
             public double MinWidth { get => _pins.MinWidth; set => _pins.MinWidth = value; }
 
             [Description("The minimum height.")]
+            [Alias("minh")]
             public double MinHeight { get => _pins.MinHeight; set => _pins.MinHeight = value; }
 
-            [Description("The offset for the label relative to the center.")]
-            public Vector2 Offset { get; set; }
-
-            [Description("The margin of labels to the edge of the black box.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             Vector2 IBoxLabeled.TopLeft => new(Location.X, Location.Y);
             Vector2 IBoxLabeled.BottomRight => new(EndLocation.X, EndLocation.Y);
-            double IBoxLabeled.CornerRadius => 0.0;
+
+            [Description("The round-off corner radius.")]
+            [Alias("r")]
+            [Alias("radius")]
+            public double CornerRadius { get => _pins.CornerRadius; set => _pins.CornerRadius = value; }
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
             /// <inheritdoc />
-            public IEnumerable<string> Properties => Drawable.GetProperties(this);
+            public IEnumerable<string[]> Properties => Drawable.GetProperties(this);
 
             /// <inheritdoc />
             public Bounds Bounds { get; private set; }
@@ -136,8 +144,8 @@ namespace SimpleCircuit.Components
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
                 go.Classes.Add("blackbox");
                 drawing.BeginGroup(go);
-                var center = 0.5 * (Location + EndLocation);
-                drawing.Rectangle(EndLocation - Location, center);
+                var size = EndLocation - Location;
+                drawing.Rectangle(Location.X, Location.Y, size.X, size.Y, CornerRadius, CornerRadius);
 
                 // Draw the label
                 BoxLabelAnchorPoints.Default.Draw(drawing, this);

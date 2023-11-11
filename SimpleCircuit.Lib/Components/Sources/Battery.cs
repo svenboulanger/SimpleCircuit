@@ -27,6 +27,7 @@ namespace SimpleCircuit.Components.Sources
             public Labels Labels { get; } = new();
 
             [Description("The number of cells.")]
+            [Alias("c")]
             public int Cells
             {
                 get => _cells;

@@ -26,15 +26,18 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// Gets or sets the width.
             /// </summary>
             [Description("The width of the block.")]
+            [Alias("w")]
             public double Width { get; set; } = 30.0;
 
             /// <summary>
             /// Gets or sets the height.
             /// </summary>
             [Description("The height of the block.")]
+            [Alias("h")]
             public double Height { get; set; } = 15.0;
 
-            [Description("The label margin to the edge.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);

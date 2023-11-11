@@ -29,9 +29,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// Gets or sets the width of the entity block.
             /// </summary>
             [Description("The width of the entity block.")]
+            [Alias("w")]
             public double Width { get; set; } = 30;
 
             [Description("The height of a line for attributes.")]
+            [Alias("lh")]
             public double LineHeight { get; set; } = 8;
 
             /// <summary>

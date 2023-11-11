@@ -16,10 +16,6 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
             private int _inputs = 2;
             private double _spacing = 5;
 
@@ -87,7 +83,8 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
-            [Description("The label margin to the edge.")]
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             double IBoxLabeled.CornerRadius => 0.0;

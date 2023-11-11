@@ -5,6 +5,7 @@ using SimpleCircuit.Components.Labeling;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml;
@@ -15,7 +16,7 @@ namespace SimpleCircuitOnline.Shared
     {
         private MarkupString _svg;
         private const double MaxPreviewWidth = 90;
-        private List<(PropertyInfo, string)> _properties;
+        private List<(PropertyInfo, string[], string)> _properties;
         private IDrawable _drawable = null;
 
         [Parameter]
@@ -30,12 +31,13 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Gets the properties of the component.
         /// </summary>
-        protected List<(PropertyInfo, string)> Properties
+        protected List<(PropertyInfo, string[], string)> Properties
         {
             get
             {
                 if (_properties == null && _drawable != null)
                 {
+                    var names = new List<string>();
                     _properties = new();
                     foreach (var p in _drawable.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
@@ -46,12 +48,34 @@ namespace SimpleCircuitOnline.Shared
                             && p.PropertyType != typeof(string)
                             && p.PropertyType != typeof(int))
                             continue;
+                        names.Clear();
                         string description = p.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "";
-                        _properties.Add((p, description));
+                        names.Add(p.Name);
+                        foreach (var attribute in p.GetCustomAttributes<AliasAttribute>())
+                            names.Add(attribute.Alias);
+                        _properties.Add((p, names.ToArray(), description));
                     }
                 }
                 return _properties;
             }
+        }
+
+        /// <summary>
+        /// Create a property type name.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The name.</returns>
+        protected string GetTypeName(Type type)
+        {
+            if (type == typeof(int))
+                return "int";
+            if (type == typeof(double))
+                return "real";
+            if (type == typeof(string))
+                return "string";
+            if (type == typeof(bool))
+                return "bool";
+            return "?";
         }
 
         /// <inheritdoc />

@@ -44,9 +44,14 @@ namespace SimpleCircuit.Components.Outputs
 
             Vector2 IBoxLabeled.TopLeft => new(0, -8);
             Vector2 IBoxLabeled.BottomRight => new(16, 8);
-            double IBoxLabeled.CornerRadius => 0.0;
 
-            [Description("The label margin to the edge.")]
+            [Description("The round-off corner radius.")]
+            [Alias("r")]
+            [Alias("radius")]
+            public double CornerRadius { get; set; }
+
+            [Description("The margin for labels to the edge.")]
+            [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
@@ -173,13 +178,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)
             {
-                width /= 2.0;
-                height /= 2.0;
-                drawing.Polygon(new Vector2[]
-                {
-                new(cx - width, cy - height), new(cx + width, cy - height),
-                new(cx + width, cy + height), new(cx - width, cy + height)
-                });
+                drawing.Rectangle(cx - width * 0.5, cy - height * 0.5, width, height, CornerRadius, CornerRadius);
             }
             private void DrawVentilator(SvgDrawing drawing, double x, double y, double scale = 4)
             {

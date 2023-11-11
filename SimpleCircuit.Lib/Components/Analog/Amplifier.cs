@@ -54,11 +54,6 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public Labels Labels { get; } = new();
 
-            /// <summary>
-            /// Gets or sets the gain string.
-            /// </summary>
-            public string Gain { get; set; }
-
             /// <inheritdoc />
             public override string Type => "amplifier";
 

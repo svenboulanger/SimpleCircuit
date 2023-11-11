@@ -54,6 +54,7 @@ namespace SimpleCircuit.Components.Analog
             public Labels Labels { get; } = new();
 
             [Description("The length of the transmission line.")]
+            [Alias("l")]
             public double Length
             {
                 get => _length;

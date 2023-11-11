@@ -30,6 +30,7 @@ namespace SimpleCircuit.Components.Outputs
             public override string Type => "plug";
 
             [Description("The multiplicity of the wall plug.")]
+            [Alias("m")]
             public int Multiple { get; set; } = 1;
 
             /// <summary>

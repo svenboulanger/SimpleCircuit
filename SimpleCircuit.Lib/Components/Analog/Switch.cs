@@ -39,6 +39,7 @@ namespace SimpleCircuit.Components.Analog
             public Labels Labels { get; } = new();
 
             [Description("The number of poles on the switch.")]
+            [Alias("p")]
             public int Poles { get; set; }
 
             /// <inheritdoc />

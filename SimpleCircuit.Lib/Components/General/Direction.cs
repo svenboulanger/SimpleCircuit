@@ -23,6 +23,8 @@ namespace SimpleCircuit.Components.General
             public Labels Labels { get; } = new();
 
             [Description("The distance of the text to the point.")]
+            [Alias("l")]
+            [Alias("d")]
             public double Length { get; set; } = 2.0;
 
             /// <inheritdoc />

@@ -16,6 +16,7 @@ namespace SimpleCircuit.Components
         /// Gets or sets the scale of the drawable.
         /// </summary>
         [Description("Scales the component by a scaling factor.")]
+        [Alias("s")]
         public double Scale
         {
             get => _scale;

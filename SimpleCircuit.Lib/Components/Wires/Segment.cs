@@ -31,6 +31,7 @@ namespace SimpleCircuit.Components.Wires
             public Labels Labels { get; } = new();
 
             [Description("The number of tubes.")]
+            [Alias("m")]
             public int Multiple { get; set; } = 1;
 
             /// <summary>

@@ -33,6 +33,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// Gets or sets the width.
             /// </summary>
             [Description("The width of the block.")]
+            [Alias("w")]
             public double Width
             {
                 get => _width;
@@ -49,6 +50,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// Gets or sets the height.
             /// </summary>
             [Description("The height of the block.")]
+            [Alias("h")]
             public double Height
             {
                 get => _height;
