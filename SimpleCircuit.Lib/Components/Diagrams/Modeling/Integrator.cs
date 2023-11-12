@@ -22,14 +22,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             /// <inheritdoc />
             public override string Type => "integrator";
 
-            /// <inheritdoc />
-            protected override double Size => 12;
-
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
             /// <param name="name">The name.</param>
-            public Instance(string name) : base(name)
+            public Instance(string name)
+                : base(name, 12.0)
             {
             }
 

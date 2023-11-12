@@ -4,6 +4,7 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -35,6 +36,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Description("The height of a line for attributes.")]
             [Alias("lh")]
             public double LineHeight { get; set; } = 8;
+
+            [Description("The round-off corner radius.")]
+            [Alias("r")]
+            [Alias("radius")]
+            public double CornerRadius { get; set; }
 
             /// <summary>
             /// Gets the height of the entity block (only valid after <see cref="Reset(IDiagnosticHandler)"/>).
@@ -93,12 +99,12 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 anchors[0] = new LabelAnchorPoint(new(), new(), new("header"));
                 if (Labels.Count <= 1)
                 {
-                    drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: new("erd"));
+                    drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius, options: new("erd"));
                 }
                 else
                 {
                     double w = Width * 0.5;
-                    drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height);
+                    drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius);
                     drawing.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
 
                     for (int i = 1; i < Labels.Count; i++)

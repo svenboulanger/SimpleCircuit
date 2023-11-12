@@ -21,16 +21,14 @@
             private const string _hp2 = "highpass2";
 
             /// <inheritdoc />
-            protected override double Size => 12;
-
-            /// <inheritdoc />
             public override string Type => "filter";
 
             /// <summary>
             /// Creats a new <see cref="Instance"/>.
             /// </summary>
             /// <param name="name">The name.</param>
-            public Instance(string name) : base(name)
+            public Instance(string name)
+                : base(name, 12.0)
             {
             }
 

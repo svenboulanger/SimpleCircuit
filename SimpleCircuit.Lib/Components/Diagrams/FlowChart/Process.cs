@@ -40,9 +40,13 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
+            [Description("The round-off corner radius.")]
+            [Alias("r")]
+            [Alias("radius")]
+            public double CornerRadius { get; set; }
+
             Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);
             Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
-            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new instance.
@@ -56,7 +60,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
+                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, CornerRadius, CornerRadius);
 
                 if (Variants.Contains(Predefined))
                 {
@@ -83,16 +87,38 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 foreach (var pin in pins)
                 {
                     double angle = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
-                    if (angle < -Math.PI * 0.75)
-                        pin.Offset = Interp(new(-a, b), new(-a, -b), angle + Math.PI * 1.25);
+
+                    // Deal with the corners first
+                    if (Math.Abs(angle + Math.PI * 0.75) < 1e-3)
+                    {
+                        double k = 0.29289321881 * CornerRadius;
+                        pin.Offset = new(-a + k, -b + k);
+                    }
+                    else if (Math.Abs(angle + Math.PI * 0.25) < 1e-3)
+                    {
+                        double k = 0.29289321881 * CornerRadius;
+                        pin.Offset = new(a - k, -b + k);
+                    }
+                    else if (Math.Abs(angle - Math.PI * 0.25) < 1e-3)
+                    {
+                        double k = 0.29289321881 * CornerRadius;
+                        pin.Offset = new(a - k, b - k);
+                    }
+                    else if (Math.Abs(angle - Math.PI * 0.75) < 1e-3)
+                    {
+                        double k = 0.29289321881 * CornerRadius;
+                        pin.Offset = new(-a + k, b - k);
+                    }
+                    else if (angle < -Math.PI * 0.75)
+                        pin.Offset = Interp(new(-a, b - CornerRadius), new(-a, -b + CornerRadius), angle + Math.PI * 1.25);
                     else if (angle < -Math.PI * 0.25)
-                        pin.Offset = Interp(new(-a, -b), new(a, -b), angle + Math.PI * 0.75);
+                        pin.Offset = Interp(new(-a + CornerRadius, -b), new(a - CornerRadius, -b), angle + Math.PI * 0.75);
                     else if (angle < Math.PI * 0.25)
-                        pin.Offset = Interp(new(a, -b), new(a, b), angle + Math.PI * 0.25);
+                        pin.Offset = Interp(new(a, -b + CornerRadius), new(a, b - CornerRadius), angle + Math.PI * 0.25);
                     else if (angle < Math.PI * 0.75)
-                        pin.Offset = Interp(new(a, b), new(-a, b), angle - Math.PI * 0.25);
+                        pin.Offset = Interp(new(a - CornerRadius, b), new(-a + CornerRadius, b), angle - Math.PI * 0.25);
                     else
-                        pin.Offset = Interp(new(-a, b), new(-a, -b), angle - Math.PI * 0.75);
+                        pin.Offset = Interp(new(-a, b - CornerRadius), new(-a, -b + CornerRadius), angle - Math.PI * 0.75);
                 }
             }
         }

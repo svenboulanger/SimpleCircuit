@@ -19,9 +19,6 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         private class Instance : ModelingDrawable
         {
             /// <inheritdoc />
-            protected override double Size => 12;
-
-            /// <inheritdoc />
             public override string Type => "block";
 
             /// <summary>
@@ -29,7 +26,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             /// </summary>
             /// <param name="name">The name.</param>
             public Instance(string name)
-                : base(name)
+                : base(name, 12.0)
             {
             }
 
