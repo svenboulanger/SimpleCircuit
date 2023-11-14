@@ -23,7 +23,6 @@ namespace SimpleCircuit.Components.Analog
 
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
-            double IBoxLabeled.CornerRadius => 0.0;
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]

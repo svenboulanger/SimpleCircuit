@@ -1,7 +1,7 @@
 ﻿namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
-    /// Describes a boxed item with a width and height.
+    /// Describes a box shape that can be used for labeling.
     /// </summary>
     public interface IBoxLabeled : ILabeled
     {
@@ -16,13 +16,8 @@
         public Vector2 BottomRight { get; }
 
         /// <summary>
-        /// Gets the radius if the box has rounded corners.
+        /// Gets or sets the margin of labels from the edge.
         /// </summary>
-        public double CornerRadius { get; }
-
-        /// <summary>
-        /// Gets the margin of labels from the edge.
-        /// </summary>
-        public double LabelMargin { get; }
+        public double LabelMargin { get; set; }
     }
 }

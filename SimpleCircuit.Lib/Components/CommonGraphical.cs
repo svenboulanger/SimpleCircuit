@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components
         public const string Outside = "outside";
 
         /// <summary>
-        /// Draws a rectangle centered around the given point.
+        /// Draws a rectangle.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
         /// <param name="x">The left coordinate.</param>
@@ -112,22 +112,112 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
-        /// Draws a rectangle center around the given point.
+        /// Draws a diamond shape centered around the given point.
         /// </summary>
         /// <param name="drawing">The drawing.</param>
-        /// <param name="size">The size.</param>
-        /// <param name="center">The center of the rectangle, default is the origin.</param>
-        /// <param name="options">Path options.</param>
-        public static void Rectangle(this SvgDrawing drawing, Vector2 size, Vector2 center = new(), GraphicOptions options = null)
+        /// <param name="x">The center X-coordinate.</param>
+        /// <param name="y">The center Y-coordinate.</param>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="rx">The radius for the left and right corners.</param>
+        /// <param name="ry">The radius for the top and bottom corners.</param>
+        /// <param name="options">The path options.</param>
+        public static void Diamond(this SvgDrawing drawing, double x, double y, double width, double height,
+            double rx = 0.0, double ry = 0.0, GraphicOptions options = null)
         {
-            size *= 0.5;
-            drawing.Polygon(new Vector2[]
+            RoundedDiamondSize(width, height, rx, ry, out var n, out var ox, out var oy);
+            var loc = new Vector2(x, y);
+            var ax = new Vector2(width * 0.5, 0);
+            var ay = new Vector2(0, height * 0.5);
+
+            drawing.Path(b =>
             {
-                new Vector2(-size.X, size.Y) + center,
-                new Vector2(size.X, size.Y) + center,
-                new Vector2(size.X, -size.Y) + center,
-                new Vector2(-size.X, -size.Y) + center
+                b.MoveTo(loc - ax + ox);
+                b.LineTo(loc - ay + oy);
+                if (!ry.IsZero())
+                     b.ArcTo(ry, ry, 0.0, false, true, loc - ay + new Vector2(-oy.X, oy.Y));
+                b.LineTo(loc + ax + new Vector2(-ox.X, ox.Y));
+                if (!rx.IsZero())
+                     b.ArcTo(rx, rx, 0.0, false, true, loc + ax - ox);
+                b.LineTo(loc + ay - oy);
+                if (!ry.IsZero())
+                    b.ArcTo(ry, ry, 0.0, false, true, loc + ay - new Vector2(-oy.X, oy.Y));
+                b.LineTo(loc - ax + new Vector2(ox.X, -ox.Y));
+                if (!rx.IsZero())
+                    b.ArcTo(rx, rx, 0.0, false, true, loc - ax + ox);
             }, options);
+        }
+
+        /// <summary>
+        /// Computes the normal and entry points of the rounded edges for a given width and height.
+        /// </summary>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="rx">The radius for the left and right corners.</param>
+        /// <param name="ry">The radius for the top and bottom corners.</param>
+        /// <param name="n">The normal of the straight lines.</param>
+        /// <param name="ox">The top-left offset for the left corner compared to (-width/2,0).</param>
+        /// <param name="oy">The top-left offset for the top corner compared to (0,-height/2).</param>
+        public static void RoundedDiamondSize(double width, double height, double rx, double ry, out Vector2 n, out Vector2 ox, out Vector2 oy)
+        {
+            if (rx.IsZero() && ry.IsZero())
+            {
+                n = new(width, height);
+                n /= n.Length;
+                ox = new();
+                oy = new();
+                return;
+            }
+
+            double x0 = width * 0.5 - rx;
+            double y0 = height * 0.5 - ry;
+            double x0sq = x0 * x0;
+            double y0sq = y0 * y0;
+            double ap = 1.0 / x0sq + 1.0 / y0sq;
+            double bp = rx / x0sq + ry / y0sq;
+            double cp = rx * rx / x0sq + ry * ry / y0sq - 1.0;
+            double c = (bp + Math.Sqrt(bp * bp - ap * cp)) / ap;
+
+            n = new Vector2(-(ry - c) / y0, -(rx - c) / x0);
+            double hp = c / n.X;
+            double wp = c / n.Y;
+
+            double dot = n.X * n.X - n.Y * n.Y; // left-right corners
+            double lx = rx / Math.Tan(Math.Acos(dot) * 0.5);
+            ox = new Vector2(-wp + width * 0.5 + lx * n.X, -lx * n.Y);
+
+            dot = -dot; // top-down
+            lx = ry / Math.Tan(Math.Acos(dot) * 0.5);
+            oy = new Vector2(-lx * n.X, -hp + height * 0.5 + lx * n.Y);
+        }
+
+        /// <summary>
+        /// Computes the offset of a key point based on the location.
+        /// </summary>
+        /// <param name="width">The diamond width.</param>
+        /// <param name="height">The diamond height.</param>
+        /// <param name="ox">The top-left offset for left corner compared to (-width/2,0).</param>
+        /// <param name="oy">The top-left offset for the top corner compared to (0,-height/2).</param>
+        /// <param name="location">The location.</param>
+        /// <returns>The offset compared to the center of the diamond.</returns>
+        public static Vector2 GetDiamondOffset(double width, double height, Vector2 ox, Vector2 oy, DiamondLocation location)
+        {
+            return location switch
+            {
+                DiamondLocation.Left => new(-width * 0.5, 0),
+                DiamondLocation.TopLeftLeft => new(-width * 0.5 + ox.X, ox.Y),
+                DiamondLocation.TopLeftTop => new(oy.X, -height * 0.5 + oy.Y),
+                DiamondLocation.Top => new(0, -height * 0.5),
+                DiamondLocation.TopRightTop => new(-oy.X, -height * 0.5 + oy.Y),
+                DiamondLocation.TopRightRight => new(width * 0.5 - ox.X, ox.Y),
+                DiamondLocation.Right => new(width * 0.5, 0),
+                DiamondLocation.BottomRightRight => new(width * 0.5 - ox.X, -ox.Y),
+                DiamondLocation.BottomRightBottom => new(-oy.X, height * 0.5 - oy.Y),
+                DiamondLocation.Bottom => new(0, height * 0.5),
+                DiamondLocation.BottomLeftBottom => new(oy.X, height * 0.5 - oy.Y),
+                DiamondLocation.BottomLeftLeft => new(-width * 0.5 + ox.X, -ox.Y),
+                _ => default,
+            };
         }
 
         /// <summary>

@@ -23,6 +23,6 @@
         /// <summary>
         /// Gets the margin of labels from the edge.
         /// </summary>
-        public double LabelMargin { get; }
+        public double LabelMargin { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -85,6 +86,12 @@ namespace SimpleCircuit.Components
                             break;
                     }
                 }
+                if (result is IRoundedBox rb)
+                    rb.CornerRadius = options.CornerRadius;
+                if (result is IBoxLabeled bl)
+                    bl.LabelMargin = options.LabelMargin;
+                if (result is IEllipseLabeled el)
+                    el.LabelMargin = options.LabelMargin;
                 options.Apply(key, result, diagnostics);
             }
             return result;

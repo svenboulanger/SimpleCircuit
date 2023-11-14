@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : LocatedDrawable, ILabeled
+        private class Instance : LocatedDrawable, ILabeled, IRoundedBox
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();

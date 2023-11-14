@@ -85,7 +85,6 @@ namespace SimpleCircuit.Components.Digital
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            double IBoxLabeled.CornerRadius => 0.0;
             Vector2 IBoxLabeled.TopLeft => 0.5 * new Vector2(-Width, -Height);
             Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
 

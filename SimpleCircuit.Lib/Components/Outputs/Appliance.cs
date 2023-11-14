@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled, IRoundedBox
         {
             private const double _k = 0.5522847498;
             private readonly static ILabelAnchorPoints<IBoxLabeled> _anchors = new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1);

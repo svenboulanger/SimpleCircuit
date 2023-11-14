@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled
+        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled, IRoundedDiamond
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -32,9 +32,16 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
+            [Description("The corner radius for the left and right corner.")]
+            [Alias("rx")]
+            public double CornerRadiusX { get; set; }
+
+            [Description("The corner radius for the top and bottom corner.")]
+            [Alias("ry")]
+            public double CornerRadiusY { get; set; }
+
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
-            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new action.
@@ -48,41 +55,47 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
-                drawing.Path(builder =>
-                {
-                    double a = Width * 0.5, b = Height * 0.5;
-                    builder.MoveTo(-a, 0)
-                        .LineTo(0, -b)
-                        .LineTo(a, 0)
-                        .LineTo(0, b)
-                        .Close();
-                });
+                drawing.Diamond(0.0, 0.0, Width, Height, CornerRadiusX, CornerRadiusY);
                 DiamondLabelAnchorPoints.Default.Draw(drawing, this);
             }
+
 
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                double a = 0.5 * Width;
-                double b = 0.5 * Height;
-
-                static Vector2 Interp(Vector2 a, Vector2 b, double ka)
+                CommonGraphical.RoundedDiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var n, out var ox, out var oy);
+                Vector2 Interp(DiamondLocation l1, DiamondLocation l2, double ka)
                 {
+                    Vector2 a = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l1);
+                    Vector2 b = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l2);
                     double k = ka / (Math.PI * 0.5);
                     return (1 - k) * a + k * b;
                 }
+                double a = Width * 0.5;
+                double b = Height * 0.5;
 
                 foreach (var pin in pins)
                 {
-                    double alpha = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
-                    if (alpha < -Math.PI * 0.5)
-                        pin.Offset = Interp(new(-a, 0), new(0, -b), alpha + Math.PI);
-                    else if (alpha < 0)
-                        pin.Offset = Interp(new(0, -b), new(a, 0), alpha + Math.PI * 0.5);
-                    else if (alpha < 0.5 * Math.PI)
-                        pin.Offset = Interp(new(a, 0), new(0, b), alpha);
+                    if (pin.Orientation.X < -0.999)
+                        pin.Offset = new(-a, 0);
+                    else if (pin.Orientation.X > 0.999)
+                        pin.Offset = new(a, 0);
+                    else if (pin.Orientation.Y < -0.999)
+                        pin.Offset = new(0, -b);
+                    else if (pin.Orientation.Y > 0.999)
+                        pin.Offset = new(0, b);
                     else
-                        pin.Offset = Interp(new(0, b), new(-a, 0), alpha - Math.PI * 0.5);
+                    {
+                        double alpha = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
+                        if (alpha < -Math.PI * 0.5)
+                            pin.Offset = Interp(DiamondLocation.TopLeftLeft, DiamondLocation.TopLeftTop, alpha + Math.PI);
+                        else if (alpha < 0)
+                            pin.Offset = Interp(DiamondLocation.TopRightTop, DiamondLocation.TopRightRight, alpha + Math.PI * 0.5);
+                        else if (alpha < 0.5 * Math.PI)
+                            pin.Offset = Interp(DiamondLocation.BottomRightRight, DiamondLocation.BottomRightBottom, alpha);
+                        else
+                            pin.Offset = Interp(DiamondLocation.BottomLeftBottom, DiamondLocation.BottomLeftLeft, alpha - Math.PI * 0.5);
+                    }
                 }
             }
         }

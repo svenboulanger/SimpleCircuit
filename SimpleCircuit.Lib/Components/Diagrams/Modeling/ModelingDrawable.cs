@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
     /// A generic drawable used for modeling block diagrams.
     /// These blocks don't have an orientation, but they can be square or circular and have 8 pins in all major directions.
     /// </summary>
-    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxLabeled, IEllipseLabeled
+    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxLabeled, IEllipseLabeled, IRoundedBox
     {
         public const string Square = "square";
 

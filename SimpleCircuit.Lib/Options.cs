@@ -72,17 +72,23 @@ namespace SimpleCircuit
         [Description("The margin along the border of the drawing.")]
         public double Margin { get; set; } = 1.0;
 
-        [Description("If true, removes any empty groups in the SVG output.")] 
+        [Description("If true, removes any empty groups in the SVG output. The default is true.")] 
         public bool RemoveEmptyGroups { get; set; } = true;
 
-        [Description("The spacing between lines of text.")]
+        [Description("The spacing between lines of text. The default is 1.")]
         public double LineSpacing { get; set; } = 1.0;
 
-        [Description("If true, wires will draw small arcs indicating jumping over another wire.")]
+        [Description("If true, wires will draw small arcs indicating jumping over another wire. The default is false.")]
         public bool JumpOverWires { get; set; } = false;
 
-        [Description("If non-zero, subsequent wires will be rounded when cornering.")]
+        [Description("If non-zero, subsequent wires will be rounded when cornering. The default is 0.")]
         public double RoundWires { get; set; } = 0.0;
+
+        [Description("The radius of corners for subsequent components that support it. The default is 0.")]
+        public double CornerRadius { get; set; } = 0.0;
+
+        [Description("The default label margin to the edge of subsequent components. The default is 1.")]
+        public double LabelMargin { get; set; } = 1.0;
 
         [Description("If non-zero, subsequent annotation boxes will be rounded.")]
         public double AnnotationRadius { get; set; } = 0.0;

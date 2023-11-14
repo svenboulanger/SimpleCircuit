@@ -3,7 +3,7 @@
 namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
-    /// A list of label anchor points that can be used for a box.
+    /// A list of label anchor points that can be used for a box shape.
     /// </summary>
     public class BoxLabelAnchorPoints : LabelAnchorPoints<IBoxLabeled>
     {
@@ -25,6 +25,10 @@ namespace SimpleCircuit.Components.Labeling
         /// <inheritdoc />
         public override bool TryCalculate(IBoxLabeled subject, string name, out LabelAnchorPoint value)
         {
+            double r = 0.0;
+            if (subject is IRoundedBox rb)
+                r = rb.CornerRadius;
+
             switch (name.ToLower())
             {
                 case "0":
@@ -38,7 +42,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "nwo":
                 case "nnw":
                 case "nnwo":
-                    value = new(subject.TopLeft + new Vector2(subject.CornerRadius, -subject.LabelMargin), new(1, -1));
+                    value = new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1));
                     return true; // Top-left above box
 
                 case "2":
@@ -54,13 +58,13 @@ namespace SimpleCircuit.Components.Labeling
                 case "neo":
                 case "nne":
                 case "nneo":
-                    value = new(new(subject.BottomRight.X - subject.CornerRadius, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1));
+                    value = new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1));
                     return true; // Top-right above box
 
                 case "4":
                 case "ene":
                 case "eneo":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + subject.CornerRadius), new(1, 1));
+                    value = new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1));
                     return true; // Top-right right of box
 
                 case "5":
@@ -74,7 +78,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "6":
                 case "ese":
                 case "eseo":
-                    value = new(subject.BottomRight + new Vector2(subject.LabelMargin, -subject.CornerRadius), new(1, -1));
+                    value = new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1));
                     return true; // Bottom-right right of box
 
                 case "7":
@@ -82,7 +86,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "seo":
                 case "sse":
                 case "sseo":
-                    value = new(subject.BottomRight + new Vector2(-subject.CornerRadius, subject.LabelMargin), new(-1, 1));
+                    value = new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1));
                     return true; // Bottom-right below box
 
                 case "8":
@@ -98,13 +102,13 @@ namespace SimpleCircuit.Components.Labeling
                 case "swo":
                 case "ssw":
                 case "sswo":
-                    value = new(new(subject.TopLeft.X + subject.CornerRadius, subject.BottomRight.Y + subject.LabelMargin), new(1, 1));
+                    value = new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1));
                     return true; // Bottom-right below box
 
                 case "10":
                 case "wsw":
                 case "wswo":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - subject.CornerRadius), new(-1, -1));
+                    value = new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1));
                     return true; // Bottom-left left of box
 
                 case "11":
@@ -118,12 +122,12 @@ namespace SimpleCircuit.Components.Labeling
                 case "12":
                 case "wnw":
                 case "wnwo":
-                    value = new(subject.TopLeft + new Vector2(-subject.LabelMargin, subject.CornerRadius), new(-1, 1));
+                    value = new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1));
                     return true; // Top-left left of box
 
                 case "13":
                 case "nwi":
-                    double f = subject.CornerRadius * 0.70710678118;
+                    double f = r * 0.70710678118;
                     value = new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1));
                     return true; // Top-left inside box
 
@@ -134,7 +138,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "15":
                 case "nei":
-                    f = subject.CornerRadius * 0.70710678118;
+                    f = r * 0.70710678118;
                     value = new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1));
                     return true; // Top-right inside box
 
@@ -145,7 +149,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "17":
                 case "sei":
-                    f = subject.CornerRadius * 0.70710678118;
+                    f = r * 0.70710678118;
                     value = new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1));
                     return true; // Bottom-right inside box
 
@@ -156,7 +160,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "19":
                 case "swi":
-                    f = subject.CornerRadius * 0.70710678118;
+                    f = r * 0.70710678118;
                     value = new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1));
                     return true; // Bottom-left inside box
 

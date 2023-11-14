@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Annotations
     /// <summary>
     /// An annotation box.
     /// </summary>
-    public class Box : IAnnotation, ILabeled, IBoxLabeled
+    public class Box : IAnnotation, ILabeled, IBoxLabeled, IRoundedBox
     {
         private readonly HashSet<ComponentInfo> _componentInfos = new();
         private readonly HashSet<WireInfo> _wireInfos = new();
@@ -106,7 +106,8 @@ namespace SimpleCircuit.Components.Annotations
 
         /// <summary>
         /// Creates a new <see cref="Box"/>.
-        /// </summary>
+        /// </summary>'
+        /// <param name="name">The name of the box.</param>
         public Box(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));

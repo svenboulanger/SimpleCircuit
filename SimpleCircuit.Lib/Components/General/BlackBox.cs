@@ -32,7 +32,7 @@ namespace SimpleCircuit.Components
             return instance;
         }
 
-        protected class Instance : ILocatedDrawable, ILabeled, IBoxLabeled
+        protected class Instance : ILocatedDrawable, ILabeled, IBoxLabeled, IRoundedBox
         {
             private readonly PinCollection _pins;
 

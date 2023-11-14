@@ -33,7 +33,6 @@ namespace SimpleCircuit.Components.Digital
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            double IBoxLabeled.CornerRadius => 0.0;
             Vector2 IBoxLabeled.TopLeft => new(-5, -5);
             Vector2 IBoxLabeled.BottomRight => new(5, 5);
 

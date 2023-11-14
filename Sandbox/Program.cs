@@ -10,7 +10,14 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"BLOCK(r=2) <se> X";
+            var script = @"FD1('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q') <a -5> X
+FD1 <a 85> X
+FD1 <a 175> X
+FD1 <a 265> X
+FD1 <a 5> X
+FD1 <a 95> X
+FD1 <a 185> X
+FD1 <a 275> X";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

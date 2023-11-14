@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using static SimpleCircuit.Components.CommonGraphical;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Labeling
         public static DiamondLabelAnchorPoints Default { get; } = new DiamondLabelAnchorPoints();
 
         /// <inheritdoc />
-        public override int Count => 9;
+        public override int Count => 17;
 
         /// <summary>
         /// Creates a new <see cref="DiamondLabelAnchorPoints"/>.
@@ -26,12 +26,29 @@ namespace SimpleCircuit.Components.Labeling
         /// <inheritdoc />
         public override bool TryCalculate(IBoxLabeled subject, string name, out LabelAnchorPoint value)
         {
+            Vector2 c = 0.5 * (subject.TopLeft + subject.BottomRight);
+            Vector2 size = subject.BottomRight - subject.TopLeft;
+            Vector2 n, ox, oy;
+            if (subject is IRoundedDiamond rd)
+                RoundedDiamondSize(size.X, size.Y, rd.CornerRadiusX, rd.CornerRadiusY, out n, out ox, out oy);
+            else
+                RoundedDiamondSize(size.X, size.Y, 0.0, 0.0, out n, out ox, out oy);
+
+            LabelAnchorPoint ComputeMidLocation(Vector2 a, Vector2 b)
+            {
+                Vector2 p = 0.5 * (a + b);
+                Vector2 n = b - a;
+                n = new Vector2(n.Y, -n.X);
+                n /= n.Length;
+                return new(p + subject.LabelMargin * n, n);
+            }
+
             switch (name.ToLower())
             {
                 case "0":
                 case "c":
                 case "ci":
-                    value = new(0.5 * (subject.TopLeft + subject.BottomRight), new());
+                    value = new(c, new());
                     return true; // Center
 
                 case "1":
@@ -41,10 +58,9 @@ namespace SimpleCircuit.Components.Labeling
                 case "nnwo":
                 case "wnw":
                 case "wnwo":
-                    Vector2 pt = 0.75 * subject.TopLeft + 0.25 * subject.BottomRight;
-                    Vector2 n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), -(subject.BottomRight.X - subject.TopLeft.X));
-                    n /= n.Length;
-                    value = new(pt + subject.LabelMargin * n, n);
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop));
                     return true; // Top-left outside
 
                 case "2":
@@ -52,14 +68,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "no":
                 case "u":
                 case "up":
-                    double f = 0.0;
-                    if (!subject.CornerRadius.IsZero())
-                    {
-                        n = subject.BottomRight - subject.TopLeft;
-                        n /= n.Length;
-                        f = subject.CornerRadius * (1 - Math.Sqrt(2 / (1 - n.X * n.X + n.Y * n.Y)));
-                    }
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin + f), new(0, -1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1));
                     return true; // Top
 
                 case "3":
@@ -69,10 +78,9 @@ namespace SimpleCircuit.Components.Labeling
                 case "eneo":
                 case "nne":
                 case "nneo":
-                    pt = new(0.25 * subject.TopLeft.X + 0.75 * subject.BottomRight.X, 0.75 * subject.TopLeft.Y + 0.25 * subject.BottomRight.Y);
-                    n = new(subject.BottomRight.Y - subject.TopLeft.Y, -(subject.BottomRight.X - subject.TopLeft.X));
-                    n /= n.Length;
-                    value = new(pt + subject.LabelMargin * n, n);
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight));
                     return true; // Top-right outside
 
                 case "4":
@@ -80,7 +88,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "eo":
                 case "r":
                 case "right":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0));
                     return true; // Right
 
                 case "5":
@@ -90,10 +98,9 @@ namespace SimpleCircuit.Components.Labeling
                 case "sseo":
                 case "ese":
                 case "eseo":
-                    pt = 0.25 * subject.TopLeft + 0.75 * subject.BottomRight;
-                    n = new((subject.BottomRight.Y - subject.TopLeft.Y), (subject.BottomRight.X - subject.TopLeft.X));
-                    n /= n.Length;
-                    value = new(pt + subject.LabelMargin * n, n);
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom));
                     return true; // Bottom-right outside
 
                 case "6":
@@ -101,7 +108,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "so":
                 case "d":
                 case "down":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1));
                     return true; // Bottom
 
                 case "7":
@@ -111,10 +118,9 @@ namespace SimpleCircuit.Components.Labeling
                 case "sswo":
                 case "wsw":
                 case "wswo":
-                    pt = new(0.75 * subject.TopLeft.X + 0.25 * subject.BottomRight.X, 0.25 * subject.TopLeft.Y + 0.75 * subject.BottomRight.Y);
-                    n = new(-(subject.BottomRight.Y - subject.TopLeft.Y), subject.BottomRight.X - subject.TopLeft.X);
-                    n /= n.Length;
-                    value = new(pt + subject.LabelMargin * n, n);
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft));
                     return true; // Bottom-left outside
 
                 case "8":
@@ -122,8 +128,64 @@ namespace SimpleCircuit.Components.Labeling
                 case "wo":
                 case "l":
                 case "left":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
                     return true; // Left
+
+                case "9":
+                case "nwi":
+                case "nnwi":
+                case "wnwi":
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft));
+                    return true; // Top-left inside
+
+                case "10":
+                case "ni":
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1));
+                    return true; // Top inside
+
+                case "11":
+                case "nei":
+                case "enei":
+                case "nnei":
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop));
+                    return true; // Top-right inside
+
+                case "12":
+                case "ei":
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
+                    return true; // Right inside
+
+                case "13":
+                case "sei":
+                case "ssei":
+                case "esei":
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight));
+                    return true; // Bottom-right outside
+
+                case "14":
+                case "si":
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1));
+                    return true; // Bottom inside
+
+                case "15":
+                case "swi":
+                case "sswi":
+                case "wswi":
+                    value = ComputeMidLocation(
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft),
+                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom));
+                    return true; // Bottom-left outside
+
+                case "16":
+                case "wi":
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0));
+                    return true; // Left inside
 
                 default:
                     if (name.All(char.IsDigit))

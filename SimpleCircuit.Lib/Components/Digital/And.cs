@@ -93,7 +93,6 @@ namespace SimpleCircuit.Components.Digital
 
             Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);
             Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
-            double IBoxLabeled.CornerRadius => 0.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
