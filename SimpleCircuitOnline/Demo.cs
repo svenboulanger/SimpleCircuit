@@ -180,7 +180,7 @@ namespace SimpleCircuitOnline
             new Demo(
                 "Example: CTIA",
                 "A Charge Transimpedance Amplifier.",
-                "// Input section\r\n.section Input\r\n    X1 <l d> I(\"I_in\") <d> GND1\r\n    X1 <d> C(\"C_in\") <d> GND2\r\n    (xy GND1 <r +25> GND2)\r\n.endsection\r\n\r\n// Link to the next section\r\nInput/X1 <r> CTIA/Xin\r\n\r\n// Charge Transimpedance Amplifier\r\n.section CTIA\r\n    Xin <r> A1 <r> Xout\r\n    Xin <u r> C1(\"C_fb\") <r d> Xout\r\n    - A1.Gain = \"-A\"\r\n    (y A1 <u +20> C1)\r\n.endsection\r\n\r\n// Link CTIA to output circuit\r\nCTIA/Xout <r> Output/Xout\r\n\r\n// Output circuit\r\n.section Output\r\n    Xout <d> C1(\"C_L\") <d> GND1\r\n    Xout <r> Xout2 <d> R1(\"R_L\") <d> GND2\r\n    Xout2 <r> T(\"V_out\")\r\n    (xy GND1 <r +20> GND2)\r\n.endsection\r\n\r\n// We can still enforce alignment between elements\r\n// This would not be possible with subcircuits\r\n(y Input/GND1 <r> Output/GND1)\r\n"),
+                "// Input section\r\n.section Input\r\n    X1 <l d> I(\"I_in\") <d> GND1\r\n    X1 <d> C(\"C_in\") <d> GND2\r\n    (xy GND1 <r +25> GND2)\r\n.endsection\r\n\r\n// Link to the next section\r\nInput/X1 <r> CTIA/Xin\r\n\r\n// Charge Transimpedance Amplifier\r\n.section CTIA\r\n    Xin <r> A1(\"-A\", anchor1=1) <r> Xout\r\n    Xin <u r> C1(\"C_fb\") <r d> Xout\r\n    (y A1 <u +20> C1)\r\n.endsection\r\n\r\n// Link CTIA to output circuit\r\nCTIA/Xout <r> Output/Xout\r\n\r\n// Output circuit\r\n.section Output\r\n    Xout <d> C1(\"C_L\") <d> GND1\r\n    Xout <r> Xout2 <d> R1(\"R_L\") <d> GND2\r\n    Xout2 <r> T(\"V_out\")\r\n    (xy GND1 <r +20> GND2)\r\n.endsection\r\n\r\n// We can still enforce alignment between elements\r\n// This would not be possible with subcircuits\r\n(y Input/GND1 <r> Output/GND1)\r\n"),
 
             // CSS styling example
             new Demo(
@@ -206,7 +206,14 @@ namespace SimpleCircuitOnline
                 "Example: Flowchart",
                 "Demonstration of flowcharts using the song \"Total Eclipse of the Heart\" by Bonnie Tyler (Jeannr - Tumblr)",
                 "// Give all wires a nice curve\r\n.options roundwires = 2.5\r\n\r\n// Turn arouuuund...\r\nFPta(\"Turn\\naround\")\r\n\r\n// ... every now and then I ...\r\nFPta <r d arrow> FP1(\"every now\\nand then I\")\r\nFPta <d arrow> FP(\"bright eyes\") <r a 80 +30 arrow> FP1\r\n\r\n// ... get a little bit ...\r\nFP1 <r arrow> FP2(\"get a little bit\")\r\n- FP2.width = 50\r\n- FP2.height = 10\r\n\r\n// Lines\r\n.section line1\r\n    FP1(\"lonely and you're never coming 'round\")\r\n    - FP1.width = 140\r\n    - FP1.height = 10\r\n.ends\r\n.section line2 line1\r\nline2/FP1(\"tired of listening to the sound of my tears\")\r\n.section line3 line1\r\nline3/FP1(\"nervous that the best of all the years have gone by\")\r\n.section line4 line1\r\nline4/FP1(\"terrified and then I see the look in your eyes\")\r\nFP2 <d +10 r arrow> line1/FP1 <r u l d arrow> FPta\r\nFP2 <d +25 r arrow> line2/FP1 <r u l d arrow> FPta\r\nFP2 <d +40 r arrow> line3/FP1 <r u l d arrow> FPta\r\nFP2 <d +55 r arrow> line4/FP1 <r u l d arrow> FPta\r\n\r\n// ... fall apart ...\r\nFP1 <d +50 arrow> FPfa(\"fall apart\")\r\nFPfa <d> FPny(\"and I\\nneed you\")\r\n\r\n// This is a little hack to allow you to connect to different positions\r\nFPny <a 30 0 r> FPnt(\"now,\\ntonight\") <d +0 l arrow a 150 0> FPny\r\nFPny <d r arrow> FP(\"more than\\never!!\")\r\n",
-                GraphicalCircuit.DefaultStyle + "#FPta polygon { fill: rgb(200, 255, 200); }\r\n#FPny polygon { fill: rgb(200, 200, 255); }"),
+                GraphicalCircuit.DefaultStyle + "\r\n#FPta polygon { fill: rgb(200, 255, 200); }\r\n#FPny polygon { fill: rgb(200, 200, 255); }"),
+
+            // Engineering flowchart demo
+            new Demo(
+                "Example: Engineering flowchart",
+                "Demonstration of flowcharts using the engineering flowchart.",
+                ".property FD rx = 1\r\n.property FD ry = 3\r\n.options roundwires = 2\r\n\r\nFT(\"start\") <d> FD1(\"Does it move?\", w=50)\r\n\r\nFD1 <r d> DIR(\"yes\") <d arrow> FD2b(\"Should it?\")\r\nFD1 <l d> DIR(\"no\") <d arrow> FD2a(\"Should it?\")\r\n\r\nFD2a <l d> DIR(\"no\") <d arrow> FTa(\"No problem\", np)\r\nFD2a <r d> DIR(\"yes\") <d arrow> FTb(\"WD-40\")\r\nFD2b <l d> DIR(\"no\") <d arrow> FTc(\"Duck tape\")\r\nFD2b <r d> DIR(\"yes\") <d arrow> FTd(\"No problem\", np)\r\n\r\n(x FTa <r +50> FTb <r +50> FTc <r +50> FTd)",
+                GraphicalCircuit.DefaultStyle + "\r\n.decision path { fill: #fcc; }\r\n.np path { fill: #cfc; }"),
 
             // All possible symbols
             new Demo(
