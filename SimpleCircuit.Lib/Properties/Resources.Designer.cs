@@ -61,21 +61,24 @@ namespace SimpleCircuit.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to path, polyline, line, circle, polygon {
+        ///   Looks up a localized string similar to g {
         ///    stroke: black;
         ///    stroke-width: 0.5pt;
         ///    fill: none;
         ///    stroke-linecap: round;
         ///    stroke-linejoin: round;
         ///}
-        ///.diagram path, .diagram circle, .diagram polygon { fill: white; }
+        ///.diagram { fill: white; }
         ///.plane { stroke-width: 1pt; }
         ///.battery .neg { stroke-width: 0.75pt; }
-        ///text { font-family: Tahoma, Verdana, Segoe, sans-serif; font-size: 4pt; }
         ///.small tspan { font-size: 0.8em; }
         ///.text-stroke { stroke-width: 0.025em; }
         ///.text-symbol { fill: black; stroke: none; }
-        ///.marker { fi [rest of string was truncated]&quot;;.
+        ///.marker { fill: black; }
+        ///.marker.erd { fill: white; }
+        ///.dotted { stroke-dasharray: 0.5 2; }
+        ///.dashed { stroke-dasharray: 2 2; }
+        ///.annotation { stroke: #6600cc; }        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DefaultStyle {
             get {
