@@ -1,7 +1,11 @@
-﻿using SimpleCircuit.Parser;
+﻿using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
+using SkiaSharp;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace Sandbox
@@ -10,14 +14,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"FD1('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q') <a -5> X
-FD1 <a 85> X
-FD1 <a 175> X
-FD1 <a 265> X
-FD1 <a 5> X
-FD1 <a 95> X
-FD1 <a 185> X
-FD1 <a 275> X";
+            // var script = @"V(""This is some longer text"") <u> X";
+            var script = @"V(""V_1"") <u> X";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

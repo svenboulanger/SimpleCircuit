@@ -21,19 +21,15 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public PreparationMode Mode { get; set; }
 
-        /// <inheritdoc />
-        public ITextFormatter Formatter { get; }
-
         /// <summary>
         /// Creates a new <see cref="PrepareContext"/>.
         /// </summary>
         /// <param name="circuit">The circuit.</param>
         /// <param name="diagnostics">The diagnostics.</param>
-        public PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IDiagnosticHandler diagnostics)
+        public PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
         {
             _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
             Diagnostics = diagnostics;
-            Formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
             Desparateness = DesperatenessLevel.Normal;
         }
 

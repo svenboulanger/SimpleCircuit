@@ -4,6 +4,7 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser.Markers;
+using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
 using System;
@@ -43,11 +44,6 @@ namespace SimpleCircuit
         public Transform CurrentTransform => _tf.Peek();
 
         /// <summary>
-        /// Gets the formatter.
-        /// </summary>
-        public ITextFormatter Formatter { get; }
-
-        /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
         /// </summary>
         public double Margin { get; set; } = 1.0;
@@ -81,9 +77,14 @@ namespace SimpleCircuit
         public IDiagnosticHandler Diagnostics { get; }
 
         /// <summary>
+        /// Gets the text measurer.
+        /// </summary>
+        public ITextMeasurer Measurer { get; }
+
+        /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgDrawing(ITextFormatter formatter = null, IDiagnosticHandler diagnostics = null)
+        public SvgDrawing(ITextMeasurer measurer = null, IDiagnosticHandler diagnostics = null)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
@@ -95,7 +96,7 @@ namespace SimpleCircuit
             _bounds.Push(new());
 
             // Create a formatter
-            Formatter = formatter ?? new ElementFormatter();
+            Measurer = measurer ?? new SkiaTextMeasurer("Tahoma");
             Diagnostics = diagnostics;
         }
 
@@ -670,7 +671,15 @@ namespace SimpleCircuit
 
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
-            var bounds = Formatter.Format(_current, value, location, expand, options, Diagnostics);
+
+            // Parse the text and layout the elements
+            var text = _document.CreateElement("text", Namespace);
+            options?.Apply(text);
+            _current.AppendChild(text);
+            var lexer = new SimpleTextLexer(value);
+            var context = new SimpleTextContext(text, Measurer);
+            SimpleTextParser.Parse(lexer, context);
+            var bounds = context.Finish(location, expand);
 
             _bounds.Peek().Expand(bounds);
             return bounds;

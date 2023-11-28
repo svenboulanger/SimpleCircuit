@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -26,11 +25,6 @@ namespace SimpleCircuit.Circuits.Contexts
         /// Gets the mode of preparation.
         /// </summary>
         public PreparationMode Mode { get; }
-
-        /// <summary>
-        /// Gets the formatter used for strings.
-        /// </summary>
-        public ITextFormatter Formatter { get; }
 
         /// <summary>
         /// Finds a circuit presence with the given name.

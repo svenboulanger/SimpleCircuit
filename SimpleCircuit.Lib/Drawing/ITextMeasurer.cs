@@ -1,0 +1,22 @@
+﻿namespace SimpleCircuit.Drawing
+{
+    /// <summary>
+    /// An interface that describes a text measurer.
+    /// </summary>
+    public interface ITextMeasurer
+    {
+        /// <summary>
+        /// Gets the font family name.
+        /// </summary>
+        public string FontFamily { get; }
+
+        /// <summary>
+        /// Measures a string of a given size. The bounds should be given with
+        /// the origin being the start of the baseline of the text.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>The bounds.</returns>
+        public Bounds Measure(string text, double size);
+    }
+}

@@ -5,11 +5,15 @@
     /// </summary>
     public static class SimpleTextParser
     {
+        /// <summary>
+        /// Parses some text for layouting.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="context">The context.</param>
         public static void Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
             while (lexer.Type != TokenType.EndOfContent)
                 ParseToken(lexer, context);
-            context.Finish();
         }
 
         private static void ParseToken(SimpleTextLexer lexer, SimpleTextContext context)
@@ -32,7 +36,7 @@
                     break;
 
                 case TokenType.Newline:
-                    context.Newline();
+                    context.FinishLine();
                     lexer.Next();
                     break;
 
@@ -46,7 +50,7 @@
         private static void ParseSubscript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             double shift = context.RelativeFontWeight * 0.375;
-            context.BaselineY += shift;
+            context.BaseLineOffset += shift;
             context.RelativeFontWeight *= 0.75;
             if (lexer.Branch(TokenType.OpenBracket))
             {
@@ -61,14 +65,14 @@
                 while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
                     ParseToken(lexer, context);
             }
-            context.BaselineY -= shift;
+            context.BaseLineOffset -= shift;
             context.RelativeFontWeight /= 0.75;
         }
 
         private static void ParseSuperscript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             double shift = context.RelativeFontWeight * 0.375;
-            context.BaselineY -= shift;
+            context.BaseLineOffset -= shift;
             context.RelativeFontWeight *= 0.75;
             if (lexer.Branch(TokenType.OpenBracket))
             {
@@ -83,7 +87,7 @@
                 while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
                     ParseToken(lexer, context);
             }
-            context.BaselineY += shift;
+            context.BaseLineOffset += shift;
             context.RelativeFontWeight /= 0.75;
         }
     }

@@ -142,9 +142,8 @@ namespace SimpleCircuit
         /// <summary>
         /// Solves the unknowns in this circuit.
         /// </summary>
-        public bool Solve(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
+        public bool Solve(IDiagnosticHandler diagnostics)
         {
-            formatter ??= new ElementFormatter();
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
             _extra.Clear();
 
@@ -154,7 +153,7 @@ namespace SimpleCircuit
                 return false;
 
             // Prepare the circuit (first constrain orientations, then prepare offsets)
-            var prepareContext = new PrepareContext(this, formatter, diagnostics);
+            var prepareContext = new PrepareContext(this, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 
@@ -493,7 +492,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter formatter = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextMeasurer measurer = null)
         {
             if (!Solved)
             {
@@ -502,7 +501,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing(formatter, diagnostics)
+            var drawing = new SvgDrawing(measurer, diagnostics)
             {
                 RenderBounds = RenderBounds
             };
