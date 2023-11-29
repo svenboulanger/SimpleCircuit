@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
+using Svg.Skia;
 using System;
 using System.IO;
 using System.Linq;
@@ -131,6 +132,27 @@ namespace SimpleCircuit
 
                 switch (Path.GetExtension(outputFilename).ToLower())
                 {
+                    case ".png":
+                        using (var svg = new SKSvg())
+                        using (var reader = new XmlNodeReader(doc))
+                        {
+                            var picture = svg.Load(reader);
+                            if (picture != null)
+                                svg.Save(outputFilename, SkiaSharp.SKColors.Transparent, SkiaSharp.SKEncodedImageFormat.Png);
+                        }
+                        break;
+
+                    case ".jpg":
+                    case ".jpeg":
+                        using (var svg = new SKSvg())
+                        using (var reader = new XmlNodeReader(doc))
+                        {
+                            var picture = svg.Load(reader);
+                            if (picture != null)
+                                svg.Save(outputFilename, SkiaSharp.SKColors.White, SkiaSharp.SKEncodedImageFormat.Jpeg);
+                        }
+                        break;
+
                     default:
                         // Finally write the resulting document to svg
                         using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
