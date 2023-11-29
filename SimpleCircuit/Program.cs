@@ -1,11 +1,10 @@
 ﻿using SimpleCircuit.Diagnostics;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using SimpleCircuit.Drawing;
+using System.IO;
 
 namespace SimpleCircuit
 {
@@ -54,10 +53,8 @@ namespace SimpleCircuit
                 return;
 
             // Let's try to do as much as possible in parallel here
-            var tasks = new Task[jobs.Count];
             for (int i = 0; i < jobs.Count; i++)
-                tasks[i] = jobs[i].Compute();
-            Task.WaitAll(tasks);
+                jobs[i].Compute();
 
             // Render all the completed tasks
             for (int i = 0; i < jobs.Count; i++)
@@ -129,9 +126,14 @@ namespace SimpleCircuit
                     default:
                         if (currentJob != null)
                             jobs.Add(currentJob);
+
+                        // Get the full filename
+                        string filename = args[i];
+                        if (!Path.IsPathRooted(args[i]))
+                            filename = Path.Combine(Directory.GetCurrentDirectory(), filename);
                         currentJob = new Job()
                         {
-                            Filename = args[i]
+                            Filename = filename
                         };
                         break;
                 }

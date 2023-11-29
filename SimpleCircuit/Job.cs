@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace SimpleCircuit
@@ -41,7 +40,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Computes the graphical circuit.
         /// </summary>
-        public async Task Compute()
+        public void Compute()
         {
             // Load the input file
             if (string.IsNullOrWhiteSpace(Filename))
@@ -84,7 +83,6 @@ namespace SimpleCircuit
             }
 
             // Now we can start parsing the input file
-            _circuit = await Task.Run(() =>
             {
                 var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Path.GetFileName(Filename));
                 var context = new ParsingContext() { Diagnostics = _logger };
@@ -92,8 +90,8 @@ namespace SimpleCircuit
 
                 // Solve it already
                 // context.Circuit.Solve(_logger);
-                return context.Circuit;
-            });
+                _circuit = context.Circuit;
+            }
         }
 
         /// <summary>
@@ -113,26 +111,35 @@ namespace SimpleCircuit
         /// <summary>
         /// Executes the job.
         /// </summary>
-        /// <param name="textFormatter">The test formatter.</param>
         /// <param name="diagnostics">The diagnostic message handler.</param>
         public void Render(IDiagnosticHandler diagnostics)
         {
+            if (_circuit == null)
+                throw new ArgumentNullException(nameof(_circuit));
+
             // Determine the output file
             string outputFilename = OutputFilename;
             if (string.IsNullOrWhiteSpace(outputFilename))
-                outputFilename = Path.GetFileNameWithoutExtension(Filename) + ".svg";
+                outputFilename = Path.Combine(Path.GetDirectoryName(Filename), Path.GetFileNameWithoutExtension(Filename) + ".svg");
+            else if (!Path.IsPathRooted(outputFilename))
+                outputFilename = Path.Combine(Directory.GetCurrentDirectory(), outputFilename);
 
             // Render
             if (_circuit != null && _circuit.Count > 0)
             {
                 var doc = _circuit.Render(diagnostics);
 
-                // Finally write the resulting document to svg
-                using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
+                switch (Path.GetExtension(outputFilename).ToLower())
                 {
-                    doc.WriteTo(writer);
+                    default:
+                        // Finally write the resulting document to svg
+                        using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
+                        {
+                            doc.WriteTo(writer);
+                        }
+                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}', output at '{outputFilename}'."));
+                        break;
                 }
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}', output at '{outputFilename}'."));
             }
             else
             {
