@@ -52,8 +52,8 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-5, 8)
                 });
 
-                drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), new("small"));
-                drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), new("small"));
+                drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
 
                 new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }

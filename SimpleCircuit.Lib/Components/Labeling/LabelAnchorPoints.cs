@@ -33,7 +33,7 @@
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label
-                drawing.Text(label.Value, location, expand, anchor.Options);
+                drawing.Text(label.Value, location, expand, label.Size, anchor.Options);
             }
         }
     }

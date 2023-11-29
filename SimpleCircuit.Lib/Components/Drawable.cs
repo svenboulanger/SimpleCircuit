@@ -164,6 +164,11 @@ namespace SimpleCircuit.Components
                             labeled.Labels[index].Location = ((int)Math.Round(number)).ToString();
                             return true;
                         }
+                        if (TryMatchIndexedProperty(property, "size", out index))
+                        {
+                            labeled.Labels[index].Size = number;
+                            return true;
+                        }
                     }
                     if (value is string label)
                     {

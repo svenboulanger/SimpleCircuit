@@ -16,6 +16,11 @@
         public string Location { get; set; }
 
         /// <summary>
+        /// Gets or sets the label font size.
+        /// </summary>
+        public double Size { get; set; } = SvgDrawing.DefaultFontSize;
+
+        /// <summary>
         /// Gets or sets the offset of the label compared to the default location.
         /// </summary>
         public Vector2 Offset { get; set; }

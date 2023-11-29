@@ -39,15 +39,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        drawing.Text("1", new(), new(0, -1), new("small"));
-                        drawing.Line(new(-2, 0), new(2, 0), new("text-stroke"));
-                        drawing.Text("s", new(), new(0, 1), new("small"));
+                        drawing.Text("1", new(), new(0, -1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                        drawing.Line(new(-2, 0), new(2, 0), new() { Style = "stroke-width: 0.1pt;" });
+                        drawing.Text("s", new(), new(0, 1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
                         break;
 
                     case 1:
-                        drawing.Text("1", new(0, -1), new(0, -1), new("small"));
-                        drawing.Line(new(-2, -1), new(2, -1), new("text-stroke"));
-                        drawing.Text("z^{-1}", new(0, -1), new(0, 1), new("small"));
+                        drawing.Text("1", new(0, -1), new(0, -1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                        drawing.Line(new(-2, -1), new(2, -1), new() { Style = "stroke-width: 0.1pt;" });
+                        drawing.Text("z^{-1}", new(0, -1), new(0, 1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
                         break;
 
                     default:

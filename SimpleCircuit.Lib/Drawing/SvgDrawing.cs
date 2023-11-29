@@ -30,6 +30,11 @@ namespace SimpleCircuit
         /// </summary>
         public const string SimpleCircuitNamespace = "https://github.com/svenboulanger/SimpleCircuit";
 
+        /// <summary>
+        /// The default font size.
+        /// </summary>
+        public const double DefaultFontSize = 4.0;
+
         private readonly XmlDocument _document;
         private XmlNode _current;
         private readonly Stack<ExpandableBounds> _bounds;
@@ -327,6 +332,7 @@ namespace SimpleCircuit
             success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
             success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
             success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
+            success &= node.Attributes.ParseOptionalScalar("size", diagnostics, 4.0, out double size);
             if (!success)
                 return;
 
@@ -336,7 +342,7 @@ namespace SimpleCircuit
 
             if (value != null && context != null)
                 value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new Vector2(nx, ny), options);
+            Text(value, new Vector2(x, y), new Vector2(nx, ny), size, options);
         }
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
@@ -664,7 +670,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public Bounds Text(string value, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public Bounds Text(string value, Vector2 location, Vector2 expand, double size = 4.0, GraphicOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return default;
@@ -677,7 +683,10 @@ namespace SimpleCircuit
             options?.Apply(text);
             _current.AppendChild(text);
             var lexer = new SimpleTextLexer(value);
-            var context = new SimpleTextContext(text, Measurer);
+            var context = new SimpleTextContext(text, Measurer)
+            {
+                FontSize = size
+            };
             SimpleTextParser.Parse(lexer, context);
             var bounds = context.Finish(location, expand);
 
