@@ -123,12 +123,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
             // Set the contents of the current span element
             string line = _sb.ToString();
-            span.InnerText = line;
+            span.InnerXml = line;
             _sb.Clear();
 
             // Apply the styling to the span
             double size = Math.Round(FontSize * _lastRelativeFontWeight, 2);
-            span.SetAttribute("style", $"font-family: {_measurer.FontFamily}; font-size: {size}pt;");
+            span.SetAttribute("style", $"font-family:{_measurer.FontFamily};font-size:{size}pt;");
 
             // Measure the text
             var bounds = _measurer.Measure(line, FontSize * _lastRelativeFontWeight);

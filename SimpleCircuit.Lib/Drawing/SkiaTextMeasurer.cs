@@ -1,5 +1,7 @@
 ﻿using SkiaSharp;
 using System;
+using System.Text.RegularExpressions;
+using System.Net;
 
 namespace SimpleCircuit.Drawing
 {
@@ -10,6 +12,8 @@ namespace SimpleCircuit.Drawing
     {
         private readonly SKTypeface _typeface;
         private readonly SKFont _font;
+        private static readonly Regex _unicode = new Regex(@"&#(?<value>\d+|x[\da-fA-F]+);", RegexOptions.Compiled);
+        private static readonly Regex _entities = new Regex(@"&(?<value>\w+);", RegexOptions.Compiled);
 
         /// <inheritdoc />
         public string FontFamily => _typeface.FamilyName;
@@ -27,6 +31,10 @@ namespace SimpleCircuit.Drawing
         /// <inheritdoc />
         public Bounds Measure(string text, double size)
         {
+            // Decode the string for HTML entities
+            text = WebUtility.HtmlDecode(text);
+
+            // Measure
             _font.Size = (float)size * 1.333f;
             var glyphs = _typeface.GetGlyphs(text);
             _font.MeasureText(glyphs, out var bounds);
