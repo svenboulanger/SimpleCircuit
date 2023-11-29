@@ -1,7 +1,8 @@
 ﻿@page "/"
 @page "/SimpleCircuit"
+@using SimpleCircuit.Drawing;
 @inject IJSRuntime _js
-@inject TextFormatter _jsTextFormatter
+@inject ITextMeasurer _textMeasurer
 @inject Blazored.LocalStorage.ILocalStorageService _localStore
 @inject NavigationManager _navigation;
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit
 {
@@ -32,7 +33,7 @@ namespace SimpleCircuit
             // Create a simple job
             var jobs = ReadJobs(args, out bool interactiveMode);
             if (jobs.Count > 0)
-                DoJobs(jobs, logger).GetAwaiter().GetResult();
+                DoJobs(jobs, logger);
             if (interactiveMode)
                 InteractiveMode(logger);
 
@@ -47,36 +48,23 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="jobs">The jobs to convert.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        public static async Task DoJobs(IReadOnlyList<Job> jobs, IDiagnosticHandler diagnostics)
+        public static void DoJobs(IReadOnlyList<Job> jobs, IDiagnosticHandler diagnostics)
         {
             if (jobs == null || jobs.Count == 0)
                 return;
 
             // Let's try to do as much as possible in parallel here
-            ChromiumTextFormatter formatter = null;
-            var formatterTask = Task.Run(() => formatter = new ChromiumTextFormatter());
-            try
-            {
-                var tasks = new Task[jobs.Count];
-                for (int i = 0; i < jobs.Count; i++)
-                    tasks[i] = jobs[i].Compute();
-                Task.WaitAll(tasks);
+            var tasks = new Task[jobs.Count];
+            for (int i = 0; i < jobs.Count; i++)
+                tasks[i] = jobs[i].Compute();
+            Task.WaitAll(tasks);
 
-                // Render all the completed tasks
-                await formatterTask;
-                if (formatter == null)
-                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "SC001", "Could not create formatter"));
-                for (int i = 0; i < jobs.Count; i++)
-                {
-                    jobs[i].DisplayMessages(diagnostics);
-                    if (!jobs[i].HasErrors)
-                        await jobs[i].Render(formatter, diagnostics);
-                }
-            }
-            finally
+            // Render all the completed tasks
+            for (int i = 0; i < jobs.Count; i++)
             {
-                // Dispose of our created formatter
-                formatter?.Dispose();
+                jobs[i].DisplayMessages(diagnostics);
+                if (!jobs[i].HasErrors)
+                    jobs[i].Render(diagnostics);
             }
         }
 
@@ -104,7 +92,7 @@ namespace SimpleCircuit
                 else
                 {
                     var jobs = ReadJobs(args, out _);
-                    DoJobs(jobs, diagnostics).GetAwaiter().GetResult();
+                    DoJobs(jobs, diagnostics);
                 }
             }
         }

@@ -50,7 +50,7 @@
         private static void ParseSubscript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             double shift = context.RelativeFontWeight * 0.375;
-            context.BaseLineOffset += shift;
+            context.RelativeBaseLineOffset += shift;
             context.RelativeFontWeight *= 0.75;
             if (lexer.Branch(TokenType.OpenBracket))
             {
@@ -65,14 +65,14 @@
                 while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
                     ParseToken(lexer, context);
             }
-            context.BaseLineOffset -= shift;
+            context.RelativeBaseLineOffset -= shift;
             context.RelativeFontWeight /= 0.75;
         }
 
         private static void ParseSuperscript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             double shift = context.RelativeFontWeight * 0.375;
-            context.BaseLineOffset -= shift;
+            context.RelativeBaseLineOffset -= shift;
             context.RelativeFontWeight *= 0.75;
             if (lexer.Branch(TokenType.OpenBracket))
             {
@@ -87,7 +87,7 @@
                 while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
                     ParseToken(lexer, context);
             }
-            context.BaseLineOffset += shift;
+            context.RelativeBaseLineOffset += shift;
             context.RelativeFontWeight /= 0.75;
         }
     }

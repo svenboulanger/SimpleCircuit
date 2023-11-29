@@ -115,7 +115,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="textFormatter">The test formatter.</param>
         /// <param name="diagnostics">The diagnostic message handler.</param>
-        public async Task Render(ChromiumTextFormatter textFormatter, IDiagnosticHandler diagnostics)
+        public void Render(IDiagnosticHandler diagnostics)
         {
             // Determine the output file
             string outputFilename = OutputFilename;
@@ -125,8 +125,7 @@ namespace SimpleCircuit
             // Render
             if (_circuit != null && _circuit.Count > 0)
             {
-                await textFormatter.UpdateStyle(_cssScript ?? GraphicalCircuit.DefaultStyle);
-                var doc = _circuit.Render(diagnostics, textFormatter);
+                var doc = _circuit.Render(diagnostics);
 
                 // Finally write the resulting document to svg
                 using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))

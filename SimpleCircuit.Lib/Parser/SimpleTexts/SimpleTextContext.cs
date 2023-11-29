@@ -13,10 +13,10 @@ namespace SimpleCircuit.Parser.SimpleTexts
     {
         private readonly XmlDocument _document;
         private readonly XmlNode _parent;
-        private XmlElement _currentSpan, _lineSpan;
+        private XmlElement _lineSpan;
         private readonly StringBuilder _sb = new();
         private readonly ITextMeasurer _measurer;
-        private double _lastBaseLineOffset = 0.0;
+        private double _lastRelativeBaseLineOffset = 0.0;
         private double _lastRelativeFontWeight = 1.0;
         private readonly List<List<SimpleTextSpan>> _spans = new();
 
@@ -33,7 +33,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <summary>
         /// Gets or sets the base line offset for the next text.
         /// </summary>
-        public double BaseLineOffset { get; set; } = 0.0;
+        public double RelativeBaseLineOffset { get; set; } = 0.0;
 
         /// <summary>
         /// Gets or sets the relative font weight for the next text.
@@ -51,8 +51,6 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
             // Start a new line
             _lineSpan = _document.CreateElement("tspan", SvgDrawing.Namespace);
-            _currentSpan = _document.CreateElement("tspan", SvgDrawing.Namespace);
-            _lineSpan.AppendChild(_currentSpan);
             parent.AppendChild(_lineSpan);
             _spans.Add(new());
         }
@@ -77,12 +75,15 @@ namespace SimpleCircuit.Parser.SimpleTexts
             _sb.Append(c);
         }
 
+        /// <summary>
+        /// Updates the current state.
+        /// </summary>
         private void UpdateState()
         {
-            if (_lastBaseLineOffset != BaseLineOffset || _lastRelativeFontWeight != RelativeFontWeight)
+            if (_lastRelativeBaseLineOffset != RelativeBaseLineOffset || _lastRelativeFontWeight != RelativeFontWeight)
             {
                 FinishSpan();
-                _lastBaseLineOffset = BaseLineOffset;
+                _lastRelativeBaseLineOffset = RelativeBaseLineOffset;
                 _lastRelativeFontWeight = RelativeFontWeight;
             }
         }
@@ -98,16 +99,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
             _lineSpan = _document.CreateElement("tspan", SvgDrawing.Namespace);
             _parent.AppendChild(_lineSpan);
 
-            // Start a fresh span
-            _currentSpan = _document.CreateElement("tspan", SvgDrawing.Namespace);
-            _lineSpan.AppendChild(_currentSpan);
-
             // Add a new list of spans
             _spans.Add(new());
 
             // Restart
-            _lastBaseLineOffset = 0.0;
-            BaseLineOffset = 0.0;
+            _lastRelativeBaseLineOffset = 0.0;
+            RelativeBaseLineOffset = 0.0;
             RelativeFontWeight = 1.0;
             _lastRelativeFontWeight = 1.0;
         }
@@ -120,31 +117,31 @@ namespace SimpleCircuit.Parser.SimpleTexts
             if (_sb.Length == 0)
                 return; // Nothing to add
 
+            // Add the span to the current line
+            var span = _document.CreateElement("tspan", SvgDrawing.Namespace);
+            _lineSpan.AppendChild(span);
+
             // Set the contents of the current span element
             string line = _sb.ToString();
-            _currentSpan.InnerText = line;
+            span.InnerText = line;
             _sb.Clear();
 
             // Apply the styling to the span
             double size = Math.Round(FontSize * _lastRelativeFontWeight, 2);
-            _currentSpan.SetAttribute("style", $"font-family: {_measurer.FontFamily}; font-size: {size}pt;");
+            span.SetAttribute("style", $"font-family: {_measurer.FontFamily}; font-size: {size}pt;");
 
             // Measure the text
             var bounds = _measurer.Measure(line, FontSize * _lastRelativeFontWeight);
             Vector2 offset;
             var lineSpans = _spans[^1];
             if (lineSpans.Count == 0)
-                offset = new Vector2(0.0, _lastBaseLineOffset);
+                offset = new Vector2(0.0, FontSize * _lastRelativeBaseLineOffset);
             else
             {
                 var last = lineSpans[^1];
-                offset = new Vector2(last.Delta.X + last.Bounds.Right, _lastBaseLineOffset);
+                offset = new Vector2(last.Delta.X + last.Bounds.Right, FontSize * _lastRelativeBaseLineOffset);
             }
-            lineSpans.Add(new SimpleTextSpan(_currentSpan, offset, bounds));
-
-            // Make a new span
-            _currentSpan = _document.CreateElement("tspan", _document.NamespaceURI);
-            _lineSpan.AppendChild(_currentSpan);
+            lineSpans.Add(new SimpleTextSpan(span, offset, bounds));
         }
 
         /// <summary>

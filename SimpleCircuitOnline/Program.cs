@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using Microsoft.JSInterop;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuitOnline
 {
@@ -16,7 +17,7 @@ namespace SimpleCircuitOnline
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            builder.Services.AddSingleton(sp => new TextFormatter(sp.GetService<IJSRuntime>()));
+            builder.Services.AddSingleton<ITextMeasurer>(sp => new TextMeasurer(sp.GetService<IJSRuntime>(), "Tahoma"));
             builder.Services.AddBlazoredLocalStorage();
 
             await builder.Build().RunAsync();
