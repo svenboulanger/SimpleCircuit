@@ -1,9 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using Svg.Skia;
-using System;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -14,9 +11,9 @@ namespace SimpleCircuit
     /// </summary>
     public class Job
     {
-        private string _cssScript = null;
+        private string? _cssScript = null;
         private readonly JobDiagnosticLogger _logger = new JobDiagnosticLogger();
-        private GraphicalCircuit _circuit;
+        private GraphicalCircuit? _circuit;
 
         /// <summary>
         /// Gets the number of errors.
@@ -26,17 +23,17 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the filename containing the SimpleCircuit script.
         /// </summary>
-        public string Filename { get; set; }
+        public string Filename { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the filename containing the CSS code.
         /// </summary>
-        public string CssFilename { get; set; }
+        public string CssFilename { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the filename to where the result should be written.
         /// </summary>
-        public string OutputFilename { get; set; }
+        public string OutputFilename { get; set; } = string.Empty;
 
         /// <summary>
         /// Computes the graphical circuit.
@@ -85,12 +82,11 @@ namespace SimpleCircuit
 
             // Now we can start parsing the input file
             {
-                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Path.GetFileName(Filename));
+                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Filename);
                 var context = new ParsingContext() { Diagnostics = _logger };
                 Parser.Parser.Parse(lexer, context);
 
                 // Solve it already
-                // context.Circuit.Solve(_logger);
                 _circuit = context.Circuit;
             }
         }
@@ -105,7 +101,7 @@ namespace SimpleCircuit
             if (diagnostics != null)
             {
                 foreach (var message in _logger.Messages)
-                    diagnostics.Post(new DiagnosticMessage(message.Severity, message.Code, $"{message.Message} for {Filename}"));
+                    diagnostics.Post(message);
             }
         }
 
@@ -138,7 +134,10 @@ namespace SimpleCircuit
                         {
                             var picture = svg.Load(reader);
                             if (picture != null)
+                            {
                                 svg.Save(outputFilename, SkiaSharp.SKColors.Transparent, SkiaSharp.SKEncodedImageFormat.Png);
+                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}' to a PNG, output at '{outputFilename}'."));
+                            }
                         }
                         break;
 
@@ -149,7 +148,10 @@ namespace SimpleCircuit
                         {
                             var picture = svg.Load(reader);
                             if (picture != null)
+                            {
                                 svg.Save(outputFilename, SkiaSharp.SKColors.White, SkiaSharp.SKEncodedImageFormat.Jpeg);
+                                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}' to JPG, output at '{outputFilename}'."));
+                            }
                         }
                         break;
 
@@ -159,7 +161,7 @@ namespace SimpleCircuit
                         {
                             doc.WriteTo(writer);
                         }
-                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}', output at '{outputFilename}'."));
+                        diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}' to an SVG, output at '{outputFilename}'."));
                         break;
                 }
             }

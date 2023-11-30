@@ -30,7 +30,7 @@ namespace SimpleCircuit.Diagnostics
         {
             string result = $"{Severity}: {Code}: {Message} at line {Token.Location.Line}, column {Token.Location.Column}";
             if (!string.IsNullOrWhiteSpace(Token.Source))
-                result += $" {Token.Source}";
+                result += $" in {Token.Source}";
             return result;
         }
     }

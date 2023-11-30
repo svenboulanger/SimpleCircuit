@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SimpleCircuit": {
+      "commandName": "Project",
+      "commandLineArgs": "-cli"
+    }
+  }
+}

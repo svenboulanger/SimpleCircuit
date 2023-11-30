@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleCircuit.Lib", "SimpleCircuit.Lib\SimpleCircuit.Lib.csproj", "{8165ED57-89B6-4B21-92BE-BFB698796B6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCircuit", "SimpleCircuit\SimpleCircuit.csproj", "{5826B0EB-64CE-4AC9-8E62-6F0A4A79F420}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCircuit", "SimpleCircuit\SimpleCircuit.csproj", "{CADBA319-AEAA-4ABC-B0CE-50388815D237}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8165ED57-89B6-4B21-92BE-BFB698796B6B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5826B0EB-64CE-4AC9-8E62-6F0A4A79F420}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5826B0EB-64CE-4AC9-8E62-6F0A4A79F420}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5826B0EB-64CE-4AC9-8E62-6F0A4A79F420}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5826B0EB-64CE-4AC9-8E62-6F0A4A79F420}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CADBA319-AEAA-4ABC-B0CE-50388815D237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CADBA319-AEAA-4ABC-B0CE-50388815D237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CADBA319-AEAA-4ABC-B0CE-50388815D237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CADBA319-AEAA-4ABC-B0CE-50388815D237}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

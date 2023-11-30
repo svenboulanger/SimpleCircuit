@@ -1,10 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using System.IO;
 
 namespace SimpleCircuit
 {
@@ -77,8 +73,8 @@ namespace SimpleCircuit
             while (keepGoing)
             {
                 Console.Write("> ");
-                string arguments = Console.ReadLine();
-                string[] args = regex.Matches(arguments).Cast<Match>().Select(m => m.Groups["value"].Value).ToArray();
+                string? arguments = Console.ReadLine();
+                string[] args = regex.Matches(arguments ?? string.Empty).Cast<Match>().Select(m => m.Groups["value"].Value).ToArray();
                 if (args.Length == 0 ||
                     args.Length == 1 && (
                         StringComparer.OrdinalIgnoreCase.Equals(args[0], "quit") ||
@@ -103,8 +99,8 @@ namespace SimpleCircuit
         private static IReadOnlyList<Job> ReadJobs(string[] args, out bool interactiveMode)
         {
             interactiveMode = false;
-            List<Job> jobs = new List<Job>();
-            Job currentJob = null;
+            var jobs = new List<Job>();
+            Job? currentJob = null;
             for (int i = 0; i < args.Length; i++)
             {
                 switch (args[i])
