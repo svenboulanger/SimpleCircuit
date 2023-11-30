@@ -1,6 +1,5 @@
 ﻿using SkiaSharp;
 using System;
-using System.Text.RegularExpressions;
 using System.Net;
 
 namespace SimpleCircuit.Drawing
@@ -10,27 +9,41 @@ namespace SimpleCircuit.Drawing
     /// </summary>
     public class SkiaTextMeasurer : ITextMeasurer
     {
-        private readonly SKTypeface _typeface;
-        private readonly SKFont _font;
-        private static readonly Regex _unicode = new Regex(@"&#(?<value>\d+|x[\da-fA-F]+);", RegexOptions.Compiled);
-        private static readonly Regex _entities = new Regex(@"&(?<value>\w+);", RegexOptions.Compiled);
+        private SKTypeface _typeface;
+        private SKFont _font;
+        private string _familyName, _lastFamilyName;
+        private bool _reload = true;
 
         /// <inheritdoc />
-        public string FontFamily => _typeface.FamilyName;
-
-        /// <summary>
-        /// Creates a new text measurer.
-        /// </summary>
-        /// <param name="fontFamily">The font family.</param>
-        public SkiaTextMeasurer(string fontFamily)
+        public string FontFamily
         {
-            _typeface = SKFontManager.Default.MatchFamily(fontFamily);
-            _font = new SKFont(_typeface);
+            get => _familyName;
+            set
+            {
+                _familyName = value?.Trim();
+                if (string.IsNullOrWhiteSpace(_familyName))
+                    _familyName = "Calibri";
+
+                // Invalidate the current typeface and font
+                if (!StringComparer.Ordinal.Equals(_familyName, _lastFamilyName))
+                {
+                    _reload = true;
+                    _lastFamilyName = _familyName;
+                }
+            }
         }
 
         /// <inheritdoc />
         public Bounds Measure(string text, double size)
         {
+            // Check whether the font needs to be loaded
+            if (_reload)
+            {
+                _typeface = SKFontManager.Default.MatchFamily(_familyName);
+                _font = new SKFont(_typeface);
+                _reload = false;
+            }
+
             // Decode the string for HTML entities
             text = WebUtility.HtmlDecode(text);
 

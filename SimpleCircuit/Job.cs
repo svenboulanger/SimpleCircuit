@@ -117,7 +117,7 @@ namespace SimpleCircuit
             // Determine the output file
             string outputFilename = OutputFilename;
             if (string.IsNullOrWhiteSpace(outputFilename))
-                outputFilename = Path.Combine(Path.GetDirectoryName(Filename), Path.GetFileNameWithoutExtension(Filename) + ".svg");
+                outputFilename = Path.Combine(Path.GetDirectoryName(Filename) ?? string.Empty, Path.GetFileNameWithoutExtension(Filename) + ".svg");
             else if (!Path.IsPathRooted(outputFilename))
                 outputFilename = Path.Combine(Directory.GetCurrentDirectory(), outputFilename);
 

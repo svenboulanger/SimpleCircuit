@@ -20,36 +20,6 @@ namespace SimpleCircuit.Components
             private readonly List<IPin> _pinsByIndex = new();
 
             /// <summary>
-            /// Gets or sets the minimum horizontal spacing.
-            /// </summary>
-            public double MinSpaceX { get; set; } = 20.0;
-
-            /// <summary>
-            /// Gets or sets the minimum horizontal spacing at the edges.
-            /// </summary>
-            public double MinEdgeX { get; set; } = 10.0;
-
-            /// <summary>
-            /// Gets or sets the minimum vertical spacing.
-            /// </summary>
-            public double MinSpaceY { get; set; } = 10.0;
-
-            /// <summary>
-            /// Gets or sets the minimum vertical spacing at the edges.
-            /// </summary>
-            public double MinEdgeY { get; set; } = 5.0;
-
-            /// <summary>
-            /// Gets or sets the minimum width.
-            /// </summary>
-            public double MinWidth { get; set; } = 30;
-
-            /// <summary>
-            /// Gets or sets the minimum height.
-            /// </summary>
-            public double MinHeight { get; set; } = 10;
-
-            /// <summary>
             /// Gets the name of the node for the right side of the black box.
             /// </summary>
             public string Right { get; }
@@ -113,7 +83,7 @@ namespace SimpleCircuit.Components
                 {
                     string name = TransformPinName(pin.Name);
                     if (name is not null)
-                        drawing.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation);
+                        drawing.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.TextSize);
                 }
             }
 
@@ -155,15 +125,15 @@ namespace SimpleCircuit.Components
 
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 double width = 0, height = 0;
-                width = Math.Max(width, Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, MinSpaceX, MinEdgeX + CornerRadius));
-                width = Math.Max(width, Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, MinSpaceX, MinEdgeX + CornerRadius));
-                height = Math.Max(height, Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY + CornerRadius));
-                height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, MinSpaceY, MinEdgeY + CornerRadius));
+                width = Math.Max(width, Apply($"{_parent.Name}.n", _parent.X, pins.Where(PointsUp).Select(p => p.X), Right, _parent.MinSpaceX, _parent.MinEdgeX + CornerRadius));
+                width = Math.Max(width, Apply($"{_parent.Name}.s", _parent.X, pins.Where(PointsDown).Select(p => p.X), Right, _parent.MinSpaceX, _parent.MinEdgeX + CornerRadius));
+                height = Math.Max(height, Apply($"{_parent.Name}.e", _parent.Y, pins.Where(PointsRight).Select(p => p.Y), Bottom, _parent.MinSpaceY, _parent.MinEdgeY + CornerRadius));
+                height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, _parent.MinSpaceY, _parent.MinEdgeY + CornerRadius));
 
-                if (width < MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Relationships.Offsets[_parent.X], context.Relationships.Offsets[Right], MinWidth, 100.0);
-                if (height < MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Relationships.Offsets[_parent.Y], context.Relationships.Offsets[Bottom], MinHeight, 100.0);
+                if (width < _parent.MinWidth)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Relationships.Offsets[_parent.X], context.Relationships.Offsets[Right], _parent.MinWidth, 100.0);
+                if (height < _parent.MinHeight)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Relationships.Offsets[_parent.Y], context.Relationships.Offsets[Bottom], _parent.MinHeight, 100.0);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
@@ -216,10 +186,10 @@ namespace SimpleCircuit.Components
                         break;
 
                     case NodeRelationMode.Links:
-                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context, MinSpaceX, MinEdgeX);
-                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context, MinSpaceX, MinEdgeX);
-                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context, MinSpaceY, MinEdgeY);
-                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context, MinSpaceY, MinEdgeY);
+                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context, _parent.MinSpaceX, _parent.MinEdgeX);
+                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context, _parent.MinSpaceX, _parent.MinEdgeX);
+                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context, _parent.MinSpaceY, _parent.MinEdgeY);
+                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context, _parent.MinSpaceY, _parent.MinEdgeY);
                         break;
                 }
                 return true;

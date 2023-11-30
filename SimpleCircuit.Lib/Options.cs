@@ -23,7 +23,6 @@ namespace SimpleCircuit
         }
         private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
         private readonly Dictionary<string, List<DefaultProperty>> _properties = new();
-        private double _spacingX = 20.0, _spacingY = 20.0;
 
         /// <summary>
         /// The identifier for AREI style components.
@@ -39,6 +38,12 @@ namespace SimpleCircuit
         /// The identifier for European style components.
         /// </summary>
         public const string European = "euro";
+
+        [Description("The font family for text. The default is 'Arial'.")]
+        public string FontFamily { get; set; } = "Arial";
+
+        [Description("The default font size for text. The default is 4.")]
+        public double FontSize { get; set; } = 4.0;
 
         /// <summary>
         /// Gets the current style.
@@ -105,43 +110,14 @@ namespace SimpleCircuit
         [Description("The default margin for annotation boxes at wire ends when using polygon annotation boxes.")]
         public double AnnotationWireMarginEnds { get; set; } = 2.5;
 
-        [Description("The spacing in X-direction between two unconnected circuit diagrams.")]
-        public double SpacingX
-        {
-            get => _spacingX;
-            set
-            {
-                if (value != _spacingX)
-                {
-                    _spacingX = value;
-                    SpacingXChanged?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
+        [Description("The spacing in X-direction between two unconnected circuit diagrams. The default is 40.")]
+        public double SpacingX { get; set; } = 40;
 
-        /// <summary>
-        /// Gets the event that is called when <see cref="SpacingX"/> changes.
-        /// </summary>
-        public event EventHandler<EventArgs> SpacingXChanged;
+        [Description("The spacing in Y-direction between two unconnected circuit diagrams. The default is 40.")]
+        public double SpacingY { get; set; } = 40;
 
-        [Description("The spacing in Y-direction between two unconnected circuit diagrams.")]
-        public double SpacingY
-        {
-            get => _spacingY;
-            set
-            {
-                if (value != _spacingY)
-                {
-                    _spacingY = value;
-                    SpacingYChanged?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the event that is called when <see cref="SpacingY"/> changes.
-        /// </summary>
-        public event EventHandler<EventArgs> SpacingYChanged;
+        [Description("If true, the graphical bounds are rendered on top of each component. The default is false.")]
+        public bool RenderBounds { get; set; }
 
         /// <summary>
         /// Adds a default property value for any drawable of the given key.
@@ -228,6 +204,17 @@ namespace SimpleCircuit
                 foreach (var defaultProperty in list)
                     drawable.SetProperty(defaultProperty.Property, defaultProperty.Value, diagnostics);
             }
+        }
+
+        /// <summary>
+        /// Applies the options to the given graphical circuit.
+        /// </summary>
+        /// <param name="circuit">The circuit.</param>
+        public void Apply(GraphicalCircuit circuit)
+        {
+            circuit.SpacingX = SpacingX;
+            circuit.SpacingY = SpacingY;
+            circuit.RenderBounds = RenderBounds;
         }
     }
 }

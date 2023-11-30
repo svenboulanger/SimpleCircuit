@@ -89,7 +89,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgDrawing(ITextMeasurer measurer = null, IDiagnosticHandler diagnostics = null)
+        public SvgDrawing(IDiagnosticHandler diagnostics = null, ITextMeasurer measurer = null)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
@@ -99,10 +99,8 @@ namespace SimpleCircuit
             // Make sure we can track the bounds of our vector image
             _bounds = new();
             _bounds.Push(new());
-
-            // Create a formatter
-            Measurer = measurer ?? new SkiaTextMeasurer("Tahoma");
             Diagnostics = diagnostics;
+            Measurer = measurer ?? new SkiaTextMeasurer();
         }
 
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿using Microsoft.JSInterop;
 using SimpleCircuit.Drawing;
-using System;
 using System.Text.Json;
 
 namespace SimpleCircuitOnline
@@ -13,7 +12,7 @@ namespace SimpleCircuitOnline
         private readonly IJSRuntime _js;
 
         /// <inheritdoc />
-        public string FontFamily { get; }
+        public string FontFamily { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="TextMeasurer"/>.

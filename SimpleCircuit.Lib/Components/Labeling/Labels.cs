@@ -10,6 +10,11 @@ namespace SimpleCircuit.Components.Labeling
     {
         private readonly List<LabelInfo> _labels = new();
 
+        /// <summary>
+        /// Gets or sets the default text size.
+        /// </summary>
+        public double FontSize { get; set; } = 4.0;
+
         /// <inheritdoc />
         public LabelInfo this[int index]
         {
@@ -26,7 +31,10 @@ namespace SimpleCircuit.Components.Labeling
                 LabelInfo result;
                 if (_labels[index] == null)
                 {
-                    result = new LabelInfo();
+                    result = new LabelInfo()
+                    {
+                        Size = FontSize
+                    };
                     _labels[index] = result;
                 }
                 else

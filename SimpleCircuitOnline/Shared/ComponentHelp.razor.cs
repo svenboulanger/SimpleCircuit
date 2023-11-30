@@ -105,7 +105,7 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgDrawing(_textMeasurer);
+            var drawing = new SvgDrawing(null, _textMeasurer);
             _drawable.Reset(null);
             _drawable.Render(drawing);
             var doc = drawing.GetDocument(GraphicalCircuit.DefaultStyle);

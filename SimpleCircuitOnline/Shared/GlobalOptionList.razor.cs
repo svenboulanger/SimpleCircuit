@@ -28,7 +28,15 @@ namespace SimpleCircuitOnline.Shared
             List<IdentifiedSingleEditOperation> ops = new();
             List<Selection> ends = new();
 
-            string cmd = $".options {name} = {defValue}";
+            string strDefValue;
+            if (defValue is bool b)
+                strDefValue = b ? "true" : "false";
+            else if (defValue is string str)
+                strDefValue = $"\"{str}\"";
+            else
+                strDefValue = defValue?.ToString() ?? "?";
+
+            string cmd = $".options {name} = {strDefValue}";
             ops.Add(new()
             {
                 Range = selection,

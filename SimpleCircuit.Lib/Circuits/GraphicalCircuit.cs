@@ -501,7 +501,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing(measurer, diagnostics)
+            var drawing = new SvgDrawing(diagnostics, measurer)
             {
                 RenderBounds = RenderBounds
             };

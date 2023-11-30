@@ -78,10 +78,20 @@ namespace SimpleCircuit.Parser
         {
             if (loadAssembly)
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+        }
 
-            // Link the circuit options to the actual circuit
-            Options.SpacingXChanged += (sender, args) => Circuit.SpacingX = Options.SpacingX;
-            Options.SpacingYChanged += (sender, args) => Circuit.SpacingY = Options.SpacingY;
+        /// <summary>
+        /// Creates a new parsing context based on an existing parsing context.
+        /// </summary>
+        /// <remarks>
+        /// The new context shares the drawable factories and the diagnostics.
+        /// </remarks>
+        /// <param name="context">The existing context.</param>
+        public ParsingContext(ParsingContext context)
+        {
+            // Things we can reuse
+            Factory = context.Factory;
+            Diagnostics = context.Diagnostics;
         }
 
         /// <summary>

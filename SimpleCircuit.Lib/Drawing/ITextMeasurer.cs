@@ -8,7 +8,7 @@
         /// <summary>
         /// Gets the font family name.
         /// </summary>
-        public string FontFamily { get; }
+        public string FontFamily { get; set; }
 
         /// <summary>
         /// Measures a string of a given size. The bounds should be given with

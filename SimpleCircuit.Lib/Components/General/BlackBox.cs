@@ -28,6 +28,8 @@ namespace SimpleCircuit.Components
             {
                 instance.MinSpaceX = options.HorizontalPinSpacing;
                 instance.MinSpaceY = options.VerticalPinSpacing;
+                instance.Labels.FontSize = options.FontSize;
+                instance.TextSize = options.FontSize;
             }
             return instance;
         }
@@ -62,31 +64,34 @@ namespace SimpleCircuit.Components
 
             [Description("The minimum horizontal space between two pins.")]
             [Alias("msx")]
-            public double MinSpaceX { get => _pins.MinSpaceX; set => _pins.MinSpaceX = value; }
+            public double MinSpaceX { get; set; } = 20.0;
 
             [Description("The minimum vertical space between two pins.")]
             [Alias("msy")]
-            public double MinSpaceY { get => _pins.MinSpaceY; set => _pins.MinSpaceY = value; }
+            public double MinSpaceY { get; set; } = 10.0;
 
             [Description("The minimum horizontal space between a pin and the edge of the black box.")]
             [Alias("mex")]
-            public double MinEdgeX { get => _pins.MinEdgeX; set => _pins.MinEdgeX = value; }
+            public double MinEdgeX { get; set; } = 10.0;
 
             [Description("The minimum vertical space between a pin and the edge of the black box.")]
             [Alias("mey")]
-            public double MinEdgeY { get => _pins.MinEdgeY; set => _pins.MinEdgeY = value; }
+            public double MinEdgeY { get; set; } = 10.0;
 
             [Description("The minimum width.")]
             [Alias("minw")]
-            public double MinWidth { get => _pins.MinWidth; set => _pins.MinWidth = value; }
+            public double MinWidth { get; set; } = 30.0;
 
             [Description("The minimum height.")]
             [Alias("minh")]
-            public double MinHeight { get => _pins.MinHeight; set => _pins.MinHeight = value; }
+            public double MinHeight { get; set; } = 10.0;
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
+
+            [Description("The font size of the port labels.")]
+            public double TextSize { get; set; } = 4.0;
 
             Vector2 IBoxLabeled.TopLeft => new(Location.X, Location.Y);
             Vector2 IBoxLabeled.BottomRight => new(EndLocation.X, EndLocation.Y);

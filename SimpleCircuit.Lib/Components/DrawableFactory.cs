@@ -92,6 +92,8 @@ namespace SimpleCircuit.Components
                     bl.LabelMargin = options.LabelMargin;
                 if (result is IEllipseLabeled el)
                     el.LabelMargin = options.LabelMargin;
+                if (result is ILabeled l)
+                    l.Labels.FontSize = options.FontSize;
                 options.Apply(key, result, diagnostics);
             }
             return result;

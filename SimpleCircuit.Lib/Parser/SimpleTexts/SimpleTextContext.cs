@@ -47,7 +47,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         {
             _parent = parent ?? throw new ArgumentNullException(nameof(parent));
             _document = parent.OwnerDocument;
-            _measurer = measurer ?? new SkiaTextMeasurer("Tahoma");
+            _measurer = measurer ?? new SkiaTextMeasurer();
 
             // Start a new line
             _lineSpan = _document.CreateElement("tspan", SvgDrawing.Namespace);

@@ -35,6 +35,9 @@ namespace SimpleCircuitOnline.Pages
         private bool _viewMode = false;
         private ComponentList _componentList;
 
+        /// <summary>
+        /// A placeholder for the standard stylesheet.
+        /// </summary>
         private const string StandardStyle = "/* #STDSTYLE# */";
 
         /// <summary>
@@ -532,12 +535,12 @@ namespace SimpleCircuitOnline.Pages
 
                 // Parse the script
                 var lexer = SimpleCircuitLexer.FromString(code.AsMemory());
+                context.Options.RenderBounds = includeBounds;
                 Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
 
                 // Include XML data
                 ckt.Style = style;
-                ckt.RenderBounds = includeBounds;
                 if (includeScript)
                 {
                     ckt.Metadata.Add("script", EncodeScript(code));
@@ -547,7 +550,10 @@ namespace SimpleCircuitOnline.Pages
 
                 // We now need the last things to have executed
                 if (ckt.Count > 0 && _logger.Errors == 0)
+                {
+                    _textMeasurer.FontFamily = context.Options.FontFamily;
                     doc = ckt.Render(_logger, _textMeasurer);
+                }
             }
             catch (Exception ex)
             {

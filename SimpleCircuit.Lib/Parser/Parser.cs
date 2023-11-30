@@ -22,13 +22,6 @@ namespace SimpleCircuit.Parser
         private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
         private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
         private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
-        private enum AnnotationOp
-        {
-            None = 0x00,
-            Added = 0x01,
-            Removed = 0x02,
-            Error = 0x0f,
-        }
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -46,6 +39,7 @@ namespace SimpleCircuit.Parser
 
             // Final check for queued anonymous points
             context.CheckQueuedPoints(context.Diagnostics);
+            context.Options.Apply(context.Circuit);
         }
 
         /// <summary>
@@ -131,7 +125,6 @@ namespace SimpleCircuit.Parser
                     return false;
             }
         }
-
         private static bool ParseComponentChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
             => ParseChainStatement(lexer, context, ComponentChainWire, true);
         private static bool ParseVirtualChainStatement(SimpleCircuitLexer lexer, ParsingContext context)
@@ -688,7 +681,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Create a new parsing context to separate our circuit
-            var localContext = new ParsingContext() { Diagnostics = context.Diagnostics };
+            var localContext = new ParsingContext(context);
             List<PinInfo> ports = new();
 
             // Parse the pins

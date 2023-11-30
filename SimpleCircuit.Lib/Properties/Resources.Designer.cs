@@ -71,14 +71,13 @@ namespace SimpleCircuit.Properties {
         ///.diagram { fill: white; }
         ///.plane { stroke-width: 1pt; }
         ///.battery .neg { stroke-width: 0.75pt; }
-        ///.small tspan { font-size: 0.8em; }
-        ///.text-stroke { stroke-width: 0.025em; }
-        ///.text-symbol { fill: black; stroke: none; }
         ///.marker { fill: black; }
         ///.marker.erd { fill: white; }
         ///.dotted { stroke-dasharray: 0.5 2; }
         ///.dashed { stroke-dasharray: 2 2; }
-        ///.annotation { stroke: #6600cc; }        /// [rest of string was truncated]&quot;;.
+        ///.annotation { stroke: #6600cc; }
+        ///.annotation text { fill: #6600cc; }
+        ///text { fill: black; stroke: none; }.
         /// </summary>
         internal static string DefaultStyle {
             get {
