@@ -46,6 +46,11 @@
         CloseBracket = 0x40,
 
         /// <summary>
+        /// An escaped slash.
+        /// </summary>
+        Slash = 0x80,
+
+        /// <summary>
         /// All tokens.
         /// </summary>
         All = -1

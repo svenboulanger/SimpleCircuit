@@ -11,8 +11,10 @@ namespace Sandbox
         static void Main()
         {
             // var script = @"V(""This is some longer text"") <u> X";
-            var script = @"GND1 <u> V1(""V&copy;"") <u r> R(""1k"") <r d> C1(""1uF"") <d> GND2
-(GND1 <r> GND2)";
+            var script = @"// For more tutorials, go to Help > Demo's.
+.options fontfamily = ""Tahoma""
+A(""Hello\\there"")
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

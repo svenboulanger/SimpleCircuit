@@ -681,13 +681,31 @@ namespace SimpleCircuit
             options?.Apply(text);
             _current.AppendChild(text);
             var lexer = new SimpleTextLexer(value);
-            var context = new SimpleTextContext(text, Measurer)
+            var context = new SimpleTextContext(_current, Measurer)
             {
-                FontSize = size
+                FontSize = size,
+                Text = text,
+                Align = expand.X
             };
-            SimpleTextParser.Parse(lexer, context);
-            var bounds = context.Finish(location, expand);
+            var span = SimpleTextParser.Parse(lexer, context);
 
+            // Compute the location based on the location and expansion
+            double y = location.Y, x = location.X;
+            if (expand.Y.IsZero())
+                y = y - span.Bounds.Height * 0.5 - span.Bounds.Top;
+            else if (expand.Y < 0)
+                y -= span.Bounds.Bottom;
+            else
+                y -= span.Bounds.Top;
+            if (expand.X.IsZero())
+                x = x - span.Bounds.Width * 0.5 - span.Bounds.Left;
+            else if (expand.X < 0)
+                x -= span.Bounds.Right;
+            else
+                x -= span.Bounds.Left;
+            span.Update(new Vector2(x, y));
+
+            var bounds = new Vector2(x, y) + span.Bounds;
             _bounds.Peek().Expand(bounds);
             return bounds;
         }

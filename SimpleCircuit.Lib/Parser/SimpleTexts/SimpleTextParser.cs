@@ -10,85 +10,168 @@
         /// </summary>
         /// <param name="lexer">The lexer.</param>
         /// <param name="context">The context.</param>
-        public static void Parse(SimpleTextLexer lexer, SimpleTextContext context)
+        public static ISpan Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            while (lexer.Type != TokenType.EndOfContent)
-                ParseToken(lexer, context);
-        }
+            var result = new MultilineSpan(context.FontSize * context.LineSpacing, context.Align);
 
-        private static void ParseToken(SimpleTextLexer lexer, SimpleTextContext context)
+            // Parse lines
+            while (lexer.Type != TokenType.EndOfContent)
+            {
+                result.Add(ParseLine(lexer, context));
+                lexer.Branch(TokenType.Newline);
+            }
+            return result;
+        }
+        private static ISpan ParseLine(SimpleTextLexer lexer, SimpleTextContext context)
         {
+            // Parses a complete line
+            var result = new LineSpan();
+            while (lexer.Check(~TokenType.Newline))
+            {
+                result.Add(ParseSuperSubScript(lexer, context));
+            }
+            return result;
+        }
+        private static ISpan ParseSuperSubScript(SimpleTextLexer lexer, SimpleTextContext context)
+        {
+            var result = ParseSegment(lexer, context);
+            if (lexer.Branch(TokenType.Subscript))
+            {
+                var s = new SubscriptSuperscriptSpan(result, 0.5 * context.FontSize)
+                {
+                    Margin = new(0, 0.05 * context.FontSize)
+                };
+                if (lexer.Branch(TokenType.OpenBracket))
+                {
+                    s.Sub = ParseBlockSegment(lexer, context);
+                    lexer.Branch(TokenType.CloseBracket);
+                }
+                else
+                    s.Sub = ParseLine(lexer, context);
+                if (lexer.Branch(TokenType.Superscript))
+                {
+                    if (lexer.Branch(TokenType.OpenBracket))
+                    {
+                        s.Super = ParseBlockSegment(lexer, context);
+                        lexer.Branch(TokenType.CloseBracket);
+                    }
+                    else
+                        s.Super = ParseLine(lexer, context);
+                }
+                return s;
+            }
+            else if (lexer.Branch(TokenType.Superscript))
+            {
+                var s = new SubscriptSuperscriptSpan(result, 0.5 * context.FontSize)
+                {
+                    Margin = new(0, 0.05 * context.FontSize)
+                };
+                if (lexer.Branch(TokenType.OpenBracket))
+                {
+                    s.Super = ParseBlockSegment(lexer, context);
+                    lexer.Branch(TokenType.CloseBracket);
+                }
+                else
+                    s.Super = ParseLine(lexer, context);
+                if (lexer.Branch(TokenType.Subscript))
+                {
+                    if (lexer.Branch(TokenType.OpenBracket))
+                    {
+                        s.Sub = ParseBlockSegment(lexer, context);
+                        lexer.Branch(TokenType.CloseBracket);
+                    }
+                    else
+                        s.Sub = ParseLine(lexer, context);
+                }
+                return s;
+            }
+            return result;
+        }
+        private static ISpan ParseBlockSegment(SimpleTextLexer lexer, SimpleTextContext context)
+        {
+            // Parses everything until the next block segment
+            var result = new LineSpan();
+            while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket))
+            {
+                result.Add(ParseSuperSubScript(lexer, context));
+            }
+            return result;
+        }
+        private static ISpan ParseSegment(SimpleTextLexer lexer, SimpleTextContext context)
+        {
+            // Parses a segment that cannot be separated
             switch (lexer.Type)
             {
-                case TokenType.Subscript:
-                    lexer.Next();
-                    ParseSubscript(lexer, context);
-                    break;
-
-                case TokenType.Superscript:
-                    lexer.Next();
-                    ParseSuperscript(lexer, context);
-                    break;
-
                 case TokenType.Escaped:
-                    context.Append(lexer.Content.Span[1]);
-                    lexer.Next();
-                    break;
+                    // Check for an escape sequence
+                    switch (lexer.Content.ToString())
+                    {
+                        case "\\overline":
+                            lexer.Next();
+                            if (lexer.Branch(TokenType.OpenBracket))
+                            {
+                                var b = ParseBlockSegment(lexer, context);
+                                lexer.Branch(TokenType.CloseBracket);
+                                return CreateOverline(b, context);
+                            }
+                            else
+                            {
+                                context.Builder.Append("\\overline");
+                                ContinueText(lexer, context);
+                                return CreateTextSpan(context);
+                            }
 
-                case TokenType.Newline:
-                    context.FinishLine();
-                    lexer.Next();
-                    break;
+                        default:
+                            context.Builder.Append(lexer.Content.ToString());
+                            lexer.Next();
+                            ContinueText(lexer, context);
+                            return CreateTextSpan(context);
+                    }
 
                 default:
-                    context.Append(lexer.Content.ToString());
+                    context.Builder.Append(lexer.Content.ToString());
                     lexer.Next();
-                    break;
+                    ContinueText(lexer, context);
+                    return CreateTextSpan(context);
             }
         }
-
-        private static void ParseSubscript(SimpleTextLexer lexer, SimpleTextContext context)
+        private static void ContinueText(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            double shift = context.RelativeFontWeight * 0.375;
-            context.RelativeBaseLineOffset += shift;
-            context.RelativeFontWeight *= 0.75;
-            if (lexer.Branch(TokenType.OpenBracket))
+            while (lexer.Check(TokenType.Character | TokenType.Slash))
             {
-                // Parse until a closing bracket
-                while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket))
-                    ParseToken(lexer, context);
-                lexer.Branch(TokenType.CloseBracket);
+                if (lexer.Check(TokenType.Slash))
+                    context.Builder.Append('\\');
+                else
+                    context.Builder.Append(lexer.Content.ToString());
+                lexer.Next();
             }
-            else
-            {
-                // Parse until a whitespace
-                while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
-                    ParseToken(lexer, context);
-            }
-            context.RelativeBaseLineOffset -= shift;
-            context.RelativeFontWeight /= 0.75;
         }
-
-        private static void ParseSuperscript(SimpleTextLexer lexer, SimpleTextContext context)
+        private static ISpan CreateOverline(ISpan @base, SimpleTextContext context)
         {
-            double shift = context.RelativeFontWeight * 0.375;
-            context.RelativeBaseLineOffset -= shift;
-            context.RelativeFontWeight *= 0.75;
-            if (lexer.Branch(TokenType.OpenBracket))
-            {
-                // Parse until a closing bracket
-                while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Superscript & ~TokenType.Subscript))
-                    ParseToken(lexer, context);
-                lexer.Branch(TokenType.CloseBracket);
-            }
-            else
-            {
-                // Parse until a whitespace
-                while (lexer.Check(~TokenType.Newline & ~TokenType.CloseBracket & ~TokenType.Subscript & ~TokenType.Superscript) && lexer.Content.Span[0] != ' ')
-                    ParseToken(lexer, context);
-            }
-            context.RelativeBaseLineOffset += shift;
-            context.RelativeFontWeight /= 0.75;
+            double margin = context.FontSize * 0.05;
+            double thickness = context.FontSize * 0.1;
+
+            var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
+            element.SetAttribute("style", $"stroke-width:{thickness.ToCoordinate()}pt;fill:none;");
+            context.Parent.AppendChild(element);
+
+            return new OverlineSpan(element, @base, margin, thickness);
+        }
+        private static ISpan CreateTextSpan(SimpleTextContext context)
+        {
+            // Measure the contents
+            string content = context.Builder.ToString();
+            context.Builder.Clear();
+            var bounds = context.Measurer.Measure(content, context.FontSize);
+
+            // Create the XML element
+            var element = context.Document.CreateElement("tspan", SvgDrawing.Namespace);
+            element.SetAttribute("style", $"font-family:{context.Measurer.FontFamily};font-size:{context.FontSize.ToCoordinate()}pt;");
+            element.InnerXml = content;
+            context.Text.AppendChild(element);
+
+            // Return the span
+            return new TextSpan(element, bounds);
         }
     }
 }

@@ -11,8 +11,13 @@ namespace SimpleCircuit.Drawing
     {
         private SKTypeface _typeface;
         private SKFont _font;
-        private string _familyName, _lastFamilyName;
+        private string _familyName = DefaultFontFamily, _lastFamilyName;
         private bool _reload = true;
+
+        /// <summary>
+        /// The default font family.
+        /// </summary>
+        public const string DefaultFontFamily = "Arial";
 
         /// <inheritdoc />
         public string FontFamily
@@ -22,7 +27,7 @@ namespace SimpleCircuit.Drawing
             {
                 _familyName = value?.Trim();
                 if (string.IsNullOrWhiteSpace(_familyName))
-                    _familyName = "Calibri";
+                    _familyName = DefaultFontFamily;
 
                 // Invalidate the current typeface and font
                 if (!StringComparer.Ordinal.Equals(_familyName, _lastFamilyName))
@@ -48,7 +53,7 @@ namespace SimpleCircuit.Drawing
             text = WebUtility.HtmlDecode(text);
 
             // Measure
-            _font.Size = (float)size * 1.333f;
+            _font.Size = (float)size * 4f / 3f;
             var glyphs = _typeface.GetGlyphs(text);
             _font.MeasureText(glyphs, out var bounds);
             return new Bounds(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom);

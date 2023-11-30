@@ -295,5 +295,22 @@ namespace SimpleCircuit
             result = new(x, y);
             return success;
         }
+
+        /// <summary>
+        /// Converts a scalar value to a coordinate for SVG. It will automatically
+        /// round to two digits.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The string representing the value.</returns>
+        public static string ToCoordinate(this double value)
+        {
+            string result = Math.Round(value, 2).ToString("F2", CultureInfo.InvariantCulture);
+            int length = result.Length - 1;
+            while (result[length] == '0')
+                length--;
+            if (result[length] == '.')
+                return result[..length];
+            return result[..(length + 1)];
+        }
     }
 }
