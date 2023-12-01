@@ -120,6 +120,8 @@ namespace SimpleCircuit.Components
                     if (width > 0)
                         MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastOffset, offsetEnd, edgeSpacing, 100.0);
                     width += edgeSpacing;
+                    if (index == 0)
+                        return 0.0;
                     return width;
                 }
 
