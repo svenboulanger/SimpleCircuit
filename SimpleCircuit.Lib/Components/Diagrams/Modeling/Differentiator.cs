@@ -33,17 +33,17 @@
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        drawing.Text("s", new(), new(), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                        drawing.Text("s", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     case 1:
-                        drawing.Text("z^{-1}", new(), new(), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                        drawing.Text("z^{-1}", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     default:
-                        drawing.Text("d", new(), new(0, -1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
-                        drawing.Line(new(-2, 0), new(2, 0), new() { Style = "stroke-width: 0.1pt;"});
-                        drawing.Text("dt", new(), new(0, 1), 0.8 * SvgDrawing.DefaultFontSize, new("small"));
+                        drawing.Text("d", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        drawing.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToCoordinate()}pt;"});
+                        drawing.Text("dt", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
                 }
                 DrawLabels(drawing);

@@ -272,27 +272,13 @@ const context = canvas_measure.getContext('2d');
 function measureText(text, fontfamily, size) {
     context.font = size + 'pt ' + fontfamily;
     var metrics = context.measureText(text)
+    console.log(metrics);
     return {
         l: 0,
         t: -metrics.actualBoundingBoxAscent,
         r: metrics.actualBoundingBoxRight,
         b: metrics.actualBoundingBoxDescent,
         a: metrics.width
-    };
-}
-
-function calculateBounds(element) {
-    // We simply parse the XML and return the bounds
-    var parser = new DOMParser();
-    var e = parser.parseFromString(element, "image/svg+xml").documentElement;
-    div_measure.appendChild(e);
-    var b = e.getBBox();
-    div_measure.removeChild(e);
-    return {
-        x: b.x,
-        y: b.y,
-        width: b.width,
-        height: b.height
     };
 }
 

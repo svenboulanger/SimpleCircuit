@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components.Analog;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 using System.Globalization;
