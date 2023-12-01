@@ -23,8 +23,8 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable, ILabeled
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -5), new(0, -1)),
-                new LabelAnchorPoint(new(0, 5), new(0, 1)));
+                new LabelAnchorPoint(new(0, -5.5), new(0, -1)),
+                new LabelAnchorPoint(new(0, 5.5), new(0, 1)));
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -92,8 +92,8 @@ namespace SimpleCircuit.Components.Analog
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1));
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:

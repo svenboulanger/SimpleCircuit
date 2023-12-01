@@ -106,7 +106,7 @@
             // Parses a segment that cannot be separated
             switch (lexer.Type)
             {
-                case TokenType.Escaped:
+                case TokenType.EscapedSequence:
                     // Check for an escape sequence
                     string content = lexer.Content.ToString();
                     switch (content)
@@ -149,18 +149,16 @@
                     }
 
                 default:
-                    context.Builder.Append(lexer.Content.ToString());
-                    lexer.Next();
                     ContinueText(lexer, context);
                     return CreateTextSpan(context);
             }
         }
         private static void ContinueText(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            while (lexer.Check(TokenType.Character | TokenType.Slash))
+            while (lexer.Check(TokenType.Character | TokenType.EscapedCharacter))
             {
-                if (lexer.Check(TokenType.Slash))
-                    context.Builder.Append('\\');
+                if (lexer.Type == TokenType.EscapedCharacter)
+                    context.Builder.Append(lexer.Content.Span[1]);
                 else
                     context.Builder.Append(lexer.Content.ToString());
                 lexer.Next();

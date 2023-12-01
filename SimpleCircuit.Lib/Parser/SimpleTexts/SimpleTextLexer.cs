@@ -27,25 +27,29 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
                 case '\\':
                     // Escaped sequence
-                    Type = TokenType.Escaped;
+                    Type = TokenType.EscapedSequence;
                     ContinueToken();
-                    if (Char == 'n')
+                    switch (Char)
                     {
-                        Type = TokenType.Newline;
-                        ContinueToken();
-                    }
-                    else if (Char == '\\')
-                    {
-                        Type = TokenType.Slash;
-                        ContinueToken();
-                    }
-                    else
-                    {
-                        while (char.IsLetter(Char))
-                        {
-                            Type = TokenType.Escaped;
+                        case 'n':
+                            Type = TokenType.Newline;
                             ContinueToken();
-                        }
+                            break;
+
+                        case '_':
+                        case '^':
+                        case '\\':
+                        case '{':
+                        case '}':
+                            Type = TokenType.EscapedCharacter;
+                            ContinueToken();
+                            break;
+
+                        default:
+                            Type = TokenType.EscapedSequence;
+                            while (char.IsLetter(Char))
+                                ContinueToken();
+                            break;
                     }
                     break;
 
