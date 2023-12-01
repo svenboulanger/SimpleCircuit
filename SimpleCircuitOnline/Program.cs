@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using Microsoft.JSInterop;
-using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
 
 namespace SimpleCircuitOnline
 {

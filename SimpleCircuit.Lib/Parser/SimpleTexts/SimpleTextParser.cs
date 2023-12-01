@@ -35,44 +35,17 @@
         private static ISpan ParseSuperSubScript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             var result = ParseSegment(lexer, context);
-            if (lexer.Branch(TokenType.Subscript))
+
+            // Deal with super/subscripts
+            if (lexer.Check(TokenType.Superscript | TokenType.Subscript))
             {
+                // Create our sub/superscript element and make the font size smaller for whatever is next
+                double oldFontSize = context.FontSize;
                 var s = new SubscriptSuperscriptSpan(result, 0.5 * context.FontSize)
                 {
                     Margin = new(0, 0.05 * context.FontSize)
                 };
-                if (lexer.Branch(TokenType.OpenBracket))
-                {
-                    s.Sub = ParseBlockSegment(lexer, context);
-                    lexer.Branch(TokenType.CloseBracket);
-                }
-                else
-                    s.Sub = ParseLine(lexer, context);
-                if (lexer.Branch(TokenType.Superscript))
-                {
-                    if (lexer.Branch(TokenType.OpenBracket))
-                    {
-                        s.Super = ParseBlockSegment(lexer, context);
-                        lexer.Branch(TokenType.CloseBracket);
-                    }
-                    else
-                        s.Super = ParseLine(lexer, context);
-                }
-                return s;
-            }
-            else if (lexer.Branch(TokenType.Superscript))
-            {
-                var s = new SubscriptSuperscriptSpan(result, 0.5 * context.FontSize)
-                {
-                    Margin = new(0, 0.05 * context.FontSize)
-                };
-                if (lexer.Branch(TokenType.OpenBracket))
-                {
-                    s.Super = ParseBlockSegment(lexer, context);
-                    lexer.Branch(TokenType.CloseBracket);
-                }
-                else
-                    s.Super = ParseLine(lexer, context);
+                context.FontSize *= 0.8;
                 if (lexer.Branch(TokenType.Subscript))
                 {
                     if (lexer.Branch(TokenType.OpenBracket))
@@ -81,8 +54,39 @@
                         lexer.Branch(TokenType.CloseBracket);
                     }
                     else
-                        s.Sub = ParseLine(lexer, context);
+                        s.Sub = ParseSegment(lexer, context);
+                    if (lexer.Branch(TokenType.Superscript))
+                    {
+                        if (lexer.Branch(TokenType.OpenBracket))
+                        {
+                            s.Super = ParseBlockSegment(lexer, context);
+                            lexer.Branch(TokenType.CloseBracket);
+                        }
+                        else
+                            s.Super = ParseSegment(lexer, context);
+                    }
                 }
+                else if (lexer.Branch(TokenType.Superscript))
+                {
+                    if (lexer.Branch(TokenType.OpenBracket))
+                    {
+                        s.Super = ParseBlockSegment(lexer, context);
+                        lexer.Branch(TokenType.CloseBracket);
+                    }
+                    else
+                        s.Super = ParseLine(lexer, context);
+                    if (lexer.Branch(TokenType.Subscript))
+                    {
+                        if (lexer.Branch(TokenType.OpenBracket))
+                        {
+                            s.Sub = ParseBlockSegment(lexer, context);
+                            lexer.Branch(TokenType.CloseBracket);
+                        }
+                        else
+                            s.Sub = ParseBlockSegment(lexer, context);
+                    }
+                }
+                context.FontSize = oldFontSize;
                 return s;
             }
             return result;
@@ -104,7 +108,8 @@
             {
                 case TokenType.Escaped:
                     // Check for an escape sequence
-                    switch (lexer.Content.ToString())
+                    string content = lexer.Content.ToString();
+                    switch (content)
                     {
                         case "\\overline":
                             lexer.Next();
@@ -116,13 +121,28 @@
                             }
                             else
                             {
-                                context.Builder.Append("\\overline");
+                                context.Builder.Append(content);
+                                ContinueText(lexer, context);
+                                return CreateTextSpan(context);
+                            }
+
+                        case "\\underline":
+                            lexer.Next();
+                            if (lexer.Branch(TokenType.OpenBracket))
+                            {
+                                var b = ParseBlockSegment(lexer, context);
+                                lexer.Branch(TokenType.CloseBracket);
+                                return CreateUnderline(b, context);
+                            }
+                            else
+                            {
+                                context.Builder.Append(content);
                                 ContinueText(lexer, context);
                                 return CreateTextSpan(context);
                             }
 
                         default:
-                            context.Builder.Append(lexer.Content.ToString());
+                            context.Builder.Append(content);
                             lexer.Next();
                             ContinueText(lexer, context);
                             return CreateTextSpan(context);
@@ -148,14 +168,25 @@
         }
         private static ISpan CreateOverline(ISpan @base, SimpleTextContext context)
         {
-            double margin = context.FontSize * 0.05;
-            double thickness = context.FontSize * 0.1;
+            double margin = context.FontSize * 0.1;
+            double thickness = context.FontSize * 0.075;
 
             var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
             element.SetAttribute("style", $"stroke-width:{thickness.ToCoordinate()}pt;fill:none;");
             context.Parent.AppendChild(element);
 
             return new OverlineSpan(element, @base, margin, thickness);
+        }
+        private static ISpan CreateUnderline(ISpan @base, SimpleTextContext context)
+        {
+            double margin = context.FontSize * 0.1;
+            double thickness = context.FontSize * 0.075;
+
+            var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
+            element.SetAttribute("style", $"stroke-width:{thickness.ToCoordinate()}pt;fill:none;");
+            context.Parent.AppendChild(element);
+
+            return new UnderlineSpan(element, @base, margin, thickness);
         }
         private static ISpan CreateTextSpan(SimpleTextContext context)
         {

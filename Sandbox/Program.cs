@@ -13,7 +13,7 @@ namespace Sandbox
             // var script = @"V(""This is some longer text"") <u> X";
             var script = @"// For more tutorials, go to Help > Demo's.
 .options fontfamily = ""Tahoma""
-A(""Hello\\there"")
+A(""This \\overline \underline is a test &Omega;"")
 ";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

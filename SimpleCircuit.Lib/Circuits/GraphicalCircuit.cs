@@ -6,7 +6,7 @@ using System.Xml;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp.Simulations;
 using SpiceSharp.Validation;
 

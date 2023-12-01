@@ -688,26 +688,28 @@ namespace SimpleCircuit
                 Align = expand.X
             };
             var span = SimpleTextParser.Parse(lexer, context);
+            var bounds = span.Bounds.Bounds;
 
             // Compute the location based on the location and expansion
             double y = location.Y, x = location.X;
             if (expand.Y.IsZero())
-                y = y - span.Bounds.Height * 0.5 - span.Bounds.Top;
+                y = y - bounds.Height * 0.5 - bounds.Top;
             else if (expand.Y < 0)
-                y -= span.Bounds.Bottom;
+                y -= bounds.Bottom;
             else
-                y -= span.Bounds.Top;
+                y -= bounds.Top;
             if (expand.X.IsZero())
-                x = x - span.Bounds.Width * 0.5 - span.Bounds.Left;
+                x = x - bounds.Width * 0.5 - bounds.Left;
             else if (expand.X < 0)
-                x -= span.Bounds.Right;
+                x -= bounds.Right;
             else
-                x -= span.Bounds.Left;
+                x -= bounds.Left;
             span.Update(new Vector2(x, y));
 
-            var bounds = new Vector2(x, y) + span.Bounds;
-            _bounds.Peek().Expand(bounds);
-            return bounds;
+            // Return the offset bounds
+            var r = new Vector2(x, y) + bounds;
+            _bounds.Peek().Expand(r);
+            return r;
         }
 
         /// <inheritdoc />

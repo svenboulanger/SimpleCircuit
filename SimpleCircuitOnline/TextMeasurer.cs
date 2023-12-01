@@ -1,5 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
+using System;
 using System.Text.Json;
 
 namespace SimpleCircuitOnline
@@ -25,17 +27,16 @@ namespace SimpleCircuitOnline
         }
 
         /// <inheritdoc />
-        public Bounds Measure(string text, double size)
+        public SpanBounds Measure(string text, double size)
         {
             // Make a piece of XML that allows measuring this element
-            string xml = $"<svg class=\"simplecircuit\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\" width=\"512px\" height=\"512px\"><text><tspan x=\"0\" y=\"0\" style=\"font-family: {FontFamily}; font-size: {size}pt; stroke: none; fill: black;\">{text}</tspan></text></svg>";
-
-            JsonElement obj = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("calculateBounds", xml);
-            double x = obj.GetProperty("x").GetDouble();
-            double y = obj.GetProperty("y").GetDouble();
-            double width = obj.GetProperty("width").GetDouble();
-            double height = obj.GetProperty("height").GetDouble();
-            return new Bounds(x, y, x + width, y + height);
+            JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, FontFamily, size);
+            double advance = obj2.GetProperty("a").GetDouble();
+            double left = obj2.GetProperty("l").GetDouble();
+            double right = obj2.GetProperty("r").GetDouble();
+            double top = obj2.GetProperty("t").GetDouble();
+            double bottom = obj2.GetProperty("b").GetDouble();
+            return new SpanBounds(new Bounds(left, top, right, bottom), advance);
         }
     }
 }

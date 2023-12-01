@@ -1,8 +1,9 @@
-﻿using SkiaSharp;
+﻿using SimpleCircuit.Drawing;
+using SkiaSharp;
 using System;
 using System.Net;
 
-namespace SimpleCircuit.Drawing
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// A text measurer based on SkiaSharp.
@@ -39,7 +40,7 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <inheritdoc />
-        public Bounds Measure(string text, double size)
+        public SpanBounds Measure(string text, double size)
         {
             // Check whether the font needs to be loaded
             if (_reload)
@@ -55,8 +56,8 @@ namespace SimpleCircuit.Drawing
             // Measure
             _font.Size = (float)size * 4f / 3f;
             var glyphs = _typeface.GetGlyphs(text);
-            _font.MeasureText(glyphs, out var bounds);
-            return new Bounds(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom);
+            float advance = _font.MeasureText(glyphs, out var bounds);
+            return new SpanBounds(new Bounds(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom), advance);
         }
     }
 }

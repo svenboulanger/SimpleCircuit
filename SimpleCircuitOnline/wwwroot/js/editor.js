@@ -266,6 +266,20 @@ function registerLanguage(keywords) {
 
 const div_measure = document.getElementById('div_measure');
 const svg_style = document.getElementById('svg-style');
+const canvas_measure = document.getElementById('canvas');
+const context = canvas_measure.getContext('2d');
+
+function measureText(text, fontfamily, size) {
+    context.font = size + 'pt ' + fontfamily;
+    var metrics = context.measureText(text)
+    return {
+        l: 0,
+        t: -metrics.actualBoundingBoxAscent,
+        r: metrics.actualBoundingBoxRight,
+        b: metrics.actualBoundingBoxDescent,
+        a: metrics.width
+    };
+}
 
 function calculateBounds(element) {
     // We simply parse the XML and return the bounds

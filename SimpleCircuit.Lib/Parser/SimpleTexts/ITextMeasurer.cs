@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing
+﻿using SimpleCircuit.Drawing;
+
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// An interface that describes a text measurer.
@@ -17,6 +19,6 @@
         /// <param name="text">The text.</param>
         /// <param name="size">The size.</param>
         /// <returns>The bounds.</returns>
-        public Bounds Measure(string text, double size);
+        public SpanBounds Measure(string text, double size);
     }
 }
