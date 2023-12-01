@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	  <LangVersion>latest</LangVersion>
 	  <RootNamespace>SimpleCircuit</RootNamespace>
-	  <VersionPrefix>1.7.1.0</VersionPrefix>
+	  <VersionPrefix>1.7.2.0</VersionPrefix>
 	  <Title>SimpleCircuit Core</Title>
 	  <Authors>SvenB</Authors>
 	  <PackageProjectUrl>https://github.com/svenboulanger/SimpleCircuit</PackageProjectUrl>
