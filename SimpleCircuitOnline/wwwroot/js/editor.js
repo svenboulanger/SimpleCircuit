@@ -272,7 +272,6 @@ const context = canvas_measure.getContext('2d');
 function measureText(text, fontfamily, size) {
     context.font = size + 'pt ' + fontfamily;
     var metrics = context.measureText(text)
-    console.log(metrics);
     return {
         l: 0,
         t: -metrics.actualBoundingBoxAscent,
