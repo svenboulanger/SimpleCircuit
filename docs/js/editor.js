@@ -266,19 +266,18 @@ function registerLanguage(keywords) {
 
 const div_measure = document.getElementById('div_measure');
 const svg_style = document.getElementById('svg-style');
+const canvas_measure = document.getElementById('canvas');
+const context = canvas_measure.getContext('2d');
 
-function calculateBounds(element) {
-    // We simply parse the XML and return the bounds
-    var parser = new DOMParser();
-    var e = parser.parseFromString(element, "image/svg+xml").documentElement;
-    div_measure.appendChild(e);
-    var b = e.getBBox();
-    div_measure.removeChild(e);
+function measureText(text, fontfamily, size) {
+    context.font = size + 'pt ' + fontfamily;
+    var metrics = context.measureText(text)
     return {
-        x: b.x,
-        y: b.y,
-        width: b.width,
-        height: b.height
+        l: 0,
+        t: -metrics.actualBoundingBoxAscent,
+        r: metrics.actualBoundingBoxRight,
+        b: metrics.actualBoundingBoxDescent,
+        a: metrics.width
     };
 }
 
