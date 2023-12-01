@@ -105,6 +105,12 @@ namespace SimpleCircuit
             {
                 switch (args[i])
                 {
+                    case "--version":
+                        // Show the version of SimpleCircuit.Lib
+                        var version = typeof(SvgDrawing).Assembly.GetName().Version;
+                        Console.WriteLine("SimpleCircuit v" + version);
+                        break;
+
                     case "-out":
                         if (currentJob != null && i + 1 < args.Length)
                             currentJob.OutputFilename = args[++i];
