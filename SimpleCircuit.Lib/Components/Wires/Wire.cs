@@ -23,6 +23,16 @@ namespace SimpleCircuit.Components.Wires
         private readonly List<Vector2> _points = [];
         private const double _jumpOverRadius = 1.5;
 
+        /// <summary>
+        /// The variant used for invisible wires.
+        /// </summary>
+        public const string Hidden = "hidden";
+
+        /// <summary>
+        /// The variant used for a wire jumping over previous wires.
+        /// </summary>
+        public const string JumpOver = "jump";
+
         /// <inheritdoc />
         public override int Order => -1;
 
@@ -49,20 +59,8 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
 
-        /// <summary>
-        /// Gets or sets whether the wire needs to jump over previous wires
-        /// with a little arc.
-        /// </summary>
-        public bool JumpOverWires { get; set; } = false;
-
-        /// <summary>
-        /// Gets whether the wire is visible or hidden.
-        /// </summary>
-        public bool IsVisible { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the round radius for corners of the wire.
-        /// </summary>
+        [Description("The radius.")]
+        [Alias("r")]
         public double RoundRadius { get; set; } = 0.0;
 
         /// <summary>
@@ -369,7 +367,7 @@ namespace SimpleCircuit.Components.Wires
                 var next = context.GetValue(GetXName(i), GetYName(i));
 
                 // Add jump-over points if specified
-                if (JumpOverWires)
+                if (Variants.Contains(JumpOver))
                     AddJumpOverWires(last, next, context.WireSegments.Take(count));
 
                 _localPoints.Add(new(next, false));
@@ -499,7 +497,7 @@ namespace SimpleCircuit.Components.Wires
         protected override void Draw(SvgDrawing drawing)
         {
             List<Marker> markers = [];
-            if (IsVisible && _localPoints.Count > 0)
+            if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
                 var tf = drawing.CurrentTransform;
                 drawing.Path(builder =>

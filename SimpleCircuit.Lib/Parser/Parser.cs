@@ -468,10 +468,10 @@ namespace SimpleCircuit.Parser
             var result = new WireInfoList();
 
             // Chain together multiple wire definitions
-            bool isVisible = true, jumpOverWires = context.Options.JumpOverWires;
             var options = new GraphicOptions("wire");
             var markers = new List<Marker>();
             var segments = new List<WireSegmentInfo>();
+            List<VariantInfo> variants = [];
             void AddWireSegment(Token token, Vector2 orientation)
             {
                 var segment = new WireSegmentInfo(token)
@@ -525,13 +525,13 @@ namespace SimpleCircuit.Parser
                                     AddWireSegment(directionToken, Vector2.Normal(-angle * Math.PI / 180.0));
                                     break;
 
-                                case "hidden": isVisible = false; break;
-                                case "visible": isVisible = true; break;
+                                case "hidden": variants.Add(new(true, Wire.Hidden)); break;
+                                case "visible": variants.Add(new(false, Wire.Hidden)); break;
                                 case "nojump":
                                 case "nojmp":
-                                case "njmp": jumpOverWires = false; break;
+                                case "njmp": variants.Add(new(false, Wire.JumpOver)); break;
                                 case "jump":
-                                case "jmp": jumpOverWires = true; break;
+                                case "jmp": variants.Add(new(true, Wire.JumpOver)); break;
                                 case "dotted": options.Classes.Add("dotted"); break;
                                 case "dashed": options.Classes.Add("dashed"); break;
 
@@ -564,13 +564,13 @@ namespace SimpleCircuit.Parser
                                         // Create the wire info
                                         var subWireInfo = new WireInfo(lexer.GetTracked(start), context.GetWireFullname())
                                         {
-                                            IsVisible = isVisible,
-                                            JumpOverWires = jumpOverWires,
-                                            RoundRadius = context.Options.RoundWires,
                                             Options = options,
                                             Segments = segments,
                                             WireToPin = new PinInfo(component, default),
                                         };
+                                        foreach (var v in variants)
+                                            subWireInfo.Variants.Add(v);
+                                        variants.Clear();
                                         subWireInfo.Simplify();
                                         result.Add(subWireInfo, directionToken, context);
 
@@ -645,12 +645,11 @@ namespace SimpleCircuit.Parser
             // Create the wire info
             var wireInfo = new WireInfo(lexer.GetTracked(start), context.GetWireFullname())
             {
-                IsVisible = isVisible,
-                JumpOverWires = jumpOverWires,
-                RoundRadius = context.Options.RoundWires,
                 Options = options,
                 Segments = segments,
             };
+            foreach (var v in variants)
+                wireInfo.Variants.Add(v);
             wireInfo.Simplify();
             result.Add(wireInfo, default, context);
             return result;
@@ -979,7 +978,9 @@ namespace SimpleCircuit.Parser
 
             // Check whether the key is actually a key
             string key = tokenKey.Content.ToString();
-            if (!context.Factory.IsKey(key))
+            if (!context.Factory.IsKey(key) &&
+                !StringComparer.Ordinal.Equals(key, AnnotationInfo.Key) &&
+                !StringComparer.Ordinal.Equals(key, WireInfo.Key))
             {
                 context.Diagnostics?.Post(tokenKey, ErrorCodes.NotAKey, tokenKey.Content.ToString());
                 return false;
@@ -1090,7 +1091,9 @@ namespace SimpleCircuit.Parser
 
             // Check whether the key is actually a key
             string key = tokenKey.Content.ToString();
-            if (!context.Factory.IsKey(key))
+            if (!context.Factory.IsKey(key) &&
+                !StringComparer.Ordinal.Equals(key, AnnotationInfo.Key) &&
+                !StringComparer.Ordinal.Equals(key, WireInfo.Key))
             {
                 context.Diagnostics?.Post(tokenKey, ErrorCodes.NotAKey, tokenKey.Content.ToString());
                 return false;

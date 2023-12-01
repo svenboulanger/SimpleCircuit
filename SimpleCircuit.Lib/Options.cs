@@ -60,50 +60,17 @@ namespace SimpleCircuit
         [Description("The minimum wire length used for wires when no minimum or fixed length is specified.")]
         public double MinimumWireLength { get; set; } = 10.0;
 
-        [Description("Horizontal inter-pin spacing for black-box components.")]
-        public double HorizontalPinSpacing { get; set; } = 30.0;
-
-        [Description("Vertical inter-pin spacing for black-box components.")]
-        public double VerticalPinSpacing { get; set; } = 20.0;
-
         [Description("The default scale for any amplifier created. The default is 1.")]
         public double Scale { get; set; } = 1.0;
 
-        [Description("The margin along the border of the drawing.")]
-        public double Margin { get; set; } = 1.0;
-
         [Description("If true, removes any empty groups in the SVG output. The default is true.")] 
         public bool RemoveEmptyGroups { get; set; } = true;
-
-        [Description("The spacing between lines of text. The default is 1.")]
-        public double LineSpacing { get; set; } = 1.0;
-
-        [Description("If true, wires will draw small arcs indicating jumping over another wire. The default is false.")]
-        public bool JumpOverWires { get; set; } = false;
-
-        [Description("If non-zero, subsequent wires will be rounded when cornering. The default is 0.")]
-        public double RoundWires { get; set; } = 0.0;
 
         [Description("The radius of corners for subsequent components that support it. The default is 0.")]
         public double CornerRadius { get; set; } = 0.0;
 
         [Description("The default label margin to the edge of subsequent components. The default is 1.")]
         public double LabelMargin { get; set; } = 1.0;
-
-        [Description("If non-zero, subsequent annotation boxes will be rounded.")]
-        public double AnnotationRadius { get; set; } = 0.0;
-
-        [Description("If \"true\", subsequent annotation boxes will be polygons.")]
-        public bool AnnotationPoly { get; set; } = false;
-
-        [Description("The default margin for annotation boxes to components.")]
-        public double AnnotationMargin { get; set; } = 5.0;
-
-        [Description("The default margin for annotation boxes to wires.")]
-        public double AnnotationWireMargin { get; set; } = 5.0;
-
-        [Description("The default margin for annotation boxes at wire ends when using polygon annotation boxes.")]
-        public double AnnotationWireMarginEnds { get; set; } = 2.5;
 
         [Description("The spacing in X-direction between two unconnected circuit diagrams. The default is 40.")]
         public double SpacingX { get; set; } = 40;

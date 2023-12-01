@@ -19,6 +19,11 @@ namespace SimpleCircuit.Parser
         private Wire _wire;
 
         /// <summary>
+        /// The key used for signifying wires.
+        /// </summary>
+        public const string Key = "wire";
+
+        /// <summary>
         /// Gets the source.
         /// </summary>
         public Token Source { get; } = source;
@@ -48,20 +53,11 @@ namespace SimpleCircuit.Parser
         /// </summary>
         public GraphicOptions Options { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the wire should jump over other wires.
-        /// </summary>
-        public bool JumpOverWires { get; set; } = true;
+        /// <inheritdoc />
+        public IList<VariantInfo> Variants { get; } = new List<VariantInfo>();
 
-        /// <summary>
-        /// Gets or sets whether the wire is visible or hidden.
-        /// </summary>
-        public bool IsVisible { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the radius for rounding corners.
-        /// </summary>
-        public double RoundRadius { get; set; } = 0.0;
+        /// <inheritdoc />
+        public IDictionary<Token, object> Properties { get; } = new Dictionary<Token, object>();
 
         /// <summary>
         /// Simplifies the wire information.
@@ -130,11 +126,23 @@ namespace SimpleCircuit.Parser
             {
                 _wire = new Wire(Fullname, PinToWire, Segments, WireToPin)
                 {
-                    JumpOverWires = JumpOverWires,
-                    IsVisible = IsVisible,
-                    RoundRadius = RoundRadius,
                     Options = Options
                 };
+                context.Options.Apply(Key, _wire, context.Diagnostics);
+
+                // Handle variants
+                foreach (var variant in Variants)
+                {
+                    if (variant.Include)
+                        _wire.Variants.Add(variant.Name);
+                    else
+                        _wire.Variants.Remove(variant.Name);
+                }
+
+                // Handle properties
+                foreach (var property in Properties)
+                    _wire.SetProperty(property.Key, property.Value, context.Diagnostics);
+
                 context.Circuit.Add(_wire);
             }
             return _wire;

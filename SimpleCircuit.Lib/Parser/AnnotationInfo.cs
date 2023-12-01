@@ -18,6 +18,11 @@ namespace SimpleCircuit.Parser
     {
         private IAnnotation _annotation = null;
 
+        /// <summary>
+        /// The key used for referring to annotations
+        /// </summary>
+        public const string Key = "annotation";
+
         /// <inheritdoc />
         public Token Source { get; } = source;
 
@@ -55,19 +60,8 @@ namespace SimpleCircuit.Parser
             }
             else
             {
-                _annotation = new Box(Fullname)
-                {
-                    CornerRadius = context.Options.AnnotationRadius,
-                    LeftMargin = context.Options.AnnotationMargin,
-                    TopMargin = context.Options.AnnotationMargin,
-                    RightMargin = context.Options.AnnotationMargin,
-                    BottomMargin = context.Options.AnnotationMargin,
-                    WireMargin = context.Options.AnnotationWireMargin,
-                    WireStartMargin = context.Options.AnnotationWireMarginEnds,
-                    WireEndMargin = context.Options.AnnotationWireMarginEnds,
-                };
-                if (context.Options.AnnotationPoly)
-                    _annotation.Variants.Add(Box.Poly);
+                _annotation = new Box(Fullname);
+                context.Options.Apply(Key, _annotation, context.Diagnostics);
                 context.Circuit.Add(_annotation);
             }
 
