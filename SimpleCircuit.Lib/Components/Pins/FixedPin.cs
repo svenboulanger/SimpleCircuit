@@ -6,14 +6,22 @@ namespace SimpleCircuit.Components.Pins
     /// <summary>
     /// A pin without orientation, at a fixed position.
     /// </summary>
-    public class FixedPin : Pin
+    /// <remarks>
+    /// Creates a pin at a fixed relative position.
+    /// </remarks>
+    /// <param name="name">The name.</param>
+    /// <param name="description">The description.</param>
+    /// <param name="owner">The owner.</param>
+    /// <param name="origin">The origin.</param>
+    /// <param name="offset">The offset.</param>
+    public class FixedPin(string name, string description, ILocatedDrawable owner, ILocatedPresence origin, Vector2 offset) : Pin(name, description, owner)
     {
-        private readonly ILocatedPresence _origin;
+        private readonly ILocatedPresence _origin = origin;
 
         /// <summary>
         /// Gets or sets the local offset of the pin. This does not include any modifications by the 
         /// </summary>
-        public Vector2 Offset { get; set; }
+        public Vector2 Offset { get; set; } = offset;
 
         /// <summary>
         /// Creates a pin at a fixed relative position.
@@ -25,21 +33,6 @@ namespace SimpleCircuit.Components.Pins
         public FixedPin(string name, string description, ILocatedDrawable owner, Vector2 offset)
             : this(name, description, owner, owner, offset)
         {
-        }
-
-        /// <summary>
-        /// Creates a pin at a fixed relative position.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="description">The description.</param>
-        /// <param name="owner">The owner.</param>
-        /// <param name="origin">The origin.</param>
-        /// <param name="offset">The offset.</param>
-        public FixedPin(string name, string description, ILocatedDrawable owner, ILocatedPresence origin, Vector2 offset)
-            : base(name, description, owner)
-        {
-            Offset = offset;
-            _origin = origin;
         }
 
         /// <inheritdoc />

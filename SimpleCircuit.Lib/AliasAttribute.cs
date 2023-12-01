@@ -5,21 +5,16 @@ namespace SimpleCircuit
     /// <summary>
     /// An attribute that indicates an alias for a property.
     /// </summary>
+    /// <remarks>
+    /// Creates a new alias attribute.
+    /// </remarks>
+    /// <param name="alias">The alias.</param>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
-    public class AliasAttribute : Attribute
+    public class AliasAttribute(string alias) : Attribute
     {
         /// <summary>
         /// Gets the alias.
         /// </summary>
-        public string Alias { get; }
-
-        /// <summary>
-        /// Creates a new alias attribute.
-        /// </summary>
-        /// <param name="alias">The alias.</param>
-        public AliasAttribute(string alias)
-        {
-            Alias = alias ?? string.Empty;
-        }
+        public string Alias { get; } = alias ?? string.Empty;
     }
 }

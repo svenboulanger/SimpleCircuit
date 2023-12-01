@@ -8,9 +8,18 @@ namespace SimpleCircuit.Components.Pins
     /// <summary>
     /// A pin that has a position and an orientation.
     /// </summary>
-    public class FixedOrientedPin : Pin, IOrientedPin
+    /// <remarks>
+    /// Creates a new <see cref="FixedOrientedPin"/>.
+    /// </remarks>
+    /// <param name="name">The name.</param>
+    /// <param name="description">The description.</param>
+    /// <param name="owner">The owner.</param>
+    /// <param name="relativeOffset">The relative offset.</param>
+    /// <param name="relativeOrientation">The relative orientation.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="owner"/> is <c>null</c>.</exception>
+    public class FixedOrientedPin(string name, string description, ILocatedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation) : Pin(name, description, owner), IOrientedPin
     {
-        private readonly ILocatedPresence _origin;
+        private readonly ILocatedPresence _origin = owner;
 
         /// <inheritdoc />
         ILocatedDrawable IPin.Owner => Owner;
@@ -18,12 +27,12 @@ namespace SimpleCircuit.Components.Pins
         /// <summary>
         /// Gets or sets the offset of the pin relative to its owner.
         /// </summary>
-        public Vector2 Offset { get; set; }
+        public Vector2 Offset { get; set; } = relativeOffset;
 
         /// <summary>
         /// Gets or sets the orientation of the pin relative to its owner.
         /// </summary>
-        public Vector2 RelativeOrientation { get; set; }
+        public Vector2 RelativeOrientation { get; set; } = relativeOrientation / relativeOrientation.Length;
 
         /// <inheritdoc />
         public bool HasFixedOrientation
@@ -51,23 +60,6 @@ namespace SimpleCircuit.Components.Pins
 
         /// <inheritdoc />
         public Vector2 Orientation => _origin is ITransformingDrawable tfd ? tfd.TransformNormal(RelativeOrientation) : RelativeOrientation;
-
-        /// <summary>
-        /// Creates a new <see cref="FixedOrientedPin"/>.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="description">The description.</param>
-        /// <param name="owner">The owner.</param>
-        /// <param name="relativeOffset">The relative offset.</param>
-        /// <param name="relativeOrientation">The relative orientation.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="owner"/> is <c>null</c>.</exception>
-        public FixedOrientedPin(string name, string description, ILocatedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation)
-            : base(name, description, owner)
-        {
-            Offset = relativeOffset;
-            RelativeOrientation = relativeOrientation / relativeOrientation.Length;
-            _origin = owner;
-        }
 
         /// <inheritdoc />
         public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics)

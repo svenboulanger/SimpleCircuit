@@ -12,17 +12,12 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// The ground nodes.
         /// </summary>
-        public static string[] _ground = new[] { "0", "gnd", "gnd!" };
+        public static string[] _ground = ["0", "gnd", "gnd!"];
 
-        private readonly struct NodeGroupItem
+        private readonly struct NodeGroupItem(NodeGroup group, double offset)
         {
-            public NodeGroup Group { get; }
-            public double Offset { get; }
-            public NodeGroupItem(NodeGroup group, double offset)
-            {
-                Group = group;
-                Offset = offset;
-            }
+            public NodeGroup Group { get; } = group;
+            public double Offset { get; } = offset;
             public override string ToString() => $"{Group.Representative} + {Offset:G3}";
         }
         private readonly struct NodeGroup

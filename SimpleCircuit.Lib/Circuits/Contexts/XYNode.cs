@@ -8,28 +8,22 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <remarks>
     /// This allows us to track which X- and Y-coordinates belong to the same graphical group.
     /// </remarks>
-    public readonly struct XYNode : IEquatable<XYNode>
+    /// <remarks>
+    /// Creates a new linked node.
+    /// </remarks>
+    /// <param name="nodeX">The X-coordinate node.</param>
+    /// <param name="nodeY">The Y-coordinate node.</param>
+    public readonly struct XYNode(string nodeX, string nodeY) : IEquatable<XYNode>
     {
         /// <summary>
         /// Gets the X-coordinate node.
         /// </summary>
-        public string NodeX { get; }
+        public string NodeX { get; } = nodeX;
 
         /// <summary>
         /// Gets the Y-coordinate node.
         /// </summary>
-        public string NodeY { get; }
-
-        /// <summary>
-        /// Creates a new linked node.
-        /// </summary>
-        /// <param name="nodeX">The X-coordinate node.</param>
-        /// <param name="nodeY">The Y-coordinate node.</param>
-        public XYNode(string nodeX, string nodeY)
-        {
-            NodeX = nodeX;
-            NodeY = nodeY;
-        }
+        public string NodeY { get; } = nodeY;
 
         /// <inheritdoc />
         public override int GetHashCode()

@@ -8,10 +8,14 @@ namespace SimpleCircuit.Circuits.Contexts
     /// The context used for collecting information about nodes in a
     /// graphical circuit.
     /// </summary>
-    public class NodeContext : IRelationshipContext
+    /// <remarks>
+    /// Creates a new <see cref="NodeContext"/>.
+    /// </remarks>
+    /// <param name="diagnostics">The diagnostics handler.</param>
+    public class NodeContext(IDiagnosticHandler diagnostics) : IRelationshipContext
     {
         /// <inheritdoc />
-        public IDiagnosticHandler Diagnostics { get; }
+        public IDiagnosticHandler Diagnostics { get; } = diagnostics;
 
         /// <inheritdoc />
         public NodeRelationMode Mode { get; set; }
@@ -23,16 +27,7 @@ namespace SimpleCircuit.Circuits.Contexts
         public Extremes Extremes { get; } = new();
 
         /// <inheritdoc />
-        public HashSet<XYNode> XYSets { get; } = new();
-
-        /// <summary>
-        /// Creates a new <see cref="NodeContext"/>.
-        /// </summary>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public NodeContext(IDiagnosticHandler diagnostics)
-        {
-            Diagnostics = diagnostics;
-        }
+        public HashSet<XYNode> XYSets { get; } = [];
 
         /// <inheritdoc />
         public void Link(string x, string y)

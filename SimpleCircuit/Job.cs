@@ -9,10 +9,10 @@ namespace SimpleCircuit
     /// <summary>
     /// A SimpleCircuit job.
     /// </summary>
-    public class Job
+    public partial class Job
     {
         private string? _cssScript = null;
-        private readonly JobDiagnosticLogger _logger = new JobDiagnosticLogger();
+        private readonly JobDiagnosticLogger _logger = new();
         private GraphicalCircuit? _circuit;
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace SimpleCircuit
             if (_cssScript != null)
             {
                 // Add the default script unless there is a comment of the form "/* exclude default */"
-                if (!Regex.IsMatch(_cssScript, @"^/\*\s*exclude\s+default\s*\*/$"))
+                if (!ExcludeDefault().IsMatch(_cssScript))
                 {
                     _cssScript = GraphicalCircuit.DefaultStyle + Environment.NewLine + _cssScript;
                 }
@@ -112,7 +112,7 @@ namespace SimpleCircuit
         public void Render(IDiagnosticHandler diagnostics)
         {
             if (_circuit == null)
-                throw new ArgumentNullException(nameof(_circuit));
+                return;
 
             // Determine the output file
             string outputFilename = OutputFilename;
@@ -170,5 +170,8 @@ namespace SimpleCircuit
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Error, "JOB02", $"No circuit elements in '{Filename}'"));
             }
         }
+
+        [GeneratedRegex(@"^/\*\s*exclude\s+default\s*\*/$")]
+        private static partial Regex ExcludeDefault();
     }
 }

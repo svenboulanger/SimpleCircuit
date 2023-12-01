@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components
             private readonly PinCollection _pins;
 
             /// <inheritdoc />
-            public VariantSet Variants { get; } = new();
+            public VariantSet Variants { get; } = [];
 
             /// <inheritdoc />
             public int Order => 0;

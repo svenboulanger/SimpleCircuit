@@ -5,16 +5,12 @@ namespace SimpleCircuit.Parser.Markers
     /// <summary>
     /// A lexer for markers.
     /// </summary>
-    public class MarkerLexer : Lexer<TokenType>
+    /// <remarks>
+    /// Creates a new marker lexer.
+    /// </remarks>
+    /// <param name="content">The content.</param>
+    public class MarkerLexer(string content) : Lexer<TokenType>(content.AsMemory())
     {
-        /// <summary>
-        /// Creates a new marker lexer.
-        /// </summary>
-        /// <param name="content">The content.</param>
-        public MarkerLexer(string content)
-            : base(content.AsMemory())
-        {
-        }
 
         /// <inheritdoc />
         public override bool Check(TokenType flags) => (Type & flags) != 0;

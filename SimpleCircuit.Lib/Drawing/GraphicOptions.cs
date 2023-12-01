@@ -12,7 +12,7 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets a set of classes used for the graphical component.
         /// </summary>
-        public HashSet<string> Classes { get; } = new();
+        public HashSet<string> Classes { get; } = [];
 
         /// <summary>
         /// Gets or sets the identifier of the element.

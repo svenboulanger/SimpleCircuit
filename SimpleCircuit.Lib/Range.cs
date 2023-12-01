@@ -18,22 +18,16 @@ namespace System
     /// int[] subArray2 = someArray[1..^0]; // { 2, 3, 4, 5 }
     /// </code>
     /// </remarks>
-    public readonly struct Range : IEquatable<Range>
+    /// <remarks>Construct a Range object using the start and end indexes.</remarks>
+    /// <param name="start">Represent the inclusive start index of the range.</param>
+    /// <param name="end">Represent the exclusive end index of the range.</param>
+    public readonly struct Range(Index start, Index end) : IEquatable<Range>
     {
         /// <summary>Represent the inclusive start index of the Range.</summary>
-        public Index Start { get; }
+        public Index Start { get; } = start;
 
         /// <summary>Represent the exclusive end index of the Range.</summary>
-        public Index End { get; }
-
-        /// <summary>Construct a Range object using the start and end indexes.</summary>
-        /// <param name="start">Represent the inclusive start index of the range.</param>
-        /// <param name="end">Represent the exclusive end index of the range.</param>
-        public Range(Index start, Index end)
-        {
-            Start = start;
-            End = end;
-        }
+        public Index End { get; } = end;
 
         /// <summary>Indicates whether the current Range object is equal to another object of the same type.</summary>
         /// <param name="value">An object to compare with this object</param>

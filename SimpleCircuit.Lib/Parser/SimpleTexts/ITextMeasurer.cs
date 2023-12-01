@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Drawing;
-
-namespace SimpleCircuit.Parser.SimpleTexts
+﻿namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// An interface that describes a text measurer.

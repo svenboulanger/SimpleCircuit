@@ -16,19 +16,14 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             return result;
         }
 
-        private class Instance : ModelingDrawable
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ModelingDrawable(name, 12.0)
         {
             /// <inheritdoc />
             public override string Type => "block";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name, 12.0)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

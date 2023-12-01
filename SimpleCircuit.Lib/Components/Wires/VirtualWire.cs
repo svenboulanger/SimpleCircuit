@@ -11,15 +11,23 @@ namespace SimpleCircuit.Components.Wires
     /// <summary>
     /// A virtual wire.
     /// </summary>
-    public class VirtualWire : ICircuitSolverPresence
+    /// <remarks>
+    /// Creates a new <see cref="VirtualWire"/>.
+    /// </remarks>
+    /// <param name="name">The name of the virtual wire.</param>
+    /// <param name="pinToWire">The pin starting the virtual wire.</param>
+    /// <param name="segments">The wire segments.</param>
+    /// <param name="wireToPin">The pin ending the virtual wire.</param>
+    /// <param name="axis">The axis along which to align the items.</param>
+    public class VirtualWire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin, Axis axis) : ICircuitSolverPresence
     {
         private ILocatedPresence _start, _end;
-        private readonly PinInfo _startInfo, _endInfo;
-        private readonly List<WireSegmentInfo> _segments;
-        private readonly Axis _direction;
+        private readonly PinInfo _startInfo = pinToWire, _endInfo = wireToPin;
+        private readonly List<WireSegmentInfo> _segments = segments?.ToList() ?? [];
+        private readonly Axis _direction = axis;
 
         /// <inheritdoc />
-        public string Name { get; }
+        public string Name { get; } = name;
 
         /// <inheritdoc />
         public int Order => 1;
@@ -43,23 +51,6 @@ namespace SimpleCircuit.Components.Wires
         /// Gets the Y-coordinate name of the last point of the wire.
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
-
-        /// <summary>
-        /// Creates a new <see cref="VirtualWire"/>.
-        /// </summary>
-        /// <param name="name">The name of the virtual wire.</param>
-        /// <param name="pinToWire">The pin starting the virtual wire.</param>
-        /// <param name="segments">The wire segments.</param>
-        /// <param name="wireToPin">The pin ending the virtual wire.</param>
-        /// <param name="axis">The axis along which to align the items.</param>
-        public VirtualWire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin, Axis axis)
-        {
-            Name = name;
-            _segments = segments?.ToList() ?? new List<WireSegmentInfo>();
-            _startInfo = pinToWire;
-            _endInfo = wireToPin;
-            _direction = axis;
-        }
 
         /// <inheritdoc />
         public bool Reset(IResetContext context)

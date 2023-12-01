@@ -16,8 +16,8 @@ namespace SimpleCircuit.Components
         protected class PinCollection : IPinCollection
         {
             private readonly Instance _parent;
-            private readonly Dictionary<string, IPin> _pinsByName = new();
-            private readonly List<IPin> _pinsByIndex = new();
+            private readonly Dictionary<string, IPin> _pinsByName = [];
+            private readonly List<IPin> _pinsByIndex = [];
 
             /// <summary>
             /// Gets the name of the node for the right side of the black box.

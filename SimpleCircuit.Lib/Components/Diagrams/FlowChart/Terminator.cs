@@ -11,7 +11,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        /// <inheritdoc />
+        private class Instance(string name) : DiagramBlockInstance(name), ILabeled
         {
             private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
             private double _width = 30.0, _height = 20.0;
@@ -57,25 +58,16 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             }
 
             /// <inheritdoc />
-            public Instance(string name)
-                : base(name)
-            {
-            }
-
-            /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
                 double a = Width * 0.5;
                 double b = Height * 0.5;
 
-                drawing.Path(builder =>
-                {
-                    builder.MoveTo(-a + b, -b)
+                drawing.Path(builder => builder.MoveTo(-a + b, -b)
                     .LineTo(a - b, -b)
                     .ArcTo(b, b, 0.0, false, true, new(a - b, b))
                     .LineTo(-a + b, b)
-                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close();
-                });
+                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close());
                 _anchors.Draw(drawing, this);
             }
 

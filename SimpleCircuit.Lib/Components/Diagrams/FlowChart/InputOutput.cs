@@ -12,7 +12,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : DiagramBlockInstance(name), ILabeled
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint());
@@ -63,15 +67,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 }
             }
 
-            /// <summary>
-            /// Creates a new instance.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
-
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
@@ -81,27 +76,21 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 if (Variants.Contains(Manual))
                 {
                     double c = b - a * 0.25;
-                    drawing.Path(builder =>
-                    {
-                        builder.MoveTo(-a, -c)
-                            .LineTo(a, -b)
-                            .LineTo(a, b)
-                            .LineTo(-a, b)
-                            .Close();
-                    });
+                    drawing.Path(builder => builder.MoveTo(-a, -c)
+                        .LineTo(a, -b)
+                        .LineTo(a, b)
+                        .LineTo(-a, b)
+                        .Close());
                     _anchors[0] = new LabelAnchorPoint(new(0, 0.5 * (b - c)), new());
                 }
                 else
                 {
                     double c = a - Height * 0.25;
-                    drawing.Path(builder =>
-                    {
-                        builder.MoveTo(-c, -b)
-                            .LineTo(a, -b)
-                            .LineTo(c, b)
-                            .LineTo(-a, b)
-                            .Close();
-                    });
+                    drawing.Path(builder => builder.MoveTo(-c, -b)
+                        .LineTo(a, -b)
+                        .LineTo(c, b)
+                        .LineTo(-a, b)
+                        .Close());
                     _anchors[0] = new LabelAnchorPoint(new(), new());
                 }
                 _anchors.Draw(drawing, this);

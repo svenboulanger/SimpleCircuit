@@ -12,7 +12,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// The ground nodes.
         /// </summary>
-        public static string[] _ground = new[] { "0", "gnd", "gnd!" };
+        public static string[] _ground = ["0", "gnd", "gnd!"];
 
         private readonly struct NodeGroup
         {

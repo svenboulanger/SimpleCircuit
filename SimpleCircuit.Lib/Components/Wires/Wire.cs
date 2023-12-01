@@ -19,8 +19,8 @@ namespace SimpleCircuit.Components.Wires
         private IPin _w2p, _p2w;
         private readonly PinInfo _wireToPin, _pinToWire;
         private readonly List<WireSegmentInfo> _segments;
-        private readonly List<WirePoint> _localPoints = new();
-        private readonly List<Vector2> _points = new();
+        private readonly List<WirePoint> _localPoints = [];
+        private readonly List<Vector2> _points = [];
         private const double _jumpOverRadius = 1.5;
 
         /// <inheritdoc />
@@ -384,7 +384,7 @@ namespace SimpleCircuit.Components.Wires
         {
             // Calculate overlapping vectors
             Vector2 d = last - next;
-            SortedDictionary<double, Vector2> pts = new();
+            SortedDictionary<double, Vector2> pts = [];
             foreach (var segment in segments)
             {
                 Vector2 sd = segment.Start - segment.End;
@@ -498,7 +498,7 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         protected override void Draw(SvgDrawing drawing)
         {
-            List<Marker> markers = new();
+            List<Marker> markers = [];
             if (IsVisible && _localPoints.Count > 0)
             {
                 var tf = drawing.CurrentTransform;

@@ -11,18 +11,13 @@ namespace SimpleCircuit
     /// </summary>
     public class Options
     {
-        private readonly struct DefaultProperty
+        private readonly struct DefaultProperty(Token property, object value)
         {
-            public Token Property { get; }
-            public object Value { get; }
-            public DefaultProperty(Token property, object value)
-            {
-                Property = property;
-                Value = value;
-            }
+            public Token Property { get; } = property;
+            public object Value { get; } = value;
         }
-        private readonly Dictionary<string, HashSet<string>> _includes = new(), _excludes = new();
-        private readonly Dictionary<string, List<DefaultProperty>> _properties = new();
+        private readonly Dictionary<string, HashSet<string>> _includes = [], _excludes = [];
+        private readonly Dictionary<string, List<DefaultProperty>> _properties = [];
 
         /// <summary>
         /// The identifier for AREI style components.
@@ -129,7 +124,7 @@ namespace SimpleCircuit
         {
             if (!_properties.TryGetValue(key, out var list))
             {
-                list = new();
+                list = [];
                 _properties.Add(key, list);
             }
             list.Add(new DefaultProperty(propertyToken, value));

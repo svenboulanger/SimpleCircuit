@@ -18,7 +18,7 @@ namespace SimpleCircuit
     public class GraphicalCircuit : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<ICircuitPresence> _extra = new();
+        private readonly List<ICircuitPresence> _extra = [];
 
         /// <summary>
         /// Gets or sets the style for the graphics.
@@ -41,7 +41,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets a dictionary of metadata key-value pairs that are optional.
         /// </summary>
-        public Dictionary<string, string> Metadata { get; } = new();
+        public Dictionary<string, string> Metadata { get; } = [];
 
         /// <summary>
         /// Gets the <see cref="IDrawable"/> with the specified name.
@@ -256,7 +256,7 @@ namespace SimpleCircuit
             bool success = true;
 
             // Preparation presences
-            List<ICircuitPresence> _todo = new();
+            List<ICircuitPresence> _todo = [];
             foreach (var c in presences)
             {
                 var result = c.Prepare(context);
@@ -388,12 +388,12 @@ namespace SimpleCircuit
             }
 
             // Use the XY sets to make a vertical stack of graphical blocks
-            Dictionary<string, HashSet<string>> stacked = new();
+            Dictionary<string, HashSet<string>> stacked = [];
             foreach (var set in context.Relationships.XYSets)
             {
                 if (!stacked.TryGetValue(set.NodeY, out var horiz))
                 {
-                    horiz = new HashSet<string>();
+                    horiz = [];
                     stacked.Add(set.NodeY, horiz);
                 }
                 horiz.Add(set.NodeX);

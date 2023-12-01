@@ -9,15 +9,20 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Information for annotations.
     /// </summary>
-    public class AnnotationInfo : IDrawableInfo
+    /// <remarks>
+    /// Creates a new <see cref="AnnotationInfo"/>.
+    /// </remarks>
+    /// <param name="source">The source.</param>
+    /// <param name="fullname">The full name.</param>
+    public class AnnotationInfo(Token source, string fullname) : IDrawableInfo
     {
-        private IAnnotation _annotation;
+        private IAnnotation _annotation = null;
 
         /// <inheritdoc />
-        public Token Source { get; }
+        public Token Source { get; } = source;
 
         /// <inheritdoc />
-        public string Fullname { get; }
+        public string Fullname { get; } = fullname;
 
         /// <inheritdoc />
         public IList<Token> Labels { get; } = new List<Token>(2);
@@ -27,18 +32,6 @@ namespace SimpleCircuit.Parser
 
         /// <inheritdoc />
         public IDictionary<Token, object> Properties { get; } = new Dictionary<Token, object>();
-
-        /// <summary>
-        /// Creates a new <see cref="AnnotationInfo"/>.
-        /// </summary>
-        /// <param name="source">The source.</param>
-        /// <param name="fullname">The full name.</param>
-        public AnnotationInfo(Token source, string fullname)
-        {
-            Source = source;
-            Fullname = fullname;
-            _annotation = null;
-        }
 
         /// <summary>
         /// Gets or creates the annotation.

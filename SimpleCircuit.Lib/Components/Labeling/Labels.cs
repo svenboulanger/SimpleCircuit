@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Labeling
     /// </summary>
     public class Labels : IReadOnlyList<LabelInfo>
     {
-        private readonly List<LabelInfo> _labels = new();
+        private readonly List<LabelInfo> _labels = [];
 
         /// <summary>
         /// Gets or sets the default text size.

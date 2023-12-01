@@ -5,12 +5,16 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams
 {
-    public class PinCollection : IPinCollection
+    /// <summary>
+    /// Creates a new pin collection.
+    /// </summary>
+    /// <param name="parent">The parent drawable.</param>
+    public class PinCollection(ILocatedDrawable parent) : IPinCollection
     {
         private int _count = 0;
-        private readonly ILocatedDrawable _parent;
-        private readonly List<LooselyOrientedPin> _orderedPins = new();
-        private readonly Dictionary<string, LooselyOrientedPin> _pinsByName = new();
+        private readonly ILocatedDrawable _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly List<LooselyOrientedPin> _orderedPins = [];
+        private readonly Dictionary<string, LooselyOrientedPin> _pinsByName = [];
 
         /// <inheritdoc />
         public IPin this[string name]
@@ -46,15 +50,6 @@ namespace SimpleCircuit.Components.Diagrams
 
         /// <inheritdoc />
         public int Count => _pinsByName.Count;
-
-        /// <summary>
-        /// Creates a new pin collection.
-        /// </summary>
-        /// <param name="parent">The parent drawable.</param>
-        public PinCollection(ILocatedDrawable parent)
-        {
-            _parent = parent ?? throw new ArgumentNullException(nameof(parent));
-        }
 
         /// <inheritdoc />
         public IEnumerable<string> NamesOf(IPin pin)

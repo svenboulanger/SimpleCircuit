@@ -5,7 +5,14 @@ namespace SimpleCircuit.Drawing
     /// <summary>
     /// a 2D matrix.
     /// </summary>
-    public struct Matrix2 : IEquatable<Matrix2>
+    /// <remarks>
+    /// Creates a new instance of the <see cref="Matrix2"/> struct.
+    /// </remarks>
+    /// <param name="a11">The top-left coefficient.</param>
+    /// <param name="a12">The top-right coefficient.</param>
+    /// <param name="a21">The bottom-left coefficient.</param>
+    /// <param name="a22">The bottom-right coefficient.</param>
+    public struct Matrix2(double a11, double a12, double a21, double a22) : IEquatable<Matrix2>
     {
         private const int _precision = 9;
         private const double _dblPrecision = 1e-9;
@@ -18,22 +25,22 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets the top-left coefficient.
         /// </summary>
-        public double A11 { get; }
+        public double A11 { get; } = a11;
 
         /// <summary>
         /// Gets the top-right coefficient.
         /// </summary>
-        public double A12 { get; }
+        public double A12 { get; } = a12;
 
         /// <summary>
         /// Gets the bottom-left coefficient.
         /// </summary>
-        public double A21 { get; }
+        public double A21 { get; } = a21;
 
         /// <summary>
         /// Gets the bottom-right coefficient.
         /// </summary>
-        public double A22 { get; }
+        public double A22 { get; } = a22;
 
         /// <summary>
         /// Gets the determinant of the matrix.
@@ -74,21 +81,6 @@ namespace SimpleCircuit.Drawing
                     return false;
                 return true;
             }
-        }
-
-        /// <summary>
-        /// Creates a new instance of the <see cref="Matrix2"/> struct.
-        /// </summary>
-        /// <param name="a11">The top-left coefficient.</param>
-        /// <param name="a12">The top-right coefficient.</param>
-        /// <param name="a21">The bottom-left coefficient.</param>
-        /// <param name="a22">The bottom-right coefficient.</param>
-        public Matrix2(double a11, double a12, double a21, double a22)
-        {
-            A11 = a11;
-            A12 = a12;
-            A21 = a21;
-            A22 = a22;
         }
 
         /// <summary>

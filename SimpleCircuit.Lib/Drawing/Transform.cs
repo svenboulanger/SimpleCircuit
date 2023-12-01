@@ -6,10 +6,15 @@ namespace SimpleCircuit.Drawing
     /// A transformation for vectors. The transform assumes
     /// a local reorientation followed by a translation.
     /// </summary>
-    public readonly struct Transform
+    /// <remarks>
+    /// Creates a new transform.
+    /// </remarks>
+    /// <param name="origin">The vector describing the translation.</param>
+    /// <param name="orientation">The matrix describing the orientation transformation.</param>
+    public readonly struct Transform(Vector2 origin, Matrix2 orientation)
     {
-        private readonly Vector2 _origin;
-        private readonly Matrix2 _orientation;
+        private readonly Vector2 _origin = origin;
+        private readonly Matrix2 _orientation = orientation;
 
         /// <summary>
         /// Gets the matrix of the transform.
@@ -28,17 +33,6 @@ namespace SimpleCircuit.Drawing
         /// The identity.
         /// </value>
         public static Transform Identity => new(new(), Matrix2.Identity);
-
-        /// <summary>
-        /// Creates a new transform.
-        /// </summary>
-        /// <param name="origin">The vector describing the translation.</param>
-        /// <param name="orientation">The matrix describing the orientation transformation.</param>
-        public Transform(Vector2 origin, Matrix2 orientation)
-        {
-            _origin = origin;
-            _orientation = orientation;
-        }
 
         /// <summary>
         /// Applies the transform to a vector.

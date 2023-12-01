@@ -3,23 +3,18 @@
     /// <summary>
     /// An entity-relationship diagram marker for "only one".
     /// </summary>
-    public class ERDOnlyOne : Marker
+    /// <remarks>
+    /// Creates an entity-relationship diagram marker for "only one".
+    /// </remarks>
+    /// <param name="location"></param>
+    /// <param name="orientation"></param>
+    /// <param name="options"></param>
+    public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null) : Marker(location, orientation, options ?? DefaultOptions)
     {
         /// <summary>
         /// Default graphic options.
         /// </summary>
         public static GraphicOptions DefaultOptions { get; } = new("marker", "erd", "onlyone");
-
-        /// <summary>
-        /// Creates an entity-relationship diagram marker for "only one".
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="orientation"></param>
-        /// <param name="options"></param>
-        public ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null)
-            : base(location, orientation, options ?? DefaultOptions)
-        {
-        }
 
         /// <inheritdoc />
         protected override void DrawMarker(SvgDrawing drawing)

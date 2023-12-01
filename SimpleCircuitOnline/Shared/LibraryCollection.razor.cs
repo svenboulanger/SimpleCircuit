@@ -21,14 +21,11 @@ namespace SimpleCircuitOnline.Shared
         /// </summary>
         public bool DefaultLibraryLoaded { get; set; } = true;
 
-        public class LibraryItem
+        public class LibraryItem(bool isLoaded, string encoded, XmlDocument document = null)
         {
-            private XmlDocument _doc = null;
-
-            public string Encoded { get; set; }
-
-            public bool IsLoaded { get; set; }
-
+            private XmlDocument _doc = document;
+            public string Encoded { get; set; } = encoded;
+            public bool IsLoaded { get; set; } = isLoaded;
             public XmlDocument Library
             {
                 get
@@ -45,18 +42,12 @@ namespace SimpleCircuitOnline.Shared
                 }
                 set => _doc = value;
             }
-            public LibraryItem(bool isLoaded, string encoded, XmlDocument document = null)
-            {
-                IsLoaded = isLoaded;
-                Encoded = encoded;
-                _doc = document;
-            }
         }
 
         /// <summary>
         /// Gets the list of libraries
         /// </summary>
-        public Dictionary<string, LibraryItem> Libraries { get; } = new Dictionary<string, LibraryItem>();
+        public Dictionary<string, LibraryItem> Libraries { get; } = [];
 
         /// <summary>
         /// Called when a library state changes, or when a library is added.

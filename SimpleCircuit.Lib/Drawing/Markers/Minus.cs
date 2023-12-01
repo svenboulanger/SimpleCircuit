@@ -3,7 +3,13 @@
     /// <summary>
     /// A minus marker.
     /// </summary>
-    public class Minus : Marker
+    /// <remarks>
+    /// Creates a new minus marker.
+    /// </remarks>
+    /// <param name="location">The location.</param>
+    /// <param name="orientation">The orientation.</param>
+    /// <param name="options">The options.</param>
+    public class Minus(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null) : Marker(location, orientation, options ?? DefaultOptions)
     {
         /// <summary>
         /// Gets the default marker options.
@@ -14,17 +20,6 @@
         /// Gets whether the plus should be drawn on the opposite side.
         /// </summary>
         public bool OppositeSide { get; set; }
-
-        /// <summary>
-        /// Creates a new minus marker.
-        /// </summary>
-        /// <param name="location">The location.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <param name="options">The options.</param>
-        public Minus(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null)
-            : base(location, orientation, options ?? DefaultOptions)
-        {
-        }
 
         /// <inheritdoc />
         protected override void DrawMarker(SvgDrawing drawing)

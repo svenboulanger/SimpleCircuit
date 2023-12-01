@@ -5,25 +5,19 @@ namespace SimpleCircuit.Diagnostics
     /// <summary>
     /// Diagnostic message based around a token.
     /// </summary>
-    public class TokenDiagnosticMessage : DiagnosticMessage
+    /// <remarks>
+    /// Creates a new <see cref="TokenDiagnosticMessage"/>.
+    /// </remarks>
+    /// <param name="token">The token.</param>
+    /// <param name="level">The severity level.</param>
+    /// <param name="code">The code.</param>
+    /// <param name="message">The message.</param>
+    public class TokenDiagnosticMessage(Token token, SeverityLevel level, string code, string message) : DiagnosticMessage(level, code, message)
     {
         /// <summary>
         /// Gets the token.
         /// </summary>
-        public Token Token { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="TokenDiagnosticMessage"/>.
-        /// </summary>
-        /// <param name="token">The token.</param>
-        /// <param name="level">The severity level.</param>
-        /// <param name="code">The code.</param>
-        /// <param name="message">The message.</param>
-        public TokenDiagnosticMessage(Token token, SeverityLevel level, string code, string message)
-            : base(level, code, message)
-        {
-            Token = token;
-        }
+        public Token Token { get; } = token;
 
         /// <inheritdoc />
         public override string ToString()

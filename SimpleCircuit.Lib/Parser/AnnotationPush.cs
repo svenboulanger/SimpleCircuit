@@ -5,21 +5,16 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// An addition of an annotation.
     /// </summary>
-    public class AnnotationPush : AnnotationChange
+    /// <remarks>
+    /// Creates a new <see cref="AnnotationPush"/>.
+    /// </remarks>
+    /// <param name="info">The info.</param>
+    public class AnnotationPush(AnnotationInfo info) : AnnotationChange
     {
         /// <summary>
         /// Gets the annotation info that needs to be pushed.
         /// </summary>
-        public AnnotationInfo Info { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="AnnotationPush"/>.
-        /// </summary>
-        /// <param name="info">The info.</param>
-        public AnnotationPush(AnnotationInfo info)
-        {
-            Info = info ?? throw new ArgumentNullException(nameof(info));
-        }
+        public AnnotationInfo Info { get; } = info ?? throw new ArgumentNullException(nameof(info));
 
         /// <inheritdoc />
         public override bool Apply(ParsingContext context)

@@ -11,7 +11,7 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class GlobalOptionList
     {
-        private readonly List<(PropertyInfo, string, object)> _options = new();
+        private readonly List<(PropertyInfo, string, object)> _options = [];
         private readonly Options _defaultOptions = new();
 
         [Parameter]
@@ -25,8 +25,8 @@ namespace SimpleCircuitOnline.Shared
             selection.StartColumn = 0;
             selection.EndColumn = 0;
             selection.EndLineNumber = selection.StartLineNumber;
-            List<IdentifiedSingleEditOperation> ops = new();
-            List<Selection> ends = new();
+            List<IdentifiedSingleEditOperation> ops = [];
+            List<Selection> ends = [];
 
             string strDefValue;
             if (defValue is bool b)

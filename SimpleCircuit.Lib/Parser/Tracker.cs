@@ -5,28 +5,22 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Describes a tracker for <see cref="ILexer"/>.
     /// </summary>
-    public readonly struct Tracker : IEquatable<Tracker>
+    /// <remarks>
+    /// Creates a new tracker for lexers.
+    /// </remarks>
+    /// <param name="index">The index.</param>
+    /// <param name="location">The location.</param>
+    public readonly struct Tracker(int index, TextLocation location) : IEquatable<Tracker>
     {
         /// <summary>
         /// Gets the index in the source.
         /// </summary>
-        public int Index { get; }
+        public int Index { get; } = index;
 
         /// <summary>
         /// Gets the text location in the source.
         /// </summary>
-        public TextLocation Location { get; }
-
-        /// <summary>
-        /// Creates a new tracker for lexers.
-        /// </summary>
-        /// <param name="index">The index.</param>
-        /// <param name="location">The location.</param>
-        public Tracker(int index, TextLocation location)
-        {
-            Index = index;
-            Location = location;
-        }
+        public TextLocation Location { get; } = location;
 
         /// <inheritdoc />
         public override int GetHashCode() => (Index * 1023) ^ Location.GetHashCode();

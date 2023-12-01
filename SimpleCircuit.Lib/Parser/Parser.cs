@@ -19,9 +19,9 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public static class Parser
     {
-        private static readonly string[] _subcktEnd = new[] { "ends", "endsubckt" };
-        private static readonly string[] _symbolEnd = new[] { "ends", "endsymbol" };
-        private static readonly string[] _sectionEnd = new[] { "ends", "endsection" };
+        private static readonly string[] _subcktEnd = ["ends", "endsubckt"];
+        private static readonly string[] _symbolEnd = ["ends", "endsymbol"];
+        private static readonly string[] _sectionEnd = ["ends", "endsection"];
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -483,9 +483,9 @@ namespace SimpleCircuit.Parser
                 if (markers.Count > 0)
                 {
                     if (segments.Count == 0)
-                        segment.StartMarkers = markers.ToArray();
+                        segment.StartMarkers = [.. markers];
                     else
-                        segments[^1].EndMarkers = markers.ToArray();
+                        segments[^1].EndMarkers = [.. markers];
                     markers.Clear();
                 }
                 segments.Add(segment);
@@ -558,7 +558,7 @@ namespace SimpleCircuit.Parser
 
                                         // Finish the wire
                                         if (markers.Count > 0 && segments.Count > 0)
-                                            segments[^1].EndMarkers = markers.ToArray();
+                                            segments[^1].EndMarkers = [.. markers];
                                         markers.Clear();
 
                                         // Create the wire info
@@ -576,7 +576,7 @@ namespace SimpleCircuit.Parser
 
                                         // Start a new wire
                                         start = lexer.Track();
-                                        segments = new List<WireSegmentInfo>();
+                                        segments = [];
                                         markers.Clear();
                                     }
                                     break;
@@ -638,7 +638,7 @@ namespace SimpleCircuit.Parser
                     }
 
                     if (markers.Count > 0 && segments.Count > 0)
-                        segments[^1].EndMarkers = markers.ToArray();
+                        segments[^1].EndMarkers = [.. markers];
                 }
             }
 
@@ -682,7 +682,7 @@ namespace SimpleCircuit.Parser
 
             // Create a new parsing context to separate our circuit
             var localContext = new ParsingContext(context);
-            List<PinInfo> ports = new();
+            List<PinInfo> ports = [];
 
             // Parse the pins
             while (lexer.Check(~TokenType.Newline))

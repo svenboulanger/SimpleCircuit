@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Common;
 
 namespace SimpleCircuit.Drawing
 {
@@ -134,18 +133,18 @@ namespace SimpleCircuit.Drawing
         /// Overloads addition for bounds.
         /// </summary>
         public static Bounds operator +(Vector2 offset, Bounds bounds)
-            => new Bounds(offset.X + bounds.Left, offset.Y + bounds.Top, offset.X + bounds.Right, offset.Y + bounds.Bottom);
+            => new(offset.X + bounds.Left, offset.Y + bounds.Top, offset.X + bounds.Right, offset.Y + bounds.Bottom);
 
         /// <summary>
         /// Overloads addition for bounds.
         /// </summary>
         public static Bounds operator +(Bounds bounds, Vector2 offset)
-            => new Bounds(offset.X + bounds.Left, offset.Y + bounds.Top, offset.X + bounds.Right, offset.Y + bounds.Bottom);
+            => new(offset.X + bounds.Left, offset.Y + bounds.Top, offset.X + bounds.Right, offset.Y + bounds.Bottom);
 
         /// <summary>
         /// Overloads subtraction for bounds.
         /// </summary>
         public static Bounds operator -(Bounds bounds, Vector2 offset)
-            => new Bounds(bounds.Left - offset.X, bounds.Top - offset.Y, bounds.Right - offset.X, bounds.Bottom - offset.Y);
+            => new(bounds.Left - offset.X, bounds.Top - offset.Y, bounds.Right - offset.X, bounds.Bottom - offset.Y);
     }
 }

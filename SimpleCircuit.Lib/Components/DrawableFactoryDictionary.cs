@@ -27,7 +27,7 @@ namespace SimpleCircuit.Components
         {
             public IDrawableFactory Factory { get; set; }
             public string Key { get; set; }
-            public Dictionary<char, KeyNode> Continuations { get; } = new();
+            public Dictionary<char, KeyNode> Continuations { get; } = [];
         }
         private readonly KeyNode _root = new();
         private int _anonymousIndex = 0;
@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components
                     continue;
                 if (t.GetInterfaces().Contains(typeof(IDrawableFactory)))
                 {
-                    var ctor = t.GetConstructor(new Type[] { });
+                    var ctor = t.GetConstructor([]);
                     if (ctor != null)
                     {
                         var factory = (IDrawableFactory)Activator.CreateInstance(t);

@@ -1,9 +1,7 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing.Markers;
 using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
@@ -14,7 +12,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled, IRoundedDiamond
+        /// <summary>
+        /// Creates a new action.
+        /// </summary>
+        /// <param name="name">The name of the action.</param>
+        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IBoxLabeled, IRoundedDiamond
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -51,15 +53,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
 
-            /// <summary>
-            /// Creates a new action.
-            /// </summary>
-            /// <param name="name">The name of the action.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
-
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
@@ -70,7 +63,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                CommonGraphical.RoundedDiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var n, out var ox, out var oy);
+                CommonGraphical.RoundedDiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var _, out var ox, out var oy);
                 Vector2 Interp(DiamondLocation l1, DiamondLocation l2, double ka)
                 {
                     Vector2 a = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l1);

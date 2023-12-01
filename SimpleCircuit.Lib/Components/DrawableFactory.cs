@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class DrawableFactory : IDrawableFactory
     {
-        private readonly Dictionary<string, DrawableMetadata> _metadata = new();
+        private readonly Dictionary<string, DrawableMetadata> _metadata = [];
 
         /// <inheritdoc />
         public IEnumerable<string> Keys => _metadata.Keys;

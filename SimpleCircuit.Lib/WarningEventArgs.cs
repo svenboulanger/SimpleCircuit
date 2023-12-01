@@ -5,7 +5,11 @@ namespace SimpleCircuit
     /// <summary>
     /// Event arguments for warning messages.
     /// </summary>
-    public class WarningEventArgs : EventArgs
+    /// <remarks>
+    /// Creates a new warning event argument.
+    /// </remarks>
+    /// <param name="message">The message.</param>
+    public class WarningEventArgs(string message) : EventArgs
     {
         /// <summary>
         /// Gets the warning message.
@@ -13,15 +17,6 @@ namespace SimpleCircuit
         /// <value>
         /// The warning message.
         /// </value>
-        public string Message { get; }
-
-        /// <summary>
-        /// Creates a new warning event argument.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        public WarningEventArgs(string message)
-        {
-            Message = message ?? throw new ArgumentNullException(nameof(message));
-        }
+        public string Message { get; } = message ?? throw new ArgumentNullException(nameof(message));
     }
 }

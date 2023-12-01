@@ -7,36 +7,29 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Represents pin information.
     /// </summary>
-    public class PinInfo
+    /// <remarks>
+    /// Creates a new pin info.
+    /// </remarks>
+    /// <param name="component"></param>
+    /// <param name="pin"></param>
+    public class PinInfo(ComponentInfo component, Token pin)
     {
-        private IPin _pin;
+        private IPin _pin = null;
 
         /// <summary>
         /// Gets the name of the component the pin belongs to.
         /// </summary>
-        public ComponentInfo Component { get; }
+        public ComponentInfo Component { get; } = component ?? throw new ArgumentNullException(nameof(component));
 
         /// <summary>
         /// Gets the name of the pin of the component.
         /// </summary>
-        public Token Name { get; }
+        public Token Name { get; } = pin;
 
         /// <summary>
         /// Gets the pin.
         /// </summary>
         public IPin Pin => _pin;
-
-        /// <summary>
-        /// Creates a new pin info.
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="pin"></param>
-        public PinInfo(ComponentInfo component, Token pin)
-        {
-            Component = component ?? throw new ArgumentNullException(nameof(component));
-            Name = pin;
-            _pin = null;
-        }
 
         /// <summary>
         /// Gets or creates the pin.

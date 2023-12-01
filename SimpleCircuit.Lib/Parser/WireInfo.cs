@@ -9,19 +9,24 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Wire information.
     /// </summary>
-    public class WireInfo
+    /// <remarks>
+    /// Creates a new <see cref="WireInfo"/>.
+    /// </remarks>
+    /// <param name="source">The source.</param>
+    /// <param name="fullname">The full name.</param>
+    public class WireInfo(Token source, string fullname)
     {
         private Wire _wire;
 
         /// <summary>
         /// Gets the source.
         /// </summary>
-        public Token Source { get; }
+        public Token Source { get; } = source;
 
         /// <summary>
         /// Gets the full name of the wire.
         /// </summary>
-        public string Fullname { get; }
+        public string Fullname { get; } = fullname;
 
         /// <summary>
         /// Gets the pin where the wire starts.
@@ -57,17 +62,6 @@ namespace SimpleCircuit.Parser
         /// Gets or sets the radius for rounding corners.
         /// </summary>
         public double RoundRadius { get; set; } = 0.0;
-
-        /// <summary>
-        /// Creates a new <see cref="WireInfo"/>.
-        /// </summary>
-        /// <param name="source">The source.</param>
-        /// <param name="fullname">The full name.</param>
-        public WireInfo(Token source, string fullname)
-        {
-            Source = source;
-            Fullname = fullname;
-        }
 
         /// <summary>
         /// Simplifies the wire information.

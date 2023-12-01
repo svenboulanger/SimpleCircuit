@@ -51,28 +51,20 @@ namespace SimpleCircuit.Components
         public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
             => new Instance(key, name, _circuit, _pins);
 
-        private class Instance : ScaledOrientedDrawable
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Subcircuit"/> class.
+        /// </summary>
+        /// <param name="type">The key of the instance.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="definition">The graphical circuit definition.</param>
+        /// <param name="pins">The ports.</param>
+        private class Instance(string type, string name, GraphicalCircuit definition, IEnumerable<PinInfo> pins) : ScaledOrientedDrawable(name)
         {
-            private readonly GraphicalCircuit _ckt;
-            private readonly List<PinInfo> _pins;
+            private readonly GraphicalCircuit _ckt = definition;
+            private readonly List<PinInfo> _pins = pins.ToList();
 
             /// <inheritdoc />
-            public override string Type { get; }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Subcircuit"/> class.
-            /// </summary>
-            /// <param name="type">The key of the instance.</param>
-            /// <param name="name">The name.</param>
-            /// <param name="definition">The graphical circuit definition.</param>
-            /// <param name="pins">The ports.</param>
-            public Instance(string type, string name, GraphicalCircuit definition, IEnumerable<PinInfo> pins)
-                : base(name)
-            {
-                Type = type.ToLower();
-                _ckt = definition;
-                _pins = pins.ToList();
-            }
+            public override string Type { get; } = type.ToLower();
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)
@@ -84,7 +76,7 @@ namespace SimpleCircuit.Components
                 Pins.Clear();
 
                 HashSet<string> takenNames = new(StringComparer.OrdinalIgnoreCase);
-                List<string> pinNames = new();
+                List<string> pinNames = [];
                 foreach (var pinInfo in _pins)
                 {
                     pinNames.Clear();

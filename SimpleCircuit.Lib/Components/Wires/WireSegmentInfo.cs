@@ -6,12 +6,16 @@ namespace SimpleCircuit.Components.Wires
     /// <summary>
     /// Wire information.
     /// </summary>
-    public class WireSegmentInfo
+    /// <remarks>
+    /// Creates a new <see cref="WireSegmentInfo"/>.
+    /// </remarks>
+    /// <param name="source">The source.</param>
+    public class WireSegmentInfo(Token source)
     {
         /// <summary>
         /// Gets the source of the wire segment.
         /// </summary>
-        public Token Source { get; }
+        public Token Source { get; } = source;
 
         /// <summary>
         /// Gets the angle of the wire.
@@ -42,14 +46,5 @@ namespace SimpleCircuit.Components.Wires
         /// Gets or sets the end marker.
         /// </summary>
         public Marker[] EndMarkers { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="WireSegmentInfo"/>.
-        /// </summary>
-        /// <param name="source">The source.</param>
-        public WireSegmentInfo(Token source)
-        {
-            Source = source;
-        }
     }
 }

@@ -10,8 +10,8 @@ namespace SimpleCircuitOnline.Shared
     {
         private string _filterString = string.Empty;
         private bool _expandAll = false;
-        private readonly HashSet<string> _searchTerms = new();
-        private readonly Dictionary<string, List<(DrawableMetadata, IDrawableFactory)>> _categories = new();
+        private readonly HashSet<string> _searchTerms = [];
+        private readonly Dictionary<string, List<(DrawableMetadata, IDrawableFactory)>> _categories = [];
 
         private bool IsFiltered((DrawableMetadata Metadata, IDrawableFactory Factory) item)
         {
@@ -55,7 +55,7 @@ namespace SimpleCircuitOnline.Shared
                 var metadata = pair.Value.GetMetadata(pair.Key);
                 if (!_categories.TryGetValue(metadata.Category, out var list))
                 {
-                    list = new();
+                    list = [];
                     _categories.Add(metadata.Category, list);
                 }
 

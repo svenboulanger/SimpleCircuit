@@ -11,7 +11,11 @@
             return result;
         }
 
-        private class Instance : ModelingDrawable
+        /// <summary>
+        /// Creats a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ModelingDrawable(name, 12.0)
         {
             private const string _graph = "graph";
             private const string _lp = "lowpass";
@@ -22,15 +26,6 @@
 
             /// <inheritdoc />
             public override string Type => "filter";
-
-            /// <summary>
-            /// Creats a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name, 12.0)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

@@ -15,21 +15,16 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             return inst;
         }
 
-        private class Instance : ModelingDrawable
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ModelingDrawable(name, 12.0)
         {
             private const string _pathData = @"M3 -8 c0 -2 -1 -3 -2 -3 c-1.5 0 -2 1 -2 3 S1 6 1 8 s-0.5 3 -2 3 c-1 0 -2 -1 -2 -3";
 
             /// <inheritdoc />
             public override string Type => "integrator";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name, 12.0)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

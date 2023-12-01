@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Circuits.Contexts
@@ -8,30 +7,23 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <summary>
     /// An implementation of the <see cref="IPrepareContext"/>.
     /// </summary>
-    public class PrepareContext : IPrepareContext
+    /// <remarks>
+    /// Creates a new <see cref="PrepareContext"/>.
+    /// </remarks>
+    /// <param name="circuit">The circuit.</param>
+    /// <param name="diagnostics">The diagnostics.</param>
+    public class PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics) : IPrepareContext
     {
-        private readonly GraphicalCircuit _circuit;
+        private readonly GraphicalCircuit _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
 
         /// <inheritdoc />
-        public IDiagnosticHandler Diagnostics { get; }
+        public IDiagnosticHandler Diagnostics { get; } = diagnostics;
 
         /// <inheritdoc />
-        public DesperatenessLevel Desparateness { get; set; }
+        public DesperatenessLevel Desparateness { get; set; } = DesperatenessLevel.Normal;
 
         /// <inheritdoc />
         public PreparationMode Mode { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="PrepareContext"/>.
-        /// </summary>
-        /// <param name="circuit">The circuit.</param>
-        /// <param name="diagnostics">The diagnostics.</param>
-        public PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
-        {
-            _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
-            Diagnostics = diagnostics;
-            Desparateness = DesperatenessLevel.Normal;
-        }
 
         /// <inheritdoc />
         public ICircuitPresence Find(string name)

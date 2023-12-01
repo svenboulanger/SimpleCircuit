@@ -5,16 +5,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A lexer for parsing simple texts/labels.
     /// </summary>
-    public class SimpleTextLexer : Lexer<TokenType>
+    /// <remarks>
+    /// Creates a new <see cref="SimpleTextLexer"/>.
+    /// </remarks>
+    /// <param name="text">The text.</param>
+    public class SimpleTextLexer(string text) : Lexer<TokenType>(text.AsMemory(), text)
     {
-        /// <summary>
-        /// Creates a new <see cref="SimpleTextLexer"/>.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        public SimpleTextLexer(string text)
-            : base(text.AsMemory(), text)
-        {
-        }
 
         /// <inheritdoc />
         public override bool Check(TokenType flags) => (Type & flags) != 0;

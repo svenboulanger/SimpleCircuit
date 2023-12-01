@@ -10,7 +10,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets the messages received by the logger.
         /// </summary>
-        public List<IDiagnosticMessage> Messages { get; } = new List<IDiagnosticMessage>();
+        public List<IDiagnosticMessage> Messages { get; } = [];
 
         /// <inheritdoc />
         public void Post(IDiagnosticMessage message)

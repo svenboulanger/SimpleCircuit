@@ -8,7 +8,13 @@ namespace SimpleCircuit.Components.Pins
     /// A loose pin, i.e. a pin that is not related to anything else.
     /// The owner is responsible for not letting this pin escape!
     /// </summary>
-    public class LoosePin : Pin, IOrientedPin
+    /// <remarks>
+    /// Creates a loose pin. This means that any constrains need to be applied manually!
+    /// </remarks>
+    /// <param name="name">The name of the pin.</param>
+    /// <param name="description">The pin description.</param>
+    /// <param name="owner">The owner of the pin.</param>
+    public class LoosePin(string name, string description, ILocatedDrawable owner) : Pin(name, description, owner), IOrientedPin
     {
         /// <inheritdoc />
         public bool HasFixedOrientation { get; private set; }
@@ -18,17 +24,6 @@ namespace SimpleCircuit.Components.Pins
 
         /// <inheritdoc />
         public bool HasFreeOrientation => !HasFixedOrientation;
-
-        /// <summary>
-        /// Creates a loose pin. This means that any constrains need to be applied manually!
-        /// </summary>
-        /// <param name="name">The name of the pin.</param>
-        /// <param name="description">The pin description.</param>
-        /// <param name="owner">The owner of the pin.</param>
-        public LoosePin(string name, string description, ILocatedDrawable owner)
-            : base(name, description, owner)
-        {
-        }
 
         /// <inheritdoc />
         public override bool Reset(IResetContext context)

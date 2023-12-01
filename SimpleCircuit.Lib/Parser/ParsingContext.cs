@@ -12,15 +12,10 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class ParsingContext
     {
-        private readonly struct SectionInfo
+        private readonly struct SectionInfo(string name, int wireCount)
         {
-            public string Name { get; }
-            public int WireCount { get; }
-            public SectionInfo(string name, int wireCount)
-            {
-                Name = name;
-                WireCount = wireCount;
-            }
+            public string Name { get; } = name;
+            public int WireCount { get; } = wireCount;
         }
         private readonly Stack<SectionInfo> _sections = new();
         private readonly Queue<ComponentInfo> _queuedPoints = new();
@@ -59,12 +54,12 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the circuit.
         /// </summary>
-        public GraphicalCircuit Circuit { get; } = new GraphicalCircuit();
+        public GraphicalCircuit Circuit { get; } = [];
 
         /// <summary>
         /// Gets the defined sections until now.
         /// </summary>
-        public Dictionary<string, Token> SectionTemplates { get; } = new();
+        public Dictionary<string, Token> SectionTemplates { get; } = [];
 
         /// <summary>
         /// Gets the currently active annotations.

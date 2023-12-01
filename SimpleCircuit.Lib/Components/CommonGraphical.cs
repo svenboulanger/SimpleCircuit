@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components
             if (rx == 0.0)
             {
                 // Simple version
-                drawing.Polygon(new Vector2[]
+                drawing.Polygon(new[]
                 {
                     new Vector2(x, y),
                     new Vector2(x + width, y),

@@ -22,9 +22,13 @@ namespace SimpleCircuit.Components.Digital
             return inst;
         }
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled
         {
-            private readonly List<string[]> _bits = new List<string[]>();
+            private readonly List<string[]> _bits = [];
             private int _maxWidth;
 
             /// <inheritdoc />
@@ -49,15 +53,6 @@ namespace SimpleCircuit.Components.Digital
             [Description("The block size for a single bit.")]
             public double BlockSize { get; set; } = 8;
 
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
-
             /// <inheritdoc />
             public override bool Reset(IResetContext context)
             {
@@ -70,7 +65,7 @@ namespace SimpleCircuit.Components.Digital
                 {
                     string label = Labels[i].Value;
                     if (Separator == null)
-                        _bits.Add(new[] { "0" });
+                        _bits.Add(["0"]);
                     else if (Separator.Length == 0)
                         _bits.Add(label.Select(c => c.ToString()).ToArray());
                     else
@@ -78,7 +73,7 @@ namespace SimpleCircuit.Components.Digital
                     _maxWidth = Math.Max(_maxWidth, _bits[^1].Length);
                 }
                 if (_bits.Count == 0)
-                    _bits.Add(new[] { "0" });
+                    _bits.Add(["0"]);
                 if (_maxWidth == 0)
                     _maxWidth = 1;
 

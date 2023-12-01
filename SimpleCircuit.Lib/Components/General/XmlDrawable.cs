@@ -2,10 +2,8 @@
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 
 namespace SimpleCircuit.Components.General
@@ -70,33 +68,25 @@ namespace SimpleCircuit.Components.General
         public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
             => new Instance(key, name, _pins, _drawing);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>
+        /// </summary>
+        /// <param name="type">The instance type.</param>
+        /// <param name="name">The instance name.</param>
+        /// <param name="drawing">The XML data describing the node.</param>
+        /// <param name="scale">The scale of the instance.</param>
+        /// <param name="pins">The pins of the instance.</param>
+        private class Instance(string type, string name, XmlNode pins, XmlNode drawing) : ScaledOrientedDrawable(name), ILabeled
         {
-            private readonly XmlNode _drawing, _pins;
-            private readonly List<int> _extend = new();
-            private readonly List<LabelAnchorPoint> _anchors = new();
+            private readonly XmlNode _drawing = drawing, _pins = pins;
+            private readonly List<int> _extend = [];
+            private readonly List<LabelAnchorPoint> _anchors = [];
 
             /// <inheritdoc />
-            public override string Type { get; }
+            public override string Type { get; } = type;
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>
-            /// </summary>
-            /// <param name="type">The instance type.</param>
-            /// <param name="name">The instance name.</param>
-            /// <param name="drawing">The XML data describing the node.</param>
-            /// <param name="scale">The scale of the instance.</param>
-            /// <param name="pins">The pins of the instance.</param>
-            public Instance(string type, string name, XmlNode pins, XmlNode drawing)
-                : base(name)
-            {
-                Type = type;
-                _drawing = drawing;
-                _pins = pins;
-            }
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)

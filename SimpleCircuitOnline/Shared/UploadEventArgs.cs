@@ -15,7 +15,7 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Gets the diagnostic messages.
         /// </summary>
-        public List<IDiagnosticMessage> Messages { get; } = new();
+        public List<IDiagnosticMessage> Messages { get; } = [];
     }
     public class UploadLibraryEventArgs : UploadEventArgs
     {

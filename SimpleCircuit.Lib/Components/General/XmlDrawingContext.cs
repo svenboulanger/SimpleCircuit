@@ -10,27 +10,21 @@ namespace SimpleCircuit.Components.General
     /// <summary>
     /// A context for drawing XML drawables.
     /// </summary>
-    public class XmlDrawingContext : IXmlDrawingContext
+    /// <remarks>
+    /// Creates a new <see cref="XmlDrawingContext"/>.
+    /// </remarks>
+    /// <param name="labels">The defined labels.</param>
+    /// <param name="variants">The defined variants.</param>
+    public class XmlDrawingContext(Labels labels, VariantSet variants) : IXmlDrawingContext
     {
-        private readonly VariantSet _variants;
+        private readonly VariantSet _variants = variants;
 
         /// <inheritdoc />
         public IList<LabelAnchorPoint> Anchors { get; } = new List<LabelAnchorPoint>();
 
         /// <inheritdoc />
-        public Labels Labels { get; }
+        public Labels Labels { get; } = labels ?? throw new ArgumentNullException(nameof(labels));
 
-        /// <summary>
-        /// Creates a new <see cref="XmlDrawingContext"/>.
-        /// </summary>
-        /// <param name="labels">The defined labels.</param>
-        /// <param name="variants">The defined variants.</param>
-        public XmlDrawingContext(Labels labels, VariantSet variants)
-        {
-            Labels = labels ?? throw new ArgumentNullException(nameof(labels));
-            _variants = variants;
-        }
-        
         /// <inheritdoc />
         public string TransformText(string input)
         {

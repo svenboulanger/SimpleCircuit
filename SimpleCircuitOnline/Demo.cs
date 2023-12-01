@@ -5,7 +5,14 @@ namespace SimpleCircuitOnline
     /// <summary>
     /// A demo.
     /// </summary>
-    public class Demo
+    /// <remarks>
+    /// Creates a new <see cref="Demo"/>.
+    /// </remarks>
+    /// <param name="title">The title of the demo.</param>
+    /// <param name="description">The description of the demo.</param>
+    /// <param name="code">The code of the demo.</param>
+    /// <param name="style">The style of the demo.</param>
+    public class Demo(string title, string description, string code, string style = null)
     {
         /// <summary>
         /// Gets the title of the demo.
@@ -13,7 +20,7 @@ namespace SimpleCircuitOnline
         /// <value>
         /// The demo title.
         /// </value>
-        public string Title { get; }
+        public string Title { get; } = title;
 
         /// <summary>
         /// Gets the description of the demo.
@@ -21,7 +28,7 @@ namespace SimpleCircuitOnline
         /// <value>
         /// The description.
         /// </value>
-        public string Description { get; }
+        public string Description { get; } = description;
 
         /// <summary>
         /// Gets the actual code of the demo.
@@ -29,7 +36,7 @@ namespace SimpleCircuitOnline
         /// <value>
         /// The code.
         /// </value>
-        public string Code { get; }
+        public string Code { get; } = code;
 
         /// <summary>
         /// Gets the style (if <c>null</c>, refer to default style).
@@ -37,28 +44,13 @@ namespace SimpleCircuitOnline
         /// <value>
         /// The style.
         /// </value>
-        public string Style { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="Demo"/>.
-        /// </summary>
-        /// <param name="title">The title of the demo.</param>
-        /// <param name="description">The description of the demo.</param>
-        /// <param name="code">The code of the demo.</param>
-        /// <param name="style">The style of the demo.</param>
-        public Demo(string title, string description, string code, string style = null)
-        {
-            Title = title;
-            Description = description;
-            Code = code;
-            Style = style ?? GraphicalCircuit.DefaultStyle;
-        }
+        public string Style { get; } = style ?? GraphicalCircuit.DefaultStyle;
 
         /// <summary>
         /// The demos.
         /// </summary>
-        public static Demo[] Demos { get; } = new[]
-        {
+        public static Demo[] Demos { get; } =
+        [
             // Low-pass RC filter
             new Demo(
                 "1. Component chains (basic)",
@@ -126,7 +118,7 @@ namespace SimpleCircuitOnline
             new Demo(
                 "11. Annotation boxes (advanced)",
                 "Tutorial on using annotation boxes.",
-                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Annotations are boxes that will automatically be fitted\r\n// to their contents.\r\n// To start an annotation box, use two pipe '|' characters\r\n// and start with the name of the annotation box.\r\n|annotation1|\r\nT(\"in\") <r> [s]NMOS1[d] <r> T(\"out\")\r\nNMOS1[g] <u> T(\"c\")\r\n// The end of an annotation box is two pipe characters\r\n// without a name.\r\n||\r\n\r\n// It is possible to start and end annotation boxes inside\r\n// a component chain\r\nC1 |a| <r> R2 ||\r\n\r\n// You can also give extra parameters to annotation boxes.\r\n// Check the Wiki for a list of available options.\r\n| b \"B\" bottom left poly radius=2 margin=2 |\r\nR3 <ne r se> R4\r\n// As long as the contents between pipe '|' characters is\r\n// not starting with the name of an annotation, it is\r\n// treated as the end of the last opened annotation box.\r\n|-------------------------------|\r\n"),
+                "// For more tutorials, go to Help > Demo's.\r\n\r\n// Annotations are boxes that will automatically be fitted\r\n// to their contents.\r\n// To start an annotation box, use two pipe '|' characters\r\n// and start with the name of the annotation box.\r\n|annotation1|\r\nT(\"in\") <r> [s]NMOS1[d] <r> T(\"out\")\r\nNMOS1[g] <u> T(\"c\")\r\n// The end of an annotation box is two pipe characters\r\n// without a name.\r\n||\r\n\r\n// It is possible to start and end annotation boxes inside\r\n// a component chain\r\nC1 |a| <r> R2 ||\r\n\r\n// You can also give extra parameters to annotation boxes.\r\n// Check the Wiki for a list of available options.\r\n| b \"B\" poly radius=2 margin=2 |\r\nR3 <ne r se> R4\r\n// As long as the contents between pipe '|' characters is\r\n// not starting with the name of an annotation, it is\r\n// treated as the end of the last opened annotation box.\r\n|-------------------------------|\r\n"),
 
             // Non-inverting amplifier
             new Demo(
@@ -220,6 +212,6 @@ namespace SimpleCircuitOnline
                 "Example: All built-in symbols (with variants)",
                 "A list of all implemented symbols without any variants applied to them.",
                 ".options minimumwirelength = 30\r\n\r\n// A\r\nA1(\"a\", \"b\", \"c\")\r\nA2(diffin, \"a\", \"b\", \"c\")\r\nA3(diffout, \"a\", \"b\", \"c\")\r\nA4(schmitt, \"a\", \"\", \"c\")\r\nA5(comparator, \"a\", \"\", \"c\")\r\nA6(programmable, \"a\")\r\n(xy A1 <r> A2 <r> A3 <r> A4 <r> A5 <r> A6)\r\nACT1(\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\")\r\nADC1(\"a\", \"b\")\r\nADC2(diffin, \"a\", \"b\")\r\nADC3(diffout, \"a\", \"b\")\r\n(xy ADC1 <r> ADC2 <r> ADC3)\r\nADD1(\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\")\r\nADD2(square, \"a\")\r\n(xy ADD1 <r> ADD2)\r\nAND1(\"a\", \"b\")\r\nAND2(euro)\r\n(xy AND1 <r> AND2)\r\nANT1(\"a\", \"b\")\r\nAPP1(\"a\")\r\nAPP2(heater, \"a\")\r\nAPP3(heater, ventilator, \"a\")\r\nAPP4(heater, accu, \"a\")\r\nAPP5(ventilator, \"a\")\r\nAPP6(boiler, \"a\")\r\nAPP7(boiler, accu, \"a\")\r\nAPP8(microwave, \"a\")\r\nAPP9(oven, \"a\")\r\nAPP10(washer, \"a\")\r\nAPP11(dryer, \"a\")\r\nAPP12(dishwasher, \"a\")\r\nAPP13(fridge, \"a\")\r\nAPP14(freezer, \"a\")\r\n(xy APP1 <r> APP2 <r> APP3 <r> APP4 <r> APP5 <r> APP6 <r> APP7 <r> APP8 <r> APP9 <r> APP10 <r> APP11 <r> APP12 <r> APP13 <r> APP14)\r\nATTR1(\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\")\r\n(xy A1 <d> ACT1 <d> ADC1 <d> ADD1 <d> AND1 <d> ANT1 <d> APP1 <d> ATTR1 <d> BAT1)\r\n\r\n// B\r\nBAT1(\"a\", \"b\")\r\nBB1(\"a\")\r\nBIT1(\"abc\", \"def\", \"ghij\")\r\nBLOCK1(\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\", \"k\", \"l\", \"m\", \"n\", \"o\", \"p\", \"q\", \"r\", \"s\", \"t\", \"u\", scale=2)\r\nBLOCK2(\"label\")\r\n(xy BLOCK1 <r> BLOCK2)\r\nBUF1(\"a\", \"b\")\r\nBUS1(\"a\", \"b\")\r\nBUS2(straight, \"a\", \"b\")\r\n(xy BUS1 <r> BUS2)\r\n(xy BAT1 <d> BB1 <d> BIT1 <d +50> BLOCK1 <d> BUF1 <d> BUS1 <d> C1)\r\n\r\n// C\r\nC1(\"a\", \"b\")\r\nC2(curved, \"a\", \"b\")\r\nC3(curved, signs, \"a\", \"b\")\r\nC4(signs, \"a\", \"b\")\r\nC5(electrolytic, \"a\", \"b\")\r\nC6(electrolytic, signs, \"a\", \"b\")\r\nC7(programmable, \"a\", \"b\")\r\nC8(sensor, \"a\", \"b\")\r\n(xy C1 <r> C2 <r> C3 <r> C4 <r> C5 <r> C6 <r> C7 <r> C8)\r\nCB1(\"a\", \"b\")\r\nCB2(euro, \"a\", \"b\")\r\nCB3(arei, \"a\", \"b\")\r\n(xy CB1 <r> CB2 <r> CB3)\r\nCIRC1(\"a\", \"b\", \"c\")\r\nCIRC2(square, \"a\", \"b\", \"c\")\r\n(xy CIRC1 <r> CIRC2)\r\nCONN1(\"a\", \"b\")\r\nCONN2(american, \"a\", \"b\")\r\nCONN3(american, male, \"a\")\r\nCONN4(american, female, \"a\")\r\n(xy CONN1 <r> CONN2 <r> CONN3 <r> CONN4)\r\nCUT1(\"a\", \"b\")\r\nCUT2(straight, \"a\", \"b\")\r\n(xy CUT1 <r> CUT2)\r\n(xy C1 <d> CB1 <d> CIRC1 <d> CONN1 <d> CUT1 <d> D1)\r\n\r\n// D\r\nD1(\"a\", \"b\")\r\nD2(varactor, \"a\", \"b\")\r\nD3(zener, \"a\", \"b\")\r\nD4(tunnel, \"a\", \"b\")\r\nD5(schockley, \"a\", \"b\")\r\nD6(photodiode, \"a\", \"b\")\r\nD7(laser, \"a\", \"b\")\r\nD8(led, \"a\", \"b\")\r\nD9(single, \"a\", \"b\")\r\nD10(slanted, \"a\", \"b\")\r\nD11(tvs, \"a\", \"b\")\r\nD12(bidirectional, \"a\", \"b\")\r\nD13(stroke, \"a\", \"b\")\r\n(xy D1 <r> D2 <r> D3 <r> D4 <r> D5 <r> D6 <r> D7 <r> D8 <r> D9 <r> D10 <r> D11 <r> D12 <r> D13)\r\nDIFF1(\"a\")\r\nDIFF2(sdomain, \"a\")\r\nDIFF3(zdomain, \"a\")\r\n(xy DIFF1 <r> DIFF2 <r> DIFF3)\r\nDIR1(\"a\", \"b\")\r\n(xy D1 <d> DIFF1 <d> DIR1 <d> E1)\r\n\r\n// E\r\nE1(\"a\", \"b\")\r\nE2(euro, \"a\", \"b\")\r\n(xy E1 <r> E2)\r\nENT1(\"a\", \"b\", \"c\")\r\n(xy E1 <d> ENT1 <d +40> F1)\r\n\r\n// F\r\nF1(\"a\", \"b\")\r\nF2(euro, \"a\", \"b\")\r\n(xy F1 <r> F2)\r\nFD1(\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\")\r\nFDOC1(\"a\")\r\nFDOC2(multiple, \"a\")\r\n(xy FDOC1 <r +40> FDOC2)\r\nFF1(\"a\")\r\nFILT1(\"a\")\r\nFILT2(lowpass, \"a\")\r\nFILT3(lowpass2, \"a\")\r\nFILT4(highpass, \"a\")\r\nFILT5(highpass2, \"a\")\r\nFILT6(bandpass, \"a\")\r\nFILT7(graph, \"a\")\r\nFILT8(graph, highpass, \"a\")\r\nFILT9(graph, bandpass, \"a\")\r\n(xy FILT1 <r> FILT2 <r> FILT3 <r> FILT4 <r> FILT5 <r> FILT6 <r> FILT7 <r> FILT8 <r> FILT9)\r\nFIO1(\"a\")\r\nFP1(\"a\")\r\nFT1(\"a\")\r\nFUSE1(\"a\", \"b\")\r\nFUSE2(alt, \"a\", \"b\")\r\nFUSE3(euro, \"a\", \"b\")\r\n(xy FUSE1 <r> FUSE2 <r> FUSE3)\r\n(xy F1 <d> FD1 <d> FDOC1 <d> FF1 <d> FILT1 <d> FIO1 <d> FP1 <d> FT1 <d> FUSE1 <d> G1)\r\n\r\n// G\r\nG1(\"a\", \"b\")\r\nG2(euro, \"a\", \"b\")\r\n(xy G1 <r> G2)\r\nGND1(\"a\", \"b\")\r\nGND2(earth, \"a\", \"b\")\r\nGND3(chassis, \"a\", \"b\")\r\nGND4(signal, \"a\", \"b\")\r\nGND5(noiseless, \"a\", \"b\")\r\nGND6(protective, \"a\", \"b\")\r\n(xy GND1 <r> GND2 <r> GND3 <r> GND4 <r> GND5 <r> GND6)\r\n(xy G1 <d> GND1 <d> H1)\r\n\r\n// H\r\nH1(\"a\", \"b\")\r\nH2(euro, \"a\", \"b\")\r\n(xy H1 <r> H2)\r\n(xy H1 <d> I1)\r\n\r\n// I\r\nI1(\"a\", \"b\")\r\nI2(ac, \"a\", \"b\")\r\nI3(euro, \"a\", \"b\")\r\nI4(programmable, \"a\", \"b\")\r\nI5(euro, programmable, \"a\", \"b\")\r\n(xy I1 <r> I2 <r> I3 <r> I4 <r> I5)\r\nINT1(\"a\")\r\nINT2(sdomain, \"a\")\r\nINT3(zdomain, \"a\")\r\n(xy INT1 <r> INT2 <r> INT3)\r\nINV1(\"a\", \"b\")\r\nINV2(euro, \"a\")\r\n(xy INV1 <r> INV2)\r\n(xy I1 <d> INT1 <d> INV1 <d> JACK1)\r\n\r\n// J\r\nJACK1(\"a\")\r\n(xy JACK1 <d> L1)\r\n\r\n// K\r\n\r\n// L\r\nL1(\"a\", \"b\")\r\nLATCH1(\"a\")\r\nLIGHT1(\"a\", \"b\")\r\nLIGHT2(arei, \"a\", \"b\")\r\nLIGHT3(arei, wall, \"a\", \"b\")\r\nLIGHT4(arei, projector, \"a\", \"b\")\r\nLIGHT5(arei, direction, \"a\", \"b\")\r\nLIGHT6(arei, direction, diverging, \"a\", \"b\")\r\nLIGHT7(arei, emergency, \"a\", \"b\")\r\n(xy LIGHT1 <r> LIGHT2 <r> LIGHT3 <r> LIGHT4 <r> LIGHT5 <r> LIGHT6 <r> LIGHT7)\r\n(xy L1 <d> LATCH1 <d> LIGHT1 <d> MIC1)\r\n\r\n// M\r\nMIC1(\"a\", \"b\")\r\nMIX1(\"a\")\r\nMIX2(square, \"a\")\r\n(xy MIX1 <r> MIX2)\r\nMN1(\"a\")\r\nMN2(packaged, \"a\")\r\n(xy MN1 <r> MN2)\r\nMOTOR1(\"a\", \"b\")\r\nMP1(\"a\")\r\nMP2(packaged, \"a\")\r\n(xy MP1 <r> MP2)\r\nMUX1(\"a\")\r\n(xy MIC1 <d> MIX1 <d> MN1 <d> MOTOR1 <d> MP1 <d> MUX1 <d> NAND1)\r\n\r\n// N\r\nNAND1(\"a\", \"b\")\r\nNAND2(euro, \"a\")\r\n(xy NAND1 <r> NAND2)\r\nNMOS1(\"a\")\r\nNMOS2(packaged, \"a\")\r\n(xy NMOS1 <r> NMOS2)\r\nNOR1(\"a\", \"b\")\r\nNOR2(euro, \"a\", \"b\")\r\n(xy NOR1 <r> NOR2)\r\nNOT1(\"a\", \"b\")\r\nNOT2(euro, \"a\", \"b\")\r\n(xy NOT1 <r> NOT2)\r\nNPN1(\"a\")\r\nNPN2(packaged, \"a\")\r\n(xy NPN1 <r> NPN2)\r\n(xy NAND1 <d> NMOS1 <d> NOR1 <d> NOT1 <d> NPN1 <d> OA1)\r\n\r\n// O\r\nOA1(\"a\", \"b\", \"c\")\r\nOR1(\"a\", \"b\")\r\nOR2(euro, \"a\", \"b\")\r\n(xy OR1 <r> OR2)\r\nOSC1(\"a\", \"b\")\r\nOSC2(square, \"a\")\r\n(xy OSC1 <r> OSC2)\r\nOTA1(\"a\", \"b\", \"c\")\r\n(xy OA1 <d> OR1 <d> OSC1 <d> OTA1 <d> PMOS1)\r\n\r\n// P\r\nPMOS1(\"a\")\r\nPMOS2(packaged, \"a\")\r\n(xy PMOS1 <r> PMOS2)\r\nPNP1(\"a\")\r\nPNP2(packaged, \"a\")\r\n(xy PNP1 <r> PNP2)\r\nPOW1(\"a\")\r\n(xy PMOS1 <d> PNP1 <d> POW1 <d> QN1)\r\n\r\n// Q\r\nQN1(\"a\")\r\nQN2(packaged)\r\n(xy QN1 <r> QN2)\r\nQP1(\"a\")\r\nQP2(packaged)\r\n(xy QP1 <r> QP2)\r\n(xy QN1 <d> QP1 <d> R1)\r\n\r\n// R\r\nR1(\"a\", \"b\")\r\nR2(programmable, \"a\", \"b\")\r\nR3(photo, \"a\", \"b\")\r\nR4(thremistor, \"a\", \"b\")\r\nR5(euro, \"a\", \"b\")\r\nR6(euro, x, \"a\", \"b\")\r\nR7(euro, memristor, \"a\", \"b\")\r\n(xy R1 <r> R2 <r> R3 <r> R4 <r> R5 <r> R6 <r> R7)\r\n(xy R1 <d> S1)\r\n\r\n// S\r\nS1(\"a\", \"b\")\r\nS2(closed, \"a\", \"b\")\r\nS3(invert, \"a\", \"b\")\r\nS4(closing, \"a\", \"b\")\r\nS5(opening, \"a\", \"b\")\r\nS6(reed, \"a\", \"b\")\r\nS7(knife, \"a\", \"b\")\r\nS8(knife, closed, \"a\", \"b\")\r\nS9(push, \"a\", \"b\")\r\nS10(push, invert, \"a\", \"b\")\r\nS11(arei, \"a\", \"b\")\r\nS12(arei, lamp, \"a\", \"b\")\r\nS13(arei, push, \"a\", \"b\")\r\nS14(arei, push, lamp, \"a\", \"b\")\r\nS15(arei, push, window, \"a\", \"b\")\r\n(xy S1 <r> S2 <r> S3 <r> S4 <r> S5 <r> S6 <r> S7 <r> S8 <r> S9 <r> S10 <r> S11 <r> S12 <r> S13 <r> S14 <r> S15)\r\nSEG1(\"a\", \"b\")\r\nSEG2(underground, \"a\", \"b\")\r\nSEG3(air, \"a\", \"b\")\r\nSEG4(tube, \"a\", \"b\")\r\nSEG5(tube, multiple=2, \"a\", \"b\")\r\nSEG6(inwall, \"a\", \"b\")\r\nSEG7(onwall, \"a\", \"b\")\r\n(xy SEG1 <r> SEG2 <r> SEG3 <r> SEG4 <r> SEG5 <r> SEG6 <r> SEG7)\r\nSGND1(\"a\", \"b\")\r\nSPDT1(\"a\")\r\nSPEAKER1(\"a\")\r\nSPEAKER2(off, \"a\")\r\n(xy SPEAKER1 <r> SPEAKER2)\r\nSPLIT1(\"a\", \"b\")\r\nSPLIT2(-square, \"a\", \"b\")\r\n(xy SPLIT1 <r> SPLIT2)\r\nSUB1(\"a\")\r\nSUB2(square, \"a\")\r\n(xy SUB1 <r> SUB2)\r\n(xy S1 <d> SEG1 <d> SGND1 <d> SPDT1 <d> SPEAKER1 <d> SPLIT1 <d> SUB1 <d> T1)\r\n\r\n// T\r\nT1(\"a\")\r\nT2(in, \"a\")\r\nT3(out, \"a\")\r\nT4(inout, \"a\")\r\nT5(other, \"a\")\r\nT6(pad, \"a\")\r\nT7(square, \"a\")\r\nT8(none, \"a\")\r\n(xy T1 <r> T2 <r> T3 <r> T4 <r> T5 <r> T6 <r> T7 <r> T8)\r\nTA1(\"a\", \"b\", \"c\")\r\nTL1(\"a\", \"b\", \"c\")\r\n(xy T1 <d> TA1 <d> TL1 <d> V1)\r\n\r\n// U\r\n\r\n// V\r\nV1(\"a\", \"b\")\r\nV2(ac, \"a\", \"b\")\r\nV3(square, \"a\", \"b\")\r\nV4(tri, \"a\", \"b\")\r\nV5(pulse, \"a\", \"b\")\r\nV6(step, \"a\", \"b\")\r\nV7(programmable, \"a\", \"b\")\r\nV8(euro, \"a\", \"b\")\r\nV9(euro, programmable, \"a\", \"b\")\r\n(xy V1 <r> V2 <r> V3 <r> V4 <r> V5 <r> V6 <r> V7 <r> V8 <r> V9)\r\n(xy V1 <d> WP1)\r\n\r\n// W\r\nWP1(\"a\")\r\nWP2(earth, \"a\")\r\nWP3(sealed, \"a\")\r\nWP4(child, \"a\")\r\nWP5(multiple=2)\r\n(xy WP1 <r> WP2 <r> WP3 <r> WP4 <r> WP5)\r\n(xy WP1 <d> X1)\r\n\r\n// X\r\nX1(\"a\")\r\nX2(-dot, \"a\")\r\nX3(forced, \"a\") <r> X\r\n(xy X1 <r> X2 <r> X3)\r\nXNOR1(\"a\", \"b\")\r\nXNOR2(euro, \"a\", \"b\")\r\n(xy XNOR1 <r> XNOR2)\r\nXOR1(\"a\", \"b\")\r\nXOR2(euro, \"a\", \"b\")\r\n(xy XOR1 <r> XOR2)\r\nXTAL1(\"a\", \"b\")\r\n(X1 <d> XNOR1 <d> XOR1 <d> XTAL1 <d> Y1)\r\n\r\n// Y\r\nY1(\"a\", \"b\")\r\nY2(programmable, \"a\", \"b\")\r\n(xy Y1 <r> Y2)\r\n(xy Y1 <d> Z1)\r\n\r\n// Z\r\nZ1(\"a\", \"b\")\r\nZ2(programmable, \"a\", \"b\")\r\n(xy Z1 <r> Z2)\r\n")
-        };
+        ];
     }
 }

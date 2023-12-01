@@ -6,24 +6,19 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <summary>
     /// A class for tracking an extreme of a group of nodes.
     /// </summary>
-    public class NodeExtremeFinder
+    /// <remarks>
+    /// Creates a new <see cref="NodeExtremeFinder"/>.
+    /// </remarks>
+    /// <param name="comparer">The comparer. The default is a case-insensitive comparer.</param>
+    public class NodeExtremeFinder(IEqualityComparer<string> comparer = null)
     {
-        private readonly HashSet<string> _extremes, _nonExtremes;
+        private readonly HashSet<string> _extremes = new(comparer ?? StringComparer.OrdinalIgnoreCase),
+            _nonExtremes = new(comparer ?? StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets all the extremes tracked by the sorter.
         /// </summary>
         public IEnumerable<string> Extremes => _extremes;
-
-        /// <summary>
-        /// Creates a new <see cref="NodeExtremeFinder"/>.
-        /// </summary>
-        /// <param name="comparer">The comparer. The default is a case-insensitive comparer.</param>
-        public NodeExtremeFinder(IEqualityComparer<string> comparer = null)
-        {
-            _extremes = new(comparer ?? StringComparer.OrdinalIgnoreCase);
-            _nonExtremes = new(comparer ?? StringComparer.OrdinalIgnoreCase);
-        }
 
         /// <summary>
         /// Tracks an order between nodes.

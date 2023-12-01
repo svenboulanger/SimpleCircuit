@@ -24,26 +24,20 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A span representing a simple text element.
     /// </summary>
-    public class TextSpan : ISpan
+    /// <remarks>
+    /// Creates a new text span from a measured XML element.
+    /// </remarks>
+    /// <param name="element">The element.</param>
+    /// <param name="bounds">The bounds of the element on its own.</param>
+    public class TextSpan(XmlElement element, SpanBounds bounds) : ISpan
     {
         /// <summary>
         /// Gets the span element.
         /// </summary>
-        public XmlElement Element { get; }
+        public XmlElement Element { get; } = element;
 
         /// <inheritdoc />
-        public SpanBounds Bounds { get; }
-
-        /// <summary>
-        /// Creates a new text span from a measured XML element.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="bounds">The bounds of the element on its own.</param>
-        public TextSpan(XmlElement element, SpanBounds bounds)
-        {
-            Element = element;
-            Bounds = bounds;
-        }
+        public SpanBounds Bounds { get; } = bounds;
 
         /// <inheritdoc />
         public void Update(Vector2 offset)
@@ -58,7 +52,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// </summary>
     public class LineSpan : ISpan
     {
-        private readonly List<ISpan> _spans = new();
+        private readonly List<ISpan> _spans = [];
         private readonly ExpandableBounds _bounds = new();
         private double _x = 0.0;
 
@@ -108,7 +102,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A superscript span.
     /// </summary>
-    public class SubscriptSuperscriptSpan : ISpan
+    /// <remarks>
+    /// Creates a new <see cref="SubscriptSuperscriptSpan"/>.
+    /// </remarks>
+    /// <param name="base">The base.</param>
+    /// <param name="halfway">The height of the halfway point.</param>
+    public class SubscriptSuperscriptSpan(ISpan @base, double halfway) : ISpan
     {
         private ISpan _super = null, _sub = null;
 
@@ -125,7 +124,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <summary>
         /// Gets or sets the base.
         /// </summary>
-        public ISpan Base { get; }
+        public ISpan Base { get; } = @base;
 
         /// <summary>
         /// Gets the margin between the spans.
@@ -135,10 +134,10 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <summary>
         /// Gets the half-way point.
         /// </summary>
-        public double Halfway { get; }
+        public double Halfway { get; } = halfway;
 
         /// <inheritdoc />
-        public SpanBounds Bounds { get; private set; }
+        public SpanBounds Bounds { get; private set; } = @base.Bounds;
 
         /// <summary>
         /// Gets the location for the superscript.
@@ -149,18 +148,6 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// Gets the location for the subscript.
         /// </summary>
         protected Vector2 SubLocation => new(Base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left, -Halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
-
-        /// <summary>
-        /// Creates a new <see cref="SubscriptSuperscriptSpan"/>.
-        /// </summary>
-        /// <param name="base">The base.</param>
-        /// <param name="halfway">The height of the halfway point.</param>
-        public SubscriptSuperscriptSpan(ISpan @base, double halfway)
-        {
-            Base = @base;
-            Halfway = halfway;
-            Bounds = @base.Bounds;
-        }
 
         private void UpdateBounds()
         {
@@ -190,7 +177,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// </summary>
     public class MultilineSpan : ISpan
     {
-        private readonly List<ISpan> _spans = new();
+        private readonly List<ISpan> _spans = [];
         private readonly ExpandableBounds _bounds = new();
 
         /// <summary>
@@ -251,50 +238,41 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A span of content that is underlined
     /// </summary>
-    public class OverlineSpan : ISpan
+    /// <remarks>
+    /// Creates a new <see cref="OverlineSpan"/>.
+    /// </remarks>
+    /// <param name="element">The element.</param>
+    /// <param name="base">The base.</param>
+    /// <param name="margin">The margin.</param>
+    /// <param name="thickness">The thickness.</param>
+    public class OverlineSpan(XmlElement element, ISpan @base, double margin, double thickness) : ISpan
     {
         /// <summary>
         /// Gets the XML element for the overline
         /// </summary>
-        public XmlElement Element { get; }
+        public XmlElement Element { get; } = element;
 
         /// <summary>
         /// Gets the content.
         /// </summary>
-        public ISpan Base { get; }
+        public ISpan Base { get; } = @base;
 
         /// <inheritdoc />
-        public SpanBounds Bounds { get; }
-
-        /// <summary>
-        /// Gets the margin.
-        /// </summary>
-        public double Margin { get; }
-
-        /// <summary>
-        /// Gets the thickness.
-        /// </summary>
-        public double Thickness { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="OverlineSpan"/>.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="base">The base.</param>
-        /// <param name="margin">The margin.</param>
-        /// <param name="thickness">The thickness.</param>
-        public OverlineSpan(XmlElement element, ISpan @base, double margin, double thickness)
-        {
-            Element = element;
-            Base = @base;
-            Margin = margin;
-            Thickness = thickness;
-            Bounds = new SpanBounds(new Bounds(
+        public SpanBounds Bounds { get; } = new SpanBounds(new Bounds(
                 @base.Bounds.Bounds.Left,
                 @base.Bounds.Bounds.Top - margin - thickness,
                 @base.Bounds.Bounds.Right,
                 @base.Bounds.Bounds.Bottom), @base.Bounds.Advance);
-        }
+
+        /// <summary>
+        /// Gets the margin.
+        /// </summary>
+        public double Margin { get; } = margin;
+
+        /// <summary>
+        /// Gets the thickness.
+        /// </summary>
+        public double Thickness { get; } = thickness;
 
         /// <inheritdoc />
         public void Update(Vector2 offset)
@@ -312,50 +290,41 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A span of content that is underlined
     /// </summary>
-    public class UnderlineSpan : ISpan
+    /// <remarks>
+    /// Creates a new <see cref="UnderlineSpan"/>.
+    /// </remarks>
+    /// <param name="element">The element.</param>
+    /// <param name="base">The base.</param>
+    /// <param name="margin">The margin.</param>
+    /// <param name="thickness">The thickness.</param>
+    public class UnderlineSpan(XmlElement element, ISpan @base, double margin, double thickness) : ISpan
     {
         /// <summary>
         /// Gets the XML element for the overline
         /// </summary>
-        public XmlElement Element { get; }
+        public XmlElement Element { get; } = element;
 
         /// <summary>
         /// Gets the content.
         /// </summary>
-        public ISpan Base { get; }
+        public ISpan Base { get; } = @base;
 
         /// <inheritdoc />
-        public SpanBounds Bounds { get; }
-
-        /// <summary>
-        /// Gets the margin.
-        /// </summary>
-        public double Margin { get; }
-
-        /// <summary>
-        /// Gets the thickness.
-        /// </summary>
-        public double Thickness { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="UnderlineSpan"/>.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="base">The base.</param>
-        /// <param name="margin">The margin.</param>
-        /// <param name="thickness">The thickness.</param>
-        public UnderlineSpan(XmlElement element, ISpan @base, double margin, double thickness)
-        {
-            Element = element;
-            Base = @base;
-            Margin = margin;
-            Thickness = thickness;
-            Bounds = new SpanBounds(new Bounds(
+        public SpanBounds Bounds { get; } = new SpanBounds(new Bounds(
                 @base.Bounds.Bounds.Left,
                 @base.Bounds.Bounds.Top,
                 @base.Bounds.Bounds.Right,
                 @base.Bounds.Bounds.Bottom + margin + thickness), @base.Bounds.Advance);
-        }
+
+        /// <summary>
+        /// Gets the margin.
+        /// </summary>
+        public double Margin { get; } = margin;
+
+        /// <summary>
+        /// Gets the thickness.
+        /// </summary>
+        public double Thickness { get; } = thickness;
 
         /// <inheritdoc />
         public void Update(Vector2 offset)

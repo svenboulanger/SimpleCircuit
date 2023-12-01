@@ -34,7 +34,11 @@ namespace SimpleCircuit.Components.Analog
             }
         }
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled
         {
             private readonly static Vector2
                 _supplyPos = new(-2, -5),
@@ -56,15 +60,6 @@ namespace SimpleCircuit.Components.Analog
 
             /// <inheritdoc />
             public override string Type => "amplifier";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name of the instance.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)

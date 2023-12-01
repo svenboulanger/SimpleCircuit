@@ -5,21 +5,16 @@ namespace SimpleCircuit
     /// <summary>
     /// An attribute that indicates the description of a property.
     /// </summary>
+    /// <remarks>
+    /// Creates a new description attribute.
+    /// </remarks>
+    /// <param name="description">The description.</param>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class DescriptionAttribute : Attribute
+    public class DescriptionAttribute(string description) : Attribute
     {
         /// <summary>
         /// Gets the description.
         /// </summary>
-        public string Description { get; }
-
-        /// <summary>
-        /// Creates a new description attribute.
-        /// </summary>
-        /// <param name="description">The description.</param>
-        public DescriptionAttribute(string description)
-        {
-            Description = description ?? string.Empty;
-        }
+        public string Description { get; } = description ?? string.Empty;
     }
 }

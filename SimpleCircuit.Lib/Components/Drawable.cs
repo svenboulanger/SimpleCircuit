@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the variants of the drawable.
         /// </summary>
-        public VariantSet Variants { get; } = new();
+        public VariantSet Variants { get; } = [];
 
         /// <inheritdoc />
         public string Name { get; }
@@ -36,7 +36,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the pins of the component.
         /// </summary>
-        public PinCollection Pins { get; } = new();
+        public PinCollection Pins { get; } = [];
 
         /// <inheritdoc />
         IPinCollection IDrawable.Pins => Pins;

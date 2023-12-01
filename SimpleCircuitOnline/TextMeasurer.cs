@@ -1,7 +1,6 @@
 ﻿using Microsoft.JSInterop;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
-using System;
 using System.Text.Json;
 
 namespace SimpleCircuitOnline
@@ -9,22 +8,16 @@ namespace SimpleCircuitOnline
     /// <summary>
     /// A text measurer that uses the browser.
     /// </summary>
-    public class TextMeasurer : ITextMeasurer
+    /// <remarks>
+    /// Creates a new <see cref="TextMeasurer"/>.
+    /// </remarks>
+    /// <param name="js">The javascript runtime.</param>
+    public class TextMeasurer(IJSRuntime js, string fontFamily) : ITextMeasurer
     {
-        private readonly IJSRuntime _js;
+        private readonly IJSRuntime _js = js;
 
         /// <inheritdoc />
-        public string FontFamily { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="TextMeasurer"/>.
-        /// </summary>
-        /// <param name="js">The javascript runtime.</param>
-        public TextMeasurer(IJSRuntime js, string fontFamily)
-        {
-            _js = js;
-            FontFamily = fontFamily;
-        }
+        public string FontFamily { get; set; } = fontFamily;
 
         /// <inheritdoc />
         public SpanBounds Measure(string text, double size)

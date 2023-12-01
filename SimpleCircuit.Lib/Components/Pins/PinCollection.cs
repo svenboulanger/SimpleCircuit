@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components.Pins
     public class PinCollection : IPinCollection
     {
         private readonly Dictionary<string, IPin> _pinsByName = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<IPin> _pinsByIndex = new();
+        private readonly List<IPin> _pinsByIndex = [];
 
         /// <inheritdoc />
         public int Count => _pinsByIndex.Count;

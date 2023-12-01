@@ -5,21 +5,16 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// A removal of an annotation.
     /// </summary>
-    public class AnnotationPop : AnnotationChange
+    /// <remarks>
+    /// Creates a new <see cref="AnnotationPop"/>.
+    /// </remarks>
+    /// <param name="source">The token source.</param>
+    public class AnnotationPop(Token source) : AnnotationChange
     {
         /// <summary>
         /// Gets the source of the change.
         /// </summary>
-        public Token Source { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="AnnotationPop"/>.
-        /// </summary>
-        /// <param name="source">The token source.</param>
-        public AnnotationPop(Token source)
-        {
-            Source = source;
-        }
+        public Token Source { get; } = source;
 
         /// <inheritdoc />
         public override bool Apply(ParsingContext context)

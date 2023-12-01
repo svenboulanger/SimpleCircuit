@@ -6,9 +6,13 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A list of custom label anchor points.
     /// </summary>
-    public class CustomLabelAnchorPoints : LabelAnchorPoints<ILabeled>
+    /// <remarks>
+    /// Creates a new list of anchor points.
+    /// </remarks>
+    /// <param name="points">The points.</param>
+    public class CustomLabelAnchorPoints(params LabelAnchorPoint[] points) : LabelAnchorPoints<ILabeled>
     {
-        private readonly LabelAnchorPoint[] _points;
+        private readonly LabelAnchorPoint[] _points = points ?? throw new ArgumentNullException(nameof(points));
 
         /// <summary>
         /// Gets or sets the label anchor point at the specified index.
@@ -23,15 +27,6 @@ namespace SimpleCircuit.Components.Labeling
 
         /// <inheritdoc />
         public override int Count => _points.Length;
-
-        /// <summary>
-        /// Creates a new list of anchor points.
-        /// </summary>
-        /// <param name="points">The points.</param>
-        public CustomLabelAnchorPoints(params LabelAnchorPoint[] points)
-        {
-            _points = points ?? throw new ArgumentNullException(nameof(points));
-        }
 
         /// <inheritdoc />
         public void Draw(SvgDrawing drawing, Labels labels)

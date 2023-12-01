@@ -140,7 +140,7 @@ namespace SimpleCircuit
 
             // If labels were found, let's try drawing the labels
             if (context.Anchors.Count > 0 && context.Labels != null && context.Labels.Count > 0)
-                new CustomLabelAnchorPoints(context.Anchors.ToArray()).Draw(this, context.Labels);
+                new CustomLabelAnchorPoints([.. context.Anchors]).Draw(this, context.Labels);
 
             if (transform)
                 EndTransform();
@@ -373,7 +373,7 @@ namespace SimpleCircuit
             string markers = node.Attributes?["marker-start"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
-                startMarkers ??= new HashSet<Marker>();
+                startMarkers ??= [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
                     AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
@@ -382,7 +382,7 @@ namespace SimpleCircuit
             markers = node.Attributes?["marker-end"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
-                endMarkers ??= new HashSet<Marker>();
+                endMarkers ??= [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
                     AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
@@ -847,9 +847,9 @@ namespace SimpleCircuit
             var elt = _document.CreateElement($"sc:{tag}", SimpleCircuitNamespace);
 
             // If the text contains data that is multiline, add a newline before and after content for easier reading
-            if (content.IndexOfAny(new[] { '\r', '\n' }) >= 0)
+            if (content.IndexOfAny(['\r', '\n']) >= 0)
                 content = Environment.NewLine + content + Environment.NewLine;
-            if (content.IndexOfAny(new[] { '"', '\'', '<', '>', '&' }) >= 0)
+            if (content.IndexOfAny(['"', '\'', '<', '>', '&']) >= 0)
                 elt.AppendChild(_document.CreateCDataSection(content));
             else
                 elt.InnerText = content;

@@ -9,15 +9,20 @@ namespace SimpleCircuit.Parser
     /// <summary>
     /// Information for components.
     /// </summary>
-    public class ComponentInfo : IDrawableInfo
+    /// <remarks>
+    /// Creates a new component information.
+    /// </remarks>
+    /// <param name="name">The token name.</param>
+    /// <param name="fullname">The full name of the component.</param>
+    public class ComponentInfo(Token name, string fullname) : IDrawableInfo
     {
-        private IDrawable _component;
+        private IDrawable _component = null;
 
         /// <inheritdoc />
-        public Token Source { get; }
+        public Token Source { get; } = name;
 
         /// <inheritdoc />
-        public string Fullname { get; }
+        public string Fullname { get; } = fullname;
 
         /// <inheritdoc />
         public IList<Token> Labels { get; } = new List<Token>(2);
@@ -32,18 +37,6 @@ namespace SimpleCircuit.Parser
         /// Gets the component if it has been created.
         /// </summary>
         public IDrawable Component => _component;
-
-        /// <summary>
-        /// Creates a new component information.
-        /// </summary>
-        /// <param name="name">The token name.</param>
-        /// <param name="fullname">The full name of the component.</param>
-        public ComponentInfo(Token name, string fullname)
-        {
-            Source = name;
-            Fullname = fullname;
-            _component = null;
-        }
 
         /// <summary>
         /// Gets or creates a component.

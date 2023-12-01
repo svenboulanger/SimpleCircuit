@@ -7,11 +7,15 @@ namespace SimpleCircuit.Drawing
     /// <summary>
     /// A class for building an SVG path.
     /// </summary>
-    public class PathBuilder
+    /// <remarks>
+    /// Creates a new path builder.
+    /// </remarks>
+    /// <param name="transform">The transform.</param>
+    public class PathBuilder(Transform transform)
     {
         private readonly StringBuilder _sb = new();
         private bool _isFirst = true;
-        private readonly ExpandableBounds _bounds;
+        private readonly ExpandableBounds _bounds = new();
         private Vector2 _p1, _n1, _h1, _p2, _n2, _h2; // The local coordinate handles and points
         private Vector2 _last; // The last global coordinate
         private char _impliedAction = '\0';
@@ -44,17 +48,7 @@ namespace SimpleCircuit.Drawing
         /// <summary>
         /// Gets or sets the transform for the path builder.
         /// </summary>
-        public Transform Transform { get; } = Transform.Identity;
-
-        /// <summary>
-        /// Creates a new path builder.
-        /// </summary>
-        /// <param name="transform">The transform.</param>
-        public PathBuilder(Transform transform)
-        {
-            _bounds = new();
-            Transform = transform;
-        }
+        public Transform Transform { get; } = transform;
 
         /// <summary>
         /// Initializes the path to the correct origin.
@@ -380,7 +374,7 @@ namespace SimpleCircuit.Drawing
             end = Transform.Apply(end);
             Append($"{Action('C')}{Convert(h1)} {Convert(h2)} {Convert(end)}");
             _last = end;
-            _bounds.Expand(new[] { h1, h2, end });
+            _bounds.Expand([h1, h2, end]);
             return this;
         }
 
@@ -407,7 +401,7 @@ namespace SimpleCircuit.Drawing
             Vector2 end = Transform.Apply(_p2);
             Append($"{Action('c')}{Convert(h1 - _last)} {Convert(h2 - _last)} {Convert(end - _last)}");
             _last = end;
-            _bounds.Expand(new[] { h1, h2, end });
+            _bounds.Expand([h1, h2, end]);
             return this;
         }
 
@@ -433,7 +427,7 @@ namespace SimpleCircuit.Drawing
             end = Transform.Apply(end);
             Append($"{Action('S')}{Convert(h2)} {Convert(end)}");
             _last = end;
-            _bounds.Expand(new[] { h1, h2, end });
+            _bounds.Expand([h1, h2, end]);
             return this;
         }
 
@@ -459,7 +453,7 @@ namespace SimpleCircuit.Drawing
             Vector2 end = Transform.Apply(_p2);
             Append($"{Action('s')}{Convert(h2 - _last)} {Convert(end - _last)}");
             _last = end;
-            _bounds.Expand(new[] { h1, h2, end });
+            _bounds.Expand([h1, h2, end]);
             return this;
         }
 
@@ -484,7 +478,7 @@ namespace SimpleCircuit.Drawing
             end = Transform.Apply(end);
             Append($"{Action('Q')}{Convert(h)} {Convert(end)}");
             _last = end;
-            _bounds.Expand(new[] { h, end });
+            _bounds.Expand([h, end]);
             return this;
         }
 
@@ -509,7 +503,7 @@ namespace SimpleCircuit.Drawing
             Vector2 end = Transform.Apply(_p2);
             Append($"{Action('q')}{Convert(h)} {Convert(end)}");
             _last = end;
-            _bounds.Expand(new[] { h, end });
+            _bounds.Expand([h, end]);
             return this;
         }
 
@@ -533,7 +527,7 @@ namespace SimpleCircuit.Drawing
             end = Transform.Apply(end);
             Append($"{Action('T')}{Convert(end)}");
             _last = end;
-            _bounds.Expand(new[] { h, end });
+            _bounds.Expand([h, end]);
             return this;
         }
 
@@ -557,7 +551,7 @@ namespace SimpleCircuit.Drawing
             Vector2 end = Transform.Apply(_p2);
             Append($"{Action('t')}{Convert(end - _last)}");
             _last = end;
-            _bounds.Expand(new[] { h, end });
+            _bounds.Expand([h, end]);
             return this;
         }
 

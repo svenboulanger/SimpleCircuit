@@ -635,10 +635,10 @@ namespace SimpleCircuitOnline.Pages
         }
         private async Task UpdateKeywords(ParsingContext context)
         {
-            List<string[]> keys = new();
+            List<string[]> keys = [];
             foreach (var pair in context.Factory.Factories)
             {
-                keys.Add(new string[] { pair.Key, pair.Value.GetMetadata(pair.Key)?.Description ?? "?" });
+                keys.Add([pair.Key, pair.Value.GetMetadata(pair.Key)?.Description ?? "?"]);
             }
             await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
         }

@@ -13,7 +13,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled, IBoxLabeled
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IBoxLabeled
         {
             private double _width = 30.0, _height = 15.0;
 
@@ -57,20 +61,10 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
 
-            /// <summary>
-            /// Creates a new instance.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
-
             private void DrawPath(PathBuilder builder)
             {
                 double a = Width * 0.5;
                 double b = Height * 0.5;
-                double r = Width * 0.5;
 
                 Vector2 aa = new(-a, b);
                 Vector2 ab = new(0, b);

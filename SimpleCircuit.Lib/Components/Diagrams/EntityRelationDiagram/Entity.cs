@@ -4,7 +4,6 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -15,7 +14,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : LocatedDrawable, ILabeled, IRoundedBox
+        /// <summary>
+        /// Creates a new entity.
+        /// </summary>
+        /// <param name="name">The name of the entity.</param>
+        private class Instance(string name) : LocatedDrawable(name), ILabeled, IRoundedBox
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -46,15 +49,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// Gets the height of the entity block (only valid after <see cref="Reset(IDiagnosticHandler)"/>).
             /// </summary>
             protected double Height { get; private set; }
-
-            /// <summary>
-            /// Creates a new entity.
-            /// </summary>
-            /// <param name="name">The name of the entity.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)

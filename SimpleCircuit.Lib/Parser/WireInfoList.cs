@@ -8,7 +8,7 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class WireInfoList : IEnumerable<WireInfo>
     {
-        private readonly List<WireInfo> _wires = new();
+        private readonly List<WireInfo> _wires = [];
 
         /// <summary>
         /// Gets the wire info at the specified index.

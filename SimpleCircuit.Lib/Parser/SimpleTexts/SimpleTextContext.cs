@@ -7,19 +7,20 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A context for parsing SimpleCircuit text.
     /// </summary>
-    public class SimpleTextContext
+    /// <remarks>
+    /// Creates a new <see cref="SimpleTextContext"/>.
+    /// </remarks>
+    public class SimpleTextContext(XmlNode parent, ITextMeasurer measurer)
     {
-        private XmlNode _text = null;
-
         /// <summary>
         /// Gets the document.
         /// </summary>
-        public XmlDocument Document { get; }
+        public XmlDocument Document { get; } = parent.OwnerDocument;
 
         /// <summary>
         /// Gets the parent node.
         /// </summary>
-        public XmlNode Parent { get; }
+        public XmlNode Parent { get; } = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <summary>
         /// Gets the current line.
@@ -29,7 +30,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <summary>
         /// Gets the text measurer.
         /// </summary>
-        public ITextMeasurer Measurer { get; }
+        public ITextMeasurer Measurer { get; } = measurer ?? new SkiaTextMeasurer();
 
         /// <summary>
         /// Gets the text builder.
@@ -55,15 +56,5 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// Gets the alignment for multiple lines.
         /// </summary>
         public double Align { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="SimpleTextContext"/>.
-        /// </summary>
-        public SimpleTextContext(XmlNode parent, ITextMeasurer measurer)
-        {
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            Document = parent.OwnerDocument;
-            Measurer = measurer ?? new SkiaTextMeasurer();
-        }
     }
 }

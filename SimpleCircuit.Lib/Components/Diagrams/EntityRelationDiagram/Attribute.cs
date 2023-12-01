@@ -11,7 +11,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : DiagramBlockInstance, ILabeled, IEllipseLabeled
+        /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IEllipseLabeled
         {
             /// <inheritdoc />
             public Labels Labels { get; } = new Labels();
@@ -40,15 +44,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             Vector2 IEllipseLabeled.Center => new();
             double IEllipseLabeled.RadiusX => Width * 0.5;
             double IEllipseLabeled.RadiusY => Height * 0.5;
-
-            /// <summary>
-            /// Creates a new attribute.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

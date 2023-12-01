@@ -11,21 +11,16 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ModelingDrawable
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ModelingDrawable(name)
         {
             private const string _pathData = @"M0.75 -1 l-1.5 0 1 1 -1 1 1.5 0";
 
             /// <inheritdoc />
             public override string Type => "addition";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

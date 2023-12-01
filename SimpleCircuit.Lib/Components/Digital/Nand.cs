@@ -14,7 +14,11 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled, IStandardizedDrawable, IBoxLabeled
         {
             private int _inputs = 2;
             private double _spacing = 5;
@@ -90,15 +94,6 @@ namespace SimpleCircuit.Components.Digital
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
-            {
-            }
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)

@@ -5,7 +5,12 @@ namespace SimpleCircuit
     /// <summary>
     /// A 2D vector.
     /// </summary>
-    public struct Vector2 : IEquatable<Vector2>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="Vector2"/> struct.
+    /// </remarks>
+    /// <param name="x">The x.</param>
+    /// <param name="y">The y.</param>
+    public struct Vector2(double x, double y) : IEquatable<Vector2>
     {
         private const int _precision = 9;
         private const double _dblPrecision = 1e-9;
@@ -16,7 +21,7 @@ namespace SimpleCircuit
         /// <value>
         /// The x-coordinate.
         /// </value>
-        public double X { get; }
+        public double X { get; } = x;
 
         /// <summary>
         /// Gets the y-coordinate.
@@ -24,7 +29,7 @@ namespace SimpleCircuit
         /// <value>
         /// The y-coordinate.
         /// </value>
-        public double Y { get; }
+        public double Y { get; } = y;
 
         /// <summary>
         /// Gets the vector that is perpendicular and of the same length.
@@ -41,17 +46,6 @@ namespace SimpleCircuit
         /// The length.
         /// </value>
         public readonly double Length => Math.Sqrt(X * X + Y * Y);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Vector2"/> struct.
-        /// </summary>
-        /// <param name="x">The x.</param>
-        /// <param name="y">The y.</param>
-        public Vector2(double x, double y)
-        {
-            X = x;
-            Y = y;
-        }
 
         /// <summary>
         /// Returns a hash code for this instance.
@@ -73,7 +67,7 @@ namespace SimpleCircuit
         /// <returns>
         ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is Vector2 vec)
                 return Equals(vec);

@@ -5,16 +5,12 @@ namespace SimpleCircuit.Parser.Variants
     /// <summary>
     /// A lexer for parsing variant combinations.
     /// </summary>
-    public class VariantLexer : Lexer<TokenType>
+    /// <remarks>
+    /// Creates a new <see cref="VariantLexer"/>.
+    /// </remarks>
+    /// <param name="text">The text.</param>
+    public class VariantLexer(string text) : Lexer<TokenType>(text.AsMemory(), text)
     {
-        /// <summary>
-        /// Creates a new <see cref="VariantLexer"/>.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        public VariantLexer(string text)
-            : base(text.AsMemory(), text)
-        {
-        }
 
         /// <inheritdoc />
         public override bool Check(TokenType flags) => (Type & flags) != 0;

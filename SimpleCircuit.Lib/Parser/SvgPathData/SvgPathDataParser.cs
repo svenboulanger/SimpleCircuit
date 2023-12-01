@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Drawing.Markers;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SvgPathData
@@ -10,15 +9,10 @@ namespace SimpleCircuit.Parser.SvgPathData
     /// </summary>
     public static class SvgPathDataParser
     {
-        public struct MarkerLocation
+        public readonly struct MarkerLocation(Vector2 location, Vector2 normal)
         {
-            public Vector2 Location { get; }
-            public Vector2 Normal { get; }
-            public MarkerLocation(Vector2 location, Vector2 normal)
-            {
-                Location = location;
-                Normal = normal;
-            }
+            public Vector2 Location { get; } = location;
+            public Vector2 Normal { get; } = normal;
         }
 
         /// <summary>
@@ -313,22 +307,6 @@ namespace SimpleCircuit.Parser.SvgPathData
                 }
             }
             return new MarkerLocation(startLocation, startNormal);
-        }
-
-        private static void DrawMarkers(HashSet<Marker> markers, SvgDrawing drawing, Vector2 location, Vector2 normal)
-        {
-            if (markers == null)
-                return;
-            if (normal.IsZero())
-                normal = new(1, 0);
-            else
-                normal /= normal.Length;
-            foreach (var marker in markers)
-            {
-                marker.Location = location;
-                marker.Orientation = normal;
-                marker.Draw(drawing);
-            }
         }
     }
 }

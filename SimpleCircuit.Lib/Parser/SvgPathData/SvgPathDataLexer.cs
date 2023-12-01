@@ -2,16 +2,12 @@
 
 namespace SimpleCircuit.Parser.SvgPathData
 {
-    public class SvgPathDataLexer : Lexer<TokenType>
+    /// <summary>
+    /// Creates a new <see cref="SvgPathDataLexer"/>
+    /// </summary>
+    /// <param name="data">The data.</param>
+    public class SvgPathDataLexer(ReadOnlyMemory<char> data) : Lexer<TokenType>(data)
     {
-        /// <summary>
-        /// Creates a new <see cref="SvgPathDataLexer"/>
-        /// </summary>
-        /// <param name="data">The data.</param>
-        public SvgPathDataLexer(ReadOnlyMemory<char> data)
-            : base(data)
-        {
-        }
 
         /// <inheritdoc />
         public override bool Check(TokenType flags) => (Type & flags) != 0;

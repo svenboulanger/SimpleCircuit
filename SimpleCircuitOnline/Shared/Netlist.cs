@@ -3,27 +3,21 @@
     /// <summary>
     /// A struct for a netlist.
     /// </summary>
-    public readonly struct Netlist
+    /// <remarks>
+    /// Creates a new <see cref="Netlist"/>.
+    /// </remarks>
+    /// <param name="script">The script.</param>
+    /// <param name="style">The style.</param>
+    public readonly struct Netlist(string script, string style)
     {
         /// <summary>
         /// Gets the script part of the netlist.
         /// </summary>
-        public string Script { get; }
+        public string Script { get; } = script;
 
         /// <summary>
         /// Gets the style part of the netlist.
         /// </summary>
-        public string Style { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="Netlist"/>.
-        /// </summary>
-        /// <param name="script">The script.</param>
-        /// <param name="style">The style.</param>
-        public Netlist(string script, string style)
-        {
-            Script = script;
-            Style = style;
-        }
+        public string Style { get; } = style;
     }
 }

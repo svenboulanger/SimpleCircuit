@@ -25,7 +25,7 @@ namespace SimpleCircuit.Components.Diagrams
         protected virtual IEnumerable<string> GroupClasses { get; }
 
         /// <inheritdoc />
-        public VariantSet Variants { get; } = new();
+        public VariantSet Variants { get; } = [];
 
         /// <inheritdoc />
         public int Order => 0;

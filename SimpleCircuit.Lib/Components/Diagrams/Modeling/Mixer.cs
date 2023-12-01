@@ -9,18 +9,14 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ModelingDrawable
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ModelingDrawable(name)
         {
             /// <inheritdoc />
             public override string Type => "mixer";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name) : base(name)
-            {
-            }
 
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)

@@ -11,7 +11,7 @@ namespace SimpleCircuitOnline
         /// <summary>
         /// Gets the error messages.
         /// </summary>
-        public List<IDiagnosticMessage> Messages { get; } = new();
+        public List<IDiagnosticMessage> Messages { get; } = [];
 
         /// <summary>
         /// Gets the number of errors tracked by the logger.

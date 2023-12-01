@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Analog
                 double l = Length * 0.5;
 
                 // The resistor
-                List<Vector2> points = new();
+                List<Vector2> points = [];
                 double increment = Length / Zigs * 0.5;
                 double x = -l;
                 points.Add(new(x, 0));

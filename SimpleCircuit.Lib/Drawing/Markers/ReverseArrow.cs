@@ -5,7 +5,7 @@
     /// </summary>
     public class ReverseArrow : Marker
     {
-        private readonly static Vector2[] _points = new Vector2[] { new(0, -1), new(-2.5, 0), new(0, 1) };
+        private readonly static Vector2[] _points = [new(0, -1), new(-2.5, 0), new(0, 1)];
 
         /// <summary>
         /// Gets the default arrow options.

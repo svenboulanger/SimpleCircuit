@@ -7,9 +7,16 @@ namespace SimpleCircuit.Components.Pins
     /// <summary>
     /// A pin with a loose oriententation (the orientation is set by whoever tries setting it).
     /// </summary>
-    public class LooselyOrientedPin : Pin, IOrientedPin
+    /// <remarks>
+    /// Creates an loosely oriented pin. This means that the pin can still be oriented
+    /// but its location can also be fixed.
+    /// </remarks>
+    /// <param name="name"></param>
+    /// <param name="description"></param>
+    /// <param name="owner"></param>
+    public class LooselyOrientedPin(string name, string description, ILocatedDrawable owner) : Pin(name, description, owner), IOrientedPin
     {
-        private readonly ILocatedDrawable _origin;
+        private readonly ILocatedDrawable _origin = owner;
 
         /// <inheritdoc />
         public bool HasFixedOrientation { get; private set; }
@@ -24,19 +31,6 @@ namespace SimpleCircuit.Components.Pins
         /// Gets or sets the offset of the pin relative to its owner.
         /// </summary>
         public Vector2 Offset { get; set; }
-
-        /// <summary>
-        /// Creates an loosely oriented pin. This means that the pin can still be oriented
-        /// but its location can also be fixed.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
-        /// <param name="owner"></param>
-        public LooselyOrientedPin(string name, string description, ILocatedDrawable owner)
-            : base(name, description, owner)
-        {
-            _origin = owner;
-        }
 
         /// <inheritdoc />
         public override bool DiscoverNodeRelationships(IRelationshipContext context)

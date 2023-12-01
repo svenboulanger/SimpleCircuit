@@ -10,10 +10,17 @@ namespace SimpleCircuit.Components.Constraints
     /// <summary>
     /// A constraint placed on the orientation of a pin.
     /// </summary>
-    public class PinOrientationConstraint : ICircuitPresence
+    /// <remarks>
+    /// Creates a new <see cref="PinOrientationConstraint"/>.
+    /// </remarks>
+    /// <param name="name">The name of the constraint.</param>
+    /// <param name="pin">The name of the pin.</param>
+    /// <param name="defaultIndex">The default pin index if no pin is given.</param>
+    /// <param name="segment">The orientation of the pin.</param>
+    public class PinOrientationConstraint(string name, PinInfo pin, int defaultIndex, WireSegmentInfo segment, bool invert) : ICircuitPresence
     {
         /// <inheritdoc />
-        public string Name { get; }
+        public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
 
         /// <inheritdoc />
         /// <remarks>
@@ -24,39 +31,23 @@ namespace SimpleCircuit.Components.Constraints
         /// <summary>
         /// Gets the pin information.
         /// </summary>
-        public PinInfo Pin { get; }
+        public PinInfo Pin { get; } = pin;
 
         /// <summary>
         /// Gets the default index if no pin is specified.
         /// A negative value will count from the last pin down.
         /// </summary>
-        public int DefaultIndex { get; }
+        public int DefaultIndex { get; } = defaultIndex;
 
         /// <summary>
         /// Gets the wire segment that needs to be constrained with.
         /// </summary>
-        public WireSegmentInfo Segment { get; }
+        public WireSegmentInfo Segment { get; } = segment;
 
         /// <summary>
         /// Gets whether the orientation needs to be inverted compared to the wire segment.
         /// </summary>
-        public bool Invert { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="PinOrientationConstraint"/>.
-        /// </summary>
-        /// <param name="name">The name of the constraint.</param>
-        /// <param name="pin">The name of the pin.</param>
-        /// <param name="defaultIndex">The default pin index if no pin is given.</param>
-        /// <param name="segment">The orientation of the pin.</param>
-        public PinOrientationConstraint(string name, PinInfo pin, int defaultIndex, WireSegmentInfo segment, bool invert)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Pin = pin;
-            DefaultIndex = defaultIndex;
-            Segment = segment;
-            Invert = invert;
-        }
+        public bool Invert { get; } = invert;
 
         /// <inheritdoc />
         public bool Reset(IResetContext context) => true;

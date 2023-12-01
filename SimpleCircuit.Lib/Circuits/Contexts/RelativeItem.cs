@@ -3,28 +3,22 @@
     /// <summary>
     /// An item that is relative to another item.
     /// </summary>
-    public readonly struct RelativeItem
+    /// <remarks>
+    /// Creates a new <see cref="RelativeItem"/>.
+    /// </remarks>
+    /// <param name="representative">The representative.</param>
+    /// <param name="offset">The offset.</param>
+    public readonly struct RelativeItem(string representative, double offset)
     {
         /// <summary>
         /// Gets the representative that this item is relative to.
         /// </summary>
-        public string Representative { get; }
+        public string Representative { get; } = representative;
 
         /// <summary>
         /// Gets the offset compared to the representative item.
         /// </summary>
-        public double Offset { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="RelativeItem"/>.
-        /// </summary>
-        /// <param name="representative">The representative.</param>
-        /// <param name="offset">The offset.</param>
-        public RelativeItem(string representative, double offset)
-        {
-            Representative = representative;
-            Offset = offset;
-        }
+        public double Offset { get; } = offset;
 
         /// <summary>
         /// Converts the relative item to a string.
