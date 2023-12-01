@@ -26,8 +26,6 @@ namespace SimpleCircuit.Components
             var instance = (Instance)base.Create(key, name, options, diagnostics);
             if (options != null)
             {
-                instance.MinSpaceX = options.HorizontalPinSpacing;
-                instance.MinSpaceY = options.VerticalPinSpacing;
                 instance.Labels.FontSize = options.FontSize;
                 instance.TextSize = options.FontSize;
             }

@@ -172,7 +172,7 @@
             double thickness = context.FontSize * 0.075;
 
             var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
-            element.SetAttribute("style", $"stroke-width:{thickness.ToCoordinate()}pt;fill:none;");
+            element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
             context.Parent.AppendChild(element);
 
             return new OverlineSpan(element, @base, margin, thickness);
@@ -183,7 +183,7 @@
             double thickness = context.FontSize * 0.075;
 
             var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
-            element.SetAttribute("style", $"stroke-width:{thickness.ToCoordinate()}pt;fill:none;");
+            element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
             context.Parent.AppendChild(element);
 
             return new UnderlineSpan(element, @base, margin, thickness);
@@ -197,7 +197,7 @@
 
             // Create the XML element
             var element = context.Document.CreateElement("tspan", SvgDrawing.Namespace);
-            element.SetAttribute("style", $"font-family:{context.Measurer.FontFamily};font-size:{context.FontSize.ToCoordinate()}pt;");
+            element.SetAttribute("style", $"font-family:{context.Measurer.FontFamily};font-size:{context.FontSize.ToSVG()}pt;");
             element.InnerXml = content;
             context.Text.AppendChild(element);
 

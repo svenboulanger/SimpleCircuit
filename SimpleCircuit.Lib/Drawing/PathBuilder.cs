@@ -57,7 +57,7 @@ namespace SimpleCircuit.Drawing
         {
             if (_isFirst && !Transform.Offset.IsZero())
             {
-                Append($"M{Convert(Transform.Offset)}");
+                Append($"M{Transform.Offset.ToSVG()}");
                 _last = Transform.Offset;
             }
         }
@@ -76,7 +76,7 @@ namespace SimpleCircuit.Drawing
 
             // Draw in global coordinate space
             location = Transform.Apply(location);
-            Append($"{Action('M', 'L')}{Convert(location)}");
+            Append($"{Action('M', 'L')}{location.ToSVG()}");
             _last = location;
             _bounds.Expand(location);
             return this;
@@ -108,7 +108,7 @@ namespace SimpleCircuit.Drawing
 
             // Draw in global coordinate space
             delta = Transform.ApplyDirection(delta);
-            Append($"{Action('m', 'l')}{Convert(delta)}");
+            Append($"{Action('m', 'l')}{delta.ToSVG()}");
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -130,11 +130,11 @@ namespace SimpleCircuit.Drawing
             if (horiz && vert)
                 return;
             else if (horiz)
-                Append($"{Action('h')}{Convert(delta.X)}");
+                Append($"{Action('h')}{delta.X.ToSVG()}");
             else if (vert)
-                Append($"{Action('v')}{Convert(delta.Y)}");
+                Append($"{Action('v')}{delta.Y.ToSVG()}");
             else
-                Append($"{Action('l')}{Convert(delta)}");
+                Append($"{Action('l')}{delta.ToSVG()}");
         }
 
         /// <summary>
@@ -372,7 +372,7 @@ namespace SimpleCircuit.Drawing
             h1 = Transform.Apply(h1);
             h2 = Transform.Apply(h2);
             end = Transform.Apply(end);
-            Append($"{Action('C')}{Convert(h1)} {Convert(h2)} {Convert(end)}");
+            Append($"{Action('C')}{h1.ToSVG()} {h2.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -399,7 +399,7 @@ namespace SimpleCircuit.Drawing
             Vector2 h1 = Transform.Apply(_h1);
             Vector2 h2 = Transform.Apply(_h2);
             Vector2 end = Transform.Apply(_p2);
-            Append($"{Action('c')}{Convert(h1 - _last)} {Convert(h2 - _last)} {Convert(end - _last)}");
+            Append($"{Action('c')}{(h1 - _last).ToSVG()} {(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -425,7 +425,7 @@ namespace SimpleCircuit.Drawing
             Vector2 h1 = Transform.Apply(_h1);
             Vector2 h2 = Transform.Apply(_h2);
             end = Transform.Apply(end);
-            Append($"{Action('S')}{Convert(h2)} {Convert(end)}");
+            Append($"{Action('S')}{h2.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -451,7 +451,7 @@ namespace SimpleCircuit.Drawing
             Vector2 h1 = Transform.Apply(_h1);
             Vector2 h2 = Transform.Apply(_h2);
             Vector2 end = Transform.Apply(_p2);
-            Append($"{Action('s')}{Convert(h2 - _last)} {Convert(end - _last)}");
+            Append($"{Action('s')}{(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -476,7 +476,7 @@ namespace SimpleCircuit.Drawing
             // Draw in global coordinate space
             h = Transform.Apply(h);
             end = Transform.Apply(end);
-            Append($"{Action('Q')}{Convert(h)} {Convert(end)}");
+            Append($"{Action('Q')}{h.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -501,7 +501,7 @@ namespace SimpleCircuit.Drawing
             // Draw in global coordinate space
             Vector2 h = Transform.Apply(_h1);
             Vector2 end = Transform.Apply(_p2);
-            Append($"{Action('q')}{Convert(h)} {Convert(end)}");
+            Append($"{Action('q')}{h.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -525,7 +525,7 @@ namespace SimpleCircuit.Drawing
             // Draw in global coordinate space
             Vector2 h = Transform.Apply(_h1);
             end = Transform.Apply(end);
-            Append($"{Action('T')}{Convert(end)}");
+            Append($"{Action('T')}{end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -549,7 +549,7 @@ namespace SimpleCircuit.Drawing
             // Draw in global coordinate space
             Vector2 h = Transform.Apply(_h1);
             Vector2 end = Transform.Apply(_p2);
-            Append($"{Action('t')}{Convert(end - _last)}");
+            Append($"{Action('t')}{(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -770,30 +770,6 @@ namespace SimpleCircuit.Drawing
                 _sb.Append(' ');
             _sb.Append(cmd);
         }
-
-        /// <summary>
-        /// Converts a double to a rounded value for our svg-document.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The formatted value.</returns>
-        private static string Convert(double value)
-        {
-            string result = Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-            int length = result.Length - 1;
-            while (result[length] == '0')
-                length--;
-            if (result[length] == '.')
-                return result[..length];
-            return result[..(length + 1)];
-        }
-
-        /// <summary>
-        /// Converts a vector to a string for our svg document.
-        /// </summary>
-        /// <param name="v">The vector.</param>
-        /// <returns>The formatted value.</returns>
-        private static string Convert(Vector2 v)
-        => $"{Convert(v.X)} {Convert(v.Y)}";
 
         /// <summary>
         /// Gets the optional action.

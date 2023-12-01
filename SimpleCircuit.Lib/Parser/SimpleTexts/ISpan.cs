@@ -42,8 +42,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <inheritdoc />
         public void Update(Vector2 offset)
         {
-            Element.SetAttribute("x", offset.X.ToCoordinate());
-            Element.SetAttribute("y", offset.Y.ToCoordinate());
+            Element.SetAttribute("x", offset.X.ToSVG());
+            Element.SetAttribute("y", offset.Y.ToSVG());
         }
     }
 
@@ -279,9 +279,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         {
             Base.Update(offset);
 
-            string y = (offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5).ToCoordinate();
-            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToCoordinate();
-            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToCoordinate();
+            string y = (offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5).ToSVG();
+            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToSVG();
+            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToSVG();
             Element.SetAttribute("d", $"M{x1} {y} L{x2} {y}");
         }
     }
@@ -331,9 +331,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         {
             Base.Update(offset);
 
-            string y = (offset.Y + Base.Bounds.Bounds.Bottom + Margin + Thickness * 0.5).ToCoordinate();
-            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToCoordinate();
-            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToCoordinate();
+            string y = (offset.Y + Base.Bounds.Bounds.Bottom + Margin + Thickness * 0.5).ToSVG();
+            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToSVG();
+            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToSVG();
             Element.SetAttribute("d", $"M{x1} {y} L{x2} {y}");
         }
     }

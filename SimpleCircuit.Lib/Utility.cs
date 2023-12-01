@@ -296,12 +296,11 @@ namespace SimpleCircuit
         }
 
         /// <summary>
-        /// Converts a scalar value to a coordinate for SVG. It will automatically
-        /// round to two digits.
+        /// Converts a scalar value to a coordinate for SVG. It will automatically round the value.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The string representing the value.</returns>
-        public static string ToCoordinate(this double value)
+        public static string ToSVG(this double value)
         {
             string result = Math.Round(value, 2).ToString("F2", CultureInfo.InvariantCulture);
             int length = result.Length - 1;
@@ -311,5 +310,13 @@ namespace SimpleCircuit
                 return result[..length];
             return result[..(length + 1)];
         }
+
+        /// <summary>
+        /// Converts a vector to a coordinate for SVG. It will automatically round the value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The string representing the value.</returns>
+        public static string ToSVG(this Vector2 value)
+            => $"{value.X.ToSVG()},{value.Y.ToSVG()}";
     }
 }

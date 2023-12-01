@@ -449,10 +449,10 @@ namespace SimpleCircuit
 
             // Create the line
             var line = _document.CreateElement("line", Namespace);
-            line.SetAttribute("x1", Convert(start.X));
-            line.SetAttribute("y1", Convert(start.Y));
-            line.SetAttribute("x2", Convert(end.X));
-            line.SetAttribute("y2", Convert(end.Y));
+            line.SetAttribute("x1", start.X.ToSVG());
+            line.SetAttribute("y1", start.Y.ToSVG());
+            line.SetAttribute("x2", end.X.ToSVG());
+            line.SetAttribute("y2", end.Y.ToSVG());
             options?.Apply(line);
             _current.AppendChild(line);
 
@@ -469,9 +469,9 @@ namespace SimpleCircuit
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
-            circle.SetAttribute("cx", Convert(position.X));
-            circle.SetAttribute("cy", Convert(position.Y));
-            circle.SetAttribute("r", Convert(radius));
+            circle.SetAttribute("cx", position.X.ToSVG());
+            circle.SetAttribute("cy", position.Y.ToSVG());
+            circle.SetAttribute("r", radius.ToSVG());
             options?.Apply(circle);
             _current.AppendChild(circle);
 
@@ -490,7 +490,7 @@ namespace SimpleCircuit
                 bounds.Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
-                sb.Append($"{Convert(tpt.X)},{Convert(tpt.Y)}");
+                sb.Append(tpt.ToSVG());
             }
 
             // Creates the poly
@@ -514,7 +514,7 @@ namespace SimpleCircuit
                 bounds.Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
-                sb.Append($"{Convert(tpt.X)},{Convert(tpt.Y)}");
+                sb.Append(tpt.ToSVG());
             }
 
             // Create the element
@@ -545,9 +545,9 @@ namespace SimpleCircuit
                 }
                 switch (v.Length)
                 {
-                    case 1: sb.Append($"M{Convert(v[0])}"); break;
-                    case 3: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
-                    default: sb.Append($"S{Convert(v[0])} {Convert(v[1])} {Convert(v[2])} {Convert(v[3])}"); break;
+                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
+                    case 3: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
+                    default: sb.Append($"S{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()} {v[3].ToSVG()}"); break;
                 }
             }
 
@@ -579,8 +579,8 @@ namespace SimpleCircuit
                 }
                 switch (v.Length)
                 {
-                    case 1: sb.Append($"M{Convert(v[0])}"); break;
-                    default: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
+                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
+                    default: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
                 }
             }
             sb.Append("Z");
@@ -613,8 +613,8 @@ namespace SimpleCircuit
                     sb.Append(' ');
                 switch (v.Length)
                 {
-                    case 1: sb.Append($"M{Convert(v[0])}"); break;
-                    default: sb.Append($"C{Convert(v[0])} {Convert(v[1])} {Convert(v[2])}"); break;
+                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
+                    default: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
                 }
             }
 
@@ -824,7 +824,7 @@ namespace SimpleCircuit
             bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);
             svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());
             svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
-            svg.SetAttribute("viewBox", $"{Convert(bounds.Left)} {Convert(bounds.Top)} {Convert(bounds.Width)} {Convert(bounds.Height)}");
+            svg.SetAttribute("viewBox", $"{bounds.Left.ToSVG()} {bounds.Top.ToSVG()} {bounds.Width.ToSVG()} {bounds.Height.ToSVG()}");
 
             return _document;
         }
@@ -855,29 +855,5 @@ namespace SimpleCircuit
                 elt.InnerText = content;
             metadata.AppendChild(elt);
         }
-
-        /// <summary>
-        /// Converts a double to a rounded value for our svg-document.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The formatted value.</returns>
-        private static string Convert(double value)
-        {
-            string result = Math.Round(value, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-            int length = result.Length - 1;
-            while (result[length] == '0')
-                length--;
-            if (result[length] == '.')
-                return result[..length];
-            return result[..(length + 1)];
-        }
-
-        /// <summary>
-        /// Converts a vector to a string for our svg document.
-        /// </summary>
-        /// <param name="v">The vector.</param>
-        /// <returns>The formatted value.</returns>
-        private static string Convert(Vector2 v)
-            => $"{Convert(v.X)} {Convert(v.Y)}";
     }
 }
