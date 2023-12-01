@@ -264,14 +264,16 @@ function registerLanguage(keywords) {
     });
 }
 
-const div_measure = document.getElementById('div_measure');
 const svg_style = document.getElementById('svg-style');
 const canvas_measure = document.getElementById('canvas');
 const context = canvas_measure.getContext('2d');
+const div_decode = document.getElementById('div_decode');
 
 function measureText(text, fontfamily, size) {
     context.font = size + 'pt ' + fontfamily;
-    var metrics = context.measureText(text)
+    div_decode.innerHTML = text;
+    var metrics = context.measureText(div_decode.innerText);
+    div_decode.innerText = '';
     return {
         l: 0,
         t: -metrics.actualBoundingBoxAscent,

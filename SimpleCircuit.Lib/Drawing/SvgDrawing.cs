@@ -676,10 +676,13 @@ namespace SimpleCircuit
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
 
-            // Parse the text and layout the elements
+            // Create the text element
             var text = _document.CreateElement("text", Namespace);
             options?.Apply(text);
             _current.AppendChild(text);
+
+            // Parse the text value
+            value = value.Replace("<", "&lt;").Replace(">", "&gt;");
             var lexer = new SimpleTextLexer(value);
             var context = new SimpleTextContext(_current, Measurer)
             {
