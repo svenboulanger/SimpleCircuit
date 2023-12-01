@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Digital
                 drawing.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
 
                 if (Pins["nq"].Connections > 0)
-                    drawing.Text("Q'", new Vector2(8, 6), new Vector2(-1, 0));
+                    drawing.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
 
                 new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }
