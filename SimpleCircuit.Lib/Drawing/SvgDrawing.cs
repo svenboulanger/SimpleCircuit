@@ -331,6 +331,7 @@ namespace SimpleCircuit
             success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
             success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
             success &= node.Attributes.ParseOptionalScalar("size", diagnostics, 4.0, out double size);
+            success &= node.Attributes.ParseOptionalScalar("line-spacing", diagnostics, 1.5, out double lineSpacing);
             if (!success)
                 return;
 
@@ -340,7 +341,7 @@ namespace SimpleCircuit
 
             if (value != null && context != null)
                 value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new Vector2(nx, ny), size, options);
+            Text(value, new Vector2(x, y), new Vector2(nx, ny), size: size, lineSpacing: lineSpacing, options: options);
         }
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
         {
@@ -668,7 +669,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public Bounds Text(string value, Vector2 location, Vector2 expand, double size = 4.0, GraphicOptions options = null)
+        public Bounds Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return default;
@@ -687,6 +688,7 @@ namespace SimpleCircuit
             var context = new SimpleTextContext(_current, Measurer)
             {
                 FontSize = size,
+                LineSpacing = lineSpacing,
                 Text = text,
                 Align = expand.X
             };

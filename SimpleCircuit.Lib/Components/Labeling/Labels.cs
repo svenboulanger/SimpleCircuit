@@ -15,6 +15,11 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         public double FontSize { get; set; } = 4.0;
 
+        /// <summary>
+        /// Gets or sets the default line spacing for labels.
+        /// </summary>
+        public double LineSpacing { get; set; } = 1.5;
+
         /// <inheritdoc />
         public LabelInfo this[int index]
         {
@@ -33,7 +38,8 @@ namespace SimpleCircuit.Components.Labeling
                 {
                     result = new LabelInfo()
                     {
-                        Size = FontSize
+                        Size = FontSize,
+                        LineSpacing = LineSpacing
                     };
                     _labels[index] = result;
                 }

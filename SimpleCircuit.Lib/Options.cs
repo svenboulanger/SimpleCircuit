@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
@@ -39,6 +40,9 @@ namespace SimpleCircuit
 
         [Description("The default font size for text. The default is 4.")]
         public double FontSize { get; set; } = 4.0;
+
+        [Description("The default line spacing for text. The default is 1.5.")]
+        public double LineSpacing { get; set; } = 1.5;
 
         /// <summary>
         /// Gets the current style.
@@ -145,9 +149,41 @@ namespace SimpleCircuit
         /// <summary>
         /// Applies the variants for the given drawable and key.
         /// </summary>
+        /// <param name="key">The drawable factory key.</param>
         /// <param name="drawable">The drawable.</param>
+        /// <param name="diagnostics">The diagnostics.</param>
         public void Apply(string key, IDrawable drawable, IDiagnosticHandler diagnostics)
         {
+            // Default scale
+            if (drawable is IScaledDrawable scaled)
+                scaled.Scale = Scale;
+
+            // Default standard
+            if (drawable is IStandardizedDrawable standardized)
+            {
+                if (Standard == Standards.AREI && (standardized.Supported & Standards.AREI) == Standards.AREI)
+                    standardized.Variants.Add(Arei);
+                if (Standard == Standards.European && (standardized.Supported & Standards.European) == Standards.European)
+                    standardized.Variants.Add(European);
+                if (Standard == Standards.American && (standardized.Supported & Standards.American) == Standards.American)
+                    standardized.Variants.Add(American);
+            }
+
+            // Rounded box
+            if (drawable is IRoundedBox rb)
+                rb.CornerRadius = CornerRadius;
+
+            // Labels
+            if (drawable is IBoxLabeled bl)
+                bl.LabelMargin = LabelMargin;
+            if (drawable is IEllipseLabeled el)
+                el.LabelMargin = LabelMargin;
+            if (drawable is ILabeled l)
+            {
+                l.Labels.FontSize = FontSize;
+                l.Labels.LineSpacing = LineSpacing;
+            }
+
             // Handle default variants
             if (_includes.TryGetValue(key, out var set))
             {

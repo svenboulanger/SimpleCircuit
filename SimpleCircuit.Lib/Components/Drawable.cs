@@ -157,16 +157,26 @@ namespace SimpleCircuit.Components
                             return true;
                         }
                     }
-                    else if (value is double number && (number - Math.Round(number)).IsZero())
+                    else if (value is double number)
                     {
-                        if (TryMatchIndexedProperty(property, "anchor", out index))
+                        if ((number - Math.Round(number)).IsZero())
                         {
-                            labeled.Labels[index].Location = ((int)Math.Round(number)).ToString();
-                            return true;
+                            // Integer-only
+                            if (TryMatchIndexedProperty(property, "anchor", out index))
+                            {
+                                labeled.Labels[index].Location = ((int)Math.Round(number)).ToString();
+                                return true;
+                            }
                         }
                         if (TryMatchIndexedProperty(property, "size", out index))
                         {
                             labeled.Labels[index].Size = number;
+                            return true;
+                        }
+                        if (TryMatchIndexedProperty(property, "linespacing", out index) ||
+                            TryMatchIndexedProperty(property, "ls", out index))
+                        {
+                            labeled.Labels[index].LineSpacing = number;
                             return true;
                         }
                     }

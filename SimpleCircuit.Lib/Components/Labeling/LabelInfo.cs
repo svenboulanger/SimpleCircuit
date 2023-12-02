@@ -18,7 +18,12 @@
         /// <summary>
         /// Gets or sets the label font size.
         /// </summary>
-        public double Size { get; set; } = SvgDrawing.DefaultFontSize;
+        public double Size { get; set; } = 4.0;
+
+        /// <summary>
+        /// Gets or sets the line spacing.
+        /// </summary>
+        public double LineSpacing { get; set; } = 1.5;
 
         /// <summary>
         /// Gets or sets the offset of the label compared to the default location.

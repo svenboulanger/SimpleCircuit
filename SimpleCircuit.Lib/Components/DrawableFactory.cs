@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -53,49 +52,7 @@ namespace SimpleCircuit.Components
         public virtual IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
         {
             var result = Factory(key, name);
-            if (options != null)
-            {
-                if (result is IScaledDrawable scaled)
-                    scaled.Scale = options.Scale;
-                if (result is IStandardizedDrawable standardized)
-                {
-                    switch (options.Standard)
-                    {
-                        case Standards.AREI:
-                            if ((standardized.Supported & Standards.AREI) == Standards.AREI)
-                                standardized.Variants.Add(Options.Arei);
-                            else
-                                goto default;
-                            break;
-
-                        case Standards.European:
-                            if ((standardized.Supported & Standards.European) == Standards.European)
-                                standardized.Variants.Add(Options.European);
-                            else
-                                goto default;
-                            break;
-
-                        case Standards.American:
-                            if ((standardized.Supported & Standards.American) == Standards.American)
-                                standardized.Variants.Add(Options.American);
-                            else
-                                goto default;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-                if (result is IRoundedBox rb)
-                    rb.CornerRadius = options.CornerRadius;
-                if (result is IBoxLabeled bl)
-                    bl.LabelMargin = options.LabelMargin;
-                if (result is IEllipseLabeled el)
-                    el.LabelMargin = options.LabelMargin;
-                if (result is ILabeled l)
-                    l.Labels.FontSize = options.FontSize;
-                options.Apply(key, result, diagnostics);
-            }
+            options?.Apply(key, result, diagnostics);
             return result;
         }
     }
