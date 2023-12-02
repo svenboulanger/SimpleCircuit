@@ -46,6 +46,8 @@ namespace SimpleCircuit.Parser
         /// <inheritdoc />
         protected override void ReadToken()
         {
+            bool isNewLine = Column == 1;
+
             // White spaces are trivia
             char c = Char;
             while (c == ' ' || c == '\t')
@@ -82,8 +84,14 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case '*':
-                        Type = TokenType.Times;
                         ContinueToken();
+                        if (isNewLine)
+                        {
+                            ContinueLineComment();
+                            isTrivia = true;
+                        }
+                        else
+                            Type = TokenType.Times;
                         break;
 
                     case '/':

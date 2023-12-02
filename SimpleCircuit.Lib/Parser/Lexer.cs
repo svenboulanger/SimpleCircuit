@@ -48,6 +48,16 @@ namespace SimpleCircuit.Parser
         }
 
         /// <summary>
+        /// Gets the column of the current character.
+        /// </summary>
+        protected int Column => _column;
+
+        /// <summary>
+        /// Gets the line of the current character.
+        /// </summary>
+        protected int Line => _line;
+
+        /// <summary>
         /// Creates a new <see cref="Lexer{T}"/>.
         /// </summary>
         /// <param name="reader">The text reader.</param>
