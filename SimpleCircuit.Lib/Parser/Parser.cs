@@ -73,9 +73,6 @@ namespace SimpleCircuit.Parser
                 case TokenType.OpenParenthesis:
                     return ParseVirtualChainStatement(lexer, context);
 
-                case TokenType.Dash:
-                    return ParsePropertyAssignmentStatement(lexer, context);
-
                 case TokenType.Newline:
                     lexer.Next();
                     return true;
@@ -371,58 +368,6 @@ namespace SimpleCircuit.Parser
             }
         }
 
-        private static bool ParsePropertyAssignmentStatement(SimpleCircuitLexer lexer, ParsingContext context)
-        {
-            if (!lexer.Branch(TokenType.Dash))
-            {
-                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyAssignment);
-                return false;
-            }
-
-            bool result = true;
-            while (lexer.Check(~TokenType.Newline))
-            {
-                // Parse the component
-                var component = ParseComponent(lexer, context)?.GetOrCreate(context);
-                if (component == null)
-                {
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-
-                // Property
-                if (!lexer.Branch(TokenType.Dot))
-                {
-                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedDot);
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-                if (!lexer.Branch(TokenType.Word, out var propertyToken))
-                {
-                    context.Diagnostics?.Post(lexer.TokenWithTrivia, ErrorCodes.ExpectedProperty);
-                    return false;
-                }
-
-                // Equals
-                if (!lexer.Branch(TokenType.Equals))
-                {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedAssignment);
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-
-                // The value
-                object value = ParsePropertyValue(lexer, context);
-                if (value == null)
-                {
-                    lexer.Skip(~TokenType.Newline);
-                    return false;
-                }
-                result &= component.SetProperty(propertyToken, value, context.Diagnostics);
-            }
-            return result;
-        }
-                
         private static ComponentInfo ParseComponent(SimpleCircuitLexer lexer, ParsingContext context)
         {
             if (!lexer.Check(TokenType.Word | TokenType.Times))
