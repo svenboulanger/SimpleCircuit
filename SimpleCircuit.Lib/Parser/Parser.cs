@@ -481,8 +481,8 @@ namespace SimpleCircuit.Parser
                                 case "njmp": variants.Add(new(false, Wire.JumpOver)); break;
                                 case "jump":
                                 case "jmp": variants.Add(new(true, Wire.JumpOver)); break;
-                                case "dotted": options.Classes.Add("dotted"); break;
-                                case "dashed": options.Classes.Add("dashed"); break;
+                                case "dotted": variants.Add(new(true, Wire.Dotted)); variants.Add(new(false, Wire.Dashed)); break;
+                                case "dashed": variants.Add(new(true, Wire.Dashed)); variants.Add(new(false, Wire.Dotted)); break;
 
                                 case "arrow": markers.Add(new Arrow()); break;
                                 case "rarrow": markers.Add(new ReverseArrow()); break;
@@ -1103,7 +1103,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Add The CSS to the circuit style
-            context.Circuit.ExtraCSS.Add(css.Content.ToString());
+            context.ExtraCss.Add(css.Content.ToString());
             return true;
         }
 

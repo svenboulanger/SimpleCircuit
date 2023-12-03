@@ -41,6 +41,16 @@ namespace SimpleCircuit
         private readonly Stack<Transform> _tf = new();
 
         /// <summary>
+        /// Adds required CSS (unordered).
+        /// </summary>
+        public ISet<string> RequiredCSS { get; } = new HashSet<string>();
+
+        /// <summary>
+        /// Adds extra CSS after the required CSS (ordered).
+        /// </summary>
+        public IList<string> ExtraCSS { get; } = new List<string>();
+
+        /// <summary>
         /// Gets the current transform.
         /// </summary>
         /// <value>
@@ -807,17 +817,20 @@ namespace SimpleCircuit
         /// Gets the SVG xml-document.
         /// </summary>
         /// <returns>The document.</returns>
-        public XmlDocument GetDocument(string style = null)
+        public XmlDocument GetDocument()
         {
             var svg = _document.DocumentElement;
 
             // Add stylesheet info if necessary
-            if (!string.IsNullOrWhiteSpace(style))
+            var styleElt = _document.CreateElement("style", Namespace);
+            List<string> style = new(RequiredCSS.Count + ExtraCSS.Count + 1)
             {
-                var styleElt = _document.CreateElement("style", Namespace);
-                styleElt.InnerText = style;
-                svg.PrependChild(styleElt);
-            }
+                Properties.Resources.DefaultStyle
+            };
+            style.AddRange(RequiredCSS);
+            style.AddRange(ExtraCSS);
+            styleElt.InnerText = string.Join(Environment.NewLine, style);
+            svg.PrependChild(styleElt);
 
             // Try to get the bounds of this
             var bounds = _bounds.Peek().Bounds;

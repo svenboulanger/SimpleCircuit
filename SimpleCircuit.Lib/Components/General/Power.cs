@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -43,7 +44,10 @@ namespace SimpleCircuit.Components
                 if (Variants.Contains(_anchor))
                     drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
                 else
+                {
+                    drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
                     drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
+                }
                 _anchors.Draw(drawing, this);
             }
         }

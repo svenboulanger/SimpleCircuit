@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -67,6 +68,8 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                drawing.RequiredCSS.Add(".battery .neg { stroke-width: 0.75pt; }");
+
                 // Wires
                 double offset = Length / 2;
                 drawing.ExtendPins(Pins);

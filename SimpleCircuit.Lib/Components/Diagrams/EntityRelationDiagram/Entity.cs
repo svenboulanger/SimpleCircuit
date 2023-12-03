@@ -88,6 +88,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                drawing.RequiredCSS.Add(".diagram { fill: white; }");
+
                 int count = Math.Max(Labels.Count, 1);
                 var anchors = new CustomLabelAnchorPoints(new LabelAnchorPoint[count]);
                 anchors[0] = new LabelAnchorPoint(new(), new(), new("header"));

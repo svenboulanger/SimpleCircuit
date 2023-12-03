@@ -124,10 +124,7 @@ namespace SimpleCircuit.Parser
                 _wire = wire;
             else
             {
-                _wire = new Wire(Fullname, PinToWire, Segments, WireToPin)
-                {
-                    Options = Options
-                };
+                _wire = new Wire(Fullname, PinToWire, Segments, WireToPin);
                 context.Options.Apply(Key, _wire, context.Diagnostics);
 
                 // Handle variants

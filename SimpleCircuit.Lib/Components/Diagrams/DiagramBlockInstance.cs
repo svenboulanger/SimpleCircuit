@@ -10,6 +10,9 @@ using System.Linq;
 
 namespace SimpleCircuit.Components.Diagrams
 {
+    /// <summary>
+    /// A diagram block.
+    /// </summary>
     public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
     {
         private readonly PinCollection _pins;
@@ -101,6 +104,8 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public void Render(SvgDrawing drawing)
         {
+            drawing.RequiredCSS.Add(".diagram { fill: white; }");
+
             // Group all elements
             var go = new GraphicOptions() { Id = Name };
             if (!string.IsNullOrWhiteSpace(Type))

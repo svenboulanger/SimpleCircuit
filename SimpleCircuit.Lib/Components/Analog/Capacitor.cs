@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -69,6 +70,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         // Plates
+                        drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
                         drawing.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));
                         drawing.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), new("neg"));
                         if (Variants.Contains(_signs))
@@ -85,6 +87,7 @@ namespace SimpleCircuit.Components.Analog
 
                     default:
                         // Plates
+                        drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
                         drawing.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));
                         drawing.Line(new(1.5, -4), new(1.5, 4), new("neg", "plane"));
                         if (Variants.Contains(_signs))

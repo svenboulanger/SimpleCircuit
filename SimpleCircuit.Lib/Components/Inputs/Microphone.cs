@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Inputs
 {
@@ -39,6 +40,8 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(SvgDrawing drawing)
             {
+                drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
+
                 drawing.ExtendPins(Pins);
                 drawing.Circle(new(), 4);
                 drawing.Line(new(4, -4), new(4, 4), new("plane"));

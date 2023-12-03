@@ -39,6 +39,8 @@
         /// <param name="drawing"></param>
         public void Draw(SvgDrawing drawing)
         {
+            drawing.RequiredCSS.Add(".marker { fill: black; }");
+
             var orientation = Orientation;
             if (orientation.IsZero())
                 orientation = new(1, 0);

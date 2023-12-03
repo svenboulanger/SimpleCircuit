@@ -104,11 +104,10 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var ckt = new GraphicalCircuit();
             var drawing = new SvgDrawing(null, _textMeasurer);
             _drawable.Reset(null);
             _drawable.Render(drawing);
-            var doc = drawing.GetDocument(ckt.Style);
+            var doc = drawing.GetDocument();
 
             // Try to resize the component
             if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))

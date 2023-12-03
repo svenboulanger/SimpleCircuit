@@ -19,6 +19,7 @@
         /// <inheritdoc />
         protected override void DrawMarker(SvgDrawing drawing)
         {
+            drawing.RequiredCSS.Add(".marker.erd { fill: white; }");
             drawing.Circle(new(-5.5, 0), 1.5, Options);
             drawing.Line(new(-2, -1.5), new(-2, 1.5), Options);
         }

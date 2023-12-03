@@ -19,31 +19,6 @@ namespace SimpleCircuit
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<ICircuitPresence> _extraPresences = [];
-        private readonly List<string> _extraCss = [];
-
-        /// <summary>
-        /// Gets or sets the style for the graphics.
-        /// </summary>
-        /// <value>
-        /// The cascading stylesheet.
-        /// </value>
-        public string Style
-        {
-            get
-            {
-                var list = new List<string>(ExtraCSS.Count + 1);
-                if (DefaultStyle)
-                    list.Add(Properties.Resources.DefaultStyle);
-                foreach (string style in ExtraCSS)
-                    list.Add(style);
-                return string.Join(Environment.NewLine, list);
-            }
-        }
-
-        /// <summary>
-        /// Gets a set of styles to be added to the default style.
-        /// </summary>
-        public IList<string> ExtraCSS => _extraCss;
 
         /// <summary>
         /// Gets the number of graphical circuit presences.
@@ -531,7 +506,7 @@ namespace SimpleCircuit
                 drawing.AddMetadata(pair.Key, pair.Value);
 
             // Return the XML document
-            return drawing.GetDocument(Style);
+            return drawing.GetDocument();
         }
 
         /// <inheritdoc />

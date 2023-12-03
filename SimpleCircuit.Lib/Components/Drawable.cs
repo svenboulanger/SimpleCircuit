@@ -20,9 +20,7 @@ namespace SimpleCircuit.Components
     {
         private readonly static ConcurrentDictionary<Type, Dictionary<string, Func<IDrawable, Token, object, bool>>> _cacheSetters = new();
 
-        /// <summary>
-        /// Gets the variants of the drawable.
-        /// </summary>
+        /// <inheritdoc />
         public VariantSet Variants { get; } = [];
 
         /// <inheritdoc />

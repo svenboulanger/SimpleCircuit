@@ -21,6 +21,7 @@
         /// <inheritdoc />
         protected override void DrawMarker(SvgDrawing drawing)
         {
+            drawing.RequiredCSS.Add(".marker.erd { fill: white; }");
             drawing.Polyline(_points, Options);
             drawing.Circle(new(-4.5, 0), 1.5, Options);
         }

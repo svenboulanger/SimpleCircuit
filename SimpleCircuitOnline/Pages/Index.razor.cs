@@ -487,7 +487,6 @@ namespace SimpleCircuitOnline.Pages
                 context.Options.RenderBounds = includeBounds;
                 Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
-                await _js.InvokeVoidAsync("updateStyle", ModifyCSS(ckt.Style));
 
                 // Include XML data
                 if (includeScript)
@@ -502,6 +501,11 @@ namespace SimpleCircuitOnline.Pages
                 {
                     _textMeasurer.FontFamily = context.Options.FontFamily;
                     doc = ckt.Render(_logger, _textMeasurer);
+
+                    // Update the style for our document
+                    var styleNode = doc.DocumentElement.ChildNodes[0];
+                    string style = styleNode.InnerText;
+                    await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
                 }
             }
             catch (Exception ex)

@@ -163,6 +163,9 @@ namespace SimpleCircuit.Components.Annotations
             // All components should have been rendered by now
             if (_components.Count + _wires.Count > 0)
             {
+                drawing.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
+                drawing.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
+
                 // Expand the bounds by the margins
                 drawing.BeginGroup(new("annotation") { Id = Name }, !Variants.Contains(_over));
                 var matrix = drawing.CurrentTransform.Matrix.Inverse;
@@ -646,7 +649,7 @@ namespace SimpleCircuit.Components.Annotations
         }
 
         /// <inheritdoc />
-        public bool Reset(IResetContext diagnostics)
+        public bool Reset(IResetContext context)
         {
             _components.Clear();
             _wires.Clear();

@@ -67,6 +67,11 @@ namespace SimpleCircuit.Parser
         public IEnumerable<IAnnotation> Annotations => _annotations.AsEnumerable();
 
         /// <summary>
+        /// Gets extra CSS.
+        /// </summary>
+        public IList<string> ExtraCss { get; } = new List<string>();
+
+        /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         public ParsingContext(bool loadAssembly = true)

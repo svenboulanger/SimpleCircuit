@@ -33,6 +33,16 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public const string JumpOver = "jump";
 
+        /// <summary>
+        /// The variant used for a wire that is dashed.
+        /// </summary>
+        public const string Dashed = "dashed";
+
+        /// <summary>
+        /// The variant used for a wire that is dotted.
+        /// </summary>
+        public const string Dotted = "dotted";
+
         /// <inheritdoc />
         public override int Order => -1;
 
@@ -62,11 +72,6 @@ namespace SimpleCircuit.Components.Wires
         [Description("The radius.")]
         [Alias("r")]
         public double RoundRadius { get; set; } = 0.0;
-
-        /// <summary>
-        /// Gets or sets the graphic options for the wire.
-        /// </summary>
-        public GraphicOptions Options { get; set; }
 
         /// <summary>
         /// Gets the global coordinates of the points of the wire.
@@ -499,6 +504,17 @@ namespace SimpleCircuit.Components.Wires
             List<Marker> markers = [];
             if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
+                if (Variants.Contains(Dashed))
+                    drawing.RequiredCSS.Add(".dashed { stroke-dasharray: 2 2; }");
+                if (Variants.Contains(Dotted))
+                    drawing.RequiredCSS.Add(".dotted { stroke-dasharray: 0.5 2; }");
+                GraphicOptions options = Variants.Select(Dashed, Dotted) switch
+                {
+                    0 => new("wire", "dashed"),
+                    1 => new("wire", "dotted"),
+                    _ => new("wire"),
+                };
+
                 var tf = drawing.CurrentTransform;
                 drawing.Path(builder =>
                 {
@@ -609,7 +625,7 @@ namespace SimpleCircuit.Components.Wires
 
                         last = current;
                     }
-                }, Options);
+                }, options);
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)

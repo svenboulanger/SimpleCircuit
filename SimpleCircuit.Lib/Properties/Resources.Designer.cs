@@ -68,15 +68,6 @@ namespace SimpleCircuit.Properties {
         ///    stroke-linecap: round;
         ///    stroke-linejoin: round;
         ///}
-        ///.diagram { fill: white; }
-        ///.plane { stroke-width: 1pt; }
-        ///.battery .neg { stroke-width: 0.75pt; }
-        ///.marker { fill: black; }
-        ///.marker.erd { fill: white; }
-        ///.dotted { stroke-dasharray: 0.5 2; }
-        ///.dashed { stroke-dasharray: 2 2; }
-        ///.annotation { stroke: #6600cc; }
-        ///.annotation text { fill: #6600cc; }
         ///text { fill: black; stroke: none; }.
         /// </summary>
         internal static string DefaultStyle {
