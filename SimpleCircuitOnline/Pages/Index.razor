@@ -15,12 +15,6 @@
                     <StandaloneCodeEditor @ref="_scriptEditor" Id="script-editor" CssClass="editor" ConstructionOptions="GetStyleOptions" OnDidChangeModelContent="Update" OnKeyUp="KeyUp" />
                 </div>
             </Tab>
-            <Tab Title="Style">
-                <div class="content fixed">
-                    <StandaloneCodeEditor @ref="_styleEditor" Id="style-editor" CssClass="editor" ConstructionOptions="GetStyleOptions" OnDidChangeModelContent="Update" OnKeyUp="KeyUp" />
-                    <Button class="style-reset" Click=@(async () => await _styleEditor.SetValue(GraphicalCircuit.DefaultStyle))>&#11118;</Button>
-                </div>
-            </Tab>
             <Tab Title="Help">
                 <div class="content scrollable">
                     <Expandable Title="Documentation" Class="mt-2">

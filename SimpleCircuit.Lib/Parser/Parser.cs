@@ -1103,7 +1103,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Add The CSS to the circuit style
-            context.Circuit.ExtraStyles.Add(css.Content.ToString());
+            context.Circuit.ExtraCSS.Add(css.Content.ToString());
             return true;
         }
 

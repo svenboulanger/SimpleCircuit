@@ -28,7 +28,7 @@ namespace SimpleCircuitOnline.Pages
         private readonly object _lock = new();
         private int _updates = 0;
         private int _loading;
-        private StandaloneCodeEditor _scriptEditor, _styleEditor;
+        private StandaloneCodeEditor _scriptEditor;
         private LibraryCollection _libraries;
         private TabMenu _tabs;
         private Settings _settings = new();
@@ -181,34 +181,8 @@ namespace SimpleCircuitOnline.Pages
                     }
                     else
                         script = Demo.Demos[0].Code;
-                    if (!string.IsNullOrWhiteSpace(style))
-                    {
-                        try
-                        {
-                            // Decode the script as a base64 string
-                            var bytes = Convert.FromBase64String(style);
-
-                            // Use GZip decompression
-                            using var inputStream = new MemoryStream(bytes);
-                            using var outputStream = new MemoryStream();
-                            using (System.IO.Compression.GZipStream gzip = new(inputStream,
-                                System.IO.Compression.CompressionMode.Decompress))
-                            {
-                                await gzip.CopyToAsync(outputStream);
-                            }
-                            style = DecodeScript(Encoding.UTF8.GetString(outputStream.ToArray()));
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error,
-                                null, $"Loading style failed: {ex.Message}"));
-                            style = GraphicalCircuit.DefaultStyle;
-                        }
-                    }
-                    else
-                        style = GraphicalCircuit.DefaultStyle;
                     _viewMode = true;
-                    await SetCurrentScript(new(script, style));
+                    await SetCurrentScript(script);
 
                     string url = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
                     _navigation.NavigateTo(url);
@@ -262,7 +236,7 @@ namespace SimpleCircuitOnline.Pages
                 }
 
                 _viewMode = true;
-                await SetCurrentScript(new(DecodeScript(svgArgs.Script), DecodeScript(svgArgs.Style)));
+                await SetCurrentScript(DecodeScript(svgArgs.Script));
             }
             else if (args is UploadLibraryEventArgs libArgs)
             {
@@ -375,19 +349,6 @@ namespace SimpleCircuitOnline.Pages
                             query.Add("script", Convert.ToBase64String(output.ToArray()));
                         }
 
-                        // Extract the style (we will try to replace the default style to reduce size)
-                        string style = await _styleEditor.GetValue();
-                        style = style.Replace(GraphicalCircuit.DefaultStyle, StandardStyle).Trim('\r', '\n', '\t', ' ');
-                        if (!string.IsNullOrWhiteSpace(style) && !StringComparer.Ordinal.Equals(style, StandardStyle))
-                        {
-                            using MemoryStream output = new();
-                            using (System.IO.Compression.GZipStream gzip = new(output, System.IO.Compression.CompressionLevel.SmallestSize))
-                            {
-                                await gzip.WriteAsync(Encoding.UTF8.GetBytes(EncodeScript(style)));
-                            }
-                            query.Add("style", Convert.ToBase64String(output.ToArray()));
-                        }
-
                         // Build the URI
                         var b = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
                         var uri = $"{b}?{query}";
@@ -418,17 +379,14 @@ namespace SimpleCircuitOnline.Pages
             if (_localStore != null)
             {
                 string script = await _localStore.GetItemAsStringAsync("last_script");
-                string style = await _localStore.GetItemAsStringAsync("last_style");
                 _logger.Clear();
                 _viewMode = false;
 
                 // Allow loading an initial script if none was stored
-                if (string.IsNullOrWhiteSpace(style))
-                    style = GraphicalCircuit.DefaultStyle;
                 if (string.IsNullOrWhiteSpace(script))
                     script = Demo.Demos[0].Code;
 
-                await SetCurrentScript(new(script, style));
+                await SetCurrentScript(script);
             }
         }
         private async Task ReportMessageClicked(Token token)
@@ -437,15 +395,11 @@ namespace SimpleCircuitOnline.Pages
             _tabs.Select(0);
             await _scriptEditor.Focus();
         }
-        private async Task SetCurrentScript(Netlist netlist)
+        private async Task SetCurrentScript(string script)
         {
             // Let us strip a few characters that might accumulate when storing inside XML for example
-            string script = netlist.Script;
-            string style = netlist.Style;
             if (script != null)
                 script = script.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
-            if (style != null)
-                style = style.Trim(' ', '\t', '\r', '\n') + Environment.NewLine;
 
             // Update the script
             lock (_lock)
@@ -453,8 +407,6 @@ namespace SimpleCircuitOnline.Pages
             if (!string.IsNullOrWhiteSpace(script))
             {
                 await _scriptEditor.SetValue(script);
-                if (!string.IsNullOrWhiteSpace(style))
-                    await _styleEditor.SetValue(style);
                 await UpdateNow(_libraries.BuildContext(_logger));
             }
             lock (_lock)
@@ -519,13 +471,11 @@ namespace SimpleCircuitOnline.Pages
             try
             {
                 var code = await _scriptEditor.GetValue();
-                var style = await _styleEditor.GetValue();
 
                 if (!_viewMode)
                 {
                     // Store the script and style for next time
                     await _localStore.SetItemAsStringAsync("last_script", code);
-                    await _localStore.SetItemAsStringAsync("last_style", style);
                 }
                 else
                 {
@@ -584,7 +534,7 @@ namespace SimpleCircuitOnline.Pages
                 // Convert the resulting ASCI character
                 int value = int.Parse(match.Groups["value"].Value);
                 return ((char)value).ToString();
-            }).Replace(StandardStyle, GraphicalCircuit.DefaultStyle); // Put the default style back
+            });
             return script;
         }
         private static string ModifyCSS(string style)

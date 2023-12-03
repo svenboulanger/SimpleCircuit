@@ -18,7 +18,8 @@ namespace SimpleCircuit
     public class GraphicalCircuit : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<ICircuitPresence> _extra = [];
+        private readonly List<ICircuitPresence> _extraPresences = [];
+        private readonly List<string> _extraCss = [];
 
         /// <summary>
         /// Gets or sets the style for the graphics.
@@ -30,11 +31,10 @@ namespace SimpleCircuit
         {
             get
             {
-                var list = new List<string>(ExtraStyles.Count + 1)
-                {
-                    Properties.Resources.DefaultStyle
-                };
-                foreach (string style in ExtraStyles)
+                var list = new List<string>(ExtraCSS.Count + 1);
+                if (DefaultStyle)
+                    list.Add(Properties.Resources.DefaultStyle);
+                foreach (string style in ExtraCSS)
                     list.Add(style);
                 return string.Join(Environment.NewLine, list);
             }
@@ -43,7 +43,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets a set of styles to be added to the default style.
         /// </summary>
-        public HashSet<string> ExtraStyles { get; } = new();
+        public IList<string> ExtraCSS => _extraCss;
 
         /// <summary>
         /// Gets the number of graphical circuit presences.
@@ -53,7 +53,7 @@ namespace SimpleCircuit
         /// <summary>
         /// The default style for drawings.
         /// </summary>
-        public static string DefaultStyle { get; set; } = Properties.Resources.DefaultStyle;
+        public static bool DefaultStyle { get; set; } = true;
 
         /// <summary>
         /// Gets a dictionary of metadata key-value pairs that are optional.
@@ -162,7 +162,7 @@ namespace SimpleCircuit
         public bool Solve(IDiagnosticHandler diagnostics)
         {
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
-            _extra.Clear();
+            _extraPresences.Clear();
 
             // Prepare all the presences
             var resetContext = new ResetContext(diagnostics);
@@ -187,7 +187,7 @@ namespace SimpleCircuit
             }
             if (!Space(registerContext))
                 return false;
-            presences.AddRange(_extra);
+            presences.AddRange(_extraPresences);
 
             // Register any solvable presences in the circuit
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
@@ -462,7 +462,7 @@ namespace SimpleCircuit
                 if (pair.Value.Minima.Count == 0 || pair.Value.Maxima.Count == 0)
                     continue;
                 foreach (var min in pair.Value.Minima)
-                    _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                    _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
             }
             return true;
         }
@@ -472,14 +472,14 @@ namespace SimpleCircuit
             if (lastMax == null)
             {
                 foreach (var min in nextMin)
-                    _extra.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
+                    _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
             }
             else
             {
                 foreach (var min in nextMin)
                 {
                     foreach (var max in lastMax)
-                        _extra.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, spacing) { Weight = 1e-6 });
+                        _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, spacing) { Weight = 1e-6 });
                 }
             }
         }

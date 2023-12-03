@@ -1,6 +1,4 @@
-﻿using SimpleCircuit;
-
-namespace SimpleCircuitOnline
+﻿namespace SimpleCircuitOnline
 {
     /// <summary>
     /// A demo.
@@ -11,8 +9,7 @@ namespace SimpleCircuitOnline
     /// <param name="title">The title of the demo.</param>
     /// <param name="description">The description of the demo.</param>
     /// <param name="code">The code of the demo.</param>
-    /// <param name="style">The style of the demo.</param>
-    public class Demo(string title, string description, string code, string style = null)
+    public class Demo(string title, string description, string code)
     {
         /// <summary>
         /// Gets the title of the demo.
