@@ -39,14 +39,6 @@ namespace SimpleCircuitOnline
         public string Code { get; } = code;
 
         /// <summary>
-        /// Gets the style (if <c>null</c>, refer to default style).
-        /// </summary>
-        /// <value>
-        /// The style.
-        /// </value>
-        public string Style { get; } = style ?? GraphicalCircuit.DefaultStyle;
-
-        /// <summary>
         /// The demos.
         /// </summary>
         public static Demo[] Demos { get; } =
@@ -178,8 +170,7 @@ namespace SimpleCircuitOnline
             new Demo(
                 "Example: CSS styling",
                 "Demonstration of how you can use CSS styling to change the circuit",
-                "* Check the style tab to see how the red lines were done\r\n.section buck\r\n    GND1 <u> V1(\"V\") <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1(\"L\") <r> X2\r\n    X2 <d> C1(\"C\") <d> GND3\r\n    X2 <r arrow r> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n",
-                GraphicalCircuit.DefaultStyle + "\r\n\r\n/* Styling section \"buck\" */\r\n#buck\\/w-4 *,\r\n#buck\\/D1 *,\r\n#buck\\/w-5 *,\r\n#buck\\/w-6 *,\r\n#buck\\/L1 path,\r\n#buck\\/w-7 *,\r\n#buck\\/w-10 *,\r\n#buck\\/w-11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/w-12 path { stroke: red; }\r\n#buck\\/w-10 polygon { fill: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/w-1 *,\r\n#buck2\\/V1 *,\r\n#buck2\\/w-2 *,\r\n#buck2\\/L1 path,\r\n#buck2\\/w-3 *,\r\n#buck2\\/S1 *,\r\n#buck2\\/w-6 *,\r\n#buck2\\/w-7 *,\r\n#buck2\\/w-10 *,\r\n#buck2\\/w-11 *,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/w-12 * { stroke: red; }\r\n#buck2\\/w-10 polygon { fill: red; }\r\n#buck2\\/V1 tspan { stroke: none; }\r\n"),
+                "* Check the style tab to see how the red lines were done\r\n.section buck\r\n    GND1 <u> V1(\"V\") <u r> S1 <r> X1\r\n    GND2 <u> D1 <u> X1\r\n    X1 <r> L1(\"L\") <r> X2\r\n    X2 <d> C1(\"C\") <d> GND3\r\n    X2 <r arrow r> X3\r\n    X3 <d> Z1 <d> GND4\r\n    (y GND*)\r\n.ends\r\n\r\n.section buck2 buck\r\nbuck2/S1(closed)\r\n\r\n.css\r\n/* Styling section \"buck\" */\r\n#buck\\/w-4 *,\r\n#buck\\/D1 *,\r\n#buck\\/w-5 *,\r\n#buck\\/w-6 *,\r\n#buck\\/L1 path,\r\n#buck\\/w-7 *,\r\n#buck\\/w-10 *,\r\n#buck\\/w-11 path,\r\n#buck\\/Z1 polygon,\r\n#buck\\/w-12 path { stroke: red; }\r\n#buck\\/w-10 polygon { fill: red; }\r\n\r\n/* Styling section \"buck2\" */\r\n#buck2\\/w-1 *,\r\n#buck2\\/V1 *,\r\n#buck2\\/w-2 *,\r\n#buck2\\/L1 path,\r\n#buck2\\/w-3 *,\r\n#buck2\\/S1 *,\r\n#buck2\\/w-6 *,\r\n#buck2\\/w-7 *,\r\n#buck2\\/w-10 *,\r\n#buck2\\/w-11 *,\r\n#buck2\\/Z1 polygon,\r\n#buck2\\/w-12 * { stroke: red; }\r\n#buck2\\/w-10 polygon { fill: red; }\r\n#buck2\\/V1 tspan { stroke: none; }\r\n.endcss\r\n"),
 
             // Bit vector demo
             new Demo(
@@ -197,15 +188,13 @@ namespace SimpleCircuitOnline
             new Demo(
                 "Example: Flowchart",
                 "Demonstration of flowcharts using the song \"Total Eclipse of the Heart\" by Bonnie Tyler (Jeannr - Tumblr)",
-                "* Give all wires a nice curve\r\n.property wire r = 2.5\r\n\r\n* Turn arouuuund...\r\nFPta(\"Turn\\naround\")\r\n\r\n* ... every now and then I ...\r\nFPta <r d arrow> FP1(\"every now\\nand then I\")\r\nFPta <d arrow> FP(\"bright eyes\") <r a 80 +30 arrow> FP1\r\n\r\n* ... get a little bit ...\r\nFP1 <r arrow> FP2(\"get a little bit\" width=50 height=10)\r\n\r\n* Lines\r\n.section line1\r\n    FP1(\"lonely and you're never coming 'round\" width=140 height=10)\r\n.ends\r\n.section line2 line1\r\nline2/FP1(\"tired of listening to the sound of my tears\")\r\n.section line3 line1\r\nline3/FP1(\"nervous that the best of all the years have gone by\")\r\n.section line4 line1\r\nline4/FP1(\"terrified and then I see the look in your eyes\")\r\nFP2 <d +10 r arrow> line1/FP1 <r u l d arrow> FPta\r\nFP2 <d +25 r arrow> line2/FP1 <r u l d arrow> FPta\r\nFP2 <d +40 r arrow> line3/FP1 <r u l d arrow> FPta\r\nFP2 <d +55 r arrow> line4/FP1 <r u l d arrow> FPta\r\n\r\n* ... fall apart ...\r\nFP1 <d +50 arrow> FPfa(\"fall apart\")\r\nFPfa <d> FPny(\"and I\\nneed you\")\r\n\r\n* This is a little hack to allow you to connect to different positions\r\nFPny <a 30 0 r> FPnt(\"now,\\ntonight\") <d +0 l arrow a 150 0> FPny\r\nFPny <d r arrow> FP(\"more than\\never!!\")\r\n",
-                GraphicalCircuit.DefaultStyle + "\r\n#FPta polygon { fill: rgb(200, 255, 200); }\r\n#FPny polygon { fill: rgb(200, 200, 255); }"),
+                "* Give all wires a nice curve\r\n.property wire r = 2.5\r\n\r\n* Turn arouuuund...\r\nFPta(\"Turn\\naround\")\r\n\r\n* ... every now and then I ...\r\nFPta <r d arrow> FP1(\"every now\\nand then I\")\r\nFPta <d arrow> FP(\"bright eyes\") <r a 80 +30 arrow> FP1\r\n\r\n* ... get a little bit ...\r\nFP1 <r arrow> FP2(\"get a little bit\" width=50 height=10)\r\n\r\n* Lines\r\n.section line1\r\n    FP1(\"lonely and you're never coming 'round\" width=140 height=10)\r\n.ends\r\n.section line2 line1\r\nline2/FP1(\"tired of listening to the sound of my tears\")\r\n.section line3 line1\r\nline3/FP1(\"nervous that the best of all the years have gone by\")\r\n.section line4 line1\r\nline4/FP1(\"terrified and then I see the look in your eyes\")\r\nFP2 <d +10 r arrow> line1/FP1 <r u l d arrow> FPta\r\nFP2 <d +25 r arrow> line2/FP1 <r u l d arrow> FPta\r\nFP2 <d +40 r arrow> line3/FP1 <r u l d arrow> FPta\r\nFP2 <d +55 r arrow> line4/FP1 <r u l d arrow> FPta\r\n\r\n* ... fall apart ...\r\nFP1 <d +50 arrow> FPfa(\"fall apart\")\r\nFPfa <d> FPny(\"and I\\nneed you\")\r\n\r\n* This is a little hack to allow you to connect to different positions\r\nFPny <a 30 0 r> FPnt(\"now,\\ntonight\") <d +0 l arrow a 150 0> FPny\r\nFPny <d r arrow> FP(\"more than\\never!!\")\r\n\r\n.css\r\n#FPta polygon { fill: rgb(200, 255, 200); }\r\n#FPny polygon { fill: rgb(200, 200, 255); }\r\n.endcss\r\n"),
 
             // Engineering flowchart demo
             new Demo(
                 "Example: Engineering flowchart",
                 "Demonstration of flowcharts using the engineering flowchart.",
-                "* Give some nice rounding to the flowchart\r\n.property FD rx = 1 ry = 3\r\n.property wire r = 3\r\n\r\n* Start and decision 1\r\nFT(\"start\") <d> FD1(\"Does it move?\", w=50)\r\n\r\n* Decision 1 to decision 2\r\nFD1 <r d> DIR(\"yes\") <d arrow> FD2b(\"Should it?\")\r\nFD1 <l d> DIR(\"no\") <d arrow> FD2a(\"Should it?\")\r\n\r\n* Decision 2 to terminals\r\nFD2a <l d> DIR(\"no\") <d arrow> FTa(\"No problem\", np)\r\nFD2a <r d> DIR(\"yes\") <d arrow> FTb(\"WD-40\")\r\nFD2b <l d> DIR(\"no\") <d arrow> FTc(\"Duck tape\")\r\nFD2b <r d> DIR(\"yes\") <d arrow> FTd(\"No problem\", np)\r\n\r\n* Some alignment\r\n(x FTa <r +50> FTb <r +50> FTc <r +50> FTd)\r\n",
-                GraphicalCircuit.DefaultStyle + "\r\n.decision path { fill: #fcc; }\r\n.np path { fill: #cfc; }"),
+                "* Give some nice rounding to the flowchart\r\n.property FD rx = 1 ry = 3\r\n.property wire r = 3\r\n\r\n* Start and decision 1\r\nFT(\"start\") <d> FD1(\"Does it move?\", w=50)\r\n\r\n* Decision 1 to decision 2\r\nFD1 <r d> DIR(\"yes\") <d arrow> FD2b(\"Should it?\")\r\nFD1 <l d> DIR(\"no\") <d arrow> FD2a(\"Should it?\")\r\n\r\n* Decision 2 to terminals\r\nFD2a <l d> DIR(\"no\") <d arrow> FTa(\"No problem\", np)\r\nFD2a <r d> DIR(\"yes\") <d arrow> FTb(\"WD-40\")\r\nFD2b <l d> DIR(\"no\") <d arrow> FTc(\"Duck tape\")\r\nFD2b <r d> DIR(\"yes\") <d arrow> FTd(\"No problem\", np)\r\n\r\n* Some alignment\r\n(x FTa <r +50> FTb <r +50> FTc <r +50> FTd)\r\n\r\n.css\r\n.decision path { fill: #fcc; }\r\n.np path { fill: #cfc; }\r\n.endcss\r\n"),
 
             // All possible symbols
             new Demo(

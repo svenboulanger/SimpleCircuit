@@ -2,7 +2,7 @@
 {
     @foreach (var demo in Demo.Demos)
     {
-        <a @onclick="x => Update(new(demo.Code, demo.Style))" class="bd-callout" role="button">
+        <a @onclick="x => Update(new(demo.Code, null))" class="bd-callout" role="button">
             <h5>@demo.Title</h5>
             <p>@demo.Description</p>
         </a>
