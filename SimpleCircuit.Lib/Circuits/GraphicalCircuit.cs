@@ -26,7 +26,24 @@ namespace SimpleCircuit
         /// <value>
         /// The cascading stylesheet.
         /// </value>
-        public string Style { get; set; } = DefaultStyle;
+        public string Style
+        {
+            get
+            {
+                var list = new List<string>(ExtraStyles.Count + 1)
+                {
+                    Properties.Resources.DefaultStyle
+                };
+                foreach (string style in ExtraStyles)
+                    list.Add(style);
+                return string.Join(Environment.NewLine, list);
+            }
+        }
+
+        /// <summary>
+        /// Gets a set of styles to be added to the default style.
+        /// </summary>
+        public HashSet<string> ExtraStyles { get; } = new();
 
         /// <summary>
         /// Gets the number of graphical circuit presences.

@@ -22,6 +22,7 @@ namespace SimpleCircuit.Parser
         private static readonly string[] _subcktEnd = ["ends", "endsubckt"];
         private static readonly string[] _symbolEnd = ["ends", "endsymbol"];
         private static readonly string[] _sectionEnd = ["ends", "endsection"];
+        private static readonly string[] _cssEnd = ["endc", "endcss"];
 
         /// <summary>
         /// Parses SimpleCircuit code.
@@ -116,6 +117,9 @@ namespace SimpleCircuit.Parser
                 case "property":
                 case "properties":
                     return ParseProperties(lexer, context);
+
+                case "css":
+                    return ParseCss(lexer, context);
 
                 default:
                     context.Diagnostics?.Post(typeToken, ErrorCodes.CouldNotRecognizeOption, typeToken.Content.ToString());
@@ -1074,7 +1078,35 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        
+
+        private static bool ParseCss(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            // Read the name of the subcircuit
+            lexer.Skip(~TokenType.Newline);
+            var tracker = lexer.Track();
+
+            // Read until a .ENDC and treat the contents as XML to be read
+            Token css;
+            while (true)
+            {
+                if (lexer.Branch(TokenType.Dot))
+                {
+                    if (BranchControlWord(lexer, _cssEnd))
+                    {
+                        css = lexer.GetTracked(tracker);
+                        lexer.Skip(~TokenType.Newline);
+                        break;
+                    }
+                }
+                else
+                    lexer.Next();
+            }
+
+            // Add The CSS to the circuit style
+            context.Circuit.ExtraStyles.Add(css.Content.ToString());
+            return true;
+        }
+
         private static object ParsePropertyValue(SimpleCircuitLexer lexer, ParsingContext context)
         {
             // The value

@@ -154,11 +154,15 @@ function registerLanguage(keywords) {
                 { include: '@line_comment' },
                 [/^[\s\t]*\./, { token: 'dot.command' }],
                 [/\b(symbol|SYMBOL)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word', bracket: '@open', next: '@command_symbol', nextEmbedded: 'xml' }]],
+                [/\b(css|CSS)\b/, { token: 'word', bracket: '@open', next: '@command_css', nextEmbedded: 'css' }],
                 [/\b\w+\b/, { token: 'word' }],
                 [/\n/, { token: 'newline', next: '@pop' }],
             ],
             command_symbol: [
-                [/^\.ends/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
+                [/^\.(ends|ENDS|endsymbol|ENDSYMBOL)/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
+            ],
+            command_css: [
+                [/^\.(endc|ENDC|endcss|ENDCSS)/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
             ],
             boxannotation: [
                 { include: '@variants_and_properties' },

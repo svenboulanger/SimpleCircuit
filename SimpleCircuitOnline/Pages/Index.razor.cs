@@ -531,16 +531,15 @@ namespace SimpleCircuitOnline.Pages
                 {
                     _logger.Messages.Add(new ViewModeDiagnosticMessage());
                 }
-                await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
 
                 // Parse the script
                 var lexer = SimpleCircuitLexer.FromString(code.AsMemory());
                 context.Options.RenderBounds = includeBounds;
                 Parser.Parse(lexer, context);
                 var ckt = context.Circuit;
+                await _js.InvokeVoidAsync("updateStyle", ModifyCSS(ckt.Style));
 
                 // Include XML data
-                ckt.Style = style;
                 if (includeScript)
                 {
                     ckt.Metadata.Add("script", EncodeScript(code));
