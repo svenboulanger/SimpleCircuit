@@ -191,18 +191,11 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.ExtendPin(Pins[0], 4);
-                if (Pins[1].Connections == 0)
-                    drawing.ExtendPin(Pins[1]);
-                if (Pins[3].Connections == 0)
-                    drawing.ExtendPin(Pins[3], 4);
+                drawing.ExtendPins(Pins, 4, "s", "d");
+                drawing.ExtendPin(Pins["g"]);
 
-                // The gate
-                drawing.Path(b => b.MoveTo(0, 11).LineTo(0, 9)
-                    .MoveTo(-6, 6).LineTo(6, 6)
-                    .MoveTo(-6, 4).LineTo(6, 4), new("gate"));
+                // Gate
+                drawing.Path(b => b.MoveTo(-6, 4).LineTo(6, 4).MoveTo(-6, 6).LineTo(6, 6), new("gate"));
                 drawing.Circle(new Vector2(0, 7.5), 1.5);
 
                 // Source and drain
@@ -212,7 +205,6 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_depletion))
                     drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
-                // Label
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
@@ -228,13 +220,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(SvgDrawing drawing)
             {
-                // Wires
-                if (Pins[0].Connections == 0)
-                    drawing.ExtendPin(Pins[0], 3);
-                if (Pins[1].Connections == 0)
-                    drawing.ExtendPin(Pins[1]);
-                if (Pins[3].Connections == 0)
-                    drawing.ExtendPin(Pins[3], 3);
+                drawing.ExtendPins(Pins, 4, "s", "d");
+                drawing.ExtendPin(Pins["g"]);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
