@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SimpleCircuitOnline",
   "resources": {
-    "hash": "sha256-xOh2FigRKE9hFNI/qtES7+HN3JFjC3VoIflFL5zjHJw=",
+    "hash": "sha256-M5J/TK0jzPnoyf+ajZJkCo7HTwPBehav6+mcgRnAcMs=",
     "jsModuleNative": {
       "dotnet.native.8.0.0.5foq2gnblu.js": "sha256-lCZIWWraj28SzbL/4ubyA9dZ+gpcx7hO1f/iKczVOEg="
     },
@@ -35,8 +35,8 @@
       "Microsoft.JSInterop.wasm": "sha256-/BqmVuL1o13tOEabTI39OR3eAIwtzEwiLr8OAO3FmgM=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-CQVLCKiSxLN5ghyJZG3mhnMGRROdqrbNUjtAXB0nWb8=",
       "netstandard.wasm": "sha256-SoSnSj7g7olYwWe2DmXR2HGvGgGzTevv8LyA/kP06FM=",
-      "SimpleCircuit.Lib.wasm": "sha256-b73XrSNEGGRCs7UHu/xLFf+yV/Zuju8tpTjSeZrpHYI=",
-      "SimpleCircuitOnline.wasm": "sha256-I614GNTDzj1FTBUCcoyq63SVS1qirA33uI0QoMiYx4o=",
+      "SimpleCircuit.Lib.wasm": "sha256-OjaOKLsuq3rhMZoWVpKg2WVIFWCXxF/wzS2Fcp/1g84=",
+      "SimpleCircuitOnline.wasm": "sha256-KoAj96rCjlh7rReKyee4c6QtwNCQsXtiCK0/LCYqtMg=",
       "SkiaSharp.wasm": "sha256-ExRntXwiBi+zVnbcLX69P9QWRDdEbcFi7uhFSap3Ofc=",
       "SpiceSharp.wasm": "sha256-RITqMK+XgFJdbpCigq8pp4+7GXpsAFNOEBgkAyNicf0=",
       "System.Collections.Concurrent.wasm": "sha256-CwDQjM2dHvxUAC5OfYV0g/nWas7oTbYvj59eWiX3cXc=",
