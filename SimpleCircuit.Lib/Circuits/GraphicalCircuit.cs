@@ -484,7 +484,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextMeasurer measurer = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextMeasurer measurer = null, IEnumerable<string> extraCss = null)
         {
             if (!Solved)
             {
@@ -497,6 +497,11 @@ namespace SimpleCircuit
             {
                 RenderBounds = RenderBounds
             };
+            if (extraCss != null)
+            {
+                foreach (var ec in extraCss)
+                    drawing.ExtraCSS.Add(ec);
+            }
 
             // Draw
             Render(drawing);

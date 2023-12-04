@@ -12,7 +12,7 @@ namespace SimpleCircuit
     public partial class Job
     {
         private readonly JobDiagnosticLogger _logger = new();
-        private GraphicalCircuit? _circuit;
+        private ParsingContext? _context = null;
 
         /// <summary>
         /// Gets the number of errors.
@@ -50,11 +50,8 @@ namespace SimpleCircuit
             // Now we can start parsing the input file
             {
                 var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Filename);
-                var context = new ParsingContext() { Diagnostics = _logger };
-                Parser.Parser.Parse(lexer, context);
-
-                // Solve it already
-                _circuit = context.Circuit;
+                _context = new ParsingContext() { Diagnostics = _logger };
+                Parser.Parser.Parse(lexer, _context);
             }
         }
 
@@ -78,7 +75,7 @@ namespace SimpleCircuit
         /// <param name="diagnostics">The diagnostic message handler.</param>
         public void Render(IDiagnosticHandler diagnostics)
         {
-            if (_circuit == null)
+            if (_context?.Circuit == null)
                 return;
 
             // Determine the output file
@@ -89,9 +86,9 @@ namespace SimpleCircuit
                 outputFilename = Path.Combine(Directory.GetCurrentDirectory(), outputFilename);
 
             // Render
-            if (_circuit != null && _circuit.Count > 0)
+            if (_context?.Circuit != null && _context.Circuit.Count > 0)
             {
-                var doc = _circuit.Render(diagnostics);
+                var doc = _context.Circuit.Render(diagnostics, extraCss: _context.ExtraCss);
 
                 switch (Path.GetExtension(outputFilename).ToLower())
                 {
