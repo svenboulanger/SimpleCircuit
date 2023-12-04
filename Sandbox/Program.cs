@@ -11,8 +11,7 @@ namespace Sandbox
         static void Main()
         {
             // var script = @"V(""This is some longer text"") <u> X";
-            var script = @"A1
-";
+            var script = @"T(""\underline{\overline{a_{1}^{2}}}"")";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

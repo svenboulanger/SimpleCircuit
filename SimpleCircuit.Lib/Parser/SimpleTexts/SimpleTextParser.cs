@@ -148,6 +148,14 @@
                             return CreateTextSpan(context);
                     }
 
+                case TokenType.OpenBracket:
+                case TokenType.CloseBracket:
+                    // This might happen if there are too many curly brackets somewhere...
+                    context.Builder.Append(lexer.Content.ToString());
+                    lexer.Next();
+                    ContinueText(lexer, context);
+                    return CreateTextSpan(context);
+
                 default:
                     ContinueText(lexer, context);
                     return CreateTextSpan(context);
