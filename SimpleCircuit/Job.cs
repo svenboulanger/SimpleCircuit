@@ -11,7 +11,6 @@ namespace SimpleCircuit
     /// </summary>
     public partial class Job
     {
-        private string? _cssScript = null;
         private readonly JobDiagnosticLogger _logger = new();
         private GraphicalCircuit? _circuit;
 
@@ -24,11 +23,6 @@ namespace SimpleCircuit
         /// Gets or sets the filename containing the SimpleCircuit script.
         /// </summary>
         public string Filename { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the filename containing the CSS code.
-        /// </summary>
-        public string CssFilename { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the filename to where the result should be written.
@@ -52,33 +46,6 @@ namespace SimpleCircuit
                 return;
             }
             string simpleCircuitScript = File.ReadAllText(Filename);
-
-            // Load the CSS file if any
-            _cssScript = null;
-            if (!string.IsNullOrWhiteSpace(CssFilename))
-            {
-                if (!File.Exists(CssFilename))
-                {
-                    _logger?.Post(new DiagnosticMessage(SeverityLevel.Error, "SC001", $"Could not find file '{CssFilename}'"));
-                    return;
-                }
-                _cssScript = File.ReadAllText(CssFilename);
-            }
-            else
-            {
-                // Include a CSS file if there is one with the same name as the input filename
-                string tryCssFilename = Path.GetFileNameWithoutExtension(Filename) + ".css";
-                if (File.Exists(tryCssFilename))
-                    _cssScript = File.ReadAllText(tryCssFilename);
-            }
-            if (_cssScript != null)
-            {
-                // Add the default script unless there is a comment of the form "/* exclude default */"
-                if (!ExcludeDefault().IsMatch(_cssScript))
-                {
-                    _cssScript = GraphicalCircuit.DefaultStyle + Environment.NewLine + _cssScript;
-                }
-            }
 
             // Now we can start parsing the input file
             {
