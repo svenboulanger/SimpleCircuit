@@ -59,12 +59,17 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the defined sections until now.
         /// </summary>
-        public Dictionary<string, Token> SectionTemplates { get; } = [];
+        public Dictionary<string, Token> SectionTemplates { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets the currently active annotations.
         /// </summary>
         public IEnumerable<IAnnotation> Annotations => _annotations.AsEnumerable();
+
+        /// <summary>
+        /// Currently included files.
+        /// </summary>
+        public HashSet<string> Included { get; } = [];
 
         /// <summary>
         /// Gets extra CSS.

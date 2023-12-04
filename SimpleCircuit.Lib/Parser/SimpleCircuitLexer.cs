@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using System;
+using System.IO;
 
 namespace SimpleCircuit.Parser
 {
@@ -29,6 +30,26 @@ namespace SimpleCircuit.Parser
         /// <returns>The lexer.</returns>
         public static SimpleCircuitLexer FromString(ReadOnlyMemory<char> netlist, string source = null, int line = 1)
             => new(netlist, source, line);
+
+        /// <summary>
+        /// Creates a lexer for a file.
+        /// </summary>
+        /// <param name="filename">The filename.</param>
+        /// <returns>The lexer, or <c>null</c> if the file doesn't exist.</returns>
+        public static SimpleCircuitLexer FromFile(string filename)
+        {
+            // Expand the filename
+            if (!Path.IsPathRooted(filename))
+                filename = Path.Combine(Directory.GetCurrentDirectory(), filename);
+            if (!File.Exists(filename))
+                return null;
+
+            // Read the file
+            string contents;
+            using (var sr = new StreamReader(filename))
+                contents = sr.ReadToEnd();
+            return new(contents.AsMemory(), filename);
+        }
 
         /// <summary>
         /// Creates a new <see cref="SimpleCircuitLexer"/>.

@@ -7,6 +7,7 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -117,6 +118,10 @@ namespace SimpleCircuit.Parser
                 case "property":
                 case "properties":
                     return ParseProperties(lexer, context);
+
+                case "include":
+                case "inc":
+                    return ParseInclude(lexer, context);
 
                 case "css":
                     return ParseCss(lexer, context);
@@ -1104,6 +1109,50 @@ namespace SimpleCircuit.Parser
 
             // Add The CSS to the circuit style
             context.ExtraCss.Add(css.Content.ToString());
+            return true;
+        }
+
+        private static bool ParseInclude(SimpleCircuitLexer lexer, ParsingContext context)
+        {
+            if (!lexer.Branch(TokenType.String, out var tokenFilename))
+            {
+                context.Diagnostics?.Post(tokenFilename, ErrorCodes.ExpectedFilename);
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
+
+            // Get the full filename
+            string filename = tokenFilename.Content[1..^1].ToString();
+            if (lexer.Source != null)
+            {
+                string basePath = Path.GetDirectoryName(lexer.Source);
+                if (!string.IsNullOrWhiteSpace(basePath))
+                    filename = Path.Combine(filename);
+            }
+
+            // Load the file
+            if (!context.Included.Add(filename))
+            {
+                context.Diagnostics?.Post(tokenFilename, ErrorCodes.RecursiveInclude, filename);
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
+
+            // Open the file and include it
+            var subLexer = SimpleCircuitLexer.FromFile(filename);
+            if (subLexer == null)
+            {
+                context.Diagnostics?.Post(tokenFilename, ErrorCodes.FileDoesNotExist, filename);
+                lexer.Skip(~TokenType.Newline);
+                return false;
+            }
+
+            // Errors are just stacked on top here...
+            Parse(subLexer, context);
+
+            // Restore
+            context.Included.Remove(filename);
+            lexer.Skip(~TokenType.Newline);
             return true;
         }
 

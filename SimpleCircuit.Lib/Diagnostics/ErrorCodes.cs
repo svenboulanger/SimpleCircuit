@@ -282,5 +282,14 @@
 
         [Diagnostic(SeverityLevel.Error, "PE077", "The symbol key '{0}' is invalid. Only words are allowed.")]
         InvalidSymbolKey,
+
+        [Diagnostic(SeverityLevel.Error, "PE078", "Expected a filename")]
+        ExpectedFilename,
+
+        [Diagnostic(SeverityLevel.Error, "PE079", "The file '{0}' is recursively included")]
+        RecursiveInclude,
+
+        [Diagnostic(SeverityLevel.Error, "PE080", "The file '{0}' does not exist")]
+        FileDoesNotExist,
     }
 }

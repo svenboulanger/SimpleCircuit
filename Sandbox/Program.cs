@@ -11,7 +11,8 @@ namespace Sandbox
         static void Main()
         {
             // var script = @"V(""This is some longer text"") <u> X";
-            var script = @"BAT1";
+            var script = @"A1
+";
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
             var context = new ParsingContext

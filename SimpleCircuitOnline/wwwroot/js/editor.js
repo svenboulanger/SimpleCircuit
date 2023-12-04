@@ -152,6 +152,8 @@ function registerLanguage(keywords) {
             ],
             command: [
                 { include: '@line_comment' },
+                { include: '@whitespace' },
+                { include: '@string' },
                 [/^[\s\t]*\./, { token: 'dot.command' }],
                 [/\b(symbol|SYMBOL)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word', bracket: '@open', next: '@command_symbol', nextEmbedded: 'xml' }]],
                 [/\b(css|CSS)\b/, { token: 'word', bracket: '@open', next: '@command_css', nextEmbedded: 'css' }],
