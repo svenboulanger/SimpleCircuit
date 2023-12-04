@@ -101,14 +101,17 @@ function registerLanguage(keywords) {
     monaco.languages.setMonarchTokensProvider('simpleCircuit', {
         defaultToken: 'invalid',
         includeLF: true,
-        lineComment: /\/\/.*\n/,
         tokenizer: {
             root: [
-                ['@lineComment', 'comment'],
+                { include: '@line_comment' },
                 [/^[\s\t]*-/, { token: 'dash.assignment', next: '@assignment' }],
                 [/^[\s\t]*\(/, { token: 'bracket.virtual', bracket: '@open', next: '@virtual' }],
                 [/^[\s\t]*\./, { token: 'dot.command', bracket: '@open', next: '@command' }],
                 { include: '@component_chain' },
+            ],
+            line_comment: [
+                [/\/\/.*\n/, 'comment'],
+                [/^\s*\*.*\n/, 'comment']
             ],
             component_chain: [
                 { include: '@whitespace' },
@@ -123,12 +126,12 @@ function registerLanguage(keywords) {
                 [/(\|)([^\|]*)(\|)/, [{ token: 'pipe.boxannotation' }, { token: 'pipe.comment' }, { token: 'pipe.boxannotation' }]],
             ],
             virtual: [
-                [ '@lineComment', 'comment', '@pop'],
+                { include: '@line_comment' },
                 { include: '@component_chain' },
                 [/\)/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
             ],
             assignment: [
-                [ '@lineComment', 'comment', '@pop' ],
+                { include: '@line_comment' },
                 [/\n/, { token: 'newline', next: '@pop' }],
                 { include: '@whitespace' },
                 { include: '@number' },
@@ -139,7 +142,7 @@ function registerLanguage(keywords) {
                 [/\./, 'dot.assignment'],
             ],
             wire: [
-                [ '@lineComment', 'comment', '@pop' ],
+                { include: '@line_comment' },
                 { include: '@whitespace' },
                 [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plusb?|minusb?|one|onlyone|many|zeroone|onemany|zeromany)\b|\?/, { token: 'pindirection.$S0' }],
                 [/\b[xX]\b/, { token: 'queuedpoint.$S0', }],
@@ -148,21 +151,27 @@ function registerLanguage(keywords) {
                 [/\+/, { token: 'operator.$S0' }],
             ],
             command: [
-                ['@lineComment', 'comment', '@pop'],
+                { include: '@line_comment' },
+                { include: '@whitespace' },
+                { include: '@string' },
                 [/^[\s\t]*\./, { token: 'dot.command' }],
                 [/\b(symbol|SYMBOL)(\s+)(\w+)/, [{ token: 'word' }, { token: 'white' }, { token: 'word', bracket: '@open', next: '@command_symbol', nextEmbedded: 'xml' }]],
+                [/\b(css|CSS)\b/, { token: 'word', bracket: '@open', next: '@command_css', nextEmbedded: 'css' }],
                 [/\b\w+\b/, { token: 'word' }],
                 [/\n/, { token: 'newline', next: '@pop' }],
             ],
             command_symbol: [
-                [/^\.ends/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
+                [/^\.(ends|ENDS|endsymbol|ENDSYMBOL)/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
+            ],
+            command_css: [
+                [/^\.(endc|ENDC|endcss|ENDCSS)/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
             ],
             boxannotation: [
                 { include: '@variants_and_properties' },
                 [/\|/, { token: 'pipe.boxannotation', bracket: '@close', next: '@pop' }],
             ],
             pin_block: [
-                [ '@lineComment', 'comment', '@popall' ],
+                { include: '@line_comment' },
                 { include: '@whitespace' },
                 [/\w+/, { token: 'word.pin' }],
                 [/\]/, { token: 'bracket.pin', bracket: '@close', next: '@pop' }],
@@ -178,7 +187,7 @@ function registerLanguage(keywords) {
                 { include: '@number' },
                 { include: '@boolean' },
                 { include: '@string' },
-                [ '@lineComment', 'comment', '@popall'],
+                { include: '@line_comment' },
                 { include: '@whitespace' },
                 [/,/, { token: 'comma.$S0' }],
             ],
