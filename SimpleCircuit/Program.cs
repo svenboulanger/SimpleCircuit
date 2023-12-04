@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace SimpleCircuit
 {
-    public class Program
+    public partial class Program
     {
         /// <summary>
         /// Main entry point of the program.
@@ -67,7 +67,7 @@ namespace SimpleCircuit
         /// <param name="diagnostics">The diagnostics message handler.</param>
         public static void InteractiveMode(IDiagnosticHandler diagnostics)
         {
-            var regex = new Regex(@"""(?<value>[^""]+)""|(?<value>[^\s]+)");
+            var regex = Arguments();
 
             bool keepGoing = true;
             while (keepGoing)
@@ -144,5 +144,8 @@ namespace SimpleCircuit
                 jobs.Add(currentJob);
             return jobs;
         }
+
+        [GeneratedRegex(@"""(?<value>[^""]+)""|(?<value>[^\s]+)")]
+        private static partial Regex Arguments();
     }
 }
