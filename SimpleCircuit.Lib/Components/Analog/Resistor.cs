@@ -135,8 +135,6 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawAmericanResistor(SvgDrawing drawing)
             {
-                drawing.ExtendPins(Pins, 2, "a", "b");
-
                 double w = Width * 0.5;
                 double l = Length * 0.5;
 
@@ -184,7 +182,6 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawEuropeanResistor(SvgDrawing drawing)
             {
-                drawing.ExtendPins(Pins, 2, "a", "b");
                 double w = Width * 0.5;
                 double l = Length * 0.5;
 
