@@ -76,6 +76,8 @@ namespace SimpleCircuit.Components.Wires
                         break;
                 }
 
+                _anchors[0] = new LabelAnchorPoint(new(0, -h - 1), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, h + 1), new(0, 1));
                 _anchors.Draw(drawing, this);
             }
         }

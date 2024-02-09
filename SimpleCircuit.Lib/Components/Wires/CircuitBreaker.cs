@@ -106,14 +106,16 @@ namespace SimpleCircuit.Components.Wires
 
                 drawing.Line(new(-6, 0), new(-4, 0), new("wire"));
                 drawing.Line(new(-4, 0), new(4, -4));
+
+                drawing.RequiredCSS.Add(".marker { fill: black; }");
                 drawing.Polygon(new Vector2[]
                 {
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
                 }, new("marker"));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
                 _anchors.Draw(drawing, this);
             }
         }
