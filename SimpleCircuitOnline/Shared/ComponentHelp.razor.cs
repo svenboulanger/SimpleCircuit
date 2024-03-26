@@ -17,6 +17,7 @@ namespace SimpleCircuitOnline.Shared
         private const double MaxPreviewWidth = 90;
         private List<(PropertyInfo, string[], string)> _properties;
         private IDrawable _drawable = null;
+        private readonly HashSet<string> _initialVariants = new();
 
         [Parameter]
         public string Class { get; set; }
@@ -60,6 +61,43 @@ namespace SimpleCircuitOnline.Shared
         }
 
         /// <summary>
+        /// Lists all the different variant modifiers used for the preview.
+        /// </summary>
+        protected IEnumerable<string> CurrentVariantModifiers
+        {
+            get
+            {
+                if (_drawable is null)
+                    yield break;
+                foreach (var variant in _drawable.Variants)
+                {
+                    if (_initialVariants.Contains(variant))
+                        continue;
+                    yield return variant;
+                }
+                foreach (var variant in _initialVariants)
+                {
+                    if (!_drawable.Variants.Contains(variant))
+                        yield return $"-{variant}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lists all the labels specified on the drawable for the preview.
+        /// </summary>
+        protected IEnumerable<string> CurrentLabels
+        {
+            get
+            {
+                if (_drawable is not ILabeled labeled)
+                    yield break;
+                foreach (var lbl in labeled.Labels)
+                    yield return lbl.Value;
+            }
+        }
+
+        /// <summary>
         /// Create a property type name.
         /// </summary>
         /// <param name="type">The type.</param>
@@ -90,6 +128,8 @@ namespace SimpleCircuitOnline.Shared
                     _drawable = factory.Create(metadata.Key, metadata.Key, new Options(), null);
                     if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]?.Value))
                         labeled.Labels[0].Value = "label";
+                    foreach (var variant in _drawable.Variants)
+                        _initialVariants.Add(variant);
                     CreateSvg();
                 }
             }

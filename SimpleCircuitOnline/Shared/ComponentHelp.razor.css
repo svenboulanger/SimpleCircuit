@@ -58,3 +58,26 @@ a.shown {
     color: #212529;
     border-color: #dae0e5;
 }
+p.code {
+    flex: 1 1 auto;
+    border-radius: 0.2rem;
+    border: 1px solid #eee;
+    padding: 0.2rem;
+    font-family: Consolas, "Courier New", monospace;
+}
+    p.code span.key {
+        font-weight: bold;
+        color: #00a;
+    }
+    p.code span.bracket {
+        color: #f00;
+    }
+    p.code span.variant {
+        color: #c99;
+    }
+    p.code span.string {
+        color: #a633f2;
+    }
+    p.code span.comma {
+        color: #000;
+    }

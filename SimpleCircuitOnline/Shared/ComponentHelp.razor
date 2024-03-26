@@ -11,8 +11,42 @@
     <div class="content">
         @if (Metadata != null)
         {
+            bool isFirst = true;
             <h5>@Metadata.Key<small class="text-muted">name</small></h5>
             <p>@(Metadata.Description)</p>
+            <p class="code">
+                <span class="key">@Metadata.Key</span>
+                @foreach (string variant in CurrentVariantModifiers)
+                {
+                    @if (isFirst)
+                    {
+                        isFirst = false;
+                        <span class="bracket">(</span>
+                    }
+                    else
+                    {
+                        <span class="comma">, </span>
+                    }
+                    <span class="variant">@variant</span>
+                }
+                @foreach (string lbl in CurrentLabels)
+                {
+                    @if (isFirst)
+                    {
+                        isFirst = false;
+                        <span class="bracket">(</span>
+                    }
+                    else
+                    {
+                        <span class="comma">, </span>
+                    }
+                    <span class="string">"@lbl"</span>
+                }
+                @if (!isFirst)
+                {
+                    <span class="bracket">)</span>
+                }
+            </p>
         }
         @if (_drawable != null)
         {
