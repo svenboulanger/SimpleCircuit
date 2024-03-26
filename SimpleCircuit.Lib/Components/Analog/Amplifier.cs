@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Analog
                 // Add output pins
                 if (Variants.Contains(_differentialOutput))
                 {
-                    if (Variants.Contains(_differentialInput))
+                    if (Variants.Contains(_swapOutput))
                     {
                         Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputPos, new(1, 0)), "outn", "no");
                         Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputNeg, new(1, 0)), "o", "out", "outp", "po");
