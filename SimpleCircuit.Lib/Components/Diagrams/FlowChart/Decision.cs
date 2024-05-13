@@ -63,7 +63,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                CommonGraphical.RoundedDiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var _, out var ox, out var oy);
+                CommonGraphical.DiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var _, out var ox, out var oy);
                 Vector2 Interp(DiamondLocation l1, DiamondLocation l2, double ka)
                 {
                     Vector2 a = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l1);

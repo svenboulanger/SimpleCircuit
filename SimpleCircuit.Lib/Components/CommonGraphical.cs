@@ -125,7 +125,7 @@ namespace SimpleCircuit.Components
         public static void Diamond(this SvgDrawing drawing, double x, double y, double width, double height,
             double rx = 0.0, double ry = 0.0, GraphicOptions options = null)
         {
-            RoundedDiamondSize(width, height, rx, ry, out var n, out var ox, out var oy);
+            DiamondSize(width, height, rx, ry, out var n, out var ox, out var oy);
             var loc = new Vector2(x, y);
             var ax = new Vector2(width * 0.5, 0);
             var ay = new Vector2(0, height * 0.5);
@@ -158,7 +158,7 @@ namespace SimpleCircuit.Components
         /// <param name="n">The normal of the straight lines.</param>
         /// <param name="ox">The top-left offset for the left corner compared to (-width/2,0).</param>
         /// <param name="oy">The top-left offset for the top corner compared to (0,-height/2).</param>
-        public static void RoundedDiamondSize(double width, double height, double rx, double ry, out Vector2 n, out Vector2 ox, out Vector2 oy)
+        public static void DiamondSize(double width, double height, double rx, double ry, out Vector2 n, out Vector2 ox, out Vector2 oy)
         {
             if (rx.IsZero() && ry.IsZero())
             {
@@ -218,6 +218,50 @@ namespace SimpleCircuit.Components
                 DiamondLocation.BottomLeftLeft => new(-width * 0.5 + ox.X, -ox.Y),
                 _ => default,
             };
+        }
+
+        /// <summary>
+        /// Draws a parallellogram centered around the given point.
+        /// </summary>
+        /// <param name="drawing">The drawing.</param>
+        /// <param name="x">The center X-coordinate.</param>
+        /// <param name="y">The center Y-coordinate.</param>
+        /// <param name="width">The width.</param>
+        /// <param name="edge">The slanted edge.</param>
+        /// <param name="radiusSharp">The radius for the sharp corners.</param>
+        /// <param name="radiusBlunt">The radius for the blunt corners.</param>
+        /// <param name="options">The path options.</param>
+        public static void Parallellogram(this SvgDrawing drawing, double x, double y, double width,
+            Vector2 edge, double radiusSharp = 0.0, double radiusBlunt = 0.0, GraphicOptions options = null)
+        {
+            var pcorner = new Vector2(-width * 0.5, -edge.Y * 0.5);
+            var horiz = new Vector2((width - edge.X) * 0.5, 0);
+            var edgeh = edge * 0.5;
+            RoundedCorner(pcorner, horiz, edgeh, radiusSharp,
+                out var ps1, out var ps2, out bool cornerSharp);
+            RoundedCorner(pcorner + edge, -edgeh, horiz, radiusBlunt,
+                out var pb1, out var pb2, out bool cornerBlunt);
+            drawing.BeginTransform(new(new(x, y), Matrix2.Identity));
+            drawing.Path(b =>
+            {
+                b.MoveTo(ps1);
+                if (cornerSharp)
+                    b.ArcTo(radiusSharp, radiusSharp, 0.0, false, true, ps2);
+
+                b.LineTo(pb1);
+                if (cornerBlunt)
+                    b.ArcTo(radiusBlunt, radiusBlunt, 0.0, false, true, pb2);
+
+                b.LineTo(-ps1);
+                if (cornerSharp)
+                    b.ArcTo(radiusSharp, radiusSharp, 0.0, false, true, -ps2);
+
+                b.LineTo(-pb1);
+                if (cornerBlunt)
+                    b.ArcTo(radiusBlunt, radiusBlunt, 0.0, false, true, -pb2);
+                b.Close();
+            }, options);
+            drawing.EndTransform();
         }
 
         /// <summary>
@@ -370,6 +414,101 @@ namespace SimpleCircuit.Components
         {
             if (vector.Y > y)
                 vector = new Vector2(vector.X, y);
+        }
+
+        /// <summary>
+        /// Computes the entry points when rounding corners.
+        /// </summary>
+        /// <param name="point">The corner location.</param>
+        /// <param name="a">The first edge, starting in <paramref name="point"/>.</param>
+        /// <param name="b">The second edge, starting in <paramref name="point"/>.</param>
+        /// <param name="radius">The radius.</param>
+        /// <param name="p1">The first entry point, along the first edge.</param>
+        /// <param name="p2">The second entry point, along the second edge.</param>
+        /// <param name="corner">If <c>true</c> the corner can be drawn; otherwise, <c>false</c>.</param>
+        /// <returns>Returns the inset along the edges.</returns>
+        public static double RoundedCorner(Vector2 point,
+            Vector2 a, Vector2 b, double radius,
+            out Vector2 p1, out Vector2 p2, out bool corner)
+        {
+            double x = RoundedCorner(a, b, radius);
+            corner = false;
+            p2 = p1 = point;
+            if (x < a.Length && x < b.Length)
+            {
+                p1 += a / a.Length * x;
+                p2 += b / b.Length * x;
+                corner = true;
+            }
+            return x;
+        }
+
+        /// <summary>
+        /// Computes the inset for the points when rounding corners.
+        /// </summary>
+        /// <param name="a">The direction of the first edge.</param>
+        /// <param name="b">The direction of the second edge.</param>
+        /// <param name="radius">The radius of the corner.</param>
+        /// <returns>Returns the distance from the origin to where the arc would touch the edges.</returns>
+        public static double RoundedCorner(Vector2 a, Vector2 b, double radius)
+        {
+            var u = a / a.Length;
+            var v = b / b.Length;
+            double alpha = Math.Acos(u.Dot(v));
+            double x = radius / Math.Tan(alpha * 0.5);
+            return x;
+        }
+
+        /// <summary>
+        /// Computes an interpolated point on a rounded corner.
+        /// </summary>
+        /// <param name="point">The corner point.</param>
+        /// <param name="a">The first edge, starting in <paramref name="point"/>.</param>
+        /// <param name="b">The second edge, starting in <paramref name="point"/>.</param>
+        /// <param name="radius">The radius of the corner.</param>
+        /// <param name="fraction">The fraction. If <c>0</c>, uses the point on <paramref name="a"/>; if <c>1</c>, uses the point on <paramref name="b"/>.</param>
+        /// <param name="p">The point location.</param>
+        /// <param name="n">The normal at the interpolated point.</param>
+        /// <param name="corner">If <c>true</c>, the corner can be drawn; otherwise, <c>false</c>.</param>
+        public static void InterpRoundedCorner(Vector2 point,
+            Vector2 a, Vector2 b, double radius, double fraction,
+            out Vector2 p, out bool corner)
+        {
+            var u = a / a.Length;
+            var v = b / b.Length;
+            double alpha = Math.Acos(u.Dot(v));
+            double x = radius / Math.Tan(alpha * 0.5);
+
+            if (x >= a.Length || x > b.Length)
+            {
+                p = point;
+                corner = false;
+                return;
+            }
+
+            corner = true;
+            if (fraction < 0.001)
+                p = point + x * u;
+            else if (fraction > 0.999)
+                p = point + x * v;
+            else
+            {
+                // Compute the center of the arc
+                var center = point;
+                if (u.X * v.Y - u.Y * v.X > 0)
+                    center += u * x + u.Perpendicular * radius;
+                else
+                    center += u * x - u.Perpendicular * radius;
+
+                // Compute the angles to the end points
+                double a0 = Math.Atan2(-u.Y, -u.X);
+                if (a0 < 0)
+                    a0 += 2 * Math.PI;
+                double a1 = Math.Atan2(-v.Y, -v.X);
+                if (a1 < 0)
+                    a1 += 2 * Math.PI;
+                p = center + Vector2.Normal(a0 + fraction * (a1 - a0)) * radius;
+            }
         }
     }
 }

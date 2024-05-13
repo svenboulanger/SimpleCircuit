@@ -30,9 +30,9 @@ namespace SimpleCircuit.Components.Labeling
             Vector2 size = subject.BottomRight - subject.TopLeft;
             Vector2 n, ox, oy;
             if (subject is IRoundedDiamond rd)
-                RoundedDiamondSize(size.X, size.Y, rd.CornerRadiusX, rd.CornerRadiusY, out n, out ox, out oy);
+                DiamondSize(size.X, size.Y, rd.CornerRadiusX, rd.CornerRadiusY, out n, out ox, out oy);
             else
-                RoundedDiamondSize(size.X, size.Y, 0.0, 0.0, out n, out ox, out oy);
+                DiamondSize(size.X, size.Y, 0.0, 0.0, out n, out ox, out oy);
 
             LabelAnchorPoint ComputeMidLocation(Vector2 a, Vector2 b)
             {
