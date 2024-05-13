@@ -1103,6 +1103,12 @@ namespace SimpleCircuit.Parser
                         break;
                     }
                 }
+                else if (lexer.Type == TokenType.EndOfContent)
+                {
+                    css = lexer.GetTracked(tracker);
+                    context.Diagnostics.Post(ErrorCodes.UnexpectedEndOfCode);
+                    break; // Escape if no end is detected
+                }
                 else
                     lexer.Next();
             }
