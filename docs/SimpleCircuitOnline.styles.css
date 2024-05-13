@@ -170,6 +170,29 @@ a.shown[b-ts37c372oa] {
     color: #212529;
     border-color: #dae0e5;
 }
+p.code[b-ts37c372oa] {
+    flex: 1 1 auto;
+    border-radius: 0.2rem;
+    border: 1px solid #eee;
+    padding: 0.2rem;
+    font-family: Consolas, "Courier New", monospace;
+}
+    p.code span.key[b-ts37c372oa] {
+        font-weight: bold;
+        color: #00a;
+    }
+    p.code span.bracket[b-ts37c372oa] {
+        color: #f00;
+    }
+    p.code span.variant[b-ts37c372oa] {
+        color: #c99;
+    }
+    p.code span.string[b-ts37c372oa] {
+        color: #a633f2;
+    }
+    p.code span.comma[b-ts37c372oa] {
+        color: #000;
+    }
 /* /Shared/DemoList.razor.rz.scp.css */
 h5[b-0yji87gb56] {
     margin-bottom: 0.25rem;
