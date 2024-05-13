@@ -1,16 +1,15 @@
 ﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using System.Numerics;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
     [Drawable("FIO", "A Flowchart Input/Output.", "Flowchart", "parallelogram")]
     public class InputOutput : DrawableFactory
     {
+        private const double _edgeSkew = 0.35;
+
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
@@ -98,7 +97,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     Trapezoid(drawing);
                 else
                 {
-                    var edge = new Vector2(Height * 0.25, -Height);
+                    var edge = new Vector2(Height * _edgeSkew, -Height);
                     drawing.Parallellogram(0.0, 0.0, Width, edge, CornerRadiusSharp, CornerRadiusBlunt);
                     _anchors[0] = new LabelAnchorPoint(new(), new());
                 }
@@ -142,9 +141,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                double a = Width * 0.5;
-                double b = Height * 0.5;
-
                 static Vector2 Interp(Vector2 a, Vector2 b, double ka)
                 {
                     double k = ka / (Math.PI * 0.5);
@@ -212,7 +208,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 else
                 {
                     // Calculate the points for the parallellogram
-                    var edge = new Vector2(Height * 0.25, -Height);
+                    var edge = new Vector2(Height * _edgeSkew, -Height);
                     var pcorner = new Vector2(-Width * 0.5, -edge.Y * 0.5);
                     var horiz = new Vector2((Width - edge.X) * 0.5, 0);
                     foreach (var pin in pins)
