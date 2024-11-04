@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Analog;
 using SpiceSharp.Components;
 using SpiceSharp.Entities;
 using System;
@@ -11,28 +12,9 @@ namespace SimpleCircuit.Components
     public class MinimumConstraint : ICircuitSolverPresence
     {
         public const string DiodeModelName = "#MinimumOffsetPinModel";
-        private const double OnResistance = 1e-4;
-        private const double OffResistance = 1e9;
-        private const double Hysteresis = 0.01;
 
         /// <inheritdoc />
         public int Order => 0;
-
-        /// <summary>
-        /// Adds the diode model that can be used to define minimum constraints.
-        /// </summary>
-        /// <param name="circuit">The circuit.</param>
-        public static void AddRectifyingModel(IEntityCollection circuit)
-        {
-            if (circuit.Contains(DiodeModelName))
-                return;
-            var model = new VoltageSwitchModel(DiodeModelName);
-            model.Parameters.OnResistance = OnResistance;
-            model.Parameters.OffResistance = OffResistance;
-            model.Parameters.Hysteresis = Hysteresis;
-            model.Parameters.Threshold = 0;
-            circuit.Add(model);
-        }
 
         /// <summary>
         /// Adds a structure to the circuit that tries to guarantee a minimum
@@ -44,17 +26,9 @@ namespace SimpleCircuit.Components
         /// <param name="minimum">The weight of the minimum.</param>
         public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1)
         {
-            // Check for valid weights
-            // If the weight is significant compared to the off-resistance of a minimum constraint, then 
-            // the results tend to be skewed/distorted.
-            double r = 1.0 / weight;
-            if (r >= OffResistance * 0.1)
-                throw new ArgumentOutOfRangeException(nameof(weight));
-
-            string i = $"{name}.i";
-            circuit.Add(new Resistor($"R{name}", highest, lowest, 1.0 / weight));
-            circuit.Add(new VoltageSource($"V{name}", i, lowest, minimum));
-            AddRectifyingElement(circuit, $"D{name}", i, highest);
+            var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest, lowest, minimum);
+            component.SetParameter("weight", weight);
+            circuit.Add(component);
         }
 
         /// <summary>
@@ -87,9 +61,6 @@ namespace SimpleCircuit.Components
         {
             double delta = lowest.Offset - highest.Offset;
             AddMinimum(circuit, name, lowest.Representative, highest.Representative, delta + minimum, weight);
-
-            // Balancing for symmetric spacing
-            circuit.Add(new CurrentSource($"I{name}", lowest.Representative, highest.Representative, delta * weight));
         }
 
         /// <summary>
@@ -107,6 +78,48 @@ namespace SimpleCircuit.Components
                 AddMinimum(circuit, name, start, end, minimum, weight);
             else
                 AddMinimum(circuit, name, end, start, -minimum, weight);
+        }
+
+        public static void AddMinimum(IEntityCollection circuit, string name,
+            string fromX, string fromY, string toX, string toY,
+            Vector2 offset, Vector2 normal, double minimum, double weight = 1.0)
+        {
+            var component = new Constraints.SlopedMinimumConstraints.SlopedMinimumConstraint(
+                name, fromX, fromY, toX, toY, offset, normal, minimum);
+            component.SetParameter("weight", weight);
+            circuit.Add(component);
+        }
+
+        /// <summary>
+        /// Adds a directional minimum in two directions.
+        /// </summary>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="name">The name of the constraint.</param>
+        /// <param name="fromX">The start X-coordinate.</param>
+        /// <param name="fromY">The start Y-coordinate.</param>
+        /// <param name="toX">The end X-coordinate.</param>
+        /// <param name="toY">The end Y-coordinate.</param>
+        /// <param name="normal">The normal (direction).</param>
+        /// <param name="minimum">The minimum distance along <paramref name="normal"/>.</param>
+        public static void AddDirectionalMinimum(IEntityCollection circuit, string name,
+            RelativeItem fromX, RelativeItem fromY, RelativeItem toX, RelativeItem toY,
+            Vector2 normal, double minimum, double weight = 1.0)
+        {
+            if (minimum < 0.0)
+            {
+                minimum = -minimum;
+                normal = -normal;
+            }
+
+            bool invertedX = normal.X < 0.0;
+            bool invertedY = normal.Y < 0.0;
+            var offset = new Vector2(fromX.Offset - toX.Offset, fromY.Offset - toX.Offset);
+            var component = new Constraints.SlopedMinimumConstraints.SlopedMinimumConstraint(
+                name, fromX.Representative, fromY.Representative, toX.Representative, toY.Representative, offset, normal, minimum);
+            component.SetParameter("weight", weight);
+            component.SetParameter("invertx", invertedX);
+            component.SetParameter("inverty", invertedY);
+            circuit.Add(component);
         }
 
         /// <summary>
@@ -167,7 +180,6 @@ namespace SimpleCircuit.Components
         /// <param name="to">The name of the node where current flows into.</param>
         public static void AddRectifyingElement(IEntityCollection circuit, string name, string from, string to)
         {
-            AddRectifyingModel(circuit);
             circuit.Add(new VoltageSwitch(name, from, to, from, to, DiodeModelName));
         }
 
@@ -244,7 +256,14 @@ namespace SimpleCircuit.Components
             var lowest = context.Relationships.Offsets[Lowest];
             var highest = context.Relationships.Offsets[Highest];
             if (lowest.Representative != highest.Representative)
-                AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
+            {
+                context.Circuit.Add(
+                new Constraints.MinimumConstraints.MinimumConstraint(
+                    Name,
+                    highest.Representative, lowest.Representative,
+                    lowest.Offset - highest.Offset + Minimum).SetParameter("w", Weight));
+                // AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
+            }
         }
 
         /// <inheritdoc />

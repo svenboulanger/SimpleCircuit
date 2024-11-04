@@ -11,9 +11,7 @@ namespace Sandbox
         static void Main()
         {
             // var script = @"V(""This is some longer text"") <u> X";
-            var script = @"FIO1(r=2, w=50, h=20, manual)
-FIO1 <a 50> X
-FIO1 <a -50> X
+            var script = @"X1 <r> INV <r d a -160 d r> INV <r u a 160 u> X1
 ";
 
             var logger = new Logger();

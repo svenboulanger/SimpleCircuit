@@ -4,7 +4,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser;
-using SpiceSharp.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -265,11 +264,11 @@ namespace SimpleCircuit.Components.Wires
                         string tx = GetXName(i);
                         string ty = GetYName(i);
                         var segment = _segments[i];
+                        var orientation = GetOrientation(i);
 
                         // Ignore unconstrained wires
                         if (!segment.IsUnconstrained)
-                        {
-                            var orientation = GetOrientation(i);
+                        {   
                             if (segment.IsFixed)
                             {
                                 double l = segment.Length;
@@ -287,21 +286,15 @@ namespace SimpleCircuit.Components.Wires
                             }
                             else
                             {
-                                if (orientation.X.IsZero())
+                                if (orientation.X.IsZero() && !context.Offsets.Group(x, tx, 0.0))
                                 {
-                                    if (!context.Offsets.Group(x, tx, 0.0))
-                                    {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
-                                        return false;
-                                    }
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
+                                    return false;
                                 }
-                                if (orientation.Y.IsZero())
+                                if (orientation.Y.IsZero() && !context.Offsets.Group(y, ty, 0.0))
                                 {
-                                    if (!context.Offsets.Group(y, ty, 0.0))
-                                    {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongY, y, ty);
-                                        return false;
-                                    }
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongY, y, ty);
+                                    return false;
                                 }
                             }
                         }
@@ -453,45 +446,10 @@ namespace SimpleCircuit.Components.Wires
                     // Wire is of minimum length
                     if (orientation.X.IsZero())
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
-                    if (orientation.Y.IsZero())
+                    else if (orientation.Y.IsZero())
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
-                    if (!orientation.X.IsZero() && !orientation.Y.IsZero())
-                    {
-                        // Odd-angle wire segment
-                        string ox, oy;
-                        double dx = fromX.Offset - toX.Offset;
-                        double dy = fromY.Offset - toY.Offset;
-                        if (dx.IsZero())
-                            ox = fromX.Representative;
-                        else
-                        {
-                            ox = $"{x}.ox";
-                            context.Circuit.Add(new VoltageSource($"V{x}.ox", ox, fromX.Representative, fromX.Offset - toX.Offset));
-                        }
-                        if (dy.IsZero())
-                            oy = fromY.Representative;
-                        else
-                        {
-                            oy = $"{y}.oy";
-                            context.Circuit.Add(new VoltageSource($"V{y}.oy", oy, fromY.Representative, fromY.Offset - toY.Offset));
-                        }
-                        string tx = toX.Representative;
-                        string ty = toY.Representative;
-
-                        // General case, in any direction
-                        // Link the X and Y coordinates such that the slope remains correct
-                        string inside = $"{x}.xc";
-                        MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, tx);
-                        context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, ox, ty, oy, orientation.X / orientation.Y));
-
-                        inside = $"{y}.yc";
-                        MinimumConstraint.AddRectifyingElement(context.Circuit, $"D{inside}", inside, ty);
-                        context.Circuit.Add(new VoltageControlledVoltageSource($"E{inside}", inside, oy, tx, ox, orientation.Y / orientation.X));
-
-                        // Make sure the X and Y length cannot go below their theoretical minimum
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.mx", ox, tx, orientation.X * segment.Length);
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{y}.my", oy, ty, orientation.Y * segment.Length);
-                    }
+                    else if (!orientation.X.IsZero() && !orientation.Y.IsZero())
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, segment.Length);
                 }
                 fromX = toX;
                 fromY = toY;
