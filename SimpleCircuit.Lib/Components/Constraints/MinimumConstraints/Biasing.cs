@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
         private readonly ElementSet<double> _elements, _rhs;
         private readonly Parameters _parameters;
         private bool _lastState, _state;
-        private readonly double _gOff, _iOn;
+        private readonly double _gOff, _iOn, _iOff;
         private double _g, _i;
         private IBiasingSimulationState _biasingState;
 
@@ -45,10 +45,15 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
 
             _state = true;
             _lastState = true;
+            
+            // Calculate conductances
             _g = _gOn;
-            _i = _iOn;
             _gOff = 1.0 / _parameters.Weight;
-            _iOn = _parameters.Minimum * _gOn;
+
+            // Calculate currents
+            _iOn = (_parameters.Offset + _parameters.Minimum) * _gOn;
+            _iOff = _parameters.Offset * _gOff;
+            _i = _iOn;
         }
 
         /// <inheritdoc />
@@ -64,7 +69,7 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             {
                 // Get the controlled value
                 _lastState = _state;
-                double ctrl = _variables.Positive.Value - _variables.Negative.Value;
+                double ctrl = _variables.Positive.Value - (_variables.Negative.Value + _parameters.Offset);
                 if (ctrl < _parameters.Minimum - _threshold)
                     _state = true;
                 else if (ctrl > _parameters.Minimum + _threshold)
@@ -81,7 +86,7 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
                     else
                     {
                         _g = _gOff;
-                        _i = 0.0;
+                        _i = _iOff;
                     }
                 }
             }

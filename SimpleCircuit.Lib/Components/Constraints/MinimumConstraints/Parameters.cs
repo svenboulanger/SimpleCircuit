@@ -20,5 +20,11 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
         /// </summary>
         [ParameterName("m"), ParameterName("minimum")]
         private double _minimum;
+
+        /// <summary>
+        /// Gets or sets the offset of the two coordinates.
+        /// </summary>
+        [ParameterName("o"), ParameterName("offset")]
+        private double _offset;
     }
 }

@@ -16,10 +16,11 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
         /// <param name="x">The smallest coordinate.</param>
         /// <param name="tx">The largest coordinate.</param>
         /// <param name="minimum">The minimum between the two coordinates.</param>
-        public MinimumConstraint(string name, string tx, string x, double minimum)
+        public MinimumConstraint(string name, string tx, string x, double offset, double minimum)
             : base(name, 2)
         {
             Connect(tx, x);
+            Parameters.Offset = offset;
             Parameters.Minimum = minimum;
         }
     }

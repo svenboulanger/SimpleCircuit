@@ -6,12 +6,12 @@ using System.Xml;
 
 namespace Sandbox
 {
-    class Program
+    public class Program
     {
         static void Main()
         {
             // var script = @"V(""This is some longer text"") <u> X";
-            var script = "* For more tutorials, go to Help > Demo's.\r\n\r\n* Wires do not have to be horizontal or vertical, SimpleCircuit can solve any angle\r\n* For shorthand notation, the 4 cardinal directions can be used\r\nX1 <n e s w> X1\r\n\r\n* In fact, the 4 ordinal directions can also be used!\r\nX2 <ne se sw nw> X2\r\n\r\n* It is possible to specify any angled wires by using <a #> as a wire segment with # the angle of the wire (counter-clockwise)\r\nX3 <a 60 r a -60 a -120 l a 120> X3\r\n* One note of caution: Using fine increments of angles can lead to rather unexpected results! Uncomment the next example to see what could happen:\r\n* X4 <e n a -91> X4\r\n* In such events, consider using unconstrained wires instead\r\n\r\n* We might just use <?> or '-' to copy the wire orientation from the pin it is connected to\r\nX5 <ne> R <?> R - R\r\n* Sometimes this could lead to errors though, for example:\r\n* X6 - R\r\n\r\n* Unconstrained wires are wires that do not constrain anything\r\n* While this may be useful for very odd angles, it also means that the components will need to be constrained in other ways.\r\n* They are specified using the <??> syntax:\r\nX7 <u> R <u r> C <r d ??> X7\r\n\r\n* Wires can also have special appearances:\r\nX8 <r arrow r arrow> X\r\nX9 <rarrow r arrow> X\r\nX10 <arrow r> X\r\nX11 <r rarrow> X\r\nX12 <r dashed> X\r\nX13 <r dotted> X\r\n";
+            var script = "* For more tutorials, go to Help > Demo's.\r\n\r\n* Subcircuits are solved separately on their own, after which they act like a component\r\n* The pins need to be specified\r\n.subckt ABC DIR1[in] DIR2[out]\r\n    DIR1 <r> X1\r\n    X1 <u r> R1 <r d> X2\r\n    X1 <d r> C1 <r u> X2\r\n    X2 <r> DIR2\r\n.ends\r\n\r\n* Now we can instantiate this subcircuit definition multiple times.\r\nABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1\r\n\r\n* They can even be angled because our pins also have a direction!\r\n* Also showing how you can refer to pins\r\nXs <a -45> [DIR1_in]ABC[DIR2_out] <a -45 0> L <a -45> Xe\r\n";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

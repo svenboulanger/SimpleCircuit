@@ -15,38 +15,6 @@ namespace SimpleCircuit.Components
         public int Order => 0;
 
         /// <summary>
-        /// Adds a structure to the circuit that tries to guarantee a minimum
-        /// </summary>
-        /// <param name="circuit">The circuit.</param>
-        /// <param name="name">A unique name for the elements.</param>
-        /// <param name="lowest">The lowest node.</param>
-        /// <param name="highest">The highest node.</param>
-        /// <param name="minimum">The weight of the minimum.</param>
-        public static void AddMinimum(IEntityCollection circuit, string name, string lowest, string highest, double minimum, double weight = 1)
-        {
-            var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest, lowest, minimum);
-            component.SetParameter("weight", weight);
-            circuit.Add(component);
-        }
-
-        /// <summary>
-        /// Adds a structure to the circuit that guarantees a minimum distance but keeps the order of the nodes depending on <paramref name="minimum"/>.
-        /// </summary>
-        /// <param name="circuit">The circuit.</param>
-        /// <param name="name">A unique name for the elements.</param>
-        /// <param name="start">The starting node.</param>
-        /// <param name="end">The end node.</param>
-        /// <param name="minimum">The mininum.</param>
-        /// <param name="weight">The weight of the minimum.</param>
-        public static void AddDirectionalMinimum(IEntityCollection circuit, string name, string start, string end, double minimum, double weight = 1)
-        {
-            if (minimum > 0)
-                AddMinimum(circuit, name, start, end, minimum, weight);
-            else
-                AddMinimum(circuit, name, end, start, -minimum, weight);
-        }
-
-        /// <summary>
         /// Adds a structure to the circuit that tries to guarantee a minimum between two relative items.
         /// </summary>
         /// <param name="circuit">The circuit.</param>
@@ -58,7 +26,9 @@ namespace SimpleCircuit.Components
         public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1)
         {
             double delta = lowest.Offset - highest.Offset;
-            AddMinimum(circuit, name, lowest.Representative, highest.Representative, delta + minimum, weight);
+            var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest.Representative, lowest.Representative, delta, minimum);
+            component.SetParameter("weight", weight);
+            circuit.Add(component);
         }
 
         /// <summary>
@@ -178,14 +148,7 @@ namespace SimpleCircuit.Components
             var lowest = context.Relationships.Offsets[Lowest];
             var highest = context.Relationships.Offsets[Highest];
             if (lowest.Representative != highest.Representative)
-            {
-                context.Circuit.Add(
-                new Constraints.MinimumConstraints.MinimumConstraint(
-                    Name,
-                    highest.Representative, lowest.Representative,
-                    lowest.Offset - highest.Offset + Minimum).SetParameter("w", Weight));
-                // AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
-            }
+                AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
         }
 
         /// <inheritdoc />
