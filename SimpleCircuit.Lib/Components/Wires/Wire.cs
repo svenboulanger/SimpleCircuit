@@ -106,127 +106,126 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
-            if (context.Mode == PreparationMode.Offsets)
+            // Find the pins
+            if (_p2w is null)
             {
-                // Find the pins
-                _p2w = _pinToWire?.GetOrCreate(context.Diagnostics, -1);
-                _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
-
-                // Make sure these pins know they are being connected to
-                if (_p2w != null)
+                _p2w = _pinToWire.GetOrCreate(context.Diagnostics, -1);
+                if (_p2w is not null)
                     _p2w.Connections++;
-                if (_w2p != null)
+            }
+            if (_w2p is null)
+            {
+                _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
+                if (_w2p is not null)
                     _w2p.Connections++;
+            }
 
-                var p1 = _p2w as IOrientedPin;
-                var p2 = _w2p as IOrientedPin;
+            var p1 = _p2w as IOrientedPin;
+            var p2 = _w2p as IOrientedPin;
+            string x, y;
 
-                if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero() && !_segments[0].IsUnconstrained)
-                {
-                    // We have a wire that connects two pins but does not have a defined orientation yet
-                    // This piece of code will pass this orientation to other nodes if they can be resolved
-                    if (p1 == null && p2 == null)
+            switch (context.Mode)
+            {
+                case PreparationMode.Orientation:
+
+                    if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero() && !_segments[0].IsUnconstrained)
                     {
-                        GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
-                        return PresenceResult.GiveUp;
-                    }
-                    else if (p1 != null && p2 != null)
-                    {
-                        // We might need to point it towards each other
-                        bool p1f = p1.HasFixedOrientation, p2f = p2.HasFixedOrientation;
-                        if (p1f && p2f)
-                            // Everything has been fixed already!
-                            return PresenceResult.Success;
-                        else if (p1f)
-                            // The first pin is fixed, so let's use its orientation to set the second one
-                            p2.ResolveOrientation(-p1.Orientation, _segments[0].Source, context.Diagnostics);
-                        else if (p2f)
-                            // The second pin is fixed, so let's use its orientation to set the first one
-                            p1.ResolveOrientation(-p2.Orientation, _segments[0].Source, context.Diagnostics);
-                        else
+                        // We have a wire that connects two pins but does not have a defined orientation yet
+                        // This piece of code will pass this orientation to other nodes if they can be resolved
+                        if (p1 == null && p2 == null)
                         {
-                            // Both aren't fixed, so we might just not have enough information...
+                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                            return PresenceResult.GiveUp;
+                        }
+                        else if (p1 != null && p2 != null)
+                        {
+                            // We might need to point it towards each other
+                            bool p1f = p1.HasFixedOrientation, p2f = p2.HasFixedOrientation;
+                            if (p1f && p2f)
+                                // Everything has been fixed already!
+                                return PresenceResult.Success;
+                            else if (p1f)
+                                // The first pin is fixed, so let's use its orientation to set the second one
+                                p2.ResolveOrientation(-p1.Orientation, _segments[0].Source, context.Diagnostics);
+                            else if (p2f)
+                                // The second pin is fixed, so let's use its orientation to set the first one
+                                p1.ResolveOrientation(-p2.Orientation, _segments[0].Source, context.Diagnostics);
+                            else
+                            {
+                                // Both aren't fixed, so we might just not have enough information...
+                                if (context.Desparateness == DesperatenessLevel.GiveUp)
+                                {
+                                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                    return PresenceResult.GiveUp;
+                                }
+                                return PresenceResult.Incomplete;
+                            }
+                        }
+                        else if (p1 != null)
+                        {
+                            // We can only try to derive from the first pin!
+                            if (p1.HasFixedOrientation)
+                                return PresenceResult.Success; // We can derive the orientation
                             if (context.Desparateness == DesperatenessLevel.GiveUp)
                             {
                                 GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
                                 return PresenceResult.GiveUp;
                             }
-                            return PresenceResult.Incomplete;
-                        }
-                    }
-                    else if (p1 != null)
-                    {
-                        // We can only try to derive from the first pin!
-                        if (p1.HasFixedOrientation)
-                            return PresenceResult.Success; // We can derive the orientation
-                        if (context.Desparateness == DesperatenessLevel.GiveUp)
-                        {
-                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
-                            return PresenceResult.GiveUp;
+                            else
+                                return PresenceResult.Incomplete;
                         }
                         else
-                            return PresenceResult.Incomplete;
+                        {
+                            // We can only try to derive from the second pin!
+                            if (p2.HasFixedOrientation)
+                                return PresenceResult.Success;
+                            if (context.Desparateness == DesperatenessLevel.GiveUp)
+                            {
+                                GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                return PresenceResult.GiveUp;
+                            }
+                            else
+                                return PresenceResult.Incomplete;
+                        }
                     }
                     else
                     {
-                        // We can only try to derive from the second pin!
-                        if (p2.HasFixedOrientation)
-                            return PresenceResult.Success;
-                        if (context.Desparateness == DesperatenessLevel.GiveUp)
+                        // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
+                        for (int i = 0; i < _segments.Count; i++)
                         {
-                            GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
-                            return PresenceResult.GiveUp;
-                        }
-                        else
-                            return PresenceResult.Incomplete;
-                    }
-                }
-                else
-                {
-                    // In case we have multiple wires, we might have some boundary conditions that we need to be taking care of
-                    for (int i = 0; i < _segments.Count; i++)
-                    {
-                        var segment = _segments[i];
-                        if (segment.IsUnconstrained)
-                            continue;
-                        else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
-                        {
-                            if (i == 0)
+                            var segment = _segments[i];
+                            if (segment.IsUnconstrained)
+                                continue;
+                            else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                             {
-                                // Check with first pin, and only with first pin...
-                                if (p1 == null)
+                                if (i == 0)
                                 {
-                                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                    // Check with first pin, and only with first pin...
+                                    if (p1 == null)
+                                    {
+                                        GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                }
+                                else if (i == _segments.Count - 1)
+                                {
+                                    if (p2 == null)
+                                    {
+                                        GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                }
+                                else
+                                {
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.UndefinedWireSegment);
                                     return PresenceResult.GiveUp;
                                 }
                             }
-                            else if (i == _segments.Count - 1)
-                            {
-                                if (p2 == null)
-                                {
-                                    GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
-                                    return PresenceResult.GiveUp;
-                                }
-                            }
-                            else
-                            {
-                                context.Diagnostics?.Post(segment.Source, ErrorCodes.UndefinedWireSegment);
-                                return PresenceResult.GiveUp;
-                            }
                         }
                     }
-                }
-            }
-            return PresenceResult.Success;
-        }
+                    break;
 
-        /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(IRelationshipContext context)
-        {
-            string x, y;
-            switch (context.Mode)
-            {
-                case NodeRelationMode.Offsets:
+                case PreparationMode.Offsets:
 
                     // Short wire ends to the correct pins
                     if (_p2w != null)
@@ -234,12 +233,12 @@ namespace SimpleCircuit.Components.Wires
                         if (!context.Offsets.Group(_p2w.X, StartX, 0.0))
                         {
                             context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
-                            return false;
+                            return PresenceResult.GiveUp;
                         }
                         if (!context.Offsets.Group(_p2w.Y, StartY, 0.0))
                         {
                             context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
-                            return false;
+                            return PresenceResult.GiveUp;
                         }
                     }
                     if (_w2p != null)
@@ -247,12 +246,12 @@ namespace SimpleCircuit.Components.Wires
                         if (!context.Offsets.Group(_w2p.X, EndX, 0.0))
                         {
                             context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
-                            return false;
+                            return PresenceResult.GiveUp;
                         }
                         if (!context.Offsets.Group(_w2p.Y, EndY, 0.0))
                         {
                             context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
-                            return false;
+                            return PresenceResult.GiveUp;
                         }
                     }
 
@@ -268,7 +267,7 @@ namespace SimpleCircuit.Components.Wires
 
                         // Ignore unconstrained wires
                         if (!segment.IsUnconstrained)
-                        {   
+                        {
                             if (segment.IsFixed)
                             {
                                 double l = segment.Length;
@@ -276,12 +275,12 @@ namespace SimpleCircuit.Components.Wires
                                 if (!context.Offsets.Group(x, tx, orientation.X * l))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l), segment.Source.Content);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                                 if (!context.Offsets.Group(y, ty, orientation.Y * l))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l), segment.Source.Content);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                             else
@@ -289,12 +288,12 @@ namespace SimpleCircuit.Components.Wires
                                 if (orientation.X.IsZero() && !context.Offsets.Group(x, tx, 0.0))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                                 if (orientation.Y.IsZero() && !context.Offsets.Group(y, ty, 0.0))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongY, y, ty);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                         }
@@ -303,38 +302,29 @@ namespace SimpleCircuit.Components.Wires
                     }
                     break;
 
-                case NodeRelationMode.Links:
-
-                    // Go through all segments and determine the order of coordinates
-                    var offsetX = context.Offsets[StartX];
-                    var offsetY = context.Offsets[StartY];
+                case PreparationMode.Groups:
+                    x = context.Offsets[StartX].Representative;
+                    y = context.Offsets[StartY].Representative;
                     for (int i = 0; i < _segments.Count; i++)
                     {
-                        var toOffsetX = context.Offsets[GetXName(i)];
-                        var toOffsetY = context.Offsets[GetYName(i)];
+                        string tx = context.Offsets[GetXName(i)].Representative;
+                        string ty = context.Offsets[GetYName(i)].Representative;
                         var segment = _segments[i];
-                        if (!segment.IsUnconstrained && !segment.IsFixed)
+                        if (!segment.IsUnconstrained)
                         {
-                            var orientation = GetOrientation(i);
-
-                            // If the wire is length is fixed, then we just need to compare their relative offset
-                            if (!orientation.X.IsZero())
-                            {
-                                if (!MinimumConstraint.MinimumDirectionalLink(context, offsetX, toOffsetX, orientation.X * segment.Length))
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInX, Math.Abs(orientation.X * segment.Length), segment.Source.Content);
-                            }
-                            if (!orientation.Y.IsZero())
-                            {
-                                if (!MinimumConstraint.MinimumDirectionalLink(context, offsetY, toOffsetY, orientation.Y * segment.Length))
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, Math.Abs(orientation.Y * segment.Length), segment.Source.Content);
-                            }
+                            // Group the nodes together
+                            if (!StringComparer.Ordinal.Equals(x, tx))
+                                context.Groups.Group(x, tx);
+                            if (!StringComparer.Ordinal.Equals(y, ty))
+                                context.Groups.Group(y, ty);
                         }
-                        offsetX = toOffsetX;
-                        offsetY = toOffsetY;
+                        x = tx;
+                        y = ty;
                     }
                     break;
             }
-            return true;
+            
+            return PresenceResult.Success;
         }
 
         private Vector2 GetOrientation(int index)

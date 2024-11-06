@@ -27,6 +27,16 @@ namespace SimpleCircuit.Circuits.Contexts
         public PreparationMode Mode { get; }
 
         /// <summary>
+        /// Tracks offsets between nodes.
+        /// </summary>
+        public NodeOffsetFinder Offsets { get; }
+
+        /// <summary>
+        /// Tracks nodes that are linked together.
+        /// </summary>
+        public NodeGrouper Groups { get; }
+
+        /// <summary>
         /// Finds a circuit presence with the given name.
         /// </summary>
         /// <param name="name">The full name of the presence.</param>

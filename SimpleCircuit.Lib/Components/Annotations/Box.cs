@@ -130,10 +130,6 @@ namespace SimpleCircuit.Components.Annotations
             => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(IRelationshipContext context)
-            => true;
-
-        /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
             // Find all component info items

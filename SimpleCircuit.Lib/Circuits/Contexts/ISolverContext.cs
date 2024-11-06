@@ -15,7 +15,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Gets the context of the relationships between nodes that will belong to the circuit.
         /// </summary>
-        public IRelationshipContext Relationships { get; }
+        public IPrepareContext Relationships { get; }
 
         /// <summary>
         /// Gets or sets whether the circuit should be recalculated.

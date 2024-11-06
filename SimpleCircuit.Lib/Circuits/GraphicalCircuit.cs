@@ -7,8 +7,8 @@ using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.SimpleTexts;
+using SpiceSharp.Components;
 using SpiceSharp.Simulations;
-using SpiceSharp.Validation;
 
 namespace SimpleCircuit
 {
@@ -149,24 +149,23 @@ namespace SimpleCircuit
             if (!Prepare(presences, prepareContext))
                 return false;
 
-            // Solver presences
-            var relationshipContext = new NodeContext(diagnostics);
-            if (!DiscoverNodeRelationships(presences.OfType<ICircuitSolverPresence>(), relationshipContext))
-                return false;
-
             // Space loose blocks next to each other to avoid overlaps
-            var registerContext = new RegisterContext(diagnostics, relationshipContext);
+            var registerContext = new RegisterContext(diagnostics, prepareContext);
             void Log(object sender, SpiceSharp.WarningEventArgs e)
             {
                 diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
             }
-            if (!Space(registerContext))
-                return false;
-            presences.AddRange(_extraPresences);
 
             // Register any solvable presences in the circuit
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
                 c.Register(registerContext);
+
+            // Make sure we have a solution by grounding floating nodes
+            foreach (var group in prepareContext.Groups.Representatives)
+            {
+                if (!StringComparer.Ordinal.Equals(group, "0"))
+                    registerContext.Circuit.Add(new Resistor($"R{group}", group, "0", 1e6));
+            }
 
             // If there are no circuit components to solve, let's stop here
             if (registerContext.Circuit.Count == 0)
@@ -176,40 +175,19 @@ namespace SimpleCircuit
             }
 
             // Solve the circuit
-            var op = new OP("op");
             SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
             try
             {
-                do
-                {
-                    registerContext.Recalculate = false;
-                    int fixResistors = 0, previousFixResistors;
-                    do
-                    {
-                        previousFixResistors = fixResistors;
-                        try
-                        {
-                            op.Run(registerContext.Circuit);
-                        }
-                        catch (ValidationFailedException ex)
-                        {
-                            // Let's fix floating nodes
-                            var violation = ex.Rules.Violations.OfType<FloatingNodeRuleViolation>().FirstOrDefault();
-                            if (violation != null)
-                                registerContext.Circuit.Add(new SpiceSharp.Components.Resistor($"fix.R{++fixResistors}", violation.FloatingVariable.Name, "0", 1));
-                            else
-                                throw ex;
-                        }
-                    }
-                    while (fixResistors > previousFixResistors);
+                // Solve
+                var op = new OP("op");
+                op.BiasingParameters.Validate = false; // We should have constructed a valid circuit
+                op.Run(registerContext.Circuit);
 
-                    // Extract the information
-                    var state = op.GetState<IBiasingSimulationState>();
-                    var updateContext = new UpdateContext(diagnostics, state, relationshipContext);
-                    foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                        c.Update(updateContext);
-                }
-                while (registerContext.Recalculate);
+                // Extract the information
+                var state = op.GetState<IBiasingSimulationState>();
+                var updateContext = new UpdateContext(diagnostics, state, prepareContext);
+                foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                    c.Update(updateContext);
             }
             finally
             {
@@ -237,6 +215,11 @@ namespace SimpleCircuit
 
             // Prepare offsets
             context.Mode = PreparationMode.Offsets;
+            if (!PrepareCycle(presences, context))
+                return false;
+
+            // Prepare groups
+            context.Mode = PreparationMode.Groups;
             if (!PrepareCycle(presences, context))
                 return false;
 
@@ -325,138 +308,6 @@ namespace SimpleCircuit
                 }
             }
             return success;
-        }
-
-        private bool DiscoverNodeRelationships(IEnumerable<ICircuitSolverPresence> presences, NodeContext context)
-        {
-            // First deal with shorts to reduce the number of variables as much as possible
-            context.Mode = NodeRelationMode.Offsets;
-            foreach (var c in presences.OfType<ICircuitSolverPresence>())
-            {
-                if (!c.DiscoverNodeRelationships(context))
-                    return false;
-            }
-            context.Offsets.ComputeBounds();
-
-            // Order coordinates to discover the bounds on blocks
-            context.Mode = NodeRelationMode.Links;
-            foreach (var c in presences.OfType<ICircuitSolverPresence>())
-            {
-                if (!c.DiscoverNodeRelationships(context))
-                    return false;
-            }
-
-            // Group nodes together that belong to the same "drawn block"
-            context.Mode = NodeRelationMode.Groups;
-            foreach (var c in presences.OfType<ICircuitSolverPresence>())
-            {
-                if (!c.DiscoverNodeRelationships(context))
-                    return false;
-            }
-            return true;
-        }
-
-        private bool Space(RegisterContext context)
-        {
-            // Make a map of representatives and their extremes
-            var dict = new Dictionary<string, (List<string> Minima, List<string> Maxima)>(StringComparer.OrdinalIgnoreCase);
-            foreach (var node in context.Relationships.Extremes.Linked.Representatives)
-                dict.Add(node, (new List<string>(), new List<string>()));
-
-            // Map all minima
-            foreach (var node in context.Relationships.Extremes.Minimum.Extremes)
-            {
-                string representative = context.Relationships.Extremes.Linked[node];
-                if (dict.TryGetValue(representative, out var extremes))
-                    extremes.Minima.Add(node);
-            }
-
-            // Map all maxima
-            foreach (var node in context.Relationships.Extremes.Maximum.Extremes)
-            {
-                string representative = context.Relationships.Extremes.Linked[node];
-                if (dict.TryGetValue(representative, out var extremes))
-                    extremes.Maxima.Add(node);
-            }
-
-            // Use the XY sets to make a vertical stack of graphical blocks
-            Dictionary<string, HashSet<string>> stacked = [];
-            foreach (var set in context.Relationships.XYSets)
-            {
-                if (!stacked.TryGetValue(set.NodeY, out var horiz))
-                {
-                    horiz = [];
-                    stacked.Add(set.NodeY, horiz);
-                }
-                horiz.Add(set.NodeX);
-            }
-
-            // Fix the positions
-            int constraint = 0;
-            IEnumerable<string> lastMaxY = null;
-            foreach (var blocks in stacked)
-            {
-                // The Y-coordinate is all related to each other, so we can simply use the minima for the y-node
-                if (!dict.TryGetValue(blocks.Key, out var minMaxY))
-                {
-                    var list = new[] { blocks.Key };
-                    AddMinimumSpacing(lastMaxY, list, SpacingY, ref constraint);
-                    lastMaxY = list;
-                }
-                else
-                {
-                    // Add the minima for y-coordinates
-                    AddMinimumSpacing(lastMaxY, minMaxY.Minima, SpacingY, ref constraint);
-                    lastMaxY = minMaxY.Maxima;
-                    dict.Remove(blocks.Key);
-                }
-
-                // Deal with the X-coordinates
-                IEnumerable<string> lastMaxX = null;
-                foreach (var nodeX in blocks.Value)
-                {
-                    if (!dict.TryGetValue(nodeX, out var minMaxX))
-                    {
-                        var list = new[] { nodeX };
-                        AddMinimumSpacing(lastMaxX, new[] { nodeX }, SpacingX, ref constraint);
-                        lastMaxX = list;
-                    }
-                    else
-                    {
-                        // Add the minima for x-coordinates
-                        AddMinimumSpacing(lastMaxX, minMaxX.Minima, SpacingX, ref constraint);
-                        lastMaxX = minMaxX.Maxima;
-                        dict.Remove(nodeX);
-                    }
-                }
-            }
-
-            // Deal with loose ends
-            foreach (var pair in dict)
-            {
-                if (pair.Value.Minima.Count == 0 || pair.Value.Maxima.Count == 0)
-                    continue;
-                foreach (var min in pair.Value.Minima)
-                    _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
-            }
-            return true;
-        }
-
-        private void AddMinimumSpacing(IEnumerable<string> lastMax, IEnumerable<string> nextMin, double spacing, ref int constraint)
-        {
-            if (lastMax == null)
-            {
-                foreach (var min in nextMin)
-                    _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", "0", min, 0.0) { Weight = 1e-6 });
-            }
-            else
-            {
-                foreach (var min in nextMin)
-                {
-                    foreach (var max in lastMax)
-                        _extraPresences.Add(new MinimumConstraint($"constraint.{constraint++}", max, min, spacing) { Weight = 1e-6 });
-                }
-            }
         }
 
         /// <summary>

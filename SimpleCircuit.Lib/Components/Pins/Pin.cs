@@ -54,15 +54,6 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public virtual PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
-
-        /// <inheritdoc />
-        public virtual void Fail(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
-        {
-        }
-
-        /// <inheritdoc />
-        public abstract bool DiscoverNodeRelationships(IRelationshipContext context);
-
         /// <inheritdoc />
         public abstract void Register(IRegisterContext context);
 

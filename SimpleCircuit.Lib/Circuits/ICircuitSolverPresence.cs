@@ -9,13 +9,6 @@ namespace SimpleCircuit.Components
     public interface ICircuitSolverPresence : ICircuitPresence
     {
         /// <summary>
-        /// Allows the discovering of aliases. This can reduce the number of unknowns to solve.
-        /// </summary>
-        /// <param name="context">The context containing the node relationships.</param>
-        /// <returns>Returns <c>true</c> if the discovery is successful; or <c>false</c> if the solver should fail.</returns>
-        public bool DiscoverNodeRelationships(IRelationshipContext context);
-
-        /// <summary>
         /// Registers the presence in the circuit that will solve all coordinates.
         /// </summary>
         /// <param name="context">The solver context.</param>

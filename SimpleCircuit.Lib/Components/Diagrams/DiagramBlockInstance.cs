@@ -97,8 +97,23 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
-            UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
-            return PresenceResult.Success;
+            var result = PresenceResult.Success;
+            foreach (var pin in _pins)
+            {
+                var r = pin.Prepare(context);
+                if (r == PresenceResult.GiveUp)
+                    return PresenceResult.GiveUp;
+                else if (r == PresenceResult.Incomplete)
+                    result = PresenceResult.Incomplete;
+            }
+
+            switch (context.Mode)
+            {
+                case PreparationMode.Offsets:
+                    UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
+                    break;
+            }
+            return result;
         }
 
         /// <inheritdoc />
@@ -133,24 +148,6 @@ namespace SimpleCircuit.Components.Diagrams
         /// </summary>
         /// <param name="drawing"></param>
         protected abstract void Draw(SvgDrawing drawing);
-
-        /// <inheritdoc />
-        public bool DiscoverNodeRelationships(IRelationshipContext context)
-        {
-            foreach (var pin in _pins)
-            {
-                if (!pin.DiscoverNodeRelationships(context))
-                    return false;
-            }
-
-            switch (context.Mode)
-            {
-                case NodeRelationMode.Groups:
-                    context.Link(X, Y);
-                    break;
-            }
-            return true;
-        }
 
         /// <inheritdoc />
         public void Register(IRegisterContext context)

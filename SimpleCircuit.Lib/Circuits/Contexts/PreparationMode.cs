@@ -14,5 +14,10 @@
         /// The mode of preparation for resolving (local) offsets. Might be for spacing.
         /// </summary>
         Offsets,
+
+        /// <summary>
+        /// The mode of preparation for resolving variable groups.
+        /// </summary>
+        Groups,
     }
 }

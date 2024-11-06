@@ -52,23 +52,18 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(IRelationshipContext context)
+        public override PresenceResult Prepare(IPrepareContext context)
         {
-            if (!base.DiscoverNodeRelationships(context))
-                return false;
+            var result = PresenceResult.Success;
             for (int i = 0; i < Pins.Count; i++)
             {
-                if (!Pins[i].DiscoverNodeRelationships(context))
-                    return false;
+                var r = Pins[i].Prepare(context);
+                if (r == PresenceResult.GiveUp)
+                    return PresenceResult.GiveUp;
+                else if (r == PresenceResult.Incomplete)
+                    result = PresenceResult.Incomplete;
             }
-
-            switch (context.Mode)
-            {
-                case NodeRelationMode.Groups:
-                    context.Link(X, Y);
-                    break;
-            }
-            return true;
+            return result;
         }
 
         /// <inheritdoc />

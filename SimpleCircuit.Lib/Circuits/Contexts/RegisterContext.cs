@@ -10,8 +10,8 @@ namespace SimpleCircuit.Circuits.Contexts
     /// Creates a new context for simulation of graphical items.
     /// </remarks>
     /// <param name="circuit">The circuit elements for simulation.</param>
-    /// <param name="relationshipContext">Extra data for the nodes.</param>
-    public class RegisterContext(IDiagnosticHandler diagnostics, IRelationshipContext relationshipContext, IEntityCollection circuit = null) : IRegisterContext
+    /// <param name="prepareContext">Extra data for the nodes.</param>
+    public class RegisterContext(IDiagnosticHandler diagnostics, IPrepareContext prepareContext, IEntityCollection circuit = null) : IRegisterContext
     {
         /// <inheritdoc />
         public IDiagnosticHandler Diagnostics { get; } = diagnostics;
@@ -20,7 +20,7 @@ namespace SimpleCircuit.Circuits.Contexts
         public IEntityCollection Circuit { get; } = circuit ?? new SpiceSharp.Circuit();
 
         /// <inheritdoc />
-        public IRelationshipContext Relationships { get; } = relationshipContext;
+        public IPrepareContext Relationships { get; } = prepareContext;
 
         /// <inheritdoc />
         public bool Recalculate { get; set; }

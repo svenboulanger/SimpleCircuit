@@ -27,14 +27,12 @@
 
   <ItemGroup>
     <Compile Include="Circuits\Contexts\IPrepareContext.cs" />
-    <Compile Include="Circuits\Contexts\IRelationshipContext.cs" />
     <Compile Include="Circuits\Contexts\ISolverContext.cs" />
     <Compile Include="Circuits\Contexts\IUpdateContext.cs" />
     <Compile Include="Circuits\Contexts\PreparationMode.cs" />
     <Compile Include="Circuits\Contexts\PrepareContext.cs" />
     <Compile Include="Circuits\Contexts\ResetContext.cs" />
     <Compile Include="Circuits\Contexts\UpdateContext.cs" />
-    <Compile Include="Circuits\Contexts\Extremes.cs" />
     <Compile Include="Circuits\Contexts\ExtremeTracker.cs" />
     <Compile Include="Circuits\GraphicalCircuit.cs" />
     <Compile Include="Circuits\Contexts\RegisterContext.cs" />
@@ -42,7 +40,6 @@
     <Compile Include="Circuits\ICircuitSolverPresence.cs" />
     <Compile Include="Circuits\ILocatedPresence.cs" />
     <Compile Include="Circuits\Contexts\IResetContext.cs" />
-    <Compile Include="Circuits\Contexts\NodeContext.cs" />
     <Compile Include="Circuits\Contexts\NodeExtremeFinder.cs" />
     <Compile Include="Circuits\Contexts\NodeGrouper.cs" />
     <Compile Include="Circuits\Contexts\NodeOffsetFinder.cs" />
@@ -50,7 +47,6 @@
     <Compile Include="Circuits\DesperatenessLevel.cs" />
     <Compile Include="Circuits\PresenceResult.cs" />
     <Compile Include="Circuits\Contexts\RelativeItem.cs" />
-    <Compile Include="Circuits\Contexts\XYNode.cs" />
     <Compile Include="Components\Analog\Amplifier.cs" />
     <Compile Include="Components\Analog\AnalogToDigital.cs" />
     <Compile Include="Components\Analog\BipolarTransistor.cs" />

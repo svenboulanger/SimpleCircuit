@@ -9,6 +9,8 @@ namespace SimpleCircuit.Circuits.Contexts
     /// </summary>
     public class NodeOffsetFinder
     {
+        private bool _found = true;
+
         /// <summary>
         /// The ground nodes.
         /// </summary>
@@ -37,7 +39,15 @@ namespace SimpleCircuit.Circuits.Contexts
         }
         private readonly NodeGroup _gndGroup;
         private readonly Dictionary<string, NodeGroupItem> _dict = new(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, ExtremeTracker> _bounds = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Gets whether new offsets have been found. If assigned false, the found flag is reset.
+        /// </summary>
+        public bool Found
+        {
+            get => _found;
+            set => _found &= value;
+        }
 
         /// <summary>
         /// Gets all the representatives in the grouper.
@@ -46,19 +56,10 @@ namespace SimpleCircuit.Circuits.Contexts
         {
             get
             {
-                if (_bounds.Count > 0)
+                if (_dict.Count > 0)
                 {
-                    foreach (var key in _bounds.Keys)
+                    foreach (var key in _dict.Keys)
                         yield return key;
-                }
-                else
-                {
-                    HashSet<string> done = new(StringComparer.OrdinalIgnoreCase);
-                    foreach (var item in _dict.Values)
-                    {
-                        if (done.Add(item.Group.Representative))
-                            yield return item.Group.Representative;
-                    }
                 }
             }
         }
@@ -119,6 +120,7 @@ namespace SimpleCircuit.Circuits.Contexts
                     return (itemB.Offset - itemA.Offset - offset).IsZero();
 
                 // Merge the two groups
+                _found = true;
                 if (itemA.Group.Nodes.Count < itemB.Group.Nodes.Count && !_gndGroup.Nodes.Contains(lowest))
                 {
                     // Merge group A into group B (group A has the least amount of elements)
@@ -143,51 +145,24 @@ namespace SimpleCircuit.Circuits.Contexts
             }
             else if (hasA && !hasB)
             {
+                _found = true;
                 _dict[highest] = new(itemA.Group, itemA.Offset + offset);
                 itemA.Group.Nodes.Add(highest);
             }
             else if (hasB && !hasA)
             {
+                _found = true;
                 _dict[lowest] = new(itemB.Group, itemB.Offset - offset);
                 itemB.Group.Nodes.Add(lowest);
             }
             else
             {
+                _found = true;
                 var g = new NodeGroup(lowest, highest);
                 _dict.Add(lowest, new(g, 0.0));
                 _dict.Add(highest, new(g, offset));
             }
             return true;
-        }
-
-        /// <summary>
-        /// Computes the bounds for all representatives based on all the 
-        /// offsets having been stored inside.
-        /// </summary>
-        public void ComputeBounds()
-        {
-            _bounds.Clear();
-            foreach (var pair in _dict)
-            {
-                if (!_bounds.TryGetValue(pair.Value.Group.Representative, out var bounds))
-                {
-                    bounds = new();
-                    _bounds.Add(pair.Value.Group.Representative, bounds);
-                }
-                bounds.Expand(pair.Value.Offset);
-            }
-        }
-
-        /// <summary>
-        /// Gets the bounds for a representative node.
-        /// </summary>
-        /// <param name="representative">The representative.</param>
-        /// <returns>The extremes associated to the representative.</returns>
-        public ExtremeTracker GetBounds(string representative)
-        {
-            if (!_bounds.TryGetValue(representative, out var extremes))
-                return new();
-            return extremes;
         }
     }
 }

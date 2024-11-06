@@ -35,10 +35,6 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(IRelationshipContext context)
-            => true;
-
-        /// <inheritdoc />
         public override void Register(IRegisterContext context)
         {
             // Left to whoever owns this pin...

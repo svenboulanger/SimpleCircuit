@@ -139,7 +139,8 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
+            public PresenceResult Prepare(IPrepareContext context)
+                => _pins.Prepare(context);
 
             /// <inheritdoc />
             public void Render(SvgDrawing drawing)
@@ -156,21 +157,6 @@ namespace SimpleCircuit.Components
                 // Draw the port names
                 _pins.Render(drawing);
                 Bounds = drawing.EndGroup();
-            }
-
-            /// <inheritdoc />
-            public bool DiscoverNodeRelationships(IRelationshipContext context)
-            {
-                if (!_pins.DiscoverNodeRelationships(context))
-                    return false;
-
-                switch (context.Mode)
-                {
-                    case NodeRelationMode.Groups:
-                        context.Link(X, Y);
-                        break;
-                }
-                return true;
             }
 
             /// <inheritdoc />

@@ -15,9 +15,9 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <param name="diagnostics">The diagnostics handler.</param>
     /// <param name="state">The state.</param>
     /// <param name="relations">The relationships between nodes.</param>
-    public class UpdateContext(IDiagnosticHandler diagnostics, IBiasingSimulationState state, IRelationshipContext relations) : IUpdateContext
+    public class UpdateContext(IDiagnosticHandler diagnostics, IBiasingSimulationState state, IPrepareContext relations) : IUpdateContext
     {
-        private readonly IRelationshipContext _relationships = relations ?? throw new ArgumentNullException(nameof(relations));
+        private readonly IPrepareContext _relationships = relations ?? throw new ArgumentNullException(nameof(relations));
 
         /// <inheritdoc />
         public IDiagnosticHandler Diagnostics { get; } = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));

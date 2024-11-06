@@ -5,9 +5,19 @@
     /// </summary>
     public enum NodeRelationMode
     {
+        /// <summary>
+        /// No mode.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Find fixed relationships between nodes.
+        /// </summary>
         Offsets,
-        Links,
+
+        /// <summary>
+        /// Find groups of nodes that should be solved together.
+        /// </summary>
         Groups,
     }
 }

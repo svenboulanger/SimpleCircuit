@@ -65,22 +65,17 @@ namespace SimpleCircuit.Components
         public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
-
-        /// <inheritdoc />
-        public bool DiscoverNodeRelationships(IRelationshipContext context)
+        public PresenceResult Prepare(IPrepareContext context)
         {
-            switch (context.Mode)
+            if (context.Mode == PreparationMode.Offsets)
             {
-                case NodeRelationMode.Offsets:
-                    if (!context.Offsets.Group(Lowest, Highest, Offset))
-                    {
-                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
-                        return false;
-                    }
-                    break;
+                if (!context.Offsets.Group(Lowest, Highest, Offset))
+                {
+                    context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
+                    return PresenceResult.GiveUp;
+                }
             }
-            return true;
+            return PresenceResult.Success;
         }
 
         /// <inheritdoc />

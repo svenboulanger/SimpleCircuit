@@ -144,12 +144,12 @@ namespace SimpleCircuit.Components
             private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
 
             /// <inheritdoc />
-            public bool DiscoverNodeRelationships(IRelationshipContext context)
+            public PresenceResult Prepare(IPrepareContext context)
             {
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
                 {
-                    case NodeRelationMode.Offsets:
+                    case PreparationMode.Offsets:
                         foreach (var pin in pins)
                         {
                             if (PointsUp(pin))
@@ -157,7 +157,7 @@ namespace SimpleCircuit.Components
                                 if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
                                 {
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                             else if (PointsDown(pin))
@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components
                                 if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
                                 {
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                             else if (PointsLeft(pin))
@@ -173,7 +173,7 @@ namespace SimpleCircuit.Components
                                 if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
                                 {
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                             else if (PointsRight(pin))
@@ -181,34 +181,13 @@ namespace SimpleCircuit.Components
                                 if (!context.Offsets.Group(Right, pin.X, 0.0))
                                 {
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
-                                    return false;
+                                    return PresenceResult.GiveUp;
                                 }
                             }
                         }
                         break;
-
-                    case NodeRelationMode.Links:
-                        OrderCoordinates(pins.Where(PointsUp).Select(p => p.X), _parent.X, Right, context, _parent.MinSpaceX, _parent.MinEdgeX);
-                        OrderCoordinates(pins.Where(PointsDown).Select(p => p.X), _parent.X, Right, context, _parent.MinSpaceX, _parent.MinEdgeX);
-                        OrderCoordinates(pins.Where(PointsLeft).Select(p => p.Y), _parent.Y, Bottom, context, _parent.MinSpaceY, _parent.MinEdgeY);
-                        OrderCoordinates(pins.Where(PointsRight).Select(p => p.Y), _parent.Y, Bottom, context, _parent.MinSpaceY, _parent.MinEdgeY);
-                        break;
                 }
-                return true;
-            }
-
-            private void OrderCoordinates(IEnumerable<string> coordinates, string first, string final, IRelationshipContext context, double spacing, double edgeSpacing)
-            {
-                var lastCoordinate = context.Offsets[first];
-                double s = edgeSpacing;
-                foreach (var coordinate in coordinates)
-                {
-                    var c = context.Offsets[coordinate];
-                    MinimumConstraint.MinimumLink(context, lastCoordinate, c, s);
-                    s = spacing;
-                    lastCoordinate = c;
-                }
-                MinimumConstraint.MinimumLink(context, lastCoordinate, context.Offsets[final], edgeSpacing);
+                return PresenceResult.Success;
             }
 
             /// <inheritdoc />

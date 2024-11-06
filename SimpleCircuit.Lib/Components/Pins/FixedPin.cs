@@ -36,26 +36,26 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public override bool DiscoverNodeRelationships(IRelationshipContext context)
+        public override PresenceResult Prepare(IPrepareContext context)
         {
-            Vector2 offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
 
             switch (context.Mode)
             {
-                case NodeRelationMode.Offsets:
+                case PreparationMode.Offsets:
+                    Vector2 offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
                     if (!context.Offsets.Group(_origin.X, X, offset.X))
                     {
                         context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.X, Name);
-                        return false;
+                        return PresenceResult.GiveUp;
                     }
                     if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
                     {
                         context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.Y, Name);
-                        return false;
+                        return PresenceResult.GiveUp;
                     }
                     break;
             }
-            return true;
+            return PresenceResult.Success;
         }
 
         /// <inheritdoc />

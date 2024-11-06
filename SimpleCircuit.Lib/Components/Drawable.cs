@@ -316,9 +316,6 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual bool DiscoverNodeRelationships(IRelationshipContext context) => true;
-
-        /// <inheritdoc />
         public abstract void Register(IRegisterContext context);
 
         /// <inheritdoc />

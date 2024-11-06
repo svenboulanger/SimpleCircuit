@@ -26,6 +26,12 @@ namespace SimpleCircuit.Circuits.Contexts
         public PreparationMode Mode { get; set; }
 
         /// <inheritdoc />
+        public NodeOffsetFinder Offsets { get; } = new();
+
+        /// <inheritdoc />
+        public NodeGrouper Groups { get; } = new();
+
+        /// <inheritdoc />
         public ICircuitPresence Find(string name)
         {
             if (_circuit.TryGetValue(name, out var result))

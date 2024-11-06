@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Analog;
-using SpiceSharp.Components;
 using SpiceSharp.Entities;
 using System;
 
@@ -80,16 +78,6 @@ namespace SimpleCircuit.Components
                 AddMinimum(circuit, name, end, start, -minimum, weight);
         }
 
-        public static void AddMinimum(IEntityCollection circuit, string name,
-            string fromX, string fromY, string toX, string toY,
-            Vector2 offset, Vector2 normal, double minimum, double weight = 1.0)
-        {
-            var component = new Constraints.SlopedMinimumConstraints.SlopedMinimumConstraint(
-                name, fromX, fromY, toX, toY, offset, normal, minimum);
-            component.SetParameter("weight", weight);
-            circuit.Add(component);
-        }
-
         /// <summary>
         /// Adds a directional minimum in two directions.
         /// </summary>
@@ -120,67 +108,6 @@ namespace SimpleCircuit.Components
             component.SetParameter("invertx", invertedX);
             component.SetParameter("inverty", invertedY);
             circuit.Add(component);
-        }
-
-        /// <summary>
-        /// Computes a link for a minimum node.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="lowest">The lowest node.</param>
-        /// <param name="highest">The highest node.</param>
-        /// <param name="minimum">The minimum.</param>
-        public static bool MinimumLink(IRelationshipContext context, RelativeItem lowest, RelativeItem highest, double minimum)
-        {
-            double offset = lowest.Offset - highest.Offset + minimum;
-            if (lowest.Representative != highest.Representative)
-            {
-                // We will try to see if this minimum allows us to order the representatives
-                double delta = context.Offsets.GetBounds(highest.Representative).Minimum + context.Offsets.GetBounds(lowest.Representative).Maximum;
-                if (offset > delta)
-                    context.Extremes.Order(lowest.Representative, highest.Representative);
-                else
-                    context.Extremes.Linked.Group(lowest.Representative, highest.Representative);
-                return true;
-            }
-            else
-            {
-                // Check whether the minimum is OK
-                if (offset < 0 || offset.IsZero())
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Computes a link for a minimum node keeping the order depending on <paramref name="minimum"/>.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="start">The start node.</param>
-        /// <param name="end">The end node.</param>
-        /// <param name="minimum">The minimum.</param>
-        public static bool MinimumDirectionalLink(IRelationshipContext context, RelativeItem start, RelativeItem end, double minimum)
-        {
-            if (minimum >= 0)
-                return MinimumLink(context, start, end, minimum);
-            else
-                return MinimumLink(context, end, start, -minimum);
-        }
-
-        /// <summary>
-        /// Adds an idealized diode. I.e. an element that conducts if <paramref name="from"/> is
-        /// higher than <paramref name="to"/>.
-        /// </summary>
-        /// <remarks>
-        /// This isn't really a diode, but a voltage-controlled switch. But for thinking it helps to look at it
-        /// like a diode.
-        /// </remarks>
-        /// <param name="circuit">The circuit to add the diode to.</param>
-        /// <param name="name">The name of the diode.</param>
-        /// <param name="from">The name of the node where currents flows away.</param>
-        /// <param name="to">The name of the node where current flows into.</param>
-        public static void AddRectifyingElement(IEntityCollection circuit, string name, string from, string to)
-        {
-            circuit.Add(new VoltageSwitch(name, from, to, from, to, DiodeModelName));
         }
 
         /// <summary>
@@ -234,20 +161,15 @@ namespace SimpleCircuit.Components
         public bool Reset(IResetContext context) => true;
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
-
-        /// <inheritdoc />
-        public bool DiscoverNodeRelationships(IRelationshipContext context)
+        public PresenceResult Prepare(IPrepareContext context)
         {
-            switch (context.Mode)
+            if (context.Mode == PreparationMode.Offsets)
             {
-                case NodeRelationMode.Links:
-                    var lowest = context.Offsets[Lowest];
-                    var highest = context.Offsets[Highest];
-                    MinimumLink(context, lowest, highest, Minimum);
-                    break;
+                var a = context.Offsets[Lowest];
+                var b = context.Offsets[Highest];
+                context.Groups.Group(a.Representative, b.Representative);
             }
-            return true;
+            return PresenceResult.Success;
         }
 
         /// <inheritdoc />

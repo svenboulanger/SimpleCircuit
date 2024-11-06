@@ -34,12 +34,13 @@ namespace SimpleCircuit.Components.Wires
             _axis = axis;
         }
 
+
         /// <inheritdoc />
-        public bool DiscoverNodeRelationships(IRelationshipContext context)
+        public PresenceResult Prepare(IPrepareContext context)
         {
             switch (context.Mode)
             {
-                case NodeRelationMode.Offsets:
+                case PreparationMode.Offsets:
                     bool doX = (_axis & Axis.X) != 0;
                     bool doY = (_axis & Axis.Y) != 0;
                     ILocatedPresence last = null;
@@ -50,19 +51,19 @@ namespace SimpleCircuit.Components.Wires
                             if (doX && !context.Offsets.Group(last.X, presence.X, 0.0))
                             {
                                 context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
-                                return false;
+                                return PresenceResult.GiveUp;
                             }
                             if (doY && !context.Offsets.Group(last.Y, presence.Y, 0.0))
                             {
                                 context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
-                                return false;
+                                return PresenceResult.GiveUp;
                             }
                         }
                         last = presence;
                     }
                     break;
             }
-            return true;
+            return PresenceResult.Success;
         }
 
         /// <inheritdoc />
@@ -77,9 +78,5 @@ namespace SimpleCircuit.Components.Wires
 
         /// <inheritdoc />
         public bool Reset(IResetContext context) => true;
-
-        /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context)
-            => PresenceResult.Success;
     }
 }
