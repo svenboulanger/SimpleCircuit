@@ -298,6 +298,7 @@ namespace SimpleCircuit.Parser
                             return false;
                     }
                 }
+                isFirst = false;
             }
 
             if (isFirst)

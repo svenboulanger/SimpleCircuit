@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
-using SpiceSharp.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -208,6 +207,23 @@ namespace SimpleCircuit.Components.Wires
                     }
                     break;
 
+                case PreparationMode.Groups:
+                    x = context.Offsets[StartX].Representative;
+                    y = context.Offsets[StartY].Representative;
+                    for (int i = 0; i < _segments.Count; i++)
+                    {
+                        var segment = _segments[i];
+                        string tx = context.Offsets[GetXName(i)].Representative;
+                        string ty = context.Offsets[GetYName(i)].Representative;
+                        if (!segment.IsUnconstrained)
+                        {
+                            if (!StringComparer.Ordinal.Equals(x, tx))
+                                context.Groups.Group(x, tx);
+                            if (!StringComparer.Ordinal.Equals(y, ty))
+                                context.Groups.Group(y, ty);
+                        }
+                    }
+                    break;
             }
             return PresenceResult.Success;
         }

@@ -97,6 +97,13 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
+            switch (context.Mode)
+            {
+                case PreparationMode.Offsets:
+                    UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
+                    break;
+            }
+
             var result = PresenceResult.Success;
             foreach (var pin in _pins)
             {
@@ -105,13 +112,6 @@ namespace SimpleCircuit.Components.Diagrams
                     return PresenceResult.GiveUp;
                 else if (r == PresenceResult.Incomplete)
                     result = PresenceResult.Incomplete;
-            }
-
-            switch (context.Mode)
-            {
-                case PreparationMode.Offsets:
-                    UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
-                    break;
             }
             return result;
         }

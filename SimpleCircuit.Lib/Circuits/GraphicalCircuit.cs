@@ -162,16 +162,13 @@ namespace SimpleCircuit
 
             // Make sure we have a solution by grounding floating nodes
             foreach (var group in prepareContext.Groups.Representatives)
-            {
-                if (!StringComparer.Ordinal.Equals(group, "0"))
-                    registerContext.Circuit.Add(new Resistor($"R{group}", group, "0", 1e6));
-            }
+                registerContext.Circuit.Add(new Resistor($"R{group}", group, "0", 1e6));
 
             // If there are no circuit components to solve, let's stop here
             if (registerContext.Circuit.Count == 0)
             {
                 diagnostics?.Post(ErrorCodes.NoUnknownsToSolve);
-                return false;
+                return true;
             }
 
             // Solve the circuit

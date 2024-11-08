@@ -40,10 +40,14 @@ namespace SimpleCircuit.Circuits.Contexts
             get
             {
                 HashSet<string> _done = new(StringComparer.OrdinalIgnoreCase);
-                foreach (var group in _dict.Values)
+                foreach (var pair in _dict)
                 {
-                    if (_done.Add(group.Representative))
-                        yield return group.Representative;
+                    // Skip the group of the grounded nodes, the user should extract them separately if necessary
+                    if (StringComparer.Ordinal.Equals(pair.Key, _ground[0]))
+                        continue;
+
+                    if (_done.Add(pair.Value.Representative))
+                        yield return pair.Value.Representative;
                 }
             }
         }

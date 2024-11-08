@@ -10,8 +10,13 @@ namespace Sandbox
     {
         static void Main()
         {
-            // var script = @"V(""This is some longer text"") <u> X";
-            var script = "* For more tutorials, go to Help > Demo's.\r\n\r\n* Subcircuits are solved separately on their own, after which they act like a component\r\n* The pins need to be specified\r\n.subckt ABC DIR1[in] DIR2[out]\r\n    DIR1 <r> X1\r\n    X1 <u r> R1 <r d> X2\r\n    X1 <d r> C1 <r u> X2\r\n    X2 <r> DIR2\r\n.ends\r\n\r\n* Now we can instantiate this subcircuit definition multiple times.\r\nABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1\r\n\r\n* They can even be angled because our pins also have a direction!\r\n* Also showing how you can refer to pins\r\nXs <a -45> [DIR1_in]ABC[DIR2_out] <a -45 0> L <a -45> Xe\r\n";
+            var script = @"A1(""a"", ""b"", ""c"")
+A2(diffin, ""a"", ""b"", ""c"")
+* A3(diffout, ""a"", ""b"", ""c"")
+* A4(schmitt, ""a"", """", ""c"")
+* A5(comparator, ""a"", """", ""c"")
+* A6(programmable, ""a"")
+(xy A1 <r> A2)";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
