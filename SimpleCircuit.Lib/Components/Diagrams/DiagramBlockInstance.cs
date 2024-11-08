@@ -62,6 +62,9 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
 
+        /// <inheritdoc />
+        public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
+
         /// <summary>
         /// Creates a new instance for a block diagram.
         /// </summary>
@@ -166,6 +169,7 @@ namespace SimpleCircuit.Components.Diagrams
         public void Update(IUpdateContext context)
         {
             Location = context.GetValue(X, Y);
+            CoordinateGroup = context.GetCoordinateGroup(X, Y);
             foreach (var pin in _pins)
                 pin.Update(context);
         }

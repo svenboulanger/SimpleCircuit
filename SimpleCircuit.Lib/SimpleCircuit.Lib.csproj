@@ -43,7 +43,6 @@
     <Compile Include="Circuits\Contexts\NodeExtremeFinder.cs" />
     <Compile Include="Circuits\Contexts\NodeGrouper.cs" />
     <Compile Include="Circuits\Contexts\NodeOffsetFinder.cs" />
-    <Compile Include="Circuits\NodeRelationMode.cs" />
     <Compile Include="Circuits\DesperatenessLevel.cs" />
     <Compile Include="Circuits\PresenceResult.cs" />
     <Compile Include="Circuits\Contexts\RelativeItem.cs" />

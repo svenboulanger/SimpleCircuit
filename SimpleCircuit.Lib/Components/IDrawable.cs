@@ -31,6 +31,11 @@ namespace SimpleCircuit.Components
         /// Gets the bounds of the drawable.
         /// </summary>
         public Bounds Bounds { get; }
+
+        /// <summary>
+        /// Gets the coordinate group that the drawable belongs to.
+        /// </summary>
+        public (string X, string Y) CoordinateGroup { get; }
         
         /// <summary>
         /// Sets a property.

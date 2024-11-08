@@ -53,6 +53,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
 
+        /// <inheritdoc />
+        public (string X, string Y) CoordinateGroup { get; protected set; } = ("0", "0");
+
         /// <summary>
         /// Creates a new component.
         /// </summary>

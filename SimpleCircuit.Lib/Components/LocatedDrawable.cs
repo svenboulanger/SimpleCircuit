@@ -45,6 +45,7 @@ namespace SimpleCircuit.Components
         public override void Update(IUpdateContext context)
         {
             Location = context.GetValue(X, Y);
+            CoordinateGroup = context.GetCoordinateGroup(X, Y);
 
             // Give the pins a chance to update as well
             for (int i = 0; i < Pins.Count; i++)

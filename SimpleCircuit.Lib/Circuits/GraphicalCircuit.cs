@@ -18,7 +18,6 @@ namespace SimpleCircuit
     public class GraphicalCircuit : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
-        private readonly List<ICircuitPresence> _extraPresences = [];
 
         /// <summary>
         /// Gets the number of graphical circuit presences.
@@ -137,7 +136,6 @@ namespace SimpleCircuit
         public bool Solve(IDiagnosticHandler diagnostics)
         {
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
-            _extraPresences.Clear();
 
             // Prepare all the presences
             var resetContext = new ResetContext(diagnostics);
@@ -148,6 +146,7 @@ namespace SimpleCircuit
             var prepareContext = new PrepareContext(this, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
+
 
             // Space loose blocks next to each other to avoid overlaps
             var registerContext = new RegisterContext(diagnostics, prepareContext);

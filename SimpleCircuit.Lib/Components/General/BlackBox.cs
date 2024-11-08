@@ -108,6 +108,9 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public Bounds Bounds { get; private set; }
 
+            /// <inheritdoc />
+            public (string X, string Y) CoordinateGroup { get; private set; }
+
             /// <summary>
             /// Creates a new black box.
             /// </summary>
@@ -170,6 +173,7 @@ namespace SimpleCircuit.Components
             {
                 Location = context.GetValue(X, Y);
                 EndLocation = context.GetValue(_pins.Right, _pins.Bottom);
+                CoordinateGroup = context.GetCoordinateGroup(X, Y);
 
                 // Update all pin locations as well
                 // We ignore pin 0, because that is a dummy pin

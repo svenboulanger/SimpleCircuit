@@ -49,6 +49,9 @@ namespace SimpleCircuit.Components.Annotations
         public Bounds Bounds { get; private set; }
 
         /// <inheritdoc />
+        public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
+
+        /// <inheritdoc />
         public Labels Labels { get; } = new Labels();
 
         [Description("The margin for the annotation box on the left side.")]
