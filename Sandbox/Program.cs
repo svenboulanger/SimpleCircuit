@@ -10,13 +10,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"A1(""a"", ""b"", ""c"")
-A2(diffin, ""a"", ""b"", ""c"")
-* A3(diffout, ""a"", ""b"", ""c"")
-* A4(schmitt, ""a"", """", ""c"")
-* A5(comparator, ""a"", """", ""c"")
-* A6(programmable, ""a"")
-(xy A1 <r> A2)";
+            var script = @"T <r 10> [b]AND2
+XOR1 <r 10 se r 10> AND2";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

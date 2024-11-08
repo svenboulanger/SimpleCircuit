@@ -43,7 +43,7 @@ namespace SimpleCircuit.Circuits.Contexts
                 foreach (var pair in _dict)
                 {
                     // Skip the group of the grounded nodes, the user should extract them separately if necessary
-                    if (StringComparer.Ordinal.Equals(pair.Key, _ground[0]))
+                    if (StringComparer.Ordinal.Equals(pair.Value.Representative, _ground[0]))
                         continue;
 
                     if (_done.Add(pair.Value.Representative))

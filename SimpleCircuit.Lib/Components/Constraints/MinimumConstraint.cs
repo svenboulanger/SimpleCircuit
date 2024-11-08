@@ -63,20 +63,10 @@ namespace SimpleCircuit.Components
             RelativeItem fromX, RelativeItem fromY, RelativeItem toX, RelativeItem toY,
             Vector2 normal, double minimum, double weight = 1.0)
         {
-            if (minimum < 0.0)
-            {
-                minimum = -minimum;
-                normal = -normal;
-            }
-
-            bool invertedX = normal.X < 0.0;
-            bool invertedY = normal.Y < 0.0;
-            var offset = new Vector2(fromX.Offset - toX.Offset, fromY.Offset - toX.Offset);
+            var offset = new Vector2(fromX.Offset - toX.Offset, fromY.Offset - toY.Offset);
             var component = new Constraints.SlopedMinimumConstraints.SlopedMinimumConstraint(
                 name, fromX.Representative, fromY.Representative, toX.Representative, toY.Representative, offset, normal, minimum);
             component.SetParameter("weight", weight);
-            component.SetParameter("invertx", invertedX);
-            component.SetParameter("inverty", invertedY);
             circuit.Add(component);
         }
 

@@ -32,17 +32,5 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
         /// </summary>
         [ParameterName("n"), ParameterName("normal")]
         public Vector2 Normal { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the coordinate ordering along the X-axis is inverted.
-        /// </summary>
-        [ParameterName("invertx")]
-        public bool InvertedX { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the coordinate ordering along the Y-axis is inverted.
-        /// </summary>
-        [ParameterName("inverty")]
-        public bool InvertedY { get; set; }
     }
 }

@@ -23,5 +23,8 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             Parameters.Offset = offset;
             Parameters.Minimum = minimum;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"Minimum {Nodes[0]} -> {Nodes[1]}";
     }
 }

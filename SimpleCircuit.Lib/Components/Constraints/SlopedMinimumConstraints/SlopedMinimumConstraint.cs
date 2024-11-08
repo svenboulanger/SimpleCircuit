@@ -31,5 +31,8 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
             Parameters.Normal = normal;
             Parameters.Minimum = minimum;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"Minimum ({Nodes[0]}, {Nodes[1]}) -> ({Nodes[2]}, {Nodes[3]})";
     }
 }
