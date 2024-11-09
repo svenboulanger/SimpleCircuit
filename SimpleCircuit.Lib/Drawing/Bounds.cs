@@ -115,11 +115,20 @@ namespace SimpleCircuit.Drawing
             return true;
         }
 
+        /// <summary>
+        /// Expands the bounds.
+        /// </summary>
+        /// <param name="margin">The margin.</param>
+        /// <returns>Returns the new bounds with margins.</returns>
+        public Bounds Expand(double margin) => new(Left - margin, Top - margin, Right + margin, Bottom + margin);
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({Left}; {Top}; {Right}; {Bottom})";
         }
 
+        /// <inheritdoc />
         public string ToString(string format, IFormatProvider formatProvider)
         {
             return "(" +

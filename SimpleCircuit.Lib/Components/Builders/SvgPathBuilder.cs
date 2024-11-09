@@ -11,11 +11,11 @@ namespace SimpleCircuit.Components.Builders
     /// Creates a new path builder.
     /// </remarks>
     /// <param name="transform">The transform.</param>
-    public class PathBuilder(Transform transform) : IPathBuilder
+    public class SvgPathBuilder(Transform transform, ExpandableBounds bounds) : IPathBuilder
     {
         private readonly StringBuilder _sb = new();
         private bool _isFirst = true;
-        private readonly ExpandableBounds _bounds = new();
+        private readonly ExpandableBounds _bounds = bounds;
         private Vector2 _p1, _n1, _h1, _p2, _n2, _h2; // The local coordinate handles and points
         private Vector2 _last; // The last global coordinate
         private char _impliedAction = '\0';
@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Builders
             _p2 = location;
             _h2 = location;
 
-            Vector2 delta = _p2 - _p1;
+            var delta = _p2 - _p1;
             if (delta.IsZero())
                 _n1 = new();
             else
@@ -396,9 +396,9 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h1 = Transform.Apply(_h1);
-            Vector2 h2 = Transform.Apply(_h2);
-            Vector2 end = Transform.Apply(_p2);
+            var h1 = Transform.Apply(_h1);
+            var h2 = Transform.Apply(_h2);
+            var end = Transform.Apply(_p2);
             Append($"{Action('c')}{(h1 - _last).ToSVG()} {(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
@@ -422,8 +422,8 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h1 = Transform.Apply(_h1);
-            Vector2 h2 = Transform.Apply(_h2);
+            var h1 = Transform.Apply(_h1);
+            var h2 = Transform.Apply(_h2);
             end = Transform.Apply(end);
             Append($"{Action('S')}{h2.ToSVG()} {end.ToSVG()}");
             _last = end;
@@ -448,9 +448,9 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h1 = Transform.Apply(_h1);
-            Vector2 h2 = Transform.Apply(_h2);
-            Vector2 end = Transform.Apply(_p2);
+            var h1 = Transform.Apply(_h1);
+            var h2 = Transform.Apply(_h2);
+            var end = Transform.Apply(_p2);
             Append($"{Action('s')}{(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
@@ -499,8 +499,8 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h = Transform.Apply(_h1);
-            Vector2 end = Transform.Apply(_p2);
+            var h = Transform.Apply(_h1);
+            var end = Transform.Apply(_p2);
             Append($"{Action('q')}{h.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
@@ -523,7 +523,7 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h = Transform.Apply(_h1);
+            var h = Transform.Apply(_h1);
             end = Transform.Apply(end);
             Append($"{Action('T')}{end.ToSVG()}");
             _last = end;
@@ -547,8 +547,8 @@ namespace SimpleCircuit.Components.Builders
             CalculateBezierNormals();
 
             // Draw in global coordinate space
-            Vector2 h = Transform.Apply(_h1);
-            Vector2 end = Transform.Apply(_p2);
+            var h = Transform.Apply(_h1);
+            var end = Transform.Apply(_p2);
             Append($"{Action('t')}{(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
@@ -592,7 +592,7 @@ namespace SimpleCircuit.Components.Builders
                 rot = Matrix2.Rotate(angle / 180.0 * Math.PI);
             irot = rot.Transposed; // Possible because transformation is orthonormal
 
-            Vector2 p1 = irot * (_p2 - end) * 0.5;
+            var p1 = irot * (_p2 - end) * 0.5;
             Vector2 p12 = new(p1.X * p1.X, p1.Y * p1.Y);
             Vector2 r2 = new(rx * rx, ry * ry);
             double cr = p12.X / r2.X + p12.Y / r2.Y;
@@ -628,17 +628,17 @@ namespace SimpleCircuit.Components.Builders
             // Approximate using bezier curves
             int segments = (int)Math.Ceiling(Math.Abs(dtheta) / (Math.PI / 2));
             double da = dtheta / segments;
-            var hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
+            double hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
             double pid2 = Math.Sign(da) * Math.PI * 0.5;
             double currentA = theta1;
             Transform toOriginal = new(0.5 * (_p2 + end), rot);
-            Vector2 lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
-            Vector2 lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
+            var lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
+            var lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
             for (int i = 1; i <= segments; i++)
             {
                 currentA += da;
-                Vector2 nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
-                Vector2 nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
+                var nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
+                var nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
                 CurveTo(
                     toOriginal.Apply(lastPoint + lastTangent),
                     toOriginal.Apply(nextPoint - nextTangent),
@@ -674,10 +674,10 @@ namespace SimpleCircuit.Components.Builders
             ry = Math.Abs(ry);
             angle *= Math.PI / 180.0;
 
-            Matrix2 rot = Matrix2.Rotate(angle);
-            Matrix2 irot = rot.Transposed; // Possible because transformation is orthonormal
+            var rot = Matrix2.Rotate(angle);
+            var irot = rot.Transposed; // Possible because transformation is orthonormal
 
-            Vector2 p1 = irot * -dend * 0.5;
+            var p1 = irot * -dend * 0.5;
             Vector2 p12 = new(p1.X * p1.X, p1.Y * p1.Y);
             Vector2 r2 = new(rx * rx, ry * ry);
             double cr = p12.X / r2.X + p12.Y / r2.Y;
@@ -713,17 +713,17 @@ namespace SimpleCircuit.Components.Builders
             // Approximate using bezier curves
             int segments = (int)Math.Ceiling(Math.Abs(dtheta) / (Math.PI / 2));
             double da = dtheta / segments;
-            var hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
+            double hl = 4.0 / 3.0 * Math.Tan(Math.Abs(da) * 0.25);
             double pid2 = Math.Sign(da) * Math.PI * 0.5;
             double currentA = theta1;
             Transform toOriginal = new(_p2 + dend * 0.5, rot);
-            Vector2 lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
-            Vector2 lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
+            var lastPoint = cp + Vector2.Normal(theta1).Scale(rx, ry);
+            var lastTangent = Vector2.Normal(theta1 + pid2).Scale(rx, ry) * hl;
             for (int i = 1; i <= segments; i++)
             {
                 currentA += da;
-                Vector2 nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
-                Vector2 nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
+                var nextPoint = cp + Vector2.Normal(currentA).Scale(rx, ry);
+                var nextTangent = Vector2.Normal(currentA + pid2).Scale(rx, ry) * hl;
                 CurveTo(
                     toOriginal.Apply(lastPoint + lastTangent),
                     toOriginal.Apply(nextPoint - nextTangent),
@@ -778,7 +778,7 @@ namespace SimpleCircuit.Components.Builders
         /// <returns>The action result.</returns>
         private string Action(char c, char nextImplied = '\0')
         {
-            var current = _impliedAction;
+            char current = _impliedAction;
             _impliedAction = nextImplied == '\0' ? c : nextImplied;
             if (c == current)
                 return "";

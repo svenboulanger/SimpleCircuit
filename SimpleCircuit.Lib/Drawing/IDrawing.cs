@@ -153,6 +153,6 @@ namespace SimpleCircuit.Drawing
         /// <param name="builder">The path builder.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>The bounds of the path as global coordinates.</returns>
-        public Bounds Path(Action<PathBuilder> builder, GraphicOptions options = null);
+        public Bounds Path(Action<SvgPathBuilder> builder, GraphicOptions options = null);
     }
 }

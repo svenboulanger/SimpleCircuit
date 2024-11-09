@@ -36,7 +36,7 @@ namespace SimpleCircuit.Components.Builders
 
         private readonly XmlDocument _document;
         private XmlNode _current;
-        private readonly Stack<ExpandableBounds> _bounds;
+        private readonly ExpandableBounds _bounds = new();
         private readonly Stack<Transform> _tf = new();
 
         /// <inheritdoc />
@@ -45,13 +45,13 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Adds extra CSS after the required CSS (ordered).
         /// </summary>
-        public IList<string> ExtraCSS { get; } = new List<string>();
+        public IList<string> ExtraCSS { get; } = [];
 
         /// <inheritdoc />
         public Transform CurrentTransform => _tf.Peek();
 
         /// <inheritdoc />
-        public Bounds Bounds { get; }
+        public Bounds Bounds => _bounds.Bounds;
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -89,8 +89,6 @@ namespace SimpleCircuit.Components.Builders
             _tf.Push(Transform.Identity);
 
             // Make sure we can track the bounds of our vector image
-            _bounds = new();
-            _bounds.Push(new());
             Diagnostics = diagnostics;
             Measurer = measurer ?? new SkiaTextMeasurer();
         }
@@ -203,7 +201,7 @@ namespace SimpleCircuit.Components.Builders
             if (attr == null)
                 return;
             var lexer = new SvgPathDataLexer(attr.AsMemory());
-            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
+            var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
 
@@ -223,7 +221,7 @@ namespace SimpleCircuit.Components.Builders
             if (attr == null)
                 return;
             var lexer = new SvgPathDataLexer(attr.AsMemory());
-            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
+            var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
             if (points == null || points.Count <= 1)
@@ -424,19 +422,11 @@ namespace SimpleCircuit.Components.Builders
             return VariantParser.Parse(lexer, context);
         }
 
-        /// <summary>
-        /// Expands the drawing to include the specified point.
-        /// </summary>
-        /// <param name="point">The point to expand.</param>
-        public void Expand(Vector2 point)
-            => _bounds.Peek().Expand(CurrentTransform.Apply(point));
-
         /// <inheritdoc />
         public IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
-            var bounds = new Bounds(start, end);
 
             // Create the line
             var line = _document.CreateElement("line", Namespace);
@@ -447,7 +437,8 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(line);
             _current.AppendChild(line);
 
-            _bounds.Peek().Expand(bounds);
+            _bounds.Expand(start);
+            _bounds.Expand(end);
             return this;
         }
 
@@ -456,7 +447,6 @@ namespace SimpleCircuit.Components.Builders
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
-            var bounds = new Bounds(position - new Vector2(radius, radius), position + new Vector2(radius, radius));
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
@@ -466,19 +456,19 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(circle);
             _current.AppendChild(circle);
 
-            _bounds.Peek().Expand(bounds);
+            _bounds.Expand(position - new Vector2(radius, radius));
+            _bounds.Expand(position + new Vector2(radius, radius));
             return this;
         }
 
         /// <inheritdoc />
         public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            var bounds = new ExpandableBounds();
             StringBuilder sb = new();
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                bounds.Expand(tpt);
+                _bounds.Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
                 sb.Append(tpt.ToSVG());
@@ -489,20 +479,17 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(poly);
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
-
-            _bounds.Peek().Expand(bounds);
             return this;
         }
 
         /// <inheritdoc />
         public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            var bounds = new ExpandableBounds();
             StringBuilder sb = new();
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                bounds.Expand(tpt);
+                _bounds.Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
                 sb.Append(tpt.ToSVG());
@@ -513,18 +500,15 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(poly);
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
-
-            _bounds.Peek().Expand(bounds);
             return this;
         }
 
         /// <inheritdoc />
         public IGraphicsBuilder SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            var bounds = new ExpandableBounds();
             StringBuilder sb = new();
             int index = -1;
-            foreach (IGrouping<int, Vector2> group in points.GroupBy(p => { index++; return index < 1 ? 0 : index < 4 ? 1 : 1 + index / 4; }))
+            foreach (var group in points.GroupBy(p => { index++; return index < 1 ? 0 : index < 4 ? 1 : 1 + index / 4; }))
             {
                 var v = group.ToArray();
                 if (sb.Length > 0)
@@ -532,7 +516,7 @@ namespace SimpleCircuit.Components.Builders
                 for (int i = 0; i < v.Length; i++)
                 {
                     v[i] = CurrentTransform.Apply(v[i]);
-                    bounds.Expand(v[i]);
+                    _bounds.Expand(v[i]);
                 }
                 switch (v.Length)
                 {
@@ -547,15 +531,12 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(path);
             _current.AppendChild(path);
             path.SetAttribute("d", sb.ToString());
-
-            _bounds.Peek().Expand(bounds);
             return this;
         }
 
         /// <inheritdoc />
         public IGraphicsBuilder ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            var bounds = new ExpandableBounds();
             var sb = new StringBuilder();
             int index = 2;
             foreach (var group in points.GroupBy(p => index++ / 3))
@@ -566,7 +547,7 @@ namespace SimpleCircuit.Components.Builders
                 for (int i = 0; i < v.Length; i++)
                 {
                     v[i] = CurrentTransform.Apply(v[i]);
-                    bounds.Expand(v[i]);
+                    _bounds.Expand(v[i]);
                 }
                 switch (v.Length)
                 {
@@ -581,15 +562,12 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(path);
             _current.AppendChild(path);
             path.SetAttribute("d", sb.ToString());
-
-            _bounds.Peek().Expand(bounds);
             return this;
         }
 
         /// <inheritdoc />
         public IGraphicsBuilder OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
-            var bounds = new ExpandableBounds();
             var sb = new StringBuilder();
             int index = 2;
             foreach (var group in points.GroupBy(p => index++ / 3))
@@ -598,7 +576,7 @@ namespace SimpleCircuit.Components.Builders
                 for (int i = 0; i < v.Length; i++)
                 {
                     v[i] = CurrentTransform.Apply(v[i]);
-                    bounds.Expand(v[i]);
+                    _bounds.Expand(v[i]);
                 }
                 if (sb.Length > 0)
                     sb.Append(' ');
@@ -614,33 +592,7 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(path);
             _current.AppendChild(path);
             path.SetAttribute("d", sb.ToString());
-
-            _bounds.Peek().Expand(bounds);
             return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
-        {
-            if (endAngle < startAngle)
-                endAngle += 2 * Math.PI;
-
-            var da = (endAngle - startAngle) / (intermediatePoints + 1);
-            var hl = 4.0 / 3.0 * Math.Tan(da * 0.25) * radius;
-
-            var pts = new List<Vector2>((intermediatePoints + 1) * 4);
-            Vector2 p = Vector2.Normal(startAngle) * radius + center;
-            pts.Add(p);
-            double alpha = startAngle;
-            for (int i = 0; i <= intermediatePoints; i++)
-            {
-                pts.Add(p + Vector2.Normal(alpha + Math.PI / 2) * hl);
-                alpha += da;
-                p = center + Vector2.Normal(alpha) * radius;
-                pts.Add(p - Vector2.Normal(alpha + Math.PI / 2) * hl);
-                pts.Add(p);
-            }
-            return OpenBezier(pts, options);
         }
 
         /// <inheritdoc />
@@ -703,7 +655,7 @@ namespace SimpleCircuit.Components.Builders
 
             // Return the offset bounds
             var r = new Vector2(x, y) + bounds;
-            _bounds.Peek().Expand(r);
+            _bounds.Expand(r);
             return this;
         }
 
@@ -712,7 +664,7 @@ namespace SimpleCircuit.Components.Builders
         {
             if (action == null)
                 return this;
-            var builder = new PathBuilder(CurrentTransform);
+            var builder = new SvgPathBuilder(CurrentTransform, _bounds);
             action(builder);
 
             // Create the path element
@@ -720,8 +672,6 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(path);
             _current.AppendChild(path);
             path.SetAttribute("d", builder.ToString());
-
-            _bounds.Peek().Expand(builder.Bounds);
             return this;
         }
 
@@ -738,9 +688,6 @@ namespace SimpleCircuit.Components.Builders
             else
                 _current.AppendChild(elt);
             _current = elt;
-
-            // Track the bounds of the group
-            _bounds.Push(new());
             return this;
         }
 
@@ -754,16 +701,6 @@ namespace SimpleCircuit.Components.Builders
 
             if (RemoveEmptyGroups && group.ChildNodes.Count == 0)
                 parent.RemoveChild(group);
-
-            // Go to the parent bounds
-            if (_bounds.Count > 1)
-            {
-                var bounds = _bounds.Pop();
-                var cBounds = _bounds.Peek();
-                cBounds.Expand(bounds);
-                _current = parent ?? group;
-                return this;
-            }
             _current = parent ?? group;
             return this;
         }
@@ -788,10 +725,9 @@ namespace SimpleCircuit.Components.Builders
             svg.PrependChild(styleElt);
 
             // Try to get the bounds of this
-            var bounds = _bounds.Peek().Bounds;
+            var bounds = _bounds.Bounds.Expand(Margin);
 
             // Apply a margin along the edges
-            bounds = new Bounds(bounds.Left - Margin, bounds.Top - Margin, bounds.Right + Margin, bounds.Bottom + Margin);
             svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());
             svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
             svg.SetAttribute("viewBox", $"{bounds.Left.ToSVG()} {bounds.Top.ToSVG()} {bounds.Width.ToSVG()} {bounds.Height.ToSVG()}");
