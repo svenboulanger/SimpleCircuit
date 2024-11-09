@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 
@@ -45,37 +46,43 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPin(Pins["a"]);
-                drawing.Arc(new(4, 0), Math.PI / 2, -Math.PI / 2, 4, null, 1);
+                builder.ExtendPin(Pins["a"]);
+                builder.Path(b => b
+                    .MoveTo(new(0, -4)).ArcTo(4, 4, 0, true, false, new(0, 4)));
 
                 if (Variants.Contains(_earth))
-                    DrawProtectiveConnection(drawing);
+                    DrawProtectiveConnection(builder);
                 if (Variants.Contains(_sealed))
-                    DrawSealed(drawing);
+                    DrawSealed(builder);
                 if (Variants.Contains(_child))
-                    DrawChildProtection(drawing);
+                    DrawChildProtection(builder);
 
                 if (Multiple > 1)
                 {
-                    drawing.Line(new(2.6, -1.4), new(-0.2, -4.2));
-                    drawing.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1));
+                    builder.Line(new(2.6, -1.4), new(-0.2, -4.2));
+                    builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1));
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawProtectiveConnection(SvgDrawing drawing)
+            private void DrawProtectiveConnection(IGraphicsBuilder builder)
             {
-                drawing.Line(new(0, 4), new(0, -4), new("earth"));
+                builder.Line(new(0, 4), new(0, -4), new("earth"));
             }
-            private void DrawChildProtection(SvgDrawing drawing)
+            private void DrawChildProtection(IGraphicsBuilder builder)
             {
-                drawing.Path(b => b.MoveTo(4, -6).LineTo(4, -4).MoveTo(4, 4).LineTo(4, 6), new("child"));
+                builder.Path(b => b
+                    .MoveTo(new(4, -6))
+                    .LineTo(new(4, -4))
+                    .MoveTo(new(4, 4))
+                    .LineTo(new(4, 6)),
+                    new("child"));
             }
-            private void DrawSealed(SvgDrawing drawing)
+            private void DrawSealed(IGraphicsBuilder builder)
             {
-                drawing.Text("h", new(0.5, 3), new(-1, 1));
+                builder.Text("h", new(0.5, 3), new(-1, 1));
             }
         }
     }

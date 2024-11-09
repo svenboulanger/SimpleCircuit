@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using SimpleCircuit.Components.Builders;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -29,7 +30,7 @@ namespace SimpleCircuit.Components.Labeling
         public override int Count => _points.Length;
 
         /// <inheritdoc />
-        public void Draw(SvgDrawing drawing, Labels labels)
+        public void Draw(IGraphicsBuilder drawing, Labels labels)
         {
             for (int i = 0; i < labels.Count; i++)
             {

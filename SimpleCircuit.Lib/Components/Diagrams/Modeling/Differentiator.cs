@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("DIFF", "A differentiator.", "Modeling", "derivative")]
     public class Differentiator : DrawableFactory
@@ -21,27 +23,27 @@
             public override string Type => "differentiator";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
 
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        drawing.Text("s", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("s", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     case 1:
-                        drawing.Text("z^{-1}", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("z^{-1}", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     default:
-                        drawing.Text("d", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
-                        drawing.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;"});
-                        drawing.Text("dt", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("d", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;"});
+                        builder.Text("dt", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
                 }
-                DrawLabels(drawing);
+                DrawLabels(builder);
             }
         }
     }

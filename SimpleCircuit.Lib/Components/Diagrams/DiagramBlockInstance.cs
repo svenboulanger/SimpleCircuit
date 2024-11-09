@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -78,7 +79,7 @@ namespace SimpleCircuit.Components.Diagrams
             _pins = new(this);
             X = $"{Name}.x";
             Y = $"{Name}.y";
-            GroupClasses = new List<string>() { "diagram" };
+            GroupClasses = ["diagram"];
         }
 
         /// <inheritdoc />
@@ -120,9 +121,9 @@ namespace SimpleCircuit.Components.Diagrams
         }
 
         /// <inheritdoc />
-        public void Render(SvgDrawing drawing)
+        public void Render(IGraphicsBuilder builder)
         {
-            drawing.RequiredCSS.Add(".diagram { fill: white; }");
+            builder.RequiredCSS.Add(".diagram { fill: white; }");
 
             // Group all elements
             var go = new GraphicOptions() { Id = Name };
@@ -135,22 +136,22 @@ namespace SimpleCircuit.Components.Diagrams
                 foreach (string name in GroupClasses)
                     go.Classes.Add(name);
             }
-            drawing.BeginGroup(go);
+            builder.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
-            drawing.BeginTransform(new(Location, Matrix2.Scale(Scale)));
-            Draw(drawing);
-            drawing.EndTransform();
+            builder.BeginTransform(new(Location, Matrix2.Scale(Scale)));
+            Draw(builder);
+            builder.EndTransform();
 
             // Stop grouping elements
-            Bounds = drawing.EndGroup();
+            builder.EndGroup();
         }
 
         /// <summary>
         /// Draws the diagram block.
         /// </summary>
-        /// <param name="drawing"></param>
-        protected abstract void Draw(SvgDrawing drawing);
+        /// <param name="builder"></param>
+        protected abstract void Draw(IGraphicsBuilder builder);
 
         /// <inheritdoc />
         public void Register(IRegisterContext context)

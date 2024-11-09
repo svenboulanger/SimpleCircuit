@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
@@ -112,7 +113,7 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 // Update the pins
                 if (_bits == null)
@@ -127,9 +128,9 @@ namespace SimpleCircuit.Components.Digital
                     for (int j = 0; j < _maxWidth; j++)
                     {
                         if (j < bits.Length || Variants.Contains(Full))
-                            drawing.Rectangle(x - hw, y - hw, BlockSize, BlockSize);
+                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize);
                         if (j < bits.Length)
-                            drawing.Text(bits[j], new(x, y), new());
+                            builder.Text(bits[j], new(x, y), new());
                         x += BlockSize;
                     }
                     y += BlockSize;

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -120,16 +121,16 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawAndIEC(drawing); break;
+                    case 0: DrawAndIEC(builder); break;
                     case 1:
-                    default: DrawAnd(drawing); break;
+                    default: DrawAnd(builder); break;
                 }
             }
-            private void DrawAnd(SvgDrawing drawing)
+            private void DrawAnd(IGraphicsBuilder builder)
             {
                 double radius = Height * 0.5;
                 double handle = 0.55 * radius;
@@ -137,8 +138,8 @@ namespace SimpleCircuit.Components.Digital
                 double xr = w - radius;
                 double h = Height * 0.5;
 
-                drawing.ExtendPins(Pins);
-                drawing.Path(builder => builder
+                builder.ExtendPins(Pins);
+                builder.Path(builder => builder
                     .MoveTo(new(-w, h))
                     .LineTo(new(xr, h))
                     .CurveTo(new(xr + handle, h), new(w, handle), new(w, 0))
@@ -147,9 +148,9 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                 );
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
-            private void DrawAndIEC(SvgDrawing drawing)
+            private void DrawAndIEC(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);

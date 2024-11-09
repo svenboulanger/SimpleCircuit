@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
@@ -49,8 +50,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Renders the component in the specified drawing.
         /// </summary>
-        /// <param name="minimizer">The minimizer.</param>
-        /// <param name="drawing">The drawing.</param>
-        public void Render(SvgDrawing drawing);
+        /// <param name="builder">The graphics builder.</param>
+        public void Render(IGraphicsBuilder builder);
     }
 }

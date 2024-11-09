@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("OSC", "An oscillator.", "Modeling", "source generator")]
     public class Oscillator : DrawableFactory
@@ -17,11 +19,11 @@
             public override string Type => "oscillator";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
-                drawing.AC(new(), Size * 0.25);
-                DrawLabels(drawing);
+                base.Draw(builder);
+                builder.AC(new(), Size * 0.25);
+                DrawLabels(builder);
             }
         }
     }

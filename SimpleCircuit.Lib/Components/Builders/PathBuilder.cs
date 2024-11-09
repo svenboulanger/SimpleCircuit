@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text;
+using SimpleCircuit.Drawing;
 
-namespace SimpleCircuit.Drawing
+namespace SimpleCircuit.Components.Builders
 {
-
     /// <summary>
     /// A class for building an SVG path.
     /// </summary>
@@ -11,7 +11,7 @@ namespace SimpleCircuit.Drawing
     /// Creates a new path builder.
     /// </remarks>
     /// <param name="transform">The transform.</param>
-    public class PathBuilder(Transform transform)
+    public class PathBuilder(Transform transform) : IPathBuilder
     {
         private readonly StringBuilder _sb = new();
         private bool _isFirst = true;
@@ -67,7 +67,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="location">The location.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder MoveTo(Vector2 location)
+        public IPathBuilder MoveTo(Vector2 location)
         {
             // Local coordinate space
             _p1 = _h1 = _p2;
@@ -88,7 +88,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="x">The x-coordinate.</param>
         /// <param name="y">The y-coordinate.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder MoveTo(double x, double y)
+        public IPathBuilder MoveTo(double x, double y)
             => MoveTo(new(x, y));
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="delta">The step.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Move(Vector2 delta)
+        public IPathBuilder Move(Vector2 delta)
         {
             InitializePath();
             _p1 = _h1 = _p2;
@@ -120,7 +120,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="dx">The step along the x-axis.</param>
         /// <param name="dy">The step along the y-axis.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Move(double dx, double dy)
+        public IPathBuilder Move(double dx, double dy)
             => Move(new(dx, dy));
 
         private void AppendLine(Vector2 delta)
@@ -142,7 +142,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="location">The location.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder LineTo(Vector2 location)
+        public IPathBuilder LineTo(Vector2 location)
         {
             InitializePath();
 
@@ -173,7 +173,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="x">The x-coordinate.</param>
         /// <param name="y">The y-coordinate.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder LineTo(double x, double y)
+        public IPathBuilder LineTo(double x, double y)
             => LineTo(new(x, y));
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="delta">The step.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Line(Vector2 delta)
+        public IPathBuilder Line(Vector2 delta)
         {
             InitializePath();
 
@@ -211,7 +211,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="dx">The step along the x-axis.</param>
         /// <param name="dy">The step along the y-axis.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Line(double dx, double dy)
+        public IPathBuilder Line(double dx, double dy)
             => Line(new(dx, dy));
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="x">The x-coordinate.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder HorizontalTo(double x)
+        public IPathBuilder HorizontalTo(double x)
         {
             InitializePath();
 
@@ -248,7 +248,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="dx">The step.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Horizontal(double dx)
+        public IPathBuilder Horizontal(double dx)
         {
             InitializePath();
 
@@ -277,7 +277,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="y">The x-coordinate.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder VerticalTo(double y)
+        public IPathBuilder VerticalTo(double y)
         {
             InitializePath();
 
@@ -302,11 +302,11 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
-        /// Draws a horizontal line using relative coordinates.
+        /// Draws a vertical line using relative coordinates.
         /// </summary>
-        /// <param name="dx">The step.</param>
+        /// <param name="dy">The step.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Vertical(double dy)
+        public IPathBuilder Vertical(double dy)
         {
             InitializePath();
 
@@ -358,7 +358,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="h2">The second handle.</param>
         /// <param name="end">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder CurveTo(Vector2 h1, Vector2 h2, Vector2 end)
+        public IPathBuilder CurveTo(Vector2 h1, Vector2 h2, Vector2 end)
         {
             InitializePath();
 
@@ -385,7 +385,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="dh2">The second handle.</param>
         /// <param name="dend">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Curve(Vector2 dh1, Vector2 dh2, Vector2 dend)
+        public IPathBuilder Curve(Vector2 dh1, Vector2 dh2, Vector2 dend)
         {
             InitializePath();
 
@@ -411,7 +411,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="h">The handle.</param>
         /// <param name="end">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder SmoothTo(Vector2 h, Vector2 end)
+        public IPathBuilder SmoothTo(Vector2 h, Vector2 end)
         {
             InitializePath();
 
@@ -437,7 +437,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="dh">The handle.</param>
         /// <param name="dend">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Smooth(Vector2 dh, Vector2 dend)
+        public IPathBuilder Smooth(Vector2 dh, Vector2 dend)
         {
             InitializePath();
 
@@ -463,7 +463,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="h">The handle.</param>
         /// <param name="end">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder QuadCurveTo(Vector2 h, Vector2 end)
+        public IPathBuilder QuadCurveTo(Vector2 h, Vector2 end)
         {
             InitializePath();
 
@@ -488,7 +488,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="dh">The handle.</param>
         /// <param name="dend">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder QuadCurve(Vector2 dh, Vector2 dend)
+        public IPathBuilder QuadCurve(Vector2 dh, Vector2 dend)
         {
             InitializePath();
 
@@ -512,7 +512,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="end">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder SmoothQuadTo(Vector2 end)
+        public IPathBuilder SmoothQuadTo(Vector2 end)
         {
             InitializePath();
 
@@ -536,7 +536,7 @@ namespace SimpleCircuit.Drawing
         /// </summary>
         /// <param name="dend">The end point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder SmoothQuad(Vector2 dend)
+        public IPathBuilder SmoothQuad(Vector2 dend)
         {
             InitializePath();
 
@@ -565,7 +565,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="sweepFlag">The sweep direction. If <c>true</c>, the sweep is through increasing angles.</param>
         /// <param name="end">The end point of the arc.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder ArcTo(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 end)
+        public IPathBuilder ArcTo(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 end)
         {
             InitializePath();
 
@@ -660,7 +660,7 @@ namespace SimpleCircuit.Drawing
         /// <param name="sweepFlag">The sweep direction. If <c>true</c>, the sweep is through increasing angles.</param>
         /// <param name="dend">The end point of the arc relative to the current point.</param>
         /// <returns>The path builder.</returns>
-        public PathBuilder Arc(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 dend)
+        public IPathBuilder Arc(double rx, double ry, double angle, bool largeArc, bool sweepFlag, Vector2 dend)
         {
             InitializePath();
 
@@ -752,7 +752,7 @@ namespace SimpleCircuit.Drawing
         /// Closes the path.
         /// </summary>
         /// <returns>The path builder.</returns>
-        public PathBuilder Close()
+        public IPathBuilder Close()
         {
             Append(Action('Z'));
             return this;

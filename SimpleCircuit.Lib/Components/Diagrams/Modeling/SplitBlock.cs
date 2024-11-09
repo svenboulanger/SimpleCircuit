@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -29,22 +30,22 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             public override string Type => "split";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
                 double s = Size * 0.5;
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
-                drawing.Line(new(-s, s), new(s, -s));
+                builder.Line(new(-s, s), new(s, -s));
 
                 _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new());
                 _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new());
                 if (Variants.Contains(Square))
                     new AggregateAnchorPoints<IBoxLabeled>(_anchors,
-                        new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1)).Draw(drawing, this);
+                        new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1)).Draw(builder, this);
                 else
                     new AggregateAnchorPoints<IEllipseLabeled>(_anchors, 
-                        new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1)).Draw(drawing, this);
+                        new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1)).Draw(builder, this);
             }
         }
     }

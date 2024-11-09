@@ -10,8 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"T <r 10> [b]AND2
-XOR1 <r 10 se r 10> AND2";
+            var script = @"XOR";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

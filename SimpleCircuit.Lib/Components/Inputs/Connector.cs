@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
@@ -73,7 +74,7 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.American))
                 {
@@ -81,11 +82,12 @@ namespace SimpleCircuit.Components.Inputs
                         switch (Variants.Select(_male, _female))
                         {
                             case 0:
-                                drawing.ExtendPin(Pins["n"], 5);
-                                drawing.Polyline(new Vector2[]
-                                {
-                                    new(-4, 4), new(), new(-4, -4)
-                                });
+                                builder.ExtendPin(Pins["n"], 5);
+                                builder.Polyline([
+                                    new(-4, 4),
+                                    new(),
+                                    new(-4, -4)
+                                ]);
                                 if (Pins["p"].Connections > 0)
                                 {
                                     _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1));
@@ -98,11 +100,12 @@ namespace SimpleCircuit.Components.Inputs
                                 break;
 
                             case 1:
-                                drawing.ExtendPin(Pins["n"], 5);
-                                drawing.Polyline(new Vector2[]
-                                {
-                                    new(4, 4), new(), new(4, -4)
-                                });
+                                builder.ExtendPin(Pins["n"], 5);
+                                builder.Polyline([
+                                    new(4, 4),
+                                    new(),
+                                    new(4, -4)
+                                ]);
                                 if (Pins["p"].Connections > 0)
                                 {
                                     _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1));
@@ -115,15 +118,17 @@ namespace SimpleCircuit.Components.Inputs
                                 break;
 
                             default:
-                                drawing.ExtendPins(Pins, 5);
-                                drawing.Polyline(new Vector2[]
-                                {
-                                    new(-6, 4), new(-2, 0), new(-6, -4)
-                                });
-                                drawing.Polyline(new Vector2[]
-                                {
-                                    new(-2, 4), new(2, 0), new(-2, -4)
-                                });
+                                builder.ExtendPins(Pins, 5);
+                                builder.Polyline([
+                                    new(-6, 4),
+                                    new(-2, 0),
+                                    new(-6, -4)
+                                ]);
+                                builder.Polyline([
+                                    new(-2, 4),
+                                    new(2, 0),
+                                    new(-2, -4)
+                                ]);
                                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                                 break;
@@ -131,16 +136,17 @@ namespace SimpleCircuit.Components.Inputs
                         break;
 
                     default:
-                        drawing.ExtendPin(Pins["n"]);
-                        drawing.ExtendPin(Pins["p"], 4);
-                        drawing.Circle(new(), 1.5);
-                        drawing.Arc(new(), Math.PI / 4, -Math.PI / 4, 4, null, 3);
+                        builder.ExtendPin(Pins["n"]);
+                        builder.ExtendPin(Pins["p"], 4);
+                        builder.Circle(new(), 1.5);
+                        double s = Math.Sqrt(2) * 2;
+                        builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)));
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                         break;
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

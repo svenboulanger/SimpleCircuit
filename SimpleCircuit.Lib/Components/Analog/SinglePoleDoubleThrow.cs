@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -71,25 +72,25 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "p", "t1", "t2");
+                builder.ExtendPins(Pins, 2, "p", "t1", "t2");
 
                 // Terminals
-                drawing.Circle(new(-5, 0), 1);
-                drawing.Circle(new(5, 4), 1);
-                drawing.Circle(new(5, -4), 1);
+                builder.Circle(new(-5, 0), 1);
+                builder.Circle(new(5, 4), 1);
+                builder.Circle(new(5, -4), 1);
 
                 // Switch position
                 switch (Variants.Select(_t1, _t2))
                 {
-                    case 0: drawing.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4)); break;
-                    case 1: drawing.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4)); break;
-                    default: drawing.Line(new(-4, 0), new(5, 0)); break;
+                    case 0: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4)); break;
+                    case 1: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4)); break;
+                    default: builder.Line(new(-4, 0), new(5, 0)); break;
                 }
 
                 // Label
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

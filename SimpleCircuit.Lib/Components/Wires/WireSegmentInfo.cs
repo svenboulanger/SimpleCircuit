@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Drawing.Markers;
+﻿using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Parser;
 
 namespace SimpleCircuit.Components.Wires

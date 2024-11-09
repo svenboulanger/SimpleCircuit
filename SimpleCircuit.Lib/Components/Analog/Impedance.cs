@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Analog
@@ -69,17 +70,17 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 // The rectangle
                 double w = Width * 0.5;
-                drawing.Rectangle(-Length * 0.5, -w, Length, Width);
+                builder.Rectangle(-Length * 0.5, -w, Length, Width);
 
                 if (Variants.Contains(_programmable))
                 {
-                    drawing.Arrow(new(-5, w + 1), new(6, -w - 4));
+                    builder.Arrow(new(-5, w + 1), new(6, -w - 4));
                     _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                 }
@@ -89,7 +90,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

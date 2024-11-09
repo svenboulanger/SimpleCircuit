@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
@@ -43,50 +44,48 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawIEC(drawing); break;
+                    case 0: DrawIEC(builder); break;
                     case 1:
                     default:
                         if (Variants.Contains(_alt))
-                            DrawANSIalt(drawing);
+                            DrawANSIalt(builder);
                         else
-                            DrawANSI(drawing);
+                            DrawANSI(builder);
                         break;
                 }
             }
-            private void DrawIEC(SvgDrawing drawing)
+            private void DrawIEC(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
-                drawing.Rectangle(-6, -3, 12, 6);
-                drawing.Path(b => b.MoveTo(-3.5, -3).Line(0, 6).MoveTo(3.5, -3).Line(0, 6));
+                builder.Rectangle(-6, -3, 12, 6);
+                builder.Path(b => b.MoveTo(new(-3.5, -3)).Line(new(0, 6)).MoveTo(new(3.5, -3)).Line(new(0, 6)));
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawANSI(SvgDrawing drawing)
+            private void DrawANSI(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
-                drawing.Rectangle(-6, -3, 12, 6);
-                drawing.Line(new(-6, 0), new(6, 0));
+                builder.Rectangle(-6, -3, 12, 6);
+                builder.Line(new(-6, 0), new(6, 0));
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawANSIalt(SvgDrawing drawing)
+            private void DrawANSIalt(IGraphicsBuilder builder)
             {
-                drawing.OpenBezier(new Vector2[]
-                {
-                    new(-6, 0),
-                    new(-6, -1.65685424949), new(-4.65685424949, -3), new(-3, -3),
-                    new(-1.34314575051, -3), new(0, -1.65685424949), new(),
-                    new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3),
-                    new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)
-                });
+                builder.Path(b => b
+                    .MoveTo(new(-6, 0))
+                    .CurveTo(new(-6, -1.65685424949), new(-4.65685424949, -3), new(-3, -3))
+                    .CurveTo(new(-1.34314575051, -3), new(0, -1.65685424949), new())
+                    .CurveTo(new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3))
+                    .CurveTo(new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)));
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

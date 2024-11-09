@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 
@@ -23,31 +24,31 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             public override string Type => "addition";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
 
                 switch (Variants.Select("sigma"))
                 {
                     case 0:
                         // Draw a sigma
-                        drawing.BeginTransform(new Transform(new(), Matrix2.Scale(0.2 * Size)));
-                        drawing.Path(b =>
+                        builder.BeginTransform(new Transform(new(), Matrix2.Scale(0.2 * Size)));
+                        builder.Path(b =>
                         {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
                             SvgPathDataParser.Parse(lexer, b, null);
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
 
                     default:
                         double s = Size * 0.3;
-                        drawing.Line(new(-s, 0), new(s, 0));
-                        drawing.Line(new(0, -s), new(0, s));
+                        builder.Line(new(-s, 0), new(s, 0));
+                        builder.Line(new(0, -s), new(0, s));
                         break;
                 }
 
-                DrawLabels(drawing);
+                DrawLabels(builder);
             }
         }
     }

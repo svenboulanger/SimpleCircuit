@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Labeling
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Labeling
 {
 
     /// <summary>
@@ -13,7 +15,7 @@
         public abstract bool TryCalculate(T subject, string name, out LabelAnchorPoint value);
 
         /// <inheritdoc />
-        public void Draw(SvgDrawing drawing, T subject)
+        public void Draw(IGraphicsBuilder builder, T subject)
         {
             for (int i = 0; i < subject.Labels.Count; i++)
             {
@@ -29,11 +31,11 @@
                 // Determine the final values
                 var location = anchor.Location;
                 if (!label.Offset.IsZero())
-                    location += drawing.CurrentTransform.Matrix.Inverse * label.Offset;
+                    location += builder.CurrentTransform.Matrix.Inverse * label.Offset;
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label
-                drawing.Text(label.Value, location, expand, size: label.Size, lineSpacing: label.LineSpacing, options: anchor.Options);
+                builder.Text(label.Value, location, expand, size: label.Size, lineSpacing: label.LineSpacing, options: anchor.Options);
             }
         }
     }

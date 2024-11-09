@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -66,109 +67,109 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(drawing);
+                        DrawEuropeanSource(builder);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(drawing);
+                        DrawAmericanSource(builder);
                         break;
                 }
             }
 
-            private void DrawAmericanSource(SvgDrawing drawing)
+            private void DrawAmericanSource(IGraphicsBuilder builder)
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
 
                 // Circle
-                drawing.Circle(new(0, 0), 6);
+                builder.Circle(new(0, 0), 6);
 
                 // Waveform / inner graphic
                 switch (Variants.Select(_ac, _square, _tri, _pulse, _step))
                 {
                     case 0:
-                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
-                        drawing.AC();
-                        drawing.EndTransform();
+                        builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
+                        builder.AC();
+                        builder.EndTransform();
                         break;
 
                     case 1:
-                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
-                        drawing.Polyline(new Vector2[]
+                        builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
+                        builder.Polyline(new Vector2[]
                         {
                             new(-3, 0), new(-3, 3), new(0, 3), new(0, -3), new(3, -3), new(3, 0)
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
 
                     case 2:
-                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
-                        drawing.Polyline(new Vector2[]
+                        builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
+                        builder.Polyline(new Vector2[]
                         {
                             new(-3, 0), new(-1.5, 1.5), new(1.5, -1.5), new(3, 0)
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
 
                     case 3:
-                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
-                        drawing.Polyline(new Vector2[]
+                        builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
+                        builder.Polyline(new Vector2[]
                         {
                             new(-3, 3), new(-1, 3), new(-1, -3), new(1, -3), new(1, 3), new(3, 3)
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
 
                     case 4:
-                        drawing.BeginTransform(new(new(), drawing.CurrentTransform.Matrix.Inverse));
-                        drawing.Polyline(new Vector2[]
+                        builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
+                        builder.Polyline(new Vector2[]
                         {
                             new(-3, 3), new(-1.5, 3), new(-1.5, -3), new(3, -3)
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
 
                     default:
-                        drawing.Signs(new(3, 0), new(-3, 0), vertical: true);
+                        builder.Signs(new(3, 0), new(-3, 0), vertical: true);
                         break;
                 }
 
                 if (Variants.Contains(_programmable))
                 {
-                    drawing.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
+                    builder.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
                     if (_anchors[0].Location.Y > -7)
                         _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                     if (_anchors[1].Location.Y < 8.5)
                         _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawEuropeanSource(SvgDrawing drawing)
+            private void DrawEuropeanSource(IGraphicsBuilder builder)
             {
-                drawing.Circle(new(0, 0), 4);
-                drawing.Line(new(-4, 0), new(4, 0));
+                builder.Circle(new(0, 0), 4);
+                builder.Line(new(-4, 0), new(4, 0));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (Variants.Contains(_programmable))
                 {
-                    drawing.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
+                    builder.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
                     if (_anchors[0].Location.Y > -5)
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                     if (_anchors[1].Location.Y < 7)
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

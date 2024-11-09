@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
@@ -46,42 +47,48 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 4);
+                builder.ExtendPins(Pins, 4);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
                 switch (Variants.Select(_underground, _air, _tube, _inwall, _onwall))
                 {
-                    case 0: DrawUnderground(drawing); break;
-                    case 1: DrawAir(drawing); break;
-                    case 2: DrawTube(drawing); break;
-                    case 3: DrawInWall(drawing); break;
-                    case 4: DrawOnWall(drawing); break;
+                    case 0: DrawUnderground(builder); break;
+                    case 1: DrawAir(builder); break;
+                    case 2: DrawTube(builder); break;
+                    case 3: DrawInWall(builder); break;
+                    case 4: DrawOnWall(builder); break;
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawUnderground(SvgDrawing drawing)
+            private void DrawUnderground(IGraphicsBuilder builder)
             {
-                drawing.Path(b => b.MoveTo(-4, -5).Line(8, 0).MoveTo(-2.5, -3.5).Line(5, 0).MoveTo(-1, -2).Line(2, 0));
+                builder.Path(b => b
+                    .MoveTo(new(-4, -5))
+                    .Line(new(8, 0))
+                    .MoveTo(new(-2.5, -3.5))
+                    .Line(new(5, 0))
+                    .MoveTo(new(-1, -2))
+                    .Line(new(2, 0)));
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
                     _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
             }
-            private void DrawAir(SvgDrawing drawing)
+            private void DrawAir(IGraphicsBuilder builder)
             {
-                drawing.Circle(new(), 2);
+                builder.Circle(new(), 2);
                 if (_anchors[0].Location.Y > -3)
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (_anchors[1].Location.Y < 3)
                     _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
             }
-            private void DrawTube(SvgDrawing drawing)
+            private void DrawTube(IGraphicsBuilder builder)
             {
-                drawing.Circle(new(0, -3.5), 1.5);
+                builder.Circle(new(0, -3.5), 1.5);
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
@@ -89,24 +96,34 @@ namespace SimpleCircuit.Components.Wires
 
                 if (Multiple > 1)
                 {
-                    drawing.Line(new(0, -3.5), new(2.1, -5.6));
-                    drawing.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1));
+                    builder.Line(new(0, -3.5), new(2.1, -5.6));
+                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1));
                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                 }
             }
-            private void DrawInWall(SvgDrawing drawing)
+            private void DrawInWall(IGraphicsBuilder builder)
             {
-                drawing.Polyline(new Vector2[] { new(-3, -2), new(-3, -5), new(3, -5), new(3, -2) });
-                drawing.Line(new(0, -2), new(0, -5));
+                builder.Polyline([
+                    new(-3, -2),
+                    new(-3, -5),
+                    new(3, -5),
+                    new(3, -2)
+                ]);
+                builder.Line(new(0, -2), new(0, -5));
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
                     _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
             }
-            private void DrawOnWall(SvgDrawing drawing)
+            private void DrawOnWall(IGraphicsBuilder builder)
             {
-                drawing.Polyline(new Vector2[] { new(-3, 5), new(-3, 2), new(3, 2), new(3, 5) });
-                drawing.Line(new(0, 5), new(0, 2));
+                builder.Polyline([
+                    new(-3, 5), 
+                    new(-3, 2), 
+                    new(3, 2), 
+                    new(3, 5)
+                ]);
+                builder.Line(new(0, 5), new(0, 2));
                 if (_anchors[0].Location.Y > -1)
                     _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 if (_anchors[1].Location.Y < 6)

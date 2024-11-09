@@ -1,8 +1,8 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Parser.SvgPathData;
@@ -13,12 +13,12 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace SimpleCircuit
+namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
     /// An Svg drawing.
     /// </summary>
-    public class SvgDrawing
+    public class SvgDrawing : IGraphicsBuilder
     {
         /// <summary>
         /// The namespace for SVG nodes.
@@ -40,9 +40,7 @@ namespace SimpleCircuit
         private readonly Stack<ExpandableBounds> _bounds;
         private readonly Stack<Transform> _tf = new();
 
-        /// <summary>
-        /// Adds required CSS (unordered).
-        /// </summary>
+        /// <inheritdoc />
         public ISet<string> RequiredCSS { get; } = new HashSet<string>();
 
         /// <summary>
@@ -50,13 +48,11 @@ namespace SimpleCircuit
         /// </summary>
         public IList<string> ExtraCSS { get; } = new List<string>();
 
-        /// <summary>
-        /// Gets the current transform.
-        /// </summary>
-        /// <value>
-        /// The current transform.
-        /// </value>
+        /// <inheritdoc />
         public Transform CurrentTransform => _tf.Peek();
+
+        /// <inheritdoc />
+        public Bounds Bounds { get; }
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -72,19 +68,6 @@ namespace SimpleCircuit
         /// Removes empty groups.
         /// </summary>
         public bool RemoveEmptyGroups { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets a flag that causes the bounding boxes of groups with an identifier to be rendered as well.
-        /// </summary>
-        /// <remarks>
-        /// Bounding boxes are grouped in a group tag, with the class "bounds".
-        /// </remarks>
-        public bool RenderBounds { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets the amount to expand the bounds if <see cref="RenderBounds"/> is <c>true</c>.
-        /// </summary>
-        public double ExpandBounds { get; set; } = 0.0;
 
         /// <summary>
         /// Gets the diagnostic handler.
@@ -113,40 +96,37 @@ namespace SimpleCircuit
             Measurer = measurer ?? new SkiaTextMeasurer();
         }
 
-        /// <summary>
-        /// Begins a new transform on top of previous transforms.
-        /// </summary>
-        /// <param name="tf">The transform.</param>
-        public void BeginTransform(Transform tf)
+        /// <inheritdoc />
+        public IGraphicsBuilder BeginTransform(Transform tf)
         {
             _tf.Push(tf.Apply(CurrentTransform));
+            return this;
         }
 
-        /// <summary>
-        /// Ends the last transform.
-        /// </summary>
-        public void EndTransform()
+        /// <inheritdoc />
+        public IGraphicsBuilder EndTransform()
         {
             _tf.Pop();
             if (_tf.Count == 0)
                 _tf.Push(Transform.Identity);
+            return this;
         }
 
         /// <inheritdoc />
-        public void DrawXml(XmlNode description, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        public IGraphicsBuilder DrawXml(XmlNode description, IXmlDrawingContext context)
         {
             // Apply some scale if necessary
             bool success = true;
-            success &= description.Attributes.ParseOptionalScalar("scale", diagnostics, 1.0, out double scale);
-            success &= description.Attributes.ParseOptionalScalar("rotate", diagnostics, 0.0, out double rotate);
-            success &= description.Attributes.ParseOptionalVector("offset", diagnostics, new(), out var offset);
+            success &= description.Attributes.ParseOptionalScalar("scale", Diagnostics, 1.0, out double scale);
+            success &= description.Attributes.ParseOptionalScalar("rotate", Diagnostics, 0.0, out double rotate);
+            success &= description.Attributes.ParseOptionalVector("offset", Diagnostics, new(), out var offset);
             if (!success)
-                return;
+                return this;
 
             bool transform = !rotate.IsZero() || !offset.IsZero() || !scale.Equals(1.0);
             if (transform)
                 BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
-            DrawXmlActions(description, context, diagnostics);
+            DrawXmlActions(description, context);
 
             // If labels were found, let's try drawing the labels
             if (context.Anchors.Count > 0 && context.Labels != null && context.Labels.Count > 0)
@@ -154,8 +134,9 @@ namespace SimpleCircuit
 
             if (transform)
                 EndTransform();
+            return this;
         }
-        private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context)
         {
             foreach (XmlNode node in parent.ChildNodes)
             {
@@ -166,55 +147,55 @@ namespace SimpleCircuit
                 switch (node.Name)
                 {
                     case "#comment": break;
-                    case "line": DrawXmlLine(node, diagnostics); break;
-                    case "circle": DrawXmlCircle(node, diagnostics); break;
-                    case "path": DrawXmlPath(node, diagnostics); break;
-                    case "polygon": DrawXmlPolygon(node, diagnostics); break;
-                    case "polyline": DrawXmlPolyline(node, diagnostics); break;
-                    case "rect": DrawXmlRectangle(node, diagnostics); break;
-                    case "text": DrawXmlText(node, context, diagnostics); break;
+                    case "line": DrawXmlLine(node); break;
+                    case "circle": DrawXmlCircle(node); break;
+                    case "path": DrawXmlPath(node); break;
+                    case "polygon": DrawXmlPolygon(node); break;
+                    case "polyline": DrawXmlPolyline(node); break;
+                    case "rect": DrawXmlRectangle(node); break;
+                    case "text": DrawXmlText(node, context); break;
                     case "variant":
                     case "v":
                         // Just recursive thingy
-                        DrawXmlActions(node, context, diagnostics);
+                        DrawXmlActions(node, context);
                         break;
-                    case "label": DrawXmlLabelAnchor(node, context, diagnostics); break;
+                    case "label": DrawXmlLabelAnchor(node, context); break;
                     case "group":
                     case "g":
                         // Parse options
                         GraphicOptions options = new();
                         ParseGraphicOptions(options, node);
                         BeginGroup(options);
-                        DrawXmlActions(node, context,diagnostics);
+                        DrawXmlActions(node, context);
                         EndGroup();
                         break;
                     default:
-                        diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
+                        Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
                         break;
                 }
             }
         }
-        private void DrawXmlLine(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlLine(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
             bool success = true;
             GraphicOptions options = new();
             HashSet<Marker> startMarkers = null, endMarkers = null;
-            success &= node.Attributes.ParseOptionalScalar("x1", diagnostics, 0.0, out double x1);
-            success &= node.Attributes.ParseOptionalScalar("y1", diagnostics, 0.0, out double y1);
-            success &= node.Attributes.ParseOptionalScalar("x2", diagnostics, 0.0, out double x2);
-            success &= node.Attributes.ParseOptionalScalar("y2", diagnostics, 0.0, out double y2);
+            success &= node.Attributes.ParseOptionalScalar("x1", Diagnostics, 0.0, out double x1);
+            success &= node.Attributes.ParseOptionalScalar("y1", Diagnostics, 0.0, out double y1);
+            success &= node.Attributes.ParseOptionalScalar("x2", Diagnostics, 0.0, out double x2);
+            success &= node.Attributes.ParseOptionalScalar("y2", Diagnostics, 0.0, out double y2);
             if (!success)
                 return;
 
             // Draw the line
-            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
+            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
             Line(new(x1, y1), new(x2, y2), options);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1));
             DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1));
         }
-        private void DrawXmlPolygon(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlPolygon(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
@@ -223,7 +204,7 @@ namespace SimpleCircuit
             if (attr == null)
                 return;
             var lexer = new SvgPathDataLexer(attr.AsMemory());
-            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
 
@@ -233,7 +214,7 @@ namespace SimpleCircuit
             // Draw the polygon
             Polygon(points, options);
         }
-        private void DrawXmlPolyline(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlPolyline(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
@@ -243,14 +224,14 @@ namespace SimpleCircuit
             if (attr == null)
                 return;
             var lexer = new SvgPathDataLexer(attr.AsMemory());
-            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, diagnostics);
+            List<Vector2> points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
             if (points == null || points.Count <= 1)
                 return;
 
             GraphicOptions options = new();
-            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
+            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             // Draw the polyline
             Polyline(points, options);
@@ -265,15 +246,15 @@ namespace SimpleCircuit
                 DrawMarkers(endMarkers, points[0], new(1, 0));
             }
         }
-        private void DrawXmlCircle(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlCircle(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
 
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("cx", diagnostics, 0.0, out double cx);
-            success &= node.Attributes.ParseOptionalScalar("cy", diagnostics, 0.0, out double cy);
-            success &= node.Attributes.ParseOptionalScalar("r", diagnostics, 0.0, out double r);
+            success &= node.Attributes.ParseOptionalScalar("cx", Diagnostics, 0.0, out double cx);
+            success &= node.Attributes.ParseOptionalScalar("cy", Diagnostics, 0.0, out double cy);
+            success &= node.Attributes.ParseOptionalScalar("r", Diagnostics, 0.0, out double r);
             if (!success)
                 return;
 
@@ -283,7 +264,7 @@ namespace SimpleCircuit
             // Draw the circle
             Circle(new(cx, cy), r, options);
         }
-        private void DrawXmlPath(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlPath(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
@@ -294,7 +275,7 @@ namespace SimpleCircuit
                 return;
 
             GraphicOptions options = new();
-            ParseGraphicOptions(options, node, diagnostics, ref startMarkers, ref endMarkers);
+            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
@@ -302,25 +283,25 @@ namespace SimpleCircuit
                 Path(b =>
                 {
                     var lexer = new SvgPathDataLexer(pathData.AsMemory());
-                    start = SvgPathDataParser.Parse(lexer, b, diagnostics);
+                    start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
                     end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
                 }, options);
                 DrawMarkers(startMarkers, start.Location, start.Normal);
                 DrawMarkers(endMarkers, end.Location, end.Normal);
             }
         }
-        private void DrawXmlRectangle(XmlNode node, IDiagnosticHandler diagnostics)
+        private void DrawXmlRectangle(XmlNode node)
         {
             if (node.Attributes == null)
                 return;
 
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("width", diagnostics, 0.0, out double width);
-            success &= node.Attributes.ParseOptionalScalar("height", diagnostics, 0.0, out double height);
-            success &= node.Attributes.ParseOptionalScalar("rx", diagnostics, double.NaN, out double rx);
-            success &= node.Attributes.ParseOptionalScalar("ry", diagnostics, double.NaN, out double ry);
+            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("width", Diagnostics, 0.0, out double width);
+            success &= node.Attributes.ParseOptionalScalar("height", Diagnostics, 0.0, out double height);
+            success &= node.Attributes.ParseOptionalScalar("rx", Diagnostics, double.NaN, out double rx);
+            success &= node.Attributes.ParseOptionalScalar("ry", Diagnostics, double.NaN, out double ry);
             if (!success)
                 return;
 
@@ -330,18 +311,18 @@ namespace SimpleCircuit
             // Draw the rectangle
             this.Rectangle(x, y, width, height, rx, ry, options);
         }
-        private void DrawXmlText(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
 
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
-            success &= node.Attributes.ParseOptionalScalar("size", diagnostics, 4.0, out double size);
-            success &= node.Attributes.ParseOptionalScalar("line-spacing", diagnostics, 1.5, out double lineSpacing);
+            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
+            success &= node.Attributes.ParseOptionalScalar("size", Diagnostics, 4.0, out double size);
+            success &= node.Attributes.ParseOptionalScalar("line-spacing", Diagnostics, 1.5, out double lineSpacing);
             if (!success)
                 return;
 
@@ -353,13 +334,13 @@ namespace SimpleCircuit
                 value = context.TransformText(value);
             Text(value, new Vector2(x, y), new Vector2(nx, ny), size: size, lineSpacing: lineSpacing, options: options);
         }
-        private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context, IDiagnosticHandler diagnostics)
+        private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
         {
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", diagnostics, 0.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", diagnostics, 0.0, out double ny);
+            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
+            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
+            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
             if (!success)
                 return;
 
@@ -452,7 +433,7 @@ namespace SimpleCircuit
             => _bounds.Peek().Expand(CurrentTransform.Apply(point));
 
         /// <inheritdoc />
-        public Bounds Line(Vector2 start, Vector2 end, GraphicOptions options = null)
+        public IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -468,11 +449,11 @@ namespace SimpleCircuit
             _current.AppendChild(line);
 
             _bounds.Peek().Expand(bounds);
-            return bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds Circle(Vector2 position, double radius, GraphicOptions options = null)
+        public IGraphicsBuilder Circle(Vector2 position, double radius, GraphicOptions options = null)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             position = CurrentTransform.Apply(position);
@@ -487,11 +468,11 @@ namespace SimpleCircuit
             _current.AppendChild(circle);
 
             _bounds.Peek().Expand(bounds);
-            return bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             var bounds = new ExpandableBounds();
             StringBuilder sb = new();
@@ -511,11 +492,11 @@ namespace SimpleCircuit
             poly.SetAttribute("points", sb.ToString());
 
             _bounds.Peek().Expand(bounds);
-            return bounds.Bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             var bounds = new ExpandableBounds();
             StringBuilder sb = new();
@@ -535,16 +516,16 @@ namespace SimpleCircuit
             poly.SetAttribute("points", sb.ToString());
 
             _bounds.Peek().Expand(bounds);
-            return bounds.Bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public IGraphicsBuilder SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             var bounds = new ExpandableBounds();
             StringBuilder sb = new();
             int index = -1;
-            foreach (IGrouping<int, Vector2> group in points.GroupBy(p => { index++; return index < 1 ? 0 : (index < 4) ? 1 : 1 + index / 4; }))
+            foreach (IGrouping<int, Vector2> group in points.GroupBy(p => { index++; return index < 1 ? 0 : index < 4 ? 1 : 1 + index / 4; }))
             {
                 var v = group.ToArray();
                 if (sb.Length > 0)
@@ -569,16 +550,16 @@ namespace SimpleCircuit
             path.SetAttribute("d", sb.ToString());
 
             _bounds.Peek().Expand(bounds);
-            return bounds.Bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public IGraphicsBuilder ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             var bounds = new ExpandableBounds();
             var sb = new StringBuilder();
             int index = 2;
-            foreach (var group in points.GroupBy(p => (index++) / 3))
+            foreach (var group in points.GroupBy(p => index++ / 3))
             {
                 var v = group.ToArray();
                 if (sb.Length > 0)
@@ -603,16 +584,16 @@ namespace SimpleCircuit
             path.SetAttribute("d", sb.ToString());
 
             _bounds.Peek().Expand(bounds);
-            return bounds.Bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public IGraphicsBuilder OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             var bounds = new ExpandableBounds();
             var sb = new StringBuilder();
             int index = 2;
-            foreach (var group in points.GroupBy(p => (index++) / 3))
+            foreach (var group in points.GroupBy(p => index++ / 3))
             {
                 var v = group.ToArray();
                 for (int i = 0; i < v.Length; i++)
@@ -636,11 +617,11 @@ namespace SimpleCircuit
             path.SetAttribute("d", sb.ToString());
 
             _bounds.Peek().Expand(bounds);
-            return bounds.Bounds;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
+        public IGraphicsBuilder Arc(Vector2 center, double startAngle, double endAngle, double radius, GraphicOptions options = null, int intermediatePoints = 0)
         {
             if (endAngle < startAngle)
                 endAngle += 2 * Math.PI;
@@ -664,7 +645,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public Bounds Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
+        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
@@ -679,7 +660,7 @@ namespace SimpleCircuit
         }
 
         /// <inheritdoc />
-        public Bounds Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
+        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return default;
@@ -724,14 +705,14 @@ namespace SimpleCircuit
             // Return the offset bounds
             var r = new Vector2(x, y) + bounds;
             _bounds.Peek().Expand(r);
-            return r;
+            return this;
         }
 
         /// <inheritdoc />
-        public Bounds Path(Action<PathBuilder> action, GraphicOptions options = null)
+        public IGraphicsBuilder Path(Action<IPathBuilder> action, GraphicOptions options = null)
         {
             if (action == null)
-                return default;
+                return this;
             var builder = new PathBuilder(CurrentTransform);
             action(builder);
 
@@ -742,14 +723,14 @@ namespace SimpleCircuit
             path.SetAttribute("d", builder.ToString());
 
             _bounds.Peek().Expand(builder.Bounds);
-            return builder.Bounds;
+            return this;
         }
 
         /// <summary>
         /// Begins a new group.
         /// </summary>
         /// <param name="options">The options.</param>
-        public void BeginGroup(GraphicOptions options = null, bool atStart = false)
+        public IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false)
         {
             var elt = _document.CreateElement("g", Namespace);
             options?.Apply(elt);
@@ -761,12 +742,13 @@ namespace SimpleCircuit
 
             // Track the bounds of the group
             _bounds.Push(new());
+            return this;
         }
 
         /// <summary>
         /// Ends the last opened group.
         /// </summary>
-        public Bounds EndGroup()
+        public IGraphicsBuilder EndGroup()
         {
             var group = _current;
             var parent = _current.ParentNode;
@@ -780,37 +762,11 @@ namespace SimpleCircuit
                 var bounds = _bounds.Pop();
                 var cBounds = _bounds.Peek();
                 cBounds.Expand(bounds);
-
-                // Draw a rectangle on top of the group to show
-                if (RenderBounds && group.ParentNode != null)
-                {
-                    string id = group.Attributes?["id"]?.Value;
-                    if (!string.IsNullOrWhiteSpace(id))
-                    {
-                        var b = bounds.Bounds;
-                        var center = new Vector2(0.5 * (b.Left + b.Right), 0.5 * (b.Top + b.Bottom));
-                        double left = b.Left - ExpandBounds, right = b.Right + ExpandBounds;
-                        double top = b.Top - ExpandBounds, bottom = b.Bottom + ExpandBounds;
-
-                        var g = _document.CreateElement("g", Namespace);
-                        _current = g;
-                        g.SetAttribute("class", "bounds");
-                        group.ParentNode.InsertAfter(_current, group);
-                        Polygon(new Vector2[]
-                        {
-                            new(left, top), new(right, top),
-                            new(right, bottom), new(left, bottom)
-                        });
-                        
-                        // Show the ID in the middle of the box
-                        Text(id.Replace("_", "\\_"), center, new());
-                    }
-                }
                 _current = parent ?? group;
-                return bounds.Bounds;
+                return this;
             }
             _current = parent ?? group;
-            return _bounds.Peek().Bounds;
+            return this;
         }
 
         /// <summary>
@@ -823,12 +779,12 @@ namespace SimpleCircuit
 
             // Add stylesheet info if necessary
             var styleElt = _document.CreateElement("style", Namespace);
-            List<string> style = new(RequiredCSS.Count + ExtraCSS.Count + 1)
-            {
-                Properties.Resources.DefaultStyle
-            };
-            style.AddRange(RequiredCSS);
-            style.AddRange(ExtraCSS);
+            List<string> style =
+            [
+                Properties.Resources.DefaultStyle,
+                .. RequiredCSS,
+                .. ExtraCSS
+            ];
             styleElt.InnerText = string.Join(Environment.NewLine, style);
             svg.PrependChild(styleElt);
 

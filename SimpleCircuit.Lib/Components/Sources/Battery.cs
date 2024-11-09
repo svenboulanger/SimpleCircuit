@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
@@ -66,29 +67,29 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.RequiredCSS.Add(".battery .neg { stroke-width: 0.75pt; }");
+                builder.RequiredCSS.Add(".battery .neg { stroke-width: 0.75pt; }");
 
                 // Wires
                 double offset = Length / 2;
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 // The cells
                 double x = -offset;
                 for (int i = 0; i < _cells; i++)
                 {
-                    drawing.Line(new(x, -2), new(x, 2), new("neg"));
+                    builder.Line(new(x, -2), new(x, 2), new("neg"));
                     x += 2.0;
-                    drawing.Line(new(x, -6), new(x, 6), new("pos"));
+                    builder.Line(new(x, -6), new(x, 6), new("pos"));
                     x += 2.0;
                 }
 
                 // Add a little plus and minus next to the terminals!
-                drawing.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
+                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

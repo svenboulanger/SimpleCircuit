@@ -1,8 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
-using SimpleCircuit.Drawing.Markers;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
@@ -447,15 +447,15 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        protected override void Draw(IGraphicsBuilder builder)
         {
             List<Marker> markers = [];
             if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
                 if (Variants.Contains(Dashed))
-                    drawing.RequiredCSS.Add(".dashed { stroke-dasharray: 2 2; }");
+                    builder.RequiredCSS.Add(".dashed { stroke-dasharray: 2 2; }");
                 if (Variants.Contains(Dotted))
-                    drawing.RequiredCSS.Add(".dotted { stroke-dasharray: 0.5 2; }");
+                    builder.RequiredCSS.Add(".dotted { stroke-dasharray: 0.5 2; }");
                 GraphicOptions options = Variants.Select(Dashed, Dotted) switch
                 {
                     0 => new("wire", "dashed"),
@@ -463,8 +463,8 @@ namespace SimpleCircuit.Components.Wires
                     _ => new("wire"),
                 };
 
-                var tf = drawing.CurrentTransform;
-                drawing.Path(builder =>
+                var tf = builder.CurrentTransform;
+                builder.Path(builder =>
                 {
                     builder.MoveTo(_localPoints[0].Location);
                     _points.Add(tf.Apply(_localPoints[0].Location));
@@ -577,7 +577,7 @@ namespace SimpleCircuit.Components.Wires
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)
-                    marker?.Draw(drawing);
+                    marker?.Draw(builder);
             }
         }
 

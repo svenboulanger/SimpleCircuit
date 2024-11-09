@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "many".
@@ -19,10 +21,10 @@
         public static GraphicOptions DefaultOptions { get; } = new("marker", "erd", "many");
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            drawing.Polyline(_points, Options);
-            drawing.Line(new(-2, 0), new(), Options);
+            builder.Polyline(_points, Options);
+            builder.Line(new(-2, 0), new(), Options);
         }
     }
 }

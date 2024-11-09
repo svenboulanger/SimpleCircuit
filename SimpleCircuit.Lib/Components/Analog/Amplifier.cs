@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -110,7 +111,7 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
                 _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
@@ -118,67 +119,67 @@ namespace SimpleCircuit.Components.Analog
                 // Differential input?
                 if (Variants.Contains(_differentialInput))
                 {
-                    drawing.ExtendPins(Pins, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        drawing.Signs(new(-5.5, 4), new(-5.5, -4));
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4));
                     else
-                        drawing.Signs(new(-5.5, -4), new(-5.5, 4));
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4));
                 }
                 else
-                    drawing.ExtendPin(Pins["in"]);
+                    builder.ExtendPin(Pins["in"]);
 
                 // Differential output?
                 if (Variants.Contains(_differentialOutput))
                 {
-                    drawing.ExtendPins(Pins, 5, "outp", "outn");
+                    builder.ExtendPins(Pins, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        drawing.Signs(new(6, -7), new(6, 7));
+                        builder.Signs(new(6, -7), new(6, 7));
                     else
-                        drawing.Signs(new(6, 7), new(6, -7));
+                        builder.Signs(new(6, 7), new(6, -7));
 
                     // Give more breathing room to the labels
                     _anchors[0] = new LabelAnchorPoint(new(2, 7), new(1, 1));
                     _anchors[2] = new LabelAnchorPoint(new(2, -7), new(1, -1));
                 }
                 else
-                    drawing.ExtendPin(Pins["out"]);
+                    builder.ExtendPin(Pins["out"]);
 
-                drawing.Polygon(new Vector2[]
-                {
+                builder.Polygon(
+                [
                     new(-8, -8),
                     new(8, 0),
                     new(-8, 8)
-                });
+                ]);
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
-                    drawing.Arrow(new(-7, 10), new(4, -8.5));
+                    builder.Arrow(new(-7, 10), new(4, -8.5));
 
                 // Comparator
                 if (Variants.Contains(_comparator))
                 {
-                    drawing.Path(b => b.MoveTo(-4, 2)
-                        .LineTo(-2, 2)
-                        .LineTo(-2, -2)
-                        .LineTo(0, -2));
+                    builder.Path(b => b.MoveTo(new(-4, 2))
+                        .LineTo(new(-2, 2))
+                        .LineTo(new(-2, -2))
+                        .LineTo(new(0, -2)));
                 }
 
                 // Schmitt trigger
                 if (Variants.Contains(_schmitt))
                 {
-                    drawing.Path(b =>
+                    builder.Path(b =>
                     {
-                        b.MoveTo(-5, 2)
-                            .LineTo(-3, 2)
-                            .LineTo(-3, -2)
-                            .LineTo(-1, -2);
-                        b.MoveTo(-3, 2)
-                            .LineTo(-1, 2)
-                            .LineTo(-1, -2)
-                            .LineTo(1, -2);
+                        b.MoveTo(new(-5, 2))
+                            .LineTo(new(-3, 2))
+                            .LineTo(new(-3, -2))
+                            .LineTo(new(-1, -2));
+                        b.MoveTo(new(-3, 2))
+                            .LineTo(new(-1, 2))
+                            .LineTo(new(-1, -2))
+                            .LineTo(new(1, -2));
                     });
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

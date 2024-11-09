@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -117,16 +118,16 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawNandIEC(drawing); break;
+                    case 0: DrawNandIEC(builder); break;
                     case 1:
-                    default: DrawNand(drawing); break;
+                    default: DrawNand(builder); break;
                 }
             }
-            private void DrawNand(SvgDrawing drawing)
+            private void DrawNand(IGraphicsBuilder builder)
             {
                 double radius = Height * 0.5;
                 double handle = 0.55 * radius;
@@ -134,8 +135,8 @@ namespace SimpleCircuit.Components.Digital
                 double xr = w - radius;
                 double h = Height * 0.5;
 
-                drawing.ExtendPins(Pins);
-                drawing.Path(builder => builder
+                builder.ExtendPins(Pins);
+                builder.Path(builder => builder
                     .MoveTo(new(-w, h))
                     .LineTo(new(xr, h))
                     .CurveTo(new(xr + handle, h), new(w, handle), new(w, 0))
@@ -143,18 +144,18 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close()
                 );
-                drawing.Circle(new Vector2(w + 1.5, 0), 1.5);
+                builder.Circle(new Vector2(w + 1.5, 0), 1.5);
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
-            private void DrawNandIEC(SvgDrawing drawing)
+            private void DrawNandIEC(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
-                drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
-                drawing.Text("&amp;", new(), new());
+                builder.ExtendPins(Pins);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
+                builder.Text("&amp;", new(), new());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

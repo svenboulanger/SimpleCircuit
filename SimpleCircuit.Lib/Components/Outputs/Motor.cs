@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Outputs
@@ -39,20 +40,25 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (!Variants.Contains(Options.Arei))
-                    drawing.ExtendPins(Pins);
-                drawing.Circle(new(), 5);
-                drawing.Text("M", new(), new());
+                    builder.ExtendPins(Pins);
+                builder.Circle(new(), 5);
+                builder.Text("M", new(), new());
 
                 if (Variants.Contains(_signs))
                 {
-                    drawing.Path(b => b.MoveTo(-7, -4).LineTo(-5, -4).MoveTo(-6, -3).LineTo(-6, -5), new("plus"));
-                    drawing.Line(new(5, -4), new(7, -4), new("minus"));
+                    builder.Path(b => b
+                            .MoveTo(new(-7, -4))
+                            .LineTo(new(-5, -4))
+                            .MoveTo(new(-6, -3))
+                            .LineTo(new(-6, -5)),
+                        new("plus"));
+                    builder.Line(new(5, -4), new(7, -4), new("minus"));
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System;
 
 namespace SimpleCircuit.Components
 {
@@ -48,28 +48,28 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                 _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
-                    case 1: DrawEarth(drawing); break;
-                    case 2: DrawSignalGround(drawing); break;
-                    default: DrawGround(drawing); break;
+                    case 1: DrawEarth(builder); break;
+                    case 2: DrawSignalGround(builder); break;
+                    default: DrawGround(builder); break;
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawGround(SvgDrawing drawing)
+            private void DrawGround(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, Variants.Contains(_protective) ? 9 : 3);
 
                 if (Variants.Contains(_noiseless))
                 {
                     drawing.ExtendPins(Pins, 6);
-                    drawing.Arc(new(0, 4), -Math.PI, 0, 8, new("shield"));
+                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), new("shield"));
                     if (_anchors[0].Location.X > -9)
                         _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
                     if (_anchors[0].Location.X < 9)
@@ -88,30 +88,42 @@ namespace SimpleCircuit.Components
                 {
                     drawing.ExtendPins(Pins, 3);
                 }
-                drawing.Path(b => b.MoveTo(-5, 0).LineTo(5, 0).MoveTo(-3, 2).LineTo(3, 2).MoveTo(-1, 4).LineTo(1, 4));
+                drawing.Path(b => b
+                    .MoveTo(new(-5, 0))
+                    .LineTo(new(5, 0))
+                    .MoveTo(new(-3, 2))
+                    .LineTo(new(3, 2))
+                    .MoveTo(new(-1, 4))
+                    .LineTo(new(1, 4)));
             }
-            private void DrawEarth(SvgDrawing drawing)
+            private void DrawEarth(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, 3);
 
                 // Ground segments
-                drawing.Path(b => b.MoveTo(-5, 0).LineTo(5, 0)
-                    .MoveTo(-5, 0).Line(-2, 4)
-                    .MoveTo(0, 0).Line(-2, 4)
-                    .MoveTo(5, 0).Line(-2, 4));
+                drawing.Path(b => b
+                    .MoveTo(new(-5, 0))
+                    .LineTo(new(5, 0))
+                    .MoveTo(new(-5, 0))
+                    .Line(new(-2, 4))
+                    .MoveTo(new(0, 0))
+                    .Line(new(-2, 4))
+                    .MoveTo(new(5, 0))
+                    .Line(new(-2, 4)));
 
                 if (_anchors[0].Location.X > -7)
                     _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
             }
-            private void DrawSignalGround(SvgDrawing drawing)
+            private void DrawSignalGround(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, 3);
 
                 // Ground
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-5, 0), new(5, 0), new(0, 4)
-                });
+                drawing.Polygon([
+                    new(-5, 0),
+                    new(5, 0),
+                    new(0, 4)
+                ]);
             }
         }
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace SimpleCircuit.Drawing
+namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
     /// Graphical options.
@@ -38,9 +38,9 @@ namespace SimpleCircuit.Drawing
         public override int GetHashCode()
         {
             int hash = Id?.GetHashCode() ?? 0;
-            hash = (hash * 1021) ^ (Style?.GetHashCode() ?? 0);
+            hash = hash * 1021 ^ (Style?.GetHashCode() ?? 0);
             foreach (string c in Classes)
-                hash = (hash * 1021) ^ hash;
+                hash = hash * 1021 ^ hash;
             return hash;
         }
 

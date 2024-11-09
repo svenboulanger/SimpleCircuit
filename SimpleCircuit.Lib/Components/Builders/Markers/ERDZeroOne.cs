@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relation diagram marker for "zero or one".
@@ -17,11 +19,11 @@
         public static GraphicOptions DefaultOptions { get; } = new("marker", "erd", "zero-one");
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            drawing.RequiredCSS.Add(".marker.erd { fill: white; }");
-            drawing.Circle(new(-5.5, 0), 1.5, Options);
-            drawing.Line(new(-2, -1.5), new(-2, 1.5), Options);
+            builder.RequiredCSS.Add(".marker.erd { fill: white; }");
+            builder.Circle(new(-5.5, 0), 1.5, Options);
+            builder.Line(new(-2, -1.5), new(-2, 1.5), Options);
         }
     }
 }

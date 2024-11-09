@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Inputs
@@ -35,15 +36,15 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPin(Pins["p"], 4);
-                drawing.ExtendPin(Pins["n"]);
-                drawing.Circle(new(), 1.5);
-                drawing.Circle(new(), 4);
-                drawing.Circle(new(4, 0), 1, new("marker"));
+                builder.ExtendPin(Pins["p"], 4);
+                builder.ExtendPin(Pins["n"]);
+                builder.Circle(new(), 1.5);
+                builder.Circle(new(), 4);
+                builder.Circle(new(4, 0), 1, new("marker"));
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

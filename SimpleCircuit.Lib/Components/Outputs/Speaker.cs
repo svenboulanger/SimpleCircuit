@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Outputs
@@ -38,34 +39,33 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
-                drawing.Rectangle(-2, -4, 4, 8);
-                drawing.Polygon(new Vector2[]
-                {
-                    new(2, -4), new(6, -9),
-                    new(6, 9), new(2, 4)
-                });
+                builder.ExtendPins(Pins);
+                builder.Rectangle(-2, -4, 4, 8);
+                builder.Polygon([
+                    new(2, -4),
+                    new(6, -9),
+                    new(6, 9),
+                    new(2, 4)
+                ]);
 
                 if (!Variants.Contains(_off))
-                    DrawOn(drawing);
+                    DrawOn(builder);
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawOn(SvgDrawing drawing)
+            private void DrawOn(IGraphicsBuilder builder)
             {
-                DrawSoundWave(drawing, 8, 0, 3);
-                DrawSoundWave(drawing, 10, 0, 5);
-                DrawSoundWave(drawing, 12, 0, 7);
+                DrawSoundWave(builder, 8, 0, 3);
+                DrawSoundWave(builder, 10, 0, 5);
+                DrawSoundWave(builder, 12, 0, 7);
             }
-            private void DrawSoundWave(SvgDrawing drawing, double x, double y, double s)
+            private void DrawSoundWave(IGraphicsBuilder builder, double x, double y, double s)
             {
-                drawing.OpenBezier(new Vector2[]
-                {
-                    new(x, y - s),
-                    new(x + s * 0.5, y - s * 0.5), new(x + s * 0.5, y + s * 0.5), new(x, y + s)
-                });
+                builder.Path(b => b
+                    .MoveTo(new(x, y - s))
+                    .CurveTo(new(x + s * 0.5, y - s * 0.5), new(x + s * 0.5, y + s * 0.5), new(x, y + s)));
             }
         }
     }

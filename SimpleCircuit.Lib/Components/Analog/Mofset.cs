@@ -1,7 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -73,27 +74,27 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_packaged))
-                    DrawPackaged(drawing);
+                    DrawPackaged(builder);
                 else
-                    DrawRegular(drawing);
+                    DrawRegular(builder);
             }
-            private void DrawRegular(SvgDrawing drawing)
+            private void DrawRegular(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"]);
+                builder.ExtendPins(Pins, 4, "s", "d");
+                builder.ExtendPin(Pins["g"]);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(-6, 4).LineTo(6, 4).MoveTo(-6, 6).LineTo(6, 6), new("gate"));
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
 
                 // Source and drain
-                drawing.Line(new(-4, 0), new(-4, 4), new("source"));
-                drawing.Line(new(4, 0), new(4, 4), new("drain"));
+                builder.Line(new(-4, 0), new(-4, 4), new("source"));
+                builder.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -106,23 +107,27 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawPackaged(SvgDrawing drawing)
+            private void DrawPackaged(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, 3, "s", "d");
                 drawing.ExtendPin(Pins["g"]);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
-                    .MoveTo(-7, 4).LineTo(-4, 4)
-                    .MoveTo(-2, 4).LineTo(2, 4)
-                    .MoveTo(4, 4).LineTo(7, 4), new("gate"));
+                drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
+                    .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
+                    .MoveTo(new(-2, 4)).LineTo(new(2, 4))
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
                 drawing.Line(new(5, 0), new(5, 4), new("drain"));
-                drawing.Polyline(new Vector2[] { new(-5, 0), new(0, 0), new(0, 4) }, new("bulk"));
+                drawing.Polyline([
+                    new(-5, 0),
+                    new(0, 0),
+                    new(0, 4)
+                ], new("bulk"));
 
                 var marker = new Arrow(new(0, 4), new(0, 1));
                 marker.Draw(drawing);
@@ -182,28 +187,28 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder drawing)
             {
                 if (Variants.Contains(_packaged))
                     DrawPackaged(drawing);
                 else
                     DrawRegular(drawing);
             }
-            private void DrawRegular(SvgDrawing drawing)
+            private void DrawRegular(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"]);
+                builder.ExtendPins(Pins, 4, "s", "d");
+                builder.ExtendPin(Pins["g"]);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(-6, 4).LineTo(6, 4).MoveTo(-6, 6).LineTo(6, 6), new("gate"));
-                drawing.Circle(new Vector2(0, 7.5), 1.5);
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
+                builder.Circle(new Vector2(0, 7.5), 1.5);
 
                 // Source and drain
-                drawing.Line(new(-4, 0), new(-4, 4), new("source"));
-                drawing.Line(new(4, 0), new(4, 4), new("drain"));
+                builder.Line(new(-4, 0), new(-4, 4), new("source"));
+                builder.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    drawing.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -216,18 +221,18 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawPackaged(SvgDrawing drawing)
+            private void DrawPackaged(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, 4, "s", "d");
                 drawing.ExtendPin(Pins["g"]);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(-6, 6).LineTo(6, 6)
-                    .MoveTo(-7, 4).LineTo(-4, 4)
-                    .MoveTo(-2, 4).LineTo(2, 4)
-                    .MoveTo(4, 4).LineTo(7, 4), new("gate"));
+                drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
+                    .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
+                    .MoveTo(new(-2, 4)).LineTo(new(2, 4))
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));

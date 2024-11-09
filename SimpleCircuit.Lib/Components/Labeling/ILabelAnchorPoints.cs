@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Labeling
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// Describes label anchor points for a subject.
@@ -23,8 +25,8 @@
         /// <summary>
         /// Draws labels using the current set of label anchor points.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The graphics builder.</param>
         /// <param name="subject">The subject.</param>
-        public void Draw(SvgDrawing drawing, T subject);
+        public void Draw(IGraphicsBuilder builder, T subject);
     }
 }

@@ -1,7 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing.Markers;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -62,70 +63,70 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(drawing);
+                        DrawEuropeanSource(builder);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(drawing);
+                        DrawAmericanSource(builder);
                         break;
                 }
             }
 
-            private void DrawAmericanSource(SvgDrawing drawing)
+            private void DrawAmericanSource(IGraphicsBuilder builder)
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
-                drawing.Circle(new(0, 0), 6);
+                builder.Circle(new(0, 0), 6);
                 switch (Variants.Select("arrow", "ac"))
                 {
                     case 1:
-                        drawing.Line(new(-3.5, 0), new(3.5, 0), new("arrow"));
+                        builder.Line(new(-3.5, 0), new(3.5, 0), new("arrow"));
                         var marker = new Arrow(new(-3.5, 0), new(-1, 0));
-                        marker.Draw(drawing);
+                        marker.Draw(builder);
                         marker.Location = new(3.5, 0);
                         marker.Orientation = new(1, 0);
-                        marker.Draw(drawing);
+                        marker.Draw(builder);
                         break;
 
                     default:
-                        drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
+                        builder.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
                         break;
                 }
 
                 if (Variants.Contains(_programmable))
                 {
-                    drawing.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
+                    builder.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
                     if (_anchors[0].Location.Y > -7)
                         _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                     if (_anchors[1].Location.Y < 8.5)
                         _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawEuropeanSource(SvgDrawing drawing)
+            private void DrawEuropeanSource(IGraphicsBuilder builder)
             {
-                drawing.Circle(new(), 4);
-                drawing.Line(new(0, -4), new(0, 4));
+                builder.Circle(new(), 4);
+                builder.Line(new(0, -4), new(0, 4));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (Variants.Contains(_programmable))
                 {
-                    drawing.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
+                    builder.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
                     if (_anchors[0].Location.Y > -5)
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                     if (_anchors[1].Location.Y < 7)
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

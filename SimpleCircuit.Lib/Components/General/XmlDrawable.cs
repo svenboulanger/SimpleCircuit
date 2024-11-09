@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
@@ -170,14 +171,14 @@ namespace SimpleCircuit.Components.General
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 foreach (var pin in _extend)
-                    drawing.ExtendPin(Pins[pin]);
+                    builder.ExtendPin(Pins[pin]);
                 if (_drawing != null)
                 {
                     var context = new XmlDrawingContext(Labels, Variants);
-                    drawing.DrawXml(_drawing, context, drawing.Diagnostics);
+                    builder.DrawXml(_drawing, context);
                 }
             }
         }

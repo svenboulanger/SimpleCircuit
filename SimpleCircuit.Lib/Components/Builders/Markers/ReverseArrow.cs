@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A reversed arrow marker.
@@ -25,7 +27,7 @@
         }
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
-            => drawing.Polygon(_points, Options);
+        protected override void DrawMarker(IGraphicsBuilder builder)
+            => builder.Polygon(_points, Options);
     }
 }

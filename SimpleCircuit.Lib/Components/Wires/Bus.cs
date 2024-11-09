@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Wires
@@ -43,27 +44,27 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, Crossings + 2);
+                builder.ExtendPins(Pins, Crossings + 2);
 
                 bool straight = Variants.Contains(_straight);
                 if (Crossings > 0)
                 {
-                    drawing.Path(b =>
+                    builder.Path(b =>
                     {
                         for (int i = 0; i < Crossings; i++)
                         {
                             double x = i * 2 - Crossings + 1;
                             if (straight)
-                                b.MoveTo(x, 3).Line(0, -6);
+                                b.MoveTo(new(x, 3)).Line(new(0, -6));
                             else
-                                b.MoveTo(x - 1.5, 3).Line(3, -6);
+                                b.MoveTo(new(x - 1.5, 3)).Line(new(3, -6));
                         }
                     });
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

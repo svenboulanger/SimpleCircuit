@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -44,30 +45,31 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "d", "c", "q");
+                builder.ExtendPins(Pins, 2, "d", "c", "q");
 
                 // Body
-                drawing.Rectangle(-9, -12, 18, 24, new());
+                builder.Rectangle(-9, -12, 18, 24, new());
 
                 // Clock thingy
-                drawing.Polyline(new[]
-                {
-                    new Vector2(-9, 4), new Vector2(-7, 6), new Vector2(-9, 8)
-                });
-                drawing.Text("D", new Vector2(-8, -6), new Vector2(1, 0));
-                drawing.Text("C", new Vector2(-6, 6), new Vector2(1, 0));
-                drawing.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
+                builder.Polyline([
+                    new Vector2(-9, 4),
+                    new Vector2(-7, 6),
+                    new Vector2(-9, 8)
+                ]);
+                builder.Text("D", new Vector2(-8, -6), new Vector2(1, 0));
+                builder.Text("C", new Vector2(-6, 6), new Vector2(1, 0));
+                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
 
                 if (Pins["nq"].Connections > 0)
-                    drawing.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
+                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
                 if (Pins["s"].Connections > 0)
-                    drawing.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                 if (Pins["r"].Connections > 0)
-                    drawing.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

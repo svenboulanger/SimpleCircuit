@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Xml;

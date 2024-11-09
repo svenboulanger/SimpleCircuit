@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser.SimpleTexts
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// Parser methods for SimpleCircuit text.

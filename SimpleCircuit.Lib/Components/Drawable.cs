@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
@@ -289,11 +290,11 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Draws the component.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        protected abstract void Draw(SvgDrawing drawing);
+        /// <param name="builder">The builder.</param>
+        protected abstract void Draw(IGraphicsBuilder builder);
 
         /// <inheritdoc />
-        public virtual void Render(SvgDrawing drawing)
+        public virtual void Render(IGraphicsBuilder builder)
         {
             // Group all elements
             var go = new GraphicOptions() { Id = Name };
@@ -307,15 +308,15 @@ namespace SimpleCircuit.Components
                     go.Classes.Add(name);
             }
 
-            drawing.BeginGroup(go);
+            builder.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
-            drawing.BeginTransform(CreateTransform());
-            Draw(drawing);
-            drawing.EndTransform();
+            builder.BeginTransform(CreateTransform());
+            Draw(builder);
+            builder.EndTransform();
 
             // Stop grouping elements
-            Bounds = drawing.EndGroup();
+            builder.EndGroup();
         }
 
         /// <inheritdoc />

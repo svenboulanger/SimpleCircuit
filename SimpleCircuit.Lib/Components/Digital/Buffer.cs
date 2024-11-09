@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -72,33 +73,34 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawBufferIEC(drawing); break;
+                    case 0: DrawBufferIEC(builder); break;
                     case 1:
-                    default: DrawBuffer(drawing); break;
+                    default: DrawBuffer(builder); break;
                 }
             }
-            private void DrawBuffer(SvgDrawing drawing)
+            private void DrawBuffer(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "in", "out");
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-6, 6), new(6, 0), new(-6, -6)
-                });
-                _anchors.Draw(drawing, this);
+                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.Polygon([
+                    new(-6, 6),
+                    new(6, 0),
+                    new(-6, -6)
+                ]);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawBufferIEC(SvgDrawing drawing)
+            private void DrawBufferIEC(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, 2, "in", "out");
 
-                drawing.Rectangle(-5, -5, 10, 10, new());
-                drawing.Text("1", new(), new());
+                builder.Rectangle(-5, -5, 10, 10, new());
+                builder.Text("1", new(), new());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

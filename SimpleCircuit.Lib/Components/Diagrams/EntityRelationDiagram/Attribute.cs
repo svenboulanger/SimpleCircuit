@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Builders;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -46,10 +47,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             double IEllipseLabeled.RadiusY => Height * 0.5;
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.Ellipse(new(), Width * 0.5, Height * 0.5);
-                EllipseLabelAnchorPoints.Default.Draw(drawing, this);
+                builder.Ellipse(new(), Width * 0.5, Height * 0.5);
+                EllipseLabelAnchorPoints.Default.Draw(builder, this);
             }
 
             /// <inheritdoc />

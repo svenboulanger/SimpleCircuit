@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A dot marker.
@@ -23,7 +23,7 @@
         }
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
-            => drawing.Circle(new(), 1.0, Options);
+        protected override void DrawMarker(IGraphicsBuilder builder)
+            => builder.Circle(new(), 1.0, Options);
     }
 }

@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -37,18 +37,22 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 if (Variants.Contains(_anchor))
-                    drawing.Polyline(new Vector2[] { new(-4, 4), new(), new(4, 4) }, new("anchor"));
+                    builder.Polyline([
+                        new(-4, 4),
+                        new(),
+                        new(4, 4)
+                    ], new("anchor"));
                 else
                 {
-                    drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
-                    drawing.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
+                    builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
+                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

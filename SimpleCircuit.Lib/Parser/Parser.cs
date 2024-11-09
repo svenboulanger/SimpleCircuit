@@ -1,10 +1,10 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
-using SimpleCircuit.Drawing.Markers;
 using System;
 using System.Collections.Generic;
 using System.IO;

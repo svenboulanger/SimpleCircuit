@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 
@@ -49,23 +50,23 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 // Transistor
-                drawing.Arrow(new(-3, 4), new(-6, 0), new("emitter"));
-                drawing.Line(new(3, 4), new(6, 0), new("collector"));
-                drawing.Line(new(-6, 4), new(6, 4), new("base"));
+                builder.Arrow(new(-3, 4), new(-6, 0), new("emitter"));
+                builder.Line(new(3, 4), new(6, 0), new("collector"));
+                builder.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (Variants.Contains(_packaged))
                 {
-                    drawing.Circle(new(), 8.0);
+                    builder.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
         private class Pnp : ScaledOrientedDrawable, ILabeled
@@ -92,23 +93,23 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 // Transistor
-                drawing.Arrow(new(6, 0), new(3, 4), new("emitter"));
-                drawing.Line(new(-3, 4), new(-6, 0), new("collector"));
-                drawing.Line(new(-6, 4), new(6, 4), new("base"));
+                builder.Arrow(new(6, 0), new(3, 4), new("emitter"));
+                builder.Line(new(-3, 4), new(-6, 0), new("collector"));
+                builder.Line(new(-6, 4), new(6, 4), new("base"));
 
                 // Package
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (Variants.Contains(_packaged))
                 {
-                    drawing.Circle(new(), 8.0);
+                    builder.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

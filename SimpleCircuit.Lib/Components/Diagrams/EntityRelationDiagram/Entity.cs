@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
@@ -86,27 +87,27 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.RequiredCSS.Add(".diagram { fill: white; }");
+                builder.RequiredCSS.Add(".diagram { fill: white; }");
 
                 int count = Math.Max(Labels.Count, 1);
                 var anchors = new CustomLabelAnchorPoints(new LabelAnchorPoint[count]);
                 anchors[0] = new LabelAnchorPoint(new(), new(), new("header"));
                 if (Labels.Count <= 1)
                 {
-                    drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius, options: new("erd"));
+                    builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius, options: new("erd"));
                 }
                 else
                 {
                     double w = Width * 0.5;
-                    drawing.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius);
-                    drawing.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
+                    builder.Rectangle(-Width * 0.5, (Height - LineHeight) * 0.5 - Height * 0.5, Width, Height, rx: CornerRadius, ry: CornerRadius);
+                    builder.Line(new(-w, LineHeight * 0.5), new(w, LineHeight * 0.5));
 
                     for (int i = 1; i < Labels.Count; i++)
                         anchors[i] = new LabelAnchorPoint(new(-w + 2.0, i * LineHeight), new(1, 0), new("attribute"));
                 }
-                anchors.Draw(drawing, this);
+                anchors.Draw(builder, this);
             }
         }
     }

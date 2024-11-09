@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -58,57 +59,53 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.Arei, Options.European, Options.American))
                 {
-                    case 0: DrawCircuitBreakerArei(drawing); break;
-                    case 1: DrawCircuitBreakerIec(drawing); break;
+                    case 0: DrawCircuitBreakerArei(builder); break;
+                    case 1: DrawCircuitBreakerIec(builder); break;
                     case 2:
-                    default: DrawRegular(drawing); break;
+                    default: DrawRegular(builder); break;
                 }
             }
-            private void DrawRegular(SvgDrawing drawing)
+            private void DrawRegular(IGraphicsBuilder builder)
             {
                 // ANSI style circuit breaker
-                drawing.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, 2, "a", "b");
 
-                drawing.OpenBezier(new Vector2[]
-                {
-                    new(-4, -2),
-                    new(-2, -4.5),
-                    new(2, -4.5),
-                    new(4, -2)
-                });
+                builder.Path(b => b
+                    .MoveTo(new(-4, -2))
+                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawCircuitBreakerIec(SvgDrawing drawing)
+            private void DrawCircuitBreakerIec(IGraphicsBuilder builder)
             {
                 // IEC style circuit breaker
-                drawing.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, 2, "a", "b");
 
-                drawing.Line(new(-4, 0), new(4, -4));
-                drawing.Cross(new(4, 0), 2);
+                builder.Line(new(-4, 0), new(4, -4));
+                builder.Cross(new(4, 0), 2);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawCircuitBreakerArei(SvgDrawing drawing)
+            private void DrawCircuitBreakerArei(IGraphicsBuilder builder)
             {
                 // AREI style circuit breaker
-                drawing.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, 2, "a", "b");
 
-                drawing.Line(new(-6, 0), new(-4, 0), new("wire"));
-                drawing.Line(new(-4, 0), new(4, -4));
+                builder.Line(new(-6, 0), new(-4, 0), new("wire"));
+                builder.Line(new(-4, 0), new(4, -4));
 
-                drawing.RequiredCSS.Add(".marker { fill: black; }");
-                drawing.Polygon(new Vector2[]
+                builder.RequiredCSS.Add(".marker { fill: black; }");
+                builder.Polygon(new Vector2[]
                 {
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
@@ -116,7 +113,7 @@ namespace SimpleCircuit.Components.Wires
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

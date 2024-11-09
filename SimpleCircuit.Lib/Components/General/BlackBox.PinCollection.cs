@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
@@ -77,13 +78,13 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Render(SvgDrawing drawing)
+            public void Render(IGraphicsBuilder builder)
             {
                 foreach (var pin in _pinsByIndex.OfType<LoosePin>().Where(p => !p.Orientation.X.IsZero() || !p.Orientation.Y.IsZero()))
                 {
                     string name = TransformPinName(pin.Name);
                     if (name is not null)
-                        drawing.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.TextSize);
+                        builder.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.TextSize);
                 }
             }
 

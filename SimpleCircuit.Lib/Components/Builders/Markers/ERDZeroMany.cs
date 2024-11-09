@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "zero or many".
@@ -19,11 +21,11 @@
         public static GraphicOptions DefaultOptions { get; } = new("marker", "erd", "zeromany");
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            drawing.RequiredCSS.Add(".marker.erd { fill: white; }");
-            drawing.Polyline(_points, Options);
-            drawing.Circle(new(-4.5, 0), 1.5, Options);
+            builder.RequiredCSS.Add(".marker.erd { fill: white; }");
+            builder.Polyline(_points, Options);
+            builder.Circle(new(-4.5, 0), 1.5, Options);
         }
     }
 }

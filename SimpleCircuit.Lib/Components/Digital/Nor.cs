@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -127,41 +128,37 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawNorIEC(drawing); break;
+                    case 0: DrawNorIEC(builder); break;
                     case 1:
-                    default: DrawNor(drawing); break;
+                    default: DrawNor(builder); break;
                 }
             }
-            private void DrawNor(SvgDrawing drawing)
+            private void DrawNor(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
                 double w = Width * 0.5;
                 double h = Height * 0.5;
 
-                drawing.Path(b =>
-                {
-                    b.MoveTo(-w, h);
-                    b.LineTo(-w * 0.8, h);
-                    b.CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0));
-                    b.CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h));
-                    b.LineTo(-w, -h);
-                    b.CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h));
-                });
-                drawing.Circle(new(w + 1.5, 0), 1.5);
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                builder.Path(b => b.MoveTo(new(-w, h))
+                    .LineTo(new(-w * 0.8, h))
+                    .CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0))
+                    .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h))
+                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)));
+                builder.Circle(new(w + 1.5, 0), 1.5);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
-            private void DrawNorIEC(SvgDrawing drawing)
+            private void DrawNorIEC(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
-                drawing.Text("&#8805;1", new(), new());
-                drawing.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
+                builder.ExtendPins(Pins);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
+                builder.Text("&#8805;1", new(), new());
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Inputs
@@ -34,34 +35,26 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_alt))
                 {
-                    drawing.Path(b =>
-                    {
-                        b.MoveTo(0, 0);
-                        b.Line(0, -10);
-                        b.MoveTo(0, -3);
-                        b.LineTo(-5, -10);
-                        b.LineTo(5, -10);
-                        b.LineTo(0, -3);
-                    });
+                    builder.Path(b => b
+                        .MoveTo(new(0, 0))
+                        .MoveTo(new(0, -3))
+                        .LineTo(new(-5, -10))
+                        .LineTo(new(0, -3)));
                 }
                 else
                 {
-                    drawing.Path(b =>
-                    {
-                        b.MoveTo(0, 0);
-                        b.Line(0, -10);
-                        b.MoveTo(0, -3);
-                        b.LineTo(-5, -10);
-                        b.MoveTo(0, -3);
-                        b.LineTo(5, -10);
-                    });
+                    builder.Path(b => b
+                        .MoveTo(new(0, 0))
+                        .MoveTo(new(0, -3))
+                        .LineTo(new(-5, -10))
+                        .LineTo(new(5, -10)));
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

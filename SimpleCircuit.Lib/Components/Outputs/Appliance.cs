@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
@@ -65,201 +66,199 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_heater))
-                    DrawHeater(drawing, Variants.Contains(_ventilator), Variants.Contains(_accu));
+                    DrawHeater(builder, Variants.Contains(_ventilator), Variants.Contains(_accu));
                 else
                 {
                     switch (Variants.Select(_ventilator, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer))
                     {
-                        case 0: DrawVentilator(drawing); break;
-                        case 1: DrawBoiler(drawing, Variants.Contains(_accu)); break;
-                        case 2: DrawCooking(drawing); break;
-                        case 3: DrawMicroWave(drawing); break;
-                        case 4: DrawOven(drawing); break;
-                        case 5: DrawWasher(drawing); break;
-                        case 6: DrawDryer(drawing); break;
-                        case 7: DrawDishwasher(drawing); break;
+                        case 0: DrawVentilator(builder); break;
+                        case 1: DrawBoiler(builder, Variants.Contains(_accu)); break;
+                        case 2: DrawCooking(builder); break;
+                        case 3: DrawMicroWave(builder); break;
+                        case 4: DrawOven(builder); break;
+                        case 5: DrawWasher(builder); break;
+                        case 6: DrawDryer(builder); break;
+                        case 7: DrawDishwasher(builder); break;
                         case 8:
-                        case 9: DrawRefrigerator(drawing); break;
-                        case 10: DrawFreezer(drawing); break;
-                        default: DrawDefault(drawing); break;
+                        case 9: DrawRefrigerator(builder); break;
+                        case 10: DrawFreezer(builder); break;
+                        default: DrawDefault(builder); break;
                     }
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawVentilator(SvgDrawing drawing)
+            private void DrawVentilator(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                DrawVentilator(drawing, 8, 0);
+                DrawBox(builder, 8, 0, 16, 16);
+                DrawVentilator(builder, 8, 0);
             }
-            private void DrawHeater(SvgDrawing drawing, bool ventilator, bool accumulator)
+            private void DrawHeater(IGraphicsBuilder builder, bool ventilator, bool accumulator)
             {
                 if (ventilator)
                 {
-                    DrawVentilator(drawing, 17, 0, 3);
-                    DrawHeater(drawing, 7, 0, 10, 10);
-                    DrawBox(drawing, 11, 0, 22, 16);
+                    DrawVentilator(builder, 17, 0, 3);
+                    DrawHeater(builder, 7, 0, 10, 10);
+                    DrawBox(builder, 11, 0, 22, 16);
                 }
                 else
                 {
                     if (accumulator)
                     {
-                        DrawBox(drawing, 11, 0, 22, 16);
-                        DrawHeater(drawing, 11, 0, 16, 12);
+                        DrawBox(builder, 11, 0, 22, 16);
+                        DrawHeater(builder, 11, 0, 16, 12);
                     }
                     else
-                        DrawHeater(drawing, 11, 0, 22, 16);
+                        DrawHeater(builder, 11, 0, 22, 16);
                 }
             }
-            private void DrawBoiler(SvgDrawing drawing, bool accumulator)
+            private void DrawBoiler(IGraphicsBuilder builder, bool accumulator)
             {
                 if (accumulator)
                 {
-                    drawing.Circle(new(8, 0), 8);
-                    DrawBoiler(drawing, 8, 0, 6);
+                    builder.Circle(new(8, 0), 8);
+                    DrawBoiler(builder, 8, 0, 6);
                 }
                 else
-                    DrawBoiler(drawing, 8, 0, 8);
+                    DrawBoiler(builder, 8, 0, 8);
             }
-            private void DrawCooking(SvgDrawing drawing)
+            private void DrawCooking(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                drawing.Circle(new(4, -4), 2, new("marker"));
-                drawing.Circle(new(12, -4), 2, new("marker"));
-                drawing.Circle(new(12, 4), 2, new("marker"));
+                DrawBox(builder, 8, 0, 16, 16);
+                builder.Circle(new(4, -4), 2, new("marker"));
+                builder.Circle(new(12, -4), 2, new("marker"));
+                builder.Circle(new(12, 4), 2, new("marker"));
             }
-            private void DrawMicroWave(SvgDrawing drawing)
+            private void DrawMicroWave(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                DrawMicrowave(drawing, 8, 0);
+                DrawBox(builder, 8, 0, 16, 16);
+                DrawMicrowave(builder, 8, 0);
             }
-            private void DrawOven(SvgDrawing drawing)
+            private void DrawOven(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                drawing.Line(new(0, -5), new(16, -5));
-                drawing.Circle(new(8, 1.5), 2, new("marker"));
+                DrawBox(builder, 8, 0, 16, 16);
+                builder.Line(new(0, -5), new(16, -5));
+                builder.Circle(new(8, 1.5), 2, new("marker"));
             }
-            private void DrawWasher(SvgDrawing drawing)
+            private void DrawWasher(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                drawing.Circle(new(8, 0), 6);
-                drawing.Circle(new(8, 0), 1.5, new("marker"));
+                DrawBox(builder, 8, 0, 16, 16);
+                builder.Circle(new(8, 0), 6);
+                builder.Circle(new(8, 0), 1.5, new("marker"));
             }
-            private void DrawDryer(SvgDrawing drawing)
+            private void DrawDryer(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                DrawVentilator(drawing, 8, -3);
-                drawing.Circle(new(8, 3), 1.5, new("marker"));
+                DrawBox(builder, 8, 0, 16, 16);
+                DrawVentilator(builder, 8, -3);
+                builder.Circle(new(8, 3), 1.5, new("marker"));
             }
-            private void DrawDishwasher(SvgDrawing drawing)
+            private void DrawDishwasher(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                DrawDishWasher(drawing, 8, 0);
+                DrawBox(builder, 8, 0, 16, 16);
+                DrawDishWasher(builder, 8, 0);
             }
-            private void DrawRefrigerator(SvgDrawing drawing)
+            private void DrawRefrigerator(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 8, 0, 16, 16);
-                DrawIce(drawing, 8, 0);
+                DrawBox(builder, 8, 0, 16, 16);
+                DrawIce(builder, 8, 0);
             }
-            private void DrawFreezer(SvgDrawing drawing)
+            private void DrawFreezer(IGraphicsBuilder builder)
             {
-                DrawBox(drawing, 14, 0, 28, 16);
-                DrawIce(drawing, 5, 0, 3.5);
-                DrawIce(drawing, 14, 0, 3.5);
-                DrawIce(drawing, 23, 0, 3.5);
+                DrawBox(builder, 14, 0, 28, 16);
+                DrawIce(builder, 5, 0, 3.5);
+                DrawIce(builder, 14, 0, 3.5);
+                DrawIce(builder, 23, 0, 3.5);
             }
-            private void DrawDefault(SvgDrawing drawing)
+            private void DrawDefault(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
-                DrawBox(drawing, 8, 0, 16, 16);
+                builder.ExtendPins(Pins);
+                DrawBox(builder, 8, 0, 16, 16);
             }
 
-            private void DrawBox(SvgDrawing drawing, double cx, double cy, double width, double height)
+            private void DrawBox(IGraphicsBuilder builder, double cx, double cy, double width, double height)
             {
-                drawing.Rectangle(cx - width * 0.5, cy - height * 0.5, width, height, CornerRadius, CornerRadius);
+                builder.Rectangle(cx - width * 0.5, cy - height * 0.5, width, height, CornerRadius, CornerRadius);
             }
-            private void DrawVentilator(SvgDrawing drawing, double x, double y, double scale = 4)
+            private void DrawVentilator(IGraphicsBuilder builder, double x, double y, double scale = 4)
             {
-                drawing.ClosedBezier(new Vector2[]
-                {
-                new(-scale, 0),
-                new(-scale, -_k * scale), new(-scale * 0.5, -_k * scale * 0.75), new(0, 0),
-                new(scale * 0.5, _k * scale * 0.75), new(scale, _k * scale), new(scale, 0),
-                new(scale, -_k * scale), new(scale * 0.5, -_k * scale * 0.75), new(0, 0),
-                new(-scale * 0.5, _k * scale * 0.75), new(-scale, _k * scale), new(-scale, 0)
-                }.Select(v => v + new Vector2(x, y)), new("ventilator"));
+                builder.BeginTransform(new Transform(new(x, y), Matrix2.Identity));
+                builder.Path(b => b.MoveTo(new(-scale, 0))
+                    .CurveTo(new(-scale, -_k * scale), new(-scale * 0.5, -_k * scale * 0.75), new(0, 0))
+                    .CurveTo(new(scale * 0.5, _k * scale * 0.75), new(scale, _k * scale), new(scale, 0))
+                    .CurveTo(new(scale, -_k * scale), new(scale * 0.5, -_k * scale * 0.75), new(0, 0))
+                    .CurveTo(new(-scale * 0.5, _k * scale * 0.75), new(-scale, _k * scale), new(-scale, 0))
+                    .Close(), new("ventilator"));
+                builder.EndTransform();
             }
-            private void DrawHeater(SvgDrawing drawing, double cx, double cy, double width, double height)
+            private void DrawHeater(IGraphicsBuilder builder, double cx, double cy, double width, double height)
             {
-                DrawBox(drawing, cx, cy, width, height);
+                DrawBox(builder, cx, cy, width, height);
                 width /= 2.0;
                 height /= 2.0;
-                drawing.Path(b =>
+                builder.Path(b =>
                 {
                     for (int i = 1; i <= 7; i++)
                     {
                         double xi = cx + (i - 4) / 4.0 * width;
-                        b.MoveTo(xi, cy - height).LineTo(xi, cy + height);
+                        b.MoveTo(new(xi, cy - height)).LineTo(new(xi, cy + height));
                     }
                 }, new("heater"));
             }
-            private void DrawBoiler(SvgDrawing drawing, double cx, double cy, double r = 8)
+            private void DrawBoiler(IGraphicsBuilder builder, double cx, double cy, double r = 8)
             {
-                drawing.Circle(new(cx, cy), r);
-                drawing.Path(b =>
+                builder.Circle(new(cx, cy), r);
+                builder.Path(b =>
                 {
                     for (int i = 1; i <= 7; i++)
                     {
                         double xi = (i - 4) / 4.0 * r;
                         double yi = Math.Sqrt(r * r - xi * xi);
-                        b.MoveTo(cx + xi, cy + yi).LineTo(cx + xi, cy - yi);
+                        b.MoveTo(new(cx + xi, cy + yi)).LineTo(new(cx + xi, cy - yi));
                     }
                 }, new("boiler"));
             }
-            private void DrawMicrowave(SvgDrawing drawing, double cx, double cy)
+            private void DrawMicrowave(IGraphicsBuilder builder, double cx, double cy)
             {
                 for (int i = -1; i <= 1; i++)
                 {
                     double y = i * 3;
-                    drawing.OpenBezier(new Vector2[]
-                    {
-                    new(-4, y),
-                    new(-3, y - _k * 3), new(-1, y - _k * 3), new(0, y),
-                    new(1, y + _k * 3), new(3, y + _k * 3), new(4, y)
-                    }.Select(v => v + new Vector2(cx, cy)), new("microwave"));
+                    builder.BeginTransform(new Transform(new(cx, cy), Matrix2.Identity));
+                    builder.Path(b => b.MoveTo(new(-4, y))
+                    .CurveTo(new(-3, y - _k * 3), new(-1, y - _k * 3), new(0, y))
+                    .CurveTo(new(1, y + _k * 3), new(3, y + _k * 3), new(4, y)), new("microwave"));
+                    builder.EndTransform();
                 }
             }
-            private void DrawDishWasher(SvgDrawing drawing, double cx, double cy, double s = 16)
+            private void DrawDishWasher(IGraphicsBuilder builder, double cx, double cy, double s = 16)
             {
                 s /= 2.0;
                 double f = 3.0 / Math.Sqrt(2.0);
-                drawing.BeginTransform(new Transform(new(cx, cy), Matrix2.Identity));
-                drawing.Path(b => b
-                    .MoveTo(-s, -s).LineTo(-f, -f)
-                    .MoveTo(s, -s).LineTo(f, -f)
-                    .MoveTo(s, s).LineTo(f, f)
-                    .MoveTo(-s, s).LineTo(-f, f));
-                drawing.Circle(new(), 3);
-                drawing.EndTransform();
+                builder.BeginTransform(new Transform(new(cx, cy), Matrix2.Identity));
+                builder.Path(b => b
+                    .MoveTo(new(-s, -s)).LineTo(new(-f, -f))
+                    .MoveTo(new(s, -s)).LineTo(new(f, -f))
+                    .MoveTo(new(s, s)).LineTo(new(f, f))
+                    .MoveTo(new(-s, s)).LineTo(new(-f, f)));
+                builder.Circle(new(), 3);
+                builder.EndTransform();
             }
-            private void DrawIce(SvgDrawing drawing, double cx, double cy, double scale = 6.0)
+            private void DrawIce(IGraphicsBuilder builder, double cx, double cy, double scale = 6.0)
             {
                 double fx = Math.Cos(Math.PI / 3.0);
                 double fy = Math.Sin(Math.PI / 3.0);
-                var pts = IceFractal(new Vector2[]
-                {
+                var pts = IceFractal([
                     new(), new(1, 0),
                     new(), new(fx, fy),
                     new(), new(-fx, fy),
                     new(), new(-1, 0),
                     new(), new(-fx, -fy),
                     new(), new(fx, -fy)
-                }, Math.PI / 6.0);
+                ], Math.PI / 6.0);
 
-                drawing.BeginTransform(new Transform(new(cx, cy), Matrix2.Scale(scale)));
-                drawing.Path(b =>
+                builder.BeginTransform(new Transform(new(cx, cy), Matrix2.Scale(scale)));
+                builder.Path(b =>
                 {
                     int index = 0;
                     foreach (var g in pts.GroupBy(p => (index++) / 2))
@@ -268,7 +267,7 @@ namespace SimpleCircuit.Components.Outputs
                         b.MoveTo(p[0]).LineTo(p[1]);
                     }
                 }, new("ice"));
-                drawing.EndTransform();
+                builder.EndTransform();
             }
             private IEnumerable<Vector2> IceFractal(IEnumerable<Vector2> points, double angle)
             {

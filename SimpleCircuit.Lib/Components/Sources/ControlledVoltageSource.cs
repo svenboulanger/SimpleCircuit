@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -60,50 +61,57 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(drawing);
+                        DrawEuropeanSource(builder);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(drawing);
+                        DrawAmericanSource(builder);
                         break;
                 }
             }
 
             /// <inheritdoc />
-            private void DrawAmericanSource(SvgDrawing drawing)
+            private void DrawAmericanSource(IGraphicsBuilder builder)
             {
                 // Diamond
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
-                });
+                builder.Polygon([
+                    new(-6, 0),
+                    new(0, 6),
+                    new(6, 0),
+                    new(0, -6)
+                ]);
 
                 // Plus and minus
-                drawing.Line(new(-3, -1), new(-3, 1), new("minus"));
-                drawing.Path(b => b.MoveTo(3, -1).Line(0, 2).MoveTo(2, 0).Line(2, 0), new("plus"));
+                builder.Line(new(-3, -1), new(-3, 1), new("minus"));
+                builder.Path(b => b
+                    .MoveTo(new(3, -1))
+                    .Line(new(0, 2))
+                    .MoveTo(new(2, 0))
+                    .Line(new(2, 0)),
+                    new("plus"));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
-            private void DrawEuropeanSource(SvgDrawing drawing)
+            private void DrawEuropeanSource(IGraphicsBuilder builder)
             {
-                drawing.Polygon(new Vector2[]
-                {
+                builder.Polygon(
+                [
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
-                });
-                drawing.Line(new(-4, 0), new(4, 0));
+                ]);
+                builder.Line(new(-4, 0), new(4, 0));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -54,31 +55,31 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
 
                 double h = 0.5 * Height;
                 double w = 0.5 * Gap;
                 switch (Variants.Select(_straight, _none))
                 {
                     case 0:
-                        drawing.Line(new(-w, -h), new(-w, h));
-                        drawing.Line(new(w, -h), new(w, h));
+                        builder.Line(new(-w, -h), new(-w, h));
+                        builder.Line(new(w, -h), new(w, h));
                         break;
 
                     case 1:
                         break;
 
                     default:
-                        drawing.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h));
-                        drawing.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h));
+                        builder.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h));
+                        builder.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h));
                         break;
                 }
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -h - 1), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, h + 1), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

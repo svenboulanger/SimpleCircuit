@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -42,20 +43,20 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
-                drawing.Polygon(new[] {
-                    new Vector2(-5, -8),
-                    new Vector2(5, -4),
-                    new Vector2(5, 4),
-                    new Vector2(-5, 8)
-                });
+                builder.ExtendPins(Pins);
+                builder.Polygon([
+                    new(-5, -8),
+                    new(5, -4),
+                    new(5, 4),
+                    new(-5, 8)
+                ]);
 
-                drawing.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
-                drawing.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

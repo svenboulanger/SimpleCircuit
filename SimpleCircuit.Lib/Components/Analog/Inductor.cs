@@ -1,7 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing.Markers;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -115,15 +116,15 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, 2, "a", "b");
                 double l = Length * 0.5;
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 0:
                     case 1:
-                        drawing.Path(b =>
+                        builder.Path(b =>
                         {
                             double x = -l;
                             b.MoveTo(new(x, 0));
@@ -137,37 +138,37 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l, 3.5), new(1, 0));
-                            marker.Draw(drawing);
+                            marker.Draw(builder);
                         }
                         
                         if (Variants.Contains(_choke))
                         {
-                            drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
+                            builder.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
                             if (_anchors[0].Location.Y > -5.5)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                             if (!Variants.Contains(_singleLine))
                             {
-                                drawing.Line(new(-l, -6), new(l, -6), new("choke"));
+                                builder.Line(new(-l, -6), new(l, -6), new("choke"));
                                 if (_anchors[0].Location.Y > -7)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
-                                drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
+                                builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
-                            drawing.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
+                            builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }
                         break;
 
                     default:
-                        drawing.Path(b =>
+                        builder.Path(b =>
                         {
                             double x = -l;
                             b.MoveTo(new(x, 0));
@@ -188,35 +189,35 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
-                            marker.Draw(drawing);
+                            marker.Draw(builder);
                         }
                         
                         if (Variants.Contains(_choke))
                         {
-                            drawing.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
+                            builder.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
                             if (!Variants.Contains(_singleLine))
                             {
-                                drawing.Line(new(-l, -6), new(l, -6), new("choke"));
+                                builder.Line(new(-l, -6), new(l, -6), new("choke"));
                                 if (_anchors[0].Location.Y > -7)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
-                                drawing.Arrow(new(-l + 1, 5), new(l, -10));
+                                builder.Arrow(new(-l + 1, 5), new(l, -10));
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
-                            drawing.Arrow(new(-l + 1, 5), new(l, -7));
+                            builder.Arrow(new(-l + 1, 5), new(l, -7));
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }
                         break;
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

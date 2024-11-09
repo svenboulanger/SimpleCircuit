@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "only one".
@@ -17,10 +19,10 @@
         public static GraphicOptions DefaultOptions { get; } = new("marker", "erd", "onlyone");
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            drawing.Line(new(-2, -1.5), new(-2, 1.5), Options);
-            drawing.Line(new(-4, -1.5), new(-4, 1.5), Options);
+            builder.Line(new(-2, -1.5), new(-2, 1.5), Options);
+            builder.Line(new(-4, -1.5), new(-4, 1.5), Options);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -34,7 +34,7 @@ namespace SimpleCircuit.Components.Analog
             /// Draws the transmission line shape.
             /// </summary>
             /// <param name="builder">The path builder.</param>
-            private void DrawShape(PathBuilder builder)
+            private void DrawShape(IPathBuilder builder)
             {
                 double offset = 0.5 * (Length - _width);
                 double inner = _inner + offset;
@@ -101,15 +101,15 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 // Wire
-                drawing.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, 2, "a", "b");
 
                 // Transmission line
-                drawing.Path(DrawShape);
+                builder.Path(DrawShape);
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

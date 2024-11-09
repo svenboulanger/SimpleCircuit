@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
@@ -146,20 +147,20 @@ namespace SimpleCircuit.Components
                 => _pins.Prepare(context);
 
             /// <inheritdoc />
-            public void Render(SvgDrawing drawing)
+            public void Render(IGraphicsBuilder builder)
             {
                 var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
                 go.Classes.Add("blackbox");
-                drawing.BeginGroup(go);
+                builder.BeginGroup(go);
                 var size = EndLocation - Location;
-                drawing.Rectangle(Location.X, Location.Y, size.X, size.Y, CornerRadius, CornerRadius);
+                builder.Rectangle(Location.X, Location.Y, size.X, size.Y, CornerRadius, CornerRadius);
 
                 // Draw the label
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                BoxLabelAnchorPoints.Default.Draw(builder, this);
 
                 // Draw the port names
-                _pins.Render(drawing);
-                Bounds = drawing.EndGroup();
+                _pins.Render(builder);
+                builder.EndGroup();
             }
 
             /// <inheritdoc />

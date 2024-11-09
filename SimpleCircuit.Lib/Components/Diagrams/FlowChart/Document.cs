@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using System;
@@ -61,7 +62,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
 
-            private void DrawPath(PathBuilder builder)
+            private void DrawPath(IPathBuilder builder)
             {
                 double a = Width * 0.5;
                 double b = Height * 0.5;
@@ -71,8 +72,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 Vector2 ac = new(a, b);
                 Vector2 h1 = new Vector2(0.1547, 0.0893) * Width;
                 Vector2 h2 = new(h1.X, -h1.Y);
-                builder.MoveTo(-a, -b)
-                    .LineTo(a, -b)
+                builder.MoveTo(new(-a, -b))
+                    .LineTo(new(a, -b))
                     .LineTo(ac)
                     // .ArcTo(a, a, 0, false, false, ab) ->
                     .CurveTo(ac - h1, ab + h2, ab)
@@ -82,20 +83,20 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(Multiple))
                 {
                     // Draw multiple paths behind it
                     for (int i = 2; i >= 1; i--)
                     {
-                        drawing.BeginTransform(new(new(-i * 2, -i * 2), Matrix2.Identity));
-                        drawing.Path(DrawPath);
-                        drawing.EndTransform();
+                        builder.BeginTransform(new(new(-i * 2, -i * 2), Matrix2.Identity));
+                        builder.Path(DrawPath);
+                        builder.EndTransform();
                     }
                 }
-                drawing.Path(DrawPath);
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                builder.Path(DrawPath);
+                BoxLabelAnchorPoints.Default.Draw(builder, this);
             }
 
             /// <inheritdoc />

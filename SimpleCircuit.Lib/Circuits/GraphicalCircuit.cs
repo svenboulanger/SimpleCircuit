@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp.Components;
@@ -309,21 +310,15 @@ namespace SimpleCircuit
         /// <summary>
         /// Renders the specified drawing.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        public void Render(SvgDrawing drawing)
+        /// <param name="builder">The drawing.</param>
+        public void Render(IGraphicsBuilder builder)
         {
-            if (drawing == null)
-                throw new ArgumentNullException(nameof(drawing));
-
-            bool oldRenderBounds = drawing.RenderBounds;
-            drawing.RenderBounds = RenderBounds;
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
 
             // Draw all components
             foreach (var c in _presences.Values.OfType<IDrawable>().OrderBy(d => d.Order))
-                c.Render(drawing);
-
-            // Restore original state
-            drawing.RenderBounds = oldRenderBounds;
+                c.Render(builder);
         }
 
         /// <summary>
@@ -340,10 +335,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing(diagnostics, measurer)
-            {
-                RenderBounds = RenderBounds
-            };
+            var drawing = new SvgDrawing(diagnostics, measurer);
             if (extraCss != null)
             {
                 foreach (var ec in extraCss)

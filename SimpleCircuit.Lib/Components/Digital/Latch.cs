@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.Digital
@@ -42,22 +43,22 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "s", "r", "q");
+                builder.ExtendPins(Pins, 2, "s", "r", "q");
 
                 // Body
-                drawing.Rectangle(-9, -12, 18, 24, new());
+                builder.Rectangle(-9, -12, 18, 24, new());
 
                 // Labels
-                drawing.Text("S", new Vector2(-8, -6), new Vector2(1, 0));
-                drawing.Text("R", new Vector2(-8, 6), new Vector2(1, 0));
-                drawing.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
+                builder.Text("S", new Vector2(-8, -6), new Vector2(1, 0));
+                builder.Text("R", new Vector2(-8, 6), new Vector2(1, 0));
+                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
 
                 if (Pins["nq"].Connections > 0)
-                    drawing.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
+                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

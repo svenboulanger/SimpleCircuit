@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SvgPathData
@@ -39,7 +39,7 @@ namespace SimpleCircuit.Parser.SvgPathData
         /// <param name="lexer">The lexer.</param>
         /// <param name="b">The path builder.</param>
         /// <param name="diagnostics">The diagnostics message handler.</param>
-        public static MarkerLocation Parse(SvgPathDataLexer lexer, PathBuilder b, IDiagnosticHandler diagnostics)
+        public static MarkerLocation Parse(SvgPathDataLexer lexer, IPathBuilder b, IDiagnosticHandler diagnostics)
         {
             bool isFirstDrawn = true;
             Vector2 startLocation = new(), startNormal = new(1, 0);

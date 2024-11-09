@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
@@ -90,21 +91,21 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 // drawing.Parallellogram(0, 0, Width, new(Height * 0.5, -Height), CornerRadius, CornerRadius);
                 if (Variants.Contains(Manual))
-                    Trapezoid(drawing);
+                    Trapezoid(builder);
                 else
                 {
                     var edge = new Vector2(Height * _edgeSkew, -Height);
-                    drawing.Parallellogram(0.0, 0.0, Width, edge, CornerRadiusSharp, CornerRadiusBlunt);
+                    builder.Parallellogram(0.0, 0.0, Width, edge, CornerRadiusSharp, CornerRadiusBlunt);
                     _anchors[0] = new LabelAnchorPoint(new(), new());
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void Trapezoid(SvgDrawing drawing)
+            private void Trapezoid(IGraphicsBuilder drawing)
             {
                 var pcorner = new Vector2(-Width * 0.5, -Height * 0.5);
                 var edge = new Vector2(Width, Height * 0.25);

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 
@@ -38,14 +39,14 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
+                builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
 
-                drawing.ExtendPins(Pins);
-                drawing.Circle(new(), 4);
-                drawing.Line(new(4, -4), new(4, 4), new("plane"));
-                _anchors.Draw(drawing, this);
+                builder.ExtendPins(Pins);
+                builder.Circle(new(), 4);
+                builder.Line(new(4, -4), new(4, 4), new("plane"));
+                _anchors.Draw(builder, this);
             }
         }
     }

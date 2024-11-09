@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -101,42 +102,42 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_differentialInput))
                 {
-                    drawing.ExtendPins(Pins, 2, "inn", "inp");
+                    builder.ExtendPins(Pins, 2, "inn", "inp");
                     if (Variants.Contains(_swapInput))
-                        drawing.Signs(new(-2, -4), new(-2, 4));
+                        builder.Signs(new(-2, -4), new(-2, 4));
                     else
-                        drawing.Signs(new(-2, 4), new(-2, -4));
+                        builder.Signs(new(-2, 4), new(-2, -4));
                 }
                 else
-                    drawing.ExtendPin(Pins["n"]);
+                    builder.ExtendPin(Pins["n"]);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    drawing.ExtendPins(Pins, 3, "outp", "outn");
+                    builder.ExtendPins(Pins, 3, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        drawing.Signs(new(6, 7), new(6, -7));
+                        builder.Signs(new(6, 7), new(6, -7));
                     else
-                        drawing.Signs(new(6, -7), new(6, 7));
+                        builder.Signs(new(6, -7), new(6, 7));
                 }
                 else
-                    drawing.ExtendPin(Pins["o"]);
+                    builder.ExtendPin(Pins["o"]);
 
                 // The triangle
-                drawing.Polygon(new Vector2[] {
+                builder.Polygon([
                     new(-5, -9),
                     new(5, -5),
                     new(5, 5),
                     new(-5, 9)
-                });
+                ]);
 
                 if (Variants.Contains(_programmable))
-                    drawing.Arrow(new(-7, 10), new(6, -12));
+                    builder.Arrow(new(-7, 10), new(6, -12));
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

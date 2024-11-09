@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
 
@@ -27,37 +28,37 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             public override string Type => "integrator";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
 
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        drawing.Text("1", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
-                        drawing.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
-                        drawing.Text("s", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
+                        builder.Text("s", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     case 1:
-                        drawing.Text("1", new(0, -1), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
-                        drawing.Line(new(-2, -1), new(2, -1), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
-                        drawing.Text("z^{-1}", new(0, -1), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(0, -1), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Line(new(-2, -1), new(2, -1), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
+                        builder.Text("z^{-1}", new(0, -1), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     default:
                         // Draw an integral sign
-                        drawing.BeginTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
-                        drawing.Path(b =>
+                        builder.BeginTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
+                        builder.Path(b =>
                         {
                             var lexer = new SvgPathDataLexer(_pathData.AsMemory());
                             // b.WithTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
                             SvgPathDataParser.Parse(lexer, b, null);
                         });
-                        drawing.EndTransform();
+                        builder.EndTransform();
                         break;
                 }
-                DrawLabels(drawing);
+                DrawLabels(builder);
             }
         }
     }

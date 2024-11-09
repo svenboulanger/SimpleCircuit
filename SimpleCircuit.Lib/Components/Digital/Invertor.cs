@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -73,36 +74,37 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawInverterIEC(drawing); break;
+                    case 0: DrawInverterIEC(builder); break;
                     case 1:
-                    default: DrawInverter(drawing); break;
+                    default: DrawInverter(builder); break;
                 }
             }
-            private void DrawInverter(SvgDrawing drawing)
+            private void DrawInverter(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "in", "out");
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-6, 6), new(6, 0), new(-6, -6)
-                });
-                drawing.Circle(new(7.5, 0), 1.5);
+                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.Polygon([
+                    new(-6, 6),
+                    new(6, 0),
+                    new(-6, -6)
+                ]);
+                builder.Circle(new(7.5, 0), 1.5);
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawInverterIEC(SvgDrawing drawing)
+            private void DrawInverterIEC(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, 2, "in", "out");
 
-                drawing.Rectangle(-5, -5, 10, 10);
-                drawing.Circle(new(6.5, 0), 1.5);
-                drawing.Text("1", new Vector2(), new Vector2());
+                builder.Rectangle(-5, -5, 10, 10);
+                builder.Circle(new(6.5, 0), 1.5);
+                builder.Text("1", new Vector2(), new Vector2());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

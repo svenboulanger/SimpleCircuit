@@ -1,4 +1,6 @@
 ﻿using System;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -19,18 +21,21 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             public override string Type => "circulator";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
-                drawing.Arc(new(), -Math.PI * 0.8, Math.PI * 0.8, Size * 0.25, intermediatePoints: 4);
-                double x = Math.Cos(Math.PI * 0.8) * Size * 0.25;
-                double y = Math.Sin(Math.PI * 0.8) * Size * 0.25;
-                double s = Size * 0.1;
-                drawing.Polyline(new Vector2[]
+                base.Draw(builder);
+
+                builder.Path(b =>
                 {
-                    new(x + s, y + s * 1.8), new(x, y), new(x + s * 1.8, y)
+                    double r = Size * 0.25;
+                    double c = Math.Cos(-Math.PI * 0.8) * r;
+                    double s = Math.Sin(-Math.PI * 0.8) * r;
+                    b.MoveTo(new(c, s));
+                    b.ArcTo(r, r, 0.0, true, true, new(c, -s));
+                    var marker = new Arrow(b.End, b.EndNormal);
+                    marker.Draw(builder);
                 });
-                DrawLabels(drawing);
+                DrawLabels(builder);
             }
         }
     }

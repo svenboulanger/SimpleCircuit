@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -105,42 +106,42 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_differentialInput))
                 {
-                    drawing.ExtendPins(Pins, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, 2, "inp", "inn");
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
                     if (Variants.Contains(_swapInput))
-                        drawing.Signs(new(x, y), new(x, -y));
+                        builder.Signs(new(x, y), new(x, -y));
                     else
-                        drawing.Signs(new(x, -y), new(x, y));
+                        builder.Signs(new(x, -y), new(x, y));
                 }
                 else
-                    drawing.ExtendPin(Pins["in"]);
+                    builder.ExtendPin(Pins["in"]);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    drawing.ExtendPins(Pins, 4, "outp", "outn");
+                    builder.ExtendPins(Pins, 4, "outp", "outn");
                     double x = Width / 2 - Height / 4 + 2;
                     double y = Height / 4 + 2.0;
                     if (Variants.Contains(_swapOutput))
-                        drawing.Signs(new(x, y), new(x, -y));
+                        builder.Signs(new(x, y), new(x, -y));
                     else
-                        drawing.Signs(new(x, -y), new(x, y));
+                        builder.Signs(new(x, -y), new(x, y));
                 }
                 else
-                    drawing.ExtendPin(Pins["out"]);
+                    builder.ExtendPin(Pins["out"]);
 
-                drawing.Polygon(new Vector2[]
-                {
+                builder.Polygon(
+                [
                     new(-Width / 2, Height / 2), new(Width / 2 - Height / 2, Height / 2),
                     new(Width / 2, 0), new(Width / 2 - Height / 2, -Height / 2),
                     new(-Width / 2, -Height / 2)
-                });
+                ]);
 
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                BoxLabelAnchorPoints.Default.Draw(builder, this);
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components
@@ -34,63 +35,73 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins, 4);
+                builder.ExtendPins(Pins, 4);
 
                 switch (Variants.Select("input", "in", "output", "out", "inout", "other", "pad", "square", "none"))
                 {
                     case 0:
                     case 1:
                         // Input
-                        drawing.Polygon(new Vector2[]
-                        {
-                            new(-5, -2), new(-2, -2), new(),
-                            new(-2, 2), new(-5, 2)
-                        });
+                        builder.Polygon([
+                            new(-5, -2),
+                            new(-2, -2),
+                            new(),
+                            new(-2, 2),
+                            new(-5, 2)
+                        ]);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 2:
                     case 3:
                         // output
-                        drawing.Polygon(new Vector2[]
-                        {
-                            new(-5, 0), new(-3, -2), new(0, -2),
-                            new(0, 2), new(-3, 2)
-                        });
+                        builder.Polygon([
+                            new(-5, 0),
+                            new(-3, -2),
+                            new(0, -2),
+                            new(0, 2),
+                            new(-3, 2)
+                        ]);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 4:
                         // inout
-                        drawing.Polygon(new Vector2[]
-                        {
-                            new(-7, 0), new(-5, -2), new(-2, -2), new(),
-                            new(-2, 2), new(-5, 2)
-                        });
+                        builder.Polygon(
+                        [
+                            new(-7, 0),
+                            new(-5, -2),
+                            new(-2, -2),
+                            new(),
+                            new(-2, 2),
+                            new(-5, 2)
+                        ]);
                         _anchors[0] = new LabelAnchorPoint(new(-8, 0), new(-1, 0));
                         break;
 
                     case 5:
                         // other
-                        drawing.Polygon(new Vector2[]
-                        {
-                            new(-5, -2), new(0, -2), new(0, 2), new(-5, 2)
-                        });
+                        builder.Polygon([
+                            new(-5, -2),
+                            new(0, -2),
+                            new(0, 2),
+                            new(-5, 2)
+                        ]);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                         break;
 
                     case 6:
                         // pad
-                        drawing.Rectangle(-4, -2, 4, 4);
-                        drawing.Cross(new(-2, 0), 4);
+                        builder.Rectangle(-4, -2, 4, 4);
+                        builder.Cross(new(-2, 0), 4);
                         _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
                         break;
 
                     case 7:
                         // square
-                        drawing.Rectangle(-4, -2, 4, 4);
+                        builder.Rectangle(-4, -2, 4, 4);
                         _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
                         break;
 
@@ -100,11 +111,11 @@ namespace SimpleCircuit.Components
                         break;
 
                     default:
-                        drawing.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
+                        builder.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
                         _anchors[0] = new LabelAnchorPoint(new(-4, 0), new(-1, 0));
                         break;
                 }
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

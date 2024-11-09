@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
@@ -53,18 +54,18 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, CornerRadius, CornerRadius);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, CornerRadius, CornerRadius);
 
                 if (Variants.Contains(Predefined))
                 {
                     double a = Width * 0.5;
                     double b = Height * 0.5;
-                    drawing.Line(new(-a + 3, -b), new(-a + 3, b));
-                    drawing.Line(new(a - 3, -b), new(a - 3, b));
+                    builder.Line(new(-a + 3, -b), new(-a + 3, b));
+                    builder.Line(new(a - 3, -b), new(a - 3, b));
                 }
-                BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                BoxLabelAnchorPoints.Default.Draw(builder, this);
             }
 
             /// <inheritdoc />

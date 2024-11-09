@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A slash marker.
@@ -20,7 +22,7 @@
         }
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
-            => drawing.Line(new(-1, 2), new(1, -2), Options);
+        protected override void DrawMarker(IGraphicsBuilder builder)
+            => builder.Line(new(-1, 2), new(1, -2), Options);
     }
 }

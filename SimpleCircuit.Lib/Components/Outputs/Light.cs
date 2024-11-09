@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
@@ -69,61 +70,69 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.Cross(new(), _sqrt2);
+                builder.Cross(new(), _sqrt2);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (!Variants.Contains(Options.Arei))
-                    drawing.Circle(new Vector2(), 4);
+                    builder.Circle(new Vector2(), 4);
                 else
                 {
                     if (Variants.Contains(_wall))
-                        DrawWall(drawing);
+                        DrawWall(builder);
                     if (Variants.Contains(_projector))
-                        DrawProjector(drawing);
+                        DrawProjector(builder);
                     if (Variants.Contains(_direction))
-                        DrawDirectional(drawing, Variants.Contains(_diverging));
+                        DrawDirectional(builder, Variants.Contains(_diverging));
                     if (Variants.Contains(_emergency))
-                        DrawEmergency(drawing);
+                        DrawEmergency(builder);
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawWall(SvgDrawing drawing)
+            private void DrawWall(IGraphicsBuilder builder)
             {
-                drawing.Line(new Vector2(-3, 5), new Vector2(3, 5));
+                builder.Line(new Vector2(-3, 5), new Vector2(3, 5));
                 if (_anchors[1].Location.Y < 6)
                     _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
-            private void DrawProjector(SvgDrawing drawing)
+            private void DrawProjector(IGraphicsBuilder builder)
             {
-                drawing.Arc(new(), -Math.PI * 0.95, -Math.PI * 0.05, 6, new("projector"), 1);
+                builder.Path(b =>
+                {
+                    double c = Math.Cos(-Math.PI * 0.95) * 6;
+                    double s = Math.Sin(-Math.PI * 0.95) * 6;
+                    b.MoveTo(new(c, s));
+                    c = Math.Cos(-Math.PI * 0.05) * 6;
+                    s = Math.Sin(-Math.PI * 0.05) * 6;
+                    b.ArcTo(6, 6, 0.0, true, true, new(c, s));
+                }, new("projector"));
                 if (_anchors[0].Location.Y > -7)
                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
             }
-            private void DrawDirectional(SvgDrawing drawing, bool diverging)
+            private void DrawDirectional(IGraphicsBuilder builder, bool diverging)
             {
                 var options = new GraphicOptions("direction");
                 if (diverging)
                 {
-                    drawing.Arrow(new(-2, 6), new(-6, 12), options);
-                    drawing.Arrow(new(2, 6), new(6, 12), options);
+                    builder.Arrow(new(-2, 6), new(-6, 12), options);
+                    builder.Arrow(new(2, 6), new(6, 12), options);
                 }
                 else
                 {
-                    drawing.Arrow(new(-2, 6), new(-2, 12), options);
-                    drawing.Arrow(new(2, 6), new(2, 12), options);
+                    builder.Arrow(new(-2, 6), new(-2, 12), options);
+                    builder.Arrow(new(2, 6), new(2, 12), options);
                 }
                 if (_anchors[1].Location.Y < 13)
                     _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1));
             }
-            private void DrawEmergency(SvgDrawing drawing)
+            private void DrawEmergency(IGraphicsBuilder builder)
             {
-                drawing.Circle(new(), 1.5, new("dot"));
+                builder.Circle(new(), 1.5, new("dot"));
             }
         }
     }

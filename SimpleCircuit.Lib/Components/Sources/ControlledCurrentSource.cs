@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -60,30 +61,32 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(drawing);
+                        DrawEuropeanSource(builder);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(drawing);
+                        DrawAmericanSource(builder);
                         break;
                 }
             }
 
             /// <inheritdoc/>
-            private void DrawAmericanSource(SvgDrawing drawing)
+            private void DrawAmericanSource(IGraphicsBuilder drawing)
             {
                 // Diamond
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-6, 0), new(0, 6), new(6, 0), new(0, -6)
-                });
+                drawing.Polygon([
+                    new(-6, 0),
+                    new(0, 6),
+                    new(6, 0),
+                    new(0, -6)
+                ]);
 
                 // The circle with the arrow
                 drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
@@ -92,12 +95,14 @@ namespace SimpleCircuit.Components.Sources
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 _anchors.Draw(drawing, this);
             }
-            private void DrawEuropeanSource(SvgDrawing drawing)
+            private void DrawEuropeanSource(IGraphicsBuilder drawing)
             {
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
-                });
+                drawing.Polygon([
+                    new(-4, 0),
+                    new(0, 4),
+                    new(4, 0),
+                    new(0, -4)
+                ]);
                 drawing.Line(new(0, -4), new(0, 4));
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));

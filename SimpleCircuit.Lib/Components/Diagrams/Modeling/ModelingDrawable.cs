@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
@@ -45,24 +46,24 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         }
 
         /// <inheritdoc />
-        protected override void Draw(SvgDrawing drawing)
+        protected override void Draw(IGraphicsBuilder builder)
         {
             if (Variants.Contains(Square))
-                drawing.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius);
+                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius);
             else
-                drawing.Circle(new(), Size * 0.5);
+                builder.Circle(new(), Size * 0.5);
         }
 
         /// <summary>
         /// Draws the labels for the drawable.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        protected void DrawLabels(SvgDrawing drawing)
+        /// <param name="builder">The builder.</param>
+        protected void DrawLabels(IGraphicsBuilder builder)
         {
             if (Variants.Contains(Square))
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             else
-                new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1).Draw(drawing, this);
+                new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this);
         }
 
         /// <inheritdoc />

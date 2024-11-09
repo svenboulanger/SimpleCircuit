@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
@@ -157,38 +158,38 @@ namespace SimpleCircuit.Components.Annotations
         public void Register(IRegisterContext context) { }
 
         /// <inheritdoc />
-        public void Render(SvgDrawing drawing)
+        public void Render(IGraphicsBuilder builder)
         {
             // All components should have been rendered by now
             if (_components.Count + _wires.Count > 0)
             {
-                drawing.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
-                drawing.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
+                builder.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
+                builder.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
 
                 // Expand the bounds by the margins
-                drawing.BeginGroup(new("annotation") { Id = Name }, !Variants.Contains(_over));
-                var matrix = drawing.CurrentTransform.Matrix.Inverse;
-                drawing.BeginTransform(new Transform(-matrix * drawing.CurrentTransform.Offset, matrix));
+                builder.BeginGroup(new("annotation") { Id = Name }, !Variants.Contains(_over));
+                var matrix = builder.CurrentTransform.Matrix.Inverse;
+                builder.BeginTransform(new Transform(-matrix * builder.CurrentTransform.Offset, matrix));
                 switch (Variants.Select(Poly))
                 {
                     case 0:
-                        DrawPolygon(drawing);
+                        DrawPolygon(builder);
                         break;
 
                     default:
-                        DrawBox(drawing);
+                        DrawBox(builder);
                         break;
                 }
-                drawing.EndTransform();
-                Bounds = drawing.EndGroup();
+                builder.EndTransform();
+                builder.EndGroup();
             }
         }
 
         /// <summary>
         /// Draws a simple box around what needs to be annotated.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        private void DrawBox(SvgDrawing drawing)
+        /// <param name="builder">The builder.</param>
+        private void DrawBox(IGraphicsBuilder builder)
         {
             // Compute the boxes
             var bounds = new ExpandableBounds();
@@ -209,18 +210,18 @@ namespace SimpleCircuit.Components.Annotations
             double y = total.Top;
             double width = total.Width;
             double height = total.Height;
-            drawing.Rectangle(x, y, width, height, CornerRadius, CornerRadius);
+            builder.Rectangle(x, y, width, height, CornerRadius, CornerRadius);
 
             _topLeft = new Vector2(total.Left, total.Top);
             _bottomRight = new Vector2(total.Right, total.Bottom);
-            _anchors.Draw(drawing, this);
+            _anchors.Draw(builder, this);
         }
 
         /// <summary>
         /// Draws a concave polygon around what needs to be annotated.
         /// </summary>
-        /// <param name="drawing"></param>
-        private void DrawPolygon(SvgDrawing drawing)
+        /// <param name="builder"></param>
+        private void DrawPolygon(IGraphicsBuilder builder)
         {
             // Track the point cloud
             var sortedPoints = new SortedDictionary<double, ExpandableLine>();
@@ -375,7 +376,7 @@ namespace SimpleCircuit.Components.Annotations
             top.RemoveLast();
 
             // Draw a polygon with rounded corners accordingly
-            drawing.Path(builder =>
+            builder.Path(builder =>
             {
                 if (CornerRadius.IsZero())
                 {
@@ -515,7 +516,7 @@ namespace SimpleCircuit.Components.Annotations
             anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0));
             anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1));
 
-            new OffsetAnchorPoints<ILabeled>(new CustomLabelAnchorPoints(anchors), 1).Draw(drawing, this);
+            new OffsetAnchorPoints<ILabeled>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this);
         }
 
         /// <summary>

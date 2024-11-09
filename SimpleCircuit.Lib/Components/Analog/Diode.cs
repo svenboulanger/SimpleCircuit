@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -100,82 +101,95 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.ExtendPins(Pins);
+                builder.ExtendPins(Pins);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
-                        DrawVaractor(drawing);
+                        DrawVaractor(builder);
                         break;
 
                     case 1: // Zener
-                        DrawZenerDiode(drawing);
+                        DrawZenerDiode(builder);
                         break;
 
                     case 2: // Tunnel
-                        DrawTunnelDiode(drawing);
+                        DrawTunnelDiode(builder);
                         break;
 
                     case 3: // Schottky
-                        DrawSchottkyDiode(drawing);
+                        DrawSchottkyDiode(builder);
                         break;
 
                     case 4: // Shockley
-                        DrawShockleyDiode(drawing);
+                        DrawShockleyDiode(builder);
                         break;
 
                     case 5: // TVS
-                        DrawTVSDiode(drawing);
+                        DrawTVSDiode(builder);
                         break;
 
                     case 6: // Bidirectional
-                        DrawBidirectional(drawing);
+                        DrawBidirectional(builder);
                         break;
 
                     default: // Just a regular diode
-                        DrawJunctionDiode(drawing);
+                        DrawJunctionDiode(builder);
                         break;
                 }
 
                 switch (Variants.Select(_photodiode, _led, _laser))
                 {
-                    case 0: DrawPhotodiode(drawing); break;
-                    case 1: DrawLed(drawing); break;
-                    case 2: DrawLaser(drawing); break;
+                    case 0: DrawPhotodiode(builder); break;
+                    case 1: DrawLed(builder); break;
+                    case 2: DrawLaser(builder); break;
                 }
                 if (Variants.Contains(_stroke))
                 {
                     var p1 = (FixedOrientedPin)Pins["anode"];
                     var p2 = (FixedOrientedPin)Pins["cathode"];
-                    drawing.Line(p1.Offset, p2.Offset, new("stroke"));
+                    builder.Line(p1.Offset, p2.Offset, new("stroke"));
                 }
 
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
-            private void DrawJunctionDiode(SvgDrawing drawing)
+            private void DrawJunctionDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Line(new(4, -4), new(4, 4), new("cathode"));
+                builder.Polygon([
+                    new(-4, -4), 
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Line(new(4, -4), new(4, 4), new("cathode"));
             }
-            private void DrawZenerDiode(SvgDrawing drawing)
+            private void DrawZenerDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
                 switch (Variants.Select(_zenerSingle, _zenerSlanted))
                 {
                     case 0:
-                        drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4) }, new("cathode"));
+                        builder.Polyline([
+                            new(2, -4),
+                            new(4, -4),
+                            new(4, 4)
+                        ], new("cathode"));
                         break;
 
                     case 1:
-                        drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
+                        builder.Polyline([
+                            new(2, -5),
+                            new(4, -4),
+                            new(4, 4),
+                            new(6, 5)
+                        ], new("cathode"));
                         if (_anchors[0].Location.Y > -6)
                             _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                         if (_anchors[1].Location.Y < 6)
@@ -183,91 +197,128 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     default:
-                        drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(6, 4) }, new("cathode"));
+                        builder.Polyline([
+                            new(2, -4),
+                            new(4, -4),
+                            new(4, 4),
+                            new(6, 4)
+                        ], new("cathode"));
                         break;
                 }
             }
-            private void DrawTunnelDiode(SvgDrawing drawing)
+            private void DrawTunnelDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Polyline(new Vector2[] { new(2, -4), new(4, -4), new(4, 4), new(2, 4) }, new("cathode"));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Polyline([
+                    new(2, -4),
+                    new(4, -4),
+                    new(4, 4),
+                    new(2, 4)
+                ], new("cathode"));
             }
-            private void DrawSchottkyDiode(SvgDrawing drawing)
+            private void DrawSchottkyDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Polyline(new Vector2[] { new(6, -3), new(6, -4), new(4, -4), new(4, 4), new(2, 4), new(2, 3) }, new("cathode"));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Polyline([
+                    new(6, -3),
+                    new(6, -4),
+                    new(4, -4),
+                    new(4, 4),
+                    new(2, 4),
+                    new(2, 3)
+                ], new("cathode"));
             }
-            private void DrawShockleyDiode(SvgDrawing drawing)
+            private void DrawShockleyDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 0)
-                }, new("anode"));
-                drawing.Line(new(-4, 0), new(-4, 4));
-                drawing.Line(new(4, -4), new(4, 4));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 0)
+                ], new("anode"));
+                builder.Line(new(-4, 0), new(-4, 4));
+                builder.Line(new(4, -4), new(4, 4));
             }
-            private void DrawVaractor(SvgDrawing drawing)
+            private void DrawVaractor(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Line(new(4, -4), new(4, 4), new("cathode"));
-                drawing.Line(new(6, -4), new(6, 4), new("cathode"));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Line(new(4, -4), new(4, 4), new("cathode"));
+                builder.Line(new(6, -4), new(6, 4), new("cathode"));
             }
-            private void DrawPhotodiode(SvgDrawing drawing)
+            private void DrawPhotodiode(IGraphicsBuilder builder)
             {
-                drawing.Arrow(new(2, 7.5), new(1, 3.5));
-                drawing.Arrow(new(-1, 9.5), new(-2, 5.5));
+                builder.Arrow(new(2, 7.5), new(1, 3.5));
+                builder.Arrow(new(-1, 9.5), new(-2, 5.5));
                 if (_anchors[1].Location.Y < 10.5)
                     _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
-            private void DrawLed(SvgDrawing drawing)
+            private void DrawLed(IGraphicsBuilder builder)
             {
-                drawing.Arrow(new(1, 3.5), new(2, 7.5));
-                drawing.Arrow(new(-2, 5.5), new(-1, 9.5));
+                builder.Arrow(new(1, 3.5), new(2, 7.5));
+                builder.Arrow(new(-2, 5.5), new(-1, 9.5));
                 if (_anchors[1].Location.Y < 10.5)
                     _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
-            private void DrawLaser(SvgDrawing drawing)
+            private void DrawLaser(IGraphicsBuilder builder)
             {
-                drawing.Line(new(0, -4), new(0, 4));
-                drawing.Arrow(new(-2, 5), new(-2, 10));
-                drawing.Arrow(new(2, 5), new(2, 10));
+                builder.Line(new(0, -4), new(0, 4));
+                builder.Arrow(new(-2, 5), new(-2, 10));
+                builder.Arrow(new(2, 5), new(2, 10));
                 if (_anchors[1].Location.Y < 11)
                     _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
             }
-            private void DrawTVSDiode(SvgDrawing drawing)
+            private void DrawTVSDiode(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Polygon(new Vector2[] {
-                    new(4, 0), new(12, -4), new(12, 4)
-                }, new("anode2"));
-                drawing.Polyline(new Vector2[] { new(2, -5), new(4, -4), new(4, 4), new(6, 5) }, new("cathode"));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Polygon([
+                    new(4, 0),
+                    new(12, -4),
+                    new(12, 4)
+                ], new("anode2"));
+                builder.Polyline([
+                    new(2, -5),
+                    new(4, -4),
+                    new(4, 4),
+                    new(6, 5)
+                ], new("cathode"));
                 if (_anchors[1].Location.Y < 6)
                     _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
-            private void DrawBidirectional(SvgDrawing drawing)
+            private void DrawBidirectional(IGraphicsBuilder builder)
             {
                 // The diode
-                drawing.Polygon(new Vector2[] {
-                    new(-4, -4), new(4, 0), new(-4, 4)
-                }, new("anode"));
-                drawing.Polygon(new Vector2[]
-                {
-                    new(-4, -8), new(4, -12), new(4, -4)
-                }, new("anode2"));
-                drawing.Line(new(-4, -4), new(-4, -12));
-                drawing.Line(new(4, -4), new(4, 4));
+                builder.Polygon([
+                    new(-4, -4),
+                    new(4, 0),
+                    new(-4, 4)
+                ], new("anode"));
+                builder.Polygon([
+                    new(-4, -8),
+                    new(4, -12),
+                    new(4, -4)
+                ], new("anode2"));
+                builder.Line(new(-4, -4), new(-4, -12));
+                builder.Line(new(4, -4), new(4, 4));
                 if (_anchors[0].Location.Y > -13)
                     _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1));
             }

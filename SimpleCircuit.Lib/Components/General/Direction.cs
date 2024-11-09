@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
 namespace SimpleCircuit.Components.General
@@ -42,11 +43,11 @@ namespace SimpleCircuit.Components.General
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
         }
     }

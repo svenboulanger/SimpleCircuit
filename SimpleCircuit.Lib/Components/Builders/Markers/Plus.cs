@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A plus marker.
@@ -22,13 +24,13 @@
         public bool OppositeSide { get; set; }
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder builder)
         {
             Vector2 offset = OppositeSide ? new(-2.5, 3) : new(-2.5, -3);
-            drawing.BeginTransform(new(offset, drawing.CurrentTransform.Matrix.Inverse));
-            drawing.Line(new(-1, 0), new(1, 0), Options);
-            drawing.Line(new(0, -1), new(0, 1), Options);
-            drawing.EndTransform();
+            builder.BeginTransform(new(offset, builder.CurrentTransform.Matrix.Inverse));
+            builder.Line(new(-1, 0), new(1, 0), Options);
+            builder.Line(new(0, -1), new(0, 1), Options);
+            builder.EndTransform();
         }
     }
 }

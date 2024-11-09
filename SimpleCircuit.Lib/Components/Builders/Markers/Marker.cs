@@ -1,4 +1,4 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An abstract class representing a marker.
@@ -37,24 +37,24 @@
         /// Draws the marker to the given drawing.
         /// </summary>
         /// <param name="drawing"></param>
-        public void Draw(SvgDrawing drawing)
+        public void Draw(IGraphicsBuilder builder)
         {
-            drawing.RequiredCSS.Add(".marker { fill: black; }");
+            builder.RequiredCSS.Add(".marker { fill: black; }");
 
             var orientation = Orientation;
             if (orientation.IsZero())
                 orientation = new(1, 0);
 
-            drawing.BeginTransform(new(Location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
-            DrawMarker(drawing);
-            drawing.EndTransform();
+            builder.BeginTransform(new(Location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
+            DrawMarker(builder);
+            builder.EndTransform();
         }
 
         /// <summary>
         /// Draws the marker in local coordinates.
         /// The location is at (0, 0).
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
-        protected abstract void DrawMarker(SvgDrawing drawing);
+        /// <param name="builder">The drawing.</param>
+        protected abstract void DrawMarker(IGraphicsBuilder builder);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Drawing.Markers
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An arrow marker.
@@ -19,7 +21,7 @@
         public static GraphicOptions DefaultOptions { get; } = new("marker", "arrow");
 
         /// <inheritdoc />
-        protected override void DrawMarker(SvgDrawing drawing)
+        protected override void DrawMarker(IGraphicsBuilder drawing)
             => drawing.Polygon(_points, Options);
     }
 }

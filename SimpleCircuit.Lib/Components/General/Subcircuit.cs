@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
@@ -120,9 +121,9 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc/>
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                _ckt.Render(drawing);
+                _ckt.Render(builder);
             }
         }
     }

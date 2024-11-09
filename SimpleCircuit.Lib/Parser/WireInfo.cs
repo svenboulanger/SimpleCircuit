@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleCircuit;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using System;
 using System.Collections.Generic;

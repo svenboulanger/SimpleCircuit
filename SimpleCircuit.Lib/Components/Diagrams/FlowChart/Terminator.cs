@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
 
@@ -58,17 +59,17 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             }
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 double a = Width * 0.5;
                 double b = Height * 0.5;
 
-                drawing.Path(builder => builder.MoveTo(-a + b, -b)
-                    .LineTo(a - b, -b)
+                builder.Path(builder => builder.MoveTo(new(-a + b, -b))
+                    .LineTo(new(a - b, -b))
                     .ArcTo(b, b, 0.0, false, true, new(a - b, b))
-                    .LineTo(-a + b, b)
+                    .LineTo(new(-a + b, b))
                     .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close());
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(builder, this);
             }
 
             /// <inheritdoc />

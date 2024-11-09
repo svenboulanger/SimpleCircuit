@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Diagrams.Modeling
+﻿using SimpleCircuit.Components.Builders;
+
+namespace SimpleCircuit.Components.Diagrams.Modeling
 {
     [Drawable("SUB", "Subtraction.", "Modeling", "minus difference")]
     internal class Subtraction : DrawableFactory
@@ -17,12 +19,12 @@
             public override string Type => "subtraction";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
                 double s = Size * 0.3;
-                drawing.Line(new(-s, 0), new(s, 0));
-                DrawLabels(drawing);
+                builder.Line(new(-s, 0), new(s, 0));
+                DrawLabels(builder);
             }
         }
     }

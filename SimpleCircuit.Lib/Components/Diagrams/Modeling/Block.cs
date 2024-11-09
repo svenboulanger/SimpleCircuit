@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -26,14 +27,14 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             public override string Type => "block";
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                base.Draw(drawing);
+                base.Draw(builder);
 
                 if (Variants.Contains(Square))
-                    BoxLabelAnchorPoints.Default.Draw(drawing, this);
+                    BoxLabelAnchorPoints.Default.Draw(builder, this);
                 else
-                    EllipseLabelAnchorPoints.Default.Draw(drawing, this);
+                    EllipseLabelAnchorPoints.Default.Draw(builder, this);
             }
         }
     }

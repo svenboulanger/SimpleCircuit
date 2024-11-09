@@ -1,6 +1,7 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Drawing.Markers;
 using System;
 
 namespace SimpleCircuit.Components
@@ -53,7 +54,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Draws a rectangle.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="x">The left coordinate.</param>
         /// <param name="y">The top coordinate.</param>
         /// <param name="width">The width.</param>
@@ -61,7 +62,7 @@ namespace SimpleCircuit.Components
         /// <param name="rx">The radius along the x-axis.</param>
         /// <param name="ry">The radius along the y-axis.</param>
         /// <param name="options">Path options.</param>
-        public static void Rectangle(this SvgDrawing drawing, double x, double y, double width, double height,
+        public static void Rectangle(this IGraphicsBuilder builder, double x, double y, double width, double height,
             double rx = double.NaN, double ry = double.NaN, GraphicOptions options = null)
         {
             // Deal with rounded corners
@@ -78,7 +79,7 @@ namespace SimpleCircuit.Components
             if (rx == 0.0)
             {
                 // Simple version
-                drawing.Polygon(new[]
+                builder.Polygon(new[]
                 {
                     new Vector2(x, y),
                     new Vector2(x + width, y),
@@ -91,9 +92,9 @@ namespace SimpleCircuit.Components
                 // Draw the rectangle
                 double kx = 0.55191502449351057 * rx;
                 double ky = 0.55191502449351057 * ry;
-                drawing.Path(b =>
+                builder.Path(b =>
                 {
-                    b.MoveTo(x + rx, y);
+                    b.MoveTo(new(x + rx, y));
                     b.Horizontal(width - 2 * rx);
                     if (rx != 0.0)
                         b.Curve(new(kx, 0), new(rx, ry - ky), new(rx, ry));
@@ -114,7 +115,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Draws a diamond shape centered around the given point.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="x">The center X-coordinate.</param>
         /// <param name="y">The center Y-coordinate.</param>
         /// <param name="width">The width.</param>
@@ -122,7 +123,7 @@ namespace SimpleCircuit.Components
         /// <param name="rx">The radius for the left and right corners.</param>
         /// <param name="ry">The radius for the top and bottom corners.</param>
         /// <param name="options">The path options.</param>
-        public static void Diamond(this SvgDrawing drawing, double x, double y, double width, double height,
+        public static void Diamond(this IGraphicsBuilder builder, double x, double y, double width, double height,
             double rx = 0.0, double ry = 0.0, GraphicOptions options = null)
         {
             DiamondSize(width, height, rx, ry, out var n, out var ox, out var oy);
@@ -130,7 +131,7 @@ namespace SimpleCircuit.Components
             var ax = new Vector2(width * 0.5, 0);
             var ay = new Vector2(0, height * 0.5);
 
-            drawing.Path(b =>
+            builder.Path(b =>
             {
                 b.MoveTo(loc - ax + ox);
                 b.LineTo(loc - ay + oy);
@@ -223,7 +224,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Draws a parallellogram centered around the given point.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="x">The center X-coordinate.</param>
         /// <param name="y">The center Y-coordinate.</param>
         /// <param name="width">The width.</param>
@@ -231,7 +232,7 @@ namespace SimpleCircuit.Components
         /// <param name="radiusSharp">The radius for the sharp corners.</param>
         /// <param name="radiusBlunt">The radius for the blunt corners.</param>
         /// <param name="options">The path options.</param>
-        public static void Parallellogram(this SvgDrawing drawing, double x, double y, double width,
+        public static void Parallellogram(this IGraphicsBuilder builder, double x, double y, double width,
             Vector2 edge, double radiusSharp = 0.0, double radiusBlunt = 0.0, GraphicOptions options = null)
         {
             var pcorner = new Vector2(-width * 0.5, -edge.Y * 0.5);
@@ -241,8 +242,8 @@ namespace SimpleCircuit.Components
                 out var ps1, out var ps2, out bool cornerSharp);
             RoundedCorner(pcorner + edge, -edgeh, horiz, radiusBlunt,
                 out var pb1, out var pb2, out bool cornerBlunt);
-            drawing.BeginTransform(new(new(x, y), Matrix2.Identity));
-            drawing.Path(b =>
+            builder.BeginTransform(new(new(x, y), Matrix2.Identity));
+            builder.Path(b =>
             {
                 b.MoveTo(ps1);
                 if (cornerSharp)
@@ -261,108 +262,105 @@ namespace SimpleCircuit.Components
                     b.ArcTo(radiusBlunt, radiusBlunt, 0.0, false, true, -pb2);
                 b.Close();
             }, options);
-            drawing.EndTransform();
+            builder.EndTransform();
         }
 
         /// <summary>
         /// Draws an arrow.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="start">The starting point of the arrow.</param>
         /// <param name="end">The ending point of the arrow.</param>
-        public static void Arrow(this SvgDrawing drawing, Vector2 start, Vector2 end, GraphicOptions options = null)
+        public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, GraphicOptions options = null)
         {
-            drawing.BeginGroup(options);
-            drawing.Line(start, end);
+            builder.BeginGroup(options);
+            builder.Line(start, end);
             var normal = end - start;
             normal /= normal.Length;
 
             var marker = new Arrow(end, normal);
-            marker.Draw(drawing);
-            drawing.EndGroup();
+            marker.Draw(builder);
+            builder.EndGroup();
         }
 
         /// <summary>
         /// Draws a plus and a minus.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="plus">The center of the plus sign.</param>
         /// <param name="minus">The center of the minus sign.</param>
         /// <param name="size">The size of the signs. The default is 2.</param>
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
-        public static void Signs(this SvgDrawing drawing, Vector2 plus, Vector2 minus, double size = 2, bool vertical = false)
+        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, double size = 2, bool vertical = false)
         {
-            drawing.BeginGroup(new("signs"));
+            builder.BeginGroup(new("signs"));
 
             // Plus sign
-            drawing.Path(b => b.MoveTo(plus.X, plus.Y - size * 0.5).Vertical(size).MoveTo(plus.X - size * 0.5, plus.Y).Horizontal(size), new("plus"));
+            builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), new("plus"));
 
             // Minus sign
             size *= 0.5;
             if (vertical)
-                drawing.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), new("minus"));
+                builder.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), new("minus"));
             else
-                drawing.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), new("minus"));
+                builder.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), new("minus"));
 
-            drawing.EndGroup();
+            builder.EndGroup();
         }
 
         /// <summary>
         /// Draws a cross.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="center">The center.</param>
         /// <param name="size">The size.</param>
         /// <param name="options">The options.</param>
-        public static void Cross(this SvgDrawing drawing, Vector2 center, double size, GraphicOptions options = null)
+        public static void Cross(this IGraphicsBuilder builder, Vector2 center, double size, GraphicOptions options = null)
         {
-            drawing.Path(b =>
+            builder.Path(b =>
                 b
                 .MoveTo(center - new Vector2(size, size) * 0.5)
-                .Line(size, size)
+                .Line(new(size, size))
                 .MoveTo(center - new Vector2(-size, size) * 0.5)
-                .Line(-size, size), options);
+                .Line(new(-size, size)), options);
         }
 
         /// <summary>
         /// Draws an AC symbol.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="center">The center of the AC wiggle.</param>
         /// <param name="size">The size of the AC wiggle.</param>
         /// <param name="vertical">If <c>true</c>, the wiggle is placed vertically.</param>
-        public static void AC(this SvgDrawing drawing, Vector2 center = new(), double size = 3, bool vertical = false)
+        public static void AC(this IGraphicsBuilder builder, Vector2 center = new(), double size = 3, bool vertical = false)
         {
-            drawing.BeginTransform(new Transform(center, (vertical ? Matrix2.Identity : Matrix2.Rotate(Math.PI / 2)) * size / 3.0));
-            drawing.OpenBezier(new Vector2[]
+            builder.BeginTransform(new Transform(center, (vertical ? Matrix2.Identity : Matrix2.Rotate(Math.PI / 2)) * size / 3.0));
+            builder.Path(b =>
             {
-                new(0, -3),
-                new(1.414, -2.293),
-                new(1.414, -0.707),
-                new(),
-                new(-1.414, 0.707),
-                new(-1.414, 2.293),
-                new(0, 3)
-            }, new("ac"));
-            drawing.EndTransform();
+                b
+                    .MoveTo(new(0, -3))
+                    .CurveTo(new(1.414, -2.293), new(1.414, -0.707), new())
+                    .CurveTo(new(-1.414, 0.707), new(-1.414, 2.293), new(0, 3));
+            });
+            builder.EndTransform();
         }
 
         /// <summary>
         /// Extends a wire from the given pin.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="pin">The pin.</param>
         /// <param name="length">The length of the wire.</param>
-        public static void ExtendPin(this SvgDrawing drawing, IPin pin, double length = 2)
+        public static void ExtendPin(this IGraphicsBuilder builder, IPin pin, double length = 2)
         {
             if (pin.Connections == 0)
             {
                 if (pin is FixedOrientedPin fop)
-                    drawing.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
+                    builder.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
                 else if (pin is FixedPin fp)
                 {
                     var marker = new Dot(fp.Offset, new(1, 0), new("marker", "dot", "wire"));
-                    marker.Draw(drawing);
+                    marker.Draw(builder);
                 }
             }
         }
@@ -370,26 +368,26 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Extends all pins.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pin wire.</param>
-        public static void ExtendPins(this SvgDrawing drawing, IPinCollection pins, double length = 2)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, double length = 2)
         {
             foreach (var pin in pins)
-                drawing.ExtendPin(pin, length);
+                builder.ExtendPin(pin, length);
         }
 
         /// <summary>
         /// Extends the specified pins.
         /// </summary>
-        /// <param name="drawing">The drawing.</param>
+        /// <param name="builder">The builder.</param>
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pins.</param>
         /// <param name="names">The names of the pins to extend.</param>
-        public static void ExtendPins(this SvgDrawing drawing, IPinCollection pins, double length, params string[] names)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, double length, params string[] names)
         {
             foreach (string name in names)
-                drawing.ExtendPin(pins[name], length);
+                builder.ExtendPin(pins[name], length);
         }
 
         /// <summary>

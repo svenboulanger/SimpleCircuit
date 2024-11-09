@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
 using System.Collections.Generic;
@@ -48,10 +49,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
 
             /// <inheritdoc />
-            protected override void Draw(SvgDrawing drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
-                drawing.Diamond(0.0, 0.0, Width, Height, CornerRadiusX, CornerRadiusY);
-                DiamondLabelAnchorPoints.Default.Draw(drawing, this);
+                builder.Diamond(0.0, 0.0, Width, Height, CornerRadiusX, CornerRadiusY);
+                DiamondLabelAnchorPoints.Default.Draw(builder, this);
             }
 
 
