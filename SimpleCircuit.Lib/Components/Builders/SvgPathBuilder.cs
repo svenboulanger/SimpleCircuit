@@ -41,11 +41,6 @@ namespace SimpleCircuit.Components.Builders
         public Vector2 EndNormal => _n2;
 
         /// <summary>
-        /// Gets the bounds of the path that was built.
-        /// </summary>
-        public Bounds Bounds => _bounds.Bounds;
-
-        /// <summary>
         /// Gets or sets the transform for the path builder.
         /// </summary>
         public Transform Transform { get; } = transform;
@@ -83,15 +78,6 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <summary>
-        /// Moves the current point using absolute coordinates.
-        /// </summary>
-        /// <param name="x">The x-coordinate.</param>
-        /// <param name="y">The y-coordinate.</param>
-        /// <returns>The path builder.</returns>
-        public IPathBuilder MoveTo(double x, double y)
-            => MoveTo(new(x, y));
-
-        /// <summary>
         /// Moves the current point using relative coordinates.
         /// </summary>
         /// <param name="delta">The step.</param>
@@ -113,15 +99,6 @@ namespace SimpleCircuit.Components.Builders
             _bounds.Expand(_last);
             return this;
         }
-
-        /// <summary>
-        /// Moves the current point using relative coordinates.
-        /// </summary>
-        /// <param name="dx">The step along the x-axis.</param>
-        /// <param name="dy">The step along the y-axis.</param>
-        /// <returns>The path builder.</returns>
-        public IPathBuilder Move(double dx, double dy)
-            => Move(new(dx, dy));
 
         private void AppendLine(Vector2 delta)
         {
@@ -168,15 +145,6 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <summary>
-        /// Draws a line using absolute coordinates.
-        /// </summary>
-        /// <param name="x">The x-coordinate.</param>
-        /// <param name="y">The y-coordinate.</param>
-        /// <returns>The path builder.</returns>
-        public IPathBuilder LineTo(double x, double y)
-            => LineTo(new(x, y));
-
-        /// <summary>
         /// Draws a line using relative coordinates.
         /// </summary>
         /// <param name="delta">The step.</param>
@@ -204,15 +172,6 @@ namespace SimpleCircuit.Components.Builders
             _bounds.Expand(_last);
             return this;
         }
-
-        /// <summary>
-        /// Draws a line using relative coordinates.
-        /// </summary>
-        /// <param name="dx">The step along the x-axis.</param>
-        /// <param name="dy">The step along the y-axis.</param>
-        /// <returns>The path builder.</returns>
-        public IPathBuilder Line(double dx, double dy)
-            => Line(new(dx, dy));
 
         /// <summary>
         /// Draws a horizontal line using absolute coordinates.

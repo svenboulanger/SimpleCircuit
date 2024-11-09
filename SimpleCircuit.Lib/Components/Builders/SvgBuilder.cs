@@ -437,8 +437,7 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(line);
             _current.AppendChild(line);
 
-            _bounds.Expand(start);
-            _bounds.Expand(end);
+            _bounds.Expand(start, end);
             return this;
         }
 
@@ -456,8 +455,9 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(circle);
             _current.AppendChild(circle);
 
-            _bounds.Expand(position - new Vector2(radius, radius));
-            _bounds.Expand(position + new Vector2(radius, radius));
+            _bounds.Expand(
+                position - new Vector2(radius, radius),
+                position + new Vector2(radius, radius));
             return this;
         }
 
