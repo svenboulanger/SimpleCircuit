@@ -109,7 +109,7 @@ namespace SimpleCircuit
                     case "-v":
                     case "--version":
                         // Show the version of SimpleCircuit.Lib
-                        var version = typeof(SvgDrawing).Assembly.GetName().Version;
+                        var version = typeof(SvgBuilder).Assembly.GetName().Version;
                         Console.WriteLine("SimpleCircuit v" + version);
                         break;
 

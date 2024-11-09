@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders.Markers;
+﻿using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
@@ -16,9 +15,9 @@ using System.Xml;
 namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
-    /// An Svg drawing.
+    /// An <see cref="IGraphicsBuilder"/> for making SVG format data.
     /// </summary>
-    public class SvgDrawing : IGraphicsBuilder
+    public class SvgBuilder : IGraphicsBuilder
     {
         /// <summary>
         /// The namespace for SVG nodes.
@@ -82,7 +81,7 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgDrawing(IDiagnosticHandler diagnostics = null, ITextMeasurer measurer = null)
+        public SvgBuilder(IDiagnosticHandler diagnostics = null, ITextMeasurer measurer = null)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);

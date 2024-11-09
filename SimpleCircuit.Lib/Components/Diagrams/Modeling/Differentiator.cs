@@ -30,17 +30,17 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        builder.Text("s", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("s", new(), new(), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     case 1:
-                        builder.Text("z^{-1}", new(), new(), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("z^{-1}", new(), new(), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     default:
-                        builder.Text("d", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("d", new(), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         builder.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;"});
-                        builder.Text("dt", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("dt", new(), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
                 }
                 DrawLabels(builder);

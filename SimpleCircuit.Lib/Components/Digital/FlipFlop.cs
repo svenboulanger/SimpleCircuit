@@ -65,9 +65,9 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["nq"].Connections > 0)
                     builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
                 if (Pins["s"].Connections > 0)
-                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                 if (Pins["r"].Connections > 0)
-                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
 
                 new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

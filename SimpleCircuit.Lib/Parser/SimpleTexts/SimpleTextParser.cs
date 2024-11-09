@@ -179,7 +179,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
-            var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
+            var element = context.Document.CreateElement("path", SvgBuilder.Namespace);
             element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
             context.Parent.AppendChild(element);
 
@@ -190,7 +190,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
-            var element = context.Document.CreateElement("path", SvgDrawing.Namespace);
+            var element = context.Document.CreateElement("path", SvgBuilder.Namespace);
             element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
             context.Parent.AppendChild(element);
 
@@ -204,7 +204,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             var bounds = context.Measurer.Measure(content, context.FontSize);
 
             // Create the XML element
-            var element = context.Document.CreateElement("tspan", SvgDrawing.Namespace);
+            var element = context.Document.CreateElement("tspan", SvgBuilder.Namespace);
             element.SetAttribute("style", $"font-family:{context.Measurer.FontFamily};font-size:{context.FontSize.ToSVG()}pt;");
             element.InnerXml = content;
             context.Text.AppendChild(element);

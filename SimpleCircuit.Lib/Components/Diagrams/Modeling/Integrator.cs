@@ -35,15 +35,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        builder.Text("1", new(), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         builder.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
-                        builder.Text("s", new(), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("s", new(), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     case 1:
-                        builder.Text("1", new(0, -1), new(0, -1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(0, -1), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         builder.Line(new(-2, -1), new(2, -1), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;" });
-                        builder.Text("z^{-1}", new(0, -1), new(0, 1), size: 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("z^{-1}", new(0, -1), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
 
                     default:

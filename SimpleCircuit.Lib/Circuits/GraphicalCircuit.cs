@@ -335,7 +335,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgDrawing(diagnostics, measurer);
+            var drawing = new SvgBuilder(diagnostics, measurer);
             if (extraCss != null)
             {
                 foreach (var ec in extraCss)

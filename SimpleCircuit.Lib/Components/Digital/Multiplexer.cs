@@ -53,8 +53,8 @@ namespace SimpleCircuit.Components.Digital
                     new(-5, 8)
                 ]);
 
-                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
-                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgDrawing.DefaultFontSize * Scale, options: new("small"));
+                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
 
                 new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
