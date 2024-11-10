@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Drawing;
+using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
@@ -27,30 +27,49 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <remarks>
     /// Creates a new text span from a measured XML element.
     /// </remarks>
-    /// <param name="element">The element.</param>
-    /// <param name="bounds">The bounds of the element on its own.</param>
-    public class TextSpan(XmlElement element, SpanBounds bounds) : ISpan
+    /// <param name="content">The contents of the text span.</param>
+    /// <param name="bounds">The bounds of the text span.</param>
+    /// <param name="fontFamily">The font family.</param>
+    /// <param name="isBold">If <c>true</c>, the font weight is bold.</param>
+    /// <param name="size">The size of the text.</param>
+    public class TextSpan(string content, string fontFamily, bool isBold, double size, SpanBounds bounds) : ISpan
     {
         /// <summary>
-        /// Gets the span element.
+        /// Gets the content of the text span.
         /// </summary>
-        public XmlElement Element { get; } = element;
+        public string Content { get; } = content ?? string.Empty;
+
+        /// <summary>
+        /// Gets the font family of the text span.
+        /// </summary>
+        public string FontFamily { get; } = fontFamily;
+
+        /// <summary>
+        /// Gets whether the text span is bold.
+        /// </summary>
+        public bool Bold { get; } = isBold;
+
+        /// <summary>
+        /// Gets the size of the text span.
+        /// </summary>
+        public double Size { get; } = size;
 
         /// <inheritdoc />
         public SpanBounds Bounds { get; } = bounds;
 
+        /// <summary>
+        /// Gets the offset of the text.
+        /// </summary>
+        public Vector2 Offset { get; private set; }
+
         /// <inheritdoc />
-        public void Update(Vector2 offset)
-        {
-            Element.SetAttribute("x", offset.X.ToSVG());
-            Element.SetAttribute("y", offset.Y.ToSVG());
-        }
+        public void Update(Vector2 offset) => Offset = offset;
     }
 
     /// <summary>
     /// A span that simply adds multiple 
     /// </summary>
-    public class LineSpan : ISpan
+    public class LineSpan : ISpan, IEnumerable<ISpan>
     {
         private readonly List<ISpan> _spans = [];
         private readonly ExpandableBounds _bounds = new();
@@ -97,6 +116,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 x += span.Bounds.Advance + Margin;
             }
         }
+
+        /// <inheritdoc />
+        public IEnumerator<ISpan> GetEnumerator() => ((IEnumerable<ISpan>)_spans).GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_spans).GetEnumerator();
     }
 
     /// <summary>
@@ -175,7 +200,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <summary>
     /// A span for multiple lines.
     /// </summary>
-    public class MultilineSpan : ISpan
+    public class MultilineSpan : ISpan, IEnumerable<ISpan>
     {
         private readonly List<ISpan> _spans = [];
         private readonly ExpandableBounds _bounds = new();
@@ -233,6 +258,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 y += LineIncrement;
             }
         }
+
+        /// <inheritdoc />
+        public IEnumerator<ISpan> GetEnumerator() => ((IEnumerable<ISpan>)_spans).GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_spans).GetEnumerator();
     }
 
     /// <summary>
@@ -241,17 +272,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <remarks>
     /// Creates a new <see cref="OverlineSpan"/>.
     /// </remarks>
-    /// <param name="element">The element.</param>
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
     /// <param name="thickness">The thickness.</param>
-    public class OverlineSpan(XmlElement element, ISpan @base, double margin, double thickness) : ISpan
+    public class OverlineSpan(ISpan @base, double margin, double thickness) : ISpan
     {
-        /// <summary>
-        /// Gets the XML element for the overline
-        /// </summary>
-        public XmlElement Element { get; } = element;
-
         /// <summary>
         /// Gets the content.
         /// </summary>
@@ -274,18 +299,34 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// </summary>
         public double Thickness { get; } = thickness;
 
+        /// <summary>
+        /// Gets the offset.
+        /// </summary>
+        public Vector2 Offset { get; private set; }
+
+        /// <summary>
+        /// Gets the starting point of the overline.
+        /// </summary>
+        public Vector2 Start { get; private set; }
+
+        /// <summary>
+        /// Gets the ending point of the overline.
+        /// </summary>
+        public Vector2 End { get; private set; }
+
         /// <inheritdoc />
         public void Update(Vector2 offset)
         {
             Base.Update(offset);
+            Offset = offset;
 
-            string y = (offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5).ToSVG();
-            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToSVG();
-            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToSVG();
-            Element.SetAttribute("d", $"M{x1} {y} L{x2} {y}");
+            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5;
+            double x1 = offset.X + Base.Bounds.Bounds.Left;
+            double x2 = offset.X + Base.Bounds.Bounds.Right;
+            Start = new(x1, y);
+            End = new(x2, y);
         }
     }
-
 
     /// <summary>
     /// A span of content that is underlined
@@ -293,17 +334,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <remarks>
     /// Creates a new <see cref="UnderlineSpan"/>.
     /// </remarks>
-    /// <param name="element">The element.</param>
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
     /// <param name="thickness">The thickness.</param>
-    public class UnderlineSpan(XmlElement element, ISpan @base, double margin, double thickness) : ISpan
+    public class UnderlineSpan(ISpan @base, double margin, double thickness) : ISpan
     {
-        /// <summary>
-        /// Gets the XML element for the overline
-        /// </summary>
-        public XmlElement Element { get; } = element;
-
         /// <summary>
         /// Gets the content.
         /// </summary>
@@ -326,15 +361,32 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// </summary>
         public double Thickness { get; } = thickness;
 
+        /// <summary>
+        /// Gets the offset.
+        /// </summary>
+        public Vector2 Offset { get; private set; }
+
+        /// <summary>
+        /// Gets the starting point of the overline.
+        /// </summary>
+        public Vector2 Start { get; private set; }
+
+        /// <summary>
+        /// Gets the ending point of the overline.
+        /// </summary>
+        public Vector2 End { get; private set; }
+
         /// <inheritdoc />
         public void Update(Vector2 offset)
         {
             Base.Update(offset);
+            Offset = offset;
 
-            string y = (offset.Y + Base.Bounds.Bounds.Bottom + Margin + Thickness * 0.5).ToSVG();
-            string x1 = (offset.X + Base.Bounds.Bounds.Left).ToSVG();
-            string x2 = (offset.X + Base.Bounds.Bounds.Right).ToSVG();
-            Element.SetAttribute("d", $"M{x1} {y} L{x2} {y}");
+            double y = offset.Y + Base.Bounds.Bounds.Bottom + Margin + Thickness * 0.5;
+            double x1 = offset.X + Base.Bounds.Bounds.Left;
+            double x2 = offset.X + Base.Bounds.Bounds.Right;
+            Start = new(x1, y);
+            End = new(x2, y);
         }
     }
 }

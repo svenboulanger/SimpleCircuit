@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Components.Builders;
-
-namespace SimpleCircuit.Parser.SimpleTexts
+﻿namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// Parser methods for SimpleCircuit text.
@@ -179,22 +177,14 @@ namespace SimpleCircuit.Parser.SimpleTexts
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
-            var element = context.Document.CreateElement("path", SvgBuilder.Namespace);
-            element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
-            context.Parent.AppendChild(element);
-
-            return new OverlineSpan(element, @base, margin, thickness);
+            return new OverlineSpan(@base, margin, thickness);
         }
         private static ISpan CreateUnderline(ISpan @base, SimpleTextContext context)
         {
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
-            var element = context.Document.CreateElement("path", SvgBuilder.Namespace);
-            element.SetAttribute("style", $"stroke-width:{thickness.ToSVG()}pt;fill:none;");
-            context.Parent.AppendChild(element);
-
-            return new UnderlineSpan(element, @base, margin, thickness);
+            return new UnderlineSpan(@base, margin, thickness);
         }
         private static ISpan CreateTextSpan(SimpleTextContext context)
         {
@@ -203,14 +193,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
             context.Builder.Clear();
             var bounds = context.Measurer.Measure(content, context.FontSize);
 
-            // Create the XML element
-            var element = context.Document.CreateElement("tspan", SvgBuilder.Namespace);
-            element.SetAttribute("style", $"font-family:{context.Measurer.FontFamily};font-size:{context.FontSize.ToSVG()}pt;");
-            element.InnerXml = content;
-            context.Text.AppendChild(element);
-
             // Return the span
-            return new TextSpan(element, bounds);
+            return new TextSpan(content, context.Measurer.FontFamily, false, context.FontSize, bounds);
         }
     }
 }
