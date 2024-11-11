@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components.Analog;
-using SimpleCircuit.Components.Builders.Markers;
+﻿using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
@@ -7,13 +6,11 @@ using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
-using SpiceSharp.Algebra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.Builders
 {
@@ -611,6 +608,44 @@ namespace SimpleCircuit.Components.Builders
                 new(rx, ky), new(kx, ry), new(0, ry),
                 new(-kx, ry), new(-rx, ky), new(-rx, 0)
             }.Select(v => v + center), options);
+        }
+
+        public IGraphicsBuilder Text(ISpan span, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        {
+            if (span is null)
+                return this;
+
+            location = CurrentTransform.Apply(location);
+            expand = CurrentTransform.ApplyDirection(expand);
+
+            // Create the text element
+            var text = _document.CreateElement("text", Namespace);
+            options?.Apply(text);
+            _current.AppendChild(text);
+
+            // Compute the location based on the location and expansion
+            var bounds = span.Bounds.Bounds;
+            double y = location.Y, x = location.X;
+            if (expand.Y.IsZero())
+                y = y - bounds.Height * 0.5 - bounds.Top;
+            else if (expand.Y < 0)
+                y -= bounds.Bottom;
+            else
+                y -= bounds.Top;
+            if (expand.X.IsZero())
+                x = x - bounds.Width * 0.5 - bounds.Left;
+            else if (expand.X < 0)
+                x -= bounds.Right;
+            else
+                x -= bounds.Left;
+            span.Update(new Vector2(x, y));
+
+            // Make the SVG for the text
+            BuildTextSVG(span, _current, text);
+
+            // Return the offset bounds
+            _bounds.Expand(bounds + new Vector2(x, y));
+            return this;
         }
 
         /// <inheritdoc />

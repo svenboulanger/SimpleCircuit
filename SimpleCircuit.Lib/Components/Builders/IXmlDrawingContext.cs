@@ -2,7 +2,7 @@
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Drawing
+namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
     /// Describes a context that can be used when drawing XML.

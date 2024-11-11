@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.Xml;
@@ -118,6 +119,16 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining methods.</returns>
         public IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null);
+
+        /// <summary>
+        /// Draws text.
+        /// </summary>
+        /// <param name="span">The span to be drawn.</param>
+        /// <param name="location">The location where the span should be.</param>
+        /// <param name="expand">The direction in which the text can overflow.</param>
+        /// <param name="options">The graphic options.</param>
+        /// <returns>Returns the graphics builder for chaining.</returns>
+        public IGraphicsBuilder Text(ISpan span, Vector2 location, Vector2 expand, GraphicOptions options = null);
 
         /// <summary>
         /// Draws text.

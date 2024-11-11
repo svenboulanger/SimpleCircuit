@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Variants;
-using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
