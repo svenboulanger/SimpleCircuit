@@ -1,24 +1,31 @@
 ﻿using SimpleCircuit.Drawing;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
-    /// Represents a span of similar styling.
+    /// An interface describing a text span.
     /// </summary>
     public interface ISpan
     {
+        /// <summary>
+        /// Gets the offset of the span.
+        /// </summary>
+        public Vector2 Offset { get; }
+
         /// <summary>
         /// Gets the bounds of the span.
         /// </summary>
         public SpanBounds Bounds { get; }
 
         /// <summary>
-        /// Updates the span with the new line start information.
+        /// Sets the offset of the span.
         /// </summary>
-        /// <param name="offset">The location of the start of the line.</param>
-        public void Update(Vector2 offset);
+        /// <param name="offset">The offset.</param>
+        public void SetOffset(Vector2 offset);
     }
 
     /// <summary>
@@ -34,6 +41,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <param name="size">The size of the text.</param>
     public class TextSpan(string content, string fontFamily, bool isBold, double size, SpanBounds bounds) : ISpan
     {
+        /// <inheritdoc />
+        public SpanBounds Bounds { get; } = bounds;
+
+        /// <inheritdoc />
+        public Vector2 Offset { get; private set; }
+
         /// <summary>
         /// Gets the content of the text span.
         /// </summary>
@@ -55,15 +68,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public double Size { get; } = size;
 
         /// <inheritdoc />
-        public SpanBounds Bounds { get; } = bounds;
-
-        /// <summary>
-        /// Gets the offset of the text.
-        /// </summary>
-        public Vector2 Offset { get; private set; }
-
-        /// <inheritdoc />
-        public void Update(Vector2 offset) => Offset = offset;
+        public void SetOffset(Vector2 offset) => Offset = offset;
     }
 
     /// <summary>
@@ -74,6 +79,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         private readonly List<ISpan> _spans = [];
         private readonly ExpandableBounds _bounds = new();
         private double _x = 0.0;
+
+        /// <inheritdoc />
+        public Vector2 Offset { get; private set; }
 
         /// <inheritdoc />
         public SpanBounds Bounds => new(_bounds.Bounds, _x);
@@ -107,12 +115,13 @@ namespace SimpleCircuit.Parser.SimpleTexts
         }
 
         /// <inheritdoc />
-        public void Update(Vector2 offset)
+        public void SetOffset(Vector2 offset)
         {
-            double x = 0.0;
+            Offset = offset;
+            double x = offset.X;
             foreach (var span in _spans)
             {
-                span.Update(new Vector2(offset.X + x, offset.Y));
+                span.SetOffset(new Vector2(x, offset.Y));
                 x += span.Bounds.Advance + Margin;
             }
         }
@@ -132,68 +141,94 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// </remarks>
     /// <param name="base">The base.</param>
     /// <param name="halfway">The height of the halfway point.</param>
-    public class SubscriptSuperscriptSpan(ISpan @base, double halfway) : ISpan
+    public class SubscriptSuperscriptSpan : ISpan
     {
-        private ISpan _super = null, _sub = null;
+        /// <summary>
+        /// Gets the halfway point for the font.
+        /// </summary>
+        public double Halfway { get; }
+
+        /// <inheritdoc />
+        public Vector2 Offset { get; private set; }
+
+        /// <inheritdoc />
+        public SpanBounds Bounds { get; }
 
         /// <summary>
         /// Gets or sets the superscript.
         /// </summary>
-        public ISpan Super { get => _super; set { _super = value; UpdateBounds(); } }
+        public ISpan Super { get; }
 
         /// <summary>
         /// Gets or sets the subscript.
         /// </summary>
-        public ISpan Sub { get => _sub; set { _sub = value; UpdateBounds(); } }
+        public ISpan Sub { get; }
 
         /// <summary>
         /// Gets or sets the base.
         /// </summary>
-        public ISpan Base { get; } = @base;
+        public ISpan Base { get; }
 
         /// <summary>
         /// Gets the margin between the spans.
         /// </summary>
-        public Vector2 Margin { get; set; }
+        public Vector2 Margin { get; }
 
         /// <summary>
-        /// Gets the half-way point.
+        /// Creates a new <see cref="SubscriptSuperscriptSpan"/>.
         /// </summary>
-        public double Halfway { get; } = halfway;
-
-        /// <inheritdoc />
-        public SpanBounds Bounds { get; private set; } = @base.Bounds;
-
-        /// <summary>
-        /// Gets the location for the superscript.
-        /// </summary>
-        protected Vector2 SuperLocation => new(Base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left, -Halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
-
-        /// <summary>
-        /// Gets the location for the subscript.
-        /// </summary>
-        protected Vector2 SubLocation => new(Base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left, -Halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
-
-        private void UpdateBounds()
+        /// <param name="base">The base span.</param>
+        /// <param name="sub">The subscript span.</param>
+        /// <param name="super">The superscript span.</param>
+        /// <param name="halfway">The halfway point.</param>
+        /// <param name="margin">The margin to the base.</param>
+        public SubscriptSuperscriptSpan(ISpan @base, ISpan sub, ISpan super, double halfway, Vector2 margin)
         {
-            ExpandableBounds bounds = new();
+            Halfway = halfway;
+            Margin = margin;
+            Base = @base ?? throw new ArgumentNullException(nameof(@base));
 
-            // Account for the space that the base takes up
-            // The base is always at the origin
-            bounds.Expand(Base.Bounds.Bounds);
-            if (Super != null)
-                bounds.Expand(SuperLocation + Super.Bounds.Bounds);
-            if (Sub != null)
-                bounds.Expand(SubLocation + Sub.Bounds.Bounds);
-            Bounds = new(bounds.Bounds, bounds.Bounds.Right);
+            var bounds = new ExpandableBounds();
+            double advance = @base.Bounds.Advance;
+            bounds.Expand(@base.Bounds.Bounds);
+            if (sub is not null)
+            {
+                var subLocation = new Vector2(
+                    @base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left,
+                    -halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
+                bounds.Expand(subLocation + sub.Bounds.Bounds);
+                advance = Math.Max(subLocation.X + sub.Bounds.Advance, advance);
+            }
+            if (super is not null)
+            {
+                var superLocation = new Vector2(
+                    @base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left,
+                    -halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
+                bounds.Expand(superLocation + super.Bounds.Bounds);
+                advance = Math.Max(superLocation.X + super.Bounds.Advance, advance);
+            }
+            Bounds = new(bounds.Bounds, advance);
         }
 
         /// <inheritdoc />
-        public void Update(Vector2 offset)
+        public void SetOffset(Vector2 offset)
         {
-            Base.Update(offset);
-            Super?.Update(SuperLocation + offset);
-            Sub?.Update(SubLocation + offset);
+            Offset = offset;
+            Base.SetOffset(offset);
+            if (Sub is not null)
+            {
+                var subLocation = new Vector2(
+                    offset.X + Base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left,
+                    offset.Y - Halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
+                Sub.SetOffset(subLocation);
+            }
+            if (Super is not null)
+            {
+                var superLocation = new Vector2(
+                    offset.X + Base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left,
+                    offset.Y - Halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
+                Super.SetOffset(superLocation);
+            }
         }
     }
 
@@ -202,59 +237,63 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// </summary>
     public class MultilineSpan : ISpan, IEnumerable<ISpan>
     {
-        private readonly List<ISpan> _spans = [];
-        private readonly ExpandableBounds _bounds = new();
+        private readonly List<ISpan> _spans;
 
         /// <summary>
-        /// Gets or sets the line spacing.
+        /// Gets the line increment.
         /// </summary>
         public double LineIncrement { get; }
 
         /// <summary>
-        /// Alignment. If less than 0, the text is left-aligned. If it is 0 it is centered, otherwise it is right-aligned.
+        /// Gets the alignment.
         /// </summary>
         public double Align { get; }
 
         /// <inheritdoc />
-        public SpanBounds Bounds => new(_bounds.Bounds, _bounds.Bounds.Right);
+        public Vector2 Offset { get; private set; }
+
+        /// <inheritdoc />
+        public SpanBounds Bounds { get; }
 
         /// <summary>
         /// Creates a new <see cref="MultilineSpan"/>.
         /// </summary>
         /// <param name="lineIncrement">The increment in y-direction for each span.</param>
-        public MultilineSpan(double lineIncrement, double align)
+        public MultilineSpan(IEnumerable<ISpan> spans, double lineIncrement, double align)
         {
+            _spans = spans?.ToList() ?? throw new ArgumentNullException(nameof(spans));
             LineIncrement = lineIncrement;
             Align = align;
-            _bounds.Expand(new Vector2());
-        }
 
-        /// <summary>
-        /// Adds a new span line to the span.
-        /// </summary>
-        /// <param name="span">The span.</param>
-        public void Add(ISpan span)
-        {
-            double y = LineIncrement * _spans.Count;
-            _spans.Add(span);
-            _bounds.Expand(new Vector2(0, y + span.Bounds.Bounds.Top), new Vector2(span.Bounds.Bounds.Width, y + span.Bounds.Bounds.Bottom));
+            var bounds = new ExpandableBounds();
+            double y = 0.0, advance = 0.0;
+            foreach (var span in spans)
+            {
+                bounds.Expand(
+                    new Vector2(0, y + span.Bounds.Bounds.Top), 
+                    new Vector2(span.Bounds.Bounds.Width, y + span.Bounds.Bounds.Bottom));
+                advance = Math.Max(advance, span.Bounds.Advance);
+                y += LineIncrement;
+            }
+            Bounds = new(bounds.Bounds, advance);
         }
 
         /// <inheritdoc />
-        public void Update(Vector2 offset)
+        public void SetOffset(Vector2 offset)
         {
+            Offset = offset;
             double y = offset.Y;
             foreach (var span in _spans)
             {
                 // Deal with X-direction alignment
                 double x = offset.X;
                 if (Align.IsZero())
-                    x += (_bounds.Bounds.Width - span.Bounds.Bounds.Width) * 0.5 - span.Bounds.Bounds.Left;
+                    x += (Bounds.Bounds.Width - span.Bounds.Bounds.Width) * 0.5 - span.Bounds.Bounds.Left;
                 else if (Align < 0)
-                    x += _bounds.Bounds.Right - span.Bounds.Bounds.Right;
+                    x += Bounds.Bounds.Right - span.Bounds.Bounds.Right;
                 else
                     x -= span.Bounds.Bounds.Left;
-                span.Update(new Vector2(x, y));
+                span.SetOffset(new Vector2(x, y));
                 y += LineIncrement;
             }
         }
@@ -299,9 +338,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// </summary>
         public double Thickness { get; } = thickness;
 
-        /// <summary>
-        /// Gets the offset.
-        /// </summary>
+        /// <inheritdoc />
         public Vector2 Offset { get; private set; }
 
         /// <summary>
@@ -315,9 +352,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public Vector2 End { get; private set; }
 
         /// <inheritdoc />
-        public void Update(Vector2 offset)
+        public void SetOffset(Vector2 offset)
         {
-            Base.Update(offset);
+            Base.SetOffset(offset);
             Offset = offset;
 
             double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5;
@@ -377,9 +414,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public Vector2 End { get; private set; }
 
         /// <inheritdoc />
-        public void Update(Vector2 offset)
+        public void SetOffset(Vector2 offset)
         {
-            Base.Update(offset);
+            Base.SetOffset(offset);
             Offset = offset;
 
             double y = offset.Y + Base.Bounds.Bounds.Bottom + Margin + Thickness * 0.5;
