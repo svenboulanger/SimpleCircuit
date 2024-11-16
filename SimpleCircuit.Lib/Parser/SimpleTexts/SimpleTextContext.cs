@@ -10,23 +10,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// <remarks>
     /// Creates a new <see cref="SimpleTextContext"/>.
     /// </remarks>
-    public class SimpleTextContext(XmlNode parent, ITextMeasurer measurer)
+    public class SimpleTextContext(ITextMeasurer measurer)
     {
-        /// <summary>
-        /// Gets the document.
-        /// </summary>
-        public XmlDocument Document { get; } = parent.OwnerDocument;
-
-        /// <summary>
-        /// Gets the parent node.
-        /// </summary>
-        public XmlNode Parent { get; } = parent ?? throw new ArgumentNullException(nameof(parent));
-
-        /// <summary>
-        /// Gets the current line.
-        /// </summary>
-        public XmlNode Text { get; set; }
-
         /// <summary>
         /// Gets the text measurer.
         /// </summary>
@@ -41,6 +26,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// Gets or sets the font size.
         /// </summary>
         public double FontSize { get; set; } = 4.0;
+
+        /// <summary>
+        /// Gets or sets whether the text is bold.
+        /// </summary>
+        public bool IsBold { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the line spacing.

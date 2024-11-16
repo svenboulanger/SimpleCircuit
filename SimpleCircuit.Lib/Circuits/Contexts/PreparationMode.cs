@@ -11,6 +11,11 @@
         Orientation,
 
         /// <summary>
+        /// The mode of preparation for resolving sizes. This can involve measuring/generate text spans.
+        /// </summary>
+        Sizes,
+
+        /// <summary>
         /// The mode of preparation for resolving (local) offsets. Might be for spacing.
         /// </summary>
         Offsets,

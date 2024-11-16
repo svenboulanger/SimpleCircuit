@@ -15,8 +15,9 @@
         /// the origin being the start of the baseline of the text.
         /// </summary>
         /// <param name="text">The text.</param>
+        /// <param name="isBold">If <c>true</c>, the text is bold text.</param>
         /// <param name="size">The size.</param>
         /// <returns>The bounds.</returns>
-        public SpanBounds Measure(string text, double size);
+        public SpanBounds Measure(string text, bool isBold, double size);
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace SimpleCircuit.Components.Labeling
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Parser.SimpleTexts;
+
+namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// Label information.
@@ -9,6 +12,11 @@
         /// Gets or sets the value of the label.
         /// </summary>
         public string Value { get; set; }
+
+        /// <summary>
+        /// Gets the formatted text.
+        /// </summary>
+        public ISpan Formatted { get; private set; }
 
         /// <summary>
         /// Gets or sets the location description of the label that is used as the reference.
@@ -35,5 +43,14 @@
         /// If <c>null</c>, the default expansion direction is used.
         /// </summary>
         public Vector2? Expand { get; set; }
+
+        /// <summary>
+        /// Formats the label.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        public void Format(IPrepareContext context)
+        {
+            Formatted = context.Format(Value, Size);
+        }
     }
 }

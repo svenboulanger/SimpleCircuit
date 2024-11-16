@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser.SimpleTexts
+﻿using System.Collections.Generic;
+
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// Parser methods for SimpleCircuit text.
@@ -12,15 +14,15 @@
         /// <param name="context">The context.</param>
         public static ISpan Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            var result = new MultilineSpan(context.FontSize * context.LineSpacing, context.Align);
+            var lines = new List<ISpan>();
 
             // Parse lines
             while (lexer.Type != TokenType.EndOfContent)
             {
-                result.Add(ParseLine(lexer, context));
+                lines.Add(ParseLine(lexer, context));
                 lexer.Branch(TokenType.Newline);
             }
-            return result;
+            return new MultilineSpan(lines, context.FontSize * context.LineSpacing, context.Align);
         }
         private static ISpan ParseLine(SimpleTextLexer lexer, SimpleTextContext context)
         {
@@ -41,53 +43,50 @@
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
                 double oldFontSize = context.FontSize;
-                var s = new SubscriptSuperscriptSpan(result, 0.5 * context.FontSize)
-                {
-                    Margin = new(0, 0.05 * context.FontSize)
-                };
+                ISpan sub = null, super = null;
                 context.FontSize *= 0.8;
                 if (lexer.Branch(TokenType.Subscript))
                 {
                     if (lexer.Branch(TokenType.OpenBracket))
                     {
-                        s.Sub = ParseBlockSegment(lexer, context);
+                        sub = ParseBlockSegment(lexer, context);
                         lexer.Branch(TokenType.CloseBracket);
                     }
                     else
-                        s.Sub = ParseSegment(lexer, context);
+                        sub = ParseSegment(lexer, context);
                     if (lexer.Branch(TokenType.Superscript))
                     {
                         if (lexer.Branch(TokenType.OpenBracket))
                         {
-                            s.Super = ParseBlockSegment(lexer, context);
+                            super = ParseBlockSegment(lexer, context);
                             lexer.Branch(TokenType.CloseBracket);
                         }
                         else
-                            s.Super = ParseSegment(lexer, context);
+                            super = ParseSegment(lexer, context);
                     }
                 }
                 else if (lexer.Branch(TokenType.Superscript))
                 {
                     if (lexer.Branch(TokenType.OpenBracket))
                     {
-                        s.Super = ParseBlockSegment(lexer, context);
+                        super = ParseBlockSegment(lexer, context);
                         lexer.Branch(TokenType.CloseBracket);
                     }
                     else
-                        s.Super = ParseLine(lexer, context);
+                        super = ParseLine(lexer, context);
                     if (lexer.Branch(TokenType.Subscript))
                     {
                         if (lexer.Branch(TokenType.OpenBracket))
                         {
-                            s.Sub = ParseBlockSegment(lexer, context);
+                            sub = ParseBlockSegment(lexer, context);
                             lexer.Branch(TokenType.CloseBracket);
                         }
                         else
-                            s.Sub = ParseBlockSegment(lexer, context);
+                            sub = ParseBlockSegment(lexer, context);
                     }
                 }
                 context.FontSize = oldFontSize;
-                return s;
+                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.FontSize, new(0, 0.05 * context.FontSize));
             }
             return result;
         }
@@ -191,7 +190,7 @@
             // Measure the contents
             string content = context.Builder.ToString();
             context.Builder.Clear();
-            var bounds = context.Measurer.Measure(content, context.FontSize);
+            var bounds = context.Measurer.Measure(content, context.IsBold, context.FontSize);
 
             // Return the span
             return new TextSpan(content, context.Measurer.FontFamily, false, context.FontSize, bounds);

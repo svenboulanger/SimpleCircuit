@@ -1,5 +1,7 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser.SimpleTexts;
 using System;
 
 namespace SimpleCircuit.Circuits.Contexts
@@ -12,7 +14,7 @@ namespace SimpleCircuit.Circuits.Contexts
     /// </remarks>
     /// <param name="circuit">The circuit.</param>
     /// <param name="diagnostics">The diagnostics.</param>
-    public class PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics) : IPrepareContext
+    public class PrepareContext(GraphicalCircuit circuit, ITextMeasurer measurer, IDiagnosticHandler diagnostics) : IPrepareContext
     {
         private readonly GraphicalCircuit _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
 
@@ -31,12 +33,23 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public NodeGrouper Groups { get; } = new();
 
+
         /// <inheritdoc />
         public ICircuitPresence Find(string name)
         {
             if (_circuit.TryGetValue(name, out var result))
                 return result;
             return null;
+        }
+
+        /// <inheritdoc />
+        public ISpan Format(string content, double fontSize = 4.0, bool isBold = false, GraphicOptions options = null)
+        {
+            var lexer = new SimpleTextLexer(content);
+            var context = new SimpleTextContext(measurer);
+            context.FontSize = fontSize;
+            context.IsBold = isBold;
+            return SimpleTextParser.Parse(lexer, context);
         }
     }
 }

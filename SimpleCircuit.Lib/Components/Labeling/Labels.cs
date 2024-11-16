@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using SimpleCircuit.Circuits.Contexts;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Labeling
@@ -51,6 +52,16 @@ namespace SimpleCircuit.Components.Labeling
 
         /// <inheritdoc />
         public int Count => _labels.Count;
+
+        /// <summary>
+        /// Formats the labels.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        public void Format(IPrepareContext context)
+        {
+            foreach (var label in _labels)
+                label.Format(context);
+        }
 
         /// <inheritdoc />
         public IEnumerator<LabelInfo> GetEnumerator() => _labels.GetEnumerator();

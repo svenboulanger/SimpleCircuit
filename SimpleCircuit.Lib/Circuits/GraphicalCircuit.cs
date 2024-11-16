@@ -210,6 +210,11 @@ namespace SimpleCircuit
             if (!PrepareCycle(presences, context))
                 return false;
 
+            // Prepare measurements
+            context.Mode = PreparationMode.Sizes;
+            if (!PrepareCycle(presences, context))
+                return false;
+
             // Prepare offsets
             context.Mode = PreparationMode.Offsets;
             if (!PrepareCycle(presences, context))

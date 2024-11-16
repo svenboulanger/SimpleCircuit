@@ -638,10 +638,9 @@ namespace SimpleCircuit.Components.Builders
                 x -= bounds.Right;
             else
                 x -= bounds.Left;
-            span.Update(new Vector2(x, y));
 
             // Make the SVG for the text
-            BuildTextSVG(span, _current, text);
+            BuildTextSVG(new(x, y), span, _current, text);
 
             // Return the offset bounds
             _bounds.Expand(bounds + new Vector2(x, y));
@@ -689,10 +688,9 @@ namespace SimpleCircuit.Components.Builders
                 x -= bounds.Right;
             else
                 x -= bounds.Left;
-            span.Update(new Vector2(x, y));
 
             // Make the SVG for the text
-            BuildTextSVG(span, _current, text);
+            BuildTextSVG(new(x, y), span, _current, text);
 
             // Return the offset bounds
             var r = new Vector2(x, y) + bounds;
@@ -700,7 +698,7 @@ namespace SimpleCircuit.Components.Builders
             return this;
         }
 
-        private void BuildTextSVG(ISpan span, XmlNode parent, XmlElement current)
+        private void BuildTextSVG(Vector2 offset, ISpan span, XmlNode parent, XmlElement current)
         {
             if (span is null)
                 return;
@@ -711,8 +709,8 @@ namespace SimpleCircuit.Components.Builders
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
                         element.SetAttribute("style", $"font-family:{textSpan.FontFamily};font-size:{textSpan.Size.ToSVG()}pt;font-weight:{(textSpan.Bold ? "bold" : "normal")};");
-                        element.SetAttribute("x", textSpan.Offset.X.ToSVG());
-                        element.SetAttribute("y", textSpan.Offset.Y.ToSVG());
+                        element.SetAttribute("x", offset.X + textSpan.Offset.X.ToSVG());
+                        element.SetAttribute("y", offset.Y + textSpan.Offset.Y.ToSVG());
                         element.InnerXml = textSpan.Content;
                         current.AppendChild(element);
                     }
@@ -721,30 +719,30 @@ namespace SimpleCircuit.Components.Builders
                 case LineSpan lineSpan:
                     {
                         foreach (var s in lineSpan)
-                            BuildTextSVG(s, parent, current);
+                            BuildTextSVG(offset, s, parent, current);
                     }
                     break;
 
                 case MultilineSpan multilineSpan:
                     {
                         foreach (var s in multilineSpan)
-                            BuildTextSVG(s, parent, current);
+                            BuildTextSVG(offset, s, parent, current);
                     }
                     break;
 
                 case SubscriptSuperscriptSpan subSuperSpan:
                     {
-                        BuildTextSVG(subSuperSpan.Base, parent, current);
-                        BuildTextSVG(subSuperSpan.Sub, parent, current);
-                        BuildTextSVG(subSuperSpan.Super, parent, current);
+                        BuildTextSVG(offset, subSuperSpan.Base, parent, current);
+                        BuildTextSVG(offset, subSuperSpan.Sub, parent, current);
+                        BuildTextSVG(offset, subSuperSpan.Super, parent, current);
                     }
                     break;
 
                 case OverlineSpan overlineSpan:
                     {
                         Path(b => b
-                            .MoveTo(overlineSpan.Start)
-                            .LineTo(overlineSpan.End),
+                            .MoveTo(offset + overlineSpan.Start)
+                            .LineTo(offset + overlineSpan.End),
                             new() { Style = $"stroke-width:{overlineSpan.Thickness.ToSVG()}pt;fill:none;" });
                     }
                     break;
@@ -752,8 +750,8 @@ namespace SimpleCircuit.Components.Builders
                 case UnderlineSpan underlineSpan:
                     {
                         Path(b => b
-                            .MoveTo(underlineSpan.Start)
-                            .LineTo(underlineSpan.End),
+                            .MoveTo(offset + underlineSpan.Start)
+                            .LineTo(offset + underlineSpan.End),
                             new() { Style = $"stroke-width:{underlineSpan.Thickness.ToSVG()}pt;fill:none;" });
                     }
                     break;
