@@ -106,6 +106,10 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
+            var result = base.Prepare(context);
+            if (result == PresenceResult.GiveUp)
+                return result;
+
             // Find the pins
             if (_p2w is null)
             {

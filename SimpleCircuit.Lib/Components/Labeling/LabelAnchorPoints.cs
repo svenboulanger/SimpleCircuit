@@ -35,7 +35,10 @@ namespace SimpleCircuit.Components.Labeling
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label
-                builder.Text(label.Value, location, expand, size: label.Size, lineSpacing: label.LineSpacing, options: anchor.Options);
+                if (label.Formatted is null)
+                    builder.Text(label.Value, location, expand, size: label.Size, lineSpacing: label.LineSpacing, options: anchor.Options);
+                else
+                    builder.Text(label.Formatted, location, expand, options: anchor.Options);
             }
         }
     }

@@ -55,7 +55,10 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
-            var result = PresenceResult.Success;
+            var result = base.Prepare(context);
+            if (result == PresenceResult.GiveUp)
+                return result;
+
             for (int i = 0; i < Pins.Count; i++)
             {
                 var r = Pins[i].Prepare(context);
