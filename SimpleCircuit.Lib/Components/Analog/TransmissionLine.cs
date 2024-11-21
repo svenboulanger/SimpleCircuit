@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
@@ -49,9 +49,6 @@ namespace SimpleCircuit.Components.Analog
                     .SmoothTo(new(-inner + _rx, _ky), new(-inner + _rx, 0))
                     .SmoothTo(new(-inner + _kx, -_height), new(-inner, -_height));
             }
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The length of the transmission line.")]
             [Alias("l")]
@@ -109,7 +106,7 @@ namespace SimpleCircuit.Components.Analog
                 // Transmission line
                 builder.Path(DrawShape);
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

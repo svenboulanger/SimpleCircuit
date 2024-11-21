@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A list of label anchor points that can be used for a circle.
     /// </summary>
-    public class EllipseLabelAnchorPoints : LabelAnchorPoints<IEllipseLabeled>
+    public class EllipseLabelAnchorPoints : LabelAnchorPoints<IEllipseDrawable>
     {
         /// <summary>
         /// Gets the ellipse label anchor points.
@@ -24,7 +24,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IEllipseLabeled subject, string name, out LabelAnchorPoint value)
+        public override bool TryCalculate(IEllipseDrawable subject, string name, out LabelAnchorPoint value)
         {
             switch (name)
             {

@@ -29,14 +29,11 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -5), new(0, -1)),
                 new LabelAnchorPoint(new(0, 5), new(0, 1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "diode";
@@ -152,7 +149,7 @@ namespace SimpleCircuit.Components.Analog
                     builder.Line(p1.Offset, p2.Offset, new("stroke"));
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
 
             private void DrawJunctionDiode(IGraphicsBuilder builder)

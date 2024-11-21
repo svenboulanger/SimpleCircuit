@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -17,6 +18,11 @@ namespace SimpleCircuit.Components
         /// Gets the variants.
         /// </summary>
         public VariantSet Variants { get; }
+
+        /// <summary>
+        /// Gets the labels.
+        /// </summary>
+        public Labels Labels { get; }
 
         /// <summary>
         /// Gets the pins.

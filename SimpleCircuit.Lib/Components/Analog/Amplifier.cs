@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Analog
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled
+        private class Instance(string name) : ScaledOrientedDrawable(name)
         {
             private readonly static Vector2
                 _supplyPos = new(-2, -5),
@@ -55,9 +55,6 @@ namespace SimpleCircuit.Components.Analog
                 new LabelAnchorPoint(new(-2.5, 0), new()),
                 new LabelAnchorPoint(new(2, -5), new(1, -1))
                 );
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "amplifier";
@@ -179,7 +176,7 @@ namespace SimpleCircuit.Components.Analog
                             .LineTo(new(1, -2));
                     });
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

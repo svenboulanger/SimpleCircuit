@@ -40,7 +40,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         }
 
         /// <inheritdoc />
-        public SpanBounds Measure(string text, double size)
+        public SpanBounds Measure(string text, bool isBold, double size)
         {
             // Check whether the font needs to be loaded
             if (_reload)
@@ -55,6 +55,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
             // Measure
             _font.Size = (float)size * 4f / 3f;
+            _font.Embolden = isBold;
             var glyphs = _typeface.GetGlyphs(text);
             float advance = _font.MeasureText(glyphs, out var bounds);
             return new SpanBounds(new Bounds(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom), advance);

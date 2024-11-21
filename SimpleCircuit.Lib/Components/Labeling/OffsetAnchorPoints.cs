@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components.Labeling
     /// </remarks>
     /// <param name="anchors">The anchors.</param>
     /// <param name="offset">The offset.</param>
-    public class OffsetAnchorPoints<T>(ILabelAnchorPoints<T> anchors, int offset) : LabelAnchorPoints<T> where T : ILabeled
+    public class OffsetAnchorPoints<T>(ILabelAnchorPoints<T> anchors, int offset) : LabelAnchorPoints<T> where T : IDrawable
     {
         private readonly ILabelAnchorPoints<T> _anchors = anchors ?? throw new ArgumentNullException(nameof(anchors));
         private readonly int _offset = offset;

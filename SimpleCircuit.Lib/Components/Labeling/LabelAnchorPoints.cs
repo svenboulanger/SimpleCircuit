@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A list of default placements for labels.
     /// </summary>
-    public abstract class LabelAnchorPoints<T> : ILabelAnchorPoints<T> where T : ILabeled
+    public abstract class LabelAnchorPoints<T> : ILabelAnchorPoints<T> where T : IDrawable
     {
         /// <inheritdoc />
         public abstract int Count { get; }

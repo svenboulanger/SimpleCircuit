@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.General
         /// <param name="drawing">The XML data describing the node.</param>
         /// <param name="scale">The scale of the instance.</param>
         /// <param name="pins">The pins of the instance.</param>
-        private class Instance(string type, string name, XmlNode pins, XmlNode drawing) : ScaledOrientedDrawable(name), ILabeled
+        private class Instance(string type, string name, XmlNode pins, XmlNode drawing) : ScaledOrientedDrawable(name)
         {
             private readonly XmlNode _drawing = drawing, _pins = pins;
             private readonly List<int> _extend = [];
@@ -85,9 +85,6 @@ namespace SimpleCircuit.Components.General
 
             /// <inheritdoc />
             public override string Type { get; } = type;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)

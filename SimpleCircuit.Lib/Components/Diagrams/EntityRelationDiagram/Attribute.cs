@@ -16,11 +16,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// Creates a new attribute.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IEllipseLabeled
+        private class Instance(string name) : DiagramBlockInstance(name), IEllipseDrawable
         {
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
-
             /// <inheritdoc />
             public override string Type => "attribute";
 
@@ -42,9 +39,9 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IEllipseLabeled.Center => new();
-            double IEllipseLabeled.RadiusX => Width * 0.5;
-            double IEllipseLabeled.RadiusY => Height * 0.5;
+            Vector2 IEllipseDrawable.Center => new();
+            double IEllipseDrawable.RadiusX => Width * 0.5;
+            double IEllipseDrawable.RadiusY => Height * 0.5;
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)

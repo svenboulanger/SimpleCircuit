@@ -26,16 +26,13 @@ namespace SimpleCircuit.Components.Analog
             };
         }
 
-        private class Npn : ScaledOrientedDrawable, ILabeled
+        private class Npn : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -3), new(0, -1)));
 
             /// <inheritdoc />
             public override string Type => "npn";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Creates a new <see cref="Npn"/>.
@@ -66,16 +63,13 @@ namespace SimpleCircuit.Components.Analog
                     builder.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
-        private class Pnp : ScaledOrientedDrawable, ILabeled
+        private class Pnp : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -3), new(0, -1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "pnp";
@@ -109,7 +103,7 @@ namespace SimpleCircuit.Components.Analog
                     builder.Circle(new(), 8.0);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

@@ -174,15 +174,12 @@ namespace SimpleCircuit
                 rb.CornerRadius = CornerRadius;
 
             // Labels
-            if (drawable is IBoxLabeled bl)
+            if (drawable is IBoxDrawable bl)
                 bl.LabelMargin = LabelMargin;
-            if (drawable is IEllipseLabeled el)
+            if (drawable is IEllipseDrawable el)
                 el.LabelMargin = LabelMargin;
-            if (drawable is ILabeled l)
-            {
-                l.Labels.FontSize = FontSize;
-                l.Labels.LineSpacing = LineSpacing;
-            }
+            drawable.Labels.FontSize = FontSize;
+            drawable.Labels.LineSpacing = LineSpacing;
 
             // Handle default variants
             if (_includes.TryGetValue(key, out var set))

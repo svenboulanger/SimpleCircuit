@@ -66,10 +66,10 @@ namespace SimpleCircuit.Parser
             }
 
             // Handle the labels
-            if (Labels.Count > 0 && _annotation is ILabeled labeled)
+            if (Labels.Count > 0)
             {
                 for (int i = 0; i < Labels.Count; i++)
-                    labeled.Labels[i].Value = Labels[i].Content[1..^1].ToString();
+                    _annotation.Labels[i].Value = Labels[i].Content[1..^1].ToString();
             }
 
             // Handle variants

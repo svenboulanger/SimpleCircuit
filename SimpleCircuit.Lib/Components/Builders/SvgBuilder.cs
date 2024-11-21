@@ -664,11 +664,10 @@ namespace SimpleCircuit.Components.Builders
             // Parse the text value
             value = value.Replace("<", "&lt;").Replace(">", "&gt;");
             var lexer = new SimpleTextLexer(value);
-            var context = new SimpleTextContext(_current, Measurer)
+            var context = new SimpleTextContext(Measurer)
             {
                 FontSize = size,
                 LineSpacing = lineSpacing,
-                Text = text,
                 Align = expand.X
             };
             var span = SimpleTextParser.Parse(lexer, context);
@@ -709,8 +708,8 @@ namespace SimpleCircuit.Components.Builders
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
                         element.SetAttribute("style", $"font-family:{textSpan.FontFamily};font-size:{textSpan.Size.ToSVG()}pt;font-weight:{(textSpan.Bold ? "bold" : "normal")};");
-                        element.SetAttribute("x", offset.X + textSpan.Offset.X.ToSVG());
-                        element.SetAttribute("y", offset.Y + textSpan.Offset.Y.ToSVG());
+                        element.SetAttribute("x", (offset.X + textSpan.Offset.X).ToSVG());
+                        element.SetAttribute("y", (offset.Y + textSpan.Offset.Y).ToSVG());
                         element.InnerXml = textSpan.Content;
                         current.AppendChild(element);
                     }

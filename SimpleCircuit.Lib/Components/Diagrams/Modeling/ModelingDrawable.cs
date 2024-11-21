@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
     /// A generic drawable used for modeling block diagrams.
     /// These blocks don't have an orientation, but they can be square or circular and have 8 pins in all major directions.
     /// </summary>
-    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxLabeled, IEllipseLabeled, IRoundedBox
+    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxDrawable, IEllipseDrawable, IRoundedBox
     {
         public const string Square = "square";
 
@@ -26,14 +26,11 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         [Alias("radius")]
         public double CornerRadius { get; set; }
 
-        /// <inheritdoc />
-        public Labels Labels { get; } = new Labels();
-
-        Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Size, Size);
-        Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Size, Size);
-        Vector2 IEllipseLabeled.Center => new();
-        double IEllipseLabeled.RadiusX => 0.5 * Size;
-        double IEllipseLabeled.RadiusY => 0.5 * Size;
+        Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(Size, Size);
+        Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Size, Size);
+        Vector2 IEllipseDrawable.Center => new();
+        double IEllipseDrawable.RadiusX => 0.5 * Size;
+        double IEllipseDrawable.RadiusY => 0.5 * Size;
 
         /// <summary>
         /// Creates a new <see cref="ModelingDrawable"/>.
@@ -61,9 +58,9 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected void DrawLabels(IGraphicsBuilder builder)
         {
             if (Variants.Contains(Square))
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             else
-                new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this);
         }
 
         /// <inheritdoc />

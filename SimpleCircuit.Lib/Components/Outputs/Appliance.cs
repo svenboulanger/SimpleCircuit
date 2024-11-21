@@ -32,19 +32,16 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled, IRoundedBox
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable, IRoundedBox
         {
             private const double _k = 0.5522847498;
-            private readonly static ILabelAnchorPoints<IBoxLabeled> _anchors = new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1);
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
+            private readonly static ILabelAnchorPoints<IBoxDrawable> _anchors = new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1);
 
             /// <inheritdoc />
             public override string Type => "appliance";
 
-            Vector2 IBoxLabeled.TopLeft => new(0, -8);
-            Vector2 IBoxLabeled.BottomRight => new(16, 8);
+            Vector2 IBoxDrawable.TopLeft => new(0, -8);
+            Vector2 IBoxDrawable.BottomRight => new(16, 8);
 
             [Description("The round-off corner radius.")]
             [Alias("r")]

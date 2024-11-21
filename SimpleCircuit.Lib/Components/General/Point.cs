@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : LocatedDrawable, ILabeled
+        private class Instance : LocatedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
 
@@ -28,9 +28,6 @@ namespace SimpleCircuit.Components
             [Alias("d")]
             [Alias("l")]
             public double Distance { get; set; } = 3.0;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "point";

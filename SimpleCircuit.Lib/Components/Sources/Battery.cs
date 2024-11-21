@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Sources
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -8), new(0, -1)),
@@ -24,9 +24,6 @@ namespace SimpleCircuit.Components.Sources
 
             private int _cells = 1;
             private double Length => _cells * 4 - 2;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The number of cells.")]
             [Alias("c")]

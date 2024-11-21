@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components.Labeling
     /// Creates a new list of anchor points.
     /// </remarks>
     /// <param name="points">The points.</param>
-    public class CustomLabelAnchorPoints(params LabelAnchorPoint[] points) : LabelAnchorPoints<ILabeled>
+    public class CustomLabelAnchorPoints(params LabelAnchorPoint[] points) : LabelAnchorPoints<IDrawable>
     {
         private readonly LabelAnchorPoint[] _points = points ?? throw new ArgumentNullException(nameof(points));
 
@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(ILabeled subject, string name, out LabelAnchorPoint value)
+        public override bool TryCalculate(IDrawable subject, string name, out LabelAnchorPoint value)
             => TryCalculate(name, out value);
 
         /// <summary>

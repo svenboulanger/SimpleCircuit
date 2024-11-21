@@ -16,15 +16,11 @@ namespace SimpleCircuit.Components.Wires
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -4), new(0, -1)),
                 new LabelAnchorPoint(new(0, 4), new(0, 1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;

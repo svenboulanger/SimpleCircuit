@@ -15,15 +15,15 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
             private const string _differentialOutput = "diffout";
             private const string _swapOutput = "swapout";
 
-            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
-            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            Vector2 IBoxDrawable.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxDrawable.BottomRight => new(Width * 0.5, Height * 0.5);
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
@@ -36,9 +36,6 @@ namespace SimpleCircuit.Components.Analog
             [Description("The height of the ADC.")]
             [Alias("h")]
             public double Height { get; set; } = 12;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "adc";

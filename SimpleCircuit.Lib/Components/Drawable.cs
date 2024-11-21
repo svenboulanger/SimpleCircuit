@@ -25,6 +25,9 @@ namespace SimpleCircuit.Components
         public VariantSet Variants { get; } = [];
 
         /// <inheritdoc />
+        public Labels Labels { get; } = new();
+
+        /// <inheritdoc />
         public string Name { get; }
 
         /// <summary>
@@ -142,58 +145,55 @@ namespace SimpleCircuit.Components
                 return setter(drawable, propertyToken, value);
             else
             {
-                if (drawable is ILabeled labeled)
+                // Let's expose some special properties if there are labels at play
+                int index;
+                if (value is Vector2 vector)
                 {
-                    // Let's expose some special properties if there are labels at play
-                    int index;
-                    if (value is Vector2 vector)
+                    if (TryMatchIndexedProperty(property, "offset", out index))
                     {
-                        if (TryMatchIndexedProperty(property, "offset", out index))
-                        {
-                            labeled.Labels[index].Offset = vector;
-                            return true;
-                        }
-                        if (TryMatchIndexedProperty(property, "expand", out index))
-                        {
-                            labeled.Labels[index].Expand = vector / vector.Length;
-                            return true;
-                        }
+                        drawable.Labels[index].Offset = vector;
+                        return true;
                     }
-                    else if (value is double number)
+                    if (TryMatchIndexedProperty(property, "expand", out index))
                     {
-                        if ((number - Math.Round(number)).IsZero())
-                        {
-                            // Integer-only
-                            if (TryMatchIndexedProperty(property, "anchor", out index))
-                            {
-                                labeled.Labels[index].Location = ((int)Math.Round(number)).ToString();
-                                return true;
-                            }
-                        }
-                        if (TryMatchIndexedProperty(property, "size", out index))
-                        {
-                            labeled.Labels[index].Size = number;
-                            return true;
-                        }
-                        if (TryMatchIndexedProperty(property, "linespacing", out index) ||
-                            TryMatchIndexedProperty(property, "ls", out index))
-                        {
-                            labeled.Labels[index].LineSpacing = number;
-                            return true;
-                        }
+                        drawable.Labels[index].Expand = vector / vector.Length;
+                        return true;
                     }
-                    if (value is string label)
+                }
+                else if (value is double number)
+                {
+                    if ((number - Math.Round(number)).IsZero())
                     {
-                        if (TryMatchIndexedProperty(property, "label", out index))
-                        {
-                            labeled.Labels[index].Value = label;
-                            return true;
-                        }
+                        // Integer-only
                         if (TryMatchIndexedProperty(property, "anchor", out index))
                         {
-                            labeled.Labels[index].Location = label;
+                            drawable.Labels[index].Location = ((int)Math.Round(number)).ToString();
                             return true;
                         }
+                    }
+                    if (TryMatchIndexedProperty(property, "size", out index))
+                    {
+                        drawable.Labels[index].Size = number;
+                        return true;
+                    }
+                    if (TryMatchIndexedProperty(property, "linespacing", out index) ||
+                        TryMatchIndexedProperty(property, "ls", out index))
+                    {
+                        drawable.Labels[index].LineSpacing = number;
+                        return true;
+                    }
+                }
+                if (value is string label)
+                {
+                    if (TryMatchIndexedProperty(property, "label", out index))
+                    {
+                        drawable.Labels[index].Value = label;
+                        return true;
+                    }
+                    if (TryMatchIndexedProperty(property, "anchor", out index))
+                    {
+                        drawable.Labels[index].Location = label;
+                        return true;
                     }
                 }
 
@@ -279,7 +279,14 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
+        public virtual PresenceResult Prepare(IPrepareContext context)
+        {
+            if (context.Mode == PreparationMode.Sizes)
+            {
+                Labels.Format(context);
+            }
+            return PresenceResult.Success;
+        }
 
         /// <summary>
         /// Creates a transform.

@@ -22,7 +22,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 lines.Add(ParseLine(lexer, context));
                 lexer.Branch(TokenType.Newline);
             }
-            return new MultilineSpan(lines, context.FontSize * context.LineSpacing, context.Align);
+            var result = new MultilineSpan(lines, context.FontSize * context.LineSpacing, context.Align);
+            result.SetOffset(default);
+            return result;
         }
         private static ISpan ParseLine(SimpleTextLexer lexer, SimpleTextContext context)
         {

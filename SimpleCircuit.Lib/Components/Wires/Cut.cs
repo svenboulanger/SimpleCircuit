@@ -12,16 +12,13 @@ namespace SimpleCircuit.Components.Wires
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -4), new(0, -1)),
                 new LabelAnchorPoint(new(0, 4), new(0, 1)));
             private const string _straight = "straight";
             private const string _none = "none";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The gap between the wires. The default is 2.")]
             [Alias("g")]

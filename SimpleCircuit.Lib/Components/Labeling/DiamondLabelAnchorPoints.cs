@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// Label anchor points for a diamond shape.
     /// </summary>
-    public class DiamondLabelAnchorPoints : LabelAnchorPoints<IBoxLabeled>
+    public class DiamondLabelAnchorPoints : LabelAnchorPoints<IBoxDrawable>
     {
         /// <summary>
         /// Gets the diamond label anchor points.
@@ -24,7 +24,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IBoxLabeled subject, string name, out LabelAnchorPoint value)
+        public override bool TryCalculate(IBoxDrawable subject, string name, out LabelAnchorPoint value)
         {
             Vector2 c = 0.5 * (subject.TopLeft + subject.BottomRight);
             Vector2 size = subject.BottomRight - subject.TopLeft;

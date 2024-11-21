@@ -19,11 +19,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// Creates a new entity.
         /// </summary>
         /// <param name="name">The name of the entity.</param>
-        private class Instance(string name) : LocatedDrawable(name), ILabeled, IRoundedBox
+        private class Instance(string name) : LocatedDrawable(name), IRoundedBox
         {
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
-
             /// <inheritdoc />
             public override string Type => "entity";
 

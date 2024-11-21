@@ -19,13 +19,10 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(6, -1), new(1, -1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "plug";

@@ -23,15 +23,12 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
             private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.AREI;

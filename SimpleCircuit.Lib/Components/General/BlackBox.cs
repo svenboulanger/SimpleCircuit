@@ -33,7 +33,7 @@ namespace SimpleCircuit.Components
             return instance;
         }
 
-        protected class Instance : ILocatedDrawable, ILabeled, IBoxLabeled, IRoundedBox
+        protected class Instance : ILocatedDrawable, IBoxDrawable, IRoundedBox
         {
             private readonly PinCollection _pins;
 
@@ -92,8 +92,8 @@ namespace SimpleCircuit.Components
             [Description("The font size of the port labels.")]
             public double TextSize { get; set; } = 4.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(Location.X, Location.Y);
-            Vector2 IBoxLabeled.BottomRight => new(EndLocation.X, EndLocation.Y);
+            Vector2 IBoxDrawable.TopLeft => new(Location.X, Location.Y);
+            Vector2 IBoxDrawable.BottomRight => new(EndLocation.X, EndLocation.Y);
 
             [Description("The round-off corner radius.")]
             [Alias("r")]

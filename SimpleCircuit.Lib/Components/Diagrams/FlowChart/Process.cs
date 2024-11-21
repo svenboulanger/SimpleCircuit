@@ -17,15 +17,12 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// Creates a new instance.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IBoxLabeled
+        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable
         {
             public const string Predefined = "predefined";
 
             /// <inheritdoc />
             public override string Type => "process";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Gets or sets the width.
@@ -50,8 +47,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Alias("radius")]
             public double CornerRadius { get; set; }
 
-            Vector2 IBoxLabeled.TopLeft => -0.5 * new Vector2(Width, Height);
-            Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
+            Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(Width, Height);
+            Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)

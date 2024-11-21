@@ -30,14 +30,11 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The number of poles on the switch.")]
             [Alias("p")]
@@ -128,7 +125,7 @@ namespace SimpleCircuit.Components.Analog
                     default: DrawSwitch(builder); break;
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
 
             private void DrawSwitch(IGraphicsBuilder builder)

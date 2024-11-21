@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// Creates a new instance.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint());
@@ -32,9 +32,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
 
             /// <inheritdoc />
             public override string Type => "io";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Gets or sets the width.

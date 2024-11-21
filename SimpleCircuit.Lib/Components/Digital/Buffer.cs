@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IStandardizedDrawable, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable, IBoxDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -4), new(0, -1)),
@@ -25,17 +25,14 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "buffer";
 
             /// <inheritdoc />
-            public Labels Labels { get; } = new();
-
-            /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(-5, -5);
-            Vector2 IBoxLabeled.BottomRight => new(5, 5);
+            Vector2 IBoxDrawable.TopLeft => new(-5, -5);
+            Vector2 IBoxDrawable.BottomRight => new(5, 5);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -100,7 +97,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-5, -5, 10, 10, new());
                 builder.Text("1", new(), new());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

@@ -41,11 +41,11 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new());
                 _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new());
                 if (Variants.Contains(Square))
-                    new AggregateAnchorPoints<IBoxLabeled>(_anchors,
-                        new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1)).Draw(builder, this);
+                    new AggregateAnchorPoints<IBoxDrawable>(_anchors,
+                        new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1)).Draw(builder, this);
                 else
-                    new AggregateAnchorPoints<IEllipseLabeled>(_anchors, 
-                        new OffsetAnchorPoints<IEllipseLabeled>(EllipseLabelAnchorPoints.Default, 1)).Draw(builder, this);
+                    new AggregateAnchorPoints<IEllipseDrawable>(_anchors, 
+                        new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1)).Draw(builder, this);
             }
         }
     }

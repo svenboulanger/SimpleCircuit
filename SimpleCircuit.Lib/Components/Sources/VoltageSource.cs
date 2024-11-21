@@ -15,7 +15,7 @@ namespace SimpleCircuit.Components.Sources
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
@@ -27,9 +27,6 @@ namespace SimpleCircuit.Components.Sources
             private const string _tri = "tri";
             private const string _step = "step";
             private const string _programmable = "programmable";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "vs";

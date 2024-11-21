@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes a circular item with a center and radius.
     /// </summary>
-    public interface IEllipseLabeled : ILabeled
+    public interface IEllipseDrawable : IDrawable
     {
         /// <summary>
         /// Gets the center of the ellipse.

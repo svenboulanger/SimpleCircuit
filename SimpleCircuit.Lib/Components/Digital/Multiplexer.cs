@@ -14,20 +14,17 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
             /// <inheritdoc />
             public override string Type => "mux";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(-5, -8);
-            Vector2 IBoxLabeled.BottomRight => new(5, 8);
+            Vector2 IBoxDrawable.TopLeft => new(-5, -8);
+            Vector2 IBoxDrawable.BottomRight => new(5, 8);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -56,7 +53,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                 builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

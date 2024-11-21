@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"T(""I_out"")";
+            var script = @"T(""I_out"") <r> R(""1k"") <r d> C(""1pF"") <d> GND";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

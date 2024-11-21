@@ -20,7 +20,7 @@ namespace SimpleCircuitOnline
         public string FontFamily { get; set; } = fontFamily;
 
         /// <inheritdoc />
-        public SpanBounds Measure(string text, double size)
+        public SpanBounds Measure(string text, bool isBold, double size)
         {
             // Make a piece of XML that allows measuring this element
             JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, FontFamily, size);

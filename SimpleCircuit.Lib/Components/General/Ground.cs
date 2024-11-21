@@ -26,16 +26,13 @@ namespace SimpleCircuit.Components
             return device;
         }
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
                 new LabelAnchorPoint(new(6, 0), new(1, 0)));
             /// <inheritdoc />
             public override string Type => "ground";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.

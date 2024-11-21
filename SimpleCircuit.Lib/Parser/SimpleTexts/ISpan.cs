@@ -193,17 +193,19 @@ namespace SimpleCircuit.Parser.SimpleTexts
             bounds.Expand(@base.Bounds.Bounds);
             if (sub is not null)
             {
+                Sub = sub;
                 var subLocation = new Vector2(
-                    @base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left,
-                    -halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
+                    @base.Bounds.Bounds.Right + Margin.X - sub.Bounds.Bounds.Left,
+                    -halfway + Margin.Y * 0.5 - sub.Bounds.Bounds.Top);
                 bounds.Expand(subLocation + sub.Bounds.Bounds);
                 advance = Math.Max(subLocation.X + sub.Bounds.Advance, advance);
             }
             if (super is not null)
             {
+                Super = super;
                 var superLocation = new Vector2(
-                    @base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left,
-                    -halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
+                    @base.Bounds.Bounds.Right + Margin.X - super.Bounds.Bounds.Left,
+                    -halfway - Margin.Y * 0.5 - super.Bounds.Bounds.Bottom);
                 bounds.Expand(superLocation + super.Bounds.Bounds);
                 advance = Math.Max(superLocation.X + super.Bounds.Advance, advance);
             }

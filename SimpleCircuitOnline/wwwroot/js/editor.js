@@ -278,8 +278,12 @@ const canvas_measure = document.getElementById('canvas');
 const context = canvas_measure.getContext('2d');
 const div_decode = document.getElementById('div_decode');
 
-function measureText(text, fontfamily, size) {
-    context.font = size + 'pt ' + fontfamily;
+function measureText(text, fontfamily, isbold, size) {
+    if (isbold) {
+        context.font = 'bold ' + size + 'pt ' + fontfamily;
+    } else {
+        context.font = size + 'pt ' + fontfamily;
+    }
     div_decode.innerHTML = text;
     var metrics = context.measureText(div_decode.innerText);
     div_decode.innerText = '';

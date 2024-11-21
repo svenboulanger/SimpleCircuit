@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// Creates a new instance.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IBoxLabeled
+        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable
         {
             private double _width = 30.0, _height = 15.0;
 
@@ -29,9 +29,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
 
             /// <inheritdoc />
             public override string Type => "document";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Gets or sets the width.
@@ -59,8 +56,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
-            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            Vector2 IBoxDrawable.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxDrawable.BottomRight => new(Width * 0.5, Height * 0.5);
 
             private void DrawPath(IPathBuilder builder)
             {

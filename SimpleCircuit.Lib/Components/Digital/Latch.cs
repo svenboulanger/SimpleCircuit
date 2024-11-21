@@ -14,20 +14,17 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
             /// <inheritdoc />
             public override string Type => "latch";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(-9, -12);
-            Vector2 IBoxLabeled.BottomRight => new(9, 12);
+            Vector2 IBoxDrawable.TopLeft => new(-9, -12);
+            Vector2 IBoxDrawable.BottomRight => new(9, 12);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -58,7 +55,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["nq"].Connections > 0)
                     builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

@@ -14,20 +14,17 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled, IBoxLabeled
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
             /// <inheritdoc />
             public override string Type => "flipflop";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => new(-9, -12);
-            Vector2 IBoxLabeled.BottomRight => new(9, 12);
+            Vector2 IBoxDrawable.TopLeft => new(-9, -12);
+            Vector2 IBoxDrawable.BottomRight => new(9, 12);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -69,7 +66,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["r"].Connections > 0)
                     builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

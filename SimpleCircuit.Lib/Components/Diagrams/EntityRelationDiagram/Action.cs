@@ -17,11 +17,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// Creates a new action.
         /// </summary>
         /// <param name="name">The name of the action.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled, IBoxLabeled, IRoundedDiamond
+        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable, IRoundedDiamond
         {
-            /// <inheritdoc />
-            public Labels Labels { get; } = new Labels();
-
             /// <inheritdoc />
             public override string Type => "action";
 
@@ -45,8 +42,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Alias("ry")]
             public double CornerRadiusY { get; set; }
 
-            Vector2 IBoxLabeled.TopLeft => new(-Width * 0.5, -Height * 0.5);
-            Vector2 IBoxLabeled.BottomRight => new(Width * 0.5, Height * 0.5);
+            Vector2 IBoxDrawable.TopLeft => new(-Width * 0.5, -Height * 0.5);
+            Vector2 IBoxDrawable.BottomRight => new(Width * 0.5, Height * 0.5);
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)

@@ -13,16 +13,13 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             => new Instance(name);
 
         /// <inheritdoc />
-        private class Instance(string name) : DiagramBlockInstance(name), ILabeled
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
             private double _width = 30.0, _height = 20.0;
 
             /// <inheritdoc />
             public override string Type => "terminator";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <summary>
             /// Gets or sets the width of the terminator.

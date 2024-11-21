@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
@@ -66,6 +67,9 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
 
+        /// <inheritdoc />
+        public Labels Labels { get; } = new();
+
         /// <summary>
         /// Creates a new instance for a block diagram.
         /// </summary>
@@ -105,6 +109,10 @@ namespace SimpleCircuit.Components.Diagrams
             {
                 case PreparationMode.Offsets:
                     UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
+                    break;
+
+                case PreparationMode.Sizes:
+                    Labels.Format(context);
                     break;
             }
 

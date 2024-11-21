@@ -19,16 +19,13 @@ namespace SimpleCircuit.Components.Digital
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled, IStandardizedDrawable, IBoxLabeled
+        private class Instance(string name) : ScaledOrientedDrawable(name), IStandardizedDrawable, IBoxDrawable
         {
             private int _inputs = 2;
             private double _spacing = 5;
 
             /// <inheritdoc />
             public override string Type => "xor";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -92,8 +89,8 @@ namespace SimpleCircuit.Components.Digital
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => 0.5 * new Vector2(-Width, -Height);
-            Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
+            Vector2 IBoxDrawable.TopLeft => 0.5 * new Vector2(-Width, -Height);
+            Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
             public override bool Reset(IResetContext context)
@@ -155,7 +152,7 @@ namespace SimpleCircuit.Components.Digital
                     .Close()
                     .MoveTo(new(-w * 1.3, h))
                     .CurveTo(new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)));
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
 
             private void DrawXorIEC(IGraphicsBuilder builder)
@@ -164,7 +161,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 builder.Text("=1", new(), new());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

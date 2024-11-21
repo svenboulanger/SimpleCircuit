@@ -21,15 +21,12 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
             private int _windings = 3;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The number of windings.")]
             public int Windings
@@ -217,7 +214,7 @@ namespace SimpleCircuit.Components.Analog
                         break;
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

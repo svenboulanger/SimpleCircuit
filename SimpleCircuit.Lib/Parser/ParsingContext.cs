@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the circuit.
         /// </summary>
-        public GraphicalCircuit Circuit { get; } = [];
+        public GraphicalCircuit Circuit { get; }
 
         /// <summary>
         /// Gets the defined sections until now.
@@ -79,10 +80,11 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
-        public ParsingContext(bool loadAssembly = true)
+        public ParsingContext(bool loadAssembly = true, ITextMeasurer measurer = null)
         {
             if (loadAssembly)
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+            Circuit = new GraphicalCircuit(measurer ?? new SkiaTextMeasurer());
         }
 
         /// <summary>
@@ -97,6 +99,7 @@ namespace SimpleCircuit.Parser
             // Things we can reuse
             Factory = context.Factory;
             Diagnostics = context.Diagnostics;
+            Circuit = new GraphicalCircuit(context.Circuit.Measurer);
         }
 
         /// <summary>

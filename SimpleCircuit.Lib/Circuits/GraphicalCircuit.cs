@@ -16,7 +16,7 @@ namespace SimpleCircuit
     /// <summary>
     /// Represents a circuit of interconnected components.
     /// </summary>
-    public class GraphicalCircuit : IEnumerable<ICircuitPresence>
+    public class GraphicalCircuit(ITextMeasurer measurer) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
 
@@ -59,6 +59,11 @@ namespace SimpleCircuit
         /// Gets or sets a flag that determines whether bounds are rendered.
         /// </summary>
         public bool RenderBounds { get; set; }
+
+        /// <summary>
+        /// Gets the text measurer.
+        /// </summary>
+        public ITextMeasurer Measurer => measurer;
 
         /// <summary>
         /// Adds the specified component.
@@ -144,7 +149,7 @@ namespace SimpleCircuit
                 return false;
 
             // Prepare the circuit (first constrain orientations, then prepare offsets)
-            var prepareContext = new PrepareContext(this, diagnostics);
+            var prepareContext = new PrepareContext(this, Measurer, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 
@@ -178,7 +183,7 @@ namespace SimpleCircuit
                 // Solve
                 var op = new OP("op");
                 op.BiasingParameters.Validate = false; // We should have constructed a valid circuit
-                op.Run(registerContext.Circuit);
+                foreach (var _ in op.Run(registerContext.Circuit)) { }
 
                 // Extract the information
                 var state = op.GetState<IBiasingSimulationState>();

@@ -19,16 +19,13 @@ namespace SimpleCircuit.Components.Digital
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled, IStandardizedDrawable, IBoxLabeled
+        private class Instance(string name) : ScaledOrientedDrawable(name), IStandardizedDrawable, IBoxDrawable
         {
             private int _inputs = 2;
             private double _spacing = 5;
 
             /// <inheritdoc />
             public override string Type => "nand";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The number of inputs (1 to 10)")]
             public int Inputs
@@ -90,8 +87,8 @@ namespace SimpleCircuit.Components.Digital
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxLabeled.TopLeft => 0.5 * new Vector2(-Width, -Height);
-            Vector2 IBoxLabeled.BottomRight => 0.5 * new Vector2(Width, Height);
+            Vector2 IBoxDrawable.TopLeft => 0.5 * new Vector2(-Width, -Height);
+            Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -146,7 +143,7 @@ namespace SimpleCircuit.Components.Digital
                 );
                 builder.Circle(new Vector2(w + 1.5, 0), 1.5);
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
             private void DrawNandIEC(IGraphicsBuilder builder)
             {
@@ -155,7 +152,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 builder.Text("&amp;", new(), new());
 
-                new OffsetAnchorPoints<IBoxLabeled>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
         }
     }

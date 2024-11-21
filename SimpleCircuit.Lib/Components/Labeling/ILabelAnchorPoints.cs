@@ -6,7 +6,7 @@ namespace SimpleCircuit.Components.Labeling
     /// Describes label anchor points for a subject.
     /// </summary>
     /// <typeparam name="T">The subject type.</typeparam>
-    public interface ILabelAnchorPoints<in T> where T : ILabeled
+    public interface ILabelAnchorPoints<in T> where T : IDrawable
     {
         /// <summary>
         /// Gets the number of anchor points defined.

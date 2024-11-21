@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Wires
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
@@ -27,9 +27,6 @@ namespace SimpleCircuit.Components.Wires
 
             /// <inheritdoc />
             public override string Type => "segment";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The number of tubes.")]
             [Alias("m")]

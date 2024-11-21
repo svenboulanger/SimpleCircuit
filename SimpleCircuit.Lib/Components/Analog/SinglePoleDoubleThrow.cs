@@ -19,13 +19,10 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(-3, 3), new(-1, 1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "spdt";
@@ -90,7 +87,7 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

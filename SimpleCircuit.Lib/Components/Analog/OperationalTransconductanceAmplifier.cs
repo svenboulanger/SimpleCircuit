@@ -28,15 +28,12 @@ namespace SimpleCircuit.Components.Analog
             return result;
         }
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(2, 8), new(1, 1)),
                 new LabelAnchorPoint(new(), new()),
                 new LabelAnchorPoint(new(2, -8), new(1, -1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "ota";
@@ -137,7 +134,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                     builder.Arrow(new(-7, 10), new(6, -12));
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

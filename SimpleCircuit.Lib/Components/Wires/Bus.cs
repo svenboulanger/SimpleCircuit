@@ -14,7 +14,7 @@ namespace SimpleCircuit.Components.Wires
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -4), new(0, -1)),
@@ -25,9 +25,6 @@ namespace SimpleCircuit.Components.Wires
             [Description("The number of crossings. Can be used to indicate a bus.")]
             [Alias("c")]
             public int Crossings { get; set; } = 1;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "bus";

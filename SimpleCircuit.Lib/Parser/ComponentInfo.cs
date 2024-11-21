@@ -64,10 +64,10 @@ namespace SimpleCircuit.Parser
             }
 
             // Handle the label
-            if (Labels.Count > 0 && _component is ILabeled labeled)
+            if (Labels.Count > 0)
             {
                 for (int i = 0; i < Labels.Count; i++)
-                    labeled.Labels[i].Value = Labels[i].Content[1..^1].ToString();
+                    _component.Labels[i].Value = Labels[i].Content[1..^1].ToString();
             }
 
             // Handle variants

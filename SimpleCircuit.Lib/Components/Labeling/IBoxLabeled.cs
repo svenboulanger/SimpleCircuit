@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes a box shape that can be used for labeling.
     /// </summary>
-    public interface IBoxLabeled : ILabeled
+    public interface IBoxDrawable : IDrawable
     {
         /// <summary>
         /// Gets the top-left coordinate of the box.

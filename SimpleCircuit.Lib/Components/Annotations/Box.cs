@@ -19,14 +19,14 @@ namespace SimpleCircuit.Components.Annotations
     /// Creates a new <see cref="Box"/>.
     /// </remarks>'
     /// <param name="name">The name of the box.</param>
-    public class Box(string name) : IAnnotation, ILabeled, IBoxLabeled, IRoundedBox
+    public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
     {
         private readonly HashSet<ComponentInfo> _componentInfos = [];
         private readonly HashSet<WireInfo> _wireInfos = [];
         private readonly HashSet<IDrawable> _components = [];
         private readonly HashSet<Wire> _wires = [];
         private Vector2 _topLeft, _bottomRight;
-        private static readonly OffsetAnchorPoints<IBoxLabeled> _anchors = new(BoxLabelAnchorPoints.Default, 1);
+        private static readonly OffsetAnchorPoints<IBoxDrawable> _anchors = new(BoxLabelAnchorPoints.Default, 1);
 
         public static readonly string Poly = "poly";
         private static readonly string _over = "over";
@@ -110,8 +110,8 @@ namespace SimpleCircuit.Components.Annotations
         [Alias("lm")]
         public double LabelMargin { get; set; } = 1.0;
 
-        Vector2 IBoxLabeled.TopLeft => _topLeft;
-        Vector2 IBoxLabeled.BottomRight => _bottomRight;
+        Vector2 IBoxDrawable.TopLeft => _topLeft;
+        Vector2 IBoxDrawable.BottomRight => _bottomRight;
 
         /// <inheritdoc />
         public void Add(ComponentInfo info)
@@ -516,7 +516,7 @@ namespace SimpleCircuit.Components.Annotations
             anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0));
             anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1));
 
-            new OffsetAnchorPoints<ILabeled>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this);
+            new OffsetAnchorPoints<IDrawable>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this);
         }
 
         /// <summary>

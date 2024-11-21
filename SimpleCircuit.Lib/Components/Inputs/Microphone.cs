@@ -15,14 +15,11 @@ namespace SimpleCircuit.Components.Inputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
                 new LabelAnchorPoint(new(6, 0), new(1, 0)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "mic";

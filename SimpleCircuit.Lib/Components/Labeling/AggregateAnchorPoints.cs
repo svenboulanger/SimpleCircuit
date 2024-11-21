@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Labeling
     /// </remarks>
     /// <param name="a">The first list.</param>
     /// <param name="b">The second list.</param>
-    public class AggregateAnchorPoints<T>(ILabelAnchorPoints<T> a, ILabelAnchorPoints<T> b) : LabelAnchorPoints<T> where T : ILabeled
+    public class AggregateAnchorPoints<T>(ILabelAnchorPoints<T> a, ILabelAnchorPoints<T> b) : LabelAnchorPoints<T> where T : IDrawable
     {
         private readonly ILabelAnchorPoints<T> _a = a, _b = b;
 

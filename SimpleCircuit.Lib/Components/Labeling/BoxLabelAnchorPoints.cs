@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A list of label anchor points that can be used for a box shape.
     /// </summary>
-    public class BoxLabelAnchorPoints : LabelAnchorPoints<IBoxLabeled>
+    public class BoxLabelAnchorPoints : LabelAnchorPoints<IBoxDrawable>
     {
         /// <summary>
         /// Gets the default box label anchor points.
@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IBoxLabeled subject, string name, out LabelAnchorPoint value)
+        public override bool TryCalculate(IBoxDrawable subject, string name, out LabelAnchorPoint value)
         {
             double r = 0.0;
             if (subject is IRoundedBox rb)

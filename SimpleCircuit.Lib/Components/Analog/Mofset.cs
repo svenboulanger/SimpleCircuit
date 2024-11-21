@@ -30,14 +30,11 @@ namespace SimpleCircuit.Components.Analog
             };
         }
 
-        private class Nmos : ScaledOrientedDrawable, ILabeled
+        private class Nmos : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "nmos";
@@ -107,7 +104,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
@@ -138,17 +135,14 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
                 _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(drawing, Labels);
             }
         }
-        private class Pmos : ScaledOrientedDrawable, ILabeled
+        private class Pmos : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "pmos";
@@ -221,7 +215,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                     _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
@@ -246,7 +240,7 @@ namespace SimpleCircuit.Components.Analog
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
                 _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
-                _anchors.Draw(drawing, this);
+                _anchors.Draw(drawing, Labels);
             }
         }
     }

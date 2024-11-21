@@ -91,9 +91,9 @@ namespace SimpleCircuitOnline.Shared
         {
             get
             {
-                if (_drawable is not ILabeled labeled)
+                if (_drawable is null)
                     yield break;
-                foreach (var lbl in labeled.Labels)
+                foreach (var lbl in _drawable.Labels)
                     yield return lbl.Value;
             }
         }
@@ -127,8 +127,8 @@ namespace SimpleCircuitOnline.Shared
                 if (factory != null && metadata != null)
                 {
                     _drawable = factory.Create(metadata.Key, metadata.Key, new Options(), null);
-                    if (_drawable is ILabeled labeled && string.IsNullOrWhiteSpace(labeled.Labels[0]?.Value))
-                        labeled.Labels[0].Value = "label";
+                    if (string.IsNullOrWhiteSpace(_drawable.Labels[0]?.Value))
+                        _drawable.Labels[0].Value = "label";
                     foreach (var variant in _drawable.Variants)
                         _initialVariants.Add(variant);
                     CreateSvg();

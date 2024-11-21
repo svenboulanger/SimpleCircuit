@@ -22,14 +22,11 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(new(0, -5.5), new(0, -1)),
                 new LabelAnchorPoint(new(0, 5.5), new(0, 1)));
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type => "capacitor";
@@ -115,7 +112,7 @@ namespace SimpleCircuit.Components.Analog
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                         break;
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }

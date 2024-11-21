@@ -27,7 +27,7 @@ namespace SimpleCircuit.Components.Digital
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), ILabeled
+        private class Instance(string name) : ScaledOrientedDrawable(name)
         {
             private readonly List<string[]> _bits = [];
             private int _maxWidth;
@@ -44,9 +44,6 @@ namespace SimpleCircuit.Components.Digital
             /// The variant for when the most-significant bit should come first.
             /// </summary>
             public const string Msb = "msb";
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The separator for the bit vector (default is an empty string, for which every character is a new bit).")]
             public string Separator { get; set; } = "";

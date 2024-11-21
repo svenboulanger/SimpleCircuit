@@ -14,14 +14,11 @@ namespace SimpleCircuit.Components.General
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : OrientedDrawable, ILabeled
+        private class Instance : OrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The distance of the text to the point.")]
             [Alias("l")]

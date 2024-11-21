@@ -22,16 +22,13 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
             private double _wiper = 0.5, _length = 12, _width = 8;
             private bool _isSet = false;
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             [Description("The length of the resistor.")]
             [Alias("l")]
@@ -132,7 +129,7 @@ namespace SimpleCircuit.Components.Analog
                         DrawAmericanResistor(builder);
                         break;
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
             private void DrawAmericanResistor(IGraphicsBuilder builder)
             {

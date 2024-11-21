@@ -17,15 +17,12 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(key == "Y" ? "admittance" : "impedance", name);
 
-        private class Instance : ScaledOrientedDrawable, ILabeled
+        private class Instance : ScaledOrientedDrawable
         {
             private double _width = 6, _length = 12;
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-
-            /// <inheritdoc />
-            public Labels Labels { get; } = new();
 
             /// <inheritdoc />
             public override string Type { get; }
@@ -90,7 +87,7 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, Labels);
             }
         }
     }
