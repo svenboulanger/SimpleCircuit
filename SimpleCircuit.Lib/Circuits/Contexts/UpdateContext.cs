@@ -40,13 +40,5 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public Vector2 GetValue(string nodeX, string nodeY)
             => new(GetValue(nodeX), GetValue(nodeY));
-
-        /// <inheritdoc />
-        public (string X, string Y) GetCoordinateGroup(string x, string y)
-        {
-            x = _relationships.Groups[_relationships.Offsets[x].Representative];
-            y = _relationships.Groups[_relationships.Offsets[y].Representative];
-            return (x, y);
-        }
     }
 }

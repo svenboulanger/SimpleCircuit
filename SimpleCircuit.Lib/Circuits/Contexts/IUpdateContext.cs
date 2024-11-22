@@ -39,13 +39,5 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <param name="nodeY">The y-coordinate node name.</param>
         /// <returns>The point.</returns>
         public Vector2 GetValue(string nodeX, string nodeY);
-
-        /// <summary>
-        /// Gets the coordinate group.
-        /// </summary>
-        /// <param name="x">The X coordinate for which to get the group.</param>
-        /// <param name="y">The Y coordinate for which to get the group.</param>
-        /// <returns>The coordinate group.</returns>
-        public (string X, string Y) GetCoordinateGroup(string x, string y);
     }
 }

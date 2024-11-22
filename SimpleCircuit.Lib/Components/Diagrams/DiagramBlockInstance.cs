@@ -178,7 +178,6 @@ namespace SimpleCircuit.Components.Diagrams
         public void Update(IUpdateContext context)
         {
             Location = context.GetValue(X, Y);
-            CoordinateGroup = context.GetCoordinateGroup(X, Y);
             foreach (var pin in _pins)
                 pin.Update(context);
         }
