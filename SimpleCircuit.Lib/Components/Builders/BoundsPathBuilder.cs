@@ -1,25 +1,19 @@
-﻿using System;
+﻿using SimpleCircuit.Drawing;
+using System;
 using System.Text;
-using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
-    /// A class for building an SVG path.
+    /// An <see cref="IPathBuilder"/> for determining bounds.
     /// </summary>
-    /// <remarks>
-    /// Creates a new path builder.
-    /// </remarks>
-    /// <param name="transform">The transform.</param>
-    public class SvgPathBuilder(Transform transform, ExpandableBounds bounds) : IPathBuilder
+    public class BoundsPathBuilder(Transform transform, ExpandableBounds bounds) : IPathBuilder
     {
-        private readonly StringBuilder _sb = new();
         private bool _isFirst = true;
         private readonly ExpandableBounds _bounds = bounds;
         private readonly Transform _transform = transform;
         private Vector2 _p1, _n1, _h1, _p2, _n2, _h2; // The local coordinate handles and points
         private Vector2 _last; // The last global coordinate
-        private char _impliedAction = '\0';
 
         /// <inheritdoc />
         public Vector2 Start => _p1;
@@ -43,10 +37,7 @@ namespace SimpleCircuit.Components.Builders
         private void InitializePath()
         {
             if (_isFirst && !_transform.Offset.IsZero())
-            {
-                Append($"M{_transform.Offset.ToSVG()}");
                 _last = _transform.Offset;
-            }
         }
 
         /// <inheritdoc />
@@ -59,7 +50,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             location = _transform.Apply(location);
-            Append($"{Action('M', 'L')}{location.ToSVG()}");
             _last = location;
             _bounds.Expand(location);
             return this;
@@ -78,24 +68,9 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            Append($"{Action('m', 'l')}{delta.ToSVG()}");
             _last += delta;
             _bounds.Expand(_last);
             return this;
-        }
-
-        private void AppendLine(Vector2 delta)
-        {
-            bool horiz = delta.Y.IsZero();
-            bool vert = delta.X.IsZero();
-            if (horiz && vert)
-                return;
-            else if (horiz)
-                Append($"{Action('h')}{delta.X.ToSVG()}");
-            else if (vert)
-                Append($"{Action('v')}{delta.Y.ToSVG()}");
-            else
-                Append($"{Action('l')}{delta.ToSVG()}");
         }
 
         /// <inheritdoc />
@@ -118,7 +93,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -143,7 +117,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -168,7 +141,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -193,7 +165,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -218,7 +189,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -243,7 +213,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Draw in global coordinate space
             delta = _transform.ApplyDirection(delta);
-            AppendLine(delta);
             _last += delta;
             _bounds.Expand(_last);
             return this;
@@ -285,7 +254,6 @@ namespace SimpleCircuit.Components.Builders
             h1 = _transform.Apply(h1);
             h2 = _transform.Apply(h2);
             end = _transform.Apply(end);
-            Append($"{Action('C')}{h1.ToSVG()} {h2.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -306,7 +274,6 @@ namespace SimpleCircuit.Components.Builders
             var h1 = _transform.Apply(_h1);
             var h2 = _transform.Apply(_h2);
             var end = _transform.Apply(_p2);
-            Append($"{Action('c')}{(h1 - _last).ToSVG()} {(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -327,7 +294,6 @@ namespace SimpleCircuit.Components.Builders
             var h1 = _transform.Apply(_h1);
             var h2 = _transform.Apply(_h2);
             end = _transform.Apply(end);
-            Append($"{Action('S')}{h2.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -348,7 +314,6 @@ namespace SimpleCircuit.Components.Builders
             var h1 = _transform.Apply(_h1);
             var h2 = _transform.Apply(_h2);
             var end = _transform.Apply(_p2);
-            Append($"{Action('s')}{(h2 - _last).ToSVG()} {(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h1, h2, end]);
             return this;
@@ -368,7 +333,6 @@ namespace SimpleCircuit.Components.Builders
             // Draw in global coordinate space
             h = _transform.Apply(h);
             end = _transform.Apply(end);
-            Append($"{Action('Q')}{h.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -388,7 +352,6 @@ namespace SimpleCircuit.Components.Builders
             // Draw in global coordinate space
             var h = _transform.Apply(_h1);
             var end = _transform.Apply(_p2);
-            Append($"{Action('q')}{h.ToSVG()} {end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -408,7 +371,6 @@ namespace SimpleCircuit.Components.Builders
             // Draw in global coordinate space
             var h = _transform.Apply(_h1);
             end = _transform.Apply(end);
-            Append($"{Action('T')}{end.ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -428,7 +390,6 @@ namespace SimpleCircuit.Components.Builders
             // Draw in global coordinate space
             var h = _transform.Apply(_h1);
             var end = _transform.Apply(_p2);
-            Append($"{Action('t')}{(end - _last).ToSVG()}");
             _last = end;
             _bounds.Expand([h, end]);
             return this;
@@ -610,44 +571,6 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IPathBuilder Close()
-        {
-            Append(Action('Z'));
-            return this;
-        }
-
-        /// <summary>
-        /// Appends a command.
-        /// </summary>
-        /// <param name="cmd">The command.</param>
-        private void Append(string cmd)
-        {
-            if (_isFirst)
-                _isFirst = false;
-            else
-                _sb.Append(' ');
-            _sb.Append(cmd);
-        }
-
-        /// <summary>
-        /// Gets the optional action.
-        /// </summary>
-        /// <param name="c">The action identifier.</param>
-        /// <returns>The action result.</returns>
-        private string Action(char c, char nextImplied = '\0')
-        {
-            char current = _impliedAction;
-            _impliedAction = nextImplied == '\0' ? c : nextImplied;
-            if (c == current)
-                return "";
-            return c.ToString();
-        }
-
-        /// <summary>
-        /// Converts the path builder to a string.
-        /// </summary>
-        /// <returns>The string.</returns>
-        public override string ToString()
-            => _sb.ToString();
+        public IPathBuilder Close() => this;
     }
 }

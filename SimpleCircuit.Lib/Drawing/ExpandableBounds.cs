@@ -22,6 +22,17 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Resets the expandable bounds.
+        /// </summary>
+        public void Reset()
+        {
+            _l = double.MaxValue;
+            _r = double.MinValue;
+            _t = double.MaxValue;
+            _b = double.MinValue;
+        }
+
+        /// <summary>
         /// Expands the bounds looking at the specified point.
         /// </summary>
         /// <param name="x">The x-coordinate.</param>

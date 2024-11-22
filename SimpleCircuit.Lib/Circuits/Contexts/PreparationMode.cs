@@ -21,8 +21,13 @@
         Offsets,
 
         /// <summary>
-        /// The mode of preparation for resolving variable groups.
+        /// The mode of preparation for resolving groups of linked variables.
         /// </summary>
         Groups,
+
+        /// <summary>
+        /// The mode of preparation for resolving groups of drawables.
+        /// </summary>
+        DrawableGroups,
     }
 }

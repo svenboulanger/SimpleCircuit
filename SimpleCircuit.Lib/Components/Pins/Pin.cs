@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Components.Pins

@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Builders
     /// <summary>
     /// An <see cref="IGraphicsBuilder"/> for making SVG format data.
     /// </summary>
-    public class SvgBuilder : IGraphicsBuilder
+    public class SvgBuilder : BaseGraphicsBuilder
     {
         /// <summary>
         /// The namespace for SVG nodes.
@@ -39,20 +39,10 @@ namespace SimpleCircuit.Components.Builders
         private XmlNode _current;
         private readonly ExpandableBounds _bounds = new();
         private readonly Stack<Transform> _tf = new();
+        private readonly ITextFormatter _formatter;
 
         /// <inheritdoc />
-        public ISet<string> RequiredCSS { get; } = new HashSet<string>();
-
-        /// <summary>
-        /// Adds extra CSS after the required CSS (ordered).
-        /// </summary>
-        public IList<string> ExtraCSS { get; } = [];
-
-        /// <inheritdoc />
-        public Transform CurrentTransform => _tf.Peek();
-
-        /// <inheritdoc />
-        public Bounds Bounds => _bounds.Bounds;
+        public override Bounds Bounds => _bounds.Bounds;
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -60,29 +50,16 @@ namespace SimpleCircuit.Components.Builders
         public double Margin { get; set; } = 1.0;
 
         /// <summary>
-        /// Gets or sets the line spacing used between text.
-        /// </summary>
-        public double LineSpacing { get; set; } = 1.0;
-
-        /// <summary>
         /// Removes empty groups.
         /// </summary>
         public bool RemoveEmptyGroups { get; set; } = true;
 
         /// <summary>
-        /// Gets the diagnostic handler.
-        /// </summary>
-        public IDiagnosticHandler Diagnostics { get; }
-
-        /// <summary>
-        /// Gets the text formatter.
-        /// </summary>
-        public ITextFormatter TextFormatter { get; }
-
-        /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgBuilder(IDiagnosticHandler diagnostics = null, ITextFormatter formatter = null)
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        public SvgBuilder(ITextFormatter formatter, IDiagnosticHandler diagnostics = null)
+            : base(diagnostics)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
@@ -90,341 +67,11 @@ namespace SimpleCircuit.Components.Builders
             _tf.Push(Transform.Identity);
 
             // Make sure we can track the bounds of our vector image
-            Diagnostics = diagnostics;
-            TextFormatter = formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
+            _formatter = formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder BeginTransform(Transform tf)
-        {
-            _tf.Push(tf.Apply(CurrentTransform));
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder EndTransform()
-        {
-            _tf.Pop();
-            if (_tf.Count == 0)
-                _tf.Push(Transform.Identity);
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder DrawXml(XmlNode description, IXmlDrawingContext context)
-        {
-            // Apply some scale if necessary
-            bool success = true;
-            success &= description.Attributes.ParseOptionalScalar("scale", Diagnostics, 1.0, out double scale);
-            success &= description.Attributes.ParseOptionalScalar("rotate", Diagnostics, 0.0, out double rotate);
-            success &= description.Attributes.ParseOptionalVector("offset", Diagnostics, new(), out var offset);
-            if (!success)
-                return this;
-
-            bool transform = !rotate.IsZero() || !offset.IsZero() || !scale.Equals(1.0);
-            if (transform)
-                BeginTransform(new Transform(offset, Matrix2.Rotate(rotate) * scale));
-            DrawXmlActions(description, context);
-
-            // If labels were found, let's try drawing the labels
-            if (context.Anchors.Count > 0 && context.Labels != null && context.Labels.Count > 0)
-                new CustomLabelAnchorPoints([.. context.Anchors]).Draw(this, context.Labels);
-
-            if (transform)
-                EndTransform();
-            return this;
-        }
-        private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context)
-        {
-            foreach (XmlNode node in parent.ChildNodes)
-            {
-                if (!EvaluateVariants(node.Attributes?["variant"]?.Value, context))
-                    continue;
-
-                // Depending on the node type, let's draw something!
-                switch (node.Name)
-                {
-                    case "#comment": break;
-                    case "line": DrawXmlLine(node); break;
-                    case "circle": DrawXmlCircle(node); break;
-                    case "path": DrawXmlPath(node); break;
-                    case "polygon": DrawXmlPolygon(node); break;
-                    case "polyline": DrawXmlPolyline(node); break;
-                    case "rect": DrawXmlRectangle(node); break;
-                    case "text": DrawXmlText(node, context); break;
-                    case "variant":
-                    case "v":
-                        // Just recursive thingy
-                        DrawXmlActions(node, context);
-                        break;
-                    case "label": DrawXmlLabelAnchor(node, context); break;
-                    case "group":
-                    case "g":
-                        // Parse options
-                        GraphicOptions options = new();
-                        ParseGraphicOptions(options, node);
-                        BeginGroup(options);
-                        DrawXmlActions(node, context);
-                        EndGroup();
-                        break;
-                    default:
-                        Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
-                        break;
-                }
-            }
-        }
-        private void DrawXmlLine(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-            bool success = true;
-            GraphicOptions options = new();
-            HashSet<Marker> startMarkers = null, endMarkers = null;
-            success &= node.Attributes.ParseOptionalScalar("x1", Diagnostics, 0.0, out double x1);
-            success &= node.Attributes.ParseOptionalScalar("y1", Diagnostics, 0.0, out double y1);
-            success &= node.Attributes.ParseOptionalScalar("x2", Diagnostics, 0.0, out double x2);
-            success &= node.Attributes.ParseOptionalScalar("y2", Diagnostics, 0.0, out double y2);
-            if (!success)
-                return;
-
-            // Draw the line
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
-            Line(new(x1, y1), new(x2, y2), options);
-            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1));
-            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1));
-        }
-        private void DrawXmlPolygon(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-
-            string attr = node.Attributes?["points"]?.Value;
-            if (attr == null)
-                return;
-            var lexer = new SvgPathDataLexer(attr.AsMemory());
-            var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
-            if (points == null || points.Count <= 1)
-                return;
-
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
-
-            // Draw the polygon
-            Polygon(points, options);
-        }
-        private void DrawXmlPolyline(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-
-            HashSet<Marker> startMarkers = null, endMarkers = null;
-            string attr = node.Attributes?["points"]?.Value;
-            if (attr == null)
-                return;
-            var lexer = new SvgPathDataLexer(attr.AsMemory());
-            var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
-            if (points == null || points.Count <= 1)
-                return;
-            if (points == null || points.Count <= 1)
-                return;
-
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
-
-            // Draw the polyline
-            Polyline(points, options);
-            if (points.Count > 1)
-            {
-                DrawMarkers(startMarkers, points[0], points[1] - points[0]);
-                DrawMarkers(endMarkers, points[0], points[0] - points[^1]);
-            }
-            else
-            {
-                DrawMarkers(startMarkers, points[0], new(1, 0));
-                DrawMarkers(endMarkers, points[0], new(1, 0));
-            }
-        }
-        private void DrawXmlCircle(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-
-            bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("cx", Diagnostics, 0.0, out double cx);
-            success &= node.Attributes.ParseOptionalScalar("cy", Diagnostics, 0.0, out double cy);
-            success &= node.Attributes.ParseOptionalScalar("r", Diagnostics, 0.0, out double r);
-            if (!success)
-                return;
-
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
-
-            // Draw the circle
-            Circle(new(cx, cy), r, options);
-        }
-        private void DrawXmlPath(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-
-            HashSet<Marker> startMarkers = null, endMarkers = null;
-            string pathData = node.Attributes?["d"]?.Value;
-            if (string.IsNullOrWhiteSpace(pathData))
-                return;
-
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
-
-            if (!string.IsNullOrWhiteSpace(pathData))
-            {
-                SvgPathDataParser.MarkerLocation start = default, end = default;
-                Path(b =>
-                {
-                    var lexer = new SvgPathDataLexer(pathData.AsMemory());
-                    start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
-                    end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
-                }, options);
-                DrawMarkers(startMarkers, start.Location, start.Normal);
-                DrawMarkers(endMarkers, end.Location, end.Normal);
-            }
-        }
-        private void DrawXmlRectangle(XmlNode node)
-        {
-            if (node.Attributes == null)
-                return;
-
-            bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("width", Diagnostics, 0.0, out double width);
-            success &= node.Attributes.ParseOptionalScalar("height", Diagnostics, 0.0, out double height);
-            success &= node.Attributes.ParseOptionalScalar("rx", Diagnostics, double.NaN, out double rx);
-            success &= node.Attributes.ParseOptionalScalar("ry", Diagnostics, double.NaN, out double ry);
-            if (!success)
-                return;
-
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
-
-            // Draw the rectangle
-            this.Rectangle(x, y, width, height, rx, ry, options);
-        }
-        private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
-        {
-            if (node.Attributes == null)
-                return;
-
-            bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
-            success &= node.Attributes.ParseOptionalScalar("size", Diagnostics, 4.0, out double size);
-            success &= node.Attributes.ParseOptionalScalar("line-spacing", Diagnostics, 1.5, out double lineSpacing);
-            if (!success)
-                return;
-
-            string value = node.Attributes?["value"]?.Value;
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
-
-            if (value != null && context != null)
-                value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new Vector2(nx, ny), size: size, lineSpacing: lineSpacing, options: options);
-        }
-        private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
-        {
-            bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
-            if (!success)
-                return;
-
-            var options = new GraphicOptions();
-            ParseGraphicOptions(options, node);
-            context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny), options));
-        }
-        private void ParseGraphicOptions(GraphicOptions options, XmlNode node)
-        {
-            options.Style = node.Attributes?["style"]?.Value;
-            string classes = node.Attributes?["class"]?.Value;
-            if (!string.IsNullOrWhiteSpace(classes))
-            {
-                foreach (string name in classes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
-                    options.Classes.Add(name);
-            }
-        }
-        private void ParseGraphicOptions(GraphicOptions options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
-        {
-            ParseGraphicOptions(options, node);
-
-            string markers = node.Attributes?["marker-start"]?.Value;
-            if (!string.IsNullOrWhiteSpace(markers))
-            {
-                startMarkers ??= [];
-                var lexer = new MarkerLexer(markers);
-                while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                    AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
-            }
-
-            markers = node.Attributes?["marker-end"]?.Value;
-            if (!string.IsNullOrWhiteSpace(markers))
-            {
-                endMarkers ??= [];
-                var lexer = new MarkerLexer(markers);
-                while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                    AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
-            }
-        }
-        private void AddMarker(HashSet<Marker> markers, string value, IDiagnosticHandler diagnostics)
-        {
-            switch (value)
-            {
-                case "arrow": markers.Add(new Arrow()); break;
-                case "rarrow": markers.Add(new ReverseArrow()); break;
-                case "erd-many": markers.Add(new ERDMany()); break;
-                case "erd-one": markers.Add(new ERDOne()); break;
-                case "erd-one-many": markers.Add(new ERDOneMany()); break;
-                case "erd-only-one": markers.Add(new ERDOnlyOne()); break;
-                case "erd-zero-many": markers.Add(new ERDZeroMany()); break;
-                case "erd-zero-one": markers.Add(new ERDZeroOne()); break;
-                case "plus": markers.Add(new Plus()); break;
-                case "minus": markers.Add(new Minus()); break;
-                case "slash": markers.Add(new Slash()); break;
-                default:
-                    diagnostics?.Post(ErrorCodes.InvalidMarker, value);
-                    break;
-            }
-        }
-        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation)
-        {
-            if (markers == null)
-                return;
-            if (orientation.IsZero())
-                orientation = new(1, 0);
-            else
-                orientation /= orientation.Length;
-            foreach (var marker in markers)
-            {
-                marker.Location = location;
-                marker.Orientation = orientation;
-                marker.Draw(this);
-            }
-        }
-        private bool EvaluateVariants(string value, IVariantContext context)
-        {
-            if (value is null)
-                return true;
-            if (string.IsNullOrWhiteSpace(value))
-                return false;
-            var lexer = new VariantLexer(value);
-            return VariantParser.Parse(lexer, context);
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
+        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -443,27 +90,27 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder Circle(Vector2 position, double radius, GraphicOptions options = null)
+        public override IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
-            position = CurrentTransform.Apply(position);
+            center = CurrentTransform.Apply(center);
 
             // Make the circle
             var circle = _document.CreateElement("circle", Namespace);
-            circle.SetAttribute("cx", position.X.ToSVG());
-            circle.SetAttribute("cy", position.Y.ToSVG());
+            circle.SetAttribute("cx", center.X.ToSVG());
+            circle.SetAttribute("cy", center.Y.ToSVG());
             circle.SetAttribute("r", radius.ToSVG());
             options?.Apply(circle);
             _current.AppendChild(circle);
 
             _bounds.Expand(
-                position - new Vector2(radius, radius),
-                position + new Vector2(radius, radius));
+                center - new Vector2(radius, radius),
+                center + new Vector2(radius, radius));
             return this;
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -484,7 +131,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -505,113 +152,22 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder SmoothBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
-        {
-            StringBuilder sb = new();
-            int index = -1;
-            foreach (var group in points.GroupBy(p => { index++; return index < 1 ? 0 : index < 4 ? 1 : 1 + index / 4; }))
-            {
-                var v = group.ToArray();
-                if (sb.Length > 0)
-                    sb.Append(' ');
-                for (int i = 0; i < v.Length; i++)
-                {
-                    v[i] = CurrentTransform.Apply(v[i]);
-                    _bounds.Expand(v[i]);
-                }
-                switch (v.Length)
-                {
-                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
-                    case 3: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
-                    default: sb.Append($"S{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()} {v[3].ToSVG()}"); break;
-                }
-            }
-
-            // Create the path element
-            var path = _document.CreateElement("path", Namespace);
-            options?.Apply(path);
-            _current.AppendChild(path);
-            path.SetAttribute("d", sb.ToString());
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder ClosedBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
-        {
-            var sb = new StringBuilder();
-            int index = 2;
-            foreach (var group in points.GroupBy(p => index++ / 3))
-            {
-                var v = group.ToArray();
-                if (sb.Length > 0)
-                    sb.Append(' ');
-                for (int i = 0; i < v.Length; i++)
-                {
-                    v[i] = CurrentTransform.Apply(v[i]);
-                    _bounds.Expand(v[i]);
-                }
-                switch (v.Length)
-                {
-                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
-                    default: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
-                }
-            }
-            sb.Append("Z");
-
-            // Create the path element
-            var path = _document.CreateElement("path", Namespace);
-            options?.Apply(path);
-            _current.AppendChild(path);
-            path.SetAttribute("d", sb.ToString());
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder OpenBezier(IEnumerable<Vector2> points, GraphicOptions options = null)
-        {
-            var sb = new StringBuilder();
-            int index = 2;
-            foreach (var group in points.GroupBy(p => index++ / 3))
-            {
-                var v = group.ToArray();
-                for (int i = 0; i < v.Length; i++)
-                {
-                    v[i] = CurrentTransform.Apply(v[i]);
-                    _bounds.Expand(v[i]);
-                }
-                if (sb.Length > 0)
-                    sb.Append(' ');
-                switch (v.Length)
-                {
-                    case 1: sb.Append($"M{v[0].ToSVG()}"); break;
-                    default: sb.Append($"C{v[0].ToSVG()} {v[1].ToSVG()} {v[2].ToSVG()}"); break;
-                }
-            }
-
-            // Create the path element
-            var path = _document.CreateElement("path", Namespace);
-            options?.Apply(path);
-            _current.AppendChild(path);
-            path.SetAttribute("d", sb.ToString());
-            return this;
-        }
-
-        /// <inheritdoc />
-        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
+        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
-            return ClosedBezier(new Vector2[]
-            {
-                new(-rx, 0),
-                new(-rx, -ky), new(-kx, -ry), new(0, -ry),
-                new(kx, -ry), new(rx, -ky), new(rx, 0),
-                new(rx, ky), new(kx, ry), new(0, ry),
-                new(-kx, ry), new(-rx, ky), new(-rx, 0)
-            }.Select(v => v + center), options);
+            BeginTransform(new Transform(center, Matrix2.Identity));
+            Path(b => b.MoveTo(new(-rx, 0))
+                .CurveTo(new(-rx, -ky), new(-kx, -ry), new(0, -ry))
+                .CurveTo(new(kx, -ry), new(rx, -ky), new(rx, 0))
+                .CurveTo(new(rx, ky), new(kx, ry), new(0, ry))
+                .CurveTo(new(-kx, ry), new(-rx, ky), new(-rx, 0)).Close(),
+                options);
+            EndTransform();
+            return this;
         }
 
-        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
             if (span is null)
                 return this;
@@ -649,12 +205,12 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
-                return default;
+                return this;
 
-            var span = TextFormatter.Format(value, size, false, options);
+            var span = _formatter.Format(value, size, false, options);
             return Text(span, location, expand, options);
         }
 
@@ -722,12 +278,12 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public IGraphicsBuilder Path(Action<IPathBuilder> action, GraphicOptions options = null)
+        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null)
         {
-            if (action == null)
+            if (pathBuild == null)
                 return this;
             var builder = new SvgPathBuilder(CurrentTransform, _bounds);
-            action(builder);
+            pathBuild(builder);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
@@ -741,7 +297,7 @@ namespace SimpleCircuit.Components.Builders
         /// Begins a new group.
         /// </summary>
         /// <param name="options">The options.</param>
-        public IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false)
+        public override IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false)
         {
             var elt = _document.CreateElement("g", Namespace);
             options?.Apply(elt);
@@ -756,7 +312,7 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Ends the last opened group.
         /// </summary>
-        public IGraphicsBuilder EndGroup()
+        public override IGraphicsBuilder EndGroup()
         {
             var group = _current;
             var parent = _current.ParentNode;

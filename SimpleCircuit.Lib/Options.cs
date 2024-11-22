@@ -207,8 +207,7 @@ namespace SimpleCircuit
         /// <param name="circuit">The circuit.</param>
         public void Apply(GraphicalCircuit circuit)
         {
-            circuit.SpacingX = SpacingX;
-            circuit.SpacingY = SpacingY;
+            circuit.Spacing = new(SpacingX, SpacingY);
             circuit.RenderBounds = RenderBounds;
         }
     }

@@ -144,7 +144,7 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgBuilder(null, _textFormatter);
+            var drawing = new SvgBuilder(_textFormatter);
             _drawable.Reset(null);
             _drawable.Render(drawing);
             var doc = drawing.GetDocument();

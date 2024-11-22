@@ -8,7 +8,6 @@ using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 
@@ -21,6 +20,7 @@ namespace SimpleCircuit
     public class GraphicalCircuit(ITextFormatter formatter) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Dictionary<string, List<IDrawable>>> _linkedGroups = [];
 
         /// <summary>
         /// Gets the number of graphical circuit presences.
@@ -48,14 +48,9 @@ namespace SimpleCircuit
         public bool Solved { get; private set; } = false;
 
         /// <summary>
-        /// Gets or sets the minimum spacing in X-direction between blocks.
+        /// Gets or sets the minimum spacing in X- and Y-direction.
         /// </summary>
-        public double SpacingX { get; set; } = 20.0;
-
-        /// <summary>
-        /// Gets or sets the minimum spacing in Y-directionb between blocks.
-        /// </summary>
-        public double SpacingY { get; set; } = 20.0;
+        public Vector2 Spacing { get; set; } = new(20.0, 20.0);
 
         /// <summary>
         /// Gets or sets a flag that determines whether bounds are rendered.
@@ -155,7 +150,6 @@ namespace SimpleCircuit
             if (!Prepare(presences, prepareContext))
                 return false;
 
-
             // Space loose blocks next to each other to avoid overlaps
             var registerContext = new RegisterContext(diagnostics, prepareContext);
             void Log(object sender, SpiceSharp.WarningEventArgs e)
@@ -212,6 +206,8 @@ namespace SimpleCircuit
 
         private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
+            _linkedGroups.Clear();
+
             // Prepare orientations
             context.Mode = PreparationMode.Orientation;
             if (!PrepareCycle(presences, context))
@@ -227,10 +223,27 @@ namespace SimpleCircuit
             if (!PrepareCycle(presences, context))
                 return false;
 
-            // Prepare groups
+            // Prepare linked groups
             context.Mode = PreparationMode.Groups;
             if (!PrepareCycle(presences, context))
                 return false;
+
+            // Prepare grouped drawables
+            context.Mode = PreparationMode.DrawableGroups;
+            if (!PrepareCycle(presences, context))
+                return false;
+
+            // Store the linked groups
+            if (context.DrawableGroupCount > 1)
+            {
+                foreach (string y in context.DrawableGroupY)
+                {
+                    var dict = new Dictionary<string, List<IDrawable>>();
+                    _linkedGroups.Add(y, dict);
+                    foreach (var p in context.GetDrawableGroups(y))
+                        dict.Add(p.Key, p.Value.ToList());
+                }
+            }
 
             return true;
         }
@@ -338,7 +351,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter textFormatter = null, IEnumerable<string> extraCss = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, IEnumerable<string> extraCss = null)
         {
             if (!Solved)
             {
@@ -347,7 +360,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgBuilder(diagnostics, textFormatter);
+            var drawing = new SvgBuilder(TextFormatter, diagnostics);
             if (extraCss != null)
             {
                 foreach (var ec in extraCss)

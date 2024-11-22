@@ -144,7 +144,15 @@ namespace SimpleCircuit.Components
 
             /// <inheritdoc />
             public PresenceResult Prepare(IPrepareContext context)
-                => _pins.Prepare(context);
+            {
+                var result = _pins.Prepare(context);
+
+                // Group the drawable
+                if (context.Mode == PreparationMode.DrawableGroups)
+                    context.GroupDrawableTo(this, X, Y);
+
+                return result;
+            }
 
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
@@ -174,7 +182,6 @@ namespace SimpleCircuit.Components
             {
                 Location = context.GetValue(X, Y);
                 EndLocation = context.GetValue(_pins.Right, _pins.Bottom);
-                CoordinateGroup = context.GetCoordinateGroup(X, Y);
 
                 // Update all pin locations as well
                 // We ignore pin 0, because that is a dummy pin

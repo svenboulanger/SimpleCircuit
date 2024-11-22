@@ -67,6 +67,10 @@ namespace SimpleCircuit.Components
                 else if (r == PresenceResult.Incomplete)
                     result = PresenceResult.Incomplete;
             }
+
+            if (context.Mode == PreparationMode.DrawableGroups)
+                context.GroupDrawableTo(this, X, Y);
+
             return result;
         }
 

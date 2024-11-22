@@ -1,8 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser.SimpleTexts;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -45,10 +43,23 @@ namespace SimpleCircuit.Circuits.Contexts
         public NodeGrouper Groups { get; }
 
         /// <summary>
+        /// Gets the number of drawable groups.
+        /// </summary>
+        public int DrawableGroupCount { get; }
+
+        /// <summary>
         /// Finds a circuit presence with the given name.
         /// </summary>
         /// <param name="name">The full name of the presence.</param>
         /// <returns>The circuit presence, of <c>null</c> if it doesn't exist.</returns>
         public ICircuitPresence Find(string name);
+
+        /// <summary>
+        /// Groups a drawable to X and Y coordinates.
+        /// </summary>
+        /// <param name="drawable">The drawable.</param>
+        /// <param name="x">The X-coordinate.</param>
+        /// <param name="y">The Y-coordinate.</param>
+        public void GroupDrawableTo(IDrawable drawable, string x, string y);
     }
 }
