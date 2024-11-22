@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.SimpleTexts;
@@ -17,7 +18,7 @@ namespace SimpleCircuitOnline.Shared
         public const string LibraryPrefix = "lib:";
         public const string DefaultLibraryLoadedKey = ":def:loaded";
 
-        private readonly ITextMeasurer _measurer;
+        private readonly ITextFormatter _textFormatter;
 
         /// <summary>
         /// Gets or sets whether the default library should be included.
@@ -61,10 +62,10 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Creates a new <see cref="LibraryCollection"/>.
         /// </summary>
-        /// <param name="measurer">The text measurer.</param>
-        public LibraryCollection(ITextMeasurer measurer)
+        /// <param name="formatter">The text formatter.</param>
+        public LibraryCollection(ITextFormatter formatter)
         {
-            _measurer = measurer;
+            _textFormatter = formatter;
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace SimpleCircuitOnline.Shared
         /// <returns>Returns the parsing context.</returns>
         public ParsingContext BuildContext(IDiagnosticHandler diagnostics)
         {
-            var context = new ParsingContext(DefaultLibraryLoaded, _measurer)
+            var context = new ParsingContext(DefaultLibraryLoaded, _textFormatter)
             {
                 Diagnostics = diagnostics
             };

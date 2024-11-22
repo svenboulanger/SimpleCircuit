@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleCircuit.Circuits.Spans;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
@@ -12,9 +13,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// </summary>
         /// <param name="lexer">The lexer.</param>
         /// <param name="context">The context.</param>
-        public static ISpan Parse(SimpleTextLexer lexer, SimpleTextContext context)
+        public static Span Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            var lines = new List<ISpan>();
+            var lines = new MultilineSpan(context.FontSize * context.LineSpacing, context.Align);
 
             // Parse lines
             while (lexer.Type != TokenType.EndOfContent)
@@ -22,11 +23,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 lines.Add(ParseLine(lexer, context));
                 lexer.Branch(TokenType.Newline);
             }
-            var result = new MultilineSpan(lines, context.FontSize * context.LineSpacing, context.Align);
-            result.SetOffset(default);
-            return result;
+
+            lines.SetOffset(default);
+            return lines;
         }
-        private static ISpan ParseLine(SimpleTextLexer lexer, SimpleTextContext context)
+        private static Span ParseLine(SimpleTextLexer lexer, SimpleTextContext context)
         {
             // Parses a complete line
             var result = new LineSpan();
@@ -36,7 +37,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             }
             return result;
         }
-        private static ISpan ParseSuperSubScript(SimpleTextLexer lexer, SimpleTextContext context)
+        private static Span ParseSuperSubScript(SimpleTextLexer lexer, SimpleTextContext context)
         {
             var result = ParseSegment(lexer, context);
 
@@ -45,7 +46,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
                 double oldFontSize = context.FontSize;
-                ISpan sub = null, super = null;
+                Span sub = null, super = null;
                 context.FontSize *= 0.8;
                 if (lexer.Branch(TokenType.Subscript))
                 {
@@ -92,7 +93,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             }
             return result;
         }
-        private static ISpan ParseBlockSegment(SimpleTextLexer lexer, SimpleTextContext context)
+        private static Span ParseBlockSegment(SimpleTextLexer lexer, SimpleTextContext context)
         {
             // Parses everything until the next block segment
             var result = new LineSpan();
@@ -102,7 +103,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             }
             return result;
         }
-        private static ISpan ParseSegment(SimpleTextLexer lexer, SimpleTextContext context)
+        private static Span ParseSegment(SimpleTextLexer lexer, SimpleTextContext context)
         {
             // Parses a segment that cannot be separated
             switch (lexer.Type)
@@ -173,21 +174,21 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 lexer.Next();
             }
         }
-        private static ISpan CreateOverline(ISpan @base, SimpleTextContext context)
+        private static Span CreateOverline(Span @base, SimpleTextContext context)
         {
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
             return new OverlineSpan(@base, margin, thickness);
         }
-        private static ISpan CreateUnderline(ISpan @base, SimpleTextContext context)
+        private static Span CreateUnderline(Span @base, SimpleTextContext context)
         {
             double margin = context.FontSize * 0.1;
             double thickness = context.FontSize * 0.075;
 
             return new UnderlineSpan(@base, margin, thickness);
         }
-        private static ISpan CreateTextSpan(SimpleTextContext context)
+        private static Span CreateTextSpan(SimpleTextContext context)
         {
             // Measure the contents
             string content = context.Builder.ToString();

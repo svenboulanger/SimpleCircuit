@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Parser.SimpleTexts;
 
 namespace SimpleCircuit.Components.Labeling
@@ -16,7 +17,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Gets the formatted text.
         /// </summary>
-        public ISpan Formatted { get; private set; }
+        public Span Formatted { get; private set; }
 
         /// <summary>
         /// Gets or sets the location description of the label that is used as the reference.
@@ -50,7 +51,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="context">The context.</param>
         public void Format(IPrepareContext context)
         {
-            Formatted = context.Format(Value, Size);
+            Formatted = context.TextFormatter.Format(Value, Size);
         }
     }
 }

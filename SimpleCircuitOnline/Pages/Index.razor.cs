@@ -524,8 +524,8 @@ namespace SimpleCircuitOnline.Pages
                 // We now need the last things to have executed
                 if (ckt.Count > 0 && _logger.Errors == 0)
                 {
-                    _textMeasurer.FontFamily = context.Options.FontFamily;
-                    doc = ckt.Render(_logger, _textMeasurer, context.ExtraCss);
+                    _textFormatter.FontFamily = context.Options.FontFamily;
+                    doc = ckt.Render(_logger, _textFormatter, context.ExtraCss);
 
                     // Update the style for our document
                     var styleNode = doc.DocumentElement.ChildNodes[0];

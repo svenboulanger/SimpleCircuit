@@ -2,7 +2,6 @@
 using SimpleCircuit;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Labeling;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -145,7 +144,7 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgBuilder(null, _textMeasurer);
+            var drawing = new SvgBuilder(null, _textFormatter);
             _drawable.Reset(null);
             _drawable.Render(drawing);
             var doc = drawing.GetDocument();

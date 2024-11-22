@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
@@ -16,7 +17,8 @@ namespace SimpleCircuit
     /// <summary>
     /// Represents a circuit of interconnected components.
     /// </summary>
-    public class GraphicalCircuit(ITextMeasurer measurer) : IEnumerable<ICircuitPresence>
+    /// <param name="formatter">A text formatter.</param>
+    public class GraphicalCircuit(ITextFormatter formatter) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
 
@@ -61,9 +63,9 @@ namespace SimpleCircuit
         public bool RenderBounds { get; set; }
 
         /// <summary>
-        /// Gets the text measurer.
+        /// Gets the text formatter.
         /// </summary>
-        public ITextMeasurer Measurer => measurer;
+        public ITextFormatter TextFormatter => formatter;
 
         /// <summary>
         /// Adds the specified component.
@@ -149,7 +151,7 @@ namespace SimpleCircuit
                 return false;
 
             // Prepare the circuit (first constrain orientations, then prepare offsets)
-            var prepareContext = new PrepareContext(this, Measurer, diagnostics);
+            var prepareContext = new PrepareContext(this, TextFormatter, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 
@@ -336,7 +338,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextMeasurer measurer = null, IEnumerable<string> extraCss = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics, ITextFormatter textFormatter = null, IEnumerable<string> extraCss = null)
         {
             if (!Solved)
             {
@@ -345,7 +347,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgBuilder(diagnostics, measurer);
+            var drawing = new SvgBuilder(diagnostics, textFormatter);
             if (extraCss != null)
             {
                 foreach (var ec in extraCss)

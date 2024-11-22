@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Parser.SimpleTexts
+﻿using SimpleCircuit.Circuits;
+
+namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// An interface that describes a text measurer.

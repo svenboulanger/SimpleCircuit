@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.SimpleTexts;
@@ -80,11 +81,13 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
-        public ParsingContext(bool loadAssembly = true, ITextMeasurer measurer = null)
+        /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
+        /// <param name="formatter">The text formatter used for the graphical circuit.</param>
+        public ParsingContext(bool loadAssembly = true, ITextFormatter formatter = null)
         {
             if (loadAssembly)
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
-            Circuit = new GraphicalCircuit(measurer ?? new SkiaTextMeasurer());
+            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
         }
 
         /// <summary>
@@ -99,7 +102,7 @@ namespace SimpleCircuit.Parser
             // Things we can reuse
             Factory = context.Factory;
             Diagnostics = context.Diagnostics;
-            Circuit = new GraphicalCircuit(context.Circuit.Measurer);
+            Circuit = new GraphicalCircuit(context.Circuit.TextFormatter);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
 using System;
@@ -128,7 +129,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="expand">The direction in which the text can overflow.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(ISpan span, Vector2 location, Vector2 expand, GraphicOptions options = null);
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null);
 
         /// <summary>
         /// Draws text.

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing;
 using SkiaSharp;
 using System;
 using System.Net;

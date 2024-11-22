@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders.Markers;
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
@@ -74,14 +75,14 @@ namespace SimpleCircuit.Components.Builders
         public IDiagnosticHandler Diagnostics { get; }
 
         /// <summary>
-        /// Gets the text measurer.
+        /// Gets the text formatter.
         /// </summary>
-        public ITextMeasurer Measurer { get; }
+        public ITextFormatter TextFormatter { get; }
 
         /// <summary>
         /// Creates a new SVG drawing instance.
         /// </summary>
-        public SvgBuilder(IDiagnosticHandler diagnostics = null, ITextMeasurer measurer = null)
+        public SvgBuilder(IDiagnosticHandler diagnostics = null, ITextFormatter formatter = null)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
@@ -90,7 +91,7 @@ namespace SimpleCircuit.Components.Builders
 
             // Make sure we can track the bounds of our vector image
             Diagnostics = diagnostics;
-            Measurer = measurer ?? new SkiaTextMeasurer();
+            TextFormatter = formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
         }
 
         /// <inheritdoc />
@@ -610,7 +611,7 @@ namespace SimpleCircuit.Components.Builders
             }.Select(v => v + center), options);
         }
 
-        public IGraphicsBuilder Text(ISpan span, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null)
         {
             if (span is null)
                 return this;
@@ -653,51 +654,11 @@ namespace SimpleCircuit.Components.Builders
             if (string.IsNullOrWhiteSpace(value))
                 return default;
 
-            location = CurrentTransform.Apply(location);
-            expand = CurrentTransform.ApplyDirection(expand);
-
-            // Create the text element
-            var text = _document.CreateElement("text", Namespace);
-            options?.Apply(text);
-            _current.AppendChild(text);
-
-            // Parse the text value
-            value = value.Replace("<", "&lt;").Replace(">", "&gt;");
-            var lexer = new SimpleTextLexer(value);
-            var context = new SimpleTextContext(Measurer)
-            {
-                FontSize = size,
-                LineSpacing = lineSpacing,
-                Align = expand.X
-            };
-            var span = SimpleTextParser.Parse(lexer, context);
-            var bounds = span.Bounds.Bounds;
-
-            // Compute the location based on the location and expansion
-            double y = location.Y, x = location.X;
-            if (expand.Y.IsZero())
-                y = y - bounds.Height * 0.5 - bounds.Top;
-            else if (expand.Y < 0)
-                y -= bounds.Bottom;
-            else
-                y -= bounds.Top;
-            if (expand.X.IsZero())
-                x = x - bounds.Width * 0.5 - bounds.Left;
-            else if (expand.X < 0)
-                x -= bounds.Right;
-            else
-                x -= bounds.Left;
-
-            // Make the SVG for the text
-            BuildTextSVG(new(x, y), span, _current, text);
-
-            // Return the offset bounds
-            var r = new Vector2(x, y) + bounds;
-            _bounds.Expand(r);
-            return this;
+            var span = TextFormatter.Format(value, size, false, options);
+            return Text(span, location, expand, options);
         }
 
-        private void BuildTextSVG(Vector2 offset, ISpan span, XmlNode parent, XmlElement current)
+        private void BuildTextSVG(Vector2 offset, Span span, XmlNode parent, XmlElement current)
         {
             if (span is null)
                 return;

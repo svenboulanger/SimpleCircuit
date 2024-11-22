@@ -1,7 +1,6 @@
-﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser.SimpleTexts;
 using System;
 
 namespace SimpleCircuit.Circuits.Contexts
@@ -13,8 +12,9 @@ namespace SimpleCircuit.Circuits.Contexts
     /// Creates a new <see cref="PrepareContext"/>.
     /// </remarks>
     /// <param name="circuit">The circuit.</param>
+    /// <param name="formatter">The text formatter.</param>
     /// <param name="diagnostics">The diagnostics.</param>
-    public class PrepareContext(GraphicalCircuit circuit, ITextMeasurer measurer, IDiagnosticHandler diagnostics) : IPrepareContext
+    public class PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IDiagnosticHandler diagnostics) : IPrepareContext
     {
         private readonly GraphicalCircuit _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
 
@@ -28,11 +28,13 @@ namespace SimpleCircuit.Circuits.Contexts
         public PreparationMode Mode { get; set; }
 
         /// <inheritdoc />
+        public ITextFormatter TextFormatter { get; } = formatter ?? throw new ArgumentNullException(nameof(formatter));
+
+        /// <inheritdoc />
         public NodeOffsetFinder Offsets { get; } = new();
 
         /// <inheritdoc />
         public NodeGrouper Groups { get; } = new();
-
 
         /// <inheritdoc />
         public ICircuitPresence Find(string name)
@@ -40,16 +42,6 @@ namespace SimpleCircuit.Circuits.Contexts
             if (_circuit.TryGetValue(name, out var result))
                 return result;
             return null;
-        }
-
-        /// <inheritdoc />
-        public ISpan Format(string content, double fontSize = 4.0, bool isBold = false, GraphicOptions options = null)
-        {
-            var lexer = new SimpleTextLexer(content);
-            var context = new SimpleTextContext(measurer);
-            context.FontSize = fontSize;
-            context.IsBold = isBold;
-            return SimpleTextParser.Parse(lexer, context);
         }
     }
 }

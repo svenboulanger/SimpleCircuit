@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Drawing;
 
-namespace SimpleCircuit.Parser.SimpleTexts
+namespace SimpleCircuit.Circuits
 {
     /// <summary>
     /// Bounds for a text span.

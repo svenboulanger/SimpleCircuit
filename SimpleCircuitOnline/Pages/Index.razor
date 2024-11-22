@@ -1,9 +1,10 @@
 ﻿@page "/"
 @page "/SimpleCircuit"
+@using SimpleCircuit.Circuits.Spans
 @using SimpleCircuit.Drawing;
 @using SimpleCircuit.Parser.SimpleTexts;
 @inject IJSRuntime _js
-@inject ITextMeasurer _textMeasurer
+@inject ITextFormatter _textFormatter
 @inject Blazored.LocalStorage.ILocalStorageService _localStore
 @inject NavigationManager _navigation;
 

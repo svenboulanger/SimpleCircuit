@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Blazored.LocalStorage;
 using Microsoft.JSInterop;
 using SimpleCircuit.Parser.SimpleTexts;
+using SimpleCircuit.Circuits.Spans;
 
 namespace SimpleCircuitOnline
 {
@@ -18,6 +19,7 @@ namespace SimpleCircuitOnline
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddSingleton<ITextMeasurer>(sp => new TextMeasurer(sp.GetService<IJSRuntime>(), "Tahoma"));
+            builder.Services.AddSingleton<ITextFormatter>(sp => new SimpleTextFormatter(sp.GetService<ITextMeasurer>()));
             builder.Services.AddBlazoredLocalStorage();
 
             await builder.Build().RunAsync();

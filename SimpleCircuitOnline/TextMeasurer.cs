@@ -1,4 +1,5 @@
 ﻿using Microsoft.JSInterop;
+using SimpleCircuit.Circuits;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
 using System.Text.Json;
