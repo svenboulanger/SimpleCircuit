@@ -24,7 +24,7 @@ namespace SimpleCircuitOnline
         public SpanBounds Measure(string text, bool isBold, double size)
         {
             // Make a piece of XML that allows measuring this element
-            JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, FontFamily, size);
+            JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, FontFamily, isBold, size);
             double advance = obj2.GetProperty("a").GetDouble();
             double left = obj2.GetProperty("l").GetDouble();
             double right = obj2.GetProperty("r").GetDouble();

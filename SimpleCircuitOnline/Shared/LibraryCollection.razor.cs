@@ -2,7 +2,6 @@
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
-using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,8 +16,6 @@ namespace SimpleCircuitOnline.Shared
         public const string Storage = "libraries";
         public const string LibraryPrefix = "lib:";
         public const string DefaultLibraryLoadedKey = ":def:loaded";
-
-        private readonly ITextFormatter _textFormatter;
 
         /// <summary>
         /// Gets or sets whether the default library should be included.
@@ -58,15 +55,6 @@ namespace SimpleCircuitOnline.Shared
         /// </summary>
         [Parameter]
         public EventCallback LibrariesChanged { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="LibraryCollection"/>.
-        /// </summary>
-        /// <param name="formatter">The text formatter.</param>
-        public LibraryCollection(ITextFormatter formatter)
-        {
-            _textFormatter = formatter;
-        }
 
         /// <summary>
         /// Builds a context with the current library collection.

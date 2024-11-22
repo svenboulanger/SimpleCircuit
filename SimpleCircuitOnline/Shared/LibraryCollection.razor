@@ -1,5 +1,7 @@
-﻿@using SimpleCircuitOnline.Shared.Icons
+﻿@using SimpleCircuit.Circuits.Spans
+@using SimpleCircuitOnline.Shared.Icons
 @inject Blazored.LocalStorage.ILocalStorageService _localStore
+@inject ITextFormatter _textFormatter
 
 <a href="javascript:void(0);" @onclick="ToggleDefault" class="bd-callout">
     <div class="toggle">
