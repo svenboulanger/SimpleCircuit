@@ -170,7 +170,7 @@ namespace SimpleCircuit
             if (registerContext.Circuit.Count == 0)
             {
                 diagnostics?.Post(ErrorCodes.NoUnknownsToSolve);
-                var updateContext = new UpdateContext(diagnostics, new DefaultBiasingSimulationState(prepareContext.Offsets), prepareContext);
+                var updateContext = new UpdateContext(diagnostics, null, prepareContext);
 
                 // Apply spacing
                 if (!Update(prepareContext, updateContext, presences))
@@ -382,19 +382,10 @@ namespace SimpleCircuit
                         continue;
 
                     var b = bounds[key];
-
                     foreach (string r in data.RepresentativesX)
-                    {
-                        var variable = updateContext.State.GetSharedVariable(r);
-                        int index = updateContext.State.Map[variable];
-                        updateContext.State.Solution[index] += offsetX - b.Left;
-                    }
+                        updateContext.AddOffset(r, offsetX - b.Left);
                     foreach (string r in data.RepresentativesY)
-                    {
-                        var variable = updateContext.State.GetSharedVariable(r);
-                        int index = updateContext.State.Map[variable];
-                        updateContext.State.Solution[index] += offsetY - b.Top;
-                    }
+                        updateContext.AddOffset(r, offsetY - b.Top);
 
                     offsetX += widths[groupX] + Spacing.X;
                 }

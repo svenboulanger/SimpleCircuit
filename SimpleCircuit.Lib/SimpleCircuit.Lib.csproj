@@ -35,7 +35,6 @@
     <Compile Include="Circuits\Contexts\ResetContext.cs" />
     <Compile Include="Circuits\Contexts\UpdateContext.cs" />
     <Compile Include="Circuits\Contexts\ExtremeTracker.cs" />
-    <Compile Include="Circuits\DefaultBiasingSimulationState.cs" />
     <Compile Include="Circuits\GraphicalCircuit.cs" />
     <Compile Include="Circuits\Contexts\RegisterContext.cs" />
     <Compile Include="Circuits\ICircuitPresence.cs" />

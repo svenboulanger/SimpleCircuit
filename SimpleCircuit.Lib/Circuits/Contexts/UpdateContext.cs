@@ -17,13 +17,15 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <param name="relations">The relationships between nodes.</param>
     public class UpdateContext(IDiagnosticHandler diagnostics, IBiasingSimulationState state, IPrepareContext relations) : IUpdateContext
     {
+        private readonly Dictionary<string, double> _unmapped = [];
+
         private readonly IPrepareContext _relationships = relations ?? throw new ArgumentNullException(nameof(relations));
 
         /// <inheritdoc />
         public IDiagnosticHandler Diagnostics { get; } = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
 
         /// <inheritdoc />
-        public IBiasingSimulationState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
+        public IBiasingSimulationState State { get; } = state;
 
         /// <inheritdoc />
         public List<WireSegment> WireSegments { get; } = [];
@@ -32,13 +34,41 @@ namespace SimpleCircuit.Circuits.Contexts
         public double GetValue(string node)
         {
             var r = _relationships.Offsets[node];
-            if (State.TryGetValue(r.Representative, out var value))
+            if (State is not null && State.TryGetValue(r.Representative, out var value))
                 return value.Value + r.Offset;
-            return r.Offset;
+            
+            // It's an unmapped value
+            if (!_unmapped.TryGetValue(r.Representative, out double existing))
+            {
+                existing = 0.0;
+                _unmapped.Add(r.Representative, 0.0);
+            }
+            return existing + r.Offset;
         }
 
         /// <inheritdoc />
         public Vector2 GetValue(string nodeX, string nodeY)
             => new(GetValue(nodeX), GetValue(nodeY));
+
+        /// <summary>
+        /// Adds an offset to a node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="offset">The offset.</param>
+        public void AddOffset(string node, double offset)
+        {
+            var r = _relationships.Offsets[node];
+            if (State is not null && State.TryGetValue(r.Representative, out var variable))
+            {
+                int index = State.Map[variable];
+                State.Solution[index] += offset;
+            }
+            else
+            {
+                if (!_unmapped.TryGetValue(r.Representative, out double existing))
+                    existing = 0.0;
+                _unmapped[r.Representative] = existing + offset;
+            }
+        }
     }
 }
