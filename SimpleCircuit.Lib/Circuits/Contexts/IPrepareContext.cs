@@ -43,11 +43,6 @@ namespace SimpleCircuit.Circuits.Contexts
         public NodeGrouper Groups { get; }
 
         /// <summary>
-        /// Gets the number of drawable groups.
-        /// </summary>
-        public int DrawableGroupCount { get; }
-
-        /// <summary>
         /// Finds a circuit presence with the given name.
         /// </summary>
         /// <param name="name">The full name of the presence.</param>

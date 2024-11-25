@@ -8,6 +8,7 @@ using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 
@@ -20,7 +21,6 @@ namespace SimpleCircuit
     public class GraphicalCircuit(ITextFormatter formatter) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, Dictionary<string, List<IDrawable>>> _linkedGroups = [];
 
         /// <summary>
         /// Gets the number of graphical circuit presences.
@@ -50,7 +50,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the minimum spacing in X- and Y-direction.
         /// </summary>
-        public Vector2 Spacing { get; set; } = new(20.0, 20.0);
+        public Vector2 Spacing { get; set; } = new(5.0, 5.0);
 
         /// <summary>
         /// Gets or sets a flag that determines whether bounds are rendered.
@@ -174,6 +174,7 @@ namespace SimpleCircuit
 
             // Solve the circuit
             SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
+            UpdateContext updateContext;
             try
             {
                 // Solve
@@ -183,7 +184,7 @@ namespace SimpleCircuit
 
                 // Extract the information
                 var state = op.GetState<IBiasingSimulationState>();
-                var updateContext = new UpdateContext(diagnostics, state, prepareContext);
+                updateContext = new UpdateContext(diagnostics, state, prepareContext);
                 foreach (var c in presences.OfType<ICircuitSolverPresence>())
                     c.Update(updateContext);
             }
@@ -191,6 +192,10 @@ namespace SimpleCircuit
             {
                 SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
             }
+
+            // Apply spacing
+            if (!Space(prepareContext, updateContext, presences))
+                return false;
             return true;
         }
 
@@ -206,8 +211,6 @@ namespace SimpleCircuit
 
         private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
-            _linkedGroups.Clear();
-
             // Prepare orientations
             context.Mode = PreparationMode.Orientation;
             if (!PrepareCycle(presences, context))
@@ -233,20 +236,9 @@ namespace SimpleCircuit
             if (!PrepareCycle(presences, context))
                 return false;
 
-            // Store the linked groups
-            if (context.DrawableGroupCount > 1)
-            {
-                foreach (string y in context.DrawableGroupY)
-                {
-                    var dict = new Dictionary<string, List<IDrawable>>();
-                    _linkedGroups.Add(y, dict);
-                    foreach (var p in context.GetDrawableGroups(y))
-                        dict.Add(p.Key, p.Value.ToList());
-                }
-            }
-
             return true;
         }
+
         private bool PrepareCycle(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
             context.Desparateness = DesperatenessLevel.Normal;
@@ -330,6 +322,81 @@ namespace SimpleCircuit
                 }
             }
             return success;
+        }
+
+        private bool Space(PrepareContext prepareContext, UpdateContext updateContext, List<ICircuitPresence> presences)
+        {
+            if (prepareContext.DrawnGroups.Count <= 1)
+                return true; // No need to apply spacing
+
+            // We will first create a matrix that we can use to map out our drawn blocks
+            Dictionary<string, double> offsets = [];
+            foreach (var pair in prepareContext.DrawnGroups.Groups)
+            {
+                offsets[pair.Key.GroupX] = 0.0;
+                offsets[pair.Key.GroupY] = 0.0;
+            }
+
+            // Fix the order of the coordinates and make an array
+            HashSet<string> groupsX = [], groupsY = [];
+            Dictionary<string, double> widths = [];
+            Dictionary<DrawableGrouper.Key, Bounds> bounds = [];
+            var boundBuilder = new BoundsBuilder(TextFormatter);
+            foreach (var pair in prepareContext.DrawnGroups.Groups)
+            {
+                groupsX.Add(pair.Key.GroupX);
+                groupsY.Add(pair.Key.GroupY);
+
+                // Calculate the bounds of this block
+                boundBuilder.Reset();
+                foreach (var c in pair.Value.Drawables)
+                    c.Render(boundBuilder);
+                bounds[pair.Key] = boundBuilder.Bounds;
+
+                // Calculate the reserved width/height for each of the group coordinates
+                if (!widths.TryGetValue(pair.Key.GroupX, out double width))
+                    width = 0.0;
+                widths[pair.Key.GroupX] = Math.Max(width, boundBuilder.Bounds.Width);
+                if (!widths.TryGetValue(pair.Key.GroupY, out width))
+                    width = 0.0;
+                widths[pair.Key.GroupY] = Math.Max(width, boundBuilder.Bounds.Height);
+            }
+
+            double offsetY = 0.0;
+            foreach (string groupY in groupsY)
+            {
+                double offsetX = 0.0;
+                foreach (string groupX in groupsX)
+                {
+                    var key = new DrawableGrouper.Key(groupX, groupY);
+                    if (!prepareContext.DrawnGroups.TryGetValue(key, out var data))
+                        continue;
+
+                    var b = bounds[key];
+
+                    foreach (string r in data.RepresentativesX)
+                    {
+                        var variable = updateContext.State.GetSharedVariable(r);
+                        int index = updateContext.State.Map[variable];
+                        updateContext.State.Solution[index] += offsetX - b.Left;
+                    }
+                    foreach (string r in data.RepresentativesY)
+                    {
+                        var variable = updateContext.State.GetSharedVariable(r);
+                        int index = updateContext.State.Map[variable];
+                        updateContext.State.Solution[index] += offsetY - b.Top;
+                    }
+
+                    offsetX += widths[groupX] + Spacing.X;
+                }
+                offsetY += widths[groupY] + Spacing.Y;
+            }
+
+            // Extract the information
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                c.Update(updateContext);
+
+            return true;
         }
 
         /// <summary>

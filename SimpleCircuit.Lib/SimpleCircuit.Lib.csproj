@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Circuits\Contexts\DrawableGrouper.cs" />
     <Compile Include="Circuits\Contexts\IPrepareContext.cs" />
     <Compile Include="Circuits\Contexts\ISolverContext.cs" />
     <Compile Include="Circuits\Contexts\IUpdateContext.cs" />

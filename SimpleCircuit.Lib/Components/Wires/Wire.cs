@@ -326,6 +326,10 @@ namespace SimpleCircuit.Components.Wires
                         y = ty;
                     }
                     break;
+
+                case PreparationMode.DrawableGroups:
+                    context.GroupDrawableTo(this, StartX, StartY);
+                    break;
             }
             
             return PresenceResult.Success;
@@ -350,6 +354,8 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override void Update(IUpdateContext context)
         {
+            _localPoints.Clear();
+
             // Extract the first node
             var last = context.GetValue(StartX, StartY);
             int count = context.WireSegments.Count;
