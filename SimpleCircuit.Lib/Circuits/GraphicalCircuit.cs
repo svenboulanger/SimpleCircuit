@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using SimpleCircuit.Circuits;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
@@ -169,12 +170,16 @@ namespace SimpleCircuit
             if (registerContext.Circuit.Count == 0)
             {
                 diagnostics?.Post(ErrorCodes.NoUnknownsToSolve);
+                var updateContext = new UpdateContext(diagnostics, new DefaultBiasingSimulationState(prepareContext.Offsets), prepareContext);
+
+                // Apply spacing
+                if (!Update(prepareContext, updateContext, presences))
+                    return false;
                 return true;
             }
 
             // Solve the circuit
             SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
-            UpdateContext updateContext;
             try
             {
                 // Solve
@@ -184,18 +189,18 @@ namespace SimpleCircuit
 
                 // Extract the information
                 var state = op.GetState<IBiasingSimulationState>();
-                updateContext = new UpdateContext(diagnostics, state, prepareContext);
-                foreach (var c in presences.OfType<ICircuitSolverPresence>())
-                    c.Update(updateContext);
+                var updateContext = new UpdateContext(diagnostics, state, prepareContext);
+
+                // Apply spacing
+                if (!Update(prepareContext, updateContext, presences))
+                    return false;
             }
             finally
             {
                 SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
             }
 
-            // Apply spacing
-            if (!Space(prepareContext, updateContext, presences))
-                return false;
+
             return true;
         }
 
@@ -324,8 +329,12 @@ namespace SimpleCircuit
             return success;
         }
 
-        private bool Space(PrepareContext prepareContext, UpdateContext updateContext, List<ICircuitPresence> presences)
+        private bool Update(PrepareContext prepareContext, UpdateContext updateContext, List<ICircuitPresence> presences)
         {
+            // Initial update
+            foreach (var c in presences.OfType<ICircuitSolverPresence>())
+                c.Update(updateContext);
+
             if (prepareContext.DrawnGroups.Count <= 1)
                 return true; // No need to apply spacing
 

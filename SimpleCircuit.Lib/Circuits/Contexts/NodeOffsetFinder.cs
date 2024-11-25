@@ -65,6 +65,11 @@ namespace SimpleCircuit.Circuits.Contexts
         }
 
         /// <summary>
+        /// Gets the number of representatives in the circuit.
+        /// </summary>
+        public int Count => _dict.Count;
+
+        /// <summary>
         /// Gets the representative for a nodes.
         /// </summary>
         /// <param name="name">The name of the node.</param>
