@@ -217,10 +217,8 @@ namespace SimpleCircuit.Components.Wires
                         string ty = context.Offsets[GetYName(i)].Representative;
                         if (!segment.IsUnconstrained)
                         {
-                            if (!StringComparer.Ordinal.Equals(x, tx))
-                                context.Groups.Group(x, tx);
-                            if (!StringComparer.Ordinal.Equals(y, ty))
-                                context.Groups.Group(y, ty);
+                            context.Groups.Group(x, tx);
+                            context.Groups.Group(y, ty);
                         }
                     }
                     break;

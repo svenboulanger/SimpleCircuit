@@ -10,7 +10,17 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"X1 <r se r> X2";
+            var script = @"BB1[Input1] <l>
+BB1[Input2] <l>
+BB1[Output1] <r>
+BB1[Output2] <r>
+BB1[VDD] <u> POW
+BB1[VSS] <d> GND
+
+BB1[Output1] <r d> R <d l> [Output2]BB1
+
+* The black box can stretch in any direction
+(x BB1[Input1] <r +80> [Output1]BB1)";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

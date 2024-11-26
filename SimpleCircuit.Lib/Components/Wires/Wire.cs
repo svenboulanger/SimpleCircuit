@@ -376,10 +376,8 @@ namespace SimpleCircuit.Components.Wires
                         var segment = _segments[i];
 
                         // Group the nodes together
-                        if (!StringComparer.Ordinal.Equals(x, tx))
-                            context.Groups.Group(x, tx);
-                        if (!StringComparer.Ordinal.Equals(y, ty))
-                            context.Groups.Group(y, ty);
+                        context.Groups.Group(x, tx);
+                        context.Groups.Group(y, ty);
 
                         x = tx;
                         y = ty;

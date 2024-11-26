@@ -187,6 +187,19 @@ namespace SimpleCircuit.Components
                             }
                         }
                         break;
+
+                    case PreparationMode.Groups:
+                        // Everything will be linked to the parent X,Y coordinates
+                        string x = context.Offsets[_parent.X].Representative;
+                        string y = context.Offsets[_parent.Y].Representative;
+                        foreach (var pin in pins)
+                        {
+                            string px = context.Offsets[pin.X].Representative;
+                            string py = context.Offsets[pin.Y].Representative;
+                            context.Groups.Group(x, px);
+                            context.Groups.Group(y, py);
+                        }
+                        break;
                 }
                 return PresenceResult.Success;
             }

@@ -148,8 +148,12 @@ namespace SimpleCircuit.Components
                 var result = _pins.Prepare(context);
 
                 // Group the drawable
-                if (context.Mode == PreparationMode.DrawableGroups)
-                    context.GroupDrawableTo(this, X, Y);
+                switch (context.Mode)
+                {
+                    case PreparationMode.DrawableGroups:
+                        context.GroupDrawableTo(this, X, Y);
+                        break;
+                }
 
                 return result;
             }

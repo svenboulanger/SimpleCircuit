@@ -96,6 +96,14 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <param name="b">The second node.</param>
         public void Group(string a, string b)
         {
+            if (_dict.Comparer.Equals(a, b))
+            {
+                // No need to group, but leave a trace
+                if (!_dict.ContainsKey(a))
+                    _dict.Add(a, new(a));
+                return;
+            }
+
             bool hasA = _dict.TryGetValue(a, out var ga);
             bool hasB = _dict.TryGetValue(b, out var gb);
             if (hasA && hasB)
