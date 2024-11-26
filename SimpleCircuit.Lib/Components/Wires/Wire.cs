@@ -289,6 +289,71 @@ namespace SimpleCircuit.Components.Wires
                             }
                             else
                             {
+                                if (!orientation.X.IsZero() && !orientation.Y.IsZero())
+                                {
+                                    // This might be transitive, we will attempt to link them together!
+                                    var rx = context.Offsets[x];
+                                    var ry = context.Offsets[y];
+                                    var rtx = context.Offsets[tx];
+                                    var rty = context.Offsets[ty];
+                                    bool isFixedX = StringComparer.Ordinal.Equals(rx.Representative, rtx.Representative);
+                                    bool isFixedY = StringComparer.Ordinal.Equals(ry.Representative, rty.Representative);
+                                    if (isFixedX && isFixedY)
+                                    {
+                                        // Check whether the orientation is OK
+                                        double dx = rtx.Offset - rx.Offset;
+                                        double dy = rty.Offset - ry.Offset;
+                                        var actualOrientation = new Vector2(dx, dy);
+                                        actualOrientation /= actualOrientation.Length;
+                                        if (orientation.Dot(actualOrientation) < 0.999)
+                                        {
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection, segment.Source.Content);
+                                            return PresenceResult.GiveUp;
+                                        }
+
+                                        // Check whether the minimum distance is OK
+                                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                        return PresenceResult.Success;
+                                    }
+                                    else if (isFixedX)
+                                    {
+                                        // This should lead to a fixed Y as well
+                                        double dx = rtx.Offset - rx.Offset;
+                                        double dy = dx / orientation.X * orientation.Y;
+                                        if (!context.Offsets.Group(y, ty, dy))
+                                        {
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                            return PresenceResult.GiveUp;
+                                        }
+
+                                        // Check whether the minimum distance is OK
+                                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                        return PresenceResult.Success;
+                                    }
+                                    else if (isFixedY)
+                                    {
+                                        // This should lead to a fixed Y as well
+                                        double dy = rty.Offset - ry.Offset;
+                                        double dx = dy / orientation.Y * orientation.X;
+                                        if (!context.Offsets.Group(x, tx, dx))
+                                        {
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                            return PresenceResult.GiveUp;
+                                        }
+
+                                        // Check whether the minimum distance is OK
+                                        if (dx * dx + dy * dy > segment.Length + 0.001)
+                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, segment.Source.Content);
+                                        return PresenceResult.Success;
+                                    }
+                                    else if (context.Desparateness == DesperatenessLevel.Fix)
+                                        return PresenceResult.Success; // Nothing to fix
+                                    else
+                                        return PresenceResult.Incomplete; // Might be fixed by other constraints
+                                        
+                                }
                                 if (orientation.X.IsZero() && !context.Offsets.Group(x, tx, 0.0))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
@@ -314,14 +379,13 @@ namespace SimpleCircuit.Components.Wires
                         string tx = context.Offsets[GetXName(i)].Representative;
                         string ty = context.Offsets[GetYName(i)].Representative;
                         var segment = _segments[i];
-                        if (!segment.IsUnconstrained)
-                        {
-                            // Group the nodes together
-                            if (!StringComparer.Ordinal.Equals(x, tx))
-                                context.Groups.Group(x, tx);
-                            if (!StringComparer.Ordinal.Equals(y, ty))
-                                context.Groups.Group(y, ty);
-                        }
+
+                        // Group the nodes together
+                        if (!StringComparer.Ordinal.Equals(x, tx))
+                            context.Groups.Group(x, tx);
+                        if (!StringComparer.Ordinal.Equals(y, ty))
+                            context.Groups.Group(y, ty);
+
                         x = tx;
                         y = ty;
                     }
@@ -329,6 +393,9 @@ namespace SimpleCircuit.Components.Wires
 
                 case PreparationMode.DrawableGroups:
                     context.GroupDrawableTo(this, StartX, StartY);
+                    for (int i = 1; i < _segments.Count; i++)
+                        context.GroupDrawableTo(this, GetXName(i), GetYName(i));
+                    context.GroupDrawableTo(this, EndX, EndY);
                     break;
             }
             
@@ -444,11 +511,11 @@ namespace SimpleCircuit.Components.Wires
                     var orientation = GetOrientation(i);
 
                     // Wire is of minimum length
-                    if (orientation.X.IsZero())
+                    if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
-                    else if (orientation.Y.IsZero())
+                    else if (orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
-                    else if (!orientation.X.IsZero() && !orientation.Y.IsZero())
+                    else if (!orientation.X.IsZero() && !orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, segment.Length);
                 }
                 fromX = toX;

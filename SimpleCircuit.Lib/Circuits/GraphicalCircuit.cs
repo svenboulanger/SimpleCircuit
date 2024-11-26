@@ -331,28 +331,21 @@ namespace SimpleCircuit
 
         private bool Update(PrepareContext prepareContext, UpdateContext updateContext, List<ICircuitPresence> presences)
         {
-            // Initial update
+            // Initial update used for determining the bounds
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
                 c.Update(updateContext);
 
             if (prepareContext.DrawnGroups.Count <= 1)
                 return true; // No need to apply spacing
 
-            // We will first create a matrix that we can use to map out our drawn blocks
-            Dictionary<string, double> offsets = [];
-            foreach (var pair in prepareContext.DrawnGroups.Groups)
-            {
-                offsets[pair.Key.GroupX] = 0.0;
-                offsets[pair.Key.GroupY] = 0.0;
-            }
-
-            // Fix the order of the coordinates and make an array
+            // Prepare information for figuring out the locations of the groups
             HashSet<string> groupsX = [], groupsY = [];
-            Dictionary<string, double> widths = [];
+            Dictionary<string, double> sizes = [];
             Dictionary<DrawableGrouper.Key, Bounds> bounds = [];
             var boundBuilder = new BoundsBuilder(TextFormatter);
             foreach (var pair in prepareContext.DrawnGroups.Groups)
             {
+                // Initialize
                 groupsX.Add(pair.Key.GroupX);
                 groupsY.Add(pair.Key.GroupY);
 
@@ -362,37 +355,52 @@ namespace SimpleCircuit
                     c.Render(boundBuilder);
                 bounds[pair.Key] = boundBuilder.Bounds;
 
-                // Calculate the reserved width/height for each of the group coordinates
-                if (!widths.TryGetValue(pair.Key.GroupX, out double width))
-                    width = 0.0;
-                widths[pair.Key.GroupX] = Math.Max(width, boundBuilder.Bounds.Width);
-                if (!widths.TryGetValue(pair.Key.GroupY, out width))
-                    width = 0.0;
-                widths[pair.Key.GroupY] = Math.Max(width, boundBuilder.Bounds.Height);
+                // Track the total width/height of the group track
+                if (sizes.TryGetValue(pair.Key.GroupX, out double existing))
+                    sizes[pair.Key.GroupX] = Math.Max(existing, boundBuilder.Bounds.Width);
+                else
+                    sizes.Add(pair.Key.GroupX, boundBuilder.Bounds.Width);
+                if (sizes.TryGetValue(pair.Key.GroupY, out existing))
+                    sizes[pair.Key.GroupY] = Math.Max(existing, boundBuilder.Bounds.Height);
+                else
+                    sizes.Add(pair.Key.GroupY, boundBuilder.Bounds.Height);
             }
 
+            // Determine the group locations based on the sizes of each group track
+            Dictionary<string, double> location = [];
             double offsetY = 0.0;
             foreach (string groupY in groupsY)
             {
                 double offsetX = 0.0;
                 foreach (string groupX in groupsX)
                 {
+                    // Get the bounds (skip if there is none)
                     var key = new DrawableGrouper.Key(groupX, groupY);
-                    if (!prepareContext.DrawnGroups.TryGetValue(key, out var data))
+                    if (!bounds.TryGetValue(key, out var b))
                         continue;
 
-                    var b = bounds[key];
-                    foreach (string r in data.RepresentativesX)
-                        updateContext.AddOffset(r, offsetX - b.Left);
-                    foreach (string r in data.RepresentativesY)
-                        updateContext.AddOffset(r, offsetY - b.Top);
-
-                    offsetX += widths[groupX] + Spacing.X;
+                    // We will allocate space for each group in a zig-zag pattern
+                    location[groupX] = offsetX;
+                    offsetX += sizes[groupX] + Spacing.X;
                 }
-                offsetY += widths[groupY] + Spacing.Y;
+                location[groupY] = offsetY;
+                offsetY += sizes[groupY] + Spacing.Y;
+            }
+
+            // Apply all offsets
+            foreach (var pair in prepareContext.DrawnGroups.Groups)
+            {
+                var b = bounds[pair.Key];
+                double ox = location[pair.Key.GroupX] - b.Left;
+                double oy = location[pair.Key.GroupY] - b.Top;
+                foreach (var x in pair.Value.RepresentativesX)
+                    updateContext.AddOffset(x, ox);
+                foreach (var y in pair.Value.RepresentativesY)
+                    updateContext.AddOffset(y, oy);
             }
 
             // Extract the information
+            updateContext.WireSegments.Clear();
             foreach (var c in presences.OfType<ICircuitSolverPresence>())
                 c.Update(updateContext);
 

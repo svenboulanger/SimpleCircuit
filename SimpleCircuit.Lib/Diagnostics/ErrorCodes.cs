@@ -229,11 +229,17 @@
         [Diagnostic(SeverityLevel.Error, "SE059", "Cannot align '{0}' and '{1}' along the Y-axis")]
         CannotAlignAlongY,
 
+        [Diagnostic(SeverityLevel.Error, "SE059", "Cannot align segment to the correct direction for '{0}'")]
+        CannotAlignDirection,
+
         [Diagnostic(SeverityLevel.Warning, "SW060", "Could not satisfy a minimum distance of {0} in the X-direction for '{1}'")]
         CouldNotSatisfyMinimumOfForInX,
 
         [Diagnostic(SeverityLevel.Warning, "SW061", "Could not satisfy a minimum distance of {0} in the Y-direction for '{1}'")]
         CouldNotSatisfyMinimumOfForInY,
+
+        [Diagnostic(SeverityLevel.Warning, "SW061", "Could not satisfy a minimum distance for '{0}'")]
+        CouldNotSatisfyMinimumDistance,
 
         [Diagnostic(SeverityLevel.Warning, "PW062", "An anonymous queued point is not available")]
         NotEnoughAnonymousPoints,

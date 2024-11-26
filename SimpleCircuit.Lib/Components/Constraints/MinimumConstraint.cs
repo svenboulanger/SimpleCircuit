@@ -42,6 +42,14 @@ namespace SimpleCircuit.Components
         /// <param name="weight">The weight of the minimum.</param>
         public static void AddDirectionalMinimum(IEntityCollection circuit, string name, RelativeItem start, RelativeItem end, double minimum, double weight = 1)
         {
+            if (StringComparer.Ordinal.Equals(start.Representative, end.Representative))
+            {
+                // Double check that the minimum is guaranteed
+                if (start.Offset + minimum < end.Offset - 1e-2)
+                {
+                    throw new ArgumentException("Invalid minimum");
+                }
+            }
             if (minimum > 0)
                 AddMinimum(circuit, name, start, end, minimum, weight);
             else
