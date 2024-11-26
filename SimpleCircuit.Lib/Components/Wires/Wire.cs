@@ -393,7 +393,7 @@ namespace SimpleCircuit.Components.Wires
 
                 case PreparationMode.DrawableGroups:
                     context.GroupDrawableTo(this, StartX, StartY);
-                    for (int i = 1; i < _segments.Count; i++)
+                    for (int i = 0; i < _segments.Count; i++)
                         context.GroupDrawableTo(this, GetXName(i), GetYName(i));
                     context.GroupDrawableTo(this, EndX, EndY);
                     break;

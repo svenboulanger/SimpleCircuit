@@ -87,7 +87,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                         new(y1, x1), new(y1, y1), new(y1, x2), new(y1, y2), new(y1, i),
                         new(x2, x1), new(x2, y1), new(x2, x2), new(x2, y2), new(x2, i),
                         new(y2, x1), new(y2, y1), new(y2, x2), new(y2, y2), new(y2, i),
-                        new(i, x1), new(i, y1), new(i, x2), new(i, y2)
+                        new(i, x1), new(i, y1), new(i, x2), new(i, y2), new(i, i)
                     ],
                     [x1, y1, x2, y2, i]);
             }
@@ -173,7 +173,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                      _gnxny, _gny2, -_gnxny, -_gny2, _n.X,
                     -_gnx2, -_gnxny, _gnx2, _gnxny, _n.Y,
                     -_gnxny, -_gny2, _gnxny, _gny2, -_n.X,
-                    -_n.Y, _n.X, _n.Y, -_n.X,
+                    -_n.Y, _n.X, _n.Y, -_n.X, 1e-9,
 
                     _i.X, _i.Y, -_i.X, -_i.Y, _xo);
             }

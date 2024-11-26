@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"X1 <n> X2
+            var script = @"X1 <r> X2
 X3 <ne sw> X3";
 
             var logger = new Logger();
