@@ -58,8 +58,12 @@ namespace SimpleCircuit.Circuits.Contexts
             {
                 if (_dict.Count > 0)
                 {
-                    foreach (var key in _dict.Keys)
-                        yield return key;
+                    var done = new HashSet<string>(_dict.Comparer);
+                    foreach (var value in _dict.Values)
+                    {
+                        if (done.Add(value.Group.Representative))
+                            yield return value.Group.Representative;
+                    }
                 }
             }
         }

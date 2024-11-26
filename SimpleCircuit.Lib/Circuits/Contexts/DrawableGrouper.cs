@@ -73,6 +73,13 @@ namespace SimpleCircuit.Circuits.Contexts
         }
 
         /// <summary>
+        /// Gets whether the given key exists in the drawable group.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns>Returns <c>true</c> if the drawable key exists.</returns>
+        public bool ContainsKey(Key key) => _dict.ContainsKey(key);
+
+        /// <summary>
         /// Tries to get a value.
         /// </summary>
         /// <param name="key">The key.</param>
