@@ -330,7 +330,6 @@ namespace SimpleCircuit.Components.Wires
                                         // Check whether the minimum distance is OK
                                         if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
                                             context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
-                                        return PresenceResult.Success;
                                     }
                                     else if (isFixedY)
                                     {
@@ -346,13 +345,9 @@ namespace SimpleCircuit.Components.Wires
                                         // Check whether the minimum distance is OK
                                         if (dx * dx + dy * dy > segment.Length + 0.001)
                                             context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, segment.Source.Content);
-                                        return PresenceResult.Success;
                                     }
-                                    else if (context.Desparateness == DesperatenessLevel.Fix)
-                                        return PresenceResult.Success; // Nothing to fix
-                                    else
-                                        return PresenceResult.Incomplete; // Might be fixed by other constraints
-                                        
+                                    else if (context.Desparateness != DesperatenessLevel.Fix && result == PresenceResult.Success)
+                                        result = PresenceResult.Incomplete; // Might be fixed by other constraints
                                 }
                                 if (orientation.X.IsZero() && !context.Offsets.Group(x, tx, 0.0))
                                 {
@@ -399,7 +394,7 @@ namespace SimpleCircuit.Components.Wires
                     break;
             }
             
-            return PresenceResult.Success;
+            return result;
         }
 
         private Vector2 GetOrientation(int index)
