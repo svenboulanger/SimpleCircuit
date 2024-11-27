@@ -269,95 +269,104 @@ namespace SimpleCircuit.Components.Wires
                         var segment = _segments[i];
                         var orientation = GetOrientation(i);
 
-                        // Ignore unconstrained wires
-                        if (!segment.IsUnconstrained)
+                        if (segment.IsFixed)
                         {
-                            if (segment.IsFixed)
-                            {
-                                double l = segment.Length;
+                            double l = segment.Length;
 
-                                if (!context.Offsets.Group(x, tx, orientation.X * l))
-                                {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l), segment.Source.Content);
-                                    return PresenceResult.GiveUp;
-                                }
-                                if (!context.Offsets.Group(y, ty, orientation.Y * l))
-                                {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l), segment.Source.Content);
-                                    return PresenceResult.GiveUp;
-                                }
+                            if (!context.Offsets.Group(x, tx, orientation.X * l))
+                            {
+                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l), segment.Source.Content);
+                                return PresenceResult.GiveUp;
                             }
-                            else
+                            if (!context.Offsets.Group(y, ty, orientation.Y * l))
                             {
-                                if (!orientation.X.IsZero() && !orientation.Y.IsZero())
-                                {
-                                    // This might be transitive, we will attempt to link them together!
-                                    var rx = context.GetOffset(x);
-                                    var ry = context.GetOffset(y);
-                                    var rtx = context.GetOffset(tx);
-                                    var rty = context.GetOffset(ty);
-                                    bool isFixedX = StringComparer.Ordinal.Equals(rx.Representative, rtx.Representative);
-                                    bool isFixedY = StringComparer.Ordinal.Equals(ry.Representative, rty.Representative);
-                                    if (isFixedX && isFixedY)
-                                    {
-                                        // Check whether the orientation is OK
-                                        double dx = rtx.Offset - rx.Offset;
-                                        double dy = rty.Offset - ry.Offset;
-                                        var actualOrientation = new Vector2(dx, dy);
-                                        actualOrientation /= actualOrientation.Length;
-                                        if (orientation.Dot(actualOrientation) < 0.999)
-                                        {
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection, segment.Source.Content);
-                                            return PresenceResult.GiveUp;
-                                        }
-
-                                        // Check whether the minimum distance is OK
-                                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
-                                        return PresenceResult.Success;
-                                    }
-                                    else if (isFixedX)
-                                    {
-                                        // This should lead to a fixed Y as well
-                                        double dx = rtx.Offset - rx.Offset;
-                                        double dy = dx / orientation.X * orientation.Y;
-                                        if (!context.Offsets.Group(y, ty, dy))
-                                        {
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
-                                            return PresenceResult.GiveUp;
-                                        }
-
-                                        // Check whether the minimum distance is OK
-                                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
-                                    }
-                                    else if (isFixedY)
-                                    {
-                                        // This should lead to a fixed Y as well
-                                        double dy = rty.Offset - ry.Offset;
-                                        double dx = dy / orientation.Y * orientation.X;
-                                        if (!context.Offsets.Group(x, tx, dx))
-                                        {
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
-                                            return PresenceResult.GiveUp;
-                                        }
-
-                                        // Check whether the minimum distance is OK
-                                        if (dx * dx + dy * dy > segment.Length + 0.001)
-                                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, segment.Source.Content);
-                                    }
-                                    else if (context.Desparateness != DesperatenessLevel.Fix && result == PresenceResult.Success)
-                                        result = PresenceResult.Incomplete; // Might be fixed by other constraints
-                                }
-                                if (orientation.X.IsZero() && !context.Offsets.Group(x, tx, 0.0))
+                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l), segment.Source.Content);
+                                return PresenceResult.GiveUp;
+                            }
+                        }
+                        else
+                        {
+                            if (orientation.X.IsZero())
+                            {
+                                // Orientation is horizontal
+                                if (!context.Offsets.Group(x, tx, 0.0))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
                                     return PresenceResult.GiveUp;
                                 }
-                                if (orientation.Y.IsZero() && !context.Offsets.Group(y, ty, 0.0))
+                                context.Offsets.Add(ty);
+                            }
+                            else if (orientation.Y.IsZero())
+                            {
+                                // Orientation is vertical
+                                if (!context.Offsets.Group(y, ty, 0.0))
                                 {
                                     context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongY, y, ty);
                                     return PresenceResult.GiveUp;
+                                }
+                                context.Offsets.Add(tx);
+                            }
+                            else
+                            {
+                                // Orientation is a slanted angle
+                                bool isFixedX = context.Offsets.AreGrouped(x, tx);
+                                bool isFixedY = context.Offsets.AreGrouped(y, ty);
+                                if (isFixedX && isFixedY)
+                                {
+                                    // Check whether the orientation is OK
+                                    double dx = context.Offsets.GetValue(tx) - context.Offsets.GetValue(x);
+                                    double dy = context.Offsets.GetValue(ty) - context.Offsets.GetValue(y);
+                                    var actualOrientation = new Vector2(dx, dy);
+                                    actualOrientation /= actualOrientation.Length;
+                                    if (orientation.Dot(actualOrientation) < 0.999)
+                                    {
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection, segment.Source.Content);
+                                        return PresenceResult.GiveUp;
+                                    }
+
+                                    // Check whether the minimum distance is OK
+                                    if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                }
+                                else if (isFixedX)
+                                {
+                                    // This should lead to a fixed Y as well
+                                    double dx = context.Offsets.GetValue(tx) - context.Offsets.GetValue(x);
+                                    double dy = dx / orientation.X * orientation.Y;
+                                    if (!context.Offsets.Group(y, ty, dy))
+                                    {
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                        return PresenceResult.GiveUp;
+                                    }
+
+                                    // Check whether the minimum distance is OK
+                                    if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                }
+                                else if (isFixedY)
+                                {
+                                    // This should lead to a fixed X as well
+                                    double dy = context.Offsets.GetValue(ty) - context.Offsets.GetValue(y);
+                                    double dx = dy / orientation.Y * orientation.X;
+                                    if (!context.Offsets.Group(x, tx, dx))
+                                    {
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                        return PresenceResult.GiveUp;
+                                    }
+
+                                    // Check whether the minimum distance is OK
+                                    if (dx * dx + dy * dy > segment.Length + 0.001)
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, segment.Source.Content);
+                                }
+                                else if (context.Desparateness == DesperatenessLevel.Normal)
+                                {
+                                    if (result == PresenceResult.Success)
+                                        result = PresenceResult.Incomplete;
+                                }
+                                else
+                                {
+                                    context.Offsets.Add(tx);
+                                    context.Offsets.Add(ty);
                                 }
                             }
                         }

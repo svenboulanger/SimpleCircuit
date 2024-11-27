@@ -160,6 +160,7 @@ namespace SimpleCircuit.Components
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
+                                context.Offsets.Add(pin.X);
                             }
                             else if (PointsDown(pin))
                             {
@@ -168,6 +169,7 @@ namespace SimpleCircuit.Components
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
+                                context.Offsets.Add(pin.X);
                             }
                             else if (PointsLeft(pin))
                             {
@@ -176,6 +178,7 @@ namespace SimpleCircuit.Components
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
+                                context.Offsets.Add(pin.Y);
                             }
                             else if (PointsRight(pin))
                             {
@@ -184,6 +187,7 @@ namespace SimpleCircuit.Components
                                     context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
+                                context.Offsets.Add(pin.Y);
                             }
                         }
                         break;
@@ -195,6 +199,8 @@ namespace SimpleCircuit.Components
                             context.Group(_parent.X, pin.X);
                             context.Group(_parent.Y, pin.Y);
                         }
+                        context.Group(_parent.X, Right);
+                        context.Group(_parent.Y, Bottom);
                         break;
                 }
                 return PresenceResult.Success;

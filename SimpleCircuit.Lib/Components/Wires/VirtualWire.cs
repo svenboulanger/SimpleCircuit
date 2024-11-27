@@ -164,9 +164,11 @@ namespace SimpleCircuit.Components.Wires
                         string tx = GetXName(i);
                         string ty = GetYName(i);
                         var segment = _segments[i];
-                        if (segment.IsFixed)
+
+                        if (doX)
                         {
-                            if (doX)
+                            // Align along X-axis
+                            if (segment.IsFixed)
                             {
                                 if (!context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length))
                                 {
@@ -174,18 +176,7 @@ namespace SimpleCircuit.Components.Wires
                                     return PresenceResult.GiveUp;
                                 }
                             }
-                            if (doY)
-                            {
-                                if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
-                                {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
-                                    return PresenceResult.GiveUp;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (segment.Orientation.X.IsZero())
+                            else if (segment.Orientation.X.IsZero())
                             {
                                 if (!context.Offsets.Group(x, tx, 0.0))
                                 {
@@ -193,7 +184,19 @@ namespace SimpleCircuit.Components.Wires
                                     return PresenceResult.GiveUp;
                                 }
                             }
-                            if (segment.Orientation.Y.IsZero())
+                        }
+                        if (doY)
+                        {
+                            // Align along Y-axis
+                            if (segment.IsFixed)
+                            {
+                                if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
+                                {
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
+                                    return PresenceResult.GiveUp;
+                                }
+                            }
+                            else if (segment.Orientation.Y.IsZero())
                             {
                                 if (!context.Offsets.Group(y, ty, 0.0))
                                 {
@@ -202,6 +205,7 @@ namespace SimpleCircuit.Components.Wires
                                 }
                             }
                         }
+
                         x = tx;
                         y = ty;
                     }

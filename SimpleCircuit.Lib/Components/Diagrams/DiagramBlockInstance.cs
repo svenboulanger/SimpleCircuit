@@ -108,11 +108,17 @@ namespace SimpleCircuit.Components.Diagrams
             switch (context.Mode)
             {
                 case PreparationMode.Offsets:
+                    context.Offsets.Add(X);
+                    context.Offsets.Add(Y);
                     UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
                     break;
 
                 case PreparationMode.Sizes:
                     Labels.Format(context);
+                    break;
+
+                case PreparationMode.DrawableGroups:
+                    context.GroupDrawableTo(this, X, Y);
                     break;
             }
 

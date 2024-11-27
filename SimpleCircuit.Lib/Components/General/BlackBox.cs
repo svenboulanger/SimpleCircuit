@@ -150,6 +150,13 @@ namespace SimpleCircuit.Components
                 // Group the drawable
                 switch (context.Mode)
                 {
+                    case PreparationMode.Offsets:
+                        context.Offsets.Add(X);
+                        context.Offsets.Add(Y);
+                        context.Offsets.Add(_pins.Right);
+                        context.Offsets.Add(_pins.Bottom);
+                        break;
+
                     case PreparationMode.DrawableGroups:
                         context.GroupDrawableTo(this, X, Y);
                         break;

@@ -58,6 +58,7 @@ namespace SimpleCircuit.Components
             if (result == PresenceResult.GiveUp)
                 return result;
 
+            // Deal with the pins
             for (int i = 0; i < Pins.Count; i++)
             {
                 var r = Pins[i].Prepare(context);
@@ -67,9 +68,17 @@ namespace SimpleCircuit.Components
                     result = PresenceResult.Incomplete;
             }
 
-            if (context.Mode == PreparationMode.DrawableGroups)
-                context.GroupDrawableTo(this, X, Y);
+            switch (context.Mode)
+            {
+                case PreparationMode.Offsets:
+                    context.Offsets.Add(X);
+                    context.Offsets.Add(Y);
+                    break;
 
+                case PreparationMode.DrawableGroups:
+                    context.GroupDrawableTo(this, X, Y);
+                    break;
+            }
             return result;
         }
 

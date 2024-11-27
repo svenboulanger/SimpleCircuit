@@ -10,12 +10,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"A/GND1 <u> A/V1 <u r> A/TL <r> A/Xo
-B/GND1 <u> B/V1 <u r> B/TL <r> B/Xo
-A/Xo <r d> C <d> GND1
-B/Xo <r d> L <d> GND2
-(x */V1)";
-            // script = @"X <u> V1 <u> X";
+            var script = @"WP
+";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());
