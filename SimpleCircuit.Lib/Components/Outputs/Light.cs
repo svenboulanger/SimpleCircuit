@@ -101,12 +101,10 @@ namespace SimpleCircuit.Components.Outputs
             {
                 builder.Path(b =>
                 {
-                    double c = Math.Cos(-Math.PI * 0.95) * 6;
-                    double s = Math.Sin(-Math.PI * 0.95) * 6;
-                    b.MoveTo(new(c, s));
-                    c = Math.Cos(-Math.PI * 0.05) * 6;
-                    s = Math.Sin(-Math.PI * 0.05) * 6;
-                    b.ArcTo(6, 6, 0.0, true, true, new(c, s));
+                    double c = Math.Cos(Math.PI * 0.95) * 6;
+                    double s = Math.Sin(Math.PI * 0.95) * 6;
+                    b.MoveTo(new(-c, -s));
+                    b.ArcTo(6, 6, 0.0, false, false, new(c, -s));
                 }, new("projector"));
                 if (_anchors[0].Location.Y > -7)
                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));

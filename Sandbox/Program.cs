@@ -10,11 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"
-NMOS1 <u> T(""c"")
-|b poly|
-R3 <r> R4
-||
+            var script = @"LIGHT(arei, projector, ""a"", ""b"")
 ";
 
             var logger = new Logger();
