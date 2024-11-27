@@ -63,5 +63,12 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <param name="node1">The first node.</param>
         /// <param name="node2">The second node.</param>
         public void Group(string node1, string node2);
+
+        /// <summary>
+        /// Gets a node representative and offset.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>Returns the representative and offset.</returns>
+        public RelativeItem GetOffset(string node);
     }
 }

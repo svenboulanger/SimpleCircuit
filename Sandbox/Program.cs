@@ -15,6 +15,7 @@ B/GND1 <u> B/V1 <u r> B/TL <r> B/Xo
 A/Xo <r d> C <d> GND1
 B/Xo <r d> L <d> GND2
 (x */V1)";
+            // script = @"X <u> V1 <u> X";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script.AsMemory());

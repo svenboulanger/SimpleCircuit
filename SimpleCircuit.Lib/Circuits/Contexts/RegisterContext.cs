@@ -24,5 +24,9 @@ namespace SimpleCircuit.Circuits.Contexts
 
         /// <inheritdoc />
         public bool Recalculate { get; set; }
+
+        /// <inheritdoc />
+        public RelativeItem GetOffset(string node)
+            => Relationships.GetOffset(node);
     }
 }

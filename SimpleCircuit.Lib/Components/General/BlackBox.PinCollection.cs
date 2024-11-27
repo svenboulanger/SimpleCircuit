@@ -105,12 +105,12 @@ namespace SimpleCircuit.Components
                 double Apply(string name, string start, IEnumerable<string> pinNodes, string end, double spacing, double edgeSpacing)
                 {
                     double width = 0.0;
-                    var lastOffset = map[start];
-                    var offsetEnd = map[end];
+                    var lastOffset = context.GetOffset(start);
+                    var offsetEnd = context.GetOffset(end);
                     int index = 0;
                     foreach (var node in pinNodes)
                     {
-                        var newOffset = map[node];
+                        var newOffset = context.GetOffset(node);
                         double currentSpace = index == 0 ? edgeSpacing : spacing;
                         MinimumConstraint.AddMinimum(context.Circuit, $"{name}.{index++}", lastOffset, newOffset, currentSpace, 100.0);
                         width += currentSpace;
@@ -134,9 +134,9 @@ namespace SimpleCircuit.Components
                 height = Math.Max(height, Apply($"{_parent.Name}.w", _parent.Y, pins.Where(PointsLeft).Select(p => p.Y), Bottom, _parent.MinSpaceY, _parent.MinEdgeY + CornerRadius));
 
                 if (width < _parent.MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.Relationships.Offsets[_parent.X], context.Relationships.Offsets[Right], _parent.MinWidth, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.x", context.GetOffset(_parent.X), context.GetOffset(Right), _parent.MinWidth, 100.0);
                 if (height < _parent.MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.Relationships.Offsets[_parent.Y], context.Relationships.Offsets[Bottom], _parent.MinHeight, 100.0);
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.min.y", context.GetOffset(_parent.Y), context.GetOffset(Bottom), _parent.MinHeight, 100.0);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
@@ -190,14 +190,10 @@ namespace SimpleCircuit.Components
 
                     case PreparationMode.Groups:
                         // Everything will be linked to the parent X,Y coordinates
-                        string x = context.Offsets[_parent.X].Representative;
-                        string y = context.Offsets[_parent.Y].Representative;
                         foreach (var pin in pins)
                         {
-                            string px = context.Offsets[pin.X].Representative;
-                            string py = context.Offsets[pin.Y].Representative;
-                            context.Group(x, px);
-                            context.Group(y, py);
+                            context.Group(_parent.X, pin.X);
+                            context.Group(_parent.Y, pin.Y);
                         }
                         break;
                 }

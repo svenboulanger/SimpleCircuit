@@ -227,15 +227,14 @@ namespace SimpleCircuit.Components.Wires
             if (!doX && !doY)
                 return;
 
-            var map = context.Relationships.Offsets;
-            var fromX = map[StartX];
-            var fromY = map[StartY];
+            var fromX = context.GetOffset(StartX);
+            var fromY = context.GetOffset(StartY);
             for (int i = 0; i < _segments.Count; i++)
             {
                 string x = GetXName(i);
                 string y = GetYName(i);
-                var toX = map[x];
-                var toY = map[y];
+                var toX = context.GetOffset(x);
+                var toY = context.GetOffset(y);
                 var segment = _segments[i];
                 if (!segment.IsFixed)
                 {

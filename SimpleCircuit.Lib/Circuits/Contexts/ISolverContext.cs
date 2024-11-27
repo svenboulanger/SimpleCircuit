@@ -21,5 +21,12 @@ namespace SimpleCircuit.Circuits.Contexts
         /// Gets or sets whether the circuit should be recalculated.
         /// </summary>
         public bool Recalculate { get; set; }
+
+        /// <summary>
+        /// Gets a node representative and offset.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>Returns the representative and offset.</returns>
+        public RelativeItem GetOffset(string node);
     }
 }

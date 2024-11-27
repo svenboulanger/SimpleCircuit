@@ -139,8 +139,8 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public void Register(IRegisterContext context)
         {
-            var lowest = context.Relationships.Offsets[Lowest];
-            var highest = context.Relationships.Offsets[Highest];
+            var lowest = context.GetOffset(Lowest);
+            var highest = context.GetOffset(Highest);
             if (lowest.Representative != highest.Representative)
                 AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
         }

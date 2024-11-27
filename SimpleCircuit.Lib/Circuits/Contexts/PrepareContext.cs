@@ -53,8 +53,8 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public void GroupDrawableTo(IDrawable drawable, string x, string y)
         {
-            string repX = Offsets[x].Representative;
-            string repY = Offsets[y].Representative;
+            string repX = Offsets.GetRepresentative(x);
+            string repY = Offsets.GetRepresentative(y);
             string groupX = Groups.GetRepresentative(repX);
             string groupY = Groups.GetRepresentative(repY);
             DrawnGroups.Group(drawable, groupX, groupY, repX, repY);
@@ -63,9 +63,16 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public void Group(string node1, string node2)
         {
-            node1 = Offsets[node1].Representative;
-            node2 = Offsets[node2].Representative;
+            node1 = Offsets.GetRepresentative(node1);
+            node2 = Offsets.GetRepresentative(node2);
             Groups.Group(node1, node2, 0);
+        }
+
+        /// <inheritdoc />
+        public RelativeItem GetOffset(string node)
+        {
+            Offsets.TryGet(node, out string representative, out double offset);
+            return new(representative, offset);
         }
     }
 }

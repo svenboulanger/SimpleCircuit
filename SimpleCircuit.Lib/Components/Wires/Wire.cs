@@ -292,10 +292,10 @@ namespace SimpleCircuit.Components.Wires
                                 if (!orientation.X.IsZero() && !orientation.Y.IsZero())
                                 {
                                     // This might be transitive, we will attempt to link them together!
-                                    var rx = context.Offsets[x];
-                                    var ry = context.Offsets[y];
-                                    var rtx = context.Offsets[tx];
-                                    var rty = context.Offsets[ty];
+                                    var rx = context.GetOffset(x);
+                                    var ry = context.GetOffset(y);
+                                    var rtx = context.GetOffset(tx);
+                                    var rty = context.GetOffset(ty);
                                     bool isFixedX = StringComparer.Ordinal.Equals(rx.Representative, rtx.Representative);
                                     bool isFixedY = StringComparer.Ordinal.Equals(ry.Representative, rty.Representative);
                                     if (isFixedX && isFixedY)
@@ -479,15 +479,14 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         public override void Register(IRegisterContext context)
         {
-            var map = context.Relationships.Offsets;
-            var fromX = map[StartX];
-            var fromY = map[StartY];
+            var fromX = context.GetOffset(StartX);
+            var fromY = context.GetOffset(StartY);
             for (int i = 0; i < _segments.Count; i++)
             {
                 string x = GetXName(i);
                 string y = GetYName(i);
-                var toX = map[x];
-                var toY = map[y];
+                var toX = context.GetOffset(x);
+                var toY = context.GetOffset(y);
                 var segment = _segments[i];
                 if (!segment.IsUnconstrained && !segment.IsFixed)
                 {

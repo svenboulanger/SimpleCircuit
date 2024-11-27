@@ -33,17 +33,17 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public double GetValue(string node)
         {
-            var r = _relationships.Offsets[node];
-            if (State is not null && State.TryGetValue(r.Representative, out var value))
-                return value.Value + r.Offset;
+            _relationships.Offsets.TryGet(node, out string representative, out double offset);
+            if (State is not null && State.TryGetValue(representative, out var value))
+                return value.Value + offset;
             
             // It's an unmapped value
-            if (!_unmapped.TryGetValue(r.Representative, out double existing))
+            if (!_unmapped.TryGetValue(representative, out double existing))
             {
                 existing = 0.0;
-                _unmapped.Add(r.Representative, 0.0);
+                _unmapped.Add(representative, 0.0);
             }
-            return existing + r.Offset;
+            return existing + offset;
         }
 
         /// <inheritdoc />
@@ -57,17 +57,17 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <param name="offset">The offset.</param>
         public void AddOffset(string node, double offset)
         {
-            var r = _relationships.Offsets[node];
-            if (State is not null && State.TryGetValue(r.Representative, out var variable))
+            var representative = _relationships.Offsets.GetRepresentative(node);
+            if (State is not null && State.TryGetValue(representative, out var variable))
             {
                 int index = State.Map[variable];
                 State.Solution[index] += offset;
             }
             else
             {
-                if (!_unmapped.TryGetValue(r.Representative, out double existing))
+                if (!_unmapped.TryGetValue(representative, out double existing))
                     existing = 0.0;
-                _unmapped[r.Representative] = existing + offset;
+                _unmapped[representative] = existing + offset;
             }
         }
     }

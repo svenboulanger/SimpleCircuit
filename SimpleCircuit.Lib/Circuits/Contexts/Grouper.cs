@@ -4,6 +4,38 @@ using System.Collections.Generic;
 namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
+    /// A class for grouping nodes together where we track offsets to the representative.
+    /// </summary>
+    public class NodeOffsetFinder : Grouper<string, double>
+    {
+        /// <inheritdoc />
+        protected override double Self => 0.0;
+
+        /// <summary>
+        /// Creates a new <see cref="NodeOffsetFinder"/>.
+        /// </summary>
+        public NodeOffsetFinder()
+            : base(StringComparer.OrdinalIgnoreCase)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override double Invert(double link) => -link;
+
+        /// <inheritdoc />
+        protected override bool IsDuplicate(GroupItem a, GroupItem b, double link)
+            => (b.Value - a.Value - link).IsZero();
+
+        /// <inheritdoc />
+        protected override double MoveLink(double linkReference, double linkMerged, double linkCurrent, double link)
+            => linkReference - linkMerged + linkCurrent + link;
+
+        /// <inheritdoc />
+        protected override double NewLink(double linkReference, double link)
+            => linkReference + link;
+    }
+
+    /// <summary>
     /// A class for grouping nodes together.
     /// </summary>
     public class NodeGrouper : Grouper<string, int>
@@ -26,10 +58,10 @@ namespace SimpleCircuit.Circuits.Contexts
         protected override bool IsDuplicate(GroupItem a, GroupItem b, int link) => true;
 
         /// <inheritdoc />
-        protected override int MoveLink(GroupItem @base, GroupItem toMove, int link) => 0;
+        protected override int MoveLink(int linkBase, int linkMerged, int linkCurrent, int link) => 0;
 
         /// <inheritdoc />
-        protected override int NewLink(GroupItem @base, int link) => 0;
+        protected override int NewLink(int @base, int link) => 0;
     }
 
     /// <summary>
@@ -70,6 +102,16 @@ namespace SimpleCircuit.Circuits.Contexts
         public IEnumerable<K> Representatives => _representatives.Values;
 
         /// <summary>
+        /// Gets the number of groups.
+        /// </summary>
+        public int Count => _representatives.Count;
+
+        /// <summary>
+        /// Gets the number of nodes in any group.
+        /// </summary>
+        public int NodeCount => _dict.Count;
+
+        /// <summary>
         /// Gets the link that describes a reference to itself.
         /// </summary>
         protected abstract V Self { get; }
@@ -95,6 +137,38 @@ namespace SimpleCircuit.Circuits.Contexts
             if (_dict.TryGetValue(key, out var gi))
                 return _representatives[gi.Group];
             return key;
+        }
+
+        /// <summary>
+        /// Gets the value of the key relative to its group.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns>The value.</returns>
+        public V GetValue(K key)
+        {
+            if (_dict.TryGetValue(key, out var gi))
+                return gi.Value;
+            return Self;
+        }
+
+        /// <summary>
+        /// Tries to get both the representative and the value.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="representative">The representative.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Returns <c>true</c> if the key was found; otherwise, <c>false</c>.</returns>
+        public bool TryGet(K key, out K representative, out V value)
+        {
+            if (_dict.TryGetValue(key, out var gi))
+            {
+                representative = _representatives[gi.Group];
+                value = gi.Value;
+                return true;
+            }
+            representative = key;
+            value = Self;
+            return false;
         }
 
         /// <summary>
@@ -146,28 +220,34 @@ namespace SimpleCircuit.Circuits.Contexts
                 // Merge the two groups
                 if (ga.Group.Count < gb.Group.Count)
                 {
+                    var invLink = Invert(link);
                     foreach (var n in ga.Group)
-                        _dict[n] = new(gb.Group, MoveLink(ga, gb, link));
+                    {
+                        var current = _dict[n].Value;
+                        _dict[n] = new(gb.Group, MoveLink(gb.Value, ga.Value, current, invLink));
+                    }
                     gb.Group.UnionWith(ga.Group);
                     _representatives.Remove(ga.Group);
                 }
                 else
                 {
-                    var invLink = Invert(link);
                     foreach (var n in gb.Group)
-                        _dict[n] = new(ga.Group, MoveLink(gb, ga, invLink));
+                    {
+                        var current = _dict[n].Value;
+                        _dict[n] = new(ga.Group, MoveLink(ga.Value, gb.Value, current, link));
+                    }
                     ga.Group.UnionWith(gb.Group);
                     _representatives.Remove(gb.Group);
                 }
             }
             else if (hasA && !hasB)
             {
-                _dict[b] = new(ga.Group, NewLink(ga, link));
+                _dict[b] = new(ga.Group, NewLink(ga.Value, link));
                 ga.Group.Add(b);
             }
             else if (hasB && !hasA)
             {
-                _dict[a] = new(gb.Group, NewLink(gb, Invert(link)));
+                _dict[a] = new(gb.Group, NewLink(gb.Value, Invert(link)));
                 gb.Group.Add(a);
             }
             else
@@ -213,21 +293,21 @@ namespace SimpleCircuit.Circuits.Contexts
         protected abstract V Invert(V link);
 
         /// <summary>
-        /// Finds the value of a link when <paramref name="toMove"/> should become part
-        /// of the <paramref name="base"/> group, given that the items are related by <paramref name="link"/>.
+        /// Calculates the new link when two groups are being merged.
         /// </summary>
-        /// <param name="base">The existing/base item.</param>
-        /// <param name="toMove">The old item that will be moved.</param>
-        /// <param name="link">The created link</param>
-        /// <returns>Returns the link of the item.</returns>
-        protected abstract V MoveLink(GroupItem @base, GroupItem toMove, V link);
+        /// <param name="linkReference">The value of the reference item that will stay around.</param>
+        /// <param name="linkMerged">The value of the item that will be removed after merging.</param>
+        /// <param name="linkCurrent">The value of the item that is currently being moved.</param>
+        /// <param name="link">The link that was added between <paramref name="linkMerged"/> and <paramref name="linkReference"/>.</param>
+        /// <returns>Returns the new link of the item represented by <paramref name="linkCurrent"/>.</returns>
+        protected abstract V MoveLink(V linkReference, V linkMerged, V linkCurrent, V link);
 
         /// <summary>
         /// Finds the value of a link when a new item would be created.
         /// </summary>
-        /// <param name="base">The existing/base item.</param>
+        /// <param name="linkReference">The reference item value.</param>
         /// <param name="link">The created link.</param>
         /// <returns>Returns the link of the item.</returns>
-        protected abstract V NewLink(GroupItem @base, V link);
+        protected abstract V NewLink(V linkReference, V link);
     }
 }
