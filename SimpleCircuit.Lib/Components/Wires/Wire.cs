@@ -385,9 +385,6 @@ namespace SimpleCircuit.Components.Wires
 
                 case PreparationMode.DrawableGroups:
                     context.GroupDrawableTo(this, StartX, StartY);
-                    for (int i = 0; i < _segments.Count; i++)
-                        context.GroupDrawableTo(this, GetXName(i), GetYName(i));
-                    context.GroupDrawableTo(this, EndX, EndY);
                     break;
             }
             
@@ -532,6 +529,7 @@ namespace SimpleCircuit.Components.Wires
                 };
 
                 var tf = builder.CurrentTransform;
+                _points.Clear();
                 builder.Path(builder =>
                 {
                     builder.MoveTo(_localPoints[0].Location);

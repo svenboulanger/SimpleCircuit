@@ -31,12 +31,8 @@ namespace SimpleCircuit.Components.Builders
 
         private readonly XmlDocument _document;
         private XmlNode _current;
-        private readonly ExpandableBounds _bounds = new();
         private readonly Stack<Transform> _tf = new();
         private readonly ITextFormatter _formatter;
-
-        /// <inheritdoc />
-        public override Bounds Bounds => _bounds.Bounds;
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -79,7 +75,7 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(line);
             _current.AppendChild(line);
 
-            _bounds.Expand(start, end);
+            Expand(start, end);
             return this;
         }
 
@@ -97,7 +93,7 @@ namespace SimpleCircuit.Components.Builders
             options?.Apply(circle);
             _current.AppendChild(circle);
 
-            _bounds.Expand(
+            Expand(
                 center - new Vector2(radius, radius),
                 center + new Vector2(radius, radius));
             return this;
@@ -110,7 +106,7 @@ namespace SimpleCircuit.Components.Builders
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                _bounds.Expand(tpt);
+                Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
                 sb.Append(tpt.ToSVG());
@@ -131,7 +127,7 @@ namespace SimpleCircuit.Components.Builders
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                _bounds.Expand(tpt);
+                Expand(tpt);
                 if (sb.Length > 0)
                     sb.Append(' ');
                 sb.Append(tpt.ToSVG());
@@ -194,7 +190,7 @@ namespace SimpleCircuit.Components.Builders
             BuildTextSVG(new(x, y), span, _current, text);
 
             // Return the offset bounds
-            _bounds.Expand(bounds + new Vector2(x, y));
+            Expand(bounds + new Vector2(x, y));
             return this;
         }
 
@@ -276,8 +272,10 @@ namespace SimpleCircuit.Components.Builders
         {
             if (pathBuild == null)
                 return this;
-            var builder = new SvgPathBuilder(CurrentTransform, _bounds);
+            var bounds = new ExpandableBounds();
+            var builder = new SvgPathBuilder(CurrentTransform, bounds);
             pathBuild(builder);
+            Expand(bounds.Bounds);
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
@@ -337,7 +335,7 @@ namespace SimpleCircuit.Components.Builders
             svg.PrependChild(styleElt);
 
             // Try to get the bounds of this
-            var bounds = _bounds.Bounds.Expand(Margin);
+            var bounds = Bounds.Expand(Margin);
 
             // Apply a margin along the edges
             svg.SetAttribute("width", ((int)bounds.Width * 5).ToString());

@@ -262,7 +262,7 @@ namespace SimpleCircuit.Components.Annotations
                         if (isFirst)
                         {
                             isFirst = false;
-
+            
                             // Add the two starting points now that we know the normal
                             AddPoint(last - normal * WireStartMargin + perpendicular * WireMargin);
                             AddPoint(last - normal * WireStartMargin - perpendicular * WireMargin);
@@ -291,12 +291,12 @@ namespace SimpleCircuit.Components.Annotations
                                 AddPoint(last - (lastNormal * kl.X + lastPerpendicular) * WireMargin);
                             }
                         }
-
+            
                         last = current;
                         lastNormal = normal;
                         lastPerpendicular = perpendicular;
                     }
-
+            
                     // Complete the last two points
                     AddPoint(last + lastNormal * WireEndMargin + lastPerpendicular * WireMargin);
                     AddPoint(last + lastNormal * WireEndMargin - lastPerpendicular * WireMargin);

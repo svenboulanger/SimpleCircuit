@@ -62,6 +62,26 @@ namespace SimpleCircuit.Components.Builders
         public IGraphicsBuilder EndGroup();
 
         /// <summary>
+        /// Begins tracking a new set of bounds.
+        /// </summary>
+        /// <returns>Returns the graphics builder for chaining.</returns>
+        public IGraphicsBuilder BeginBounds();
+
+        /// <summary>
+        /// Ends tracking the bounds.
+        /// </summary>
+        /// <param name="bounds">The bounds.</param>
+        /// <returns>Returns the graphics builder for chaining.</returns>
+        public IGraphicsBuilder EndBounds(out Bounds bounds);
+
+        /// <summary>
+        /// Ensures that a given point is considered as part of the bounds.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <returns>Returns the graphics builder for chaining.</returns>
+        public IGraphicsBuilder ExpandBounds(Vector2 point);
+
+        /// <summary>
         /// Draws using SVG-style XML.
         /// </summary>
         /// <param name="description">The description.</param>

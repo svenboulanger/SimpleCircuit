@@ -10,7 +10,11 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"CIRC
+            var script = @"
+NMOS1 <u> T(""c"")
+|b poly|
+R3 <r> R4
+||
 ";
 
             var logger = new Logger();

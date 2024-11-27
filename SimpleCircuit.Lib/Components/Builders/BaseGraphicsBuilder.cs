@@ -18,6 +18,8 @@ namespace SimpleCircuit.Components.Builders
     public abstract class BaseGraphicsBuilder : IGraphicsBuilder
     {
         private readonly Stack<Transform> _tf = new();
+        private readonly ExpandableBounds _globalBounds = new();
+        private readonly Stack<ExpandableBounds> _bounds = new();
 
         /// <inheritdoc />
         public IDiagnosticHandler Diagnostics { get; }
@@ -34,7 +36,7 @@ namespace SimpleCircuit.Components.Builders
         public Transform CurrentTransform => _tf.Peek();
 
         /// <inheritdoc />
-        public abstract Bounds Bounds { get; }
+        public Bounds Bounds => _globalBounds.Bounds;
 
         /// <summary>
         /// Creates a new <see cref="BaseGraphicsBuilder"/>.
@@ -44,6 +46,40 @@ namespace SimpleCircuit.Components.Builders
         {
             Diagnostics = diagnostics;
             _tf.Push(Transform.Identity);
+            _bounds.Push(new());
+        }
+
+        /// <summary>
+        /// Expands all currently active bounds by the given point.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        protected void Expand(Vector2 point)
+        {
+            _globalBounds.Expand(point);
+            foreach (var b in _bounds)
+                b.Expand(point);
+        }
+
+        /// <summary>
+        /// Expands all currently active bounds by the given points.
+        /// </summary>
+        /// <param name="points">The points.</param>
+        protected void Expand(params Vector2[] points)
+        {
+            if (points is null)
+                return;
+            for (int i = 0; i < points.Length; i++)
+                Expand(points[i]);
+        }
+
+        /// <summary>
+        /// Expands all currently active bounds by the given bound.
+        /// </summary>
+        /// <param name="bounds">The bounds.</param>
+        protected void Expand(Bounds bounds)
+        {
+            Expand(new Vector2(bounds.Left, bounds.Top));
+            Expand(new Vector2(bounds.Right, bounds.Bottom));
         }
 
         /// <inheritdoc />
@@ -59,6 +95,28 @@ namespace SimpleCircuit.Components.Builders
             _tf.Pop();
             if (_tf.Count == 0)
                 _tf.Push(Transform.Identity);
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IGraphicsBuilder BeginBounds()
+        {
+            _bounds.Push(new());
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IGraphicsBuilder EndBounds(out Bounds bounds)
+        {
+            bounds = _bounds.Pop().Bounds;
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IGraphicsBuilder ExpandBounds(Vector2 point)
+        {
+            point = CurrentTransform.Apply(point);
+            Expand(point);
             return this;
         }
 

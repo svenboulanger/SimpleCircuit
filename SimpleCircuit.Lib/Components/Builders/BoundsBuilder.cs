@@ -3,7 +3,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
-using System.Xml;
 
 namespace SimpleCircuit.Components.Builders
 {
@@ -12,12 +11,8 @@ namespace SimpleCircuit.Components.Builders
     /// </summary>
     public class BoundsBuilder : BaseGraphicsBuilder
     {
-        private readonly ExpandableBounds _bounds = new();
         private readonly Stack<Transform> _tf = new();
         private readonly ITextFormatter _formatter;
-
-        /// <inheritdoc />
-        public override Bounds Bounds => _bounds.Bounds;
 
         /// <summary>
         /// Creates a new <see cref="BoundsBuilder"/>.
@@ -31,11 +26,6 @@ namespace SimpleCircuit.Components.Builders
             _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
         }
 
-        /// <summary>
-        /// Resets the bounds.
-        /// </summary>
-        public void Reset() => _bounds.Reset();
-
         /// <inheritdoc />
         public override IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false) => this;
 
@@ -44,7 +34,7 @@ namespace SimpleCircuit.Components.Builders
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             center = CurrentTransform.Apply(center);
-            _bounds.Expand(
+            Expand(
                 center - new Vector2(radius, radius),
                 center + new Vector2(radius, radius));
             return this;
@@ -74,7 +64,7 @@ namespace SimpleCircuit.Components.Builders
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
-            _bounds.Expand(start, end);
+            Expand(start, end);
             return this;
         }
 
@@ -83,8 +73,10 @@ namespace SimpleCircuit.Components.Builders
         {
             if (pathBuild is null)
                 return this;
-            var builder = new BoundsPathBuilder(CurrentTransform, _bounds);
+            var bounds = new ExpandableBounds();
+            var builder = new BoundsPathBuilder(CurrentTransform, bounds);
             pathBuild(builder);
+            Expand(bounds.Bounds);
             return this;
         }
 
@@ -94,7 +86,7 @@ namespace SimpleCircuit.Components.Builders
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                _bounds.Expand(tpt);
+                Expand(tpt);
             }
             return this;
         }
@@ -105,7 +97,7 @@ namespace SimpleCircuit.Components.Builders
             foreach (var pt in points)
             {
                 var tpt = CurrentTransform.Apply(pt);
-                _bounds.Expand(tpt);
+                Expand(tpt);
             }
             return this;
         }
@@ -133,7 +125,7 @@ namespace SimpleCircuit.Components.Builders
                 x -= bounds.Left;
 
             // Return the offset bounds
-            _bounds.Expand(bounds + new Vector2(x, y));
+            Expand(bounds + new Vector2(x, y));
             return this;
         }
 

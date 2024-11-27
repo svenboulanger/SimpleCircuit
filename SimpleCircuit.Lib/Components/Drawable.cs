@@ -312,6 +312,7 @@ namespace SimpleCircuit.Components
                     go.Classes.Add(name);
             }
 
+            builder.BeginBounds();
             builder.BeginGroup(go);
 
             // Transform all the elements inside the drawing method
@@ -321,6 +322,8 @@ namespace SimpleCircuit.Components
 
             // Stop grouping elements
             builder.EndGroup();
+            builder.EndBounds(out var bounds);
+            Bounds = bounds;
         }
 
         /// <inheritdoc />

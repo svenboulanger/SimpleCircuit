@@ -77,10 +77,10 @@ namespace SimpleCircuit
         public double LabelMargin { get; set; } = 1.0;
 
         [Description("The spacing in X-direction between two unconnected circuit diagrams. The default is 10.")]
-        public double SpacingX { get; set; } = 10.0;
+        public double SpacingX { get; set; } = 20.0;
 
         [Description("The spacing in Y-direction between two unconnected circuit diagrams. The default is 10.")]
-        public double SpacingY { get; set; } = 10.0;
+        public double SpacingY { get; set; } = 20.0;
 
         [Description("If true, the graphical bounds are rendered on top of each component. The default is false.")]
         public bool RenderBounds { get; set; }

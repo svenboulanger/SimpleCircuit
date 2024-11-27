@@ -54,7 +54,11 @@ namespace SimpleCircuit.Components
                         var marker = new Dot(new(), new(1, 0), new("marker", "dot", "wire"));
                         marker.Draw(builder);
                     }
+                    else
+                        builder.ExpandBounds(new());
                 }
+                else
+                    builder.ExpandBounds(new());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
                 _anchors[0] = new LabelAnchorPoint(n * Distance, n);

@@ -51,7 +51,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the minimum spacing in X- and Y-direction.
         /// </summary>
-        public Vector2 Spacing { get; set; } = new(5.0, 5.0);
+        public Vector2 Spacing { get; set; } = new(20.0, 20.0);
 
         /// <summary>
         /// Gets or sets a flag that determines whether bounds are rendered.
@@ -341,7 +341,7 @@ namespace SimpleCircuit
             // Prepare information for figuring out the locations of the groups
             HashSet<string> groupsX = [], groupsY = [];
             Dictionary<string, double> sizes = [], offset = [];
-            var boundBuilder = new BoundsBuilder(TextFormatter);
+            var builder = new BoundsBuilder(TextFormatter);
             foreach (var pair in prepareContext.DrawnGroups.Groups)
             {
                 // Initialize
@@ -349,29 +349,30 @@ namespace SimpleCircuit
                 groupsY.Add(pair.Key.GroupY);
 
                 // Calculate the bounds of this block
-                boundBuilder.Reset();
+                builder.BeginBounds();
                 foreach (var c in pair.Value.Drawables)
-                    c.Render(boundBuilder);
+                    c.Render(builder);
+                builder.EndBounds(out var bounds);
 
                 // Track the total width/height of the group track
                 if (sizes.TryGetValue(pair.Key.GroupX, out double existing))
-                    sizes[pair.Key.GroupX] = Math.Max(existing, boundBuilder.Bounds.Width);
+                    sizes[pair.Key.GroupX] = Math.Max(existing, bounds.Width);
                 else
-                    sizes.Add(pair.Key.GroupX, boundBuilder.Bounds.Width);
+                    sizes.Add(pair.Key.GroupX, bounds.Width);
                 if (sizes.TryGetValue(pair.Key.GroupY, out existing))
-                    sizes[pair.Key.GroupY] = Math.Max(existing, boundBuilder.Bounds.Height);
+                    sizes[pair.Key.GroupY] = Math.Max(existing, bounds.Height);
                 else
-                    sizes.Add(pair.Key.GroupY, boundBuilder.Bounds.Height);
+                    sizes.Add(pair.Key.GroupY, bounds.Height);
 
                 // Track the top-left corner
                 if (offset.TryGetValue(pair.Key.GroupX, out existing))
-                    offset[pair.Key.GroupX] = Math.Min(existing, boundBuilder.Bounds.Left);
+                    offset[pair.Key.GroupX] = Math.Min(existing, bounds.Left);
                 else
-                    offset[pair.Key.GroupX] = boundBuilder.Bounds.Left;
+                    offset[pair.Key.GroupX] = bounds.Left;
                 if (offset.TryGetValue(pair.Key.GroupY, out existing))
-                    offset[pair.Key.GroupY] = Math.Min(existing, boundBuilder.Bounds.Top);
+                    offset[pair.Key.GroupY] = Math.Min(existing, bounds.Top);
                 else
-                    offset[pair.Key.GroupY] = boundBuilder.Bounds.Top;
+                    offset[pair.Key.GroupY] = bounds.Top;
             }
 
             // Determine the group locations based on the sizes of each group track
