@@ -196,8 +196,8 @@ namespace SimpleCircuit.Components
                         {
                             string px = context.Offsets[pin.X].Representative;
                             string py = context.Offsets[pin.Y].Representative;
-                            context.Groups.Group(x, px);
-                            context.Groups.Group(y, py);
+                            context.Group(x, px);
+                            context.Group(y, py);
                         }
                         break;
                 }

@@ -367,20 +367,10 @@ namespace SimpleCircuit.Components.Wires
                     break;
 
                 case PreparationMode.Groups:
-                    x = context.Offsets[StartX].Representative;
-                    y = context.Offsets[StartY].Representative;
                     for (int i = 0; i < _segments.Count; i++)
                     {
-                        string tx = context.Offsets[GetXName(i)].Representative;
-                        string ty = context.Offsets[GetYName(i)].Representative;
-                        var segment = _segments[i];
-
-                        // Group the nodes together
-                        context.Groups.Group(x, tx);
-                        context.Groups.Group(y, ty);
-
-                        x = tx;
-                        y = ty;
+                        context.Group(StartX, GetXName(i));
+                        context.Group(StartY, GetYName(i));
                     }
                     break;
 

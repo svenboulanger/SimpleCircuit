@@ -397,9 +397,9 @@ namespace SimpleCircuit
 
             foreach (string representative in prepareContext.Offsets.Representatives)
             {
-                if (representative == "0")
+                if (StringComparer.Ordinal.Equals(representative, "0"))
                     continue;
-                string group = prepareContext.Groups[representative];
+                string group = prepareContext.Groups.GetRepresentative(representative);
                 updateContext.AddOffset(representative, location[group]);
             }
 

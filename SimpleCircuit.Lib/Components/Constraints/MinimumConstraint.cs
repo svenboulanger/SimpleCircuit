@@ -132,11 +132,7 @@ namespace SimpleCircuit.Components
         public PresenceResult Prepare(IPrepareContext context)
         {
             if (context.Mode == PreparationMode.Offsets)
-            {
-                var a = context.Offsets[Lowest];
-                var b = context.Offsets[Highest];
-                context.Groups.Group(a.Representative, b.Representative);
-            }
+                context.Group(Lowest, Highest);
             return PresenceResult.Success;
         }
 

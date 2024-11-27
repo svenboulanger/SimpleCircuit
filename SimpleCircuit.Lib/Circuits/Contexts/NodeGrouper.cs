@@ -7,7 +7,7 @@ namespace SimpleCircuit.Circuits.Contexts
     /// A class for grouping nodes together.
     /// It will also make sure ground nodes are not mapped to other nodes.
     /// </summary>
-    public class NodeGrouper
+    public class NodeGrouperB
     {
         /// <summary>
         /// The ground nodes.
@@ -72,7 +72,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Creates a new node grouper.
         /// </summary>
-        public NodeGrouper()
+        public NodeGrouperB()
         {
             bool first = true;
             NodeGroup g = new();

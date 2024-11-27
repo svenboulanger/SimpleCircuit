@@ -56,5 +56,12 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <param name="x">The X-coordinate.</param>
         /// <param name="y">The Y-coordinate.</param>
         public void GroupDrawableTo(IDrawable drawable, string x, string y);
+
+        /// <summary>
+        /// Groups unknowns together.
+        /// </summary>
+        /// <param name="node1">The first node.</param>
+        /// <param name="node2">The second node.</param>
+        public void Group(string node1, string node2);
     }
 }
