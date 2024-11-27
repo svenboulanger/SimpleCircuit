@@ -1,15 +1,9 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Builders.Markers;
-using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SimpleTexts;
-using SimpleCircuit.Parser.SvgPathData;
-using SimpleCircuit.Parser.Variants;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Xml;
 

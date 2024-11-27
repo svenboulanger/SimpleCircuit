@@ -32,8 +32,9 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     double s = Math.Sin(-Math.PI * 0.8) * r;
                     b.MoveTo(new(c, s));
                     b.ArcTo(r, r, 0.0, true, true, new(c, -s));
-                    var marker = new Arrow(b.End, b.EndNormal);
-                    marker.Draw(builder);
+                    b.Line(new(0.5, 2));
+                    b.MoveTo(new(c, -s));
+                    b.Line(new(2, 0));
                 });
                 DrawLabels(builder);
             }

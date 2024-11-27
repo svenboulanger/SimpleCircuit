@@ -10,7 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"WP
+            var script = @"CIRC
 ";
 
             var logger = new Logger();

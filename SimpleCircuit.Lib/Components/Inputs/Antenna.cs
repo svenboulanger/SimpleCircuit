@@ -36,19 +36,27 @@ namespace SimpleCircuit.Components.Inputs
             {
                 if (Variants.Contains(_alt))
                 {
-                    builder.Path(b => b
-                        .MoveTo(new(0, 0))
-                        .MoveTo(new(0, -3))
-                        .LineTo(new(-5, -10))
-                        .LineTo(new(0, -3)));
+                    builder.Path(b =>
+                    {
+                        b.MoveTo(new(0, 0));
+                        b.Line(new(0, -10));
+                        b.MoveTo(new(0, -3));
+                        b.LineTo(new(-5, -10));
+                        b.LineTo(new(5, -10));
+                        b.LineTo(new(0, -3));
+                    });
                 }
                 else
                 {
-                    builder.Path(b => b
-                        .MoveTo(new(0, 0))
-                        .MoveTo(new(0, -3))
-                        .LineTo(new(-5, -10))
-                        .LineTo(new(5, -10)));
+                    builder.Path(b =>
+                    {
+                        b.MoveTo(new(0, 0));
+                        b.Line(new(0, -10));
+                        b.MoveTo(new(0, -3));
+                        b.LineTo(new(-5, -10));
+                        b.MoveTo(new(0, -3));
+                        b.LineTo(new(5, -10));
+                    });
                 }
 
                 _anchors.Draw(builder, this);

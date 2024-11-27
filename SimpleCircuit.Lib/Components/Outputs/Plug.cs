@@ -47,7 +47,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 builder.ExtendPin(Pins["a"]);
                 builder.Path(b => b
-                    .MoveTo(new(0, -4)).ArcTo(4, 4, 0, true, false, new(0, 4)));
+                    .MoveTo(new(4, -4))
+                    .ArcTo(4, 4, 0, true, false, new(4, 4)));
 
                 if (Variants.Contains(_earth))
                     DrawProtectiveConnection(builder);
