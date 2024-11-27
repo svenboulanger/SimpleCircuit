@@ -4,67 +4,6 @@ using System.Collections.Generic;
 namespace SimpleCircuit.Circuits.Contexts
 {
     /// <summary>
-    /// A class for grouping nodes together where we track offsets to the representative.
-    /// </summary>
-    public class NodeOffsetFinder : Grouper<string, double>
-    {
-        /// <inheritdoc />
-        protected override double Self => 0.0;
-
-        /// <summary>
-        /// Creates a new <see cref="NodeOffsetFinder"/>.
-        /// </summary>
-        public NodeOffsetFinder()
-            : base(StringComparer.OrdinalIgnoreCase)
-        {
-        }
-
-        /// <inheritdoc />
-        protected override double Invert(double link) => -link;
-
-        /// <inheritdoc />
-        protected override bool IsDuplicate(GroupItem a, GroupItem b, double link)
-            => (b.Value - a.Value - link).IsZero();
-
-        /// <inheritdoc />
-        protected override double MoveLink(double linkReference, double linkMerged, double linkCurrent, double link)
-            => linkReference - linkMerged + linkCurrent + link;
-
-        /// <inheritdoc />
-        protected override double NewLink(double linkReference, double link)
-            => linkReference + link;
-    }
-
-    /// <summary>
-    /// A class for grouping nodes together.
-    /// </summary>
-    public class NodeGrouper : Grouper<string, int>
-    {
-        /// <inheritdoc />
-        protected override int Self => 0;
-
-        /// <summary>
-        /// Creates a new <see cref="NodeGrouper"/>
-        /// </summary>
-        public NodeGrouper()
-            : base(StringComparer.OrdinalIgnoreCase)
-        {
-        }
-
-        /// <inheritdoc />
-        protected override int Invert(int link) => 0;
-
-        /// <inheritdoc />
-        protected override bool IsDuplicate(GroupItem a, GroupItem b, int link) => true;
-
-        /// <inheritdoc />
-        protected override int MoveLink(int linkBase, int linkMerged, int linkCurrent, int link) => 0;
-
-        /// <inheritdoc />
-        protected override int NewLink(int @base, int link) => 0;
-    }
-
-    /// <summary>
     /// Describes a class that can group items together.
     /// </summary>
     /// <typeparam name="K">The key.</typeparam>

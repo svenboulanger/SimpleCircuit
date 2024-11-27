@@ -32,7 +32,7 @@ namespace SimpleCircuit.Circuits.Contexts
         public ITextFormatter TextFormatter { get; } = formatter ?? throw new ArgumentNullException(nameof(formatter));
 
         /// <inheritdoc />
-        public NodeOffsetFinder Offsets { get; } = new();
+        public NodeOffsetGrouper Offsets { get; } = new();
 
         /// <inheritdoc />
         public NodeGrouper Groups { get; } = new();

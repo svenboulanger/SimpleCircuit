@@ -35,7 +35,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Tracks offsets between nodes.
         /// </summary>
-        public NodeOffsetFinder Offsets { get; }
+        public NodeOffsetGrouper Offsets { get; }
 
         /// <summary>
         /// Tracks nodes that are linked together.

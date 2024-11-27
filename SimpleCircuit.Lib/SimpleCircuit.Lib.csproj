@@ -31,6 +31,8 @@
     <Compile Include="Circuits\Contexts\IPrepareContext.cs" />
     <Compile Include="Circuits\Contexts\ISolverContext.cs" />
     <Compile Include="Circuits\Contexts\IUpdateContext.cs" />
+    <Compile Include="Circuits\Contexts\NodeGrouper.cs" />
+    <Compile Include="Circuits\Contexts\NodeOffsetGrouper.cs" />
     <Compile Include="Circuits\Contexts\PreparationMode.cs" />
     <Compile Include="Circuits\Contexts\PrepareContext.cs" />
     <Compile Include="Circuits\Contexts\ResetContext.cs" />
