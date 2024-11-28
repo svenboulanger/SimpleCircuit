@@ -103,7 +103,7 @@ namespace SimpleCircuit.Components.Diagrams
         }
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context)
+        public virtual PresenceResult Prepare(IPrepareContext context)
         {
             switch (context.Mode)
             {

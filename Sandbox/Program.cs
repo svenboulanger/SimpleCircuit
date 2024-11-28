@@ -10,7 +10,9 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"LIGHT(arei, projector, ""a"", ""b"")
+            var script = @"FP(""Hello world"") <r> FP(""This is some example text"", r=3)
+FP(""This is some example text"", predefined, r=2)
+FP(""a"", ""b"", anchor1=""nwi"", anchor2=""nei"")
 ";
 
             var logger = new Logger();

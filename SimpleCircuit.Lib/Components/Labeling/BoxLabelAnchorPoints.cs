@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using SimpleCircuit.Drawing;
+using System;
+using System.Collections;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -20,6 +24,140 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         protected BoxLabelAnchorPoints()
         {
+        }
+
+        /// <summary>
+        /// Calculates the size of a box that fits all the labels inside with given spacing.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="spacing">The spacing.</param>
+        /// <returns></returns>
+        public Vector2 CalculateSize(IBoxDrawable subject, Vector2 spacing)
+        {
+            double leftWidth = 0.0, centerWidth = 0.0, rightWidth = 0.0;
+            double topHeight = 0.0, centerHeight = 0.0, bottomHeight = 0.0;
+            void Expand(int index, Bounds bounds)
+            {
+                switch (index)
+                {
+                    case 0:
+                        centerWidth = Math.Max(bounds.Width, centerWidth);
+                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        break;
+
+                    case 13:
+                        leftWidth = Math.Max(bounds.Width, leftWidth);
+                        topHeight = Math.Max(bounds.Height, topHeight);
+                        break;
+
+                    case 14:
+                        centerWidth = Math.Max(bounds.Width, centerWidth);
+                        topHeight = Math.Max(bounds.Height, topHeight);
+                        break;
+
+                    case 15:
+                        rightWidth = Math.Max(bounds.Width, rightWidth);
+                        topHeight = Math.Max(bounds.Height, topHeight);
+                        break;
+
+                    case 16:
+                        rightWidth = Math.Max(bounds.Width, rightWidth);
+                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        break;
+
+                    case 17:
+                        rightWidth = Math.Max(bounds.Width, rightWidth);
+                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        break;
+
+                    case 18:
+                        centerWidth = Math.Max(bounds.Width, centerWidth);
+                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        break;
+
+                    case 19:
+                        leftWidth = Math.Max(bounds.Width, leftWidth);
+                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        break;
+
+                    case 20:
+                        leftWidth = Math.Max(bounds.Width, leftWidth);
+                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        break;
+                }
+            }
+
+            for (int i = 0; i < subject.Labels.Count; i++)
+            {
+                var label = subject.Labels[i];
+                if (label?.Formatted is null)
+                    continue;
+                string name = label.Location ?? i.ToString();
+                var bounds = label.Formatted.Bounds.Bounds;
+
+                switch (name)
+                {
+                    case "0":
+                    case "c":
+                    case "ci": Expand(0, bounds); break;
+
+                    case "13":
+                    case "nwi": Expand(13, bounds); break;
+
+                    case "14":
+                    case "ni": Expand(14, bounds); break;
+
+                    case "15":
+                    case "nei": Expand(15, bounds); break;
+
+                    case "16":
+                    case "ei": Expand(16, bounds); break;
+
+                    case "17":
+                    case "sei": Expand(17, bounds); break;
+
+                    case "18":
+                    case "si": Expand(18, bounds); break;
+
+                    case "19":
+                    case "swi": Expand(19, bounds); break;
+
+                    case "20":
+                    case "wi": Expand(20, bounds); break;
+
+                    default:
+                        if (label.Location.All(char.IsDigit))
+                        {
+                            int index = int.Parse(label.Location);
+                            index %= Count;
+                            if (index < 0)
+                                index += Count;
+                            Expand(index, bounds);
+                        }
+                        break;
+                }
+            }
+
+            // Calculate the total width and height
+            double width = 0.0;
+            if (leftWidth > 0)
+                width += leftWidth + subject.LabelMargin;
+            if (centerWidth > 0)
+                width += width.Equals(0.0) ? centerWidth + subject.LabelMargin : centerWidth + spacing.X;
+            if (rightWidth > 0)
+                width += width.Equals(0.0) ? rightWidth + subject.LabelMargin : rightWidth + spacing.X;
+            width += subject.LabelMargin;
+
+            double height = 0.0;
+            if (topHeight > 0)
+                height += topHeight;
+            if (centerHeight > 0)
+                height += height.Equals(0.0) ? centerHeight + subject.LabelMargin : centerHeight + spacing.Y;
+            if (bottomHeight > 0)
+                height += height.Equals(0.0) ? bottomHeight + subject.LabelMargin : bottomHeight + spacing.Y;
+            height += subject.LabelMargin;
+
+            return new(width, height);
         }
 
         /// <inheritdoc />
