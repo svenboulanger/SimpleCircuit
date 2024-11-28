@@ -33,15 +33,6 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override bool Reset(IResetContext context)
-        {
-            if (!base.Reset(context))
-                return false;
-            Location = new();
-            return true;
-        }
-
-        /// <inheritdoc />
         public override void Update(IUpdateContext context)
         {
             Location = context.GetValue(X, Y);
@@ -70,6 +61,10 @@ namespace SimpleCircuit.Components
 
             switch (context.Mode)
             {
+                case PreparationMode.Reset:
+                    Location = new();
+                    break;
+
                 case PreparationMode.Offsets:
                     context.Offsets.Add(X);
                     context.Offsets.Add(Y);

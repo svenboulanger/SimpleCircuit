@@ -136,6 +136,14 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
+            switch (context.Mode)
+            {
+                case PreparationMode.Reset:
+                    _components.Clear();
+                    _wires.Clear();
+                    break;
+            }
+
             // Find all component info items
             foreach (var info in _componentInfos)
             {
@@ -151,6 +159,7 @@ namespace SimpleCircuit.Components.Annotations
                     return PresenceResult.GiveUp;
                 _wires.Add(wire);
             }
+
             return PresenceResult.Success;
         }
 
@@ -646,14 +655,6 @@ namespace SimpleCircuit.Components.Annotations
             avg /= count;
             x = avg.X;
             y = avg.Y;
-        }
-
-        /// <inheritdoc />
-        public bool Reset(IResetContext context)
-        {
-            _components.Clear();
-            _wires.Clear();
-            return true;
         }
 
         /// <inheritdoc />

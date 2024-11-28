@@ -26,12 +26,19 @@ namespace SimpleCircuit.Components.Pins
         public bool HasFreeOrientation => !HasFixedOrientation;
 
         /// <inheritdoc />
-        public override bool Reset(IResetContext context)
+        public override PresenceResult Prepare(IPrepareContext context)
         {
-            if (!base.Reset(context))
-                return false;
-            HasFixedOrientation = false;
-            return true;
+            var result = base.Prepare(context);
+            if (result == PresenceResult.GiveUp)
+                return result;
+
+            switch (context.Mode)
+            {
+                case PreparationMode.Reset:
+                    HasFixedOrientation = false;
+                    break;
+            }
+            return result;
         }
 
         /// <inheritdoc />

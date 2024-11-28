@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleCircuit;
+using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using System;
@@ -145,7 +146,12 @@ namespace SimpleCircuitOnline.Shared
             }
 
             var drawing = new SvgBuilder(_textFormatter);
-            _drawable.Reset(null);
+            var context = new PrepareContext(null, _textFormatter, null);
+            context.Mode = PreparationMode.Reset;
+            _drawable.Prepare(context);
+            context.Mode = PreparationMode.Sizes;
+            _drawable.Prepare(context);
+
             _drawable.Render(drawing);
             var doc = drawing.GetDocument();
 

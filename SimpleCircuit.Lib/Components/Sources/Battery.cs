@@ -53,14 +53,21 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                double offset = Length / 2;
-                SetPinOffset(0, new(-offset, 0));
-                SetPinOffset(1, new(offset, 0));
-                return true;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        double offset = Length / 2;
+                        SetPinOffset(0, new(-offset, 0));
+                        SetPinOffset(1, new(offset, 0));
+                        break;
+                }
+                return result;
             }
 
             /// <inheritdoc />

@@ -50,9 +50,6 @@ namespace SimpleCircuit.Components.Constraints
         public bool Invert { get; } = invert;
 
         /// <inheritdoc />
-        public bool Reset(IResetContext context) => true;
-
-        /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
             if (context.Mode == PreparationMode.Orientation)

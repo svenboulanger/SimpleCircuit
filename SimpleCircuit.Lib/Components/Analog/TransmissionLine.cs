@@ -80,21 +80,28 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                double x = -_inner - (Length - _width) / 2;
-                SetPinOffset(0, new(x, 0));
-                SetPinOffset(1, new(x, _height));
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                x = _inner + (Length - _width) / 2;
-                SetPinOffset(2, new(x, _height));
-                SetPinOffset(3, new(_width + (Length - _width) / 2, 0));
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        double x = -_inner - (Length - _width) / 2;
+                        SetPinOffset(0, new(x, 0));
+                        SetPinOffset(1, new(x, _height));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -_height - 1), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, _height + 1), new(0, 1));
-                return true;
+                        x = _inner + (Length - _width) / 2;
+                        SetPinOffset(2, new(x, _height));
+                        SetPinOffset(3, new(_width + (Length - _width) / 2, 0));
+
+                        _anchors[0] = new LabelAnchorPoint(new(0, -_height - 1), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, _height + 1), new(0, 1));
+                        break;
+                }
+                return result;
             }
 
             /// <inheritdoc />

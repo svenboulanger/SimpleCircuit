@@ -40,34 +40,41 @@ namespace SimpleCircuit.Components.Inputs
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                switch (Variants.Select(Options.American))
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
                 {
-                    case 0:
-                        switch (Variants.Select(_male, _female))
+                    case PreparationMode.Reset:
+                        switch (Variants.Select(Options.American))
                         {
                             case 0:
-                            case 1:
-                                SetPinOffset(0, new());
-                                SetPinOffset(1, new());
+                                switch (Variants.Select(_male, _female))
+                                {
+                                    case 0:
+                                    case 1:
+                                        SetPinOffset(0, new());
+                                        SetPinOffset(1, new());
+                                        break;
+
+                                    default:
+                                        SetPinOffset(0, new(-2, 0));
+                                        SetPinOffset(1, new(2, 0));
+                                        break;
+                                }
                                 break;
 
                             default:
-                                SetPinOffset(0, new(-2, 0));
-                                SetPinOffset(1, new(2, 0));
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(1.5, 0));
                                 break;
                         }
                         break;
-
-                    default:
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(1.5, 0));
-                        break;
                 }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

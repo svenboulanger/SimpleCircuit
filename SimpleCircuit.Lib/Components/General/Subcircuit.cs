@@ -68,56 +68,62 @@ namespace SimpleCircuit.Components
             public override string Type { get; } = type.ToLower();
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                // Calculate the positions of the pins
-                Pins.Clear();
-
-                HashSet<string> takenNames = new(StringComparer.OrdinalIgnoreCase);
-                List<string> pinNames = [];
-                foreach (var pinInfo in _pins)
+                switch (context.Mode)
                 {
-                    pinNames.Clear();
+                    case PreparationMode.Reset:
+                        // Calculate the positions of the pins
+                        Pins.Clear();
 
-                    // Find the ports
-                    var pin = pinInfo.GetOrCreate(context.Diagnostics, -1);
-                    if (pin == null)
-                    {
-                        context.Diagnostics?.Post(pinInfo.Name, ErrorCodes.CouldNotFindPin, pinInfo.Name.Content, pinInfo.Component.Fullname);
-                        return false;
-                    }
+                        HashSet<string> takenNames = new(StringComparer.OrdinalIgnoreCase);
+                        List<string> pinNames = [];
+                        foreach (var pinInfo in _pins)
+                        {
+                            pinNames.Clear();
 
-                    // Component name as pin name
-                    if (takenNames.Add(pinInfo.Component.Source.Content.ToString()))
-                        pinNames.Add(pinInfo.Component.Source.Content.ToString());
+                            // Find the ports
+                            var pin = pinInfo.GetOrCreate(context.Diagnostics, -1);
+                            if (pin == null)
+                            {
+                                context.Diagnostics?.Post(pinInfo.Name, ErrorCodes.CouldNotFindPin, pinInfo.Name.Content, pinInfo.Component.Fullname);
+                                return PresenceResult.GiveUp;
+                            }
 
-                    // Shorthand notation for DIR
-                    if (pin.Name.StartsWith("DIR") && pin.Name.Length > 3)
-                    {
-                        string name = pin.Name[3..];
-                        if (takenNames.Add(name))
-                            pinNames.Add(name);
-                    }
+                            // Component name as pin name
+                            if (takenNames.Add(pinInfo.Component.Source.Content.ToString()))
+                                pinNames.Add(pinInfo.Component.Source.Content.ToString());
 
-                    // Deduce names
-                    foreach (var name in pin.Owner.Pins.NamesOf(pin))
-                        pinNames.Add($"{pin.Owner.Name}_{name}");
+                            // Shorthand notation for DIR
+                            if (pin.Name.StartsWith("DIR") && pin.Name.Length > 3)
+                            {
+                                string name = pin.Name[3..];
+                                if (takenNames.Add(name))
+                                    pinNames.Add(name);
+                            }
 
-                    if (pin is IOrientedPin op)
-                    {
-                        Pins.Add(new FixedOrientedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location, op.Orientation),
-                            pinNames);
-                    }
-                    else
-                    {
-                        Pins.Add(new FixedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location),
-                            pinNames);
-                    }
+                            // Deduce names
+                            foreach (var name in pin.Owner.Pins.NamesOf(pin))
+                                pinNames.Add($"{pin.Owner.Name}_{name}");
+
+                            if (pin is IOrientedPin op)
+                            {
+                                Pins.Add(new FixedOrientedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location, op.Orientation),
+                                    pinNames);
+                            }
+                            else
+                            {
+                                Pins.Add(new FixedPin($"{pin.Owner.Name}_{pin.Name}", pin.Description, this, pin.Location),
+                                    pinNames);
+                            }
+                        }
+                        break;
                 }
-                return true;
+                return result;
             }
 
             /// <inheritdoc/>

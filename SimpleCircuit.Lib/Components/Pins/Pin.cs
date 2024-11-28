@@ -44,14 +44,16 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public virtual bool Reset(IResetContext context)
+        public virtual PresenceResult Prepare(IPrepareContext context)
         {
-            Location = new();
-            return true;
+            switch (context.Mode)
+            {
+                case PreparationMode.Reset:
+                    Location = new();
+                    break;
+            }
+            return PresenceResult.Success;
         }
-
-        /// <inheritdoc />
-        public virtual PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
         /// <inheritdoc />
         public abstract void Register(IRegisterContext context);

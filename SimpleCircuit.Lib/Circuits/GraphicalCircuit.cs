@@ -141,11 +141,6 @@ namespace SimpleCircuit
         {
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
 
-            // Prepare all the presences
-            var resetContext = new ResetContext(diagnostics);
-            if (!Reset(presences, resetContext))
-                return false;
-
             // Prepare the circuit (first constrain orientations, then prepare offsets)
             var prepareContext = new PrepareContext(this, TextFormatter, diagnostics);
             if (!Prepare(presences, prepareContext))
@@ -200,22 +195,15 @@ namespace SimpleCircuit
                 SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
             }
 
-
-            return true;
-        }
-
-        private bool Reset(IEnumerable<ICircuitPresence> presences, ResetContext context)
-        {
-            foreach (var c in presences)
-            {
-                if (!c.Reset(context))
-                    return false;
-            }
             return true;
         }
 
         private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
+            context.Mode = PreparationMode.Reset;
+            foreach (var presence in presences)
+                presence.Prepare(context);
+
             // Prepare orientations
             context.Mode = PreparationMode.Orientation;
             if (!PrepareCycle(presences, context))

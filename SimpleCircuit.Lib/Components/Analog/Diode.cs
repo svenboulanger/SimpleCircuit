@@ -49,52 +49,57 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(4, 0), new(1, 0)), "n", "c", "cathode");
             }
 
-            /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
-                switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
+                switch (context.Mode)
                 {
-                    case 0: // Varactor
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(6, 0));
-                        break;
+                    case PreparationMode.Reset:
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                        switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
+                        {
+                            case 0: // Varactor
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(6, 0));
+                                break;
 
-                    case 1: // Zener
-                    case 2: // Tunnel
-                    case 3: // Schottky
-                    case 4: // Shockley
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(4, 0));
-                        break;
+                            case 1: // Zener
+                            case 2: // Tunnel
+                            case 3: // Schottky
+                            case 4: // Shockley
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(4, 0));
+                                break;
 
-                    case 5: // TVS
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(12, 0));
-                        break;
+                            case 5: // TVS
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(12, 0));
+                                break;
 
-                    case 6: // Bidirectional
-                        SetPinOffset(0, new(-4, -4));
-                        SetPinOffset(1, new(4, -4));
-                        break;
+                            case 6: // Bidirectional
+                                SetPinOffset(0, new(-4, -4));
+                                SetPinOffset(1, new(4, -4));
+                                break;
 
-                    default:
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(4, 0));
+                            default:
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(4, 0));
+                                break;
+                        }
+
+                        switch (Variants.Select(_photodiode, _led, _laser))
+                        {
+                            case 0:
+                            case 1: break;
+                            case 2: break;
+                        }
                         break;
                 }
-
-                switch (Variants.Select(_photodiode, _led, _laser))
-                {
-                    case 0:
-                    case 1:  break;
-                    case 2:  break;
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

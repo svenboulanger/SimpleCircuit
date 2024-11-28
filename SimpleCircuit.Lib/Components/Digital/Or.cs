@@ -93,35 +93,42 @@ namespace SimpleCircuit.Components.Digital
             Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                bool keepLeft = Variants.Contains(Options.European);
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                Pins.Clear();
-                char c = 'a';
-                double w = Width * 0.5;
-                double h = Height * 0.5;
-                double x = -w;
-                double y = -(_inputs - 1) * Spacing * 0.5;
-
-                // Solving cubic equations...
-                for (int i = 0; i < _inputs; i++)
+                switch (context.Mode)
                 {
-                    if (!keepLeft)
-                    {
-                        // Calculate the left side of the curve
-                        double t = (1 - y / h) * 0.5;
-                        double rt = 1 - t;
-                        x = -(rt * rt * rt + t * t * t) * w - 3 * (rt * rt * t + rt * t * t) * w * 0.6;
-                    }
-                    Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(x, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
-                    y += Spacing;
-                    c++;
+                    case PreparationMode.Reset:
+                        bool keepLeft = Variants.Contains(Options.European);
+
+                        Pins.Clear();
+                        char c = 'a';
+                        double w = Width * 0.5;
+                        double h = Height * 0.5;
+                        double x = -w;
+                        double y = -(_inputs - 1) * Spacing * 0.5;
+
+                        // Solving cubic equations...
+                        for (int i = 0; i < _inputs; i++)
+                        {
+                            if (!keepLeft)
+                            {
+                                // Calculate the left side of the curve
+                                double t = (1 - y / h) * 0.5;
+                                double rt = 1 - t;
+                                x = -(rt * rt * rt + t * t * t) * w - 3 * (rt * rt * t + rt * t * t) * w * 0.6;
+                            }
+                            Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(x, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
+                            y += Spacing;
+                            c++;
+                        }
+                        Pins.Add(new FixedOrientedPin("output", "Output", this, new(w, 0), new(1, 0)), "output", "out", "o");
+                        break;
                 }
-                Pins.Add(new FixedOrientedPin("output", "Output", this, new(w, 0), new(1, 0)), "output", "out", "o");
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

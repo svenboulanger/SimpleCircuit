@@ -60,59 +60,65 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                switch (Variants.Select(Options.Arei))
+                switch (context.Mode)
                 {
-                    case 0:
-                        if (Variants.Contains(_push))
+                    case PreparationMode.Reset:
+                        switch (Variants.Select(Options.Arei))
                         {
-                            SetPinOffset(0, new(-4, 0));
-                            SetPinOffset(3, new(4, 0));
-                        }
-                        else
-                        {
-                            SetPinOffset(0, new(-2, 0));
-                            SetPinOffset(3, new(2, 0));
-                        }
-                        break;
+                            case 0:
+                                if (Variants.Contains(_push))
+                                {
+                                    SetPinOffset(0, new(-4, 0));
+                                    SetPinOffset(3, new(4, 0));
+                                }
+                                else
+                                {
+                                    SetPinOffset(0, new(-2, 0));
+                                    SetPinOffset(3, new(2, 0));
+                                }
+                                break;
 
-                    default:
-                        SetPinOffset(0, new(-6, 0));
-                        SetPinOffset(3, new(6, 0));
+                            default:
+                                SetPinOffset(0, new(-6, 0));
+                                SetPinOffset(3, new(6, 0));
 
-                        if (Variants.Contains(_invert))
-                        {
-                            if (Variants.Contains(_closed))
-                            {
-                                SetPinOffset(1, new(0, -2));
-                                SetPinOffset(2, new());
-                            }
-                            else
-                            {
-                                SetPinOffset(1, new(0, -4.25));
-                                SetPinOffset(2, new(0, -2));
-                            }
-                        }
-                        else
-                        {
-                            if (Variants.Contains(_closed))
-                            {
-                                SetPinOffset(1, new());
-                                SetPinOffset(2, new());
-                            }
-                            else
-                            {
-                                SetPinOffset(1, new(0, -2));
-                                SetPinOffset(2, new(0, -2));
-                            }
+                                if (Variants.Contains(_invert))
+                                {
+                                    if (Variants.Contains(_closed))
+                                    {
+                                        SetPinOffset(1, new(0, -2));
+                                        SetPinOffset(2, new());
+                                    }
+                                    else
+                                    {
+                                        SetPinOffset(1, new(0, -4.25));
+                                        SetPinOffset(2, new(0, -2));
+                                    }
+                                }
+                                else
+                                {
+                                    if (Variants.Contains(_closed))
+                                    {
+                                        SetPinOffset(1, new());
+                                        SetPinOffset(2, new());
+                                    }
+                                    else
+                                    {
+                                        SetPinOffset(1, new(0, -2));
+                                        SetPinOffset(2, new(0, -2));
+                                    }
+                                }
+                                break;
                         }
                         break;
                 }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

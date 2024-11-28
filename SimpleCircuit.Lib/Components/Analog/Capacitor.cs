@@ -43,21 +43,28 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                if (Variants.Contains(_electrolytic))
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
                 {
-                    SetPinOffset(Pins["a"], new(-2.25, 0));
-                    SetPinOffset(Pins["b"], new(2.25, 0));
+                    case PreparationMode.Reset:
+                        if (Variants.Contains(_electrolytic))
+                        {
+                            SetPinOffset(Pins["a"], new(-2.25, 0));
+                            SetPinOffset(Pins["b"], new(2.25, 0));
+                        }
+                        else
+                        {
+                            SetPinOffset(Pins["a"], new(-1.5, 0));
+                            SetPinOffset(Pins["b"], new(1.5, 0));
+                        }
+                        break;
                 }
-                else
-                {
-                    SetPinOffset(Pins["a"], new(-1.5, 0));
-                    SetPinOffset(Pins["b"], new(1.5, 0));
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

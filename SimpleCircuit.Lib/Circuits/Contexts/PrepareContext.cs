@@ -2,7 +2,6 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using System;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -17,7 +16,7 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <param name="diagnostics">The diagnostics.</param>
     public class PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IDiagnosticHandler diagnostics) : IPrepareContext
     {
-        private readonly GraphicalCircuit _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
+        private readonly GraphicalCircuit _circuit = circuit;
 
         /// <inheritdoc />
         public IDiagnosticHandler Diagnostics { get; } = diagnostics;
@@ -45,7 +44,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <inheritdoc />
         public ICircuitPresence Find(string name)
         {
-            if (_circuit.TryGetValue(name, out var result))
+            if (_circuit is not null && _circuit.TryGetValue(name, out var result))
                 return result;
             return null;
         }

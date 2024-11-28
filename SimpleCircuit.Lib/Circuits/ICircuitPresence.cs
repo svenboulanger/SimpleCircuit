@@ -18,12 +18,6 @@ namespace SimpleCircuit.Components
         public int Order { get; }
 
         /// <summary>
-        /// Resets the circuit presence before resolving a graphical circuit.
-        /// </summary>
-        /// <param name="diagnostics">The diagnostics handler.</param>
-        public bool Reset(IResetContext diagnostics);
-
-        /// <summary>
         /// Prepares the circuit presence for resolving a graphical circuit.
         /// </summary>
         /// <param name="circuit">The circuit.</param>

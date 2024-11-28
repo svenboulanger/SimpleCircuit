@@ -49,25 +49,32 @@ namespace SimpleCircuit.Components.Digital
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                if (Variants.Contains(Options.European))
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
                 {
-                    SetPinOffset(0, new(-5, 0));
-                    SetPinOffset(1, new(0, -5));
-                    SetPinOffset(2, new(0, 5));
-                    SetPinOffset(3, new(8, 0));
+                    case PreparationMode.Reset:
+                        if (Variants.Contains(Options.European))
+                        {
+                            SetPinOffset(0, new(-5, 0));
+                            SetPinOffset(1, new(0, -5));
+                            SetPinOffset(2, new(0, 5));
+                            SetPinOffset(3, new(8, 0));
+                        }
+                        else
+                        {
+                            SetPinOffset(0, new(-6, 0));
+                            SetPinOffset(1, new(0, -3));
+                            SetPinOffset(2, new(0, 3));
+                            SetPinOffset(3, new(9, 0));
+                        }
+                        break;
                 }
-                else
-                {
-                    SetPinOffset(0, new(-6, 0));
-                    SetPinOffset(1, new(0, -3));
-                    SetPinOffset(2, new(0, 3));
-                    SetPinOffset(3, new(9, 0));
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

@@ -91,22 +91,14 @@ namespace SimpleCircuit.Components.Diagrams
             => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
-        public bool Reset(IResetContext context)
-        {
-            _pins.SortClockwise();
-            foreach (var pin in _pins)
-            {
-                if (!pin.Reset(context))
-                    return false;
-            }
-            return true;
-        }
-
-        /// <inheritdoc />
         public virtual PresenceResult Prepare(IPrepareContext context)
         {
             switch (context.Mode)
             {
+                case PreparationMode.Reset:
+                    _pins.SortClockwise();
+                    break;
+
                 case PreparationMode.Offsets:
                     context.Offsets.Add(X);
                     context.Offsets.Add(Y);

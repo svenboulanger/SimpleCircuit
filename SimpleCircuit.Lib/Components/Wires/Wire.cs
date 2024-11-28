@@ -93,44 +93,37 @@ namespace SimpleCircuit.Components.Wires
         }
 
         /// <inheritdoc />
-        public override bool Reset(IResetContext context)
-        {
-            if (!base.Reset(context))
-                return false;
-            _localPoints.Clear();
-            _p2w = null;
-            _w2p = null;
-            return true;
-        }
-
-        /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
             var result = base.Prepare(context);
             if (result == PresenceResult.GiveUp)
                 return result;
-
-            // Find the pins
-            if (_p2w is null)
-            {
-                _p2w = _pinToWire.GetOrCreate(context.Diagnostics, -1);
-                if (_p2w is not null)
-                    _p2w.Connections++;
-            }
-            if (_w2p is null)
-            {
-                _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
-                if (_w2p is not null)
-                    _w2p.Connections++;
-            }
-
-            var p1 = _p2w as IOrientedPin;
-            var p2 = _w2p as IOrientedPin;
-            string x, y;
-
             switch (context.Mode)
             {
+                case PreparationMode.Reset:
+                    _localPoints.Clear();
+                    _p2w = null;
+                    _w2p = null;
+                    break;
+
                 case PreparationMode.Orientation:
+
+                    // Find the pins
+                    if (_p2w is null)
+                    {
+                        _p2w = _pinToWire.GetOrCreate(context.Diagnostics, -1);
+                        if (_p2w is not null)
+                            _p2w.Connections++;
+                    }
+                    if (_w2p is null)
+                    {
+                        _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
+                        if (_w2p is not null)
+                            _w2p.Connections++;
+                    }
+                    var p1 = _p2w as IOrientedPin;
+                    var p2 = _w2p as IOrientedPin;
+                    string x, y;
 
                     if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero() && !_segments[0].IsUnconstrained)
                     {

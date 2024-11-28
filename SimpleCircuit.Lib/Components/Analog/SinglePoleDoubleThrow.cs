@@ -42,30 +42,37 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                if (Variants.Contains(_swap))
-                {
-                    SetPinOffset(3, new(6, -4));
-                    SetPinOffset(4, new(6, 4));
-                }
-                else
-                {
-                    SetPinOffset(3, new(6, 4));
-                    SetPinOffset(4, new(6, -4));
-                }
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                Vector2 loc = Variants.Select(_t1, _t2) switch
+                switch (context.Mode)
                 {
-                    0 => new(0, Variants.Contains(_swap) ? -2 : 2),
-                    1 => new(0, Variants.Contains(_swap) ? 2 : -2),
-                    _ => new()
-                };
-                SetPinOffset(1, loc);
-                SetPinOffset(2, loc);
-                return true;
+                    case PreparationMode.Reset:
+                        if (Variants.Contains(_swap))
+                        {
+                            SetPinOffset(3, new(6, -4));
+                            SetPinOffset(4, new(6, 4));
+                        }
+                        else
+                        {
+                            SetPinOffset(3, new(6, 4));
+                            SetPinOffset(4, new(6, -4));
+                        }
+
+                        Vector2 loc = Variants.Select(_t1, _t2) switch
+                        {
+                            0 => new(0, Variants.Contains(_swap) ? -2 : 2),
+                            1 => new(0, Variants.Contains(_swap) ? 2 : -2),
+                            _ => new()
+                        };
+                        SetPinOffset(1, loc);
+                        SetPinOffset(2, loc);
+                        break;
+                }
+                return result;
             }
 
             /// <inheritdoc />

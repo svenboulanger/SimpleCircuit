@@ -40,15 +40,21 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                // Reset the pin locations
-                SetPinOffset(0, new(-Gap * 0.5, 0));
-                SetPinOffset(1, new(Gap * 0.5, 0));
-                return true;
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        // Reset the pin locations
+                        SetPinOffset(0, new(-Gap * 0.5, 0));
+                        SetPinOffset(1, new(Gap * 0.5, 0));
+                        break;
+                }
+                return result;
             }
 
             /// <inheritdoc />

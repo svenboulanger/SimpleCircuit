@@ -51,14 +51,6 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
 
-        /// <inheritdoc />
-        public bool Reset(IResetContext context)
-        {
-            _start = null;
-            _end = null;
-            return true;
-        }
-
         private ILocatedPresence FindPin(IPrepareContext context, PinInfo pin, int defaultIndex)
         {
             // Finding a pin for virtual wires works slightly different than normal:
@@ -88,6 +80,11 @@ namespace SimpleCircuit.Components.Wires
         {
             switch (context.Mode)
             {
+                case PreparationMode.Reset:
+                    _start = null;
+                    _end = null;
+                    break;
+
                 case PreparationMode.Offsets:
                     // Find the start and end locations
                     _start = FindPin(context, _startInfo, -1);

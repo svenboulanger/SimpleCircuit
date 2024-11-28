@@ -62,9 +62,6 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool Reset(IResetContext context) => true;
-
-        /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
             if (context.Mode == PreparationMode.Offsets)

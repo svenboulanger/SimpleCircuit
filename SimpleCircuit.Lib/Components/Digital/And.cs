@@ -97,24 +97,30 @@ namespace SimpleCircuit.Components.Digital
             Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                double r = Width * 0.5;
-                double y = -(_inputs - 1) * Spacing * 0.5;
-
-                Pins.Clear();
-                char c = 'a';
-                for (int i = 0; i < _inputs; i++)
+                switch (context.Mode)
                 {
-                    Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(-r, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
-                    y += Spacing;
-                    c++;
+                    case PreparationMode.Reset:
+                        double r = Width * 0.5;
+                        double y = -(_inputs - 1) * Spacing * 0.5;
+
+                        Pins.Clear();
+                        char c = 'a';
+                        for (int i = 0; i < _inputs; i++)
+                        {
+                            Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(-r, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
+                            y += Spacing;
+                            c++;
+                        }
+                        Pins.Add(new FixedOrientedPin("output", "Output", this, new(r, 0), new(1, 0)), "output", "out", "o");
+                        break;
                 }
-                Pins.Add(new FixedOrientedPin("output", "Output", this, new(r, 0), new(1, 0)), "output", "out", "o");
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

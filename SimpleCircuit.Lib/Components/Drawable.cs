@@ -265,24 +265,23 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public virtual bool Reset(IResetContext context)
-        {
-            foreach (var pin in Pins)
-            {
-                if (!pin.Reset(context))
-                    return false;
-            }
-            return true;
-        }
-
-        /// <inheritdoc />
         public virtual PresenceResult Prepare(IPrepareContext context)
         {
-            if (context.Mode == PreparationMode.Sizes)
+            var result = PresenceResult.Success;
+            
+            // Give pins the opportunity
+            foreach (var pin in Pins)
             {
-                Labels.Format(context);
+                var r = pin.Prepare(context);
+                if (r == PresenceResult.GiveUp)
+                    result = PresenceResult.GiveUp;
+                else if (result == PresenceResult.Success)
+                    result = r;
             }
-            return PresenceResult.Success;
+
+            if (context.Mode == PreparationMode.Sizes)
+                Labels.Format(context);
+            return result;
         }
 
         /// <summary>

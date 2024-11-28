@@ -43,24 +43,31 @@ namespace SimpleCircuit.Components.Sources
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                switch (Variants.Select(Options.American, Options.European))
-                {
-                    case 1:
-                        SetPinOffset(0, new(-4, 0));
-                        SetPinOffset(1, new(4, 0));
-                        break;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                    case 0:
-                    default:
-                        SetPinOffset(0, new(-6, 0));
-                        SetPinOffset(1, new(6, 0));
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        switch (Variants.Select(Options.American, Options.European))
+                        {
+                            case 1:
+                                SetPinOffset(0, new(-4, 0));
+                                SetPinOffset(1, new(4, 0));
+                                break;
+
+                            case 0:
+                            default:
+                                SetPinOffset(0, new(-6, 0));
+                                SetPinOffset(1, new(6, 0));
+                                break;
+                        }
                         break;
                 }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

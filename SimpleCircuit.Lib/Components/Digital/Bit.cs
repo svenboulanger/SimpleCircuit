@@ -52,61 +52,67 @@ namespace SimpleCircuit.Components.Digital
             public double BlockSize { get; set; } = 8;
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                // Update the pins
-                _maxWidth = 0;
-                for (int i = 0; i < Labels.Count; i++)
+                switch (context.Mode)
                 {
-                    string label = Labels[i].Value;
-                    if (Separator == null)
-                        _bits.Add(["0"]);
-                    else if (Separator.Length == 0)
-                        _bits.Add(label.Select(c => c.ToString()).ToArray());
-                    else
-                        _bits.Add(Regex.Split(label, Separator));
-                    _maxWidth = Math.Max(_maxWidth, _bits[^1].Length);
+                    case PreparationMode.Reset:
+                        // Update the pins
+                        _maxWidth = 0;
+                        for (int i = 0; i < Labels.Count; i++)
+                        {
+                            string label = Labels[i].Value;
+                            if (Separator == null)
+                                _bits.Add(["0"]);
+                            else if (Separator.Length == 0)
+                                _bits.Add(label.Select(c => c.ToString()).ToArray());
+                            else
+                                _bits.Add(Regex.Split(label, Separator));
+                            _maxWidth = Math.Max(_maxWidth, _bits[^1].Length);
+                        }
+                        if (_bits.Count == 0)
+                            _bits.Add(["0"]);
+                        if (_maxWidth == 0)
+                            _maxWidth = 1;
+
+                        double hw = 0.5 * BlockSize;
+
+                        // Left pin
+                        Pins.Clear();
+
+                        // Left
+                        for (int i = 0; i < _bits.Count; i++)
+                            Pins.Add(new FixedOrientedPin($"left{i + 1}", $"The left pin of row {i + 1}.", this, new(-hw * _maxWidth, BlockSize * i), new(-1, 0)), $"left{i + 1}", $"l{i + 1}", $"w{i + 1}");
+
+                        // Top
+                        double x = -hw * (_maxWidth - 1);
+                        int width = Variants.Contains(Full) ? _maxWidth : _bits[0].Length;
+                        for (int i = 0; i < width; i++)
+                        {
+                            // Make a top pin
+                            int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
+                            Pins.Add(new FixedOrientedPin($"top{bit}", $"Top pin of bit {bit}.", this, new(x, -hw), new(0, -1)), $"t{bit}", $"u{bit}");
+                        }
+
+                        // Bottom
+                        width = Variants.Contains(Full) ? _maxWidth : _bits[^1].Length;
+                        for (int i = 0; i < width; i++)
+                        {
+                            int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
+                            Pins.Add(new FixedOrientedPin($"bottom{bit}", $"Bottom pin of bit {bit}.", this, new(x, BlockSize * _bits.Count - hw), new(0, 1)), $"b{bit}", $"d{bit}");
+                            x += BlockSize;
+                        }
+
+                        // Right
+                        for (int i = 0; i < _bits.Count; i++)
+                            Pins.Add(new FixedOrientedPin($"right{i + 1}", $"The right pin of row {i + 1}", this, new(hw * _maxWidth, BlockSize * i), new(1, 0)), $"right{i + 1}", $"r{i + 1}", $"e{i + 1}");
+                        break;
                 }
-                if (_bits.Count == 0)
-                    _bits.Add(["0"]);
-                if (_maxWidth == 0)
-                    _maxWidth = 1;
-
-                double hw = 0.5 * BlockSize;
-
-                // Left pin
-                Pins.Clear();
-
-                // Left
-                for (int i = 0; i < _bits.Count; i++)
-                    Pins.Add(new FixedOrientedPin($"left{i + 1}", $"The left pin of row {i + 1}.", this, new(-hw * _maxWidth, BlockSize * i), new(-1, 0)), $"left{i + 1}", $"l{i + 1}", $"w{i + 1}");
-
-                // Top
-                double x = -hw * (_maxWidth - 1);
-                int width = Variants.Contains(Full) ? _maxWidth : _bits[0].Length;
-                for (int i = 0; i < width; i++)
-                {
-                    // Make a top pin
-                    int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
-                    Pins.Add(new FixedOrientedPin($"top{bit}", $"Top pin of bit {bit}.", this, new(x, -hw), new(0, -1)), $"t{bit}", $"u{bit}");
-                }
-
-                // Bottom
-                width = Variants.Contains(Full) ? _maxWidth : _bits[^1].Length;
-                for (int i = 0; i < width; i++)
-                {
-                    int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
-                    Pins.Add(new FixedOrientedPin($"bottom{bit}", $"Bottom pin of bit {bit}.", this, new(x, BlockSize * _bits.Count - hw), new(0, 1)), $"b{bit}", $"d{bit}");
-                    x += BlockSize;
-                }
-
-                // Right
-                for (int i = 0; i < _bits.Count; i++)
-                    Pins.Add(new FixedOrientedPin($"right{i + 1}", $"The right pin of row {i + 1}", this, new(hw * _maxWidth, BlockSize * i), new(1, 0)), $"right{i + 1}", $"r{i + 1}", $"e{i + 1}");
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

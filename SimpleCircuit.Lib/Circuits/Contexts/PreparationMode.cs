@@ -6,6 +6,11 @@
     public enum PreparationMode
     {
         /// <summary>
+        /// The mode of preparation for resetting all presences.
+        /// </summary>
+        Reset,
+
+        /// <summary>
         /// The mode of preparation for resolving orientation.
         /// </summary>
         Orientation,

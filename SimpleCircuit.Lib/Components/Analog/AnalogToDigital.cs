@@ -54,52 +54,59 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                double x = -Width / 2;
-                double y = Height / 4;
-                if (Variants.Contains(_differentialInput))
-                {
-                    if (Variants.Contains(_swapInput))
-                    {
-                        SetPinOffset(0, new(x, y));
-                        SetPinOffset(1, new(x, -y));
-                    }
-                    else
-                    {
-                        SetPinOffset(0, new(x, -y));
-                        SetPinOffset(1, new(x, y));
-                    }
-                }
-                else
-                {
-                    SetPinOffset(0, new(x, 0));
-                    SetPinOffset(1, new(x, 0));
-                }
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                if (Variants.Contains(_differentialOutput))
+                switch (context.Mode)
                 {
-                    x = Width / 2 - Height / 4;
-                    if (Variants.Contains(_swapOutput))
-                    {
-                        SetPinOffset(2, new(x, -y));
-                        SetPinOffset(3, new(x, y));
-                    }
-                    else
-                    {
-                        SetPinOffset(2, new(x, y));
-                        SetPinOffset(3, new(x, -y));
-                    }
+                    case PreparationMode.Reset:
+                        double x = -Width / 2;
+                        double y = Height / 4;
+                        if (Variants.Contains(_differentialInput))
+                        {
+                            if (Variants.Contains(_swapInput))
+                            {
+                                SetPinOffset(0, new(x, y));
+                                SetPinOffset(1, new(x, -y));
+                            }
+                            else
+                            {
+                                SetPinOffset(0, new(x, -y));
+                                SetPinOffset(1, new(x, y));
+                            }
+                        }
+                        else
+                        {
+                            SetPinOffset(0, new(x, 0));
+                            SetPinOffset(1, new(x, 0));
+                        }
+
+                        if (Variants.Contains(_differentialOutput))
+                        {
+                            x = Width / 2 - Height / 4;
+                            if (Variants.Contains(_swapOutput))
+                            {
+                                SetPinOffset(2, new(x, -y));
+                                SetPinOffset(3, new(x, y));
+                            }
+                            else
+                            {
+                                SetPinOffset(2, new(x, y));
+                                SetPinOffset(3, new(x, -y));
+                            }
+                        }
+                        else
+                        {
+                            x = Width / 2;
+                            SetPinOffset(2, new(x, 0));
+                            SetPinOffset(3, new(x, 0));
+                        }
+                        break;
                 }
-                else
-                {
-                    x = Width / 2;
-                    SetPinOffset(2, new(x, 0));
-                    SetPinOffset(3, new(x, 0));
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

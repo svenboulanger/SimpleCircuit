@@ -87,20 +87,26 @@ namespace SimpleCircuit.Components.General
             public override string Type { get; } = type;
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                // Add the pins
-                Pins.Clear();
-                _extend.Clear();
-                if (_pins != null)
-                    AddPins(_pins, context);
-                return true;
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        // Add the pins
+                        Pins.Clear();
+                        _extend.Clear();
+                        if (_pins != null)
+                            AddPins(_pins, context);
+                        break;
+                }
+                return result;
             }
 
-            private void AddPins(XmlNode pins, IResetContext context)
+            private void AddPins(XmlNode pins, IPrepareContext context)
             {
                 foreach (XmlNode child in pins.ChildNodes)
                 {

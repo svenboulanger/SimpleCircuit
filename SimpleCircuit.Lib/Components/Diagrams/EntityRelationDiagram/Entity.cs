@@ -49,38 +49,44 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             protected double Height { get; private set; }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                Pins.Clear();
-                double w = Width * 0.5;
-                if (Labels.Count <= 1)
+                switch (context.Mode)
                 {
-                    Height = LineHeight * 2;
-                    Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-w, 0), new(-1, 0)), "l", "w", "left");
-                    Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(0, -LineHeight), new(0, -1)), "t", "n", "top");
-                    Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(0, LineHeight), new(0, 1)), "b", "s", "bottom");
-                    Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(w, 0), new(1, 0)), "r", "e", "right");
-                }
-                else
-                {
-                    // We have a header and attributes
-                    Height = LineHeight * Labels.Count;
-                    Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-w, 0), new(-1, 0)), "l", "w", "left");
-                    Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(0, -LineHeight * 0.5), new(0, -1)), "t", "n", "top");
-                    Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(0, -LineHeight * 0.5 + Height), new(0, 1)), "b", "s", "bottom");
+                    case PreparationMode.Reset:
+                        Pins.Clear();
+                        double w = Width * 0.5;
+                        if (Labels.Count <= 1)
+                        {
+                            Height = LineHeight * 2;
+                            Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-w, 0), new(-1, 0)), "l", "w", "left");
+                            Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(0, -LineHeight), new(0, -1)), "t", "n", "top");
+                            Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(0, LineHeight), new(0, 1)), "b", "s", "bottom");
+                            Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(w, 0), new(1, 0)), "r", "e", "right");
+                        }
+                        else
+                        {
+                            // We have a header and attributes
+                            Height = LineHeight * Labels.Count;
+                            Pins.Add(new FixedOrientedPin("left", "The left pin", this, new(-w, 0), new(-1, 0)), "l", "w", "left");
+                            Pins.Add(new FixedOrientedPin("top", "The top pin", this, new(0, -LineHeight * 0.5), new(0, -1)), "t", "n", "top");
+                            Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, new(0, -LineHeight * 0.5 + Height), new(0, 1)), "b", "s", "bottom");
 
-                    // Add pins for all the attributes
-                    for (int i = 1; i < Labels.Count; i++)
-                    {
-                        Pins.Add(new FixedOrientedPin($"attribute {i} left", $"The left pin for attribute {i}.", this, new(-w, i * LineHeight), new(-1, 0)), $"l{i}", $"w{i}", $"left{i}");
-                        Pins.Add(new FixedOrientedPin($"attribute {i} right", $"The right pin of attribute {i}.", this, new(w, i * LineHeight), new(1, 0)), $"r{i}", $"e{i}", $"right{i}");
-                    }
-                    Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(w, 0), new(1, 0)), "r", "e", "right");
+                            // Add pins for all the attributes
+                            for (int i = 1; i < Labels.Count; i++)
+                            {
+                                Pins.Add(new FixedOrientedPin($"attribute {i} left", $"The left pin for attribute {i}.", this, new(-w, i * LineHeight), new(-1, 0)), $"l{i}", $"w{i}", $"left{i}");
+                                Pins.Add(new FixedOrientedPin($"attribute {i} right", $"The right pin of attribute {i}.", this, new(w, i * LineHeight), new(1, 0)), $"r{i}", $"e{i}", $"right{i}");
+                            }
+                            Pins.Add(new FixedOrientedPin("right", "The right pin", this, new(w, 0), new(1, 0)), "r", "e", "right");
+                        }
+                        break;
                 }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

@@ -75,8 +75,5 @@ namespace SimpleCircuit.Components.Wires
         public void Update(IUpdateContext context)
         {
         }
-
-        /// <inheritdoc />
-        public bool Reset(IResetContext context) => true;
     }
 }

@@ -132,17 +132,6 @@ namespace SimpleCircuit.Components
                 => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
             /// <inheritdoc />
-            public bool Reset(IResetContext context)
-            {
-                foreach (var pin in _pins)
-                {
-                    if (!pin.Reset(context))
-                        return false;
-                }
-                return true;
-            }
-
-            /// <inheritdoc />
             public PresenceResult Prepare(IPrepareContext context)
             {
                 var result = _pins.Prepare(context);

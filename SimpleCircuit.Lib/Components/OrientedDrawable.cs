@@ -44,13 +44,20 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public override bool Reset(IResetContext context)
+        public override PresenceResult Prepare(IPrepareContext context)
         {
-            if (!base.Reset(context))
-                return false;
-            _dof = 2;
-            UpdateTransform();
-            return true;
+            var result = base.Prepare(context);
+            if (result == PresenceResult.GiveUp)
+                return result;
+
+            switch (context.Mode)
+            {
+                case PreparationMode.Reset:
+                    _dof = 2;
+                    UpdateTransform();
+                    break;
+            }
+            return result;
         }
 
         /// <inheritdoc />

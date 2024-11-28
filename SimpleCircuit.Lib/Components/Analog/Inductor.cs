@@ -71,45 +71,51 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
-
-                // Let's clear the pins and re-add them correctly
-                Pins.Clear();
-
-                double l = Length * 0.5;
-                Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-l, 0), new(-1, 0)), "p", "a");
-
-                // Add a tap for each winding
-                double x = -l;
-                switch (Variants.Select(Options.American, Options.European))
+                switch (context.Mode)
                 {
-                    case 0:
-                    case 1:
-                        x += 3;
-                        for (int i = 0; i < _windings - 1; i++)
-                        {
-                            Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i}", this, new(x, 0), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
-                            x += 3;
-                        }
-                        break;
+                    case PreparationMode.Reset:
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
-                    default:
-                        x += 3;
-                        for (int i = 0; i < _windings; i++)
+                        // Let's clear the pins and re-add them correctly
+                        Pins.Clear();
+
+                        double l = Length * 0.5;
+                        Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-l, 0), new(-1, 0)), "p", "a");
+
+                        // Add a tap for each winding
+                        double x = -l;
+                        switch (Variants.Select(Options.American, Options.European))
                         {
-                            Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i + 1}", this, new(x, 3), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
-                            x += 3;
+                            case 0:
+                            case 1:
+                                x += 3;
+                                for (int i = 0; i < _windings - 1; i++)
+                                {
+                                    Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i}", this, new(x, 0), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
+                                    x += 3;
+                                }
+                                break;
+
+                            default:
+                                x += 3;
+                                for (int i = 0; i < _windings; i++)
+                                {
+                                    Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i + 1}", this, new(x, 3), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
+                                    x += 3;
+                                }
+                                break;
                         }
+                        Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
                         break;
                 }
-                Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

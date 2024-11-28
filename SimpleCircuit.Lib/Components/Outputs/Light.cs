@@ -48,22 +48,28 @@ namespace SimpleCircuit.Components.Outputs
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
 
-                if (Variants.Contains(Options.Arei))
+                switch (context.Mode)
                 {
-                    SetPinOffset(0, new());
-                    SetPinOffset(1, new());
+                    case PreparationMode.Reset:
+                        if (Variants.Contains(Options.Arei))
+                        {
+                            SetPinOffset(0, new());
+                            SetPinOffset(1, new());
+                        }
+                        else
+                        {
+                            SetPinOffset(0, new(-4, 0));
+                            SetPinOffset(1, new(4, 0));
+                        }
+                        break;
                 }
-                else
-                {
-                    SetPinOffset(0, new(-4, 0));
-                    SetPinOffset(1, new(4, 0));
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />

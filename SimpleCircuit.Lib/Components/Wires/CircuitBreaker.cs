@@ -38,21 +38,28 @@ namespace SimpleCircuit.Components.Wires
             }
 
             /// <inheritdoc />
-            public override bool Reset(IResetContext context)
+            public override PresenceResult Prepare(IPrepareContext context)
             {
-                if (!base.Reset(context))
-                    return false;
-                if (Variants.Contains(Options.Arei) || Variants.Contains(Options.European))
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
                 {
-                    SetPinOffset(1, new(0, -2));
-                    SetPinOffset(2, new(0, -2));
+                    case PreparationMode.Reset:
+                        if (Variants.Contains(Options.Arei) || Variants.Contains(Options.European))
+                        {
+                            SetPinOffset(1, new(0, -2));
+                            SetPinOffset(2, new(0, -2));
+                        }
+                        else
+                        {
+                            SetPinOffset(1, new(0, -1.875));
+                            SetPinOffset(2, new(0, -1.875));
+                        }
+                        break;
                 }
-                else
-                {
-                    SetPinOffset(1, new(0, -1.875));
-                    SetPinOffset(2, new(0, -1.875));
-                }
-                return true;
+                return result;
             }
 
             /// <inheritdoc />
