@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
@@ -20,7 +21,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// <param name="name">The name.</param>
         private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable
         {
-            private double _width = 30.0, _height = 15.0;
+            private double _width = 0.0, _height = 0.0;
 
             /// <summary>
             /// Variant for multiple documents.
@@ -35,46 +36,91 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// </summary>
             [Description("The width of the block.")]
             [Alias("w")]
-            public double Width
-            {
-                get => _width;
-                set => _width = value;
-            }
+            public double Width { get; set; }
+
+            /// <summary>
+            /// Gets or sets the minimum width.
+            /// </summary>
+            [Description("The minimum width of the block. Only used when determining the width from contents.")]
+            public double MinWidth { get; set; } = 0.0;
 
             /// <summary>
             /// Gets or sets the height.
             /// </summary>
             [Description("The height of the block.")]
             [Alias("h")]
-            public double Height
-            {
-                get => _height;
-                set => _height = value;
-            }
+            public double Height { get; set; }
 
+            /// <summary>
+            /// Gets or sets the minimum height.
+            /// </summary>
+            [Description("The minimum height of the block. Only used when determining the height from contents.")]
+            public double MinHeight { get; set; } = 10.0;
+
+            /// <inheritdoc />
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            Vector2 IBoxDrawable.TopLeft => new(-Width * 0.5, -Height * 0.5);
-            Vector2 IBoxDrawable.BottomRight => new(Width * 0.5, Height * 0.5);
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
+
+            /// <summary>
+            /// Gets or sets the margin for content when sizing.
+            /// </summary>
+            [Description("The margin used when sizing the block using the contents. The default is 2 on all sides.")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
+
+            /// <summary>
+            /// Gets or sets the spacing between content when sizing.
+            /// </summary>
+            [Description("The spacing used between multiple labels when sizing the block using content.")]
+            public Vector2 Spacing { get; set; } = new(3, 3);
+
+            /// <inheritdoc />
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                // When determining the size, let's update the size based on the label bounds
+                switch (context.Mode)
+                {
+                    case PreparationMode.Sizes:
+                        if (Width.IsZero() || Height.IsZero())
+                        {
+                            var b = BoxLabelAnchorPoints.Default.CalculateSize(this, Spacing);
+                            _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin);
+                            _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin);
+                        }
+                        else
+                        {
+                            _width = Width;
+                            _height = Height;
+                        }
+                        break;
+                }
+                return result;
+            }
 
             private void DrawPath(IPathBuilder builder)
             {
-                double a = Width * 0.5;
-                double b = Height * 0.5;
+                double a = _width * 0.5;
+                double b = _height * 0.5;
 
-                Vector2 aa = new(-a, b);
-                Vector2 ab = new(0, b);
-                Vector2 ac = new(a, b);
-                Vector2 h1 = new Vector2(0.1547, 0.0893) * Width;
+                Vector2 h1 = new Vector2(0.1547, 0.0893) * _width;
+                Vector2 aa = new(-a, b + h1.Y * 0.75);
+                Vector2 ab = new(0, aa.Y);
+                Vector2 ac = new(a, aa.Y);
                 Vector2 h2 = new(h1.X, -h1.Y);
                 builder.MoveTo(new(-a, -b))
                     .LineTo(new(a, -b))
                     .LineTo(ac)
-                    // .ArcTo(a, a, 0, false, false, ab) ->
                     .CurveTo(ac - h1, ab + h2, ab)
-                    // .ArcTo(a, a, 0, false, true, aa) ->
                     .CurveTo(ab - h2, aa + h1, aa)
                     .Close();
             }
@@ -99,8 +145,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                double a = Width * 0.5;
-                double b = Height * 0.5;
+                double a = _width * 0.5;
+                double b = _height * 0.5;
 
                 static Vector2 Interp(Vector2 a, Vector2 b, double ka)
                 {

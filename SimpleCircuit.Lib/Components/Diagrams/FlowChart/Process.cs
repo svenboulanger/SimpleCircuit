@@ -30,27 +30,27 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <summary>
             /// Gets or sets the width.
             /// </summary>
-            [Description("The width of the block. If 0, the width is calculated using the text inside.")]
+            [Description("The width of the block. If 0, the width is calculated using the contents. The default is 0.")]
             [Alias("w")]
             public double Width { get; set; } = 0.0;
 
             /// <summary>
             /// Gets or sets the minimum width.
             /// </summary>
-            [Description("The minimum width of the block. Only used when Width = 0.")]
+            [Description("The minimum width of the block. Only used when determining the width from contents.")]
             public double MinWidth { get; set; } = 0.0;
 
             /// <summary>
             /// Gets or sets the height.
             /// </summary>
-            [Description("The height of the block.")]
+            [Description("The height of the block. If 0, the height is calculated using the contents. The default is 0.")]
             [Alias("h")]
             public double Height { get; set; } = 0.0;
 
             /// <summary>
             /// Gets or sets the minimum height.
             /// </summary>
-            [Description("The minimum height of the block. Only used when Height = 0.")]
+            [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
             /// <summary>
@@ -60,9 +60,15 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            [Description("The margin used when sizing the block using the content.")]
+            /// <summary>
+            /// Gets or sets the margin of content when sizing.
+            /// </summary>
+            [Description("The margin used when sizing the block using the contents.")]
             public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
+            /// <summary>
+            /// Gets or sets the spacing between content when sizing.
+            /// </summary>
             [Description("The spacing used between multiple labels when sizing the block using content.")]
             public Vector2 Spacing { get; set; } = new(3, 3);
 
@@ -74,7 +80,10 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Alias("radius")]
             public double CornerRadius { get; set; }
 
+            /// <inheritdoc />
             Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(_width, _height);
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(_width, _height);
 
             /// <inheritdoc />
@@ -91,8 +100,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         if (Width.IsZero() || Height.IsZero())
                         {
                             var b = BoxLabelAnchorPoints.Default.CalculateSize(this, Spacing);
-                            _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right + CornerRadius * 0.707 * 2);
-                            _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom + CornerRadius * 0.707 * 2);
+                            _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin + CornerRadius * 0.707 * 2);
+                            _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin + CornerRadius * 0.707 * 2);
                         }
                         else
                         {
@@ -122,8 +131,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                double a = Width * 0.5;
-                double b = Height * 0.5;
+                double a = _width * 0.5;
+                double b = _height * 0.5;
 
                 static Vector2 Interp(Vector2 a, Vector2 b, double ka)
                 {

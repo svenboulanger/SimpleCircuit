@@ -122,6 +122,13 @@ namespace SimpleCircuit.Drawing
         /// <returns>Returns the new bounds with margins.</returns>
         public Bounds Expand(double margin) => new(Left - margin, Top - margin, Right + margin, Bottom + margin);
 
+        /// <summary>
+        /// Expands the bounds.
+        /// </summary>
+        /// <param name="margin">The margin.</param>
+        /// <returns>Returns the new bounds with margins.</returns>
+        public Bounds Expand(Margins margin) => new(Left - margin.Left, Top - margin.Top, Right + margin.Right, Bottom + margin.Bottom);
+
         /// <inheritdoc />
         public override string ToString()
         {
