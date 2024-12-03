@@ -3,6 +3,7 @@ using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
+using System;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
@@ -72,9 +73,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                                 bounds.Expand(label.Formatted.Bounds.Bounds);
                             var b = bounds.Bounds.Expand(LabelMargin);
                             if (Height.IsZero())
-                                _height = b.Height;
+                                _height = Math.Max(MinHeight, b.Height);
                             if (Width.IsZero())
-                                _width = b.Width + _height;
+                                _width = Math.Max(MinWidth, b.Width + _height);
                         }
                         else
                         {

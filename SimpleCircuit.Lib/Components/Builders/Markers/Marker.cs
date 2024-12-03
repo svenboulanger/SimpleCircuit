@@ -3,35 +3,22 @@
     /// <summary>
     /// An abstract class representing a marker.
     /// </summary>
-    public abstract class Marker
+    /// <remarks>
+    /// Creates a new <see cref="Marker"/>.
+    /// </remarks>
+    /// <param name="location">The location.</param>
+    /// <param name="orientation">The orientation.</param>
+    public abstract class Marker(Vector2 location, Vector2 orientation)
     {
-        /// <summary>
-        /// Gets or sets the options of the marker.
-        /// </summary>
-        public GraphicOptions Options { get; set; }
-
         /// <summary>
         /// Gets the location of the marker.
         /// </summary>
-        public Vector2 Location { get; set; }
+        public Vector2 Location { get; set; } = location;
 
         /// <summary>
         /// Gets the orientation of the marker.
         /// </summary>
-        public Vector2 Orientation { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="Marker"/>.
-        /// </summary>
-        /// <param name="location">The location.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <param name="options">The options of the marker.</param>
-        protected Marker(Vector2 location, Vector2 orientation, GraphicOptions options = null)
-        {
-            Location = location;
-            Orientation = orientation;
-            Options = options;
-        }
+        public Vector2 Orientation { get; set; } = orientation;
 
         /// <summary>
         /// Draws the marker to the given drawing.
@@ -39,8 +26,6 @@
         /// <param name="drawing"></param>
         public void Draw(IGraphicsBuilder builder)
         {
-            builder.RequiredCSS.Add(".marker { fill: black; }");
-
             var orientation = Orientation;
             if (orientation.IsZero())
                 orientation = new(1, 0);

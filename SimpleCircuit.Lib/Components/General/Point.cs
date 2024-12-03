@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components
                     int connections = Pins[0].Connections;
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
                     {
-                        var marker = new Dot(new(), new(1, 0), new("marker", "dot", "wire"));
+                        var marker = new Dot(new(), new(1, 0));
                         marker.Draw(builder);
                     }
                     else

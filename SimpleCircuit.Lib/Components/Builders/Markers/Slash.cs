@@ -1,28 +1,17 @@
-﻿using SimpleCircuit.Components.Builders;
-
-namespace SimpleCircuit.Components.Builders.Markers
+﻿namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A slash marker.
     /// </summary>
-    public class Slash : Marker
+    /// <remarks>
+    /// Creates a new slash marker.
+    /// </remarks>
+    /// <param name="location">The location.</param>
+    /// <param name="orientation">The orientation.</param>
+    public class Slash(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
-        public static GraphicOptions DefaultOptions { get; } = new("marker", "slash");
-
-        /// <summary>
-        /// Creates a new slash marker.
-        /// </summary>
-        /// <param name="location">The location.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <param name="options">The options.</param>
-        public Slash(Vector2 location = new(), Vector2 orientation = new(), GraphicOptions options = null)
-            : base(location, orientation, options)
-        {
-            Options = DefaultOptions;
-        }
-
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder)
-            => builder.Line(new(-1, 2), new(1, -2), Options);
+            => builder.Line(new(-1, 2), new(1, -2), new("marker", "slash"));
     }
 }

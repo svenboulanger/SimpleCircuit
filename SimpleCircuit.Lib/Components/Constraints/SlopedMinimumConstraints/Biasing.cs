@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
         private readonly ElementSet<double> _elements;
         private double _gnx2, _gnxny, _gny2;
         private Vector2 _i;
-        private readonly double _xo, _minimum;
+        private readonly double _xo;
         private readonly Vector2 _iOn, _n;
         private readonly bool _zeroX, _zeroY;
 

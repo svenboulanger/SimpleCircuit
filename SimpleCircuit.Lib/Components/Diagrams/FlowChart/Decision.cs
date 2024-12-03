@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
+    /// <summary>
+    /// A flowchart decision.
+    /// </summary>
     [Drawable("FD", "A Flowchart Decision.", "Flowchart", "diamond")]
     public class Decision : DrawableFactory
     {
@@ -155,8 +158,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     double k = ka / (Math.PI * 0.5);
                     return (1 - k) * a + k * b;
                 }
-                double a = Width * 0.5;
-                double b = Height * 0.5;
+                double a = _width * 0.5;
+                double b = _height * 0.5;
 
                 foreach (var pin in pins)
                 {

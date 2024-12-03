@@ -359,7 +359,7 @@ namespace SimpleCircuit.Components
                     builder.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, new("wire"));
                 else if (pin is FixedPin fp)
                 {
-                    var marker = new Dot(fp.Offset, new(1, 0), new("marker", "dot", "wire"));
+                    var marker = new Dot(fp.Offset, new(1, 0));
                     marker.Draw(builder);
                 }
             }

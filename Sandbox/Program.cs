@@ -11,10 +11,7 @@ namespace Sandbox
         static void Main()
         {
             var script = @"
-FDOC(""abc"")
-FDOC(""This is a longer line"")
-FDOC(""This is a\nmultiple line"")
-FDOC(""This is\neven more\nlines to be taken into account."")
+ENT(""abc"") <r +50 arrow> ENT(""abcdef"", ""ghijkl"")
 ";
 
             var logger = new Logger();
