@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public override string Type => "entity";
 
             /// <inheritdoc />
-            protected override IEnumerable<string> GroupClasses => new[] { "diagram" };
+            protected override IEnumerable<string> GroupClasses => ["diagram"];
 
             /// <summary>
             /// Gets or sets the width of the entity block.
@@ -49,9 +49,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <summary>
             /// Gets or sets the height of an attribute line.
             /// </summary>
-            [Description("The height of a line for attributes. If 0, the content of each attribute is used to size a line. The default is 0.")]
+            [Description("The height of a line for attributes, relative to the font size. If 0, the content of each attribute is used to size a line. The default is 2.")]
             [Alias("lh")]
-            public double LineHeight { get; set; }
+            public double LineHeight { get; set; } = 2.0;
+
+            /// <summary>
+            /// Gets or sets the baseline for text within the line height, relative to the font size.
+            /// </summary>
+            [Description("The text baseline within a line.")]
+            public double BaseLine { get; set; } = 0.5;
 
             /// <summary>
             /// Gets or sets the corner radius.
@@ -92,9 +98,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         break;
 
                     case PreparationMode.Offsets:
+
+                        // Place the header
+                        _anchors[0] = new LabelAnchorPoint(new(_width * 0.5, _anchors[0].Location.Y), new(), new("header"));
+
                         ((FixedOrientedPin)Pins[1]).Offset = new(_width * 0.5, 0);
                         ((FixedOrientedPin)Pins[2]).Offset = new(_width * 0.5, _height);
-                        ((FixedOrientedPin)Pins[Pins.Count - 1]).Offset = new(_width, ((FixedOrientedPin)Pins[0]).Offset.Y);
+                        ((FixedOrientedPin)Pins[^1]).Offset = new(_width, ((FixedOrientedPin)Pins[0]).Offset.Y);
                         for (int i = 1; i < Labels.Count; i++)
                             ((FixedOrientedPin)Pins[i * 2 + 2]).Offset = new(_width, ((FixedOrientedPin)Pins[i * 2 + 1]).Offset.Y);
                         break;
@@ -114,13 +124,25 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         for (int i = 0; i < Labels.Count; i++)
                         {
                             var bounds = Labels[i].Formatted.Bounds.Bounds.Expand(Margin);
-                            _anchors[i] = new LabelAnchorPoint(
-                                new(Margin.Left, _height + bounds.Height * 0.5),
-                                new(1, 0), new(i == 0 ? "header" : "attribute"));
+
                             if (i == 0)
+                            {
+                                // This is the header, we will center it according to the line height
+                                _anchors[0] = new LabelAnchorPoint(
+                                    new(0, _height + (LineHeight - BaseLine) * Labels[0].Size),
+                                    new(0, 0), new("header"));
                                 ((FixedOrientedPin)Pins[0]).Offset = new(0, bounds.Height * 0.5);
+                            }
                             else
+                            {
+                                // These are attributes, we will simply follow the line height given
+                                _anchors[i] = new LabelAnchorPoint(
+                                    new(Margin.Left, _height + bounds.Height * 0.5),
+                                    new(1, 0), new("attribute"));
+
+                                // We can already update the left-side pins (we will u
                                 ((FixedOrientedPin)Pins[i * 2 + 1]).Offset = new(0, _height + bounds.Height * 0.5);
+                            }    
                             _height += bounds.Height;
                             _width = Math.Max(_width, bounds.Width);
                         }
