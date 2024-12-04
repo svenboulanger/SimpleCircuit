@@ -9,10 +9,72 @@ namespace SimpleCircuit.Components
     /// </summary>
     public class MinimumConstraint : ICircuitSolverPresence
     {
-        public const string DiodeModelName = "#MinimumOffsetPinModel";
-
         /// <inheritdoc />
         public int Order => 0;
+
+        /// <summary>
+        /// Gets the name of the constraint.
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the lowest of the two nodes.
+        /// </summary>
+        public string Lowest { get; }
+
+        /// <summary>
+        /// Gets the highest of the two nodes.
+        /// </summary>
+        public string Highest { get; }
+
+        /// <summary>
+        /// Gets the minimum between the two nodes.
+        /// </summary>
+        public double Minimum { get; }
+
+        /// <summary>
+        /// Gets or sets the weight of the minimum constraint.
+        /// </summary>
+        public double Weight { get; set; } = 1.0;
+
+        /// <summary>
+        /// Creates a new <see cref="MinimumConstraint"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="lowest">The lowest node.</param>
+        /// <param name="highest">The highest node.</param>
+        /// <param name="minimum">The minimum between the two values.</param>
+        /// <exception cref="ArgumentNullException">Thrown if any node name is <c>null</c>.</exception>
+        public MinimumConstraint(string name, string lowest, string highest, double minimum)
+        {
+            Name = !string.IsNullOrWhiteSpace(name) ? name : throw new ArgumentNullException(nameof(name));
+            Lowest = !string.IsNullOrWhiteSpace(lowest) ? lowest : throw new ArgumentNullException(nameof(lowest)); ;
+            Highest = !string.IsNullOrWhiteSpace(highest) ? highest : throw new ArgumentNullException(nameof(highest)); ;
+            Minimum = minimum;
+        }
+
+        /// <inheritdoc />
+        public PresenceResult Prepare(IPrepareContext context)
+        {
+            if (context.Mode == PreparationMode.Offsets)
+                context.Group(Lowest, Highest);
+            return PresenceResult.Success;
+        }
+
+        /// <inheritdoc />
+        public void Register(IRegisterContext context)
+        {
+            var lowest = context.GetOffset(Lowest);
+            var highest = context.GetOffset(Highest);
+            if (lowest.Representative != highest.Representative)
+                AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
+        }
+
+        /// <inheritdoc />
+        public void Update(IUpdateContext context)
+        {
+        }
+
 
         /// <summary>
         /// Adds a structure to the circuit that tries to guarantee a minimum between two relative items.
@@ -76,75 +138,6 @@ namespace SimpleCircuit.Components
                 name, fromX.Representative, fromY.Representative, toX.Representative, toY.Representative, offset, normal, minimum);
             component.SetParameter("weight", weight);
             circuit.Add(component);
-        }
-
-        /// <summary>
-        /// Gets the name of the constraint.
-        /// </summary>
-        public string Name { get; }
-
-        /// <summary>
-        /// Gets the lowest of the two nodes.
-        /// </summary>
-        public string Lowest { get; }
-
-        /// <summary>
-        /// Gets the highest of the two nodes.
-        /// </summary>
-        public string Highest { get; }
-
-        /// <summary>
-        /// Gets the minimum between the two nodes.
-        /// </summary>
-        public double Minimum { get; }
-
-        /// <summary>
-        /// Gets or sets the weight of the minimum constraint.
-        /// </summary>
-        public double Weight { get; set; } = 1.0;
-
-        /// <summary>
-        /// Creates a new <see cref="MinimumConstraint"/>.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="lowest">The lowest node.</param>
-        /// <param name="highest">The highest node.</param>
-        /// <param name="minimum">The minimum between the two values.</param>
-        /// <exception cref="ArgumentNullException">Thrown if any node name is <c>null</c>.</exception>
-        public MinimumConstraint(string name, string lowest, string highest, double minimum)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException(nameof(name));
-            Name = name;
-            if (string.IsNullOrWhiteSpace(lowest))
-                throw new ArgumentNullException(nameof(lowest));
-            Lowest = lowest;
-            if (string.IsNullOrWhiteSpace(highest))
-                throw new ArgumentNullException(nameof(highest));
-            Highest = highest;
-            Minimum = minimum;
-        }
-
-        /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context)
-        {
-            if (context.Mode == PreparationMode.Offsets)
-                context.Group(Lowest, Highest);
-            return PresenceResult.Success;
-        }
-
-        /// <inheritdoc />
-        public void Register(IRegisterContext context)
-        {
-            var lowest = context.GetOffset(Lowest);
-            var highest = context.GetOffset(Highest);
-            if (lowest.Representative != highest.Representative)
-                AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
-        }
-
-        /// <inheritdoc />
-        public void Update(IUpdateContext context)
-        {
         }
     }
 }

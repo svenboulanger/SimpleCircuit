@@ -17,12 +17,11 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
         private const double _gOn = 1.0e4;
         private readonly IIterationSimulationState _iteration;
         private readonly OnePort<double> _variables;
-        private readonly ElementSet<double> _elements, _rhs;
+        private readonly ElementSet<double> _elements;
         private readonly Parameters _parameters;
         private bool _lastState, _state;
         private readonly double _gOff, _iOn, _iOff;
         private double _g, _i;
-        private IBiasingSimulationState _biasingState;
 
         /// <summary>
         /// Creates a new <see cref="Biasing"/> behavior.
@@ -35,13 +34,13 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             _iteration = context.GetState<IIterationSimulationState>();
 
             // Get the nodes
-            _biasingState = context.GetState<IBiasingSimulationState>();
+            var state = context.GetState<IBiasingSimulationState>();
             _variables = new OnePort<double>(
-                _biasingState.GetSharedVariable(context.Nodes[0]),
-                _biasingState.GetSharedVariable(context.Nodes[1]));
-            _elements = new ElementSet<double>(_biasingState.Solver,
-                _variables.GetMatrixLocations(_biasingState.Map),
-                _variables.GetRhsIndices(_biasingState.Map));
+                state.GetSharedVariable(context.Nodes[0]),
+                state.GetSharedVariable(context.Nodes[1]));
+            _elements = new ElementSet<double>(state.Solver,
+                _variables.GetMatrixLocations(state.Map),
+                _variables.GetRhsIndices(state.Map));
 
             _state = true;
             _lastState = true;
