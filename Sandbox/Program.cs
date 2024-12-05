@@ -11,7 +11,8 @@ namespace Sandbox
         static void Main()
         {
             var script = @"
-ENT(""abc"") <r +50 arrow> ENT(""abcdef"", ""ghijkl"")
+.property ENT r=2
+ENT(""abcgA"") <one r +50 many> ENT(""abcdef"", ""ghijkl"", ""AAAA"")[b] <d> T
 ";
 
             var logger = new Logger();
