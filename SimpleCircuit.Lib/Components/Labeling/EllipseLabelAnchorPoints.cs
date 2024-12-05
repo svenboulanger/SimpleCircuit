@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using SimpleCircuit.Drawing;
+using System;
+using System.Collections;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -21,6 +24,64 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="circle">The circle.</param>
         protected EllipseLabelAnchorPoints()
         {
+        }
+
+        /// <summary>
+        /// Calculates the size of an ellipse that fits all the labels with given spacing.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="spacing">The spacing.</param>
+        /// <returns>Returns the size as a vector.</returns>
+        public Vector2 CalculateSize(IEllipseDrawable subject, Vector2 spacing)
+        {
+            double width = 0.0;
+            double height = 0.0;
+
+            void Expand(int index, Bounds bounds)
+            {
+                switch (index)
+                {
+                    case 0:
+                        width = Math.Max(bounds.Width, width);
+                        height = Math.Max(bounds.Height, height);
+                        break;
+                }
+            }
+
+            for (int i = 0; i < subject.Labels.Count; i++)
+            {
+                var label = subject.Labels[i];
+                if (label?.Formatted is null)
+                    continue;
+                string name = label.Location ?? i.ToString();
+                var bounds = label.Formatted.Bounds.Bounds;
+                
+                switch (name)
+                {
+                    case "0":
+                    case "c":
+                    case "ci": Expand(0, bounds); break;
+
+                    default:
+                        if (label.Location.All(char.IsDigit))
+                        {
+                            int index = int.Parse(label.Location);
+                            index %= Count;
+                            if (index < 0)
+                                index += Count;
+                            Expand(index, bounds);
+                        }
+                        break;
+                }
+            }
+
+            if (width > 0)
+                width += subject.LabelMargin * 2;
+            if (height > 0)
+                height += subject.LabelMargin * 2;
+
+            // Calculate the ellipse size
+            return new Vector2(width, height) * Math.Sqrt(2.0);
         }
 
         /// <inheritdoc />

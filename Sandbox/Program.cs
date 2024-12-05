@@ -10,9 +10,7 @@ namespace Sandbox
     {
         static void Main()
         {
-            var script = @"
-.property ENT r=2
-ENT(""abcgA"") <one r +50 many> ENT(""abcdef"", ""ghijkl"", ""AAAA"")[b] <d> T
+            var script = @"T <r> ATTR(""attribute"") <r> ACT(""action"")
 ";
 
             var logger = new Logger();

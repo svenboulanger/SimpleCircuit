@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="subject">The subject.</param>
         /// <param name="spacing">The spacing.</param>
-        /// <returns></returns>
+        /// <returns>Returns the size as a vector.</returns>
         public Vector2 CalculateSize(IBoxDrawable subject, Vector2 spacing)
         {
             double leftWidth = 0.0, centerWidth = 0.0, rightWidth = 0.0;

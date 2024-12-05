@@ -1,6 +1,8 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
 
@@ -19,53 +21,143 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// <param name="name">The name of the action.</param>
         private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable, IRoundedDiamond
         {
+            private double _width, _height;
+
             /// <inheritdoc />
             public override string Type => "action";
 
+            /// <summary>
+            /// Gets or sets the width of the action block.
+            /// </summary>
             [Description("The width of the block.")]
             [Alias("w")]
-            public double Width { get; set; } = 40;
+            public double Width { get; set; } = 0;
 
+            /// <summary>
+            /// Gets or sets the minimum width.
+            /// </summary>
+            [Description("The minimum width of the block. Only used when determining the width from contents.")]
+            public double MinWidth { get; set; } = 0.0;
+
+            /// <summary>
+            /// Gets or sets the height of the action block.
+            /// </summary>
             [Description("The height of the block.")]
             [Alias("h")]
-            public double Height { get; set; } = 20;
+            public double Height { get; set; } = 0;
 
+            /// <summary>
+            /// Gets or sets the minimum height.
+            /// </summary>
+            [Description("The minimum height of the block. Only used when determining the height from contents.")]
+            public double MinHeight { get; set; } = 10.0;
+
+            /// <inheritdoc />
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
+            /// <inheritdoc />
             [Description("The corner radius for the left and right corner.")]
             [Alias("rx")]
             public double CornerRadiusX { get; set; }
 
+            /// <inheritdoc />
             [Description("The corner radius for the top and bottom corner.")]
             [Alias("ry")]
             public double CornerRadiusY { get; set; }
 
-            Vector2 IBoxDrawable.TopLeft => new(-Width * 0.5, -Height * 0.5);
-            Vector2 IBoxDrawable.BottomRight => new(Width * 0.5, Height * 0.5);
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
+
+
+            /// <inheritdoc />
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                Bounds GetBounds()
+                {
+                    // Figure out the bounds of the contents
+                    var bounds = new ExpandableBounds();
+                    foreach (var label in Labels)
+                        bounds.Expand(label.Formatted.Bounds.Bounds);
+                    return bounds.Bounds.Expand(LabelMargin);
+                }
+
+                // When determining the size, let's update the size based on the label bounds
+                switch (context.Mode)
+                {
+                    case PreparationMode.Sizes:
+                        if (Width.IsZero())
+                        {
+                            if (Height.IsZero())
+                            {
+                                // The smallest circumference is where the same slope as the bounds is used
+                                var bounds = GetBounds();
+                                _width = bounds.Width * 2;
+                                _height = bounds.Height * 2;
+                            }
+                            else
+                            {
+                                var bounds = GetBounds();
+                                _height = Height;
+                                _width = bounds.Width * Height / (Height - bounds.Height);
+                                if (_width < 0)
+                                {
+                                    // Not possible to fit!
+                                    _width = bounds.Width * 2;
+                                }
+
+                                // Try to find a width that still contains the bounds
+                            }
+                        }
+                        else
+                        {
+                            if (Height.IsZero())
+                            {
+                                var bounds = GetBounds();
+                                _width = Width;
+                                _height = bounds.Height * Width / (Width - bounds.Width);
+                                if (_height < 0)
+                                    _height = bounds.Height * 2;
+                            }
+                            else
+                            {
+                                _width = Width;
+                                _height = Height;
+                            }
+                        }
+                        break;
+                }
+                return result;
+            }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Diamond(0.0, 0.0, Width, Height, CornerRadiusX, CornerRadiusY);
+                builder.Diamond(0.0, 0.0, _width, _height, CornerRadiusX, CornerRadiusY);
                 DiamondLabelAnchorPoints.Default.Draw(builder, this);
             }
-
 
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
             {
-                CommonGraphical.DiamondSize(Width, Height, CornerRadiusX, CornerRadiusY, out var _, out var ox, out var oy);
+                CommonGraphical.DiamondSize(_width, _height, CornerRadiusX, CornerRadiusY, out var _, out var ox, out var oy);
                 Vector2 Interp(DiamondLocation l1, DiamondLocation l2, double ka)
                 {
-                    Vector2 a = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l1);
-                    Vector2 b = CommonGraphical.GetDiamondOffset(Width, Height, ox, oy, l2);
+                    Vector2 a = CommonGraphical.GetDiamondOffset(_width, _height, ox, oy, l1);
+                    Vector2 b = CommonGraphical.GetDiamondOffset(_width, _height, ox, oy, l2);
                     double k = ka / (Math.PI * 0.5);
                     return (1 - k) * a + k * b;
                 }
-                double a = Width * 0.5;
-                double b = Height * 0.5;
+                double a = _width * 0.5;
+                double b = _height * 0.5;
 
                 foreach (var pin in pins)
                 {
