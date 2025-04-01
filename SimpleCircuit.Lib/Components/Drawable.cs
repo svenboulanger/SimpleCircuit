@@ -30,6 +30,9 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public string Name { get; }
 
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
+
         /// <summary>
         /// Gets the type name of the instance.
         /// </summary>

@@ -214,7 +214,7 @@ namespace SimpleCircuit.Components.Builders
             string attr = node.Attributes?["points"]?.Value;
             if (attr == null)
                 return;
-            var lexer = new SvgPathDataLexer(attr.AsMemory());
+            var lexer = new SvgPathDataLexer(attr);
             var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
@@ -235,7 +235,7 @@ namespace SimpleCircuit.Components.Builders
             string attr = node.Attributes?["points"]?.Value;
             if (attr == null)
                 return;
-            var lexer = new SvgPathDataLexer(attr.AsMemory());
+            var lexer = new SvgPathDataLexer(attr);
             var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
@@ -296,7 +296,7 @@ namespace SimpleCircuit.Components.Builders
                 SvgPathDataParser.MarkerLocation start = default, end = default;
                 Path(b =>
                 {
-                    var lexer = new SvgPathDataLexer(pathData.AsMemory());
+                    var lexer = new SvgPathDataLexer(pathData);
                     start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
                     end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
                 }, options);

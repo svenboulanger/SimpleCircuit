@@ -20,7 +20,7 @@ namespace SimpleCircuit.Parser
             public int WireCount { get; } = wireCount;
         }
         private readonly Stack<SectionInfo> _sections = new();
-        private readonly Queue<ComponentInfo> _queuedPoints = new();
+        // private readonly Queue<ComponentInfo> _queuedPoints = new();
         private readonly Stack<IAnnotation> _annotations = new();
 
         /// <summary>
@@ -77,6 +77,11 @@ namespace SimpleCircuit.Parser
         /// Gets extra CSS.
         /// </summary>
         public IList<string> ExtraCss { get; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the defined parameters in the current scope.
+        /// </summary>
+        public Dictionary<string, double> Parameters { get; set; }
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
@@ -161,42 +166,5 @@ namespace SimpleCircuit.Parser
         /// <returns>The wire name.</returns>
         public string GetWireFullname()
             => GetFullname($"w{DrawableFactoryDictionary.AnonymousSeparator}{++WireCount}");
-
-        /// <summary>
-        /// Creats a queued anonymous point for later reuse.
-        /// </summary>
-        /// <param name="source">The source.</param>
-        /// <returns>The created queued point.</returns>
-        public ComponentInfo CreateQueuedPoint(Token source)
-        {
-            var component = new ComponentInfo(source, GetFullname($"X{DrawableFactoryDictionary.AnonymousSeparator}Q{++QueuedPointCount}"));
-            _queuedPoints.Enqueue(component);
-            return component;
-        }
-
-        /// <summary>
-        /// Gets a queued anonymous point or creates a new one.
-        /// </summary>
-        /// <param name="source">The source.</param>
-        /// <returns>The point component.</returns>
-        public ComponentInfo GetOrCreateAnonymousPoint(Token source)
-        {
-            if (_queuedPoints.Count > 0)
-            {
-                var c = _queuedPoints.Dequeue();
-                return new ComponentInfo(source, c.Fullname);
-            }
-            return new ComponentInfo(source, GetFullname("X"));
-        }
-
-        /// <summary>
-        /// Generates diagnostic messages for left-over queued points.
-        /// </summary>
-        /// <param name="diagnostics">The diagnostic handler.</param>
-        public void CheckQueuedPoints(IDiagnosticHandler diagnostics)
-        {
-            foreach (var pt in _queuedPoints)
-                diagnostics?.Post(pt.Source, ErrorCodes.LeftOverAnonymousPoints);
-        }
     }
 }

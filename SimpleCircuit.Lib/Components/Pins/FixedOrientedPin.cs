@@ -18,7 +18,8 @@ namespace SimpleCircuit.Components.Pins
     /// <param name="relativeOffset">The relative offset.</param>
     /// <param name="relativeOrientation">The relative orientation.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="owner"/> is <c>null</c>.</exception>
-    public class FixedOrientedPin(string name, string description, ILocatedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation) : Pin(name, description, owner), IOrientedPin
+    public class FixedOrientedPin(string name, string description, ILocatedDrawable owner, Vector2 relativeOffset, Vector2 relativeOrientation)
+        : Pin(name, description, owner), IOrientedPin
     {
         private readonly ILocatedPresence _origin = owner;
 
@@ -63,7 +64,7 @@ namespace SimpleCircuit.Components.Pins
         public Vector2 Orientation => _origin is ITransformingDrawable tfd ? tfd.TransformNormal(RelativeOrientation) : RelativeOrientation;
 
         /// <inheritdoc />
-        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics)
+        public bool ResolveOrientation(Vector2 orientation, TextLocation source, IDiagnosticHandler diagnostics)
         {
             // Make sure the orientation is normalized to avoid issues...
             orientation /= orientation.Length;

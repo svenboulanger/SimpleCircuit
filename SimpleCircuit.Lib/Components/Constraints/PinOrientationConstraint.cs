@@ -4,6 +4,8 @@ using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Constraints
 {
@@ -17,10 +19,13 @@ namespace SimpleCircuit.Components.Constraints
     /// <param name="pin">The name of the pin.</param>
     /// <param name="defaultIndex">The default pin index if no pin is given.</param>
     /// <param name="segment">The orientation of the pin.</param>
-    public class PinOrientationConstraint(string name, PinInfo pin, int defaultIndex, WireSegmentInfo segment, bool invert) : ICircuitPresence
+    public class PinOrientationConstraint(string name, PinReference pin, int defaultIndex, WireSegmentInfo segment, bool invert) : ICircuitPresence
     {
         /// <inheritdoc />
         public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
 
         /// <inheritdoc />
         /// <remarks>
@@ -31,7 +36,7 @@ namespace SimpleCircuit.Components.Constraints
         /// <summary>
         /// Gets the pin information.
         /// </summary>
-        public PinInfo Pin { get; } = pin;
+        public PinReference Pin { get; } = pin;
 
         /// <summary>
         /// Gets the default index if no pin is specified.
@@ -55,13 +60,13 @@ namespace SimpleCircuit.Components.Constraints
             if (context.Mode == PreparationMode.Orientation)
             {
                 // Get the drawable
-                var drawable = Pin.Component.Component;
-                if (drawable == null)
+                var drawable = Pin.Drawable;
+                if (drawable is null)
                     return PresenceResult.Success;
 
                 // Get the pin
                 var pin = Pin.GetOrCreate(context.Diagnostics, DefaultIndex);
-                if (pin == null)
+                if (pin is null)
                     return PresenceResult.GiveUp;
 
                 // Resolve the orientation of the found pin
@@ -85,14 +90,14 @@ namespace SimpleCircuit.Components.Constraints
         /// <inheritdoc />
         public void Fail(IDiagnosticHandler diagnostics)
         {
-            var drawable = Pin.Component?.Component;
-            if (drawable == null)
+            var drawable = Pin.Drawable;
+            if (drawable is null)
                 return;
 
-            if (Pin.Name.Content.Length > 0)
+            if (Pin.Name.Length > 0)
             {
-                if (!drawable.Pins.TryGetValue(Pin.Name.Content.ToString(), out _))
-                    diagnostics?.Post(Pin.Component.Source, ErrorCodes.CouldNotFindPin, Pin.Name.Content, drawable.Name);
+                if (!drawable.Pins.TryGetValue(Pin.Name, out _))
+                    diagnostics?.Post(Pin.Source, ErrorCodes.CouldNotFindPin, Pin.Name, drawable.Name);
             }
         }
     }

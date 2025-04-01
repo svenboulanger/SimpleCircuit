@@ -14,7 +14,8 @@ namespace SimpleCircuit.Components.Pins
     /// <param name="name">The name of the pin.</param>
     /// <param name="description">The pin description.</param>
     /// <param name="owner">The owner of the pin.</param>
-    public class LoosePin(string name, string description, ILocatedDrawable owner) : Pin(name, description, owner), IOrientedPin
+    public class LoosePin(string name, string description, ILocatedDrawable owner)
+        : Pin(name, description, owner), IOrientedPin
     {
         /// <inheritdoc />
         public bool HasFixedOrientation { get; private set; }
@@ -48,7 +49,7 @@ namespace SimpleCircuit.Components.Pins
         }
 
         /// <inheritdoc />
-        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics)
+        public bool ResolveOrientation(Vector2 orientation, TextLocation source, IDiagnosticHandler diagnostics)
         {
             if (HasFixedOrientation)
             {

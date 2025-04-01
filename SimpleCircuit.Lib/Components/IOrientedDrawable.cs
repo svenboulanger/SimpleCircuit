@@ -28,6 +28,6 @@ namespace SimpleCircuit.Components
         /// <param name="source">The source code that results in this orientation resolution.</param>
         /// <param name="diagnostics">The diagnostic handler.</param>
         /// <returns>Returns <c>true</c> if the orientation can be constrained; otherwise, <c>false</c>.</returns>
-        public bool ConstrainOrientation(Vector2 p, Vector2 b, Token source, IDiagnosticHandler diagnostics);
+        public bool ConstrainOrientation(Vector2 p, Vector2 b, TextLocation source, IDiagnosticHandler diagnostics);
     }
 }

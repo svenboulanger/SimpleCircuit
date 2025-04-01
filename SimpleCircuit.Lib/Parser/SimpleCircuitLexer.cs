@@ -9,8 +9,6 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public class SimpleCircuitLexer : Lexer<TokenType>
     {
-        private const double _isqr2 = 0.70710678118;
-
         /// <summary>
         /// Gets or sets the diagnostic message handler.
         /// </summary>
@@ -28,7 +26,7 @@ namespace SimpleCircuit.Parser
         /// <param name="source">The source.</param>
         /// <param name="line">The line number.</param>
         /// <returns>The lexer.</returns>
-        public static SimpleCircuitLexer FromString(ReadOnlyMemory<char> netlist, string source = null, int line = 1)
+        public static SimpleCircuitLexer FromString(string netlist, string source = null, int line = 1)
             => new(netlist, source, line);
 
         /// <summary>
@@ -48,7 +46,7 @@ namespace SimpleCircuit.Parser
             string contents;
             using (var sr = new StreamReader(filename))
                 contents = sr.ReadToEnd();
-            return new(contents.AsMemory(), filename);
+            return new(contents, filename);
         }
 
         /// <summary>
@@ -56,7 +54,7 @@ namespace SimpleCircuit.Parser
         /// </summary>
         /// <param name="code">The source.</param>
         /// <param name="line">The starting line number.</param>
-        protected SimpleCircuitLexer(ReadOnlyMemory<char> code, string source, int line = 1)
+        protected SimpleCircuitLexer(string code, string source, int line = 1)
             : base(code, source, line)
         {
         }
@@ -86,37 +84,73 @@ namespace SimpleCircuit.Parser
                 switch (c)
                 {
                     case '\0':
-                        Type = TokenType.EndOfContent;
+                        NextType = TokenType.EndOfContent;
                         break;
 
                     case '.':
-                        Type = TokenType.Dot;
-                        ContinueToken();
-                        break;
-
                     case '-':
-                        Type = TokenType.Dash;
+                    case '+':
+                    case '(':
+                    case ')':
+                    case '[':
+                    case ']':
+                    case '{':
+                    case '}':
+                    case '=':
+                    case ',':
+                    case '?':
+                    case ':':
+                        NextType = TokenType.Punctuator;
                         ContinueToken();
                         break;
 
-                    case '+':
-                        Type = TokenType.Plus;
+                    case '<':
+                        NextType = TokenType.Punctuator;
                         ContinueToken();
+                        if (Char == '<' || Char == '=')
+                            ContinueToken();
+                        break;
+
+                    case '>':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '>' || Char == '=')
+                            ContinueToken();
+                        break;
+
+                    case '|':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '|')
+                            ContinueToken();
+                        break;
+
+                    case '&':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '&')
+                            ContinueToken();
+                        break;
+
+                    case '!':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '=')
+                            ContinueToken();
                         break;
 
                     case '*':
+                        NextType = TokenType.Punctuator;
                         ContinueToken();
                         if (isNewLine)
                         {
                             ContinueLineComment();
                             isTrivia = true;
                         }
-                        else
-                            Type = TokenType.Times;
                         break;
 
                     case '/':
-                        Type = TokenType.Divide;
+                        NextType = TokenType.Punctuator;
                         ContinueToken();
                         if (Char == '/')
                         {
@@ -127,13 +161,13 @@ namespace SimpleCircuit.Parser
 
                     case '"':
                     case '\'':
-                        Type = TokenType.String;
+                        NextType = TokenType.String;
                         ContinueToken();
                         ContinueString(c);
                         break;
 
                     case '\r':
-                        Type = TokenType.Newline;
+                        NextType = TokenType.Newline;
                         ContinueToken();
                         if (Char == '\n')
                             ContinueToken();
@@ -141,121 +175,35 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case '\n':
-                        Type = TokenType.Newline;
+                        NextType = TokenType.Newline;
                         ContinueToken();
                         Newline();
                         break;
 
-                    case '(':
-                        Type = TokenType.OpenParenthesis;
-                        ContinueToken();
-                        break;
-
-                    case ')':
-                        Type = TokenType.CloseParenthesis;
-                        ContinueToken();
-                        break;
-
-                    case '[':
-                        Type = TokenType.OpenIndex;
-                        ContinueToken();
-                        break;
-
-                    case ']':
-                        Type = TokenType.CloseIndex;
-                        ContinueToken();
-                        break;
-
-                    case '<':
-                        Type = TokenType.OpenBeak;
-                        ContinueToken();
-                        break;
-
-                    case '>':
-                        Type = TokenType.CloseBeak;
-                        ContinueToken();
-                        break;
-
-                    case '=':
-                        Type = TokenType.Equals;
-                        ContinueToken();
-                        break;
-
-                    case ',':
-                        Type = TokenType.Comma;
-                        ContinueToken();
-                        break;
-
-                    case '?':
-                        Type = TokenType.Question;
-                        ContinueToken();
-                        break;
-
                     case '\u2190': // Left arrow
-                        ArrowOrientation = new(-1, 0);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2191': // Up arrow
-                        ArrowOrientation = new(0, -1);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2192': // Right arrow
-                        ArrowOrientation = new(1, 0);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2193': // Down arrow
-                        ArrowOrientation = new(0, 1);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2196': // North-west arrow
-                        ArrowOrientation = new(-_isqr2, -_isqr2);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2197': // North-east arrow
-                        ArrowOrientation = new(_isqr2, -_isqr2);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2198': // South-east arrow
-                        ArrowOrientation = new(_isqr2, _isqr2);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
                     case '\u2199': // South-west arrow
-                        ArrowOrientation = new(-_isqr2, _isqr2);
-                        Type = TokenType.Arrow;
-                        ContinueToken();
-                        break;
-
-                    case '|':
-                        Type = TokenType.Pipe;
+                        NextType = TokenType.Arrow;
                         ContinueToken();
                         break;
 
                     case char w when char.IsLetter(w):
-                        Type = TokenType.Word;
+                        NextType = TokenType.Word;
                         ContinueWord();
                         break;
 
                     case char d when char.IsDigit(d):
-                        Type = TokenType.Integer;
+                        NextType = TokenType.Number;
                         ContinueNumber();
                         break;
 
                     default:
-                        Type = TokenType.Unknown;
+                        NextType = TokenType.Unknown;
                         ContinueToken();
                         break;
                 }
@@ -284,53 +232,60 @@ namespace SimpleCircuit.Parser
 
         private void ContinueNumber()
         {
-            char c = Char;
-            while (char.IsDigit(c))
+            // Whole number mantissa
+            while (char.IsDigit(Char))
+                ContinueToken(); // digit
+
+            // Decimal point
+            if (Char == '.')
             {
-                ContinueToken();
-                c = Char;
+                NextType = TokenType.Number;
+
+                // '.'
+                ContinueToken(); // '.'
+
+                // Fraction (optional)
+                while (char.IsDigit(Char))
+                    ContinueToken(); // number
             }
 
-            if (c == '.')
+            // 'e' or 'E'
+            if (Char == 'e' || Char == 'E')
             {
-                // Fraction
-                Type = TokenType.Number;
-                ContinueToken();
-                c = Char;
-                while (char.IsDigit(c))
+                // '+' or '-'
+                char la = LookAhead();
+                if (la == '+' || la == '-')
                 {
-                    ContinueToken();
-                    c = Char;
-                }
-            }
-
-            if (c == 'e' || c == 'E')
-            {
-                // Special case: if the type is integer at this point then we can migrate to a word
-                if (Type == TokenType.Integer)
-                    Type = TokenType.Word;
-
-                // Exponential notation
-                ContinueToken();
-                c = Char;
-                if (c == '+' || c == '-')
-                {
-                    // No ambiguity anymore!
-                    Type = TokenType.Number;
-                    ContinueToken();
-                    c = Char;
-                }
-
-                if (!char.IsDigit(c))
-                    ContinueWord();
-                else
-                {
-                    while (char.IsDigit(c))
+                    // Number
+                    if (char.IsDigit(LookAhead(2)))
                     {
-                        ContinueToken();
-                        c = Char;
+                        NextType = TokenType.Number;
+                        ContinueToken(); // 'e' or 'E'
+                        ContinueToken(); // '+' or '-'
+                        ContinueToken(); // number
+                        while (char.IsDigit(Char))
+                            ContinueToken();
                     }
                 }
+
+                // digit
+                else if (char.IsDigit(la))
+                {
+                    NextType = TokenType.Number;
+                    ContinueToken(); // 'e' or 'E'
+                    ContinueToken(); // number
+                    while (char.IsDigit(Char))
+                        ContinueToken();
+                }
+            }
+
+            // Spice modifiers (optional)
+            if (char.IsLetter(Char))
+            {
+                NextType = TokenType.Number;
+                ContinueToken();
+                while (char.IsLetterOrDigit(Char) || Char == '_')
+                    ContinueToken();
             }
         }
 
@@ -350,7 +305,7 @@ namespace SimpleCircuit.Parser
             }
             if (c != end)
             {
-                Diagnostics?.Post(Token, ErrorCodes.QuoteMismatch);
+                Diagnostics?.Post(NextToken, ErrorCodes.QuoteMismatch);
             }
             ContinueToken();
         }

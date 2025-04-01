@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Wires
     public class Wire : Drawable
     {
         private IPin _w2p, _p2w;
-        private readonly PinInfo _wireToPin, _pinToWire;
+        private readonly PinReference _wireToPin, _pinToWire;
         private readonly List<WireSegmentInfo> _segments;
         private readonly List<WirePoint> _localPoints = [];
         private readonly List<Vector2> _points = [];
@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components.Wires
         /// <param name="pinToWire">The pin that will start the wire.</param>
         /// <param name="segments">The wire segments.</param>
         /// <param name="wireToPin">The pin that will end the wire.</param>
-        public Wire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin)
+        public Wire(string name, PinReference pinToWire, IEnumerable<WireSegmentInfo> segments, PinReference wireToPin)
             : base(name)
         {
             _pinToWire = pinToWire;
@@ -125,13 +125,13 @@ namespace SimpleCircuit.Components.Wires
                     var p2 = _w2p as IOrientedPin;
                     string x, y;
 
-                    if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero() && !_segments[0].IsUnconstrained)
+                    if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero())
                     {
                         // We have a wire that connects two pins but does not have a defined orientation yet
                         // This piece of code will pass this orientation to other nodes if they can be resolved
                         if (p1 == null && p2 == null)
                         {
-                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                            GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Drawable.Name);
                             return PresenceResult.GiveUp;
                         }
                         else if (p1 != null && p2 != null)
@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Wires
                                 // Both aren't fixed, so we might just not have enough information...
                                 if (context.Desparateness == DesperatenessLevel.GiveUp)
                                 {
-                                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                    GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Drawable.Name);
                                     return PresenceResult.GiveUp;
                                 }
                                 return PresenceResult.Incomplete;
@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components.Wires
                                 return PresenceResult.Success; // We can derive the orientation
                             if (context.Desparateness == DesperatenessLevel.GiveUp)
                             {
-                                GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Drawable.Name);
                                 return PresenceResult.GiveUp;
                             }
                             else
@@ -178,7 +178,7 @@ namespace SimpleCircuit.Components.Wires
                                 return PresenceResult.Success;
                             if (context.Desparateness == DesperatenessLevel.GiveUp)
                             {
-                                GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Drawable.Name);
                                 return PresenceResult.GiveUp;
                             }
                             else
@@ -191,16 +191,14 @@ namespace SimpleCircuit.Components.Wires
                         for (int i = 0; i < _segments.Count; i++)
                         {
                             var segment = _segments[i];
-                            if (segment.IsUnconstrained)
-                                continue;
-                            else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                            if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                             {
                                 if (i == 0)
                                 {
                                     // Check with first pin, and only with first pin...
                                     if (p1 == null)
                                     {
-                                        GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Component.Fullname);
+                                        GenerateError(context.Diagnostics, _pinToWire, ErrorCodes.AmbiguousOrientation, _p2w.Name, _pinToWire.Drawable.Name);
                                         return PresenceResult.GiveUp;
                                     }
                                 }
@@ -208,7 +206,7 @@ namespace SimpleCircuit.Components.Wires
                                 {
                                     if (p2 == null)
                                     {
-                                        GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Component.Fullname);
+                                        GenerateError(context.Diagnostics, _wireToPin, ErrorCodes.AmbiguousOrientation, _w2p.Name, _wireToPin.Drawable.Name);
                                         return PresenceResult.GiveUp;
                                     }
                                 }
@@ -262,18 +260,18 @@ namespace SimpleCircuit.Components.Wires
                         var segment = _segments[i];
                         var orientation = GetOrientation(i);
 
-                        if (segment.IsFixed)
+                        if (!segment.IsMinimum)
                         {
                             double l = segment.Length;
 
                             if (!context.Offsets.Group(x, tx, orientation.X * l))
                             {
-                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l), segment.Source.Content);
+                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l));
                                 return PresenceResult.GiveUp;
                             }
                             if (!context.Offsets.Group(y, ty, orientation.Y * l))
                             {
-                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l), segment.Source.Content);
+                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l));
                                 return PresenceResult.GiveUp;
                             }
                         }
@@ -313,13 +311,13 @@ namespace SimpleCircuit.Components.Wires
                                     actualOrientation /= actualOrientation.Length;
                                     if (orientation.Dot(actualOrientation) < 0.999)
                                     {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection);
                                         return PresenceResult.GiveUp;
                                     }
 
                                     // Check whether the minimum distance is OK
                                     if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
                                 }
                                 else if (isFixedX)
                                 {
@@ -328,13 +326,13 @@ namespace SimpleCircuit.Components.Wires
                                     double dy = dx / orientation.X * orientation.Y;
                                     if (!context.Offsets.Group(y, ty, dy))
                                     {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy);
                                         return PresenceResult.GiveUp;
                                     }
 
                                     // Check whether the minimum distance is OK
                                     if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
                                 }
                                 else if (isFixedY)
                                 {
@@ -343,13 +341,13 @@ namespace SimpleCircuit.Components.Wires
                                     double dx = dy / orientation.Y * orientation.X;
                                     if (!context.Offsets.Group(x, tx, dx))
                                     {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy);
                                         return PresenceResult.GiveUp;
                                     }
 
                                     // Check whether the minimum distance is OK
                                     if (dx * dx + dy * dy > segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY, segment.Source.Content);
+                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY);
                                 }
                                 else if (context.Desparateness == DesperatenessLevel.Normal)
                                 {
@@ -487,7 +485,7 @@ namespace SimpleCircuit.Components.Wires
                 var toX = context.GetOffset(x);
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
-                if (!segment.IsUnconstrained && !segment.IsFixed)
+                // if (!segment.IsUnconstrained && !segment.IsFixed)
                 {
                     var orientation = GetOrientation(i);
 
@@ -667,12 +665,12 @@ namespace SimpleCircuit.Components.Wires
         }
         private string GetXName(int index) => $"{Name}.{index + 1}.x";
         private string GetYName(int index) => $"{Name}.{index + 1}.y";
-        private void GenerateError(IDiagnosticHandler diagnostics, PinInfo pin, ErrorCodes code, params object[] arguments)
+        private void GenerateError(IDiagnosticHandler diagnostics, PinReference pin, ErrorCodes code, params object[] arguments)
         {
-            if (pin.Name.Content.Length > 0)
-                diagnostics?.Post(pin.Name, code, arguments);
+            if (pin.Name.Length > 0)
+                diagnostics?.Post(pin.Source, code, arguments);
             else
-                diagnostics?.Post(pin.Component.Source, code, arguments);
+                diagnostics?.Post(pin.Drawable.Sources.FirstOrDefault(), code, arguments);
         }
     }
 }

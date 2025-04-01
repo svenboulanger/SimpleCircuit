@@ -51,7 +51,7 @@ namespace SimpleCircuit
             {
                 var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Filename);
                 _context = new ParsingContext() { Diagnostics = _logger };
-                Parser.Parser.Parse(lexer, _context);
+                Parser.SimpleCircuitParser.Parse(lexer, _context);
             }
         }
 

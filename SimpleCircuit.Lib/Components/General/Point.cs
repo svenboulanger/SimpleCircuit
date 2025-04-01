@@ -9,9 +9,14 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A factory for points.
     /// </summary>
-    [Drawable("X", "A point that can connect to multiple wires.", "General")]
+    [Drawable(Key, "A point that can connect to multiple wires.", "General")]
     public class PointFactory : DrawableFactory
     {
+        /// <summary>
+        /// The key for points.
+        /// </summary>
+        public const string Key = "X";
+
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);

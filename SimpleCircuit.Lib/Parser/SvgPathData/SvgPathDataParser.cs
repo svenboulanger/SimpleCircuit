@@ -24,7 +24,7 @@ namespace SimpleCircuit.Parser.SvgPathData
         public static List<Vector2> ParsePoints(SvgPathDataLexer lexer, IDiagnosticHandler diagnostics)
         {
             var points = new List<Vector2>();
-            while (lexer.Type != TokenType.EndOfContent)
+            while (lexer.NextType != TokenType.EndOfContent)
             {
                 // Keep parsing vectors
                 lexer.ParseVector(diagnostics, out var p);
@@ -52,14 +52,14 @@ namespace SimpleCircuit.Parser.SvgPathData
                     startNormal = -b.StartNormal;
                 }
             }
-            while (lexer.Type != TokenType.EndOfContent)
+            while (lexer.NextType != TokenType.EndOfContent)
             {
                 Vector2 h1, h2, p;
                 double d;
                 bool result = true;
                 if (!lexer.Branch(TokenType.Command, out var cmd))
                 {
-                    diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizePathCommand, lexer.Token.Content.ToString());
+                    diagnostics?.Post(lexer.NextToken, ErrorCodes.CouldNotRecognizePathCommand, lexer.NextToken.Content.ToString());
                     break;
                 }
                 switch (cmd.Content.Span[0])

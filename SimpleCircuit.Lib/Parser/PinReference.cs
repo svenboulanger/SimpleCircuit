@@ -1,30 +1,33 @@
-﻿using SimpleCircuit.Components.Pins;
+﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using System;
 
 namespace SimpleCircuit.Parser
 {
     /// <summary>
-    /// Represents pin information.
+    /// Pin information.
     /// </summary>
-    /// <remarks>
-    /// Creates a new pin info.
-    /// </remarks>
-    /// <param name="component"></param>
-    /// <param name="pin"></param>
-    public class PinInfo(ComponentInfo component, Token pin)
+    /// <param name="drawable">The component.</param>
+    /// <param name="name">The pin name.</param>
+    public class PinReference(IDrawable drawable, string name, TextLocation Source)
     {
         private IPin _pin = null;
 
         /// <summary>
         /// Gets the name of the component the pin belongs to.
         /// </summary>
-        public ComponentInfo Component { get; } = component ?? throw new ArgumentNullException(nameof(component));
+        public IDrawable Drawable { get; } = drawable ?? throw new ArgumentNullException(nameof(drawable));
 
         /// <summary>
         /// Gets the name of the pin of the component.
         /// </summary>
-        public Token Name { get; } = pin;
+        public string Name { get; } = name;
+
+        /// <summary>
+        /// Gets the source of the reference.
+        /// </summary>
+        public TextLocation Source { get; }
 
         /// <summary>
         /// Gets the pin.
@@ -41,29 +44,27 @@ namespace SimpleCircuit.Parser
         {
             if (_pin == null)
             {
-                if (Component == null)
+                if (Drawable == null)
                     return null;
-
-                var drawable = Component.Component;
-                if (Name.Content.Length == 0)
+                if (Name is null)
                 {
                     // Get the pin by its index
-                    if (drawable.Pins != null)
+                    if (Drawable.Pins != null)
                     {
                         if (defaultIndex >= 0)
-                            _pin = drawable.Pins[defaultIndex];
+                            _pin = Drawable.Pins[defaultIndex];
                         else
-                            _pin = drawable.Pins[drawable.Pins.Count + defaultIndex];
+                            _pin = Drawable.Pins[drawable.Pins.Count + defaultIndex];
                     }
                     if (_pin == null)
-                        diagnostics?.Post(Component.Source, ErrorCodes.DoesNotHavePins, Component.Fullname);
+                        diagnostics?.Post(default(TextLocation), ErrorCodes.DoesNotHavePins, drawable.Name);
                 }
                 else
                 {
                     // Get the pin by its name
-                    _pin = drawable.Pins[Name.Content.ToString()];
+                    _pin = Drawable.Pins[Name];
                     if (_pin == null)
-                        diagnostics?.Post(Name, ErrorCodes.CouldNotFindPin, Name.Content, Component.Fullname);
+                        diagnostics?.Post(Source, ErrorCodes.CouldNotFindPin, Name, drawable.Name);
                 }
             }
             return _pin;
@@ -72,10 +73,10 @@ namespace SimpleCircuit.Parser
         /// <inheritdoc />
         public override string ToString()
         {
-            if (Name.Content.Length > 0)
-                return $"{Component.Fullname}[{Name.Content}]";
+            if (Name.Length > 0)
+                return $"{Drawable.Name}[{Name}]";
             else
-                return Component.Fullname;
+                return Drawable.Name;
         }
     }
 }

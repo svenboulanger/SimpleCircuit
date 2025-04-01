@@ -19,6 +19,12 @@ namespace SimpleCircuit.Components.Diagrams
     {
         private readonly PinCollection _pins;
 
+        /// <inheritdoc />
+        public string Name { get; }
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
+
         /// <summary>
         /// Gets the type of the diagram block.
         /// </summary>
@@ -50,9 +56,6 @@ namespace SimpleCircuit.Components.Diagrams
 
         /// <inheritdoc />
         public Vector2 Location { get; protected set; }
-
-        /// <inheritdoc />
-        public string Name { get; }
 
         /// <inheritdoc />
         public IEnumerable<string[]> Properties => Drawable.GetProperties(this);

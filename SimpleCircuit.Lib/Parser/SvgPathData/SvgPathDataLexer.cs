@@ -6,11 +6,11 @@ namespace SimpleCircuit.Parser.SvgPathData
     /// Creates a new <see cref="SvgPathDataLexer"/>
     /// </summary>
     /// <param name="data">The data.</param>
-    public class SvgPathDataLexer(ReadOnlyMemory<char> data) : Lexer<TokenType>(data)
+    public class SvgPathDataLexer(string data) : Lexer<TokenType>(data)
     {
 
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (Type & flags) != 0;
+        public override bool Check(TokenType flags) => (NextType & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()
@@ -26,7 +26,7 @@ namespace SimpleCircuit.Parser.SvgPathData
             switch (c)
             {
                 case '\0':
-                    Type = TokenType.EndOfContent;
+                    NextType = TokenType.EndOfContent;
                     break;
 
                 case 'A':
@@ -50,17 +50,17 @@ namespace SimpleCircuit.Parser.SvgPathData
                 case 'z':
                 case 'Z':
                     // We support everything except for arcs as they don't transform easily
-                    Type = TokenType.Command;
+                    NextType = TokenType.Command;
                     ContinueToken();
                     break;
 
                 case char d when char.IsDigit(d) || d == '-' || d == '+' || d == '.':
                     ContinueNumber();
-                    Type = TokenType.Number;
+                    NextType = TokenType.Number;
                     break;
 
                 default:
-                    Type = TokenType.Unknown;
+                    NextType = TokenType.Unknown;
                     ContinueToken();
                     break;
             }

@@ -12,9 +12,9 @@
                 {
                     <p>@(message.Message). Edit the script to start tracking, or click <a href="javascript:void(0);" @onclick=@(async () => await ViewModeClicked.InvokeAsync(true))>here</a> to restore your last saved work.</p>
                 }
-                else if (message is TokenDiagnosticMessage tdm)
+                else if (message is SourceDiagnosticMessage tdm)
                 {
-                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Token))>line @(tdm.Token.Location.Line), column @(tdm.Token.Location.Column)</a>.</p>
+                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Location))>line @(tdm.Location.Location.Line), column @(tdm.Location.Location.Column)</a>.</p>
                 }
                 else
                 {

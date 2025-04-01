@@ -33,6 +33,6 @@ namespace SimpleCircuit.Components.Pins
         /// <param name="source">The source code that results in this orientation resolution.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>Returns <c>true</c> if the orientation could be applied; otherwise, <c>false</c>.</returns>
-        public bool ResolveOrientation(Vector2 orientation, Token source, IDiagnosticHandler diagnostics);
+        public bool ResolveOrientation(Vector2 orientation, TextLocation source, IDiagnosticHandler diagnostics);
     }
 }

@@ -10,8 +10,13 @@ namespace SimpleCircuit.Parser
     /// </remarks>
     /// <param name="line">The line number.</param>
     /// <param name="column">The column number.</param>
-    public readonly struct TextLocation(int line, int column) : IEquatable<TextLocation>
+    public readonly struct TextLocation(string source, int line, int column) : IEquatable<TextLocation>
     {
+        /// <summary>
+        /// Gets the source.
+        /// </summary>
+        public string Source { get; } = source ?? string.Empty;
+
         /// <summary>
         /// Gets the line number.
         /// </summary>
@@ -23,9 +28,9 @@ namespace SimpleCircuit.Parser
         public int Column { get; } = column;
 
         /// <inheritdoc />
-        public bool Equals(TextLocation other) => Line == other.Line && Column == other.Column;
+        public bool Equals(TextLocation other) => Source == other.Source && Line == other.Line && Column == other.Column;
 
         /// <inheritdoc />
-        public override string ToString() => $"line {Line}, column {Column}";
+        public override string ToString() => string.IsNullOrEmpty(Source) ? $"line {Line}, column {Column}" : $"line {Line}, column {Column} in {Source}";
     }
 }

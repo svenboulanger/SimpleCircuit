@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Parser.SimpleTexts
+﻿namespace SimpleCircuit.Parser.SimpleTexts
 {
     /// <summary>
     /// A lexer for parsing simple texts/labels.
@@ -9,11 +7,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
     /// Creates a new <see cref="SimpleTextLexer"/>.
     /// </remarks>
     /// <param name="text">The text.</param>
-    public class SimpleTextLexer(string text) : Lexer<TokenType>(text.AsMemory(), text)
+    public class SimpleTextLexer(string text) : Lexer<TokenType>(text, text)
     {
 
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (Type & flags) != 0;
+        public override bool Check(TokenType flags) => (NextType & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()
@@ -22,17 +20,17 @@ namespace SimpleCircuit.Parser.SimpleTexts
             switch (Char)
             {
                 case '\0':
-                    Type = TokenType.EndOfContent;
+                    NextType = TokenType.EndOfContent;
                     break;
 
                 case '\\':
                     // Escaped sequence
-                    Type = TokenType.EscapedSequence;
+                    NextType = TokenType.EscapedSequence;
                     ContinueToken();
                     switch (Char)
                     {
                         case 'n':
-                            Type = TokenType.Newline;
+                            NextType = TokenType.Newline;
                             ContinueToken();
                             break;
 
@@ -41,12 +39,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
                         case '\\':
                         case '{':
                         case '}':
-                            Type = TokenType.EscapedCharacter;
+                            NextType = TokenType.EscapedCharacter;
                             ContinueToken();
                             break;
 
                         default:
-                            Type = TokenType.EscapedSequence;
+                            NextType = TokenType.EscapedSequence;
                             while (char.IsLetter(Char))
                                 ContinueToken();
                             break;
@@ -54,27 +52,27 @@ namespace SimpleCircuit.Parser.SimpleTexts
                     break;
 
                 case '_':
-                    Type = TokenType.Subscript;
+                    NextType = TokenType.Subscript;
                     ContinueToken();
                     break;
 
                 case '^':
-                    Type = TokenType.Superscript;
+                    NextType = TokenType.Superscript;
                     ContinueToken();
                     break;
 
                 case '{':
-                    Type = TokenType.OpenBracket;
+                    NextType = TokenType.OpenBracket;
                     ContinueToken();
                     break;
 
                 case '}':
-                    Type = TokenType.CloseBracket;
+                    NextType = TokenType.CloseBracket;
                     ContinueToken();
                     break;
 
                 default:
-                    Type = TokenType.Character;
+                    NextType = TokenType.Character;
                     ContinueToken();
                     break;
             }

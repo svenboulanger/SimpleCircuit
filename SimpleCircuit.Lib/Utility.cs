@@ -114,7 +114,7 @@ namespace SimpleCircuit
                 return true;
             }
 
-            var lexer = new SvgPathDataLexer(attribute.Value.AsMemory());
+            var lexer = new SvgPathDataLexer(attribute.Value);
             if (!lexer.ParseVector(diagnostics, out result))
             {
                 result = defValue;
@@ -170,7 +170,7 @@ namespace SimpleCircuit
             else
             {
                 result = 0.0;
-                diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedCoordinateButWas, lexer.Token.Content);
+                diagnostics?.Post(lexer.NextToken, ErrorCodes.ExpectedCoordinateButWas, lexer.NextToken.Content);
                 return false;
             }
         }

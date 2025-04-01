@@ -9,11 +9,11 @@ namespace SimpleCircuit.Parser.Markers
     /// Creates a new marker lexer.
     /// </remarks>
     /// <param name="content">The content.</param>
-    public class MarkerLexer(string content) : Lexer<TokenType>(content.AsMemory())
+    public class MarkerLexer(string content) : Lexer<TokenType>(content)
     {
 
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (Type & flags) != 0;
+        public override bool Check(TokenType flags) => (NextType & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()
@@ -23,10 +23,10 @@ namespace SimpleCircuit.Parser.Markers
                 ContinueTrivia();
 
             if (c == '\0')
-                Type = TokenType.EndOfContent;
+                NextType = TokenType.EndOfContent;
             else
             {
-                Type = TokenType.Marker;
+                NextType = TokenType.Marker;
                 while ((c = Char) != '\0' && c != ' ' && c != '+')
                     ContinueToken();
             }

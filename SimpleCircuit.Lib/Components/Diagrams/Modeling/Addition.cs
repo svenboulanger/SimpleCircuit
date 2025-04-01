@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         builder.BeginTransform(new Transform(new(), Matrix2.Scale(0.2 * Size)));
                         builder.Path(b =>
                         {
-                            var lexer = new SvgPathDataLexer(_pathData.AsMemory());
+                            var lexer = new SvgPathDataLexer(_pathData);
                             SvgPathDataParser.Parse(lexer, b, null);
                         });
                         builder.EndTransform();

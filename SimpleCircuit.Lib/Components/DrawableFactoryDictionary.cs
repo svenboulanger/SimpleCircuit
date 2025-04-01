@@ -222,6 +222,14 @@ namespace SimpleCircuit.Components
         public bool IsAnonymous(string fullname) => Extract(fullname, out _, out _);
 
         /// <summary>
+        /// Determines whether the full name represents an anonymous component.
+        /// </summary>
+        /// <param name="fullname">The full name.</param>
+        /// <param name="key">The key.</param>
+        /// <returns>Returns <c>true</c> if the name represents an anonymous component; otherwise, <c>false</c>.</returns>
+        public bool IsAnonymous(string fullname, out string key) => Extract(fullname, out key, out _);
+
+        /// <summary>
         /// Determines whether the given key is present in the factory.
         /// </summary>
         /// <param name="key">The key.</param>

@@ -9,11 +9,11 @@ namespace SimpleCircuit.Parser.Variants
     /// Creates a new <see cref="VariantLexer"/>.
     /// </remarks>
     /// <param name="text">The text.</param>
-    public class VariantLexer(string text) : Lexer<TokenType>(text.AsMemory(), text)
+    public class VariantLexer(string text) : Lexer<TokenType>(text, text)
     {
 
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (Type & flags) != 0;
+        public override bool Check(TokenType flags) => (NextType & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()
@@ -25,40 +25,40 @@ namespace SimpleCircuit.Parser.Variants
             switch (Char)
             {
                 case '\0':
-                    Type = TokenType.EndOfContent;
+                    NextType = TokenType.EndOfContent;
                     break;
 
                 case '(':
-                    Type = TokenType.OpenBracket;
+                    NextType = TokenType.OpenBracket;
                     ContinueToken();
                     break;
 
                 case ')':
-                    Type = TokenType.CloseBracket;
+                    NextType = TokenType.CloseBracket;
                     ContinueToken();
                     break;
 
                 case '|':
-                    Type = TokenType.Or;
+                    NextType = TokenType.Or;
                     ContinueToken();
                     if (Char == '|')
                         ContinueToken();
                     break;
 
                 case '&':
-                    Type = TokenType.And;
+                    NextType = TokenType.And;
                     ContinueToken();
                     if (Char == '&')
                         ContinueToken();
                     break;
 
                 case '!':
-                    Type = TokenType.Not;
+                    NextType = TokenType.Not;
                     ContinueToken();
                     break;
 
                 case 'a':
-                    Type = TokenType.Variant;
+                    NextType = TokenType.Variant;
                     ContinueToken();
                     if (Char == 'n')
                     {
@@ -66,59 +66,59 @@ namespace SimpleCircuit.Parser.Variants
                         if (Char == 'd')
                         {
                             ContinueToken();
-                            Type = TokenType.And;
+                            NextType = TokenType.And;
                         }
                     }
                     while (char.IsLetterOrDigit(c = Char) || c == '_' || c == '-')
                     {
-                        Type = TokenType.Variant;
+                        NextType = TokenType.Variant;
                         ContinueToken();
                     }
                     break;
 
                 case 'o':
-                    Type = TokenType.Variant;
+                    NextType = TokenType.Variant;
                     ContinueToken();
                     if (Char == 'r')
                     {
                         ContinueToken();
-                        Type = TokenType.Or;
+                        NextType = TokenType.Or;
                     }
                     while (char.IsLetterOrDigit(c = Char) || c == '_' || c == '-')
                     {
-                        Type = TokenType.Variant;
+                        NextType = TokenType.Variant;
                         ContinueToken();
                     }
                     break;
 
                 case 'n':
-                    Type = TokenType.Variant;
+                    NextType = TokenType.Variant;
                     ContinueToken();
                     if (Char == 'o')
                     {
                         ContinueToken();
                         if (Char == 't')
                         {
-                            Type = TokenType.Not;
+                            NextType = TokenType.Not;
                             ContinueToken();
                         }
                     }
                     while (char.IsLetterOrDigit(c = Char) || c == '_' || c == '-')
                     {
-                        Type = TokenType.Variant;
+                        NextType = TokenType.Variant;
                         ContinueToken();
                     }
                     break;
 
                 case char l when char.IsLetter(l):
-                    Type = TokenType.Variant;
+                    NextType = TokenType.Variant;
                     ContinueToken();
                     while (char.IsLetterOrDigit(c = Char) || c == '_' || c == '-')
                         ContinueToken();
                     break;
 
                 default:
-                    Type = TokenType.Variant;
+                    NextType = TokenType.Variant;
                     ContinueToken();
                     break;
             }

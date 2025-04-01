@@ -1,6 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Parser;
 using SpiceSharp.Entities;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -12,10 +14,11 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public int Order => 0;
 
-        /// <summary>
-        /// Gets the name of the constraint.
-        /// </summary>
+        /// <inheritdoc />
         public string Name { get; }
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
 
         /// <summary>
         /// Gets the lowest of the two nodes.

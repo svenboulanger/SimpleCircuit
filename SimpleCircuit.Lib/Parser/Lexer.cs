@@ -9,30 +9,31 @@ namespace SimpleCircuit.Parser
     /// <typeparam name="T">The token type.</typeparam>
     public abstract class Lexer<T> : ILexer<T>
     {
-        private readonly ReadOnlyMemory<char> _contents;
-        private int _line, _trivia = 0, _index = 0, _length = 0, _column = 1;
-        private TextLocation _triviaStart, _tokenStart;
-        private bool _isTrivia = true;
+        private readonly string _contents;
+        private int _triviaLine, _triviaColumn, _triviaIndex;
+        private int _tokenLine, _tokenColumn, _tokenIndex;
+        private int _line, _column, _index;
 
         /// <inheritdoc />
         public string Source { get; }
 
         /// <inheritdoc/>
-        public ReadOnlyMemory<char> Content => _contents[(_index-_length).._index];
+        public ReadOnlyMemory<char> NextContent => _contents.AsMemory(_tokenIndex, _index - _tokenIndex);
 
         /// <inheritdoc />
-        public Token Token => new(Source, _tokenStart, Content);
+        public ReadOnlyMemory<char> Content { get; private set; }
 
         /// <inheritdoc />
-        public Token TokenWithTrivia => new(Source, _triviaStart, _contents[(_index - _length - _trivia).._index]);
+        public Token NextToken => new(new(Source, _tokenLine, _tokenColumn), NextContent);
 
-        /// <summary>
-        /// Gets the current token type.
-        /// </summary>
-        public T Type { get; protected set; }
+        /// <inheritdoc />
+        public Token Token { get; private set; }
 
-        /// <inheritdoc/>
-        public bool HasTrivia => _trivia > 0;
+        /// <inheritdoc />
+        public T NextType { get; protected set; }
+
+        /// <inheritdoc />
+        public T Type { get; private set; }
 
         /// <summary>
         /// Gets the current character.
@@ -43,7 +44,7 @@ namespace SimpleCircuit.Parser
             {
                 if (_index >= _contents.Length)
                     return '\0';
-                return _contents.Span[_index];
+                return _contents[_index];
             }
         }
 
@@ -68,9 +69,10 @@ namespace SimpleCircuit.Parser
             Source = source;
             using (reader)
             {
-                _contents = reader.ReadToEnd().AsMemory();
+                _contents = reader.ReadToEnd();
             }
             _line = line;
+            _column = 1;
             Next();
         }
 
@@ -81,21 +83,44 @@ namespace SimpleCircuit.Parser
         /// <param name="netlist">The source.</param>
         /// <param name="source">The source.</param>
         /// <param name="line">The initial line number.</param>
-        protected Lexer(ReadOnlyMemory<char> netlist, string source = null, int line = 1)
+        protected Lexer(string netlist, string source = null, int line = 1)
         {
             Source = source;
             _contents = netlist;
             _line = line;
+            _column = 1;
             Next();
+            Next();
+        }
+
+        /// <summary>
+        /// Looks ahead some characters.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>Returns the character in the future.</returns>
+        protected char LookAhead(int offset = 1)
+        {
+            int index = _index + offset;
+            if (index >= _contents.Length)
+                return '\0';
+            return _contents[index];
         }
 
         /// <inheritdoc />
         public void Next()
         {
-            _length = 0;
-            _trivia = 0;
-            _triviaStart = new(_line, _column);
-            _isTrivia = true;
+            Token = NextToken;
+            Type = NextType;
+            Content = NextContent;
+
+            _triviaLine = _line;
+            _triviaColumn = _column;
+            _triviaIndex = _index;
+
+            _tokenLine = _line;
+            _tokenColumn = _column;
+            _tokenIndex = _index;
+
             ReadToken();
         }
 
@@ -159,43 +184,30 @@ namespace SimpleCircuit.Parser
             return false;
         }
 
-        /// <summary>
-        /// Reads contents as long as the token is one of the specified flags.
-        /// </summary>
-        /// <param name="flags">The flags to check.</param>
-        /// <param name="shouldNotIncludeTrivia">If <c>false</c>, trivia is read along with the tokens.</param>
-        /// <returns>The contents.</returns>
-        public Token ReadWhile(T flags, bool shouldNotIncludeTrivia = false)
+        /// <inheritdoc />
+        public bool Branch(T flag, string content, out Token token)
         {
-            // We include the current token
-            int startIndex = _index - _length;
-            var startToken = _tokenStart;
-
-            // Consume the first one
-            ReadOnlyMemory<char> result;
-            if (Check(flags))
+            if (Check(flag, content))
             {
+                token = Token;
                 Next();
-
-                // Keep reading as long as we don't have any trivia and the flag matches
-                while (Check(flags))
-                {
-                    if (shouldNotIncludeTrivia && HasTrivia)
-                        break;
-                    Next();
-                }
-
-                // Take the relevant memory chunk
-                result = _contents[startIndex..(_index - _trivia - _length)];
+                return true;
             }
-            else
+            token = default;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public bool Branch(T flag, string content, StringComparison comparison, out Token token)
+        {
+            if (Check(flag, content, comparison))
             {
-                // There is nothing here!
-                result = new();
+                token = Token;
+                Next();
+                return true;
             }
-
-            // The current token should not be considered
-            return new(Source, startToken, result);
+            token = default;
+            return false;
         }
 
         /// <summary>
@@ -215,14 +227,8 @@ namespace SimpleCircuit.Parser
         {
             if (_index < _contents.Length)
             {
-                if (_isTrivia)
-                {
-                    _isTrivia = false;
-                    _tokenStart = new(_line, _column);
-                }
-                _column++;
                 _index++;
-                _length++;
+                _column++;
             }
         }
 
@@ -235,11 +241,12 @@ namespace SimpleCircuit.Parser
         {
             if (_index < _contents.Length)
             {
-                _isTrivia = true;
-                _column++;
                 _index++;
-                _trivia += _length + 1;
-                _length = 0;
+                _column++;
+
+                _tokenIndex = _index;
+                _tokenLine = _line;
+                _tokenColumn = _column;
             }
         }
 
@@ -256,16 +263,16 @@ namespace SimpleCircuit.Parser
         public Tracker Track(bool includeTrivia = false)
         {
             if (includeTrivia)
-                return new(_index - _length - _trivia, _triviaStart);
-            return new(_index - _length, _tokenStart);
+                return new(_triviaIndex, new(Source, _triviaLine, _triviaColumn));
+            return new(_tokenIndex, new(Source, _tokenLine, _tokenColumn));
         }
 
         /// <inheritdoc />
         public Token GetTracked(Tracker tracker, bool includeCurrentToken = false)
         {
             if (includeCurrentToken)
-                return new(Source, tracker.Location, _contents[tracker.Index.._index]);
-            return new(Source, tracker.Location, _contents[tracker.Index..(_index - _length - _trivia)]);
+                return new(tracker.Location, _contents.AsMemory(tracker.Index, _index - tracker.Index));
+            return new(tracker.Location, _contents.AsMemory(tracker.Index, _triviaIndex - tracker.Index));
         }
     }
 }

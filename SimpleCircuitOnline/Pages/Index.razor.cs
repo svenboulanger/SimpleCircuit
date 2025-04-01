@@ -510,7 +510,7 @@ namespace SimpleCircuitOnline.Pages
                 // Parse the script
                 var lexer = SimpleCircuitLexer.FromString(code.AsMemory());
                 context.Options.RenderBounds = includeBounds;
-                Parser.Parse(lexer, context);
+                SimpleCircuitParser.Parse(lexer, context);
                 var ckt = context.Circuit;
 
                 // Include XML data

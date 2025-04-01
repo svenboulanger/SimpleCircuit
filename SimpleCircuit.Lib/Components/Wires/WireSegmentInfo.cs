@@ -10,12 +10,12 @@ namespace SimpleCircuit.Components.Wires
     /// Creates a new <see cref="WireSegmentInfo"/>.
     /// </remarks>
     /// <param name="source">The source.</param>
-    public class WireSegmentInfo(Token source)
+    public class WireSegmentInfo(TextLocation source)
     {
         /// <summary>
         /// Gets the source of the wire segment.
         /// </summary>
-        public Token Source { get; } = source;
+        public TextLocation Source { get; } = source;
 
         /// <summary>
         /// Gets the angle of the wire.
@@ -23,14 +23,9 @@ namespace SimpleCircuit.Components.Wires
         public Vector2 Orientation { get; set; }
 
         /// <summary>
-        /// Gets whether the wire segment has a fixed length.
+        /// Determines whether the wire segment can be longer.
         /// </summary>
-        public bool IsFixed { get; set; }
-
-        /// <summary>
-        /// Gets whether or not the wire segment is unconstrained.
-        /// </summary>
-        public bool IsUnconstrained { get; set; }
+        public bool IsMinimum { get; set; }
 
         /// <summary>
         /// Gets the length of the wire.

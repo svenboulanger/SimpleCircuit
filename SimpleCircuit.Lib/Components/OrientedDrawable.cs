@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool ConstrainOrientation(Vector2 p, Vector2 b, Token source, IDiagnosticHandler diagnostics)
+        public bool ConstrainOrientation(Vector2 p, Vector2 b, TextLocation source, IDiagnosticHandler diagnostics)
         {
             switch (_dof)
             {

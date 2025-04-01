@@ -21,10 +21,7 @@ namespace SimpleCircuit.Components.Annotations
     /// <param name="name">The name of the box.</param>
     public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
     {
-        private readonly HashSet<ComponentInfo> _componentInfos = [];
-        private readonly HashSet<WireInfo> _wireInfos = [];
-        private readonly HashSet<IDrawable> _components = [];
-        private readonly HashSet<Wire> _wires = [];
+        private readonly HashSet<IDrawable> _drawables = [];
         private Vector2 _topLeft, _bottomRight;
         private static readonly OffsetAnchorPoints<IBoxDrawable> _anchors = new(BoxLabelAnchorPoints.Default, 1);
 
@@ -33,6 +30,9 @@ namespace SimpleCircuit.Components.Annotations
 
         /// <inheritdoc />
         public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
 
         /// <inheritdoc />
         public int Order => 100;
@@ -114,19 +114,9 @@ namespace SimpleCircuit.Components.Annotations
         Vector2 IBoxDrawable.BottomRight => _bottomRight;
 
         /// <inheritdoc />
-        public void Add(ComponentInfo info)
+        public void Add(IDrawable drawable)
         {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-            _componentInfos.Add(info);
-        }
-
-        /// <inheritdoc />
-        public void Add(WireInfo info)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-            _wireInfos.Add(info);
+            _drawables.Add(drawable ?? throw new ArgumentNullException(nameof(drawable)));
         }
 
         /// <inheritdoc />
@@ -136,30 +126,6 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
-            switch (context.Mode)
-            {
-                case PreparationMode.Reset:
-                    _components.Clear();
-                    _wires.Clear();
-                    break;
-            }
-
-            // Find all component info items
-            foreach (var info in _componentInfos)
-            {
-                var drawable = info.Get(context);
-                if (drawable == null)
-                    return PresenceResult.GiveUp;
-                _components.Add(drawable);
-            }
-            foreach (var info in _wireInfos)
-            {
-                var wire = info.Get(context);
-                if (wire == null)
-                    return PresenceResult.GiveUp;
-                _wires.Add(wire);
-            }
-
             return PresenceResult.Success;
         }
 
@@ -170,7 +136,7 @@ namespace SimpleCircuit.Components.Annotations
         public void Render(IGraphicsBuilder builder)
         {
             // All components should have been rendered by now
-            if (_components.Count + _wires.Count > 0)
+            if (_drawables.Count > 0)
             {
                 builder.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
                 builder.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
@@ -202,15 +168,18 @@ namespace SimpleCircuit.Components.Annotations
         {
             // Compute the boxes
             var bounds = new ExpandableBounds();
-            foreach (var drawable in _components)
+            foreach (var drawable in _drawables)
             {
-                bounds.Expand(drawable.Bounds.Left - LeftMargin, drawable.Bounds.Top - TopMargin);
-                bounds.Expand(drawable.Bounds.Right + RightMargin, drawable.Bounds.Bottom + BottomMargin);
-            }
-            foreach (var wire in _wires)
-            {
-                bounds.Expand(wire.Bounds.Left - WireMargin, wire.Bounds.Top - WireMargin);
-                bounds.Expand(wire.Bounds.Right + WireMargin, wire.Bounds.Bottom + WireMargin);
+                if (drawable is Wire)
+                {
+                    bounds.Expand(drawable.Bounds.Left - WireMargin, drawable.Bounds.Top - WireMargin);
+                    bounds.Expand(drawable.Bounds.Right + WireMargin, drawable.Bounds.Bottom + WireMargin);
+                }
+                else
+                {
+                    bounds.Expand(drawable.Bounds.Left - LeftMargin, drawable.Bounds.Top - TopMargin);
+                    bounds.Expand(drawable.Bounds.Right + RightMargin, drawable.Bounds.Bottom + BottomMargin);
+                }
             }
 
             // Draw the rectangle that encompasses them all
@@ -245,78 +214,81 @@ namespace SimpleCircuit.Components.Annotations
                 }
                 expandable.Expand(point.Y);
             }
-            foreach (var drawable in _components)
+            foreach (var drawable in _drawables)
             {
-                var localBounds = drawable.Bounds;
-                AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Top - TopMargin));
-                AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Top - TopMargin));
-                AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Bottom + BottomMargin));
-                AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Bottom + BottomMargin));
-            }
-            foreach (var drawable in _wires)
-            {
-                if (drawable.Points.Count > 1)
+                if (drawable is Wire wire)
                 {
-                    bool isFirst = true;
-                    var last = drawable.Points[0];
-                    Vector2 lastNormal = default, lastPerpendicular = default, normal;
-                    for (int i = 1; i < drawable.Points.Count; i++)
+                    if (wire.Points.Count > 1)
                     {
-                        var current = drawable.Points[i];
-                        if ((current - last).IsZero())
-                            continue;
-                        normal = current - last;
-                        normal /= normal.Length;
-                        Vector2 perpendicular = normal.Perpendicular;
-                        if (isFirst)
+                        bool isFirst = true;
+                        var last = wire.Points[0];
+                        Vector2 lastNormal = default, lastPerpendicular = default, normal;
+                        for (int i = 1; i < wire.Points.Count; i++)
                         {
-                            isFirst = false;
-            
-                            // Add the two starting points now that we know the normal
-                            AddPoint(last - normal * WireStartMargin + perpendicular * WireMargin);
-                            AddPoint(last - normal * WireStartMargin - perpendicular * WireMargin);
-                        }
-                        else
-                        {
-                            // Add the two intermediate points
-                            double determinant = lastNormal.X * normal.Y - lastNormal.Y * normal.X;
-                            if (determinant.IsZero())
+                            var current = wire.Points[i];
+                            if ((current - last).IsZero())
+                                continue;
+                            normal = current - last;
+                            normal /= normal.Length;
+                            Vector2 perpendicular = normal.Perpendicular;
+                            if (isFirst)
                             {
-                                if ((lastNormal - normal).IsZero())
-                                    continue; // No change in direction
-                                else
-                                {
-                                    // Opposite direction
-                                    AddPoint(last + (-normal + perpendicular) * WireMargin);
-                                    AddPoint(last + (-normal - perpendicular) * WireMargin);
-                                }
+                                isFirst = false;
+
+                                // Add the two starting points now that we know the normal
+                                AddPoint(last - normal * WireStartMargin + perpendicular * WireMargin);
+                                AddPoint(last - normal * WireStartMargin - perpendicular * WireMargin);
                             }
                             else
                             {
-                                var matrix = new Matrix2(-lastNormal.X, normal.X, -lastNormal.Y, normal.Y);
-                                var inv = matrix.Inverse;
-                                var kl = inv * (lastPerpendicular - perpendicular);
-                                AddPoint(last + (lastNormal * kl.X + lastPerpendicular) * WireMargin);
-                                AddPoint(last - (lastNormal * kl.X + lastPerpendicular) * WireMargin);
+                                // Add the two intermediate points
+                                double determinant = lastNormal.X * normal.Y - lastNormal.Y * normal.X;
+                                if (determinant.IsZero())
+                                {
+                                    if ((lastNormal - normal).IsZero())
+                                        continue; // No change in direction
+                                    else
+                                    {
+                                        // Opposite direction
+                                        AddPoint(last + (-normal + perpendicular) * WireMargin);
+                                        AddPoint(last + (-normal - perpendicular) * WireMargin);
+                                    }
+                                }
+                                else
+                                {
+                                    var matrix = new Matrix2(-lastNormal.X, normal.X, -lastNormal.Y, normal.Y);
+                                    var inv = matrix.Inverse;
+                                    var kl = inv * (lastPerpendicular - perpendicular);
+                                    AddPoint(last + (lastNormal * kl.X + lastPerpendicular) * WireMargin);
+                                    AddPoint(last - (lastNormal * kl.X + lastPerpendicular) * WireMargin);
+                                }
                             }
+
+                            last = current;
+                            lastNormal = normal;
+                            lastPerpendicular = perpendicular;
                         }
-            
-                        last = current;
-                        lastNormal = normal;
-                        lastPerpendicular = perpendicular;
+
+                        // Complete the last two points
+                        AddPoint(last + lastNormal * WireEndMargin + lastPerpendicular * WireMargin);
+                        AddPoint(last + lastNormal * WireEndMargin - lastPerpendicular * WireMargin);
                     }
-            
-                    // Complete the last two points
-                    AddPoint(last + lastNormal * WireEndMargin + lastPerpendicular * WireMargin);
-                    AddPoint(last + lastNormal * WireEndMargin - lastPerpendicular * WireMargin);
+                    else if (wire.Points.Count == 1)
+                    {
+                        var pt = wire.Points[0];
+                        AddPoint(new Vector2(pt.X - WireMargin, pt.Y - WireMargin));
+                        AddPoint(new Vector2(pt.X + WireMargin, pt.Y - WireMargin));
+                        AddPoint(new Vector2(pt.X + WireMargin, pt.Y + WireMargin));
+                        AddPoint(new Vector2(pt.X - WireMargin, pt.Y + WireMargin));
+                    }
                 }
-                else if (drawable.Points.Count == 1)
+                else
                 {
-                    var pt = drawable.Points[0];
-                    AddPoint(new Vector2(pt.X - WireMargin, pt.Y - WireMargin));
-                    AddPoint(new Vector2(pt.X + WireMargin, pt.Y - WireMargin));
-                    AddPoint(new Vector2(pt.X + WireMargin, pt.Y + WireMargin));
-                    AddPoint(new Vector2(pt.X - WireMargin, pt.Y + WireMargin));
+                    var localBounds = drawable.Bounds;
+                    AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Top - TopMargin));
+                    AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Top - TopMargin));
+                    AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Bottom + BottomMargin));
+                    AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Bottom + BottomMargin));
                 }
             }
 

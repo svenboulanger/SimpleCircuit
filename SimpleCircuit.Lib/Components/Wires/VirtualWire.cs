@@ -18,15 +18,18 @@ namespace SimpleCircuit.Components.Wires
     /// <param name="segments">The wire segments.</param>
     /// <param name="wireToPin">The pin ending the virtual wire.</param>
     /// <param name="axis">The axis along which to align the items.</param>
-    public class VirtualWire(string name, PinInfo pinToWire, IEnumerable<WireSegmentInfo> segments, PinInfo wireToPin, Axis axis) : ICircuitSolverPresence
+    public class VirtualWire(string name, PinReference pinToWire, IEnumerable<WireSegmentInfo> segments, PinReference wireToPin, Axis axis) : ICircuitSolverPresence
     {
         private ILocatedPresence _start, _end;
-        private readonly PinInfo _startInfo = pinToWire, _endInfo = wireToPin;
+        private readonly PinReference _startInfo = pinToWire, _endInfo = wireToPin;
         private readonly List<WireSegmentInfo> _segments = segments?.ToList() ?? [];
         private readonly Axis _direction = axis;
 
         /// <inheritdoc />
         public string Name { get; } = name;
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; }
 
         /// <inheritdoc />
         public int Order => 1;
@@ -51,20 +54,20 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
 
-        private ILocatedPresence FindPin(IPrepareContext context, PinInfo pin, int defaultIndex)
+        private ILocatedPresence FindPin(IPrepareContext context, PinReference pin, int defaultIndex)
         {
             // Finding a pin for virtual wires works slightly different than normal:
             // If a pin is not named, then we actually want to refer to the origin of the component!
-            var drawable = pin.Component.Get(context);
-            if (drawable == null)
+            var drawable = pin.Drawable;
+            if (drawable is null)
                 return null;
 
-            if (pin.Name.Content.Length == 0)
+            if (pin.Name.Length == 0)
             {
                 // We are referring to the origin of the component, not a pin
                 if (drawable is not ILocatedDrawable ld)
                 {
-                    context.Diagnostics?.Post(pin.Component.Source, ErrorCodes.ComponentWithoutLocation, pin.Component.Source.Content);
+                    context.Diagnostics?.Post(pin.Drawable.Sources.FirstOrDefault(), ErrorCodes.ComponentWithoutLocation, pin.Drawable.Sources.FirstOrDefault());
                     return null;
                 }
                 return ld;
@@ -101,12 +104,7 @@ namespace SimpleCircuit.Components.Wires
                     for (int i = 0; i < _segments.Count; i++)
                     {
                         var segment = _segments[i];
-                        if (segment.IsUnconstrained)
-                        {
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnconstrainedSegment);
-                            return PresenceResult.GiveUp;
-                        }
-                        else if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
+                        if (segment.Orientation.X.IsZero() && segment.Orientation.Y.IsZero())
                         {
                             context.Diagnostics?.Post(segment.Source, ErrorCodes.VirtualWireUnknownSegment);
                             return PresenceResult.GiveUp;
@@ -165,11 +163,11 @@ namespace SimpleCircuit.Components.Wires
                         if (doX)
                         {
                             // Align along X-axis
-                            if (segment.IsFixed)
+                            if (!segment.IsMinimum)
                             {
                                 if (!context.Offsets.Group(x, tx, segment.Orientation.X * segment.Length))
                                 {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.X * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.X * segment.Length), segment);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -177,7 +175,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(x, tx, 0.0))
                                 {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -185,11 +183,11 @@ namespace SimpleCircuit.Components.Wires
                         if (doY)
                         {
                             // Align along Y-axis
-                            if (segment.IsFixed)
+                            if (!segment.IsMinimum)
                             {
                                 if (!context.Offsets.Group(y, ty, segment.Orientation.Y * segment.Length))
                                 {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(segment.Orientation.Y * segment.Length), segment);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -197,7 +195,7 @@ namespace SimpleCircuit.Components.Wires
                             {
                                 if (!context.Offsets.Group(y, ty, 0.0))
                                 {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment.Source.Content);
+                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, 0.0, segment);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -237,7 +235,7 @@ namespace SimpleCircuit.Components.Wires
                 var toX = context.GetOffset(x);
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
-                if (!segment.IsFixed)
+                if (segment.IsMinimum)
                 {
                     if (doY && segment.Orientation.X.IsZero() && fromY.Representative != toY.Representative)
                         MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, segment.Orientation.Y * segment.Length);

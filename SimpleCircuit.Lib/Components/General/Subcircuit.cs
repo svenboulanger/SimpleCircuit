@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components
     {
         private readonly string _key;
         private readonly GraphicalCircuit _circuit;
-        private readonly IEnumerable<PinInfo> _pins;
+        private readonly IEnumerable<PinReference> _pins;
 
         /// <inheritdoc />
         public IEnumerable<string> Keys => new[] { _key };
@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components
         /// <param name="pins">The pins.</param>
         /// <param name="diagnostics">The diagnostic handler.</param>
         /// <exception cref="ArgumentNullException">Thrown if an argument is <c>null</c>.</exception>
-        public Subcircuit(string key, GraphicalCircuit definition, IEnumerable<PinInfo> pins, IDiagnosticHandler diagnostics)
+        public Subcircuit(string key, GraphicalCircuit definition, IEnumerable<PinReference> pins, IDiagnosticHandler diagnostics)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
@@ -59,10 +59,10 @@ namespace SimpleCircuit.Components
         /// <param name="name">The name.</param>
         /// <param name="definition">The graphical circuit definition.</param>
         /// <param name="pins">The ports.</param>
-        private class Instance(string type, string name, GraphicalCircuit definition, IEnumerable<PinInfo> pins) : ScaledOrientedDrawable(name)
+        private class Instance(string type, string name, GraphicalCircuit definition, IEnumerable<PinReference> pins) : ScaledOrientedDrawable(name)
         {
             private readonly GraphicalCircuit _ckt = definition;
-            private readonly List<PinInfo> _pins = pins.ToList();
+            private readonly List<PinReference> _pins = pins.ToList();
 
             /// <inheritdoc />
             public override string Type { get; } = type.ToLower();
@@ -90,13 +90,9 @@ namespace SimpleCircuit.Components
                             var pin = pinInfo.GetOrCreate(context.Diagnostics, -1);
                             if (pin == null)
                             {
-                                context.Diagnostics?.Post(pinInfo.Name, ErrorCodes.CouldNotFindPin, pinInfo.Name.Content, pinInfo.Component.Fullname);
+                                context.Diagnostics?.Post(pinInfo.Source, ErrorCodes.CouldNotFindPin, pinInfo.Name, pinInfo.Drawable.Name);
                                 return PresenceResult.GiveUp;
                             }
-
-                            // Component name as pin name
-                            if (takenNames.Add(pinInfo.Component.Source.Content.ToString()))
-                                pinNames.Add(pinInfo.Component.Source.Content.ToString());
 
                             // Shorthand notation for DIR
                             if (pin.Name.StartsWith("DIR") && pin.Name.Length > 3)

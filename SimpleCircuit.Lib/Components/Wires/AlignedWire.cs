@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,9 @@ namespace SimpleCircuit.Components.Wires
 
         /// <inheritdoc />
         public string Name { get; }
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; }
 
         /// <inheritdoc />
         public int Order => 2;

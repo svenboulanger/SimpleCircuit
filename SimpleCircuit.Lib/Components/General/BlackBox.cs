@@ -41,6 +41,9 @@ namespace SimpleCircuit.Components
             public VariantSet Variants { get; } = [];
 
             /// <inheritdoc />
+            public List<TextLocation> Sources { get; } = [];
+
+            /// <inheritdoc />
             public int Order => 0;
 
             /// <inheritdoc />

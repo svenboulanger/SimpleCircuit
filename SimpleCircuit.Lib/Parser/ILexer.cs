@@ -18,14 +18,9 @@ namespace SimpleCircuit.Parser
         public Token Token { get; }
 
         /// <summary>
-        /// Gets the token including the trivia.
+        /// Gets the next token.
         /// </summary>
-        public Token TokenWithTrivia { get; }
-
-        /// <summary>
-        /// Determines whether the current token has trivia leading up to it.
-        /// </summary>
-        bool HasTrivia { get; }
+        public Token NextToken { get; }
 
         /// <summary>
         /// Goes to the next token.
@@ -38,6 +33,16 @@ namespace SimpleCircuit.Parser
     /// </summary>
     public interface ILexer<T>
     {
+        /// <summary>
+        /// Gets the next token type.
+        /// </summary>
+        public T NextType { get; }
+
+        /// <summary>
+        /// Gets the current token type.
+        /// </summary>
+        public T Type { get; }
+
         /// <summary>
         /// Checks whether the current token has flags.
         /// </summary>
@@ -72,11 +77,36 @@ namespace SimpleCircuit.Parser
         /// The contents of the matched token is returned.
         /// </summary>
         /// <param name="flag">The flag.</param>
-        /// <param name="content">The content of the matched token.</param>
+        /// <param name="token">The matched token.</param>
         /// <returns>
         ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
         /// </returns>
         public bool Branch(T flag, out Token token);
+
+        /// <summary>
+        /// Checks whether current token matches the flag and content and consumes it
+        /// if it matches.
+        /// </summary>
+        /// <param name="flag">The flag.</param>
+        /// <param name="content">The content to match.</param>
+        /// <param name="token">The matched token.</param>
+        /// <returns>
+        ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Branch(T flag, string content, out Token token);
+
+        /// <summary>
+        /// Checks whether current token matches the flag and content and consumes it
+        /// if it matches.
+        /// </summary>
+        /// <param name="flag">The flag.</param>
+        /// <param name="content">The content to match.</param>
+        /// <param name="comparison">The type of comparison for the content.</param>
+        /// <param name="token">The matched token.</param>
+        /// <returns>
+        ///     <c>true</c> if the current token matched and was consumed; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Branch(T flag, string content, StringComparison comparison, out Token token);
 
         /// <summary>
         /// Creates a tracker that allows to track combined tokens using <see cref="GetTracked(Tracker, bool)"/>.

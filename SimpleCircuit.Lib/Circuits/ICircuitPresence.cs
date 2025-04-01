@@ -1,4 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Parser;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
 {
@@ -13,6 +15,11 @@ namespace SimpleCircuit.Components
         public string Name { get; }
 
         /// <summary>
+        /// Gets a list that can be used to store where the presence is referenced.
+        /// </summary>
+        public List<TextLocation> Sources { get; }
+
+        /// <summary>
         /// Gets the order in which the presence needs to be executed.
         /// </summary>
         public int Order { get; }
@@ -20,7 +27,6 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Prepares the circuit presence for resolving a graphical circuit.
         /// </summary>
-        /// <param name="circuit">The circuit.</param>
         /// <param name="context">The preparation context.</param>
         /// <returns>
         ///     Returns the result of the preparation.

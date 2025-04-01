@@ -1,5 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Parser;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Pins
 {
@@ -13,6 +15,9 @@ namespace SimpleCircuit.Components.Pins
 
         /// <inheritdoc />
         public string Name { get; }
+
+        /// <inheritdoc />
+        public List<TextLocation> Sources { get; } = [];
 
         /// <inheritdoc />
         public string Description { get; }
