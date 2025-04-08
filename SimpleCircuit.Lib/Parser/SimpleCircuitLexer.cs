@@ -82,9 +82,21 @@ namespace SimpleCircuit.Parser
                         NextType = TokenType.EndOfContent;
                         break;
 
-                    case '.':
                     case '-':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '-')
+                            ContinueToken();
+                        break;
+
                     case '+':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '+')
+                            ContinueToken();
+                        break;
+
+                    case '.':
                     case '(':
                     case ')':
                     case '[':

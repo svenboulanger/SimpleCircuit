@@ -16,7 +16,8 @@ namespace SimpleCircuit.Evaluator
     public class EvaluationContext
     {
         private readonly Stack<string> _sections = new();
-        private readonly Dictionary<string, int> _anonymousCounters = [];
+        private readonly Stack<Dictionary<string, int>> _anonymousCounterStack = [];
+        private Dictionary<string, int> _anonymousCounters = [];
 
         /// <summary>
         /// Gets the options.
@@ -29,9 +30,9 @@ namespace SimpleCircuit.Evaluator
         public IDiagnosticHandler Diagnostics { get; set; }
 
         /// <summary>
-        /// Gets or sets the parameters.
+        /// Gets or sets the current scope.
         /// </summary>
-        public Dictionary<string, SyntaxNode> Parameters { get; set; }
+        public Scope CurrentScope { get; set; }
 
         /// <summary>
         /// Gets the factory for components.
@@ -42,6 +43,11 @@ namespace SimpleCircuit.Evaluator
         /// Gets the circuit.
         /// </summary>
         public GraphicalCircuit Circuit { get; }
+
+        /// <summary>
+        /// Gets a dictionary of section definitions.
+        /// </summary>
+        public Dictionary<string, SectionDefinitionNode> SectionDefinitions { get; } = [];
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
@@ -55,6 +61,7 @@ namespace SimpleCircuit.Evaluator
             Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
             Options = parsingContext.Options;
             Diagnostics = parsingContext.Diagnostics;
+            CurrentScope = new();
         }
 
         /// <summary>
@@ -143,6 +150,29 @@ namespace SimpleCircuit.Evaluator
                 _anonymousCounters[":virtual:"] = 2;
             }
             return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+
+        /// <summary>
+        /// Pushes/starts a new section.
+        /// </summary>
+        /// <param name="sectionName">The section.</param>
+        public void StartSection(string sectionName)
+        {
+            _sections.Push(sectionName);
+            CurrentScope = new Scope(CurrentScope);
+            _anonymousCounterStack.Push(_anonymousCounters);
+            _anonymousCounters = [];
+        }
+
+        /// <summary>
+        /// Pops/ends the last started section.
+        /// </summary>
+        /// <returns>The section name that was closed.</returns>
+        public string EndSection()
+        {
+            CurrentScope = CurrentScope.ParentScope;
+            _anonymousCounters = _anonymousCounterStack.Pop();
+            return _sections.Pop();
         }
     }
 }

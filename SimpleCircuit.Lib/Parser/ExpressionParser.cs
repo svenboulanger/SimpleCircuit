@@ -184,6 +184,8 @@ namespace SimpleCircuit.Parser
                     "+" => UnaryOperatorTypes.Positive,
                     "-" => UnaryOperatorTypes.Negative,
                     "!" => UnaryOperatorTypes.Invert,
+                    "++" => UnaryOperatorTypes.PrefixIncrement,
+                    "--" => UnaryOperatorTypes.PrefixDecrement,
                     _ => UnaryOperatorTypes.None
                 };
 
@@ -197,7 +199,7 @@ namespace SimpleCircuit.Parser
                         context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
                         return false;
                     }
-                    result = new UnaryNode(token, arg, UnaryOperatorTypes.Positive);
+                    result = new UnaryNode(token, arg, type);
                     return true;
                 }
             }
@@ -239,8 +241,11 @@ namespace SimpleCircuit.Parser
                             args.Add(arg);
                         }
                     }
-
                 }
+                else if (lexer.Branch(TokenType.Punctuator, "++", out var op))
+                    result = new UnaryNode(op, result, UnaryOperatorTypes.PostfixIncrement);
+                else if (lexer.Branch(TokenType.Punctuator, "--", out op))
+                    result = new UnaryNode(op, result, UnaryOperatorTypes.PostfixDecrement);
                 else
                     return true;
             }

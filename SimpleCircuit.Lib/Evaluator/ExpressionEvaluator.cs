@@ -261,9 +261,9 @@ namespace SimpleCircuit.Evaluator
 
         private static object Evaluate(IdentifierNode identifier, EvaluationContext context)
         {
-            if (context.Parameters.TryGetValue(identifier.Name, out var node))
-                return Evaluate(node, context);
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Location, SeverityLevel.Error, "ERR", "Cannot find parameter '{0}'".FormatString(identifier.Name)));
+            if (context.CurrentScope.TryGetValue(identifier.Name, out var result))
+                return result;
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Location, SeverityLevel.Error, "ERR", $"Could not find variable '{identifier.Name}'"));
             return null;
         }
         private static object Evaluate(NumberNode number, EvaluationContext context)
@@ -272,23 +272,15 @@ namespace SimpleCircuit.Evaluator
             => quoted.Value.ToString();
         private static object Evaluate(TernaryNode ternary, EvaluationContext context)
         {
-            var condition = Evaluate(ternary.Left, context);
+            object condition = Evaluate(ternary.Left, context);
             if (condition is null)
                 return null;
-            if (condition is double d)
-            {
-                if (d.Equals(0.0))
-                    return Evaluate(ternary.Middle, context);
-                else
-                    return Evaluate(ternary.Right, context);
-            }
+            if (condition is bool b)
+                return b ? Evaluate(ternary.Middle, context) : Evaluate(ternary.Right, context);
+            else if (condition is double d)
+                return !d.IsZero() ? Evaluate(ternary.Middle, context) : Evaluate(ternary.Right, context);
             else
-            {
-                if (string.IsNullOrWhiteSpace(condition.ToString()))
-                    return Evaluate(ternary.Middle, context);
-                else
-                    return Evaluate(ternary.Right, context);
-            }
+                return !string.IsNullOrWhiteSpace(condition.ToString()) ? Evaluate(ternary.Middle, context) : Evaluate(ternary.Right, context);
         }
         private static object Evaluate(UnaryNode unary, EvaluationContext context)
         {
@@ -317,6 +309,102 @@ namespace SimpleCircuit.Evaluator
                             return d.Equals(0.0) ? 1.0 : 0.0;
                         context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Location, SeverityLevel.Error, "ERR", "Cannot invert non-numbers"));
                         return null;
+                    }
+
+                case UnaryOperatorTypes.PrefixDecrement:
+                    {
+                        if (unary.Argument is not IdentifierNode identifier)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only decrement variable"));
+                            return null;
+                        }
+                        switch (arg)
+                        {
+                            case double d:
+                                d--;
+                                context.CurrentScope[identifier.Name] = d;
+                                return d;
+
+                            case int i:
+                                i--;
+                                context.CurrentScope[identifier.Name] = i;
+                                return i;
+
+                            default:
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot decrement type {arg.GetType().Name}"));
+                                return null;
+                        }
+                    }
+
+                case UnaryOperatorTypes.PrefixIncrement:
+                    {
+                        if (unary.Argument is not IdentifierNode identifier)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only increment variable"));
+                            return null;
+                        }
+                        switch (arg)
+                        {
+                            case double d:
+                                d++;
+                                context.CurrentScope[identifier.Name] = d;
+                                return d;
+
+                            case int i:
+                                i++;
+                                context.CurrentScope[identifier.Name] = i;
+                                return i;
+
+                            default:
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot increment type {arg.GetType().Name}"));
+                                return null;
+                        }
+                    }
+
+                case UnaryOperatorTypes.PostfixDecrement:
+                    {
+                        if (unary.Argument is not IdentifierNode identifier)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only decrement variable"));
+                            return null;
+                        }
+                        switch (arg)
+                        {
+                            case double d:
+                                context.CurrentScope[identifier.Name] = d - 1.0;
+                                return d;
+
+                            case int i:
+                                context.CurrentScope[identifier.Name] = i - 1;
+                                return i;
+
+                            default:
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot decrement type {arg.GetType().Name}"));
+                                return null;
+                        }
+                    }
+
+                case UnaryOperatorTypes.PostfixIncrement:
+                    {
+                        if (unary.Argument is not IdentifierNode identifier)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only increment variable"));
+                            return null;
+                        }
+                        switch (arg)
+                        {
+                            case double d:
+                                context.CurrentScope[identifier.Name] = d + 1.0;
+                                return d;
+
+                            case int i:
+                                context.CurrentScope[identifier.Name] = i + 1;
+                                return i;
+
+                            default:
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot increment type {arg.GetType().Name}"));
+                                return null;
+                        }
                     }
 
                 default:

@@ -39,6 +39,10 @@ namespace SimpleCircuit.Parser.Nodes
 
         /// <inheritdoc />
         public override string ToString()
-            => $"{Operator.Content}{Argument}";
+            => Type switch
+            {
+                UnaryOperatorTypes.PostfixDecrement or UnaryOperatorTypes.PostfixIncrement => $"{Argument}{Operator.Content}",
+                _ => $"{Operator.Content}{Argument}"
+            };
     }
 }

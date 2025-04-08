@@ -7,6 +7,7 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -38,6 +39,8 @@ namespace SimpleCircuit.Evaluator
                 case ComponentChain chain: Evaluate(chain, context); break;
                 case VirtualChainNode virtualChain: Evaluate(virtualChain, context); break;
                 case ControlPropertyNode controlProperty: Evaluate(controlProperty, context); break;
+                case ParameterDefinitionNode parameterDefinition: Evaluate(parameterDefinition, context); break;
+                case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -209,6 +212,79 @@ namespace SimpleCircuit.Evaluator
             }
 
             StorePropertiesAndVariants(key, context.Options, controlProperty.Properties, context);
+        }
+        private static void Evaluate(ParameterDefinitionNode parameterDefinition, EvaluationContext context)
+            => context.CurrentScope[parameterDefinition.Name] = ExpressionEvaluator.Evaluate(parameterDefinition.Value, context);
+        private static void Evaluate(SectionDefinitionNode sectionDefinition, EvaluationContext context)
+        {
+            // First determine the name of the section
+            string name = sectionDefinition.Name.Content.ToString();
+
+            // If there is an identifier in the properties, let's try to find a template
+            var template = sectionDefinition;
+            if (sectionDefinition.Properties.Length > 0)
+            {
+                if (sectionDefinition.Properties[0] is IdentifierNode sectionName)
+                {
+                    // Try to find the template
+                    if (!context.SectionDefinitions.TryGetValue(sectionName.Name, out template))
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(sectionName.Token, SeverityLevel.Error, "ERR", $"Cannot find any section with the name '{sectionName.Name}'"));
+                        return;
+                    }
+                }
+            }
+
+            // Setup the right context for evaluating the section
+            context.StartSection(name);
+            foreach (var property in template.Properties)
+            {
+                // Try to parse a property and update the local scope
+                if (property is not BinaryNode assignment ||
+                    assignment.Type != BinaryOperatorTypes.Assignment ||
+                    assignment.Left is not IdentifierNode propertyName)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                    return;
+                }
+
+                // Update the value
+                object value = EvaluateExpression(assignment.Right, context);
+                if (value is null)
+                    return;
+                context.CurrentScope[propertyName.Name] = value;
+            }
+
+            // If the template is not the same as the current section, override the default properties from before
+            if (!ReferenceEquals(sectionDefinition, template))
+            {
+                // Ignore the first property since that is supposed to be the name of the template
+                for (int i = 1; i < sectionDefinition.Properties.Length; i++)
+                {
+                    var property = sectionDefinition.Properties[i];
+                    if (property is not BinaryNode assignment ||
+                        assignment.Type != BinaryOperatorTypes.Assignment ||
+                        assignment.Left is not IdentifierNode propertyName)
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                        return;
+                    }
+
+                    // Update the value
+                    object value = EvaluateExpression(assignment.Right, context);
+                    if (value is null)
+                        return;
+                    context.CurrentScope[propertyName.Name] = value;
+                }
+            }
+
+            // Execute the statements under a new section
+            Evaluate(template.Statements, context);
+            context.EndSection();
+
+            // Register the section as a template if there was no base template given
+            if (ReferenceEquals(sectionDefinition, template))
+                context.SectionDefinitions[name] = sectionDefinition;
         }
 
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)
@@ -630,7 +706,7 @@ namespace SimpleCircuit.Evaluator
         {
             switch (expression)
             {
-                case BracketNode bracket when bracket.Left.Content.Span[0] == '{':
+                case BracketNode bracket when bracket.Left.Content.ToString() == "{":
                     return ExpressionEvaluator.Evaluate(bracket.Value, context);
 
                 default:

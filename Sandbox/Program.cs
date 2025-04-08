@@ -11,8 +11,14 @@ namespace Sandbox
     {
         static void Main()
         {
-            string script = @".property A diffout diffin
-A <r> A(scale=2)";
+            string script = @"
+.section A expr=""hello""
+GND <u> R1(label1={expr})
+.ends
+
+.section B A expr=""world""
+
+";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
@@ -20,7 +26,7 @@ A <r> A(scale=2)";
             {
                 Diagnostics = logger
             };
-            SimpleCircuitParser.ParseStatements(lexer, context, out var statements);
+            SimpleCircuitParser.Parse(lexer, context, out var statements);
             foreach (var stmt in statements)
                 Console.WriteLine(stmt.ToString());
 

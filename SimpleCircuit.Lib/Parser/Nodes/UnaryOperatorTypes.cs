@@ -9,5 +9,9 @@
         Positive,
         Negative,
         Invert,
+        PrefixIncrement,
+        PostfixIncrement,
+        PrefixDecrement,
+        PostfixDecrement,
     }
 }

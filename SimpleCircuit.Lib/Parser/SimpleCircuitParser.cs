@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Diagrams.Modeling;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
 using SpiceSharp;
 using System;
@@ -23,13 +24,23 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
-        public static bool ParseStatements(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
+        public static bool Parse(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
+        {
+            if (!ParseStatements(lexer, context, out result))
+                return false;
+            if (lexer.Type != TokenType.EndOfContent)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Unrecognized statement"));
+                return false;
+            }
+            return true;
+        }
+        private static bool ParseStatements(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
         {
             result = [];
-            bool success = true;
-            while (lexer.Type != TokenType.EndOfContent)
+            while (true)
             {
-                // Ignore any newlines
+                // Skip any empty lines
                 while (lexer.Type == TokenType.Newline || lexer.Type == TokenType.Comment)
                     lexer.Next();
                 if (lexer.Type == TokenType.EndOfContent)
@@ -37,17 +48,15 @@ namespace SimpleCircuit.Parser
 
                 // Parse a statement
                 if (!ParseStatement(lexer, context, out var statement))
-                {
-                    success = false;
-                    while (lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
-                        lexer.Next();
-                }
-                else if (statement is not null)
-                    result.Add(statement);
+                    return false;
+                if (statement is null)
+                    break;
+                result.Add(statement);
             }
-            return success;
+            if (result.Count == 0)
+                result = null;
+            return true;
         }
-
         private static bool ParseStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             // Try parsing a component chain
@@ -658,7 +667,7 @@ namespace SimpleCircuit.Parser
                     var expression = new LiteralNode(word);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
-                else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
+                else if (!lexer.HasTrivia && lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                 {
                     // expression
                     if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
@@ -684,6 +693,8 @@ namespace SimpleCircuit.Parser
                     expression = new BracketNode(bracketLeft, expression, bracketRight);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
+                else if (!lexer.HasTrivia && lexer.Branch(TokenType.Punctuator, "/", out var slash))
+                    result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(slash));
                 else
                     return true;
             }
@@ -820,16 +831,41 @@ namespace SimpleCircuit.Parser
             if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == "." &&
                 lexer.NextType == TokenType.Word && lexer.NextHasTrivia == false)
             {
-                lexer.Next(); // '.'
-                switch (lexer.Content.ToString())
+                
+                switch (lexer.NextContent.ToString())
                 {
                     case "variant":
                     case "variants":
                     case "property":
                     case "properties":
-                        lexer.Next();
+                        lexer.Next(); // '.'
+                        lexer.Next(); // the control statement word
                         if (!ParseControlPropertyStatement(lexer, context, out result))
                             return false;
+                        break;
+
+                    case "param":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'param'
+                        if (!ParseParameterDefinition(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected parameter definition"));
+                            return false;
+                        }
+                        break;
+
+                    case "section":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'section'
+                        if (!ParseSectionDefinition(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected section definition"));
+                            return false;
+                        }
                         break;
 
                     default:
@@ -852,6 +888,80 @@ namespace SimpleCircuit.Parser
                 return false;
             result = new ControlPropertyNode(keyToken, properties);
             return true;
+        }
+        private static bool ParseParameterDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            if (lexer.Branch(TokenType.Word, out var identifier))
+            {
+                if (!lexer.Branch(TokenType.Punctuator, "="))
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a '='"));
+                    return false;
+                }
+                if (!ParseValueOrExpression(lexer, context, out var value))
+                    return false;
+                if (value is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a value"));
+                    return false;
+                }
+                result = new ParameterDefinitionNode(identifier, value);
+            }
+            return true;
+        }
+        private static bool ParseSectionDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Section name
+            if (!lexer.Branch(TokenType.Word, out var nameToken))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a section name"));
+                return false;
+            }
+
+            // Expected properties
+            if (!ParsePropertyList(lexer, context, out var propertyList))
+                return false;
+
+            // If the properties indicate a templated section, don't try to look for statements
+            if (propertyList is not null && propertyList.Count > 0 && propertyList[0] is IdentifierNode)
+            {
+                result = new SectionDefinitionNode(nameToken, propertyList, null);
+                return true;
+            }
+
+            // Start the expressions
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                return false;
+            }
+
+            // Parse the statements
+            if (!ParseStatements(lexer, context, out var statements))
+                return false;
+
+            // Expect a .ends
+            if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")
+            {
+                if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
+                {
+                    switch (lexer.NextContent.ToString())
+                    {
+                        case "ends":
+                        case "endsection":
+                            lexer.Next(); // '.'
+                            lexer.Next(); // 'ends'
+
+                            result = new SectionDefinitionNode(nameToken, propertyList, statements);
+                            return true;
+                    }
+                }
+            }
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endsection'"));
+            return false;
         }
     }
 }
