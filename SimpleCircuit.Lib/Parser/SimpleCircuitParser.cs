@@ -32,6 +32,8 @@ namespace SimpleCircuit.Parser
                 // Ignore any newlines
                 while (lexer.Type == TokenType.Newline || lexer.Type == TokenType.Comment)
                     lexer.Next();
+                if (lexer.Type == TokenType.EndOfContent)
+                    break;
 
                 // Parse a statement
                 if (!ParseStatement(lexer, context, out var statement))
@@ -39,14 +41,8 @@ namespace SimpleCircuit.Parser
                     success = false;
                     while (lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
                         lexer.Next();
-                }    
-                else if (statement is null)
-                {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected statement"));
-                    while (lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
-                        lexer.Next();
                 }
-                else
+                else if (statement is not null)
                     result.Add(statement);
             }
             return success;
@@ -55,7 +51,19 @@ namespace SimpleCircuit.Parser
         private static bool ParseStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             // Try parsing a component chain
-            if (!ParseChain(lexer, context, out result))
+            if (!ParseComponentChain(lexer, context, out result))
+                return false;
+            if (result is not null)
+                return true;
+
+            // Try parsing a virtual chain
+            if (!ParseVirtualChain(lexer, context, out result))
+                return false;
+            if (result is not null)
+                return true;
+
+            // Try parsing a control statement
+            if (!ParseControlStatement(lexer, context, out result))
                 return false;
             if (result is not null)
                 return true;
@@ -70,20 +78,24 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
-        public static bool ParseChain(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        public static bool ParseComponentChain(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
+            result = null;
             List<SyntaxNode> items = [];
-
-            // PinNamePin
-            if (!ParsePinNamePin(lexer, context, out result))
-                return false;
-            if (result is null)
-                return true;
-            items.Add(result);
 
             // Alternating wires and components
             while (true)
             {
+                // Try parsing a component
+                if (!ParsePinNamePin(lexer, context, out var item))
+                    return false;
+                if (item is not null)
+                {
+                    items.Add(item);
+                    continue;
+                }
+
+                // Try parsing a wire
                 if (lexer.Branch(TokenType.Punctuator, "<"))
                 {
                     // Parse wire
@@ -105,16 +117,11 @@ namespace SimpleCircuit.Parser
                     }
 
                     items.Add(wire);
-
-                    // Possibly, another pin-name-pin
-                    if (!ParsePinNamePin(lexer, context, out var next))
-                        return false;
-                    if (next is null)
-                        break;
-                    items.Add(next);
+                    continue;
                 }
-                else
-                    break;
+
+                // There doesn't seem to be anything
+                break;
             }
 
             if (items.Count > 0)
@@ -146,7 +153,6 @@ namespace SimpleCircuit.Parser
                     items.Add(arg);
             }
         }
-
         private static bool ParseWireItem(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             // Wire direction
@@ -181,19 +187,18 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.Branch(TokenType.Punctuator, "+", out var op))
                 {
-                    result = new Unary(op, new IdentifierNode(lexer.Token), UnaryOperatorTypes.Positive);
+                    result = new UnaryNode(op, new IdentifierNode(lexer.Token), UnaryOperatorTypes.Positive);
                     lexer.Next();
                 }
                 else if (lexer.Branch(TokenType.Punctuator, "-", out op))
                 {
-                    result = new Unary(op, new IdentifierNode(lexer.Token), UnaryOperatorTypes.Negative);
+                    result = new UnaryNode(op, new IdentifierNode(lexer.Token), UnaryOperatorTypes.Negative);
                     lexer.Next();
                 }
             }
 
             return true;
         }
-
         private static bool ParseWireDirection(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
@@ -262,7 +267,6 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-
         private static bool ParseDistance(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
@@ -274,7 +278,7 @@ namespace SimpleCircuit.Parser
                 lexer.Next();
                 if (!ParseValueOrExpression(lexer, context, out var distance))
                     return false;
-                result = new Minimum(distance, plus.Location);
+                result = new MinimumNode(distance, plus.Location);
             }
             else
             {
@@ -282,6 +286,117 @@ namespace SimpleCircuit.Parser
                     return false;
                 result = distance;
             }
+            return true;
+        }
+
+        /// <summary>
+        /// Parses a virtual chain.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="context">The parsing context.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
+        public static bool ParseVirtualChain(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            List<SyntaxNode> items = [];
+
+            // '('
+            if (lexer.Branch(TokenType.Punctuator, "(", out var bracketLeft))
+            {
+                // The constraint flags
+                var flags = VirtualChainConstraints.None;
+                if (lexer.Branch(TokenType.Word, "x", out var constraints))
+                    flags = VirtualChainConstraints.X;
+                else if (lexer.Branch(TokenType.Word, "y", out constraints))
+                    flags = VirtualChainConstraints.Y;
+                else if (lexer.Branch(TokenType.Word, "xy", out constraints))
+                    flags = VirtualChainConstraints.XY;
+                else
+                    flags = VirtualChainConstraints.XY;
+
+                // Parse the virtual chain
+                while (true)
+                {
+                    // Virtual component pin
+                    if (!ParsePinVirtualNamePin(lexer, context, out var item))
+                        return false;
+                    if (item is not null)
+                    {
+                        items.Add(item);
+                        continue;
+                    }
+
+                    // Try parsing a virtual wire
+                    if (lexer.Branch(TokenType.Punctuator, "<"))
+                    {
+                        // Parse wire
+                        if (!ParseVirtualWire(lexer, context, out var wire))
+                            return false;
+                        if (wire is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected wire"));
+                            lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
+                            return false;
+                        }
+
+                        // '>'
+                        if (!lexer.Branch(TokenType.Punctuator, ">"))
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '>'"));
+                            lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
+                            return false;
+                        }
+
+                        items.Add(wire);
+                        continue;
+                    }
+
+                    break;
+                }
+
+                // ')'
+                if (!lexer.Branch(TokenType.Punctuator, ")", out var bracketRight))
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected ')'"));
+                    result = null;
+                    return false;
+                }
+                if (items.Count > 0)
+                    result = new VirtualChainNode(bracketLeft, constraints, items, bracketRight, flags);
+            }
+            return true;
+        }
+
+        private static bool ParseVirtualWire(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            // Wire item
+            List<SyntaxNode> items = [];
+
+            while (true)
+            {
+                if (!ParseVirtualWireItem(lexer, context, out var arg))
+                {
+                    result = null;
+                    return false;
+                }
+                if (arg is null)
+                {
+                    if (items.Count > 0)
+                        result = new WireNode(items);
+                    else
+                        result = null;
+                    return true;
+                }
+                else
+                    items.Add(arg);
+            }
+        }
+        private static bool ParseVirtualWireItem(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            // Wire direction
+            if (!ParseWireDirection(lexer, context, out result))
+                return false;
             return true;
         }
 
@@ -334,7 +449,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 }
                 if (properties is not null)
-                    result = new PropertyList(result, properties);
+                    result = new PropertyListNode(result, properties);
                 if (!lexer.Branch(TokenType.Punctuator, ")"))
                 {
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected property or ')'"));
@@ -372,7 +487,81 @@ namespace SimpleCircuit.Parser
             }
 
             if (pinLeft is not null || pinRight is not null)
-                result = new PinNamePin(pinLeft, result, pinRight);
+                result = new PinNamePinNode(pinLeft, result, pinRight);
+            return true;
+        }
+
+        /// <summary>
+        /// Parses a [pin]virtual-name[pin] item.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="context">The parsing context.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
+        public static bool ParsePinVirtualNamePin(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Pin before name (optional)
+            SyntaxNode pinLeft = null;
+            if (lexer.Branch(TokenType.Punctuator, "["))
+            {
+                // Pin name
+                if (!ParseName(lexer, context, out pinLeft))
+                    return false;
+                if (pinLeft is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
+                    return false;
+                }
+
+                // ']'
+                if (!lexer.Branch(TokenType.Punctuator, "]"))
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
+                    return false;
+                }
+            }
+
+            // The name itself
+            if (!ParseVirtualName(lexer, context, out result))
+                return false;
+            if (result is null)
+                return true;
+
+            // Pin after name (optional)
+            SyntaxNode pinRight = null;
+            if (lexer.Branch(TokenType.Punctuator, "["))
+            {
+                // Pin name
+                if (!ParseName(lexer, context, out pinRight))
+                    return false;
+                if (pinRight is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    return false;
+                }
+
+                if (pinRight is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
+                    return false;
+                }
+
+                // ']'
+                if (!lexer.Branch(TokenType.Punctuator, "]"))
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
+                    return false;
+                }
+            }
+
+            if (pinLeft is not null || pinRight is not null)
+                result = new PinNamePinNode(pinLeft, result, pinRight);
             return true;
         }
 
@@ -407,7 +596,6 @@ namespace SimpleCircuit.Parser
                 result.Add(property);
             }
         }
-
         private static bool ParseProperty(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
@@ -417,24 +605,8 @@ namespace SimpleCircuit.Parser
                 // word '=' value
                 if (lexer.Branch(TokenType.Punctuator, "=", out var assignment))
                 {
-                    SyntaxNode value = null;
-                    switch (lexer.Type)
-                    {
-                        case TokenType.Number:
-                            if (!ExpressionParser.ParseNumber(lexer, context, out var number))
-                                return false;
-                            value = number;
-                            break;
-
-                        case TokenType.String:
-                            result = new Quoted(lexer.Token);
-                            lexer.Next();
-                            break;
-
-                        default:
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected value"));
-                            return false;
-                    }
+                    if (!ParseValueOrExpression(lexer, context, out var value))
+                        return false;
                     result = new BinaryNode(BinaryOperatorTypes.Assignment, new IdentifierNode(word), assignment, value);
                 }
                 else
@@ -449,7 +621,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
                     return false;
                 }
-                result = new Unary(op, new IdentifierNode(word), UnaryOperatorTypes.Positive);
+                result = new UnaryNode(op, new IdentifierNode(word), UnaryOperatorTypes.Positive);
                 return true;
             }
             else if (lexer.Branch(TokenType.Punctuator, "-", out op))
@@ -460,11 +632,11 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
                     return false;
                 }
-                result = new Unary(op, new IdentifierNode(word), UnaryOperatorTypes.Negative);
+                result = new UnaryNode(op, new IdentifierNode(word), UnaryOperatorTypes.Negative);
                 return true;
             }
             else if (lexer.Branch(TokenType.String, out var stringLiteral))
-                result = new Quoted(stringLiteral);
+                result = new QuotedNode(stringLiteral);
             return true;
         }
 
@@ -478,41 +650,99 @@ namespace SimpleCircuit.Parser
         public static bool ParseName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
-
-            // word
-            if (lexer.Branch(TokenType.Word, out var word))
-                result = new Literal(word);
-            else
-                return true;
-
-            // '{' expression '}'
-            while (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
+            while (true)
             {
-                // expression
-                if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
+                // word
+                if (lexer.Branch(TokenType.Word, out var word))
                 {
-                    // Skip to new line or '}'
-                    lexer.SkipToTokenOrLine(TokenType.Punctuator, "}");
-                    return false;
+                    var expression = new LiteralNode(word);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
-                if (expression is null)
+                else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
-                    result = null;
-                    return false;
-                }
+                    // expression
+                    if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
+                    {
+                        // Skip to new line or '}'
+                        lexer.SkipToTokenOrLine(TokenType.Punctuator, "}");
+                        return false;
+                    }
+                    if (expression is null)
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                        result = null;
+                        return false;
+                    }
 
-                // '}'
-                if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
-                {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
-                    return false;
-                }
+                    // '}'
+                    if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
+                        return false;
+                    }
 
-                expression = new BracketNode(bracketLeft, expression, bracketRight);
-                result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                    expression = new BracketNode(bracketLeft, expression, bracketRight);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                }
+                else
+                    return true;
             }
-            return true;
+        }
+
+        /// <summary>
+        /// Parses a name in a virtual chain.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="context">The parsing context.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
+        public static bool ParseVirtualName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            while (true)
+            {
+                // Don't allow concatenation if there's any spaces between it
+                if (result is not null && lexer.HasTrivia)
+                    return true;
+
+                // word
+                SyntaxNode expression;
+                if (lexer.Branch(TokenType.Word, out var word))
+                    expression = new LiteralNode(word);
+                else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
+                {
+                    // expression
+                    if (!ExpressionParser.ParseExpression(lexer, context, out expression))
+                    {
+                        // Skip to new line or '}'
+                        lexer.SkipToTokenOrLine(TokenType.Punctuator, "}");
+                        return false;
+                    }
+                    if (expression is null)
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                        result = null;
+                        return false;
+                    }
+
+                    // '}'
+                    if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
+                    {
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
+                        return false;
+                    }
+                    expression = new BracketNode(bracketLeft, expression, bracketRight);
+                }
+                else if (lexer.Branch(TokenType.Punctuator, "*", out var asterisk))
+                    expression = new LiteralNode(asterisk);
+                else
+                    return true;
+
+                if (result is null)
+                    result = expression;
+                else
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+            }
         }
 
         private static bool ParseValueOrExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -523,7 +753,7 @@ namespace SimpleCircuit.Parser
             {
                 case TokenType.Punctuator:
                     // '{'
-                    if (lexer.Branch(TokenType.Punctuator, "{"))
+                    if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                     {
                         // Expression
                         if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
@@ -533,11 +763,26 @@ namespace SimpleCircuit.Parser
                         }
 
                         // '}'
-                        if (!lexer.Branch(TokenType.Punctuator, "}"))
+                        if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
                         {
                             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
                             return false;
                         }
+
+                        result = new BracketNode(bracketLeft, expression, bracketRight);
+                    }
+                    else if (lexer.Branch(TokenType.Punctuator, "-", out var minus))
+                    {
+                        // parse a number
+                        if (!ParseValueOrExpression(lexer, context, out var argument))
+                            return false;
+                        result = new UnaryNode(minus, argument, UnaryOperatorTypes.Negative);
+                    }
+                    else if (lexer.Branch(TokenType.Punctuator, "+", out var plus))
+                    {
+                        if (!ParseValueOrExpression(lexer, context, out var argument))
+                            return false;
+                        result = new UnaryNode(plus, argument, UnaryOperatorTypes.Positive);
                     }
                     break;
 
@@ -548,17 +793,65 @@ namespace SimpleCircuit.Parser
                     break;
 
                 case TokenType.String:
-                    result = new Quoted(lexer.Token);
+                    result = new QuotedNode(lexer.Token);
                     lexer.Next();
                     break;
             }
             return true;
         }
-
         private static void SkipToTokenOrLine(this SimpleCircuitLexer lexer, TokenType type, string content)
         {
             while (!lexer.Branch(type, content) && lexer.Type != TokenType.Newline && lexer.Type != TokenType.EndOfContent)
                 lexer.Next();
+        }
+
+        /// <summary>
+        /// Parses a control statement.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <param name="context">The parsing context.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
+        public static bool ParseControlStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // '.' word (without trivia)
+            if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == "." &&
+                lexer.NextType == TokenType.Word && lexer.NextHasTrivia == false)
+            {
+                lexer.Next(); // '.'
+                switch (lexer.Content.ToString())
+                {
+                    case "variant":
+                    case "variants":
+                    case "property":
+                    case "properties":
+                        lexer.Next();
+                        if (!ParseControlPropertyStatement(lexer, context, out result))
+                            return false;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return true;
+        }
+        private static bool ParseControlPropertyStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            if (!lexer.Branch(TokenType.Word, out var keyToken))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected component key"));
+                return false;
+            }
+
+            // Start reading properties
+            if (!ParsePropertyList(lexer, context, out var properties))
+                return false;
+            result = new ControlPropertyNode(keyToken, properties);
+            return true;
         }
     }
 }

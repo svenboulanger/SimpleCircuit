@@ -2,6 +2,7 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser.Nodes;
 using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
@@ -81,7 +82,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets or sets the defined parameters in the current scope.
         /// </summary>
-        public Dictionary<string, double> Parameters { get; set; }
+        public Dictionary<string, SyntaxNode> Parameters { get; set; }
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.
@@ -158,7 +159,7 @@ namespace SimpleCircuit.Parser
         /// <param name="name">The name.</param>
         /// <returns>The full name.</returns>
         public string GetFullname(string name)
-            => string.Join(DrawableFactoryDictionary.Separator, _sections.Select(s => s.Name).Reverse().Union(new[] { name }));
+            => string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Select(s => s.Name).Reverse().Union(new[] { name }));
 
         /// <summary>
         /// Gets the full name of a wire.

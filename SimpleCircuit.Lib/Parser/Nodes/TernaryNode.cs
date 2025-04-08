@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A ternary operator.
     /// </summary>
-    public record Ternary : SyntaxNode
+    public record TernaryNode : SyntaxNode
     {
         /// <summary>
         /// Gets the left argument.
@@ -23,13 +23,13 @@ namespace SimpleCircuit.Parser.Nodes
         public SyntaxNode Right { get; }
 
         /// <summary>
-        /// Creates a new <see cref="Ternary"/>
+        /// Creates a new <see cref="TernaryNode"/>
         /// </summary>
         /// <param name="left">The left argument.</param>
         /// <param name="middle">The middle argument.</param>
         /// <param name="right">The right argument.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="left"/>, <paramref name="middle"/> or <paramref name="right"/> is <c>null</c>.</exception>
-        public Ternary(SyntaxNode left, SyntaxNode middle, SyntaxNode right)
+        public TernaryNode(SyntaxNode left, SyntaxNode middle, SyntaxNode right)
             : base(left.Location)
         {
             Left = left ?? throw new ArgumentNullException(nameof(left));

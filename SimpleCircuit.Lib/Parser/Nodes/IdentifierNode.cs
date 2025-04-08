@@ -10,19 +10,12 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the identifier
         /// </summary>
-        public string Name { get; }
+        public string Name => Token.Content.ToString();
 
         /// <summary>
-        /// Creates a new <see cref="IdentifierNode"/>.
+        /// Gets the token.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="location">The location.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
-        public IdentifierNode(string name, TextLocation location)
-            : base(location)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-        }
+        public Token Token { get; }
 
         /// <summary>
         /// Creates a new <see cref="IdentifierNode"/>.
@@ -31,7 +24,7 @@ namespace SimpleCircuit.Parser.Nodes
         public IdentifierNode(Token token)
             : base(token.Location)
         {
-            Name = token.Content.ToString();
+            Token = token;
         }
 
         /// <inheritdoc />

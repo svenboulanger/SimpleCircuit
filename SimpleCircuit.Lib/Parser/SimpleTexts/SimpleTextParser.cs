@@ -18,7 +18,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             var lines = new MultilineSpan(context.FontSize * context.LineSpacing, context.Align);
 
             // Parse lines
-            while (lexer.NextType != TokenType.EndOfContent)
+            while (lexer.Type != TokenType.EndOfContent)
             {
                 lines.Add(ParseLine(lexer, context));
                 lexer.Branch(TokenType.Newline);
@@ -106,11 +106,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
         private static Span ParseSegment(SimpleTextLexer lexer, SimpleTextContext context)
         {
             // Parses a segment that cannot be separated
-            switch (lexer.NextType)
+            switch (lexer.Type)
             {
                 case TokenType.EscapedSequence:
                     // Check for an escape sequence
-                    string content = lexer.NextContent.ToString();
+                    string content = lexer.Content.ToString();
                     switch (content)
                     {
                         case "\\overline":
@@ -153,7 +153,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 case TokenType.OpenBracket:
                 case TokenType.CloseBracket:
                     // This might happen if there are too many curly brackets somewhere...
-                    context.Builder.Append(lexer.NextContent.ToString());
+                    context.Builder.Append(lexer.Content.ToString());
                     lexer.Next();
                     ContinueText(lexer, context);
                     return CreateTextSpan(context);
@@ -167,10 +167,10 @@ namespace SimpleCircuit.Parser.SimpleTexts
         {
             while (lexer.Check(TokenType.Character | TokenType.EscapedCharacter))
             {
-                if (lexer.NextType == TokenType.EscapedCharacter)
-                    context.Builder.Append(lexer.NextContent.Span[1]);
+                if (lexer.Type == TokenType.EscapedCharacter)
+                    context.Builder.Append(lexer.Content.Span[1]);
                 else
-                    context.Builder.Append(lexer.NextContent.ToString());
+                    context.Builder.Append(lexer.Content.ToString());
                 lexer.Next();
             }
         }

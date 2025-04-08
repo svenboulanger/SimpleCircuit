@@ -223,155 +223,17 @@ namespace SimpleCircuit.Components.Wires
                 case PreparationMode.Offsets:
 
                     // Short wire ends to the correct pins
-                    if (_p2w != null)
-                    {
-                        if (!context.Offsets.Group(_p2w.X, StartX, 0.0))
-                        {
-                            context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongX, _p2w.X, StartX);
-                            return PresenceResult.GiveUp;
-                        }
-                        if (!context.Offsets.Group(_p2w.Y, StartY, 0.0))
-                        {
-                            context.Diagnostics?.Post(_segments[0].Source, ErrorCodes.CannotAlignAlongY, _p2w.Y, StartY);
-                            return PresenceResult.GiveUp;
-                        }
-                    }
-                    if (_w2p != null)
-                    {
-                        if (!context.Offsets.Group(_w2p.X, EndX, 0.0))
-                        {
-                            context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongX, _w2p.X, EndX);
-                            return PresenceResult.GiveUp;
-                        }
-                        if (!context.Offsets.Group(_w2p.Y, EndY, 0.0))
-                        {
-                            context.Diagnostics?.Post(_segments[^1].Source, ErrorCodes.CannotAlignAlongY, _w2p.Y, EndY);
-                            return PresenceResult.GiveUp;
-                        }
-                    }
-
-                    // Deal with horizontal and vertical segments
-                    x = StartX;
-                    y = StartY;
-                    for (int i = 0; i < _segments.Count; i++)
-                    {
-                        string tx = GetXName(i);
-                        string ty = GetYName(i);
-                        var segment = _segments[i];
-                        var orientation = GetOrientation(i);
-
-                        if (!segment.IsMinimum)
-                        {
-                            double l = segment.Length;
-
-                            if (!context.Offsets.Group(x, tx, orientation.X * l))
-                            {
-                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.X * l));
-                                return PresenceResult.GiveUp;
-                            }
-                            if (!context.Offsets.Group(y, ty, orientation.Y * l))
-                            {
-                                context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, Math.Abs(orientation.Y * l));
-                                return PresenceResult.GiveUp;
-                            }
-                        }
-                        else
-                        {
-                            if (orientation.X.IsZero())
-                            {
-                                // Orientation is horizontal
-                                if (!context.Offsets.Group(x, tx, 0.0))
-                                {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongX, x, tx);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(ty);
-                            }
-                            else if (orientation.Y.IsZero())
-                            {
-                                // Orientation is vertical
-                                if (!context.Offsets.Group(y, ty, 0.0))
-                                {
-                                    context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignAlongY, y, ty);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(tx);
-                            }
-                            else
-                            {
-                                // Orientation is a slanted angle
-                                bool isFixedX = context.Offsets.AreGrouped(x, tx);
-                                bool isFixedY = context.Offsets.AreGrouped(y, ty);
-                                if (isFixedX && isFixedY)
-                                {
-                                    // Check whether the orientation is OK
-                                    double dx = context.Offsets.GetValue(tx) - context.Offsets.GetValue(x);
-                                    double dy = context.Offsets.GetValue(ty) - context.Offsets.GetValue(y);
-                                    var actualOrientation = new Vector2(dx, dy);
-                                    actualOrientation /= actualOrientation.Length;
-                                    if (orientation.Dot(actualOrientation) < 0.999)
-                                    {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotAlignDirection);
-                                        return PresenceResult.GiveUp;
-                                    }
-
-                                    // Check whether the minimum distance is OK
-                                    if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
-                                }
-                                else if (isFixedX)
-                                {
-                                    // This should lead to a fixed Y as well
-                                    double dx = context.Offsets.GetValue(tx) - context.Offsets.GetValue(x);
-                                    double dy = dx / orientation.X * orientation.Y;
-                                    if (!context.Offsets.Group(y, ty, dy))
-                                    {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy);
-                                        return PresenceResult.GiveUp;
-                                    }
-
-                                    // Check whether the minimum distance is OK
-                                    if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
-                                }
-                                else if (isFixedY)
-                                {
-                                    // This should lead to a fixed X as well
-                                    double dy = context.Offsets.GetValue(ty) - context.Offsets.GetValue(y);
-                                    double dx = dy / orientation.Y * orientation.X;
-                                    if (!context.Offsets.Group(x, tx, dx))
-                                    {
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CannotResolveFixedOffsetFor, dy);
-                                        return PresenceResult.GiveUp;
-                                    }
-
-                                    // Check whether the minimum distance is OK
-                                    if (dx * dx + dy * dy > segment.Length + 0.001)
-                                        context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumOfForInY);
-                                }
-                                else if (context.Desparateness == DesperatenessLevel.Normal)
-                                {
-                                    if (result == PresenceResult.Success)
-                                        result = PresenceResult.Incomplete;
-                                }
-                                else
-                                {
-                                    context.Offsets.Add(tx);
-                                    context.Offsets.Add(ty);
-                                }
-                            }
-                        }
-                        x = tx;
-                        y = ty;
-                    }
-                    break;
+                    if (_p2w is not null && Helpers.PrepareEntryOffset(_segments[0].Source, _p2w, StartX, StartY, Parser.Nodes.VirtualChainConstraints.XY, context) == PresenceResult.GiveUp)
+                        return PresenceResult.GiveUp;
+                    if (_w2p is not null && Helpers.PrepareEntryOffset(_segments[^1].Source, _w2p, EndX, EndY, Parser.Nodes.VirtualChainConstraints.XY, context) == PresenceResult.GiveUp)
+                        return PresenceResult.GiveUp;
+                    return Helpers.PrepareSegmentsOffset(
+                        GetXName, GetYName, GetOrientation,
+                        _segments, Parser.Nodes.VirtualChainConstraints.XY, context);
 
                 case PreparationMode.Groups:
                     for (int i = 0; i < _segments.Count; i++)
-                    {
-                        context.Group(StartX, GetXName(i));
-                        context.Group(StartY, GetYName(i));
-                    }
+                        Helpers.PrepareSegmentGroup(StartX, StartY, GetXName(i), GetYName(i), Parser.Nodes.VirtualChainConstraints.XY, context);
                     break;
 
                 case PreparationMode.DrawableGroups:
@@ -380,22 +242,6 @@ namespace SimpleCircuit.Components.Wires
             }
             
             return result;
-        }
-
-        private Vector2 GetOrientation(int index)
-        {
-            var orientation = _segments[index].Orientation;
-            if (orientation.X.IsZero() && orientation.Y.IsZero())
-            {
-                // Take the pin orientation instead
-                if (index == 0 && _p2w is IOrientedPin p1)
-                    orientation = p1.Orientation;
-                else if (index == _segments.Count - 1 && _w2p is IOrientedPin p2)
-                    orientation = -p2.Orientation;
-                else
-                    orientation = new(1, 0);
-            }
-            return orientation;
         }
 
         /// <inheritdoc />
@@ -485,18 +331,15 @@ namespace SimpleCircuit.Components.Wires
                 var toX = context.GetOffset(x);
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
-                // if (!segment.IsUnconstrained && !segment.IsFixed)
-                {
-                    var orientation = GetOrientation(i);
+                var orientation = GetOrientation(i);
 
-                    // Wire is of minimum length
-                    if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
-                    else if (orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
-                    else if (!orientation.X.IsZero() && !orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, segment.Length);
-                }
+                // Wire is of minimum length
+                if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
+                else if (orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
+                else if (!orientation.X.IsZero() && !orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, segment.Length);
                 fromX = toX;
                 fromY = toY;
             }
@@ -665,6 +508,22 @@ namespace SimpleCircuit.Components.Wires
         }
         private string GetXName(int index) => $"{Name}.{index + 1}.x";
         private string GetYName(int index) => $"{Name}.{index + 1}.y";
+        private Vector2 GetOrientation(int index)
+        {
+            var orientation = _segments[index].Orientation;
+            if (orientation.X.IsZero() && orientation.Y.IsZero())
+            {
+                // Take the pin orientation instead
+                if (index == 0 && _p2w is IOrientedPin p1)
+                    orientation = p1.Orientation;
+                else if (index == _segments.Count - 1 && _w2p is IOrientedPin p2)
+                    orientation = -p2.Orientation;
+                else
+                    orientation = new(1, 0);
+            }
+            return orientation;
+        }
+
         private void GenerateError(IDiagnosticHandler diagnostics, PinReference pin, ErrorCodes code, params object[] arguments)
         {
             if (pin.Name.Length > 0)

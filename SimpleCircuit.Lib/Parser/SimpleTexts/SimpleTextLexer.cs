@@ -9,9 +9,8 @@
     /// <param name="text">The text.</param>
     public class SimpleTextLexer(string text) : Lexer<TokenType>(text, text)
     {
-
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (NextType & flags) != 0;
+        public override bool Check(TokenType flags) => (Type & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()

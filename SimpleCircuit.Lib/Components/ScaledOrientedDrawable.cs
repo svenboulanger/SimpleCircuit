@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components
     /// Default implementation for a component that has a location, an orientation,
     /// and can be scaled.
     /// </summary>
-    public abstract class ScaledOrientedDrawable : OrientedDrawable
+    public abstract class ScaledOrientedDrawable : OrientedDrawable, IScaledDrawable
     {
         private double _scale = 1.0;
 

@@ -44,6 +44,16 @@ namespace SimpleCircuit.Parser
         public T Type { get; }
 
         /// <summary>
+        /// Gets whether the current token has trivia.
+        /// </summary>
+        public bool HasTrivia { get; }
+
+        /// <summary>
+        /// Gets whether the next token has trivia.
+        /// </summary>
+        public bool NextHasTrivia { get; }
+
+        /// <summary>
         /// Checks whether the current token has flags.
         /// </summary>
         /// <returns>

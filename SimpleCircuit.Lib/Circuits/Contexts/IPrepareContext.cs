@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -43,11 +44,18 @@ namespace SimpleCircuit.Circuits.Contexts
         public NodeGrouper Groups { get; }
 
         /// <summary>
-        /// Finds a circuit presence with the given name.
+        /// Finds a circuit presence by a given name.
         /// </summary>
         /// <param name="name">The full name of the presence.</param>
         /// <returns>The circuit presence, of <c>null</c> if it doesn't exist.</returns>
         public ICircuitPresence Find(string name);
+
+        /// <summary>
+        /// Finds presences based on a regular expression.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        /// <returns>Returns the presences.</returns>
+        public IEnumerable<ICircuitPresence> FindFilter(string filter);
 
         /// <summary>
         /// Groups a drawable to X and Y coordinates.

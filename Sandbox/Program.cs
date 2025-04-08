@@ -11,7 +11,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            string script = @"GND <u 5> X{2-1} <u 5> V <u r> R <r d> R <d l>";
+            string script = @".property A diffout diffin
+A <r> A(scale=2)";
 
             var logger = new Logger();
             var lexer = SimpleCircuitLexer.FromString(script);
@@ -23,8 +24,8 @@ namespace Sandbox
             foreach (var stmt in statements)
                 Console.WriteLine(stmt.ToString());
 
-            var evalContext = new EvaluationContext();
-            NodeEvaluator.Evaluate(statements, evalContext);
+            var evalContext = new EvaluationContext(context);
+            StatementEvaluator.Evaluate(statements, evalContext);
 
             context.Circuit.Metadata.Add("script", script);
 

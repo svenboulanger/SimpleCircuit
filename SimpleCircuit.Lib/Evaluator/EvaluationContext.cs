@@ -1,0 +1,148 @@
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser;
+using SimpleCircuit.Parser.Nodes;
+using SimpleCircuit.Parser.SimpleTexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SimpleCircuit.Evaluator
+{
+    /// <summary>
+    /// A context for evaluating the AST for SimpleCircuit.
+    /// </summary>
+    public class EvaluationContext
+    {
+        private readonly Stack<string> _sections = new();
+        private readonly Dictionary<string, int> _anonymousCounters = [];
+
+        /// <summary>
+        /// Gets the options.
+        /// </summary>
+        public Options Options { get; } = new();
+
+        /// <summary>
+        /// Gets or sets the diagnostics handler.
+        /// </summary>
+        public IDiagnosticHandler Diagnostics { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameters.
+        /// </summary>
+        public Dictionary<string, SyntaxNode> Parameters { get; set; }
+
+        /// <summary>
+        /// Gets the factory for components.
+        /// </summary>
+        public DrawableFactoryDictionary Factory { get; } = new();
+
+        /// <summary>
+        /// Gets the circuit.
+        /// </summary>
+        public GraphicalCircuit Circuit { get; }
+
+        /// <summary>
+        /// Create a new parsing context with the default stuff in it.
+        /// </summary>
+        /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
+        /// <param name="formatter">The text formatter used for the graphical circuit.</param>
+        public EvaluationContext(ParsingContext parsingContext, bool loadAssembly = true, ITextFormatter formatter = null)
+        {
+            if (loadAssembly)
+                Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
+            Options = parsingContext.Options;
+            Diagnostics = parsingContext.Diagnostics;
+        }
+
+        /// <summary>
+        /// Gets the full name based on the current section stack.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="resolveAnonymous">If <c>true</c>, the name is changed to a unique name if the name is anonymous. If <c>false</c>, the name is simply expanded to the full name without modification.</param>
+        /// <returns>The full name.</returns>
+        public string GetFullname(string name, bool resolveAnonymous = true)
+        {
+            if (resolveAnonymous)
+            {
+                if (Factory.IsAnonymous(name, out string key))
+                {
+                    if (_anonymousCounters.TryGetValue(key, out int counter))
+                    {
+                        name = $"{name}{DrawableFactoryDictionary.AnonymousSeparator}{counter}";
+                        _anonymousCounters[key] = counter + 1;
+                    }
+                    else
+                    {
+                        name = $"{name}{DrawableFactoryDictionary.AnonymousSeparator}1";
+                        _anonymousCounters[key] = 2;
+                    }
+
+                }
+            }
+            return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+
+        /// <summary>
+        /// Gets the full name for an anonymous point.
+        /// </summary>
+        /// <returns>Gets the full name of the anonymous point.</returns>
+        public string GetAnonymousPointName()
+        {
+            string name;
+            if (_anonymousCounters.TryGetValue(PointFactory.Key, out int counter))
+            {
+                name = $"{PointFactory.Key}{DrawableFactoryDictionary.AnonymousSeparator}{counter}";
+                _anonymousCounters[PointFactory.Key] = counter + 1;
+            }
+            else
+            {
+                name = $"{PointFactory.Key}{DrawableFactoryDictionary.AnonymousSeparator}1";
+                _anonymousCounters[PointFactory.Key] = 2;
+            }
+            return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+
+        /// <summary>
+        /// Gets a wire name.
+        /// </summary>
+        /// <returns>The wire name.</returns>
+        public string GetWireName()
+        {
+            string name;
+            if (_anonymousCounters.TryGetValue(":wire:", out int counter))
+            {
+                name = $"wire-{counter}";
+                _anonymousCounters[":wire:"] = counter + 1;
+            }
+            else
+            {
+                name = "wire-1";
+                _anonymousCounters[":wire:"] = 2;
+            }
+            return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+
+        /// <summary>
+        /// Gets the name of a virtual chain item.
+        /// </summary>
+        /// <returns>The virtual item name.</returns>
+        public string GetVirtualName()
+        {
+            string name;
+            if (_anonymousCounters.TryGetValue(":virtual:", out int counter))
+            {
+                name = $"virtual-{counter}";
+                _anonymousCounters[":virtual:"] = counter + 1;
+            }
+            else
+            {
+                name = "virtual-1";
+                _anonymousCounters[":virtual:"] = 2;
+            }
+            return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+    }
+}

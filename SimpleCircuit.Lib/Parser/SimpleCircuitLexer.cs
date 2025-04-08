@@ -15,11 +15,6 @@ namespace SimpleCircuit.Parser
         public IDiagnosticHandler Diagnostics { get; set; }
 
         /// <summary>
-        /// Gets the orientation of the last encountered arrow.
-        /// </summary>
-        public Vector2 ArrowOrientation { get; private set; }
-
-        /// <summary>
         /// Creates a new lexer for a string.
         /// </summary>
         /// <param name="netlist">The netlist.</param>

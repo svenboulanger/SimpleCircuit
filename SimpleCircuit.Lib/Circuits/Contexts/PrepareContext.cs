@@ -2,6 +2,8 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Diagnostics;
 using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -47,6 +49,17 @@ namespace SimpleCircuit.Circuits.Contexts
             if (_circuit is not null && _circuit.TryGetValue(name, out var result))
                 return result;
             return null;
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<ICircuitPresence> FindFilter(string filter)
+        {
+            var regex = new Regex(filter);
+            foreach (var item in _circuit)
+            {
+                if (regex.IsMatch(item.Name))
+                    yield return item;
+            }
         }
 
         /// <inheritdoc />

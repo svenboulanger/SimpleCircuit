@@ -53,7 +53,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
                     return false;
                 }
-                result = new Ternary(result, ifTrue, ifFalse);
+                result = new TernaryNode(result, ifTrue, ifFalse);
             }
             return true;
         }
@@ -197,7 +197,7 @@ namespace SimpleCircuit.Parser
                         context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
                         return false;
                     }
-                    result = new Unary(token, arg, UnaryOperatorTypes.Positive);
+                    result = new UnaryNode(token, arg, UnaryOperatorTypes.Positive);
                     return true;
                 }
             }
@@ -337,7 +337,7 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if no errors were encountered; otherwise, <c>false</c>.</returns>
-        public static bool ParseNumber(SimpleCircuitLexer lexer, ParsingContext context, out Number result)
+        public static bool ParseNumber(SimpleCircuitLexer lexer, ParsingContext context, out NumberNode result)
         {
             // Should be a number token
             if (lexer.Type != TokenType.Number)
@@ -402,7 +402,7 @@ namespace SimpleCircuit.Parser
                 }
             }
 
-            result = new Number(scalar, location);
+            result = new NumberNode(scalar, location);
             lexer.Next();
             return true;
         }

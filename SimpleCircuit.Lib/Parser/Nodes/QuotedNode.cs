@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A quoted value.
     /// </summary>
-    public record Quoted : SyntaxNode
+    public record QuotedNode : SyntaxNode
     {
         /// <summary>
         /// Gets the unquoted value.
@@ -13,10 +13,10 @@ namespace SimpleCircuit.Parser.Nodes
         public ReadOnlyMemory<char> Value { get; }
 
         /// <summary>
-        /// Creates a new <see cref="Quoted"/>.
+        /// Creates a new <see cref="QuotedNode"/>.
         /// </summary>
         /// <param name="token">The token.</param>
-        public Quoted(Token token)
+        public QuotedNode(Token token)
             : base(token.Location)
         {
             Value = token.Content[1..^1];

@@ -3,7 +3,7 @@
     /// <summary>
     /// A number.
     /// </summary>
-    public record Number : SyntaxNode
+    public record NumberNode : SyntaxNode
     {
         /// <summary>
         /// Gets the value.
@@ -11,11 +11,11 @@
         public double Value { get; }
 
         /// <summary>
-        /// Creates a <see cref="Number"/>.
+        /// Creates a <see cref="NumberNode"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="location">The location.</param>
-        public Number(double value, TextLocation location)
+        public NumberNode(double value, TextLocation location)
             : base(location)
         {
             Value = value;

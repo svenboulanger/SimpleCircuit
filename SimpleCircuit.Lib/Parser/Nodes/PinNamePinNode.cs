@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A name with a pin before and after.
     /// </summary>
-    public record PinNamePin : SyntaxNode
+    public record PinNamePinNode : SyntaxNode
     {
         /// <summary>
         /// Gets the left pin.
@@ -23,13 +23,13 @@ namespace SimpleCircuit.Parser.Nodes
         public SyntaxNode PinRight { get; }
 
         /// <summary>
-        /// Creates a new <see cref="PinNamePin"/>.
+        /// Creates a new <see cref="PinNamePinNode"/>.
         /// </summary>
         /// <param name="left">The left pin.</param>
         /// <param name="name">The name.</param>
         /// <param name="right">The right pin.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
-        public PinNamePin(SyntaxNode left, SyntaxNode name, SyntaxNode right)
+        public PinNamePinNode(SyntaxNode left, SyntaxNode name, SyntaxNode right)
             : base(left?.Location ?? name?.Location ?? default)
         {
             PinLeft = left;

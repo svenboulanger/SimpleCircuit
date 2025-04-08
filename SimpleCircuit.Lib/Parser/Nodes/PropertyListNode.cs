@@ -8,7 +8,7 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A list of properties.
     /// </summary>
-    public record PropertyList : SyntaxNode, IEquatable<PropertyList>
+    public record PropertyListNode : SyntaxNode, IEquatable<PropertyListNode>
     {
         /// <summary>
         /// Gets the subject that should receive the properties.
@@ -21,12 +21,12 @@ namespace SimpleCircuit.Parser.Nodes
         public SyntaxNode[] Properties { get; }
 
         /// <summary>
-        /// Creates a new <see cref="PropertyList"/>.
+        /// Creates a new <see cref="PropertyListNode"/>.
         /// </summary>
         /// <param name="subject">The subject.</param>
         /// <param name="properties">The properties.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="subject"/> is <c>null</c>.</exception>
-        public PropertyList(SyntaxNode subject, IEnumerable<SyntaxNode> properties)
+        public PropertyListNode(SyntaxNode subject, IEnumerable<SyntaxNode> properties)
             : base(subject?.Location ?? default)
         {
             Subject = subject ?? throw new ArgumentNullException(nameof(subject));
@@ -43,7 +43,7 @@ namespace SimpleCircuit.Parser.Nodes
         }
 
         /// <inheritdoc />
-        public virtual bool Equals(PropertyList other)
+        public virtual bool Equals(PropertyListNode other)
         {
             if (!Subject.Equals(other.Subject))
                 return false;

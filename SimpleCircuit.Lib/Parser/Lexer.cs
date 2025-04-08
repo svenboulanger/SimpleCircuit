@@ -35,6 +35,12 @@ namespace SimpleCircuit.Parser
         /// <inheritdoc />
         public T Type { get; private set; }
 
+        /// <inheritdoc />
+        public bool NextHasTrivia => _triviaIndex < _tokenIndex;
+
+        /// <inheritdoc />
+        public bool HasTrivia { get; private set; }
+
         /// <summary>
         /// Gets the current character.
         /// </summary>
@@ -112,6 +118,7 @@ namespace SimpleCircuit.Parser
             Token = NextToken;
             Type = NextType;
             Content = NextContent;
+            HasTrivia = NextHasTrivia;
 
             _triviaLine = _line;
             _triviaColumn = _column;

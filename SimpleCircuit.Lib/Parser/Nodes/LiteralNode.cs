@@ -5,7 +5,7 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A literal value.
     /// </summary>
-    public record Literal : SyntaxNode
+    public record LiteralNode : SyntaxNode
     {
         /// <summary>
         /// Gets the literal value.
@@ -13,10 +13,10 @@ namespace SimpleCircuit.Parser.Nodes
         public ReadOnlyMemory<char> Value { get; }
 
         /// <summary>
-        /// Creates a new <see cref="Literal"/>.
+        /// Creates a new <see cref="LiteralNode"/>.
         /// </summary>
         /// <param name="token">The token.</param>
-        public Literal(Token token)
+        public LiteralNode(Token token)
             : base(token.Location)
         {
             Value = token.Content;

@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets or sets the separator for paths.
         /// </summary>
-        public static string Separator { get; set; } = "/";
+        public static char Separator { get; set; } = '/';
 
         /// <summary>
         /// Gets or sets the separator for the anonymous index.
@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components
             int index = fullname.LastIndexOf(Separator);
             if (index < 0)
                 return fullname;
-            return fullname[(index + Separator.Length)..];
+            return fullname[(index + 1)..];
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace SimpleCircuit.Components
             int index = fullname.LastIndexOf(Separator);
             if (index < 0)
                 return "";
-            return fullname[..(index + Separator.Length)];
+            return fullname[..(index + 1)];
         }
 
         private bool Extract(string fullname, out string key, out IDrawableFactory factory)
