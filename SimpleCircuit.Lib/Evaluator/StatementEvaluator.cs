@@ -41,6 +41,7 @@ namespace SimpleCircuit.Evaluator
                 case ControlPropertyNode controlProperty: Evaluate(controlProperty, context); break;
                 case ParameterDefinitionNode parameterDefinition: Evaluate(parameterDefinition, context); break;
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
+                case ForLoopNode forLoop: Evaluate(forLoop, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -285,6 +286,53 @@ namespace SimpleCircuit.Evaluator
             // Register the section as a template if there was no base template given
             if (ReferenceEquals(sectionDefinition, template))
                 context.SectionDefinitions[name] = sectionDefinition;
+        }
+        private static void Evaluate(ForLoopNode forLoop, EvaluationContext context)
+        {
+            // Evaluate the values for the for-loop
+            string variableName = forLoop.Variable.Content.ToString();
+            double start = EvaluateAsNumber(forLoop.Start, context, 0.0);
+            double end = EvaluateAsNumber(forLoop.End, context, 1.0);
+            double increment = EvaluateAsNumber(forLoop.Increment, context, 1.0);
+
+            // Make sure we don't end up in an infinite loop
+            if (increment.IsZero())
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(forLoop.Increment.Location, SeverityLevel.Error, "ERR", $"For-loop increment is too small ({increment})"));
+                return;
+            }
+            
+            // Execute the for-loop
+            if (end > start)
+            {
+                if (increment < 0)
+                    increment = -increment;
+                double value = start;
+                while (value < end + 1e-9)
+                {
+                    context.StartScope();
+                    context.CurrentScope[variableName] = value;
+                    foreach (var statement in forLoop.Statements)
+                        Evaluate(statement, context);
+                    context.EndScope();
+                    value += increment;
+                }
+            }
+            else
+            {
+                if (increment > 0)
+                    increment = -increment;
+                double value = start;
+                while (value > end - 1e-9)
+                {
+                    context.StartScope();
+                    context.CurrentScope[variableName] = value;
+                    foreach (var statement in forLoop.Statements)
+                        Evaluate(statement, context);
+                    context.EndScope();
+                    value += increment;
+                }
+            }
         }
 
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)

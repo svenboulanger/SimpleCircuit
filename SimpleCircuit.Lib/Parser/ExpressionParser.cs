@@ -261,6 +261,11 @@ namespace SimpleCircuit.Parser
                     lexer.Next();
                     return true;
 
+                case TokenType.String:
+                    result = new QuotedNode(lexer.Token);
+                    lexer.Next();
+                    return true;
+
                 case TokenType.Number:
                     if (!ParseNumber(lexer, context, out var number))
                         return false;

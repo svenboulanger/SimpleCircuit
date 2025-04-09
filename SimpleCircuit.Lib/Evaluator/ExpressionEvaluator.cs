@@ -21,10 +21,19 @@ namespace SimpleCircuit.Evaluator
                 QuotedNode quoted => Evaluate(quoted, context),
                 TernaryNode ternary => Evaluate(ternary, context),
                 UnaryNode unary => Evaluate(unary, context),
+                BracketNode bracket => Evaluate(bracket, context),
                 _ => throw new NotImplementedException(),
             };
         }
 
+        private static object Evaluate(BracketNode bracket, EvaluationContext context)
+        {
+            if (bracket.Left.Content.Length == 1 && bracket.Right.Content.Length == 1 &&
+                bracket.Left.Content.Span[0] == '(' && bracket.Right.Content.Span[0] == ')')
+                return Evaluate(bracket.Value, context);
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(bracket.Left.Location, SeverityLevel.Error, "ERR", "Unrecognized brackets"));
+            return null;
+        }
         private static object Evaluate(BinaryNode binary, EvaluationContext context)
         {
             object left = Evaluate(binary.Left, context);
@@ -213,7 +222,6 @@ namespace SimpleCircuit.Evaluator
                     throw new NotImplementedException();
             }
         }
-
         private static object Evaluate(CallNode call, EvaluationContext context)
         {
             object[] args = new object[call.Arguments.Length];
@@ -258,7 +266,6 @@ namespace SimpleCircuit.Evaluator
             }
             throw new NotImplementedException();
         }
-
         private static object Evaluate(IdentifierNode identifier, EvaluationContext context)
         {
             if (context.CurrentScope.TryGetValue(identifier.Name, out var result))

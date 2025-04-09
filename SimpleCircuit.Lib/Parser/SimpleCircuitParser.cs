@@ -868,6 +868,18 @@ namespace SimpleCircuit.Parser
                         }
                         break;
 
+                    case "for":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'for'
+                        if (!ParseForLoop(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected for loop"));
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -961,6 +973,73 @@ namespace SimpleCircuit.Parser
                 }
             }
             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endsection'"));
+            return false;
+        }
+        private static bool ParseForLoop(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Parse the variable name
+            if (!lexer.Branch(TokenType.Word, out var variableToken))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a variable name"));
+                return false;
+            }
+
+            // Parse the initializer expression
+            if (!ParseValueOrExpression(lexer, context, out var start))
+                return false;
+            if (start is null)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected start value"));
+                return false;
+            }
+
+            // Parse the end value
+            if (!ParseValueOrExpression(lexer, context, out var end))
+                return false;
+            if (start is null)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end value"));
+                return false;
+            }
+
+            // Parse the increment value
+            if (!ParseValueOrExpression(lexer, context, out var increment))
+                return false;
+            if (increment is null)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected increment"));
+                return false;
+            }
+
+            // New line
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a new line"));
+                return false;
+            }
+
+            // Parse statements
+            if (!ParseStatements(lexer, context, out var statements))
+                return false;
+
+            // Expect the end of the loop
+            if (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word && !lexer.NextHasTrivia &&
+                lexer.Content.ToString() == ".")
+            {
+                switch (lexer.NextContent.ToString())
+                {
+                    case "end":
+                    case "endf":
+                    case "endfor":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'end'
+                        result = new ForLoopNode(variableToken, start, end, increment, statements);
+                        return true;
+                }
+            }
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected for-loop end ('.end', '.endf', '.endfor')"));
             return false;
         }
     }

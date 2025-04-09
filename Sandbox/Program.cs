@@ -12,12 +12,9 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.section A expr=""hello""
-GND <u> R1(label1={expr})
-.ends
-
-.section B A expr=""world""
-
+.for i 0 3 1
+R{i}(label1={""R_""+i}) <r> R{i+1}(label1={""R_""+(i+1)})
+.endf
 ";
 
             var logger = new Logger();

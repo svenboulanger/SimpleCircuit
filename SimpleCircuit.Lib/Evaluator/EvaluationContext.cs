@@ -159,10 +159,15 @@ namespace SimpleCircuit.Evaluator
         public void StartSection(string sectionName)
         {
             _sections.Push(sectionName);
-            CurrentScope = new Scope(CurrentScope);
+            StartScope();
             _anonymousCounterStack.Push(_anonymousCounters);
             _anonymousCounters = [];
         }
+
+        /// <summary>
+        /// Starts a new scope.
+        /// </summary>
+        public void StartScope() => CurrentScope = new Scope(CurrentScope);
 
         /// <summary>
         /// Pops/ends the last started section.
@@ -174,5 +179,10 @@ namespace SimpleCircuit.Evaluator
             _anonymousCounters = _anonymousCounterStack.Pop();
             return _sections.Pop();
         }
+
+        /// <summary>
+        /// Ends a previously started scope.
+        /// </summary>
+        public void EndScope() => CurrentScope = CurrentScope.ParentScope;
     }
 }
