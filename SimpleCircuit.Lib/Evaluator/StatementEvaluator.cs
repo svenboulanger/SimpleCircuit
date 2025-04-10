@@ -42,6 +42,7 @@ namespace SimpleCircuit.Evaluator
                 case ParameterDefinitionNode parameterDefinition: Evaluate(parameterDefinition, context); break;
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
+                case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -333,6 +334,11 @@ namespace SimpleCircuit.Evaluator
                     value += increment;
                 }
             }
+        }
+        private static void Evaluate(SymbolDefinitionNode symbolDefinition, EvaluationContext context)
+        {
+            string key = symbolDefinition.Key.Content.ToString();
+            context.Factory.Register(new XmlDrawable(key, symbolDefinition.Xml, context.Diagnostics));
         }
 
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)

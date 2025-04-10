@@ -13,6 +13,7 @@ namespace SimpleCircuit.Parser
         private int _triviaLine, _triviaColumn, _triviaIndex;
         private int _tokenLine, _tokenColumn, _tokenIndex;
         private int _line, _column, _index;
+        private int _lastTriviaIndex, _lastTokenIndex;
 
         /// <inheritdoc />
         public string Source { get; }
@@ -122,10 +123,12 @@ namespace SimpleCircuit.Parser
 
             _triviaLine = _line;
             _triviaColumn = _column;
+            _lastTriviaIndex = _triviaIndex;
             _triviaIndex = _index;
 
             _tokenLine = _line;
             _tokenColumn = _column;
+            _lastTokenIndex = _tokenIndex;
             _tokenIndex = _index;
 
             ReadToken();
@@ -267,19 +270,15 @@ namespace SimpleCircuit.Parser
         }
 
         /// <inheritdoc />
-        public Tracker Track(bool includeTrivia = false)
-        {
-            if (includeTrivia)
-                return new(_triviaIndex, new(Source, _triviaLine, _triviaColumn));
-            return new(_tokenIndex, new(Source, _tokenLine, _tokenColumn));
-        }
+        public Tracker Track()
+            => new(_lastTokenIndex, Token.Location);
 
         /// <inheritdoc />
         public Token GetTracked(Tracker tracker, bool includeCurrentToken = false)
         {
             if (includeCurrentToken)
-                return new(tracker.Location, _contents.AsMemory(tracker.Index, _index - tracker.Index));
-            return new(tracker.Location, _contents.AsMemory(tracker.Index, _triviaIndex - tracker.Index));
+                return new(tracker.Location, _contents.AsMemory(tracker.Index, _tokenIndex - tracker.Index));
+            return new(tracker.Location, _contents.AsMemory(tracker.Index, _lastTokenIndex - tracker.Index));
         }
     }
 }

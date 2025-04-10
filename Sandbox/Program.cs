@@ -12,9 +12,17 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.for i 0 3 1
-R{i}(label1={""R_""+i}) <r> R{i+1}(label1={""R_""+(i+1)})
-.endf
+.symbol ARROW
+    <pins>
+        <pin name=""A"" x=""0"" y=""0"" nx=""-1"" ny=""0"" />
+        <pin name=""B"" x=""10"" y=""0"" nx=""1"" ny=""0"" />
+    </pins>
+    <drawing>
+        <line x1=""0"" y1=""0"" x2=""5"" y2=""-5"" marker-end=""arrow"" />
+        <line x1=""8"" y1=""0"" x2=""10"" y2=""0"" />
+    </drawing>
+.endsymbol
+R <a 45> ARROW(flip) <a 45> R
 ";
 
             var logger = new Logger();

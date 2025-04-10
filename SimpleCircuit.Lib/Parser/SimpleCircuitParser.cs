@@ -880,6 +880,18 @@ namespace SimpleCircuit.Parser
                         }
                         break;
 
+                    case "symbol":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'symbol'
+                        if (!ParseSymbolDefinition(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected symbol definition"));
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -1041,6 +1053,70 @@ namespace SimpleCircuit.Parser
             }
             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected for-loop end ('.end', '.endf', '.endfor')"));
             return false;
+        }
+        private static bool ParseSymbolDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Read the key name
+            if (!lexer.Branch(TokenType.Word, out var keyToken))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected symbol key"));
+                return false;
+            }
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a newline"));
+                return false;
+            }
+
+            // Read the XML
+            var tracker = lexer.Track();
+            while (lexer.Type != TokenType.EndOfContent)
+            {
+                if (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word &&
+                    lexer.Content.ToString() == ".")
+                {
+                    switch (lexer.NextContent.ToString())
+                    {
+                        case "end":
+                        case "ends":
+                        case "endsymbol":
+                            // Get the XML tracked
+                            var xml = lexer.GetTracked(tracker);
+
+                            // Consume the end
+                            lexer.Next(); // '.'
+                            lexer.Next(); // 'end':
+
+                            // Try to parse the XML
+                            var doc = new XmlDocument();
+                            try
+                            {
+                                string fullXml = $"<symbol>{Environment.NewLine}{xml.Content}{Environment.NewLine}</symbol>";
+                                doc.LoadXml(fullXml);
+                            }
+                            catch (XmlException ex)
+                            {
+                                var loc = new TextLocation(
+                                    xml.Location.Source,
+                                    xml.Location.Line + ex.LineNumber - 1,
+                                    xml.Location.Line == 1 ? xml.Location.Column + ex.LinePosition : ex.LinePosition);
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(loc, SeverityLevel.Error, "XML", ex.Message));
+                                return false;
+                            }
+                            result = new SymbolDefinitionNode(keyToken, doc.DocumentElement);
+                            return true;
+                    }
+                }
+                lexer.Next();
+            }
+            if (lexer.Type == TokenType.EndOfContent)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Unexpected end of document, expected symbol end"));
+                return false;
+            }
+            return true;
         }
     }
 }

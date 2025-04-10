@@ -13,7 +13,7 @@ namespace SimpleCircuit.Parser.Markers
     {
 
         /// <inheritdoc />
-        public override bool Check(TokenType flags) => (NextType & flags) != 0;
+        public override bool Check(TokenType flags) => (Type & flags) != 0;
 
         /// <inheritdoc />
         protected override void ReadToken()

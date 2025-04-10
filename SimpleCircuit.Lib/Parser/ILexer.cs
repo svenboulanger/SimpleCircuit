@@ -121,9 +121,8 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Creates a tracker that allows to track combined tokens using <see cref="GetTracked(Tracker, bool)"/>.
         /// </summary>
-        /// <param name="includeTrivia">If <c>true</c>, the trivia is included in the tracker.</param>
         /// <returns>Returns the tracker.</returns>
-        public Tracker Track(bool includeTrivia = false);
+        public Tracker Track();
 
         /// <summary>
         /// Gets a token that contains the combined content since the tracker.
