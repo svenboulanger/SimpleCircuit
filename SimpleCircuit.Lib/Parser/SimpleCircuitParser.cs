@@ -892,6 +892,18 @@ namespace SimpleCircuit.Parser
                         }
                         break;
 
+                    case "if":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'if'
+                        if (!ParseIfElse(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected if-else statement"));
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -1115,6 +1127,94 @@ namespace SimpleCircuit.Parser
             {
                 context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Unexpected end of document, expected symbol end"));
                 return false;
+            }
+            return true;
+        }
+        private static bool ParseIfElse(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            List<SyntaxNode> conditions = [];
+            List<List<SyntaxNode>> ifTrue = [];
+            List<SyntaxNode> elseStatements = null;
+            TextLocation first;
+
+            // Parse the condition
+            if (!ParseValueOrExpression(lexer, context, out var condition))
+                return false;
+            if (condition is null)
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
+                return false;
+            }
+            first = condition.Location;
+            conditions.Add(condition);
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                return false;
+            }
+
+            // Parse the statements
+            if (!ParseStatements(lexer, context, out var statements))
+                return false;
+            ifTrue.Add(statements ?? []);
+
+            // Parse elif statements
+            while (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word &&
+                lexer.Content.ToString() == ".")
+            {
+                switch (lexer.NextContent.ToString())
+                {
+                    case "end":
+                    case "endif":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'endif'
+                        result = new IfElseNode(first, conditions, ifTrue, elseStatements);
+                        return true;
+
+                    case "elif":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'elif'
+
+                        // Condition
+                        if (!ParseValueOrExpression(lexer, context, out condition))
+                            return false;
+                        if (condition is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
+                            return false;
+                        }
+                        conditions.Add(condition);
+                        if (!lexer.Branch(TokenType.Newline))
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                            return false;
+                        }
+
+                        // Statements
+                        if (!ParseStatements(lexer, context, out statements))
+                            return false;
+                        ifTrue.Add(statements ?? []);
+                        break;
+
+                    case "else":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'else'
+                        if (!lexer.Branch(TokenType.Newline))
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                            return false;
+                        }
+
+                        // Statements
+                        if (!ParseStatements(lexer, context, out elseStatements))
+                            return false;
+                        break;
+
+                    default:
+                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", $"Could not recognize control statement '.{lexer.NextContent}'"));
+                        return false;
+                }
             }
             return true;
         }

@@ -7,7 +7,6 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -43,6 +42,7 @@ namespace SimpleCircuit.Evaluator
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
                 case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
+                case IfElseNode ifElse: Evaluate(ifElse, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -339,6 +339,41 @@ namespace SimpleCircuit.Evaluator
         {
             string key = symbolDefinition.Key.Content.ToString();
             context.Factory.Register(new XmlDrawable(key, symbolDefinition.Xml, context.Diagnostics));
+        }
+        private static void Evaluate(IfElseNode ifElse, EvaluationContext context)
+        {
+            for (int i = 0; i < ifElse.Conditions.Length; i++)
+            {
+                var value = EvaluateExpression(ifElse.Conditions[i], context);
+                switch (value)
+                {
+                    case double d:
+                        if (d.IsZero())
+                            continue;
+                        break;
+
+                    case int integer:
+                        if (integer == 0)
+                            continue;
+                        break;
+
+                    case bool b:
+                        if (!b)
+                            continue;
+                        break;
+
+                    default:
+                        continue;
+                }
+
+                // Evaluate the statements
+                Evaluate(ifElse.IfTrue[i], context);
+                return;
+            }
+
+            // If we reached here, then none of the conditions matched
+            if (ifElse.Else is not null)
+                Evaluate(ifElse.Else, context);
         }
 
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)

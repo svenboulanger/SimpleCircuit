@@ -96,6 +96,13 @@ namespace SimpleCircuit.Parser
                             ContinueToken();
                         break;
 
+                    case '=':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '=')
+                            ContinueToken();
+                        break;
+
                     case '.':
                     case '(':
                     case ')':
@@ -103,7 +110,6 @@ namespace SimpleCircuit.Parser
                     case ']':
                     case '{':
                     case '}':
-                    case '=':
                     case ',':
                     case '?':
                     case ':':
