@@ -80,11 +80,6 @@ namespace SimpleCircuit.Parser
         public IList<string> ExtraCss { get; } = new List<string>();
 
         /// <summary>
-        /// Gets or sets the defined parameters in the current scope.
-        /// </summary>
-        public Dictionary<string, SyntaxNode> Parameters { get; set; }
-
-        /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
@@ -94,21 +89,6 @@ namespace SimpleCircuit.Parser
             if (loadAssembly)
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
             Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
-        }
-
-        /// <summary>
-        /// Creates a new parsing context based on an existing parsing context.
-        /// </summary>
-        /// <remarks>
-        /// The new context shares the drawable factories and the diagnostics.
-        /// </remarks>
-        /// <param name="context">The existing context.</param>
-        public ParsingContext(ParsingContext context)
-        {
-            // Things we can reuse
-            Factory = context.Factory;
-            Diagnostics = context.Diagnostics;
-            Circuit = new GraphicalCircuit(context.Circuit.TextFormatter);
         }
 
         /// <summary>

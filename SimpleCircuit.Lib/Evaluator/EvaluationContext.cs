@@ -35,6 +35,17 @@ namespace SimpleCircuit.Evaluator
         public Scope CurrentScope { get; set; }
 
         /// <summary>
+        /// Gets any local parameter definitions.
+        /// </summary>
+        public Dictionary<string, SyntaxNode> LocalParameterValues { get; } = [];
+
+        /// <summary>
+        /// Gets a set of parameters that are currently being evaluated.
+        /// This set is used to find circular dependencies of variable expressions.
+        /// </summary>
+        public HashSet<string> UsedExpressionParameters { get; } = [];
+
+        /// <summary>
         /// Gets the factory for components.
         /// </summary>
         public DrawableFactoryDictionary Factory { get; } = new();

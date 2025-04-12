@@ -8,7 +8,7 @@ namespace SimpleCircuit.Evaluator
     /// <param name="parent">The parent scope.</param>
     public class Scope(Scope parent = null)
     {
-        private readonly Dictionary<string, object> _parameters = [];
+        private readonly Dictionary<string, object> _parameterValues = [];
         private readonly Scope _parentScope = parent;
         private readonly HashSet<string> _usedParameters = parent?._usedParameters ?? [];
 
@@ -24,8 +24,8 @@ namespace SimpleCircuit.Evaluator
         /// <returns>Returns the name.</returns>
         public object this[string name]
         {
-            get => _parameters[name];
-            set => _parameters[name] = value;
+            get => _parameterValues[name];
+            set => _parameterValues[name] = value;
         }
 
         /// <summary>
@@ -34,13 +34,6 @@ namespace SimpleCircuit.Evaluator
         /// <param name="name">The parameter name.</param>
         /// <param name="value">The parameter value.</param>
         /// <returns>Returns <c>true</c> if the parameter exists; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue(string name, out object value)
-        {
-            if (_parameters.TryGetValue(name, out value))
-                return true;
-            if (_parentScope is not null)
-                return _parentScope.TryGetValue(name, out value);
-            return false;
-        }
+        public bool TryGetValue(string name, out object value) => _parameterValues.TryGetValue(name, out value);
     }
 }

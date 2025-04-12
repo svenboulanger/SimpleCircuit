@@ -268,8 +268,37 @@ namespace SimpleCircuit.Evaluator
         }
         private static object Evaluate(IdentifierNode identifier, EvaluationContext context)
         {
-            if (context.CurrentScope.TryGetValue(identifier.Name, out var result))
+            // If we are actually in the middle of evaluating the identifier, raise an error
+            if (context.UsedExpressionParameters.Contains(identifier.Name))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Token.Location, SeverityLevel.Error, "ERR", $"Circular variable reference for '{identifier.Name}'"));
+                return null;
+            }
+
+            // If the current scope contains the evaluated parameter value, use it
+            if (context.CurrentScope.TryGetValue(identifier.Name, out object result))
                 return result;
+
+            // If not, it might not be evaluated yet, so let's do that now
+            if (context.LocalParameterValues.TryGetValue(identifier.Name, out var value))
+            {
+                context.UsedExpressionParameters.Add(identifier.Name);
+                result = context.CurrentScope[identifier.Name] = StatementEvaluator.EvaluateExpression(value, context);
+                context.UsedExpressionParameters.Remove(identifier.Name);
+                return result;
+            }
+
+            // If it is not defined anywhere locally, try to find it back in one of the parent scopes
+            var scope = context.CurrentScope.ParentScope;
+            while (scope is not null)
+            {
+                if (scope.TryGetValue(identifier.Name, out result))
+                    return result;
+                scope = scope.ParentScope;
+            }
+
+            // It was not in the current scope, not in one of the parameter to be evaluated, and it wasn't in a parent scope
+            // Give up now
             context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Location, SeverityLevel.Error, "ERR", $"Could not find variable '{identifier.Name}'"));
             return null;
         }
@@ -316,102 +345,6 @@ namespace SimpleCircuit.Evaluator
                             return d.Equals(0.0) ? 1.0 : 0.0;
                         context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Location, SeverityLevel.Error, "ERR", "Cannot invert non-numbers"));
                         return null;
-                    }
-
-                case UnaryOperatorTypes.PrefixDecrement:
-                    {
-                        if (unary.Argument is not IdentifierNode identifier)
-                        {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only decrement variable"));
-                            return null;
-                        }
-                        switch (arg)
-                        {
-                            case double d:
-                                d--;
-                                context.CurrentScope[identifier.Name] = d;
-                                return d;
-
-                            case int i:
-                                i--;
-                                context.CurrentScope[identifier.Name] = i;
-                                return i;
-
-                            default:
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot decrement type {arg.GetType().Name}"));
-                                return null;
-                        }
-                    }
-
-                case UnaryOperatorTypes.PrefixIncrement:
-                    {
-                        if (unary.Argument is not IdentifierNode identifier)
-                        {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only increment variable"));
-                            return null;
-                        }
-                        switch (arg)
-                        {
-                            case double d:
-                                d++;
-                                context.CurrentScope[identifier.Name] = d;
-                                return d;
-
-                            case int i:
-                                i++;
-                                context.CurrentScope[identifier.Name] = i;
-                                return i;
-
-                            default:
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot increment type {arg.GetType().Name}"));
-                                return null;
-                        }
-                    }
-
-                case UnaryOperatorTypes.PostfixDecrement:
-                    {
-                        if (unary.Argument is not IdentifierNode identifier)
-                        {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only decrement variable"));
-                            return null;
-                        }
-                        switch (arg)
-                        {
-                            case double d:
-                                context.CurrentScope[identifier.Name] = d - 1.0;
-                                return d;
-
-                            case int i:
-                                context.CurrentScope[identifier.Name] = i - 1;
-                                return i;
-
-                            default:
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot decrement type {arg.GetType().Name}"));
-                                return null;
-                        }
-                    }
-
-                case UnaryOperatorTypes.PostfixIncrement:
-                    {
-                        if (unary.Argument is not IdentifierNode identifier)
-                        {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", "Can only increment variable"));
-                            return null;
-                        }
-                        switch (arg)
-                        {
-                            case double d:
-                                context.CurrentScope[identifier.Name] = d + 1.0;
-                                return d;
-
-                            case int i:
-                                context.CurrentScope[identifier.Name] = i + 1;
-                                return i;
-
-                            default:
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot increment type {arg.GetType().Name}"));
-                                return null;
-                        }
                     }
 
                 default:

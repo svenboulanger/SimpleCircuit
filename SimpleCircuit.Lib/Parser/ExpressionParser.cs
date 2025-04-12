@@ -57,7 +57,6 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-
         private static bool ParseLogicalOrExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -67,7 +66,6 @@ namespace SimpleCircuit.Parser
                     _ => BinaryOperatorTypes.None
                 }, ParseLogicalAndExpression);
         }
-
         private static bool ParseLogicalAndExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -77,7 +75,6 @@ namespace SimpleCircuit.Parser
                     _ => BinaryOperatorTypes.None
                 }, ParseOrExpression);
         }
-
         private static bool ParseOrExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -87,7 +84,6 @@ namespace SimpleCircuit.Parser
                     _ => BinaryOperatorTypes.None
                 }, ParseXorExpression);
         }
-
         private static bool ParseXorExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -97,7 +93,6 @@ namespace SimpleCircuit.Parser
                     _ => BinaryOperatorTypes.None
                 }, ParseAndExpression);
         }
-
         private static bool ParseAndExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -107,7 +102,6 @@ namespace SimpleCircuit.Parser
                     _ => BinaryOperatorTypes.None
                 }, ParseEqualityExpression);
         }
-
         private static bool ParseEqualityExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -119,7 +113,6 @@ namespace SimpleCircuit.Parser
                 },
                 ParseRelationalExpression);
         }
-
         private static bool ParseRelationalExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -133,7 +126,6 @@ namespace SimpleCircuit.Parser
                 },
                 ParseShiftExpression);
         }
-
         private static bool ParseShiftExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -145,7 +137,6 @@ namespace SimpleCircuit.Parser
                 },
                 ParseAdditiveExpression);
         }
-
         private static bool ParseAdditiveExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -157,7 +148,6 @@ namespace SimpleCircuit.Parser
                 },
                 ParseMultipliciativeExpression);
         }
-
         private static bool ParseMultipliciativeExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             return ParseBinaryOperator(lexer, context, out result,
@@ -170,7 +160,6 @@ namespace SimpleCircuit.Parser
                 },
                 ParseUnaryExpression);
         }
-
         private static bool ParseUnaryExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
@@ -209,7 +198,6 @@ namespace SimpleCircuit.Parser
                 return false;
             return true;
         }
-
         private static bool ParsePostfixExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             // Primary expression
@@ -250,7 +238,6 @@ namespace SimpleCircuit.Parser
                     return true;
             }
         }
-
         private static bool ParsePrimaryExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;

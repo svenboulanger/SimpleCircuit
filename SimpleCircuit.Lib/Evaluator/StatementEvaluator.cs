@@ -20,25 +20,16 @@ namespace SimpleCircuit.Evaluator
         /// <summary>
         /// Evaluates a list of statements.
         /// </summary>
-        /// <param name="statements">The statements.</param>
+        /// <param name="statement">The node to evaluate.</param>
         /// <param name="context">The context.</param>
-        public static void Evaluate(IEnumerable<SyntaxNode> statements, EvaluationContext context)
-        {
-            // First evaluate all the .param statements
-
-            // Then handle all the statements as they go
-            foreach (var statement in statements)
-                Evaluate(statement, context);
-        }
-
-        private static void Evaluate(SyntaxNode statement, EvaluationContext context)
+        public static void Evaluate(SyntaxNode statement, EvaluationContext context)
         {
             switch (statement)
             {
+                case ScopedStatementsNode statements: EvaluateScoped(statements, context); break;
                 case ComponentChain chain: Evaluate(chain, context); break;
                 case VirtualChainNode virtualChain: Evaluate(virtualChain, context); break;
                 case ControlPropertyNode controlProperty: Evaluate(controlProperty, context); break;
-                case ParameterDefinitionNode parameterDefinition: Evaluate(parameterDefinition, context); break;
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
                 case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
@@ -48,6 +39,21 @@ namespace SimpleCircuit.Evaluator
             }
         }
 
+        private static void EvaluateScoped(ScopedStatementsNode statements, EvaluationContext context)
+        {
+            // First set up the new scope, and apply the parameter definitions to them
+            context.StartScope();
+            Evaluate(statements, context);
+            context.EndScope();
+        }
+        private static void Evaluate(ScopedStatementsNode statements, EvaluationContext context)
+        {
+            ApplyLocalParameterDefinitions(statements.ParameterDefinitions, context);
+
+            // Evaluate the statements
+            foreach (var statement in statements.Statements)
+                Evaluate(statement, context);
+        }
         private static void Evaluate(ComponentChain chain, EvaluationContext context)
         {
             WireNode lastWire = null;
@@ -215,8 +221,6 @@ namespace SimpleCircuit.Evaluator
 
             StorePropertiesAndVariants(key, context.Options, controlProperty.Properties, context);
         }
-        private static void Evaluate(ParameterDefinitionNode parameterDefinition, EvaluationContext context)
-            => context.CurrentScope[parameterDefinition.Name] = ExpressionEvaluator.Evaluate(parameterDefinition.Value, context);
         private static void Evaluate(SectionDefinitionNode sectionDefinition, EvaluationContext context)
         {
             // First determine the name of the section
@@ -313,8 +317,7 @@ namespace SimpleCircuit.Evaluator
                 {
                     context.StartScope();
                     context.CurrentScope[variableName] = value;
-                    foreach (var statement in forLoop.Statements)
-                        Evaluate(statement, context);
+                    Evaluate(forLoop.Statements, context);
                     context.EndScope();
                     value += increment;
                 }
@@ -328,8 +331,7 @@ namespace SimpleCircuit.Evaluator
                 {
                     context.StartScope();
                     context.CurrentScope[variableName] = value;
-                    foreach (var statement in forLoop.Statements)
-                        Evaluate(statement, context);
+                    Evaluate(forLoop.Statements, context);
                     context.EndScope();
                     value += increment;
                 }
@@ -342,9 +344,9 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(IfElseNode ifElse, EvaluationContext context)
         {
-            for (int i = 0; i < ifElse.Conditions.Length; i++)
+            foreach (var condition in ifElse.Conditions)
             {
-                var value = EvaluateExpression(ifElse.Conditions[i], context);
+                object value = EvaluateExpression(condition.Condition, context);
                 switch (value)
                 {
                     case double d:
@@ -366,16 +368,36 @@ namespace SimpleCircuit.Evaluator
                         continue;
                 }
 
-                // Evaluate the statements
-                Evaluate(ifElse.IfTrue[i], context);
+                // Evaluate the statements of the condition
+                EvaluateScoped(condition.Statements, context);
                 return;
             }
 
             // If we reached here, then none of the conditions matched
             if (ifElse.Else is not null)
-                Evaluate(ifElse.Else, context);
+                EvaluateScoped(ifElse.Else, context);
         }
 
+        private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, EvaluationContext context)
+        {
+            // Make sure we can find the parameter definitions back
+            foreach (var parameterDefinition in parameterDefinitions)
+                context.LocalParameterValues[parameterDefinition.Name] = parameterDefinition.Value;
+
+            // Evaluate all the parameter definitions for the current scope
+            foreach (var parameterDefinition in parameterDefinitions)
+            {
+                // Make sure we avoid evaluating circular expressions
+                context.UsedExpressionParameters.Add(parameterDefinition.Name);
+
+                // Evaluate the value of the parameter
+                object value = EvaluateExpression(parameterDefinition.Value, context);
+                context.CurrentScope[parameterDefinition.Name] = value;
+
+                // Release the used parameter name
+                context.UsedExpressionParameters.Remove(parameterDefinition.Name);
+            }
+        }
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)
         {
             int labelIndex = 0;
@@ -791,7 +813,14 @@ namespace SimpleCircuit.Evaluator
             }
             return true;
         }
-        private static object EvaluateExpression(SyntaxNode expression, EvaluationContext context)
+
+        /// <summary>
+        /// Evaluates a syntax node as an expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>The evaluated expression.</returns>
+        public static object EvaluateExpression(SyntaxNode expression, EvaluationContext context)
         {
             switch (expression)
             {

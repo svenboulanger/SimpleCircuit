@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -10,6 +9,11 @@ namespace SimpleCircuit.Parser.Nodes
     /// </summary>
     public record SectionDefinitionNode : SyntaxNode
     {
+        /// <summary>
+        /// Gets the SECTION token.
+        /// </summary>
+        public Token Section { get; }
+
         /// <summary>
         /// Gets the section name.
         /// </summary>
@@ -23,7 +27,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the statements inside the section.
         /// </summary>
-        public SyntaxNode[] Statements { get; }
+        public ScopedStatementsNode Statements { get; }
 
         /// <summary>
         /// Creates a new <see cref="SectionDefinitionNode"/>.
@@ -31,12 +35,13 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="name">The name.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="statements">The statements.</param>
-        public SectionDefinitionNode(Token name, IEnumerable<SyntaxNode> properties, IEnumerable<SyntaxNode> statements)
-            : base(name.Location)
+        public SectionDefinitionNode(Token section, Token name, IEnumerable<SyntaxNode> properties, ScopedStatementsNode statements)
+            : base(section.Location)
         {
+            Section = section;
             Name = name;
             Properties = properties?.ToArray() ?? [];
-            Statements = statements?.ToArray() ?? [];
+            Statements = statements ?? ScopedStatementsNode.Empty;
         }
 
         /// <inheritdoc />
@@ -53,13 +58,9 @@ namespace SimpleCircuit.Parser.Nodes
                     sb.Append(Properties[i]);
                 }
             }
-            if (Statements.Length > 0)
-            {
-                sb.AppendLine();
-                foreach (var statement in Statements)
-                    sb.AppendLine(statement.ToString());
-                sb.Append(".ends");
-            }
+            sb.AppendLine();
+            sb.AppendLine(Statements.ToString());
+            sb.Append(".endsection");
             return sb.ToString();
         }
     }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace SimpleCircuit.Parser.Nodes
@@ -10,6 +8,11 @@ namespace SimpleCircuit.Parser.Nodes
     /// </summary>
     public record ForLoopNode : SyntaxNode
     {
+        /// <summary>
+        /// Gets the FOR token.
+        /// </summary>
+        public Token For { get; }
+
         /// <summary>
         /// Gets the variable name.
         /// </summary>
@@ -33,7 +36,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the statements in the for-loop.
         /// </summary>
-        public SyntaxNode[] Statements { get; }
+        public ScopedStatementsNode Statements { get; }
 
         /// <summary>
         /// Creates a new <see cref="ForLoopNode"/>.
@@ -43,21 +46,24 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="end">The end value.</param>
         /// <param name="increment">The increment.</param>
         /// <param name="statements">The statements.</param>
-        public ForLoopNode(Token variable, SyntaxNode start, SyntaxNode end, SyntaxNode increment, IEnumerable<SyntaxNode> statements)
-            : base(variable.Location)
+        public ForLoopNode(Token forToken, Token variable, SyntaxNode start, SyntaxNode end, SyntaxNode increment, ScopedStatementsNode statements)
+            : base(forToken.Location)
         {
+            For = forToken;
             Variable = variable;
             Start = start ?? throw new ArgumentNullException(nameof(start));
             End = end ?? throw new ArgumentNullException(nameof(end));
             Increment = increment ?? throw new ArgumentNullException(nameof(increment));
-            Statements = statements?.ToArray() ?? [];
+            Statements = statements ?? ScopedStatementsNode.Empty;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
             StringBuilder sb = new();
-            sb.Append(".for ");
+            sb.Append('.');
+            sb.Append(For.Content);
+            sb.Append(' ');
             sb.Append(Variable.Content);
             sb.Append(' ');
             sb.Append(Start);
@@ -66,10 +72,7 @@ namespace SimpleCircuit.Parser.Nodes
             sb.Append(' ');
             sb.Append(Increment);
             sb.AppendLine();
-
-            foreach (var statement in Statements)
-                sb.AppendLine(statement.ToString());
-
+            sb.AppendLine(Statements.ToString());
             sb.Append(".endfor");
             return sb.ToString();
         }

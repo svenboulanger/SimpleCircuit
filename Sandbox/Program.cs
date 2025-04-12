@@ -12,14 +12,15 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.param a = ""b""
-.if {a == ""a""}
+.if {b == ""a""}
 GND <u> R
-.elif {a == ""b""}
+.elif {b == ""b""}
 GND <u> L
 .else
 GND <u> C
 .endif
+.param b = {a == ""b""}
+.param a = {b}
 ";
 
             var logger = new Logger();
@@ -29,8 +30,7 @@ GND <u> C
                 Diagnostics = logger
             };
             SimpleCircuitParser.Parse(lexer, context, out var statements);
-            foreach (var stmt in statements)
-                Console.WriteLine(stmt.ToString());
+            Console.WriteLine(statements.ToString());
 
             var evalContext = new EvaluationContext(context);
             StatementEvaluator.Evaluate(statements, evalContext);

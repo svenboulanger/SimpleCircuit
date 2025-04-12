@@ -1,13 +1,7 @@
-﻿using SimpleCircuit.Components.Diagrams.Modeling;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
-using SpiceSharp;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace SimpleCircuit.Parser
@@ -24,9 +18,9 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
-        public static bool Parse(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
+        public static bool Parse(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result)
         {
-            if (!ParseStatements(lexer, context, out result))
+            if (!ParseScopedStatements(lexer, context, out result))
                 return false;
             if (lexer.Type != TokenType.EndOfContent)
             {
@@ -35,9 +29,12 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseStatements(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
+        private static bool ParseScopedStatements(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result)
         {
-            result = [];
+            result = null;
+            var statements = new List<SyntaxNode>();
+            var parameterDefinitions = new List<ParameterDefinitionNode>();
+
             while (true)
             {
                 // Skip any empty lines
@@ -51,10 +48,17 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (statement is null)
                     break;
-                result.Add(statement);
+
+                // Don't add a statement if it is a parameter definition (this is added separately to the context)
+                if (statement is ParameterDefinitionNode parameterDefinition)
+                    parameterDefinitions.Add(parameterDefinition);
+                else
+                    statements.Add(statement);
             }
-            if (result.Count == 0)
-                result = null;
+
+            // We finished parsing statements. If there are any, let's create our result node
+            if (statements.Count > 0 || parameterDefinitions.Count > 0)
+                result = new ScopedStatementsNode(statements, parameterDefinitions);
             return true;
         }
         private static bool ParseStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -831,7 +835,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == "." &&
                 lexer.NextType == TokenType.Word && lexer.NextHasTrivia == false)
             {
-                
+                var word = lexer.NextToken;
                 switch (lexer.NextContent.ToString())
                 {
                     case "variant":
@@ -847,19 +851,14 @@ namespace SimpleCircuit.Parser
                     case "param":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'param'
-                        if (!ParseParameterDefinition(lexer, context, out result))
+                        if (!ParseParameterDefinition(word, lexer, context, out result))
                             return false;
-                        if (result is null)
-                        {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected parameter definition"));
-                            return false;
-                        }
                         break;
 
                     case "section":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'section'
-                        if (!ParseSectionDefinition(lexer, context, out result))
+                        if (!ParseSectionDefinition(word, lexer, context, out result))
                             return false;
                         if (result is null)
                         {
@@ -871,7 +870,7 @@ namespace SimpleCircuit.Parser
                     case "for":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'for'
-                        if (!ParseForLoop(lexer, context, out result))
+                        if (!ParseForLoop(word, lexer, context, out result))
                             return false;
                         if (result is null)
                         {
@@ -895,7 +894,7 @@ namespace SimpleCircuit.Parser
                     case "if":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'if'
-                        if (!ParseIfElse(lexer, context, out result))
+                        if (!ParseIfElse(word, lexer, context, out result))
                             return false;
                         if (result is null)
                         {
@@ -925,7 +924,7 @@ namespace SimpleCircuit.Parser
             result = new ControlPropertyNode(keyToken, properties);
             return true;
         }
-        private static bool ParseParameterDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        private static bool ParseParameterDefinition(Token param, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
             if (lexer.Branch(TokenType.Word, out var identifier))
@@ -942,11 +941,11 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a value"));
                     return false;
                 }
-                result = new ParameterDefinitionNode(identifier, value);
+                result = new ParameterDefinitionNode(param, identifier, value);
             }
             return true;
         }
-        private static bool ParseSectionDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        private static bool ParseSectionDefinition(Token section, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
 
@@ -964,7 +963,7 @@ namespace SimpleCircuit.Parser
             // If the properties indicate a templated section, don't try to look for statements
             if (propertyList is not null && propertyList.Count > 0 && propertyList[0] is IdentifierNode)
             {
-                result = new SectionDefinitionNode(nameToken, propertyList, null);
+                result = new SectionDefinitionNode(section, nameToken, propertyList, ScopedStatementsNode.Empty);
                 return true;
             }
 
@@ -976,7 +975,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse the statements
-            if (!ParseStatements(lexer, context, out var statements))
+            if (!ParseScopedStatements(lexer, context, out var statements))
                 return false;
 
             // Expect a .ends
@@ -991,7 +990,7 @@ namespace SimpleCircuit.Parser
                             lexer.Next(); // '.'
                             lexer.Next(); // 'ends'
 
-                            result = new SectionDefinitionNode(nameToken, propertyList, statements);
+                            result = new SectionDefinitionNode(section, nameToken, propertyList, statements);
                             return true;
                     }
                 }
@@ -999,7 +998,7 @@ namespace SimpleCircuit.Parser
             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endsection'"));
             return false;
         }
-        private static bool ParseForLoop(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        private static bool ParseForLoop(Token @for, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
 
@@ -1045,7 +1044,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse statements
-            if (!ParseStatements(lexer, context, out var statements))
+            if (!ParseScopedStatements(lexer, context, out var statements))
                 return false;
 
             // Expect the end of the loop
@@ -1059,7 +1058,7 @@ namespace SimpleCircuit.Parser
                     case "endfor":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'end'
-                        result = new ForLoopNode(variableToken, start, end, increment, statements);
+                        result = new ForLoopNode(@for, variableToken, start, end, increment, statements);
                         return true;
                 }
             }
@@ -1130,13 +1129,11 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseIfElse(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        private static bool ParseIfElse(Token @if, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
-            List<SyntaxNode> conditions = [];
-            List<List<SyntaxNode>> ifTrue = [];
-            List<SyntaxNode> elseStatements = null;
-            TextLocation first;
+            List<IfConditionNode> conditions = [];
+            ScopedStatementsNode elseStatements = null;
 
             // Parse the condition
             if (!ParseValueOrExpression(lexer, context, out var condition))
@@ -1146,8 +1143,6 @@ namespace SimpleCircuit.Parser
                 context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
                 return false;
             }
-            first = condition.Location;
-            conditions.Add(condition);
             if (!lexer.Branch(TokenType.Newline))
             {
                 context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
@@ -1155,9 +1150,9 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse the statements
-            if (!ParseStatements(lexer, context, out var statements))
+            if (!ParseScopedStatements(lexer, context, out var statements))
                 return false;
-            ifTrue.Add(statements ?? []);
+            conditions.Add(new IfConditionNode(@if, condition, statements));
 
             // Parse elif statements
             while (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word &&
@@ -1169,11 +1164,12 @@ namespace SimpleCircuit.Parser
                     case "endif":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'endif'
-                        result = new IfElseNode(first, conditions, ifTrue, elseStatements);
+                        result = new IfElseNode(conditions, elseStatements);
                         return true;
 
                     case "elif":
                         lexer.Next(); // '.'
+                        @if = lexer.Token;
                         lexer.Next(); // 'elif'
 
                         // Condition
@@ -1184,7 +1180,6 @@ namespace SimpleCircuit.Parser
                             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
                             return false;
                         }
-                        conditions.Add(condition);
                         if (!lexer.Branch(TokenType.Newline))
                         {
                             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
@@ -1192,9 +1187,9 @@ namespace SimpleCircuit.Parser
                         }
 
                         // Statements
-                        if (!ParseStatements(lexer, context, out statements))
+                        if (!ParseScopedStatements(lexer, context, out statements))
                             return false;
-                        ifTrue.Add(statements ?? []);
+                        conditions.Add(new IfConditionNode(@if, condition, statements));
                         break;
 
                     case "else":
@@ -1207,7 +1202,7 @@ namespace SimpleCircuit.Parser
                         }
 
                         // Statements
-                        if (!ParseStatements(lexer, context, out elseStatements))
+                        if (!ParseScopedStatements(lexer, context, out elseStatements))
                             return false;
                         break;
 

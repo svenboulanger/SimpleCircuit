@@ -8,6 +8,11 @@ namespace SimpleCircuit.Parser.Nodes
     public record ParameterDefinitionNode : SyntaxNode
     {
         /// <summary>
+        /// Gets the PARAM token.
+        /// </summary>
+        public Token Param { get; }
+
+        /// <summary>
         /// The token of the parameter name.
         /// </summary>
         public Token Token { get; }
@@ -28,15 +33,16 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="token">The token.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c>.</exception>
-        public ParameterDefinitionNode(Token token, SyntaxNode value)
-            : base(token.Location)
+        public ParameterDefinitionNode(Token paramToken, Token token, SyntaxNode value)
+            : base(paramToken.Location)
         {
+            Param = paramToken;
             Token = token;
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <inheritdoc />
         public override string ToString()
-            => $"{Name} = {Value}";
+            => $".{Param.Content} {Name} = {Value}";
     }
 }
