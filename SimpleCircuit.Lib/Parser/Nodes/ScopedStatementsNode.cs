@@ -12,7 +12,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets an empty scoped statements node.
         /// </summary>
-        public static ScopedStatementsNode Empty { get; } = new([], []);
+        public static ScopedStatementsNode Empty { get; } = new([], [], []);
 
         /// <summary>
         /// Gets the statements.
@@ -25,15 +25,25 @@ namespace SimpleCircuit.Parser.Nodes
         public ParameterDefinitionNode[] ParameterDefinitions { get; }
 
         /// <summary>
+        /// Gets a sorted array of strings that contain all the references.
+        /// </summary>
+        /// <remarks>
+        /// Rather than a set, we can 
+        /// </remarks>
+        public string[] References { get; }
+
+        /// <summary>
         /// Creates a new <see cref="ScopedStatementsNode"/>
         /// </summary>
         /// <param name="statements">The statements.</param>
         /// <param name="parameterDefinitions">The parameter definitions.</param>
-        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions)
+        /// <param name="references">The references.</param>
+        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<string> references)
             : base(statements.FirstOrDefault()?.Location ?? parameterDefinitions.First().Location)
         {
             Statements = statements?.ToArray() ?? [];
             ParameterDefinitions = parameterDefinitions?.ToArray() ?? [];
+            References = references?.ToArray() ?? [];
         }
 
         /// <inheritdoc />

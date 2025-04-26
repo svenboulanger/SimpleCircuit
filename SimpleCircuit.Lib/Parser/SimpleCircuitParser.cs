@@ -2,6 +2,7 @@
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace SimpleCircuit.Parser
@@ -58,7 +59,12 @@ namespace SimpleCircuit.Parser
 
             // We finished parsing statements. If there are any, let's create our result node
             if (statements.Count > 0 || parameterDefinitions.Count > 0)
-                result = new ScopedStatementsNode(statements, parameterDefinitions);
+            {
+                // Use the collected scoped statements
+                foreach (var parameterDefinition in parameterDefinitions)
+                    context.ReferencedVariables.Remove(parameterDefinition.Name);
+                result = new ScopedStatementsNode(statements, parameterDefinitions, context.ReferencedVariables.OrderBy(n => n));
+            }
             return true;
         }
         private static bool ParseStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -665,6 +671,10 @@ namespace SimpleCircuit.Parser
             result = null;
             while (true)
             {
+                // We don't allow spaces for concatenations
+                if (result is not null && lexer.HasTrivia)
+                    return true;
+
                 // word
                 if (lexer.Branch(TokenType.Word, out var word))
                 {
@@ -899,6 +909,18 @@ namespace SimpleCircuit.Parser
                         if (result is null)
                         {
                             context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected if-else statement"));
+                            return false;
+                        }
+                        break;
+
+                    case "subckt":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'subckt'
+                        if (!ParseSubcircuitDefinition(word, lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected subcircuit definition"));
                             return false;
                         }
                         break;
@@ -1212,6 +1234,69 @@ namespace SimpleCircuit.Parser
                 }
             }
             return true;
+        }
+        private static bool ParseSubcircuitDefinition(Token subckt, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+            if (!lexer.Branch(TokenType.Word, out var nameToken))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected subcircuit name"));
+                return false;
+            }
+
+            // Try parsing pins
+            List<SyntaxNode> pins = [];
+            while (lexer.Check(~TokenType.Newline))
+            {
+                // Detect properties
+                if (lexer.Type == TokenType.Word && lexer.NextType == TokenType.Punctuator && lexer.NextContent.ToString() == "=")
+                    break;
+
+                // Parse the pin
+                if (!ParsePinNamePin(lexer, context, out var pin))
+                    return false;
+                if (pin is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a pin"));
+                    return false;
+                }
+                pins.Add(pin);
+            }
+            List<SyntaxNode> properties = null;
+            if (lexer.Check(~TokenType.Newline))
+            {
+                if (!ParsePropertyList(lexer, context, out properties))
+                    return false;
+            }
+
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a new line"));
+                return false;
+            }
+
+            // Parse the statements
+            if (!ParseScopedStatements(lexer, context, out var statements))
+                return false;
+
+            // Expect a .ends
+            if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")
+            {
+                if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
+                {
+                    switch (lexer.NextContent.ToString())
+                    {
+                        case "ends":
+                        case "endsubckt":
+                            lexer.Next(); // '.'
+                            lexer.Next(); // 'ends'
+
+                            result = new SubcircuitDefinitionNode(subckt, nameToken, pins, properties, statements);
+                            return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

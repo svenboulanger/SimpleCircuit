@@ -35,7 +35,7 @@ namespace SimpleCircuit.Parser.Nodes
         {
             IfToken = ifToken;
             Condition = condition ?? throw new ArgumentNullException(nameof(condition));
-            Statements = statements ?? new([], []);
+            Statements = statements ?? ScopedStatementsNode.Empty;
         }
 
         /// <inheritdoc />

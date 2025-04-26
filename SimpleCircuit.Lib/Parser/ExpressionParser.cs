@@ -244,8 +244,34 @@ namespace SimpleCircuit.Parser
             switch (lexer.Type)
             {
                 case TokenType.Word:
-                    result = new IdentifierNode(lexer.Token);
-                    lexer.Next();
+                    // Variable or function
+                    if (lexer.NextType == TokenType.Punctuator && lexer.NextContent.Length == 1 && lexer.NextContent.Span[0] == '(')
+                    {
+                        // Function
+                        var id = lexer.Token;
+                        lexer.Next();
+                        lexer.Next(); // '('
+
+                        List<SyntaxNode> arguments = [];
+                        while (!lexer.Branch(TokenType.Punctuator, ")", out var bracketClose))
+                        {
+                            if (!ParseExpression(lexer, context, out var argument))
+                                return false;
+                            if (argument is null)
+                            {
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected an argument"));
+                                return false;
+                            }
+                        }
+                        result = new CallNode(new IdentifierNode(id), arguments);
+                    }
+                    else
+                    {
+                        // Variable
+                        result = new IdentifierNode(lexer.Token);
+                        context.ReferencedVariables.Add(lexer.Content.ToString());
+                        lexer.Next();
+                    }
                     return true;
 
                 case TokenType.String:

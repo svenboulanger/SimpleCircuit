@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
@@ -73,6 +74,23 @@ namespace SimpleCircuit.Evaluator
             Options = parsingContext.Options;
             Diagnostics = parsingContext.Diagnostics;
             CurrentScope = new();
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="EvaluationContext"/>.
+        /// </summary>
+        /// <param name="factories">The factories.</param>
+        /// <param name="circuit">The circuit.</param>
+        /// <param name="options">The options.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="factories"/>, <paramref name="circuit"/> or <paramref name="options"/> is <c>null</c>.</exception>
+        public EvaluationContext(DrawableFactoryDictionary factories, GraphicalCircuit circuit, Options options, IDiagnosticHandler diagnostics, Scope scope = null)
+        {
+            Factory = factories ?? throw new ArgumentNullException(nameof(factories));
+            Circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
+            Options = options ?? throw new ArgumentNullException(nameof(options));
+            Diagnostics = diagnostics;
+            CurrentScope = scope ?? new();
         }
 
         /// <summary>

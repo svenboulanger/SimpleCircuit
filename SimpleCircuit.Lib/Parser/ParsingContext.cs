@@ -77,7 +77,12 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets extra CSS.
         /// </summary>
-        public IList<string> ExtraCss { get; } = new List<string>();
+        public IList<string> ExtraCss { get; } = [];
+
+        /// <summary>
+        /// Gets the referenced variables in the current scope.
+        /// </summary>
+        public HashSet<string> ReferencedVariables { get; } = [];
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.

@@ -12,15 +12,11 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.if {b == ""a""}
-GND <u> R
-.elif {b == ""b""}
-GND <u> L
-.else
-GND <u> C
-.endif
-.param b = {a == ""b""}
-.param a = {b}
+.param s = 5
+.subckt SUB DIR1 DIR2 label=""a""
+    DIR1(label1={label}) <r> R(scale={s}) <r> [b]DIR2[a]
+.ends
+SUB1 <r> SUB2(label=""b"" s=1)
 ";
 
             var logger = new Logger();

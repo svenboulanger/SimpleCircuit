@@ -72,7 +72,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
+        public virtual bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
             => SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
@@ -257,7 +257,7 @@ namespace SimpleCircuit.Components
                 if (!property.CanWrite)
                     continue;
                 set.Clear();
-                foreach (var attr in property.GetCustomAttributes(true))
+                foreach (object attr in property.GetCustomAttributes(true))
                 {
                     if (attr is AliasAttribute aliasAttr)
                         set.Add(aliasAttr.Alias);

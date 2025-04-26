@@ -34,6 +34,7 @@ namespace SimpleCircuit.Evaluator
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
                 case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
                 case IfElseNode ifElse: Evaluate(ifElse, context); break;
+                case SubcircuitDefinitionNode subckt: Evaluate(subckt, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -377,6 +378,11 @@ namespace SimpleCircuit.Evaluator
             if (ifElse.Else is not null)
                 EvaluateScoped(ifElse.Else, context);
         }
+        private static void Evaluate(SubcircuitDefinitionNode subckt, EvaluationContext context)
+        {
+            // Create a new factory
+            context.Factory.Register(new Subcircuit(subckt.Name.Content.ToString(), subckt, context.Factory, context.Options, context.Diagnostics));
+        }
 
         private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, EvaluationContext context)
         {
@@ -689,6 +695,9 @@ namespace SimpleCircuit.Evaluator
             {
                 presence = context.Factory.Create(name, context.Options, context.Diagnostics);
                 context.Circuit.Add(presence);
+
+                if (presence is Subcircuit.Instance inst)
+                    inst.ApplyDefaultProperties(context);
             }
 
             // Register the source
@@ -742,7 +751,14 @@ namespace SimpleCircuit.Evaluator
             var resultRight = new AlignedPins(context.GetVirtualName(), name, pinRight, flags);
             return (resultLeft, resultRight);
         }
-        private static string EvaluateName(SyntaxNode node, EvaluationContext context)
+
+        /// <summary>
+        /// Evaluates a syntax node as a component name.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>Returns the name.</returns>
+        public static string EvaluateName(SyntaxNode node, EvaluationContext context)
         {
             switch (node)
             {
@@ -784,7 +800,7 @@ namespace SimpleCircuit.Evaluator
         }
         private static double EvaluateAsNumber(SyntaxNode node, EvaluationContext context, double defaultValue)
         {
-            object result = ExpressionEvaluator.Evaluate(node, context);
+            object result = EvaluateExpression(node, context);
             if (result is null)
                 return defaultValue;
             if (result is double dResult)
