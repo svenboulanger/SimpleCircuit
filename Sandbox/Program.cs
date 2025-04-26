@@ -12,11 +12,11 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.param s = 5
-.subckt SUB DIR1 DIR2 label=""a""
-    DIR1(label1={label}) <r> R(scale={s}) <r> [b]DIR2[a]
+.param s = 1
+.subckt SUB DIR1[a] DIR2[b] label=""a""
+    DIR1(label1={label}) <r> R(scale={s}) <r> DIR2
 .ends
-SUB1 <r> SUB2(label=""b"" s=1)
+SUB1[2] <r> SUB2(label=""b"" s=1)
 ";
 
             var logger = new Logger();

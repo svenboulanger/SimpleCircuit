@@ -130,7 +130,6 @@ namespace SimpleCircuit.Evaluator
                             else
                                 lastPin = null;
                             lastWire = null;
-
                         }
                         break;
 
@@ -694,6 +693,11 @@ namespace SimpleCircuit.Evaluator
             if (!context.Circuit.TryGetValue(name, out var presence))
             {
                 presence = context.Factory.Create(name, context.Options, context.Diagnostics);
+                if (presence is null)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(component.Location, SeverityLevel.Error, "ERR", $"Could not create a component for '{name}'"));
+                    return null;
+                }
                 context.Circuit.Add(presence);
 
                 if (presence is Subcircuit.Instance inst)

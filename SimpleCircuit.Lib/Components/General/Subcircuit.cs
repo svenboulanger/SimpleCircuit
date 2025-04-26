@@ -6,7 +6,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
-using SpiceSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace SimpleCircuit.Components
     {
         private readonly string _key;
         private readonly SubcircuitDefinitionNode _definitionNode;
-        private readonly Dictionary<SubcircuitState, (GraphicalCircuit, List<Func<ILocatedDrawable, IPin>>)> _versions = [];
+        private readonly Dictionary<SubcircuitState, (GraphicalCircuit, List<Action<PinCollection, ILocatedDrawable>>)> _versions = [];
         private readonly DrawableFactoryDictionary _factories;
         private readonly Options _options;
 
@@ -94,6 +93,8 @@ namespace SimpleCircuit.Components
             public bool ApplyDefaultProperties(EvaluationContext context)
             {
                 // Find the global scope
+                // Note: the top-level statements are usually defined in their own scope, so we'll use
+                // the sub-global scope instead of the global scope.
                 var globalScope = context.CurrentScope;
                 while (globalScope.ParentScope?.ParentScope != null)
                     globalScope = globalScope.ParentScope;
@@ -173,66 +174,158 @@ namespace SimpleCircuit.Components
                             if (!circuit.Solve(context.Diagnostics))
                                 return PresenceResult.GiveUp;
 
-                            HashSet<string> takenNames = new(StringComparer.OrdinalIgnoreCase);
-                            List<string> pinNames = [];
-                            List<Func<ILocatedDrawable, IPin>> pinFactories = [];
+                            HashSet<string> usedPins = [];
+                            List<Action<PinCollection, ILocatedDrawable>> pinFactories = [];
                             foreach (var pinInfo in _parentFactory._definitionNode.Pins)
                             {
-                                pinNames.Clear();
-                                string name = null;
-                                switch (pinInfo)
-                                {
-                                    case PinNamePinNode pnp:
-                                        // Try to find the component in the graphical circuit
-                                        name = StatementEvaluator.EvaluateName(pnp.Name, evalContext);
-                                        break;
-
-                                    case LiteralNode literal:
-                                        name = literal.Value.ToString();
-                                        break;
-
-                                    case IdentifierNode id:
-                                        name = id.Name;
-                                        break;
-
-                                    default:
-                                        context.Diagnostics?.Post(new SourceDiagnosticMessage(pinInfo.Location, SeverityLevel.Error, "ERR", "Cannot recognize pin"));
-                                        return PresenceResult.GiveUp;
-                                }
-
-                                // Find the pin
-                                if (!circuit.TryGetValue(name, out var presence) || presence is not IDrawable drawable)
-                                {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(pinInfo.Location, SeverityLevel.Error, "ERR", $"Could not find component '{name}' in subcircuit '{_parentFactory._key}'"));
+                                var r = RegisterPin(circuit, pinInfo, evalContext, pinFactories, usedPins, context.Diagnostics);
+                                if (r == PresenceResult.GiveUp)
                                     return PresenceResult.GiveUp;
-                                }
-                                var pinReference = new PinReference(drawable, null, pinInfo.Location);
-                                var pin = pinReference.GetOrCreate(context.Diagnostics, 0);
-                                var location = pin.Location;
-                                switch (pin)
-                                {
-                                    case IOrientedPin orientedPin:
-                                        var orientation = orientedPin.Orientation;
-                                        pinFactories.Add(d => new FixedOrientedPin(name, "pin", d, location, orientation));
-                                        break;
-
-                                    default:
-                                        pinFactories.Add(d => new FixedPin(name, "pin", d, location));
-                                        break;
-                                }
                             }
                             version = (circuit, pinFactories);
                         }
 
-
                         // Calculate the positions of the pins
                         Pins.Clear();
                         foreach (var pf in version.Item2)
-                            Pins.Add(pf(this));
+                            pf(Pins, this);
                         _circuit = version.Item1;
                         break;
                 }
                 return result;
+            }
+
+            private PresenceResult RegisterPin(GraphicalCircuit circuit, SyntaxNode node, EvaluationContext context, List<Action<PinCollection, ILocatedDrawable>> pinFactories, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
+            {
+                switch (node)
+                {
+                    case PinNamePinNode pnp:
+                        {
+                            // Let's try to find the drawable
+                            string name = StatementEvaluator.EvaluateName(pnp.Name, context);
+                            if (!circuit.TryGetValue(name, out var presence) || presence is not IDrawable drawable)
+                            {
+                                diagnostics?.Post(new SourceDiagnosticMessage(pnp.Name.Location, SeverityLevel.Error, "ERR", $"Could not find component '{name}' in subcircuit '{_parentFactory._key}'"));
+                                return PresenceResult.GiveUp;
+                            }
+
+                            // Deal with the pins
+                            if (pnp.PinLeft is not null)
+                            {
+                                // Find the pin on the drawable
+                                string pinName = StatementEvaluator.EvaluateName(pnp.PinLeft, context);
+                                if (pinName is null)
+                                    return PresenceResult.GiveUp;
+                                if (drawable.Pins.TryGetValue(pinName, out var pin))
+                                    pinFactories.Add(CreatePinFactory(name, pinName, pin, usedPins, context.Diagnostics));
+                                else
+                                {
+                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(pnp.PinLeft.Location, SeverityLevel.Error, "ERR", $"Could not find pin '{pinName}' on '{name}'"));
+                                    return PresenceResult.GiveUp;
+                                }
+                            }
+                            if (pnp.PinRight is not null)
+                            {
+                                string pinName = StatementEvaluator.EvaluateName(pnp.PinRight, context);
+                                if (pinName is null)
+                                    return PresenceResult.GiveUp;
+                                if (drawable.Pins.TryGetValue(pinName, out var pin))
+                                    pinFactories.Add(CreatePinFactory(name, pinName, pin, usedPins, context.Diagnostics));
+                                else
+                                {
+                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(pnp.PinRight.Location, SeverityLevel.Error, "ERR", $"Could not find pin '{pinName}' on '{name}'"));
+                                    return PresenceResult.GiveUp;
+                                }
+                            }
+                        }
+                        break;
+
+                    case LiteralNode literal:
+                        {
+                            // Let's try to find the drawable
+                            string name = literal.Value.ToString();
+                            if (!circuit.TryGetValue(name, out var presence) || presence is not IDrawable drawable)
+                            {
+                                diagnostics?.Post(new SourceDiagnosticMessage(literal.Location, SeverityLevel.Error, "ERR", $"Could not find component '{name}' in subcircuit '{_parentFactory._key}'"));
+                                return PresenceResult.GiveUp;
+                            }
+
+                            // Determine the name of the pin
+                            if (drawable.Pins.Count == 0)
+                            {
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(literal.Location, SeverityLevel.Error, "ERR", $"The component '{name}' does not have pins"));
+                                return PresenceResult.GiveUp;
+                            }
+                            var pin = drawable.Pins[^1];
+                            pinFactories.Add(CreatePinFactory(name, pin.Name, pin, usedPins, context.Diagnostics));
+                        }
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
+                }
+                return PresenceResult.Success;
+            }
+
+            private static Action<PinCollection, ILocatedDrawable> CreatePinFactory(string drawableName, string pinName, IPin pin, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
+            {
+                List<string> names = [];
+
+                // The full name with pin
+                string namePin = $"{drawableName}_{pinName}";
+                if (usedPins.Add(namePin))
+                    names.Add(namePin);
+                else
+                    diagnostics?.Post(new SourcesDiagnosticMessage(pin.Sources, SeverityLevel.Warning, "WARNING", $"The pin '{pinName}' on '{drawableName}' is used multiple times and will not be accessible as a port anymore."));
+
+                // Also try just the drawable name
+                if (usedPins.Add(drawableName))
+                    names.Add(drawableName);
+
+                // Then also try to add the local name
+                string localName = drawableName;
+                int index = drawableName.LastIndexOf(DrawableFactoryDictionary.Separator);
+                if (index >= 0)
+                {
+                    localName = drawableName[index..];
+
+                    // The local name with pin
+                    string localNamePin = $"{localName}_{pinName}";
+                    if (usedPins.Add(localNamePin))
+                        names.Add(localNamePin);
+
+                    // The local name
+                    if (usedPins.Add(localName))
+                        names.Add(localName);
+                }
+
+                // Also make a shorter version for DIR components
+                // These can be quite handy then
+                if (localName.StartsWith("DIR"))
+                {
+                    string shortPinName = localName[3..];
+                    if (usedPins.Add(shortPinName))
+                        names.Add(shortPinName);
+                }
+
+                switch (pin)
+                {
+                    case FixedOrientedPin oriented:
+                        {
+                            var offset = oriented.Location;
+                            var orientation = oriented.Orientation;
+                            return (pc, d) => pc.Add(new FixedOrientedPin(namePin, "Pin", d, offset, orientation), names);
+                        }
+
+                    case FixedPin @fixed:
+                        {
+                            var offset = @fixed.Location;
+                            return (pc, d) => pc.Add(new FixedPin(namePin, "Pin", d, offset), names);
+                        }
+
+                    default:
+                        throw new NotImplementedException();
+                }
             }
 
             /// <inheritdoc/>

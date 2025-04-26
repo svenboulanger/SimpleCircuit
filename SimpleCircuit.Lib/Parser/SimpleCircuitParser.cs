@@ -435,7 +435,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.Punctuator, "["))
             {
                 // Pin name
-                if (!ParseName(lexer, context, out pinLeft))
+                if (!ParseName(lexer, context, out pinLeft, allowNumbers: true))
                     return false;
                 if (pinLeft is null)
                 {
@@ -481,7 +481,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.Punctuator, "["))
             {
                 // Pin name
-                if (!ParseName(lexer, context, out pinRight))
+                if (!ParseName(lexer, context, out pinRight, allowNumbers: true))
                     return false;
                 if (pinRight is null)
                 {
@@ -526,7 +526,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.Punctuator, "["))
             {
                 // Pin name
-                if (!ParseName(lexer, context, out pinLeft))
+                if (!ParseName(lexer, context, out pinLeft, allowNumbers: true))
                     return false;
                 if (pinLeft is null)
                 {
@@ -555,7 +555,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Branch(TokenType.Punctuator, "["))
             {
                 // Pin name
-                if (!ParseName(lexer, context, out pinRight))
+                if (!ParseName(lexer, context, out pinRight, allowNumbers: true))
                     return false;
                 if (pinRight is null)
                 {
@@ -666,7 +666,7 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
-        public static bool ParseName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        public static bool ParseName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result, bool allowNumbers = false)
         {
             result = null;
             while (true)
@@ -675,9 +675,15 @@ namespace SimpleCircuit.Parser
                 if (result is not null && lexer.HasTrivia)
                     return true;
 
-                // word
-                if (lexer.Branch(TokenType.Word, out var word))
+                if (allowNumbers && lexer.Branch(TokenType.Number, out var number))
                 {
+                    // A number (if allowed)
+                    var expression = new LiteralNode(number);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                }
+                else if (lexer.Branch(TokenType.Word, out var word))
+                {
+                    // A word
                     var expression = new LiteralNode(word);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
@@ -914,6 +920,11 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case "subckt":
+                        if (!context.AllowSubcircuitDefinitions)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Nested subcircuit definitions are not allowed"));
+                            return false;
+                        }
                         lexer.Next(); // '.'
                         lexer.Next(); // 'subckt'
                         if (!ParseSubcircuitDefinition(word, lexer, context, out result))
@@ -1276,8 +1287,11 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse the statements
+            bool lastAllowSubckt = context.AllowSubcircuitDefinitions;
+            context.AllowSubcircuitDefinitions = false;
             if (!ParseScopedStatements(lexer, context, out var statements))
                 return false;
+            context.AllowSubcircuitDefinitions = lastAllowSubckt;
 
             // Expect a .ends
             if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")

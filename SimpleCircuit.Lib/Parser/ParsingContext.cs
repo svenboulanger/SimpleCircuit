@@ -30,6 +30,11 @@ namespace SimpleCircuit.Parser
         public Options Options { get; } = new();
 
         /// <summary>
+        /// Gets or sets a flag that allows definitions of subcircuit definitions.
+        /// </summary>
+        public bool AllowSubcircuitDefinitions { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the number of wires.
         /// </summary>
         public int WireCount { get; set; } = 0;
