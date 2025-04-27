@@ -2,7 +2,6 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser.Nodes;
 using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
@@ -97,7 +96,9 @@ namespace SimpleCircuit.Parser
         public ParsingContext(bool loadAssembly = true, ITextFormatter formatter = null)
         {
             if (loadAssembly)
+            {
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+            }
             Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
         }
 

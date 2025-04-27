@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Wires;
@@ -7,6 +8,7 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -535,55 +537,90 @@ namespace SimpleCircuit.Evaluator
         private static void ProcessWire(PinReference startPin, WireNode wire, PinReference endPin, EvaluationContext context)
         {
             List<WireSegmentInfo> segments = [];
+            List<Marker> markers = [];
+            HashSet<string> variants = [];
             foreach (var item in wire.Items)
             {
                 switch (item)
                 {
                     case DirectionNode direction:
-                        // Create the segment and apply defaults
-                        var segment = new WireSegmentInfo(direction.Location)
                         {
-                            IsMinimum = true,
-                            Length = context.Options.MinimumWireLength
-                        };
-
-                        if (direction.Angle is not null)
-                        {
-                            double angle = EvaluateAsNumber(direction.Angle, context, 0.0);
-                            segment.Orientation = Vector2.Normal(angle / 180.0 * Math.PI);
-                        }
-                        else
-                        {
-                            // Use the direction name itself
-                            segment.Orientation = direction.Value.ToString() switch
+                            // Create the segment and apply defaults
+                            var segment = new WireSegmentInfo(direction.Location)
                             {
-                                DirectionNode.UpArrow or "n" or "u" => new(0, -1),
-                                DirectionNode.DownArrow or "s" or "d" => new(0, 1),
-                                DirectionNode.LeftArrow or "e" or "l" => new(-1, 0),
-                                DirectionNode.RightArrow or "w" or "r" => new(1, 0),
-                                DirectionNode.UpLeftArrow or "nw" => new(-_isqrt2, -_isqrt2),
-                                DirectionNode.UpRightArrow or "ne" => new(_isqrt2, -_isqrt2),
-                                DirectionNode.DownRightArrow or "se" => new(_isqrt2, _isqrt2),
-                                DirectionNode.DownLeftArrow or "sw" => new(-_isqrt2, _isqrt2),
-                                _ => throw new NotImplementedException(),
+                                IsMinimum = true,
+                                Length = context.Options.MinimumWireLength
                             };
-                        }
-                        if (direction.Distance is not null)
-                        {
-                            if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
-                                segment.Length = EvaluateAsNumber(unary.Argument, context, context.Options.MinimumWireLength);
+
+                            // Handle markers
+                            if (markers.Count > 0)
+                            {
+                                if (segments.Count == 0)
+                                    segment.StartMarkers = [.. markers];
+                                else
+                                    segments[^1].EndMarkers = [.. markers];
+                            }
+                            markers.Clear();
+
+                            if (direction.Angle is not null)
+                            {
+                                double angle = EvaluateAsNumber(direction.Angle, context, 0.0);
+                                segment.Orientation = Vector2.Normal(angle / 180.0 * Math.PI);
+                            }
                             else
                             {
-                                segment.Length = EvaluateAsNumber(direction.Distance, context, context.Options.MinimumWireLength);
-                                segment.IsMinimum = false;
+                                // Use the direction name itself
+                                segment.Orientation = direction.Value.ToString() switch
+                                {
+                                    DirectionNode.UpArrow or "n" or "u" => new(0, -1),
+                                    DirectionNode.DownArrow or "s" or "d" => new(0, 1),
+                                    DirectionNode.LeftArrow or "e" or "l" => new(-1, 0),
+                                    DirectionNode.RightArrow or "w" or "r" => new(1, 0),
+                                    DirectionNode.UpLeftArrow or "nw" => new(-_isqrt2, -_isqrt2),
+                                    DirectionNode.UpRightArrow or "ne" => new(_isqrt2, -_isqrt2),
+                                    DirectionNode.DownRightArrow or "se" => new(_isqrt2, _isqrt2),
+                                    DirectionNode.DownLeftArrow or "sw" => new(-_isqrt2, _isqrt2),
+                                    _ => throw new NotImplementedException(),
+                                };
                             }
+                            if (direction.Distance is not null)
+                            {
+                                if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
+                                    segment.Length = EvaluateAsNumber(unary.Argument, context, context.Options.MinimumWireLength);
+                                else
+                                {
+                                    segment.Length = EvaluateAsNumber(direction.Distance, context, context.Options.MinimumWireLength);
+                                    segment.IsMinimum = false;
+                                }
+                            }
+                            segments.Add(segment);
                         }
-                        segments.Add(segment);
+                        break;
+
+                    case IdentifierNode identifier:
+                        {
+                            string name = identifier.Name;
+
+                            // Identify markers
+                            if (context.Markers.TryGetValue(name, out var markerFactory))
+                            {
+                                markers.Add(markerFactory());
+                                continue;
+                            }
+
+                            // Identify styles
+                            variants.Add(name);
+                        }
                         break;
 
                     default:
                         throw new NotImplementedException();
                 }
+            }
+            if (markers.Count > 0)
+            {
+                if (segments.Count > 0)
+                    segments[^1].EndMarkers = markers.ToArray();
             }
 
             // Create pin constraints
@@ -608,6 +645,8 @@ namespace SimpleCircuit.Evaluator
 
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
+                foreach (string variant in variants)
+                    result.Variants.Add(variant);
                 context.Circuit.Add(result);
             }
         }

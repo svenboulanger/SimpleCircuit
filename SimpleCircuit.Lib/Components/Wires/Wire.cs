@@ -272,11 +272,11 @@ namespace SimpleCircuit.Components.Wires
         private void AddJumpOverWires(Vector2 last, Vector2 next, IEnumerable<WireSegment> segments)
         {
             // Calculate overlapping vectors
-            Vector2 d = last - next;
+            var d = last - next;
             SortedDictionary<double, Vector2> pts = [];
             foreach (var segment in segments)
             {
-                Vector2 sd = segment.Start - segment.End;
+                var sd = segment.Start - segment.End;
                 double denom = d.X * sd.Y - d.Y * sd.X;
                 if (denom.IsZero())
                     continue;
@@ -294,7 +294,7 @@ namespace SimpleCircuit.Components.Wires
                     continue;
                 if (tn >= denom * 0.999 || un >= denom * 1.001)
                     continue;
-                Vector2 intersection = last - tn / denom * d;
+                var intersection = last - tn / denom * d;
                 sd = intersection - last;
                 double distance = sd.X * sd.X + sd.Y * sd.Y;
                 if (!pts.ContainsKey(distance))
@@ -370,18 +370,18 @@ namespace SimpleCircuit.Components.Wires
                     _points.Add(tf.Apply(_localPoints[0].Location));
                     int segment = 0;
                     var startMarkers = _segments[0].StartMarkers;
-                    Vector2 last = _localPoints[0].Location;
+                    var last = _localPoints[0].Location;
                     for (int i = 1; i < _localPoints.Count; i++)
                     {
-                        Vector2 current = _localPoints[i].Location;
+                        var current = _localPoints[i].Location;
 
                         // Draw a small half circle for crossing over this point
                         if (_localPoints[i].IsJumpOver)
                         {
                             GetNewAxes(last, current, out var nx, out var ny);
-                            Vector2 s = current - nx * _jumpOverRadius;
-                            Vector2 e = current + _jumpOverRadius * nx;
-                            Vector2 m = current + ny * _jumpOverRadius;
+                            var s = current - nx * _jumpOverRadius;
+                            var e = current + _jumpOverRadius * nx;
+                            var m = current + ny * _jumpOverRadius;
 
                             builder.LineTo(s);
 
@@ -409,9 +409,9 @@ namespace SimpleCircuit.Components.Wires
                                 builder.LineTo(current);
                             else
                             {
-                                Vector2 nu = last - current;
+                                var nu = last - current;
                                 double lu = nu.Length;
-                                Vector2 nv = _localPoints[i + 1].Location - current;
+                                var nv = _localPoints[i + 1].Location - current;
                                 double lv = nv.Length;
                                 if (lu > 0 && lv > 0.0)
                                 {
@@ -523,7 +523,6 @@ namespace SimpleCircuit.Components.Wires
             }
             return orientation;
         }
-
         private void GenerateError(IDiagnosticHandler diagnostics, PinReference pin, ErrorCodes code, params object[] arguments)
         {
             if (pin.Name.Length > 0)

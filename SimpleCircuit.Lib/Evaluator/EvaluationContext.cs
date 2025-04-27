@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
@@ -47,6 +48,11 @@ namespace SimpleCircuit.Evaluator
         public HashSet<string> UsedExpressionParameters { get; } = [];
 
         /// <summary>
+        /// Gets possible markers.
+        /// </summary>
+        public Dictionary<string, Func<Marker>> Markers { get; } = [];
+
+        /// <summary>
         /// Gets the factory for components.
         /// </summary>
         public DrawableFactoryDictionary Factory { get; } = new();
@@ -69,7 +75,11 @@ namespace SimpleCircuit.Evaluator
         public EvaluationContext(ParsingContext parsingContext, bool loadAssembly = true, ITextFormatter formatter = null)
         {
             if (loadAssembly)
+            {
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
+                Markers.Add("arrow", () => new Arrow());
+                Markers.Add("rarrow", () => new ReverseArrow());
+            }
             Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
             Options = parsingContext.Options;
             Diagnostics = parsingContext.Diagnostics;
