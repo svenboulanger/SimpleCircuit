@@ -78,6 +78,12 @@ namespace SimpleCircuit.Components.Wires
         public IReadOnlyList<Vector2> Points => _points.AsReadOnly();
 
         /// <summary>
+        /// Gets or sets the thickness.
+        /// </summary>
+        [Description("The wire thickness"), Alias("t")]
+        public double Thickness { get; set; } = 0.5;
+
+        /// <summary>
         /// Creates a new wire.
         /// </summary>
         /// <param name="name">The name of the wire.</param>
@@ -361,6 +367,7 @@ namespace SimpleCircuit.Components.Wires
                     1 => new("wire", "dotted"),
                     _ => new("wire"),
                 };
+                options.Style = $"stroke-width: {Thickness.ToString("g2", System.Globalization.CultureInfo.InvariantCulture)}pt;";
 
                 var tf = builder.CurrentTransform;
                 _points.Clear();

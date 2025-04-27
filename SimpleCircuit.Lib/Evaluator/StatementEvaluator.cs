@@ -551,7 +551,7 @@ namespace SimpleCircuit.Evaluator
         {
             List<WireSegmentInfo> segments = [];
             List<Marker> markers = [];
-            HashSet<string> variants = [];
+            List<SyntaxNode> propertiesAndVariants = [];
             foreach (var item in wire.Items)
             {
                 switch (item)
@@ -622,8 +622,13 @@ namespace SimpleCircuit.Evaluator
                             }
 
                             // Identify styles
-                            variants.Add(name);
+                            propertiesAndVariants.Add(identifier);
                         }
+                        break;
+
+                    case UnaryNode unary:
+                    case BinaryNode binary:
+                        propertiesAndVariants.Add(item);
                         break;
 
                     default:
@@ -658,8 +663,10 @@ namespace SimpleCircuit.Evaluator
 
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
-                foreach (string variant in variants)
-                    result.Variants.Add(variant);
+
+                // Apply properties and variants
+                ApplyPropertiesAndVariants(result, propertiesAndVariants, context);
+
                 context.Circuit.Add(result);
             }
         }

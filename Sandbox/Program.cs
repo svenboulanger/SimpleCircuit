@@ -12,7 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-A <r x r> A
+A <r t=1 x r> A
 X <d> R
 ";
 
