@@ -633,7 +633,7 @@ namespace SimpleCircuit.Evaluator
             if (markers.Count > 0)
             {
                 if (segments.Count > 0)
-                    segments[^1].EndMarkers = markers.ToArray();
+                    segments[^1].EndMarkers = [.. markers];
             }
 
             // Create pin constraints

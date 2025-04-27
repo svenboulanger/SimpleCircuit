@@ -12,7 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-A <r . r> A
+A <r x r> A
 X <d> R
 ";
 
@@ -28,7 +28,7 @@ X <d> R
             var evalContext = new EvaluationContext(context);
             StatementEvaluator.Evaluate(statements, evalContext);
 
-            context.Circuit.Metadata.Add("script", script);
+            evalContext.Circuit.Metadata.Add("script", script);
 
             // Draw the component
             if (evalContext.Circuit.Count > 0 && logger.ErrorCount == 0)

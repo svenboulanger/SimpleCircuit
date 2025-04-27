@@ -68,6 +68,11 @@ namespace SimpleCircuit.Evaluator
         public Dictionary<string, SectionDefinitionNode> SectionDefinitions { get; } = [];
 
         /// <summary>
+        /// Gets or sets whether the evaluator should try to be compatible with SimpleCircuit 2.x.
+        /// </summary>
+        public bool CompatibilityMode { get; set; } = true;
+
+        /// <summary>
         /// Gets the queue of anonymous points.
         /// </summary>
         public Queue<ILocatedDrawable> QueuedPoints { get; } = [];

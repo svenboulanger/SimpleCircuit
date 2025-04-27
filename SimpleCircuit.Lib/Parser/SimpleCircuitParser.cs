@@ -131,7 +131,8 @@ namespace SimpleCircuit.Parser
                         }
 
                         // Allow queued anonymous points here
-                        if (lexer.Branch(TokenType.Punctuator, ".", out var dot))
+                        if (lexer.Branch(TokenType.Punctuator, ".", out var dot) ||
+                            context.CompatibilityMode && lexer.Branch(TokenType.Word, "x", out dot))
                         {
                             items.Add(wire);
                             items.Add(new QueuedAnonymousPoint(dot));
@@ -194,6 +195,12 @@ namespace SimpleCircuit.Parser
             // Variant or properties
             if (lexer.Type == TokenType.Word)
             {
+                if (context.CompatibilityMode && lexer.Type == TokenType.Word && lexer.Content.ToString() == "x" &&
+                    (lexer.NextType != TokenType.Punctuator || lexer.NextContent.ToString() != "="))
+                {
+                    // Compatibility mode queued anonymous point
+                    return true;
+                }
                 result = new IdentifierNode(lexer.Token);
                 lexer.Next();
 
