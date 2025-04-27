@@ -118,13 +118,26 @@ namespace SimpleCircuit.Parser
                 if (lexer.Branch(TokenType.Punctuator, "<"))
                 {
                     // Parse wire
-                    if (!ParseWire(lexer, context, out var wire))
-                        return false;
-                    if (wire is null)
+                    SyntaxNode wire;
+                    while (true)
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected wire"));
-                        lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
-                        return false;
+                        if (!ParseWire(lexer, context, out wire))
+                            return false;
+                        if (wire is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected wire"));
+                            lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
+                            return false;
+                        }
+
+                        // Allow queued anonymous points here
+                        if (lexer.Branch(TokenType.Punctuator, ".", out var dot))
+                        {
+                            items.Add(wire);
+                            items.Add(new QueuedAnonymousPoint(dot));
+                        }
+                        else
+                            break; // We don't have an anonymous queued point
                     }
 
                     // '>'
@@ -136,11 +149,9 @@ namespace SimpleCircuit.Parser
                     }
 
                     items.Add(wire);
-                    continue;
                 }
-
-                // There doesn't seem to be anything
-                break;
+                else
+                    break;
             }
 
             if (items.Count > 0)

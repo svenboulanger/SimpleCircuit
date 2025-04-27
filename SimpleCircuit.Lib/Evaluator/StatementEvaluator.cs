@@ -9,6 +9,7 @@ using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -132,6 +133,18 @@ namespace SimpleCircuit.Evaluator
                             else
                                 lastPin = null;
                             lastWire = null;
+                        }
+                        break;
+
+                    case QueuedAnonymousPoint qap:
+                        {
+                            var point = context.Factory.Create(PointFactory.Key, context.Options, context.Diagnostics) as ILocatedDrawable;
+                            context.Circuit.Add(point);
+                            context.QueuedPoints.Enqueue(point);
+                            if (lastWire is not null)
+                                ProcessWire(lastPin, lastWire, new PinReference(point, default, item.Location), context);
+                            lastWire = null;
+                            lastPin = new PinReference(point, default, item.Location);
                         }
                         break;
 
@@ -717,6 +730,11 @@ namespace SimpleCircuit.Evaluator
             string name = EvaluateName(component, context);
             if (name is null)
                 return null;
+            if (context.QueuedPoints.Count > 0 && name.Equals(PointFactory.Key))
+            {
+                var pt = context.QueuedPoints.Dequeue();
+                return pt;
+            }
 
             // Validate the name of the component
             if (!IsValidName(name))

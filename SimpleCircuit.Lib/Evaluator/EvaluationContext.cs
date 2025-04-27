@@ -68,6 +68,11 @@ namespace SimpleCircuit.Evaluator
         public Dictionary<string, SectionDefinitionNode> SectionDefinitions { get; } = [];
 
         /// <summary>
+        /// Gets the queue of anonymous points.
+        /// </summary>
+        public Queue<ILocatedDrawable> QueuedPoints { get; } = [];
+
+        /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
