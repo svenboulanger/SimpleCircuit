@@ -100,7 +100,10 @@ namespace SimpleCircuit.Components
                     globalScope = globalScope.ParentScope;
 
                 // Create a new evaluation context
-                var evalContext = new EvaluationContext(context.Factory, context.Circuit, context.Options, context.Diagnostics, globalScope);
+                var evalContext = new EvaluationContext(context.Factory, context.Circuit, context.Options, globalScope)
+                {
+                    Diagnostics = context.Diagnostics
+                };
                 var direct = new Dictionary<string, object>();
                 foreach (var node in _parentFactory._definitionNode.Properties)
                 {
@@ -163,7 +166,10 @@ namespace SimpleCircuit.Components
                         if (!_parentFactory._versions.TryGetValue(state, out var version))
                         {
                             var circuit = new GraphicalCircuit(context.TextFormatter);
-                            var evalContext = new EvaluationContext(_parentFactory._factories, circuit, _parentFactory._options, context.Diagnostics);
+                            var evalContext = new EvaluationContext(_parentFactory._factories, circuit, _parentFactory._options)
+                            {
+                                Diagnostics = context.Diagnostics
+                            };
 
                             // Apply the parameters
                             for (int i = 0; i < _properties.Length; i++)

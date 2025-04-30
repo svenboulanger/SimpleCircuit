@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
@@ -61,9 +62,9 @@ namespace SimpleCircuitOnline.Shared
         /// </summary>
         /// <param name="diagnostics">The diagnostics.</param>
         /// <returns>Returns the parsing context.</returns>
-        public ParsingContext BuildContext(IDiagnosticHandler diagnostics)
+        public EvaluationContext BuildContext(IDiagnosticHandler diagnostics)
         {
-            var context = new ParsingContext(DefaultLibraryLoaded, _textFormatter)
+            var context = new EvaluationContext(DefaultLibraryLoaded, _textFormatter)
             {
                 Diagnostics = diagnostics
             };

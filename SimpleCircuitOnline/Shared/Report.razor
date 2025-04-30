@@ -14,7 +14,7 @@
                 }
                 else if (message is SourceDiagnosticMessage tdm)
                 {
-                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Location))>line @(tdm.Location.Location.Line), column @(tdm.Location.Location.Column)</a>.</p>
+                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Location))>line @(tdm.Location.Line), column @(tdm.Location.Column)</a>.</p>
                 }
                 else
                 {
@@ -30,7 +30,7 @@
     public List<IDiagnosticMessage> Messages { get; set; }
 
     [Parameter]
-    public EventCallback<Token> MessageClicked { get; set; }
+    public EventCallback<TextLocation> MessageClicked { get; set; }
 
     [Parameter]
     public EventCallback<bool> ViewModeClicked { get; set; }

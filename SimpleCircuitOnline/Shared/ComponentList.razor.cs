@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using SimpleCircuit.Components;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
@@ -45,8 +46,8 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Updates the list with the given parsing context.
         /// </summary>
-        /// <param name="context"></param>
-        public void Update(ParsingContext context)
+        /// <param name="context">Gets the evaluation context.</param>
+        public void Update(EvaluationContext context)
         {
             _categories.Clear();
             foreach (var pair in context.Factory.Factories)

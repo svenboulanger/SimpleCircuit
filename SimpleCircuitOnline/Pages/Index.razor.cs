@@ -2,11 +2,13 @@
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using SimpleCircuitOnline.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -414,9 +416,9 @@ namespace SimpleCircuitOnline.Pages
                 await SetCurrentScript(script);
             }
         }
-        private async Task ReportMessageClicked(Token token)
+        private async Task ReportMessageClicked(TextLocation location)
         {
-            await _scriptEditor.SetPosition(new Position() { LineNumber = token.Location.Line, Column = token.Location.Column }, "warning");
+            await _scriptEditor.SetPosition(new Position() { LineNumber = location.Line, Column = location.Column }, "warning");
             _tabs.Select(0);
             await _scriptEditor.Focus();
         }
@@ -483,14 +485,14 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private async Task UpdateNow(ParsingContext context)
+        private async Task UpdateNow(EvaluationContext context)
         {
             _loading = 2;
             _svg = await ComputeXml(context, false, _settings.RenderBounds);
             _loading = 0;
             StateHasChanged();
         }
-        private async Task<XmlDocument> ComputeXml(ParsingContext context, bool includeScript, bool includeBounds = false)
+        private async Task<XmlDocument> ComputeXml(EvaluationContext context, bool includeScript, bool includeBounds = false)
         {
             XmlDocument doc = null;
             try
@@ -508,29 +510,33 @@ namespace SimpleCircuitOnline.Pages
                 }
 
                 // Parse the script
-                var lexer = SimpleCircuitLexer.FromString(code.AsMemory());
+                var lexer = SimpleCircuitLexer.FromString(code);
                 context.Options.RenderBounds = includeBounds;
-                SimpleCircuitParser.Parse(lexer, context);
-                var ckt = context.Circuit;
-
-                // Include XML data
-                if (includeScript)
+                var parsingContext = new ParsingContext();
+                if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node.Statements.Length > 0)
                 {
-                    ckt.Metadata.Add("script", EncodeScript(code));
-                    if (_simpleCircuitVersion != null)
-                        ckt.Metadata.Add("version", _simpleCircuitVersion);
-                }
+                    StatementEvaluator.Evaluate(node, context);
+                    var ckt = context.Circuit;
 
-                // We now need the last things to have executed
-                if (ckt.Count > 0 && _logger.Errors == 0)
-                {
-                    _textFormatter.FontFamily = context.Options.FontFamily;
-                    doc = ckt.Render(_logger, context.ExtraCss);
+                    // Include XML data
+                    if (includeScript)
+                    {
+                        ckt.Metadata.Add("script", EncodeScript(code));
+                        if (_simpleCircuitVersion != null)
+                            ckt.Metadata.Add("version", _simpleCircuitVersion);
+                    }
 
-                    // Update the style for our document
-                    var styleNode = doc.DocumentElement.ChildNodes[0];
-                    string style = styleNode.InnerText;
-                    await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
+                    // We now need the last things to have executed
+                    if (ckt.Count > 0 && _logger.Errors == 0)
+                    {
+                        _textFormatter.FontFamily = context.Options.FontFamily;
+                        doc = ckt.Render(_logger, []); // context.ExtraCss);
+
+                        // Update the style for our document
+                        var styleNode = doc.DocumentElement.ChildNodes[0];
+                        string style = styleNode.InnerText;
+                        await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
+                    }
                 }
             }
             catch (Exception ex)
@@ -611,14 +617,14 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private async Task UpdateKeywords(ParsingContext context)
+        private async Task UpdateKeywords(EvaluationContext context)
         {
             List<string[]> keys = [];
             foreach (var pair in context.Factory.Factories)
             {
                 keys.Add([pair.Key, pair.Value.GetMetadata(pair.Key)?.Description ?? "?"]);
             }
-            await _js.InvokeVoidAsync("registerLanguage", new object[] { keys.ToArray() });
+            await _js.InvokeVoidAsync("registerLanguage", [.. keys]);
         }
         private async Task LibrariesUpdated()
         {

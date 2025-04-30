@@ -82,7 +82,7 @@ namespace SimpleCircuit.Evaluator
         /// </summary>
         /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
         /// <param name="formatter">The text formatter used for the graphical circuit.</param>
-        public EvaluationContext(ParsingContext parsingContext, bool loadAssembly = true, ITextFormatter formatter = null)
+        public EvaluationContext(bool loadAssembly = true, ITextFormatter formatter = null, Options options = null)
         {
             if (loadAssembly)
             {
@@ -91,8 +91,7 @@ namespace SimpleCircuit.Evaluator
                 Markers.Add("rarrow", () => new ReverseArrow());
             }
             Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
-            Options = parsingContext.Options;
-            Diagnostics = parsingContext.Diagnostics;
+            Options = options ?? new Options();
             CurrentScope = new();
         }
 
@@ -104,12 +103,11 @@ namespace SimpleCircuit.Evaluator
         /// <param name="options">The options.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="factories"/>, <paramref name="circuit"/> or <paramref name="options"/> is <c>null</c>.</exception>
-        public EvaluationContext(DrawableFactoryDictionary factories, GraphicalCircuit circuit, Options options, IDiagnosticHandler diagnostics, Scope scope = null)
+        public EvaluationContext(DrawableFactoryDictionary factories, GraphicalCircuit circuit, Options options, Scope scope = null)
         {
             Factory = factories ?? throw new ArgumentNullException(nameof(factories));
             Circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            Diagnostics = diagnostics;
             CurrentScope = scope ?? new();
         }
 

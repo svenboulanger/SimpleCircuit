@@ -12,8 +12,21 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-A <r t=1 x r> A
-X <d> R
+* For more tutorials, go to Help > Demo's.
+
+* Variants allow changing the appearance of certain components
+* For example, a resistor can have the ""programmable"" variant:
+T1(""in"") <r> R1(programmable) <r> T2(""out"")
+
+* Many components also have properties that can be specified as well
+R1(scale=2 zigs=7)
+
+* The property syntax can also be used to specify variants
+T1(input)
+T2(output)
+
+* Variants can be removed again by adding a '-' before them
+T2(-output, +pad)
 ";
 
             var logger = new Logger();
@@ -25,7 +38,7 @@ X <d> R
             SimpleCircuitParser.Parse(lexer, context, out var statements);
             Console.WriteLine(statements.ToString());
 
-            var evalContext = new EvaluationContext(context);
+            var evalContext = new EvaluationContext() { Diagnostics = logger };
             StatementEvaluator.Evaluate(statements, evalContext);
 
             evalContext.Circuit.Metadata.Add("script", script);

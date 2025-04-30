@@ -658,7 +658,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
                     return false;
                 }
-                result = new UnaryNode(op, new IdentifierNode(word), UnaryOperatorTypes.Positive);
+                result = new UnaryNode(op, new LiteralNode(word), UnaryOperatorTypes.Positive);
                 return true;
             }
             else if (lexer.Branch(TokenType.Punctuator, "-", out op))
@@ -669,7 +669,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
                     return false;
                 }
-                result = new UnaryNode(op, new IdentifierNode(word), UnaryOperatorTypes.Negative);
+                result = new UnaryNode(op, new LiteralNode(word), UnaryOperatorTypes.Negative);
                 return true;
             }
             else if (lexer.Branch(TokenType.String, out var stringLiteral))

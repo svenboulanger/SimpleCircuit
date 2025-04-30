@@ -1,7 +1,4 @@
-﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components;
-using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser.SimpleTexts;
+﻿using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser
@@ -27,19 +24,9 @@ namespace SimpleCircuit.Parser
         public bool AllowSubcircuitDefinitions { get; set; } = true;
 
         /// <summary>
-        /// Gets the factory for components.
-        /// </summary>
-        public DrawableFactoryDictionary Factory { get; } = new();
-
-        /// <summary>
         /// Gets or sets the diagnostics handler.
         /// </summary>
         public IDiagnosticHandler Diagnostics { get; set; }
-
-        /// <summary>
-        /// Gets the circuit.
-        /// </summary>
-        public GraphicalCircuit Circuit { get; }
 
         /// <summary>
         /// Currently included files.
@@ -55,19 +42,5 @@ namespace SimpleCircuit.Parser
         /// Gets the referenced variables in the current scope.
         /// </summary>
         public HashSet<string> ReferencedVariables { get; } = [];
-
-        /// <summary>
-        /// Create a new parsing context with the default stuff in it.
-        /// </summary>
-        /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
-        /// <param name="formatter">The text formatter used for the graphical circuit.</param>
-        public ParsingContext(bool loadAssembly = true, ITextFormatter formatter = null)
-        {
-            if (loadAssembly)
-            {
-                Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
-            }
-            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
-        }
     }
 }

@@ -39,7 +39,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="parameterDefinitions">The parameter definitions.</param>
         /// <param name="references">The references.</param>
         public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<string> references)
-            : base(statements.FirstOrDefault()?.Location ?? parameterDefinitions.First().Location)
+            : base(statements.FirstOrDefault()?.Location ?? default)
         {
             Statements = statements?.ToArray() ?? [];
             ParameterDefinitions = parameterDefinitions?.ToArray() ?? [];
