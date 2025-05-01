@@ -17,6 +17,7 @@ namespace SimpleCircuit.Evaluator
     public static class StatementEvaluator
     {
         private const double _isqrt2 = 0.70710678118;
+        private const string _wireKey = "wire";
 
         /// <summary>
         /// Evaluates a list of statements.
@@ -94,10 +95,10 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
-                    case WireNode w: lastWire = w; break;
 
                     case LiteralNode:
                     case BinaryNode:
+                    case PropertyListNode:
                         {
                             // Assume a component name
                             var component = ProcessComponent(item, context);
@@ -107,26 +108,6 @@ namespace SimpleCircuit.Evaluator
                                     ProcessWire(lastPin, lastWire, new PinReference(drawable, default, item.Location), context);
                                 lastWire = null;
                                 lastPin = new PinReference(drawable, default, item.Location);
-                            }
-                            else
-                                lastPin = null;
-                            lastWire = null;
-                        }
-                        break;
-
-                    case PropertyListNode property:
-                        {
-                            // Deal with the component
-                            var component = ProcessComponent(property.Subject, context);
-                            if (component is IDrawable drawable)
-                            {
-                                if (lastWire is not null)
-                                    ProcessWire(lastPin, lastWire, new PinReference(drawable, default, property.Subject.Location), context);
-                                lastWire = null;
-                                lastPin = new PinReference(drawable, default, property.Subject.Location);
-
-                                // Deal with the properties and variants
-                                ApplyPropertiesAndVariants(drawable, property.Properties, context);
                             }
                             else
                                 lastPin = null;
@@ -145,6 +126,8 @@ namespace SimpleCircuit.Evaluator
                             lastPin = new PinReference(point, default, item.Location);
                         }
                         break;
+
+                    case WireNode w: lastWire = w; break;
 
                     default:
                         throw new NotImplementedException();
@@ -226,9 +209,9 @@ namespace SimpleCircuit.Evaluator
             string key = controlProperty.Key.Content.ToString();
 
             // Check whether the key is actually a key
-            if (!context.Factory.IsKey(key))
+            if (!StringComparer.Ordinal.Equals(key, _wireKey) && !context.Factory.IsKey(key))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(controlProperty.Key, SeverityLevel.Error, "ERR", "Expected component key"));
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(controlProperty.Key, SeverityLevel.Error, "ERR", $"Expected component key of '{_wireKey}'"));
                 return;
             }
 
@@ -652,6 +635,9 @@ namespace SimpleCircuit.Evaluator
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
 
+                // Apply default properties and variants for wires
+                context.Options.Apply(_wireKey, result, context.Diagnostics);
+
                 // Apply properties and variants
                 ApplyPropertiesAndVariants(result, propertiesAndVariants, context);
 
@@ -696,8 +682,8 @@ namespace SimpleCircuit.Evaluator
                         }
                         if (direction.Distance is not null)
                         {
-                            if (direction.Distance is MinimumNode minimum)
-                                segment.Length = EvaluateAsNumber(minimum.Distance, context, context.Options.MinimumWireLength);
+                            if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
+                                segment.Length = EvaluateAsNumber(unary.Argument, context, context.Options.MinimumWireLength);
                             else
                             {
                                 segment.Length = EvaluateAsNumber(direction.Distance, context, context.Options.MinimumWireLength);
@@ -722,6 +708,12 @@ namespace SimpleCircuit.Evaluator
         private static ICircuitPresence ProcessComponent(SyntaxNode component, EvaluationContext context)
         {
             // Evaluate the full name
+            SyntaxNode[] properties = null;
+            if (component is PropertyListNode pln)
+            {
+                properties = pln.Properties;
+                component = pln.Subject;
+            }
             string name = EvaluateName(component, context);
             if (name is null)
                 return null;
@@ -758,6 +750,10 @@ namespace SimpleCircuit.Evaluator
 
             // Register the source
             presence.Sources.Add(component.Location);
+
+            // Apply properties and variants
+            if (presence is IDrawable drawable && properties is not null)
+                ApplyPropertiesAndVariants(drawable, properties, context);
             return presence;
         }
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)

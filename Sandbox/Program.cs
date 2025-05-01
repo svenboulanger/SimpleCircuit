@@ -12,19 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-BB1[Input1] <l>
-BB1[Input2] <l>
-BB1[Output1] <r>
-BB1[Output2] <r>
-BB1[VDD] <u> POW
-BB1[VSS] <d> GND
-
-* The distance between pins can vary, but they cannot change order
-* Notice how the two pins are spaced further apart because of the following statement
-BB1[Output1] <r d> R <d l> [Output2]BB1
-
-* The black box can stretch in any direction
-(x BB1[Input1] <r +80> [Output1]BB1)
+FP2 <d +10 r arrow> FP(""lonely and you're never coming 'round"") <r u> Xal1 <u l d arrow> FPta
 ";
 
             var logger = new Logger();

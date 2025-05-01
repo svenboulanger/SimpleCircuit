@@ -315,7 +315,7 @@ namespace SimpleCircuit.Parser
                 lexer.Next();
                 if (!ParseValueOrExpression(lexer, context, out var distance))
                     return false;
-                result = new MinimumNode(distance, plus.Location);
+                result = new UnaryNode(plus, distance, UnaryOperatorTypes.Positive);
             }
             else
             {
