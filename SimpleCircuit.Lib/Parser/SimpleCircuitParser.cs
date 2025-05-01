@@ -699,13 +699,18 @@ namespace SimpleCircuit.Parser
                     var expression = new LiteralNode(number);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
+                else if (result is not null && lexer.Branch(TokenType.Punctuator, "/", out var opSlash))
+                {
+                    // A separator for sections
+                    result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(opSlash));
+                }
                 else if (lexer.Branch(TokenType.Word, out var word))
                 {
                     // A word
                     var expression = new LiteralNode(word);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
-                else if (!lexer.HasTrivia && lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
+                else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                 {
                     // expression
                     if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
@@ -731,8 +736,6 @@ namespace SimpleCircuit.Parser
                     expression = new BracketNode(bracketLeft, expression, bracketRight);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
-                else if (!lexer.HasTrivia && lexer.Branch(TokenType.Punctuator, "/", out var slash))
-                    result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(slash));
                 else
                     return true;
             }
@@ -755,13 +758,21 @@ namespace SimpleCircuit.Parser
                     return true;
 
                 // word
-                SyntaxNode expression;
-                if (lexer.Branch(TokenType.Word, out var word))
-                    expression = new LiteralNode(word);
+                if (result is not null && lexer.Branch(TokenType.Punctuator, "/", out var opSlash))
+                {
+                    // A separator for sections
+                    result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(opSlash));
+                }
+                else if (lexer.Branch(TokenType.Word, out var word))
+                {
+                    // A word
+                    var expression = new LiteralNode(word);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                }
                 else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                 {
                     // expression
-                    if (!ExpressionParser.ParseExpression(lexer, context, out expression))
+                    if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
                     {
                         // Skip to new line or '}'
                         lexer.SkipToTokenOrLine(TokenType.Punctuator, "}");
@@ -780,17 +791,14 @@ namespace SimpleCircuit.Parser
                         context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
                         return false;
                     }
+
                     expression = new BracketNode(bracketLeft, expression, bracketRight);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
                 }
                 else if (lexer.Branch(TokenType.Punctuator, "*", out var asterisk))
-                    expression = new LiteralNode(asterisk);
+                    result = result is null ? new LiteralNode(asterisk) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(asterisk));
                 else
                     return true;
-
-                if (result is null)
-                    result = expression;
-                else
-                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
             }
         }
 

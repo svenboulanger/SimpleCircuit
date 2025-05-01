@@ -12,8 +12,25 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-X1 <n e s w> X1
-X2 <ne se sw nw> X2
+A/Xo <r d> C <d> GND1
+.section A
+    GND1 <u> V1 <u r> TL <r> Xo
+    GND1(signal)
+.endsection
+(y A/GND1 <r> GND1)
+
+* You can re-use previously defined sections
+.section B A
+B/Xo <r d> L <d> GND2
+(y B/GND1 <r> GND2)
+
+.section C A
+C/Xo <r d> R <d> GND3
+(y C/GND1 <r> GND3)
+
+
+* Or we can also align instances across sections
+(y */V1)
 ";
 
             var logger = new Logger();
