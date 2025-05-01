@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.General
         /// <param name="states">The states.</param>
         public SubcircuitState(IEnumerable<object> states)
         {
-            _state = [states];
+            _state = [.. states];
             _hash = 0;
             foreach (object value in _state)
                 _hash = (_hash * 1021) ^ value.GetHashCode();

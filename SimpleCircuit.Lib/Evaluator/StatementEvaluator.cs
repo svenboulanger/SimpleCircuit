@@ -576,7 +576,7 @@ namespace SimpleCircuit.Evaluator
                             if (direction.Angle is not null)
                             {
                                 double angle = EvaluateAsNumber(direction.Angle, context, 0.0);
-                                segment.Orientation = Vector2.Normal(angle / 180.0 * Math.PI);
+                                segment.Orientation = Vector2.Normal(-angle / 180.0 * Math.PI);
                             }
                             else
                             {

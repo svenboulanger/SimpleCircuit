@@ -189,6 +189,7 @@ namespace SimpleCircuit.Components
                                     return PresenceResult.GiveUp;
                             }
                             version = (circuit, pinFactories);
+                            _parentFactory._versions.Add(state, version);
                         }
 
                         // Calculate the positions of the pins

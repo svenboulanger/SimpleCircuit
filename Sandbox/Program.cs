@@ -12,25 +12,14 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-A/Xo <r d> C <d> GND1
-.section A
-    GND1 <u> V1 <u r> TL <r> Xo
-    GND1(signal)
-.endsection
-(y A/GND1 <r> GND1)
-
-* You can re-use previously defined sections
-.section B A
-B/Xo <r d> L <d> GND2
-(y B/GND1 <r> GND2)
-
-.section C A
-C/Xo <r d> R <d> GND3
-(y C/GND1 <r> GND3)
-
-
-* Or we can also align instances across sections
-(y */V1)
+.subckt ABC DIR1[in] DIR2[out]
+    DIR1 <r> X1
+    X1 <u r> R1 <r d> X2
+    X1 <d r> C1 <r u> X2
+    X2 <r> DIR2
+.ends
+ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
+Xs <a -45> [DIR1_in]ABC[DIR2_out] <a -45 0> L <a -45> Xe
 ";
 
             var logger = new Logger();
