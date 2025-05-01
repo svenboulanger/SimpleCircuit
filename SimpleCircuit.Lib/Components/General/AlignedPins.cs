@@ -17,6 +17,7 @@ namespace SimpleCircuit.Components.General
         private readonly string _componentFilter, _pinFilter;
         private readonly List<IPin> _pins = [];
         private readonly VirtualChainConstraints _flags;
+        private bool _hasSearched = false;
 
         /// <inheritdoc />
         public string Name { get; }
@@ -64,30 +65,55 @@ namespace SimpleCircuit.Components.General
             {
                 case PreparationMode.Reset:
                     _pins.Clear();
-                    var regex = new Regex(_pinFilter);
-                    foreach (var component in context.FindFilter(_componentFilter))
-                    {
-                        bool foundPin = false;
-                        if (component is IDrawable drawable)
-                        {
-                            foreach (var pin in drawable.Pins)
-                            {
-                                if (regex.IsMatch(pin.Name))
-                                {
-                                    _pins.Add(pin);
-                                    foundPin = true;
-                                }
-                            }
-                            if (!foundPin)
-                                context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"No matching pins found for {component.Name}"));
-                        }
-                        else
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"Component {component.Name} does not have any pins"));
-                    }
+                    break;
+
+                case PreparationMode.Find:
                     if (_pins.Count == 0)
                     {
-                        context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"No pins found"));
-                        return PresenceResult.Success;
+                        var regex = new Regex(_pinFilter);
+
+                        // Find the components that match the filter
+                        bool foundComponent = false;
+                        foreach (var component in context.FindFilter(_componentFilter))
+                        {
+                            foundComponent = true;
+                            bool foundPin = false;
+                            if (component is IDrawable drawable)
+                            {
+                                foreach (var pin in drawable.Pins)
+                                {
+                                    if (regex.IsMatch(pin.Name))
+                                    {
+                                        _pins.Add(pin);
+                                        foundPin = true;
+                                    }
+                                }
+
+                                // We need to at least find the pin, but in some cases the pin may not have been created yet
+                                // So we'll mark it as incomplete if we don't find the pin to try again later
+                                if (!foundPin)
+                                {
+                                    if (context.Desparateness == DesperatenessLevel.GiveUp)
+                                    {
+                                        context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"No matching pins found for {component.Name}"));
+                                        return PresenceResult.Success;
+                                    }
+                                    return PresenceResult.Incomplete;
+                                }
+                            }
+                            else
+                                context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"Component {component.Name} does not have any pins"));
+                        }
+                        if (!foundComponent)
+                        {
+                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", $"Could not find any components for '{_componentFilter}'"));
+                            return PresenceResult.GiveUp;
+                        }
+                        if (_pins.Count == 0)
+                        {
+                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", $"Could not find any pins"));
+                            return PresenceResult.GiveUp;
+                        }
                     }
                     break;
 

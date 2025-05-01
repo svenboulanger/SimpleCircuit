@@ -200,9 +200,15 @@ namespace SimpleCircuit
 
         private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)
         {
+            // Reset all presences
             context.Mode = PreparationMode.Reset;
             foreach (var presence in presences)
                 presence.Prepare(context);
+
+            // Resolve links and references to other elements
+            context.Mode = PreparationMode.Find;
+            if (!PrepareCycle(presences, context))
+                return false;
 
             // Prepare orientations
             context.Mode = PreparationMode.Orientation;

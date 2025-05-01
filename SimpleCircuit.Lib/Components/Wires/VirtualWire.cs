@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Wires
         public List<TextLocation> Sources { get; }
 
         /// <inheritdoc />
-        public int Order => 1;
+        public int Order => 200;
 
         /// <summary>
         /// Gets the X-coordinate name of the first point of the wire.

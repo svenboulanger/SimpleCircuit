@@ -68,7 +68,7 @@ namespace SimpleCircuit.Evaluator
                         {
                             // Assume a component
                             var component = ProcessComponent(pnp.Name, context);
-                            if (component is Drawable drawable)
+                            if (component is IDrawable drawable)
                             {
                                 if (pnp.PinLeft is not null)
                                 {
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Evaluator
                         {
                             // Assume a component name
                             var component = ProcessComponent(item, context);
-                            if (component is Drawable drawable)
+                            if (component is IDrawable drawable)
                             {
                                 if (lastWire is not null)
                                     ProcessWire(lastPin, lastWire, new PinReference(drawable, default, item.Location), context);
@@ -118,7 +118,7 @@ namespace SimpleCircuit.Evaluator
                         {
                             // Deal with the component
                             var component = ProcessComponent(property.Subject, context);
-                            if (component is Drawable drawable)
+                            if (component is IDrawable drawable)
                             {
                                 if (lastWire is not null)
                                     ProcessWire(lastPin, lastWire, new PinReference(drawable, default, property.Subject.Location), context);
@@ -644,20 +644,10 @@ namespace SimpleCircuit.Evaluator
             if (segments.Count > 0)
             {
                 // Create anonymous points if the pin isn't specified
-                if (startPin is null)
-                {
-                    var point = context.Factory.Create(context.GetAnonymousPointName(), context.Options, context.Diagnostics);
-                    context.Circuit.Add(point);
-                    startPin = new PinReference(point, null, default);
-                }
-                if (endPin is null)
-                {
-                    var point = context.Factory.Create(context.GetAnonymousPointName(), context.Options, context.Diagnostics);
-                    context.Circuit.Add(point);
-                    endPin = new PinReference(point, null, default);
-                }
-                context.Circuit.Add(new PinOrientationConstraint($"{wireName}.s", startPin, -1, segments[0], false));
-                context.Circuit.Add(new PinOrientationConstraint($"{wireName}.e", endPin, 0, segments[^1], true));
+                if (startPin is not null)
+                    context.Circuit.Add(new PinOrientationConstraint($"{wireName}.s", startPin, -1, segments[0], false));
+                if (endPin is not null)
+                    context.Circuit.Add(new PinOrientationConstraint($"{wireName}.e", endPin, 0, segments[^1], true));
 
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);

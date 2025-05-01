@@ -12,14 +12,19 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.subckt ABC DIR1[in] DIR2[out]
-    DIR1 <r> X1
-    X1 <u r> R1 <r d> X2
-    X1 <d r> C1 <r u> X2
-    X2 <r> DIR2
-.ends
-ABC1 <r d> ABC <d> Xe <l> ABC <l u> ABC <u> Xs <r> ABC1
-Xs <a -45> [DIR1_in]ABC[DIR2_out] <a -45 0> L <a -45> Xe
+BB1[Input1] <l>
+BB1[Input2] <l>
+BB1[Output1] <r>
+BB1[Output2] <r>
+BB1[VDD] <u> POW
+BB1[VSS] <d> GND
+
+* The distance between pins can vary, but they cannot change order
+* Notice how the two pins are spaced further apart because of the following statement
+BB1[Output1] <r d> R <d l> [Output2]BB1
+
+* The black box can stretch in any direction
+(x BB1[Input1] <r +80> [Output1]BB1)
 ";
 
             var logger = new Logger();

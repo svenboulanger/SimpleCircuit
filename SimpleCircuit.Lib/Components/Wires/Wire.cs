@@ -112,9 +112,7 @@ namespace SimpleCircuit.Components.Wires
                     _w2p = null;
                     break;
 
-                case PreparationMode.Orientation:
-
-                    // Find the pins
+                case PreparationMode.Find:
                     if (_p2w is null)
                     {
                         _p2w = _pinToWire.GetOrCreate(context.Diagnostics, -1);
@@ -127,9 +125,13 @@ namespace SimpleCircuit.Components.Wires
                         if (_w2p is not null)
                             _w2p.Connections++;
                     }
+                    break;
+
+                case PreparationMode.Orientation:
+
+                    // Find the pins
                     var p1 = _p2w as IOrientedPin;
                     var p2 = _w2p as IOrientedPin;
-                    string x, y;
 
                     if (_segments.Count == 1 && _segments[0].Orientation.X.IsZero() && _segments[0].Orientation.Y.IsZero())
                     {
