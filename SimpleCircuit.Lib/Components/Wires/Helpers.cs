@@ -59,18 +59,22 @@ namespace SimpleCircuit.Components.Wires
             Func<int, string> nameX, Func<int, string> nameY, Func<int, Vector2> orientation,
             IReadOnlyList<WireSegmentInfo> segments, VirtualChainConstraints axis, IPrepareContext context)
         {
+            var result = PresenceResult.Success;
             string x = nameX(-1);
             string y = nameY(-1);
             for (int i = 0; i < segments.Count; i++)
             {
                 string tx = nameX(i);
                 string ty = nameY(i);
-                if (PrepareSegmentOffset(x, y, tx, ty, segments[i], orientation(i), axis, context) == PresenceResult.GiveUp)
-                    return PresenceResult.GiveUp;
+                switch (PrepareSegmentOffset(x, y, tx, ty, segments[i], orientation(i), axis, context))
+                {
+                    case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                    case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                }
                 x = tx;
                 y = ty;
             }
-            return PresenceResult.Success;
+            return result;
         }
 
         /// <summary>
@@ -217,14 +221,18 @@ namespace SimpleCircuit.Components.Wires
             Func<int, string> nameX, Func<int, string> nameY, IReadOnlyList<WireSegmentInfo> segments,
             VirtualChainConstraints axis, IPrepareContext context)
         {
+            var result = PresenceResult.Success;
             string sx = nameX(-1);
             string sy = nameY(-1);
             for (int i = 0; i < segments.Count; i++)
             {
-                if (PrepareSegmentGroup(sx, sy, nameX(i), nameY(i), axis, context) == PresenceResult.GiveUp)
-                    return PresenceResult.GiveUp;
+                switch (PrepareSegmentGroup(sx, sy, nameX(i), nameY(i), axis, context))
+                {
+                    case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                    case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                }
             }
-            return PresenceResult.Success;
+            return result;
         }
 
         /// <summary>

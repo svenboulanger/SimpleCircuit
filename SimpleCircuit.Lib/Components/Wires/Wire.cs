@@ -229,17 +229,40 @@ namespace SimpleCircuit.Components.Wires
                 case PreparationMode.Offsets:
 
                     // Short wire ends to the correct pins
-                    if (_p2w is not null && Helpers.PrepareEntryOffset(_segments[0].Source, _p2w, StartX, StartY, Parser.Nodes.VirtualChainConstraints.XY, context) == PresenceResult.GiveUp)
-                        return PresenceResult.GiveUp;
-                    if (_w2p is not null && Helpers.PrepareEntryOffset(_segments[^1].Source, _w2p, EndX, EndY, Parser.Nodes.VirtualChainConstraints.XY, context) == PresenceResult.GiveUp)
-                        return PresenceResult.GiveUp;
-                    return Helpers.PrepareSegmentsOffset(
+                    if (_p2w is not null)
+                    {
+                        switch (Helpers.PrepareEntryOffset(_segments[0].Source, _p2w, StartX, StartY, Parser.Nodes.VirtualChainConstraints.XY, context))
+                        {
+                            case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                            case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                        }
+                    }
+                    if (_w2p is not null)
+                    {
+                        switch (Helpers.PrepareEntryOffset(_segments[^1].Source, _w2p, EndX, EndY, Parser.Nodes.VirtualChainConstraints.XY, context))
+                        {
+                            case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                            case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                        }
+                    }
+                    switch (Helpers.PrepareSegmentsOffset(
                         GetXName, GetYName, GetOrientation,
-                        _segments, Parser.Nodes.VirtualChainConstraints.XY, context);
+                        _segments, Parser.Nodes.VirtualChainConstraints.XY, context))
+                    {
+                        case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                        case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                    }
+                    break;
 
                 case PreparationMode.Groups:
                     for (int i = 0; i < _segments.Count; i++)
-                        Helpers.PrepareSegmentGroup(StartX, StartY, GetXName(i), GetYName(i), Parser.Nodes.VirtualChainConstraints.XY, context);
+                    {
+                        switch (Helpers.PrepareSegmentGroup(StartX, StartY, GetXName(i), GetYName(i), Parser.Nodes.VirtualChainConstraints.XY, context))
+                        {
+                            case PresenceResult.GiveUp: return PresenceResult.GiveUp;
+                            case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
+                        }
+                    }
                     break;
 
                 case PreparationMode.DrawableGroups:

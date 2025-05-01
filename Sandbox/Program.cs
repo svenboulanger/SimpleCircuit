@@ -12,21 +12,8 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-* For more tutorials, go to Help > Demo's.
-
-* Variants allow changing the appearance of certain components
-* For example, a resistor can have the ""programmable"" variant:
-T1(""in"") <r> R1(programmable) <r> T2(""out"")
-
-* Many components also have properties that can be specified as well
-R1(scale=2 zigs=7)
-
-* The property syntax can also be used to specify variants
-T1(input)
-T2(output)
-
-* Variants can be removed again by adding a '-' before them
-T2(-output, +pad)
+X1 <n e s w> X1
+X2 <ne se sw nw> X2
 ";
 
             var logger = new Logger();

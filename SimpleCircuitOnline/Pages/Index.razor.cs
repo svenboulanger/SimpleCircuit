@@ -163,7 +163,7 @@ namespace SimpleCircuitOnline.Pages
                         try
                         {
                             // Decode the script as a base64 string
-                            var bytes = Convert.FromBase64String(script);
+                            byte[] bytes = Convert.FromBase64String(script);
 
                             // Use GZip decompression
                             using var inputStream = new MemoryStream(bytes);
@@ -377,8 +377,8 @@ namespace SimpleCircuitOnline.Pages
                         }
 
                         // Build the URI
-                        var b = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
-                        var uri = $"{b}?{query}";
+                        string b = new Uri(_navigation.Uri).GetLeftPart(UriPartial.Path);
+                        string uri = $"{b}?{query}";
                         if (uri.Length <= 2048)
                         {
                             await _js.InvokeVoidAsync("copyToClipboard", uri);
@@ -497,7 +497,7 @@ namespace SimpleCircuitOnline.Pages
             XmlDocument doc = null;
             try
             {
-                var code = await _scriptEditor.GetValue();
+                string code = await _scriptEditor.GetValue();
 
                 if (!_viewMode)
                 {
@@ -512,7 +512,7 @@ namespace SimpleCircuitOnline.Pages
                 // Parse the script
                 var lexer = SimpleCircuitLexer.FromString(code);
                 context.Options.RenderBounds = includeBounds;
-                var parsingContext = new ParsingContext();
+                var parsingContext = new ParsingContext() { Diagnostics = context.Diagnostics };
                 if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node.Statements.Length > 0)
                 {
                     StatementEvaluator.Evaluate(node, context);

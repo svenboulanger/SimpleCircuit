@@ -158,7 +158,7 @@ namespace SimpleCircuit
                 c.Register(registerContext);
 
             // Make sure we have a solution by grounding floating nodes
-            foreach (var group in prepareContext.Groups.Representatives)
+            foreach (string group in prepareContext.Groups.Representatives)
                 registerContext.Circuit.Add(new Resistor($"R{group}", group, "0", 1e6));
 
             // If there are no circuit components to solve, let's stop here
