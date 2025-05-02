@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace SimpleCircuit.Components.Builders
@@ -7,7 +7,7 @@ namespace SimpleCircuit.Components.Builders
     /// <summary>
     /// Graphical options.
     /// </summary>
-    public class GraphicOptions : IEquatable<GraphicOptions>
+    public class GraphicOptions
     {
         /// <summary>
         /// Gets a set of classes used for the graphical component.
@@ -20,9 +20,9 @@ namespace SimpleCircuit.Components.Builders
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the style of the path.
+        /// Gets the style.
         /// </summary>
-        public string Style { get; set; }
+        public Dictionary<string, string> Style { get; } = [];
 
         /// <summary>
         /// Creates new graphic options.
@@ -32,34 +32,6 @@ namespace SimpleCircuit.Components.Builders
         {
             foreach (var n in classNames)
                 Classes.Add(n);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            int hash = Id?.GetHashCode() ?? 0;
-            hash = hash * 1021 ^ (Style?.GetHashCode() ?? 0);
-            foreach (string c in Classes)
-                hash = hash * 1021 ^ hash;
-            return hash;
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-            => obj is GraphicOptions go && Equals(go);
-
-        /// <inheritdoc />
-        public bool Equals(GraphicOptions other)
-        {
-            if (ReferenceEquals(this, other))
-                return true;
-            if (Id != other.Id)
-                return false;
-            if (Style != other.Style)
-                return false;
-            if (!Classes.SetEquals(other.Classes))
-                return false;
-            return true;
         }
 
         /// <summary>
@@ -74,36 +46,8 @@ namespace SimpleCircuit.Components.Builders
                 element.SetAttribute("class", string.Join(" ", Classes));
             if (!string.IsNullOrWhiteSpace(Id))
                 element.SetAttribute("id", Id);
-            if (!string.IsNullOrWhiteSpace(Style))
-                element.SetAttribute("style", Style);
+            if (Style.Count > 0)
+                element.SetAttribute("style", string.Join("; ", Style.Select(p => $"{p.Key}: {p.Value}")));
         }
-
-        /// <summary>
-        /// Overload of equality of graphic options.
-        /// </summary>
-        /// <param name="left">The left argument.</param>
-        /// <param name="right">The right argument.</param>
-        /// <returns>
-        ///     Returns <c>true</c> if both are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(GraphicOptions left, GraphicOptions right)
-        {
-            if (ReferenceEquals(left, right))
-                return true;
-            if (left is null || right is null)
-                return false;
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Overload of inequality of graphic options.
-        /// </summary>
-        /// <param name="left">The left argument.</param>
-        /// <param name="right">The right argument.</param>
-        /// <returns>
-        ///     Returns <c>true</c> if both are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(GraphicOptions left, GraphicOptions right)
-            => !(left == right);
     }
 }

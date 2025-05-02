@@ -246,19 +246,27 @@ namespace SimpleCircuit.Components.Builders
 
                 case OverlineSpan overlineSpan:
                     {
+                        var options = new GraphicOptions();
+                        options.Style["stroke"] = "black";
+                        options.Style["fill"] = "none";
+                        options.Style["stroke-width"] = $"{overlineSpan.Thickness.ToSVG()}pt";
                         Path(b => b
                             .MoveTo(offset + overlineSpan.Start)
                             .LineTo(offset + overlineSpan.End),
-                            new() { Style = $"stroke-width:{overlineSpan.Thickness.ToSVG()}pt;fill:none;" });
+                            options);
                     }
                     break;
 
                 case UnderlineSpan underlineSpan:
                     {
+                        var options = new GraphicOptions();
+                        options.Style["stroke"] = "black";
+                        options.Style["fill"] = "none";
+                        options.Style["stroke-width"] = $"{underlineSpan.Thickness.ToSVG()}pt";
                         Path(b => b
                             .MoveTo(offset + underlineSpan.Start)
                             .LineTo(offset + underlineSpan.End),
-                            new() { Style = $"stroke-width:{underlineSpan.Thickness.ToSVG()}pt;fill:none;" });
+                            options);
                     }
                     break;
 

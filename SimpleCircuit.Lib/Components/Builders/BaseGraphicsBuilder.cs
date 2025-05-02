@@ -368,11 +368,25 @@ namespace SimpleCircuit.Components.Builders
 
         private void ParseGraphicOptions(GraphicOptions options, XmlNode node)
         {
-            options.Style = node.Attributes?["style"]?.Value;
+            // Parse the style
+            string style = node.Attributes?["style"]?.Value;
+            if (!string.IsNullOrWhiteSpace(style))
+            {
+                string[] parts = style.Split(["; "], StringSplitOptions.RemoveEmptyEntries);
+                foreach (string part in parts)
+                {
+                    int index = part.IndexOf(':');
+                    if (index < 0)
+                        continue;
+                    string key = part[0..index].Trim();
+                    string value = part[(index + 1)..].Trim();
+                    options.Style[key] = value;
+                }
+            }
             string classes = node.Attributes?["class"]?.Value;
             if (!string.IsNullOrWhiteSpace(classes))
             {
-                foreach (string name in classes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string name in classes.Split([' '], StringSplitOptions.RemoveEmptyEntries))
                     options.Classes.Add(name);
             }
         }

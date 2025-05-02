@@ -45,10 +45,14 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         /// <inheritdoc />
         protected override void Draw(IGraphicsBuilder builder)
         {
+            var options = new GraphicOptions();
+            options.Style["stroke"] = Foreground;
+            options.Style["fill"] = Background;
+            options.Style["stroke-width"] = "0.5pt";
             if (Variants.Contains(Square))
-                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius);
+                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius, options);
             else
-                builder.Circle(new(), Size * 0.5);
+                builder.Circle(new(), Size * 0.5, options);
         }
 
         /// <summary>
@@ -144,9 +148,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             {
                 // Assume a circle
                 foreach (var pin in pins)
-                {
                     pin.Offset = pin.Orientation * s;
-                }
             }
         }
     }

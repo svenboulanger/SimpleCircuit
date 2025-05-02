@@ -12,7 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-X <r fg=""#aaa"" t=1 arrow> X
+R <r +50 fg=""#aaa"" t=1 dotted arrow> C
 ";
 
             var logger = new Logger();

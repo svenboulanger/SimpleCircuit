@@ -73,10 +73,6 @@ namespace SimpleCircuit.Components.Wires
         [Alias("r")]
         public double RoundRadius { get; set; } = 0.0;
 
-        [Description("The color of the wire.")]
-        [Alias("fg")]
-        public string Foreground { get; set; } = "black";
-
         /// <summary>
         /// Gets the global coordinates of the points of the wire.
         /// </summary>
@@ -400,21 +396,22 @@ namespace SimpleCircuit.Components.Wires
             {
                 // Compute the graphical style
                 var options = new GraphicOptions("wire") { Id = Name };
+                options.Style["stroke"] = Foreground;
+                options.Style["stroke-width"] = $"{Thickness.ToSVG()}pt";
+                options.Style["fill"] = "none";
+                options.Style["stroke-linejoin"] = "round";
+                options.Style["stroke-linecap"] = "round";
                 if (Variants.Contains(Dashed))
                 {
                     options.Classes.Add("dashed");
-                    style.Append("stroke-dasharray: 2 2; ");
+                    options.Style["stroke-dasharray"] = $"{(Thickness * 4).ToSVG()} {(Thickness * 4).ToSVG()}";
                 }
                 if (Variants.Contains(Dotted))
                 {
                     options.Classes.Add("dotted");
-                    style.Append("stroke-dasharray: 0.5 2; ");
+                    options.Style["stroke-dasharray"] = $"{Thickness.ToSVG()} {(Thickness * 4).ToSVG()};";
                 }
-                style.Append($"stroke-width: {Thickness.ToSVG()}pt; ");
-                style.Append($"stroke: {Foreground}; ");
-                style.Append($"fill: none; stroke-linejoin: round; stroke-linecap: round; ");
-                options.Style = style.ToString();
-
+                
                 var tf = builder.CurrentTransform;
                 _points.Clear();
                 builder.Path(builder =>

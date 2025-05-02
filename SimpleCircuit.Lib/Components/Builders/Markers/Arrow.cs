@@ -17,10 +17,12 @@ namespace SimpleCircuit.Components.Builders.Markers
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            var options = new GraphicOptions("marker", "arrow")
-            {
-                Style = $"stroke: {Foreground}; stroke-width: {Thickness.ToSVG()}pt; fill: {Foreground}; stroke-linejoin: round; stroke-linecap: round;"
-            };
+            var options = new GraphicOptions("marker", "arrow");
+            options.Style["stroke"] = Foreground;
+            options.Style["fill"] = Foreground;
+            options.Style["stroke-width"] = $"{Thickness.ToSVG()}pt";
+            options.Style["stroke-linejoin"] = "round";
+            options.Style["stroke-linecap"] = "round";
             builder.Polygon(_points.Select(pt => pt * 2.0 * Thickness), options);
         }
     }

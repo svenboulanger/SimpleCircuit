@@ -61,6 +61,20 @@ namespace SimpleCircuit.Components
         public Bounds Bounds { get; private set; }
 
         /// <summary>
+        /// Gets or sets the foreground color.
+        /// </summary>
+        [Description("The foreground color.")]
+        [Alias("fg")]
+        public string Foreground { get; set; } = "black";
+
+        /// <summary>
+        /// Gets or sets the background color.
+        /// </summary>
+        [Description("The background/fill color.")]
+        [Alias("bg"), Alias("fill")]
+        public string Background { get; set; } = "none";
+
+        /// <summary>
         /// Creates a new component.
         /// </summary>
         /// <param name="name">The name of the component.</param>

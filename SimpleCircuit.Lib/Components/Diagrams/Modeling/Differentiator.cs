@@ -38,8 +38,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         break;
 
                     default:
+                        var options = new GraphicOptions();
+                        options.Style["stroke"] = Foreground;
+                        options.Style["fill"] = "none";
+                        options.Style["stroke-width"] = $"{(0.1 * Scale).ToSVG()}pt";
+                        options.Style["stroke-linecap"] = "butt";
                         builder.Text("d", new(), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
-                        builder.Line(new(-2, 0), new(2, 0), new() { Style = $"stroke-width: {(0.1 * Scale).ToSVG()}pt;"});
+                        builder.Line(new(-2, 0), new(2, 0), options);
                         builder.Text("dt", new(), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
                         break;
                 }
