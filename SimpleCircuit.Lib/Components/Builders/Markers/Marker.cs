@@ -21,6 +21,16 @@
         public Vector2 Orientation { get; set; } = orientation;
 
         /// <summary>
+        /// Gets or sets the foreground color.
+        /// </summary>
+        public string Foreground { get; set; } = "black";
+
+        /// <summary>
+        /// Gets or sets the thickness of the wire for which the marker is drawn.
+        /// </summary>
+        public double Thickness { get; set; } = 0.5;
+
+        /// <summary>
         /// Draws the marker to the given drawing.
         /// </summary>
         /// <param name="drawing"></param>

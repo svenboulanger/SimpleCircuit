@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using System.Linq;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An arrow marker.
@@ -15,8 +17,11 @@
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder)
         {
-            builder.RequiredCSS.Add(".marker.arrow { fill: black; }");
-            builder.Polygon(_points, new("marker", "arrow"));
+            var options = new GraphicOptions("marker", "arrow")
+            {
+                Style = $"stroke: {Foreground}; stroke-width: {Thickness.ToSVG()}pt; fill: {Foreground}; stroke-linejoin: round; stroke-linecap: round;"
+            };
+            builder.Polygon(_points.Select(pt => pt * 2.0 * Thickness), options);
         }
     }
 }

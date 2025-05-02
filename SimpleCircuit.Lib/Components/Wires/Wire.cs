@@ -7,6 +7,7 @@ using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -71,6 +72,10 @@ namespace SimpleCircuit.Components.Wires
         [Description("The radius.")]
         [Alias("r")]
         public double RoundRadius { get; set; } = 0.0;
+
+        [Description("The color of the wire.")]
+        [Alias("fg")]
+        public string Foreground { get; set; } = "black";
 
         /// <summary>
         /// Gets the global coordinates of the points of the wire.
@@ -389,20 +394,26 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         protected override void Draw(IGraphicsBuilder builder)
         {
+            var style = new StringBuilder();
             List<Marker> markers = [];
             if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
+                // Compute the graphical style
+                var options = new GraphicOptions("wire") { Id = Name };
                 if (Variants.Contains(Dashed))
-                    builder.RequiredCSS.Add(".dashed { stroke-dasharray: 2 2; }");
-                if (Variants.Contains(Dotted))
-                    builder.RequiredCSS.Add(".dotted { stroke-dasharray: 0.5 2; }");
-                GraphicOptions options = Variants.Select(Dashed, Dotted) switch
                 {
-                    0 => new("wire", "dashed"),
-                    1 => new("wire", "dotted"),
-                    _ => new("wire"),
-                };
-                options.Style = $"stroke-width: {Thickness.ToString("g2", System.Globalization.CultureInfo.InvariantCulture)}pt;";
+                    options.Classes.Add("dashed");
+                    style.Append("stroke-dasharray: 2 2; ");
+                }
+                if (Variants.Contains(Dotted))
+                {
+                    options.Classes.Add("dotted");
+                    style.Append("stroke-dasharray: 0.5 2; ");
+                }
+                style.Append($"stroke-width: {Thickness.ToSVG()}pt; ");
+                style.Append($"stroke: {Foreground}; ");
+                style.Append($"fill: none; stroke-linejoin: round; stroke-linecap: round; ");
+                options.Style = style.ToString();
 
                 var tf = builder.CurrentTransform;
                 _points.Clear();
@@ -519,7 +530,14 @@ namespace SimpleCircuit.Components.Wires
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)
+                {
+                    // Update styling info
+                    marker.Thickness = Thickness;
+                    marker.Foreground = Foreground;
+
+                    // Pass information
                     marker?.Draw(builder);
+                }
             }
         }
 

@@ -12,26 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-X1 <n e s w> X1
-X2 <ne se sw nw> X2
-X3 <a 60 r a -60 a -120 l a 120> X3
-X <ne> R - R - R
-X7 <u> R <u r> C <r d ??> X7
-Xt1 <d arrow d arrow> X
-Xt2 <rarrow d arrow> X
-Xt3 <arrow d> X
-Xt4 <d rarrow> X
-Xt5 <d one> X
-Xt6 <d many> X
-Xt7 <d onemany> X
-Xt8 <d zeroone> X
-Xt9 <d zeromany> X
-Xt10 <d plus> X
-Xt11 <d minus> X
-Xt12 <d dashed> X
-Xt13 <d dotted> X
-(y Xt*)
-
+X <r fg=""#aaa"" t=1 arrow> X
 ";
 
             var logger = new Logger();
