@@ -8,6 +8,7 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -533,8 +534,9 @@ namespace SimpleCircuit.Evaluator
             List<WireSegmentInfo> segments = [];
             List<Marker> markers = [];
             List<SyntaxNode> propertiesAndVariants = [];
-            foreach (var item in wire.Items)
+            for (int i = 0; i < wire.Items.Length; i++)
             {
+                var item = wire.Items[i];
                 switch (item)
                 {
                     case DirectionNode direction:
@@ -574,6 +576,8 @@ namespace SimpleCircuit.Evaluator
                                     DirectionNode.UpRightArrow or "ne" => new(_isqrt2, -_isqrt2),
                                     DirectionNode.DownRightArrow or "se" => new(_isqrt2, _isqrt2),
                                     DirectionNode.DownLeftArrow or "sw" => new(-_isqrt2, _isqrt2),
+                                    "?" => new(),
+                                    "??" => new(double.NaN, double.NaN),
                                     _ => throw new NotImplementedException(),
                                 };
                             }
@@ -607,6 +611,18 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
+                    case LiteralNode literal when literal.Value.Length == 1 && literal.Value.Span[0] == '-':
+                        {
+                            // Create the segment and apply defaults
+                            var segment = new WireSegmentInfo(literal.Location)
+                            {
+                                IsMinimum = true,
+                                Length = context.Options.MinimumWireLength
+                            };
+                            segments.Add(segment);
+                        }
+                        break;
+
                     case UnaryNode unary:
                     case BinaryNode binary:
                         propertiesAndVariants.Add(item);
@@ -622,7 +638,11 @@ namespace SimpleCircuit.Evaluator
                     segments[^1].EndMarkers = [.. markers];
             }
 
-            // Create pin constraints
+            // Create the wire
+            CreateWire(startPin, segments, propertiesAndVariants, endPin, context);
+        }
+        private static void CreateWire(PinReference startPin, List<WireSegmentInfo> segments, List<SyntaxNode> propertiesAndVariants, PinReference endPin, EvaluationContext context)
+        {
             string wireName = context.GetWireName();
             if (segments.Count > 0)
             {
@@ -640,7 +660,6 @@ namespace SimpleCircuit.Evaluator
 
                 // Apply properties and variants
                 ApplyPropertiesAndVariants(result, propertiesAndVariants, context);
-
                 context.Circuit.Add(result);
             }
         }

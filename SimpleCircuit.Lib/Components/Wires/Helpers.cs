@@ -66,7 +66,13 @@ namespace SimpleCircuit.Components.Wires
             {
                 string tx = nameX(i);
                 string ty = nameY(i);
-                switch (PrepareSegmentOffset(x, y, tx, ty, segments[i], orientation(i), axis, context))
+                var n = orientation(i);
+
+                // Ignore unconstrained wires
+                if (double.IsNaN(n.X) || double.IsNaN(n.Y))
+                    continue;
+
+                switch (PrepareSegmentOffset(x, y, tx, ty, segments[i], n, axis, context))
                 {
                     case PresenceResult.GiveUp: return PresenceResult.GiveUp;
                     case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
@@ -92,6 +98,10 @@ namespace SimpleCircuit.Components.Wires
         public static PresenceResult PrepareSegmentOffset(string x, string y, string tx, string ty,
             WireSegmentInfo segment, Vector2 orientation, VirtualChainConstraints axis, IPrepareContext context)
         {
+            // Ignore any unconstrained wires (no offsets can be defined then)
+            if (double.IsNaN(segment.Orientation.X) || double.IsNaN(segment.Orientation.Y))
+                return PresenceResult.Success;
+
             double l = segment.Length;
             if (!segment.IsMinimum)
             {

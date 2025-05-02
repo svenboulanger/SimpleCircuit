@@ -259,6 +259,12 @@ namespace SimpleCircuit.Components.Wires
                 case PreparationMode.Groups:
                     for (int i = 0; i < _segments.Count; i++)
                     {
+                        // Ignore any unconstrained segments
+                        var orientation = GetOrientation(i);
+                        if (double.IsNaN(orientation.X) || double.IsNaN(orientation.Y))
+                            continue;
+
+                        // Group any other segments
                         switch (Helpers.PrepareSegmentGroup(StartX, StartY, GetXName(i), GetYName(i), Parser.Nodes.VirtualChainConstraints.XY, context))
                         {
                             case PresenceResult.GiveUp: return PresenceResult.GiveUp;
@@ -363,6 +369,10 @@ namespace SimpleCircuit.Components.Wires
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
                 var orientation = GetOrientation(i);
+
+                // Ignore unconstrained wires
+                if (double.IsNaN(orientation.X) || double.IsNaN(orientation.Y))
+                    continue;
 
                 // Wire is of minimum length
                 if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))

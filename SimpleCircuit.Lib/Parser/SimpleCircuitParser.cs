@@ -151,6 +151,11 @@ namespace SimpleCircuit.Parser
 
                     items.Add(wire);
                 }
+                else if (lexer.Branch(TokenType.Punctuator, "-", out var dash))
+                {
+                    // Short hand for <?>
+                    items.Add(new WireNode([new LiteralNode(dash)]));
+                }
                 else
                     break;
             }
@@ -299,6 +304,17 @@ namespace SimpleCircuit.Parser
                         if (!ParseDistance(lexer, context, out distance))
                             return false;
                         result = new DirectionNode(dir, angle, distance);
+                        break;
+                }
+            }
+            else if (lexer.Type == TokenType.Punctuator)
+            {
+                switch (lexer.Content.ToString())
+                {
+                    case "?":
+                    case "??":
+                        result = new DirectionNode(lexer.Token, null, null);
+                        lexer.Next();
                         break;
                 }
             }

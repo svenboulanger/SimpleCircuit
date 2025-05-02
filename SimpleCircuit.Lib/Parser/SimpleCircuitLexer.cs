@@ -111,10 +111,16 @@ namespace SimpleCircuit.Parser
                     case '{':
                     case '}':
                     case ',':
-                    case '?':
                     case ':':
                         NextType = TokenType.Punctuator;
                         ContinueToken();
+                        break;
+
+                    case '?':
+                        NextType = TokenType.Punctuator;
+                        ContinueToken();
+                        if (Char == '?')
+                            ContinueToken();
                         break;
 
                     case '<':
