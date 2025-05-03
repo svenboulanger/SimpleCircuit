@@ -110,6 +110,9 @@ namespace SimpleCircuit.Components.Annotations
         [Alias("lm")]
         public double LabelMargin { get; set; } = 1.0;
 
+        /// <inheritdoc />
+        public AppearanceOptions Appearance { get; } = new();
+
         Vector2 IBoxDrawable.TopLeft => _topLeft;
         Vector2 IBoxDrawable.BottomRight => _bottomRight;
 

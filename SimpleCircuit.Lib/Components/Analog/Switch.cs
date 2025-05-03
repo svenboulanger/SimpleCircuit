@@ -164,7 +164,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegularSwitch(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
 
                 // Switch terminals
                 builder.Circle(new Vector2(-5, 0), 1);
@@ -200,7 +200,7 @@ namespace SimpleCircuit.Components.Analog
                         if (_anchors[1].Location.Y < 3)
                             _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
                         var marker = new Arrow(new(2, 2), new(0.24253562503, 0.97014250014));
-                        marker.Draw(builder);
+                        marker.Draw(builder, Appearance);
                         break;
 
                     case 1:
@@ -212,7 +212,7 @@ namespace SimpleCircuit.Components.Analog
                         if (_anchors[1].Location.Y < 2)
                             _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
                         marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
-                        marker.Draw(builder);
+                        marker.Draw(builder, Appearance);
                         break;
                 }
 
@@ -280,7 +280,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawAreiPushSwitch(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["a"]);
+                builder.ExtendPin(Pins["a"], Appearance, this);
                 builder.Circle(new(), 4);
                 builder.Circle(new(), 2);
 

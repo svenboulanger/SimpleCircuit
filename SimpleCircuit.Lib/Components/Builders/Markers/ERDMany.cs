@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using System.Linq;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "many".
@@ -13,11 +15,11 @@
         private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
-            builder.RequiredCSS.Add(".marker.erd.many { fill: transparent; }");
-            builder.Polyline(_points, new("marker", "erd", "many"));
-            builder.Line(new(-2, 0), new(), new("marker", "erd", "many"));
+            var options = appearance.CreateMarkerOptions(hasFill: false);
+            builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), options);
+            builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), options);
         }
     }
 }

@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components
             public Bounds Bounds { get; private set; }
 
             /// <inheritdoc />
-            public (string X, string Y) CoordinateGroup { get; private set; }
+            public AppearanceOptions Appearance { get; } = new();
 
             /// <summary>
             /// Creates a new black box.

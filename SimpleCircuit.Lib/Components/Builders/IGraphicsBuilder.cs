@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.Xml;
@@ -149,7 +148,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="expand">The direction in which the text can overflow.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null);
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);
 
         /// <summary>
         /// Draws text.
@@ -157,10 +156,8 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="value">The text.</param>
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction in which text can expand.</param>
-        /// <param name="size">The size in points of the text.</param>
-        /// <param name="lineSpacing">The line spacing.</param>
-        /// <param name="options">The graphic options.</param>
+        /// <param name="appearance">The parent appearance options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null);
+        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance);
     }
 }

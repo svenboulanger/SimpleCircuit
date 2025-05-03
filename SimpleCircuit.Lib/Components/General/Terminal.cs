@@ -34,7 +34,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 4);
+                builder.ExtendPins(Pins, Appearance, this, 4);
 
                 switch (Variants.Select("input", "in", "output", "out", "inout", "other", "pad", "square", "none"))
                 {

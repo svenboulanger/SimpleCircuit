@@ -11,11 +11,11 @@
     public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
-            GraphicOptions options = new("marker", "erd", "onlyone");
-            builder.Line(new(-2, -1.5), new(-2, 1.5), options);
-            builder.Line(new(-4, -1.5), new(-4, 1.5), options);
+            var options = appearance.CreateMarkerOptions();
+            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);
+            builder.Line(new Vector2(-8, -3) * appearance.LineThickness, new Vector2(-8, 3) * appearance.LineThickness, options);
         }
     }
 }

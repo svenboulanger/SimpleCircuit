@@ -21,27 +21,17 @@
         public Vector2 Orientation { get; set; } = orientation;
 
         /// <summary>
-        /// Gets or sets the foreground color.
-        /// </summary>
-        public string Foreground { get; set; } = "black";
-
-        /// <summary>
-        /// Gets or sets the thickness of the wire for which the marker is drawn.
-        /// </summary>
-        public double Thickness { get; set; } = 0.5;
-
-        /// <summary>
         /// Draws the marker to the given drawing.
         /// </summary>
-        /// <param name="drawing"></param>
-        public void Draw(IGraphicsBuilder builder)
+        /// <param name="builder">The graphics builder.</param>
+        public void Draw(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
             var orientation = Orientation;
             if (orientation.IsZero())
                 orientation = new(1, 0);
 
             builder.BeginTransform(new(Location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
-            DrawMarker(builder);
+            DrawMarker(builder, appearance);
             builder.EndTransform();
         }
 
@@ -50,6 +40,6 @@
         /// The location is at (0, 0).
         /// </summary>
         /// <param name="builder">The drawing.</param>
-        protected abstract void DrawMarker(IGraphicsBuilder builder);
+        protected abstract void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance);
     }
 }

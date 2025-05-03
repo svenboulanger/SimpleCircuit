@@ -16,11 +16,12 @@
         public bool OppositeSide { get; set; }
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
             Vector2 offset = OppositeSide ? new(-2.5, 3) : new(-2.5, -3);
             builder.BeginTransform(new(offset, builder.CurrentTransform.Matrix.Inverse));
-            GraphicOptions options = new("marker", "plus");
+            GraphicOptions options = appearance.CreateMarkerOptions();
+            options.Style["stroke-width"] = $"{AppearanceOptions.DefaultLineThickness.ToSVG()}pt";
             builder.Line(new(-1, 0), new(1, 0), options);
             builder.Line(new(0, -1), new(0, 1), options);
             builder.EndTransform();

@@ -33,16 +33,6 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public const string JumpOver = "jump";
 
-        /// <summary>
-        /// The variant used for a wire that is dashed.
-        /// </summary>
-        public const string Dashed = "dashed";
-
-        /// <summary>
-        /// The variant used for a wire that is dotted.
-        /// </summary>
-        public const string Dotted = "dotted";
-
         /// <inheritdoc />
         public override int Order => -1;
 
@@ -77,12 +67,6 @@ namespace SimpleCircuit.Components.Wires
         /// Gets the global coordinates of the points of the wire.
         /// </summary>
         public IReadOnlyList<Vector2> Points => _points.AsReadOnly();
-
-        /// <summary>
-        /// Gets or sets the thickness.
-        /// </summary>
-        [Description("The wire thickness"), Alias("t")]
-        public double Thickness { get; set; } = 0.5;
 
         /// <summary>
         /// Creates a new wire.
@@ -395,23 +379,6 @@ namespace SimpleCircuit.Components.Wires
             if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
                 // Compute the graphical style
-                var options = new GraphicOptions("wire") { Id = Name };
-                options.Style["stroke"] = Foreground;
-                options.Style["stroke-width"] = $"{Thickness.ToSVG()}pt";
-                options.Style["fill"] = "none";
-                options.Style["stroke-linejoin"] = "round";
-                options.Style["stroke-linecap"] = "round";
-                if (Variants.Contains(Dashed))
-                {
-                    options.Classes.Add("dashed");
-                    options.Style["stroke-dasharray"] = $"{(Thickness * 4).ToSVG()} {(Thickness * 4).ToSVG()}";
-                }
-                if (Variants.Contains(Dotted))
-                {
-                    options.Classes.Add("dotted");
-                    options.Style["stroke-dasharray"] = $"{Thickness.ToSVG()} {(Thickness * 4).ToSVG()};";
-                }
-                
                 var tf = builder.CurrentTransform;
                 _points.Clear();
                 builder.Path(builder =>
@@ -523,18 +490,11 @@ namespace SimpleCircuit.Components.Wires
 
                         last = current;
                     }
-                }, options);
+                }, Appearance.CreatePathOptions(this));
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)
-                {
-                    // Update styling info
-                    marker.Thickness = Thickness;
-                    marker.Foreground = Foreground;
-
-                    // Pass information
-                    marker?.Draw(builder);
-                }
+                    marker?.Draw(builder, Appearance);
             }
         }
 

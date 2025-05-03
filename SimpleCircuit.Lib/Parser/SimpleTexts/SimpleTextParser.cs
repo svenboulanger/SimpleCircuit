@@ -196,7 +196,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             var bounds = context.Measurer.Measure(content, context.IsBold, context.FontSize);
 
             // Return the span
-            return new TextSpan(content, context.Measurer.FontFamily, false, context.FontSize, bounds);
+            return new TextSpan(content, context.Color, context.Opacity, context.Measurer.FontFamily, false, context.FontSize, bounds);
         }
     }
 }

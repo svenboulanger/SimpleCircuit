@@ -172,9 +172,9 @@ namespace SimpleCircuit.Components.Builders
                     case "group":
                     case "g":
                         // Parse options
-                        GraphicOptions options = new();
-                        ParseGraphicOptions(options, node);
-                        BeginGroup(options);
+                        AppearanceOptions options = new();
+                        ParseAppearanceOptions(options, node);
+                        BeginGroup();
                         DrawXmlActions(node, context);
                         EndGroup();
                         break;
@@ -190,7 +190,6 @@ namespace SimpleCircuit.Components.Builders
             if (node.Attributes == null)
                 return;
             bool success = true;
-            GraphicOptions options = new();
             HashSet<Marker> startMarkers = null, endMarkers = null;
             success &= node.Attributes.ParseOptionalScalar("x1", Diagnostics, 0.0, out double x1);
             success &= node.Attributes.ParseOptionalScalar("y1", Diagnostics, 0.0, out double y1);
@@ -200,10 +199,11 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             // Draw the line
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
-            Line(new(x1, y1), new(x2, y2), options);
-            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1));
-            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1));
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
+            Line(new(x1, y1), new(x2, y2), appearance.CreatePathOptions());
+            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), appearance);
+            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), appearance);
         }
 
         private void DrawXmlPolygon(XmlNode node)
@@ -219,11 +219,11 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node);
 
             // Draw the polygon
-            Polygon(points, options);
+            Polygon(points, appearance.CreatePathOptions());
         }
 
         private void DrawXmlPolyline(XmlNode node)
@@ -242,20 +242,20 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             // Draw the polyline
-            Polyline(points, options);
+            Polyline(points, appearance.CreatePathOptions());
             if (points.Count > 1)
             {
-                DrawMarkers(startMarkers, points[0], points[1] - points[0]);
-                DrawMarkers(endMarkers, points[0], points[0] - points[^1]);
+                DrawMarkers(startMarkers, points[0], points[1] - points[0], appearance);
+                DrawMarkers(endMarkers, points[0], points[0] - points[^1], appearance);
             }
             else
             {
-                DrawMarkers(startMarkers, points[0], new(1, 0));
-                DrawMarkers(endMarkers, points[0], new(1, 0));
+                DrawMarkers(startMarkers, points[0], new(1, 0), appearance);
+                DrawMarkers(endMarkers, points[0], new(1, 0), appearance);
             }
         }
 
@@ -271,11 +271,11 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node);
 
             // Draw the circle
-            Circle(new(cx, cy), r, options);
+            Circle(new(cx, cy), r, appearance.CreatePathOptions());
         }
 
         private void DrawXmlPath(XmlNode node)
@@ -288,8 +288,8 @@ namespace SimpleCircuit.Components.Builders
             if (string.IsNullOrWhiteSpace(pathData))
                 return;
 
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node, Diagnostics, ref startMarkers, ref endMarkers);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
@@ -299,9 +299,9 @@ namespace SimpleCircuit.Components.Builders
                     var lexer = new SvgPathDataLexer(pathData);
                     start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
                     end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
-                }, options);
-                DrawMarkers(startMarkers, start.Location, start.Normal);
-                DrawMarkers(endMarkers, end.Location, end.Normal);
+                }, appearance.CreatePathOptions());
+                DrawMarkers(startMarkers, start.Location, start.Normal, appearance);
+                DrawMarkers(endMarkers, end.Location, end.Normal, appearance);
             }
         }
 
@@ -320,11 +320,11 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node);
 
             // Draw the rectangle
-            this.Rectangle(x, y, width, height, rx, ry, options);
+            this.Rectangle(x, y, width, height, rx, ry, options: appearance.CreatePathOptions());
         }
 
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
@@ -337,18 +337,16 @@ namespace SimpleCircuit.Components.Builders
             success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
             success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
             success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
-            success &= node.Attributes.ParseOptionalScalar("size", Diagnostics, 4.0, out double size);
-            success &= node.Attributes.ParseOptionalScalar("line-spacing", Diagnostics, 1.5, out double lineSpacing);
             if (!success)
                 return;
 
             string value = node.Attributes?["value"]?.Value;
-            GraphicOptions options = new();
-            ParseGraphicOptions(options, node);
+            AppearanceOptions appearance = new();
+            ParseAppearanceOptions(appearance, node);
 
             if (value != null && context != null)
                 value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new Vector2(nx, ny), size: size, lineSpacing: lineSpacing, options: options);
+            Text(value, new Vector2(x, y), new Vector2(nx, ny), appearance);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
@@ -361,39 +359,21 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            var options = new GraphicOptions();
-            ParseGraphicOptions(options, node);
+            var options = new AppearanceOptions();
+            ParseAppearanceOptions(options, node);
             context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny), options));
         }
 
-        private void ParseGraphicOptions(GraphicOptions options, XmlNode node)
+        private void ParseAppearanceOptions(AppearanceOptions options, XmlNode node)
         {
             // Parse the style
-            string style = node.Attributes?["style"]?.Value;
-            if (!string.IsNullOrWhiteSpace(style))
-            {
-                string[] parts = style.Split(["; "], StringSplitOptions.RemoveEmptyEntries);
-                foreach (string part in parts)
-                {
-                    int index = part.IndexOf(':');
-                    if (index < 0)
-                        continue;
-                    string key = part[0..index].Trim();
-                    string value = part[(index + 1)..].Trim();
-                    options.Style[key] = value;
-                }
-            }
-            string classes = node.Attributes?["class"]?.Value;
-            if (!string.IsNullOrWhiteSpace(classes))
-            {
-                foreach (string name in classes.Split([' '], StringSplitOptions.RemoveEmptyEntries))
-                    options.Classes.Add(name);
-            }
+
+            // Stroke attributes
         }
 
-        private void ParseGraphicOptions(GraphicOptions options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private void ParseAppearanceOptions(AppearanceOptions options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
-            ParseGraphicOptions(options, node);
+            ParseAppearanceOptions(options, node);
 
             string markers = node.Attributes?["marker-start"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
@@ -435,7 +415,7 @@ namespace SimpleCircuit.Components.Builders
             }
         }
 
-        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation)
+        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation, AppearanceOptions appearance)
         {
             if (markers == null)
                 return;
@@ -447,7 +427,7 @@ namespace SimpleCircuit.Components.Builders
             {
                 marker.Location = location;
                 marker.Orientation = orientation;
-                marker.Draw(this);
+                marker.Draw(this, appearance);
             }
         }
 
@@ -486,9 +466,9 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4, double lineSpacing = 1.5, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance);
     }
 }

@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:

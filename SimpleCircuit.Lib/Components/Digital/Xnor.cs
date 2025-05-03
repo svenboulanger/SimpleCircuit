@@ -144,7 +144,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawXnor(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 double w = Width * 0.5;
                 double h = Height * 0.5;
@@ -164,9 +164,9 @@ namespace SimpleCircuit.Components.Digital
 
             private void DrawXnorIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
-                builder.Text("=1", new(), new());
+                builder.Text("=1", new(), new(), Appearance);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);

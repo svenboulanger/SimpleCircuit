@@ -73,19 +73,8 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public Labels Labels { get; } = new();
 
-        /// <summary>
-        /// Gets or sets the foreground color.
-        /// </summary>
-        [Description("The foreground color.")]
-        [Alias("fg")]
-        public string Foreground { get; set; } = "black";
-
-        /// <summary>
-        /// Gets or sets the background color.
-        /// </summary>
-        [Description("The background/fill color.")]
-        [Alias("bg"), Alias("fill")]
-        public string Background { get; set; } = "white";
+        /// <inheritdoc />
+        public AppearanceOptions Appearance { get; } = new() { Background = AppearanceOptions.White };
 
         /// <summary>
         /// Creates a new instance for a block diagram.
@@ -119,11 +108,11 @@ namespace SimpleCircuit.Components.Diagrams
                 case PreparationMode.Offsets:
                     context.Offsets.Add(X);
                     context.Offsets.Add(Y);
-                    UpdatePins(_pins.Cast<LooselyOrientedPin>().ToList());
+                    UpdatePins([.. _pins.Cast<LooselyOrientedPin>()]);
                     break;
 
                 case PreparationMode.Sizes:
-                    Labels.Format(context);
+                    Labels.Format(context, Appearance);
                     break;
 
                 case PreparationMode.DrawableGroups:

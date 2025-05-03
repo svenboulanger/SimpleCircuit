@@ -40,9 +40,12 @@ namespace SimpleCircuit.Components.Inputs
             {
                 builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
 
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 builder.Circle(new(), 4);
-                builder.Line(new(4, -4), new(4, 4), new("plane"));
+
+                var options = Appearance.Clone();
+                options.LineThickness = 1.0;
+                builder.Line(new(4, -4), new(4, 4), options.CreatePathOptions(this));
                 _anchors.Draw(builder, this);
             }
         }

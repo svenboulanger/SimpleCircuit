@@ -103,7 +103,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand)
         {
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
@@ -130,13 +130,13 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return this;
 
-            var span = _formatter.Format(value, size, false, options);
-            return Text(span, location, expand, options);
+            var span = _formatter.Format(value, appearance);
+            return Text(span, location, expand);
         }
     }
 }

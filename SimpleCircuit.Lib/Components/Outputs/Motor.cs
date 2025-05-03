@@ -40,9 +40,9 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 if (!Variants.Contains(Options.Arei))
-                    builder.ExtendPins(Pins);
+                    builder.ExtendPins(Pins, Appearance, this);
                 builder.Circle(new(), 5);
-                builder.Text("M", new(), new());
+                builder.Text("M", new(), new(), Appearance);
 
                 if (Variants.Contains(_signs))
                 {

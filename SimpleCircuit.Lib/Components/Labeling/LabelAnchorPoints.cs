@@ -36,9 +36,9 @@ namespace SimpleCircuit.Components.Labeling
 
                 // Draw the label
                 if (label.Formatted is null)
-                    builder.Text(label.Value, location, expand, size: label.Size, lineSpacing: label.LineSpacing, options: anchor.Options);
+                    builder.Text(label.Value, location, expand, anchor.Appearance);
                 else
-                    builder.Text(label.Formatted, location, expand, options: anchor.Options);
+                    builder.Text(label.Formatted, location, expand);
             }
         }
     }

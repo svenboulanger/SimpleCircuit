@@ -73,7 +73,7 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
@@ -92,6 +92,7 @@ namespace SimpleCircuit.Components.Sources
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                var options = Appearance.CreatePathOptions(this);
 
                 // Circle
                 builder.Circle(new(0, 0), 6);
@@ -107,48 +108,48 @@ namespace SimpleCircuit.Components.Sources
 
                     case 1:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.Polyline(new Vector2[]
-                        {
+                        builder.Polyline(
+                        [
                             new(-3, 0), new(-3, 3), new(0, 3), new(0, -3), new(3, -3), new(3, 0)
-                        });
+                        ]);
                         builder.EndTransform();
                         break;
 
                     case 2:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.Polyline(new Vector2[]
-                        {
+                        builder.Polyline(
+                        [
                             new(-3, 0), new(-1.5, 1.5), new(1.5, -1.5), new(3, 0)
-                        });
+                        ]);
                         builder.EndTransform();
                         break;
 
                     case 3:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.Polyline(new Vector2[]
-                        {
+                        builder.Polyline(
+                        [
                             new(-3, 3), new(-1, 3), new(-1, -3), new(1, -3), new(1, 3), new(3, 3)
-                        });
+                        ]);
                         builder.EndTransform();
                         break;
 
                     case 4:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.Polyline(new Vector2[]
-                        {
+                        builder.Polyline(
+                        [
                             new(-3, 3), new(-1.5, 3), new(-1.5, -3), new(3, -3)
-                        });
+                        ]);
                         builder.EndTransform();
                         break;
 
                     default:
-                        builder.Signs(new(3, 0), new(-3, 0), vertical: true);
+                        builder.Signs(new(3, 0), new(-3, 0), options, vertical: true);
                         break;
                 }
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-6, -6), new(7.5, 7.5), new("arrow", "programmable"));
+                    builder.Arrow(new(-6, -6), new(7.5, 7.5), Appearance, this);
                     if (_anchors[0].Location.Y > -7)
                         _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                     if (_anchors[1].Location.Y < 8.5)
@@ -167,7 +168,7 @@ namespace SimpleCircuit.Components.Sources
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-4, -4), new(6, 6), new("arrow", "programmable"));
+                    builder.Arrow(new(-4, -4), new(6, 6), Appearance, this);
                     if (_anchors[0].Location.Y > -5)
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                     if (_anchors[1].Location.Y < 7)

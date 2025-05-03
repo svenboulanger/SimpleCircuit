@@ -121,7 +121,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
                 double l = Length * 0.5;
                 switch (Variants.Select(Options.American, Options.European))
                 {
@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l, 3.5), new(1, 0));
-                            marker.Draw(builder);
+                            marker.Draw(builder, Appearance);
                         }
                         
                         if (Variants.Contains(_choke))
@@ -157,14 +157,14 @@ namespace SimpleCircuit.Components.Analog
                             }
                             if (Variants.Contains(_programmable))
                             {
-                                builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10));
+                                builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10), Appearance, this);
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
-                            builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7));
+                            builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7), Appearance, this);
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }
@@ -192,7 +192,7 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
-                            marker.Draw(builder);
+                            marker.Draw(builder, Appearance);
                         }
                         
                         if (Variants.Contains(_choke))
@@ -206,14 +206,14 @@ namespace SimpleCircuit.Components.Analog
                             }
                             if (Variants.Contains(_programmable))
                             {
-                                builder.Arrow(new(-l + 1, 5), new(l, -10));
+                                builder.Arrow(new(-l + 1, 5), new(l, -10), Appearance, this);
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
-                            builder.Arrow(new(-l + 1, 5), new(l, -7));
+                            builder.Arrow(new(-l + 1, 5), new(l, -7), Appearance, this);
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
                         }

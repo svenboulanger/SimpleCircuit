@@ -170,7 +170,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDefault(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 DrawBox(builder, 8, 0, 16, 16);
             }
 

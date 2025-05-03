@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawBuffer(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, Appearance, this, 2, "in", "out");
                 builder.Polygon([
                     new(-6, 6),
                     new(6, 0),
@@ -99,10 +99,10 @@ namespace SimpleCircuit.Components.Digital
 
             private void DrawBufferIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, Appearance, this, 2, "in", "out");
 
                 builder.Rectangle(-5, -5, 10, 10, new());
-                builder.Text("1", new(), new());
+                builder.Text("1", new(), new(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

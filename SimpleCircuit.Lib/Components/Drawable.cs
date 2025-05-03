@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static SimpleCircuit.Circuits.Contexts.DrawableGrouper;
 
 namespace SimpleCircuit.Components
 {
@@ -60,19 +61,8 @@ namespace SimpleCircuit.Components
         /// <inheritdoc />
         public Bounds Bounds { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the foreground color.
-        /// </summary>
-        [Description("The foreground color.")]
-        [Alias("fg")]
-        public string Foreground { get; set; } = "black";
-
-        /// <summary>
-        /// Gets or sets the background color.
-        /// </summary>
-        [Description("The background/fill color.")]
-        [Alias("bg"), Alias("fill")]
-        public string Background { get; set; } = "none";
+        /// <inheritdoc />
+        public AppearanceOptions Appearance { get; } = new();
 
         /// <summary>
         /// Creates a new component.
@@ -89,6 +79,62 @@ namespace SimpleCircuit.Components
         public virtual bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
             => SetProperty(this, propertyToken, value, diagnostics);
 
+        private static Dictionary<string, Func<IDrawable, Token, object, bool>> CreateCache(Type key, IDiagnosticHandler diagnostics)
+        {
+            // Extract the property names for the type
+            var result = new Dictionary<string, Func<IDrawable, Token, object, bool>>(StringComparer.OrdinalIgnoreCase);
+            var properties = key.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var property in properties)
+            {
+                names.Clear();
+                if (!property.CanWrite)
+                    continue;
+                string description = null;
+                foreach (var attribute in property.GetCustomAttributes(true))
+                {
+                    if (attribute is DescriptionAttribute descAttr)
+                        description = descAttr.Description;
+                    if (attribute is AliasAttribute aliasAttr)
+                        names.Add(aliasAttr.Alias);
+                }
+                if (string.IsNullOrEmpty(description))
+                    continue;
+                names.Add(property.Name);
+
+                // Add the information
+                var p = property;
+                var setter = new Func<IDrawable, Token, object, bool>((drawable, token, value) =>
+                {
+                    if (value is null)
+                        return false;
+                    var type = value.GetType();
+                    if (p.PropertyType == type)
+                    {
+                        p.SetValue(drawable, value);
+                        return true;
+                    }
+                    else
+                    {
+                        // Some implicit type conversion here
+                        if (p.PropertyType == typeof(int) && type == typeof(double))
+                            p.SetValue(drawable, (int)(double)value);
+                        else if (p.PropertyType == typeof(double) && type == typeof(int))
+                            p.SetValue(drawable, (double)(int)value);
+                        else
+                        {
+                            diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariant, p, drawable.Name);
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+                foreach (string name in names)
+                    result[name] = setter;
+            }
+            return result;
+        }
+
         /// <inheritdoc />
         public static bool SetProperty(IDrawable drawable, Token propertyToken, object value, IDiagnosticHandler diagnostics)
         {
@@ -99,62 +145,9 @@ namespace SimpleCircuit.Components
             string property = propertyToken.Content.ToString().ToLower();
 
             // Gets the dictionary that describes the property setters
-            var result = _cacheSetters.GetOrAdd(drawable.GetType(), key =>
-            {
-                // Extract the property names for the type
-                var result = new Dictionary<string, Func<IDrawable, Token, object, bool>>(StringComparer.OrdinalIgnoreCase);
-                var properties = key.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-                var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var property in properties)
-                {
-                    names.Clear();
-                    if (!property.CanWrite)
-                        continue;
-                    string description = null;
-                    foreach (var attribute in property.GetCustomAttributes(true))
-                    {
-                        if (attribute is DescriptionAttribute descAttr)
-                            description = descAttr.Description;
-                        if (attribute is AliasAttribute aliasAttr)
-                            names.Add(aliasAttr.Alias);
-                    }
-                    if (string.IsNullOrEmpty(description))
-                        continue;
-                    names.Add(property.Name);
+            var result = _cacheSetters.GetOrAdd(drawable.GetType(), key => CreateCache(key, diagnostics));
 
-                    // Add the information
-                    var p = property;
-                    var setter = new Func<IDrawable, Token, object, bool>((drawable, token, value) =>
-                    {
-                        if (value is null)
-                            return false;
-                        var type = value.GetType();
-                        if (p.PropertyType == type)
-                        {
-                            p.SetValue(drawable, value);
-                            return true;
-                        }
-                        else
-                        {
-                            // Some implicit type conversion here
-                            if (p.PropertyType == typeof(int) && type == typeof(double))
-                                p.SetValue(drawable, (int)(double)value);
-                            else if (p.PropertyType == typeof(double) && type == typeof(int))
-                                p.SetValue(drawable, (double)(int)value);
-                            else
-                            {
-                                diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariant, p, drawable.Name);
-                                return false;
-                            }
-                            return true;
-                        }
-                    });
-                    foreach (string name in names)
-                        result[name] = setter;
-                }
-                return result;
-            });
-
+            // First check defined properties
             if (result.TryGetValue(property, out var setter))
                 return setter(drawable, propertyToken, value);
             else
@@ -176,38 +169,81 @@ namespace SimpleCircuit.Components
                 }
                 else if (value is double number)
                 {
-                    if ((number - Math.Round(number)).IsZero())
+                    switch (property)
                     {
-                        // Integer-only
-                        if (TryMatchIndexedProperty(property, "anchor", out index))
-                        {
-                            drawable.Labels[index].Location = ((int)Math.Round(number)).ToString();
+                        case "transparency":
+                        case "opacity":
+                        case "alpha":
+                            drawable.Appearance.Opacity = number;
+                            drawable.Appearance.BackgroundOpacity = number;
                             return true;
-                        }
-                    }
-                    if (TryMatchIndexedProperty(property, "size", out index))
-                    {
-                        drawable.Labels[index].Size = number;
-                        return true;
-                    }
-                    if (TryMatchIndexedProperty(property, "linespacing", out index) ||
-                        TryMatchIndexedProperty(property, "ls", out index))
-                    {
-                        drawable.Labels[index].LineSpacing = number;
-                        return true;
+
+                        case "foregroundopacity":
+                        case "fgo":
+                            drawable.Appearance.Opacity = number;
+                            return true;
+
+                        case "backgroundopacity":
+                        case "bgo":
+                            drawable.Appearance.Opacity = number;
+                            return true;
+
+                        case "thickness":
+                        case "t":
+                            drawable.Appearance.LineThickness = number;
+                            return true;
+
+                        default:
+                            if ((number - Math.Round(number)).IsZero())
+                            {
+                                // Integer-only
+                                if (TryMatchIndexedProperty(property, "anchor", out index))
+                                {
+                                    drawable.Labels[index].Location = ((int)Math.Round(number)).ToString();
+                                    return true;
+                                }
+                            }
+                            if (TryMatchIndexedProperty(property, "size", out index))
+                            {
+                                drawable.Labels[index].Size = number;
+                                return true;
+                            }
+                            if (TryMatchIndexedProperty(property, "linespacing", out index) ||
+                                TryMatchIndexedProperty(property, "ls", out index))
+                            {
+                                drawable.Labels[index].LineSpacing = number;
+                                return true;
+                            }
+                            break;
                     }
                 }
                 if (value is string label)
                 {
-                    if (TryMatchIndexedProperty(property, "label", out index))
+                    switch (property)
                     {
-                        drawable.Labels[index].Value = label;
-                        return true;
-                    }
-                    if (TryMatchIndexedProperty(property, "anchor", out index))
-                    {
-                        drawable.Labels[index].Location = label;
-                        return true;
+                        case "color":
+                        case "foreground":
+                        case "fg":
+                            drawable.Appearance.Color = label;
+                            return true;
+
+                        case "background":
+                        case "bg":
+                            drawable.Appearance.Background = label;
+                            return true;
+
+                        default:
+                            if (TryMatchIndexedProperty(property, "label", out index))
+                            {
+                                drawable.Labels[index].Value = label;
+                                return true;
+                            }
+                            if (TryMatchIndexedProperty(property, "anchor", out index))
+                            {
+                                drawable.Labels[index].Location = label;
+                                return true;
+                            }
+                            break;
                     }
                 }
 
@@ -297,7 +333,7 @@ namespace SimpleCircuit.Components
             }
 
             if (context.Mode == PreparationMode.Sizes)
-                Labels.Format(context);
+                Labels.Format(context, Appearance);
             return result;
         }
 

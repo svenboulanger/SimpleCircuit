@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Sources
                 ]);
 
                 // The circle with the arrow
-                drawing.Arrow(new(-3, 0), new(3, 0), new("marker", "arrow"));
+                drawing.Arrow(new(-3, 0), new(3, 0), Appearance, this);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));

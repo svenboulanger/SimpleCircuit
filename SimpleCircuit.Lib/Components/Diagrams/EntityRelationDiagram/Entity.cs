@@ -100,7 +100,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     case PreparationMode.Offsets:
 
                         // Place the header
-                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), _anchors[0].Expand, _anchors[0].Options);
+                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), _anchors[0].Expand, Appearance);
 
                         ((FixedOrientedPin)Pins[1]).Offset = new(_width * 0.5, 0);
                         ((FixedOrientedPin)Pins[2]).Offset = new(_width * 0.5, _height);
@@ -130,7 +130,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 // This is the header, we will center it according to the line height
                                 _anchors[0] = new LabelAnchorPoint(
                                     new(0, _height + LineHeight * (1 - BaseLine) * Labels[0].Size + bounds.Top),
-                                    new(0, 1), new("header"));
+                                    new(0, 1), Appearance);
                                 ((FixedOrientedPin)Pins[0]).Offset = new(0, _height + LineHeight * Labels[0].Size * 0.5);
                                 _height += Margin.Bottom;
                             }
@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 // These are attributes, we will simply follow the line height given
                                 _anchors[i] = new LabelAnchorPoint(
                                     new(Margin.Left + bounds.Left, _height + LineHeight * (1 - BaseLine) * Labels[i].Size + bounds.Top),
-                                    new(1, 1), new("attribute"));
+                                    new(1, 1), Appearance);
 
                                 // We can already update the left-side pins (we will u
                                 ((FixedOrientedPin)Pins[i * 2 + 1]).Offset = new(0, _height + LineHeight * Labels[i].Size * 0.5);
@@ -158,8 +158,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 if (Labels.Count > 1)
                 {
-                    builder.RequiredCSS.Add(".erd.attributes { stroke: black; }");
-                    builder.RequiredCSS.Add(".erd.attribute { stroke: none; }");
+                    var options = Appearance.CreatePathOptions(this);
 
                     // The header
                     double y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
@@ -174,12 +173,12 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(CornerRadius, 0));
                         b.Close();
-                    }, new("erd", "header"));
+                    }, options);
 
                     // The attributes
                     for (int i = 1; i < Labels.Count - 1; i++)
                     {
-                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, options: new("erd", "attribute", i % 2 == 1 ? "even" : "odd"));
+                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, options: options);
                         y += LineHeight * Labels[i].Size;
                     }
 
@@ -195,7 +194,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, new("erd", "attribute", Labels.Count % 2 == 0 ? "even" : "odd"));
+                    }, options);
 
                     // All attributes encapsulated
                     y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
@@ -210,11 +209,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, new("erd", "attributes"));
+                    }, options);
                 }
                 else
                 {
-                    builder.Rectangle(0, 0, _width, _height, CornerRadius, CornerRadius, new("erd", "header"));
+                    builder.Rectangle(0, 0, _width, _height, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
                 }    
                 _anchors.Draw(builder, this);
             }

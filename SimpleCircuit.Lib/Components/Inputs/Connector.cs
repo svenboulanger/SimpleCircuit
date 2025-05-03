@@ -86,7 +86,7 @@ namespace SimpleCircuit.Components.Inputs
                         switch (Variants.Select(_male, _female))
                         {
                             case 0:
-                                builder.ExtendPin(Pins["n"], 5);
+                                builder.ExtendPin(Pins["n"], Appearance, this, 5);
                                 builder.Polyline([
                                     new(-4, 4),
                                     new(),
@@ -104,7 +104,7 @@ namespace SimpleCircuit.Components.Inputs
                                 break;
 
                             case 1:
-                                builder.ExtendPin(Pins["n"], 5);
+                                builder.ExtendPin(Pins["n"], Appearance, this, 5);
                                 builder.Polyline([
                                     new(4, 4),
                                     new(),
@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components.Inputs
                                 break;
 
                             default:
-                                builder.ExtendPins(Pins, 5);
+                                builder.ExtendPins(Pins, Appearance, this,  5);
                                 builder.Polyline([
                                     new(-6, 4),
                                     new(-2, 0),
@@ -140,8 +140,8 @@ namespace SimpleCircuit.Components.Inputs
                         break;
 
                     default:
-                        builder.ExtendPin(Pins["n"]);
-                        builder.ExtendPin(Pins["p"], 4);
+                        builder.ExtendPin(Pins["n"], Appearance, this);
+                        builder.ExtendPin(Pins["p"], Appearance, this, 4);
                         builder.Circle(new(), 1.5);
                         double s = Math.Sqrt(2) * 2;
                         builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)));

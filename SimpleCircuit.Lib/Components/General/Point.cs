@@ -57,7 +57,7 @@ namespace SimpleCircuit.Components
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
                     {
                         var marker = new Dot(new(), new(1, 0));
-                        marker.Draw(builder);
+                        marker.Draw(builder, Appearance);
                     }
                     else
                         builder.ExpandBounds(new());

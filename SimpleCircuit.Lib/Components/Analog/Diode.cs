@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
@@ -264,23 +264,23 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPhotodiode(IGraphicsBuilder builder)
             {
-                builder.Arrow(new(2, 7.5), new(1, 3.5));
-                builder.Arrow(new(-1, 9.5), new(-2, 5.5));
+                builder.Arrow(new(2, 7.5), new(1, 3.5), Appearance, this);
+                builder.Arrow(new(-1, 9.5), new(-2, 5.5), Appearance, this);
                 if (_anchors[1].Location.Y < 10.5)
                     _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
             private void DrawLed(IGraphicsBuilder builder)
             {
-                builder.Arrow(new(1, 3.5), new(2, 7.5));
-                builder.Arrow(new(-2, 5.5), new(-1, 9.5));
+                builder.Arrow(new(1, 3.5), new(2, 7.5), Appearance, this);
+                builder.Arrow(new(-2, 5.5), new(-1, 9.5), Appearance, this);
                 if (_anchors[1].Location.Y < 10.5)
                     _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
             private void DrawLaser(IGraphicsBuilder builder)
             {
                 builder.Line(new(0, -4), new(0, 4));
-                builder.Arrow(new(-2, 5), new(-2, 10));
-                builder.Arrow(new(2, 5), new(2, 10));
+                builder.Arrow(new(-2, 5), new(-2, 10), Appearance, this);
+                builder.Arrow(new(2, 5), new(2, 10), Appearance, this);
                 if (_anchors[1].Location.Y < 11)
                     _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
             }

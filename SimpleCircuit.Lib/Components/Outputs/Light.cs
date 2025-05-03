@@ -117,16 +117,15 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDirectional(IGraphicsBuilder builder, bool diverging)
             {
-                var options = new GraphicOptions("direction");
                 if (diverging)
                 {
-                    builder.Arrow(new(-2, 6), new(-6, 12), options);
-                    builder.Arrow(new(2, 6), new(6, 12), options);
+                    builder.Arrow(new(-2, 6), new(-6, 12), Appearance, this);
+                    builder.Arrow(new(2, 6), new(6, 12), Appearance, this);
                 }
                 else
                 {
-                    builder.Arrow(new(-2, 6), new(-2, 12), options);
-                    builder.Arrow(new(2, 6), new(2, 12), options);
+                    builder.Arrow(new(-2, 6), new(-2, 12), Appearance, this);
+                    builder.Arrow(new(2, 6), new(2, 12), Appearance, this);
                 }
                 if (_anchors[1].Location.Y < 13)
                     _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1));

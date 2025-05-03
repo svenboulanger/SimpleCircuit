@@ -84,7 +84,7 @@ namespace SimpleCircuit.Components
                 {
                     string name = TransformPinName(pin.Name);
                     if (name is not null)
-                        builder.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.TextSize);
+                        builder.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.Appearance);
                 }
             }
 

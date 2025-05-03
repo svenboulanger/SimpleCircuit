@@ -112,38 +112,40 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var options = Appearance.CreatePathOptions();
+                var signOptions = Appearance.CreateMarkerOptions();
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(x, y), new(x, -y));
+                        builder.Signs(new(x, y), new(x, -y), signOptions);
                     else
-                        builder.Signs(new(x, -y), new(x, y));
+                        builder.Signs(new(x, -y), new(x, y), signOptions);
                 }
                 else
-                    builder.ExtendPin(Pins["in"]);
+                    builder.ExtendPin(Pins["in"], Appearance, this);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, 4, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, this, 4, "outp", "outn");
                     double x = Width / 2 - Height / 4 + 2;
                     double y = Height / 4 + 2.0;
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(x, y), new(x, -y));
+                        builder.Signs(new(x, y), new(x, -y), signOptions);
                     else
-                        builder.Signs(new(x, -y), new(x, y));
+                        builder.Signs(new(x, -y), new(x, y), signOptions);
                 }
                 else
-                    builder.ExtendPin(Pins["out"]);
+                    builder.ExtendPin(Pins["out"], Appearance, this);
 
                 builder.Polygon(
                 [
                     new(-Width / 2, Height / 2), new(Width / 2 - Height / 2, Height / 2),
                     new(Width / 2, 0), new(Width / 2 - Height / 2, -Height / 2),
                     new(-Width / 2, -Height / 2)
-                ]);
+                ], options);
 
                 BoxLabelAnchorPoints.Default.Draw(builder, this);
             }

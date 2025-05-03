@@ -34,11 +34,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 // The crystal
-                builder.Rectangle(-2.5, -5, 5, 10, options: new("body"));
-                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)));
+                var options = Appearance.CreatePathOptions(this);
+                builder.Rectangle(-2.5, -5, 5, 10, options: options);
+                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), options);
 
                 _anchors.Draw(builder, Labels);
             }

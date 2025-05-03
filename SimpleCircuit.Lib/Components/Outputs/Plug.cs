@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["a"]);
+                builder.ExtendPin(Pins["a"], Appearance, this);
                 builder.Path(b => b
                     .MoveTo(new(4, -4))
                     .ArcTo(4, 4, 0, true, false, new(4, 4)));
@@ -60,7 +60,7 @@ namespace SimpleCircuit.Components.Outputs
                 if (Multiple > 1)
                 {
                     builder.Line(new(2.6, -1.4), new(-0.2, -4.2));
-                    builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1));
+                    builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1), Appearance);
                 }
 
                 _anchors.Draw(builder, this);
@@ -80,7 +80,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawSealed(IGraphicsBuilder builder)
             {
-                builder.Text("h", new(0.5, 3), new(-1, 1));
+                builder.Text("h", new(0.5, 3), new(-1, 1), Appearance);
             }
         }
     }

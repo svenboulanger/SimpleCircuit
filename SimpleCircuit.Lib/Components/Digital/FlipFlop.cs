@@ -44,27 +44,30 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "d", "c", "q");
+                builder.ExtendPins(Pins, Appearance, this, 2, "d", "c", "q");
 
                 // Body
                 builder.Rectangle(-9, -12, 18, 24, new());
 
                 // Clock thingy
+                var textAppearance = Appearance.Clone();
+                textAppearance.FontSize = AppearanceOptions.DefaultFontSize;
                 builder.Polyline([
                     new Vector2(-9, 4),
                     new Vector2(-7, 6),
                     new Vector2(-9, 8)
-                ]);
-                builder.Text("D", new Vector2(-8, -6), new Vector2(1, 0));
-                builder.Text("C", new Vector2(-6, 6), new Vector2(1, 0));
-                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
+                ], Appearance.CreatePathOptions(this));
+                builder.Text("D", new Vector2(-8, -6), new Vector2(1, 0), textAppearance);
+                builder.Text("C", new Vector2(-6, 6), new Vector2(1, 0), textAppearance);
+                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0), textAppearance);
 
                 if (Pins["nq"].Connections > 0)
-                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
+                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0), textAppearance);
+                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * 0.8;
                 if (Pins["s"].Connections > 0)
-                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), textAppearance);
                 if (Pins["r"].Connections > 0)
-                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), textAppearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

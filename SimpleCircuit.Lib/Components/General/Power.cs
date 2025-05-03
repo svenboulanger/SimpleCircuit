@@ -36,18 +36,19 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 if (Variants.Contains(_anchor))
                     builder.Polyline([
                         new(-4, 4),
                         new(),
                         new(4, 4)
-                    ], new("anchor"));
+                    ], Appearance.CreatePathOptions(this));
                 else
                 {
-                    builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
-                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), new("plane"));
+                    var options = Appearance.Clone();
+                    options.LineThickness = 1.0;
+                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options.CreatePathOptions(this));
                 }
                 _anchors.Draw(builder, this);
             }

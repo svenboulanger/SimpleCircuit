@@ -17,7 +17,6 @@ namespace SimpleCircuit.Components.General
         private readonly string _componentFilter, _pinFilter;
         private readonly List<IPin> _pins = [];
         private readonly VirtualChainConstraints _flags;
-        private bool _hasSearched = false;
 
         /// <inheritdoc />
         public string Name { get; }

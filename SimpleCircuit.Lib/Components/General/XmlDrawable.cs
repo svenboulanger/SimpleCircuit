@@ -177,7 +177,7 @@ namespace SimpleCircuit.Components.General
             protected override void Draw(IGraphicsBuilder builder)
             {
                 foreach (var pin in _extend)
-                    builder.ExtendPin(Pins[pin]);
+                    builder.ExtendPin(Pins[pin], Appearance, this);
                 if (_drawing != null)
                 {
                     var context = new XmlDrawingContext(Labels, Variants);

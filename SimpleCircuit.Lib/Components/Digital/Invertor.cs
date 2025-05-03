@@ -89,7 +89,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawInverter(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, Appearance, this, 2, "in", "out");
                 builder.Polygon([
                     new(-6, 6),
                     new(6, 0),
@@ -102,11 +102,11 @@ namespace SimpleCircuit.Components.Digital
 
             private void DrawInverterIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "in", "out");
+                builder.ExtendPins(Pins, Appearance, this, 2, "in", "out");
 
                 builder.Rectangle(-5, -5, 10, 10);
                 builder.Circle(new(6.5, 0), 1.5);
-                builder.Text("1", new Vector2(), new Vector2());
+                builder.Text("1", new Vector2(), new Vector2(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

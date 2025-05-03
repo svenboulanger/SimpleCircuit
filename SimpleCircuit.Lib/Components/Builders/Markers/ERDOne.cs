@@ -12,9 +12,10 @@
     public class ERDOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
-            builder.Line(new(-2, -1.5), new(-2, 1.5), new("marker", "erd", "one"));
+            var options = appearance.CreateMarkerOptions(hasFill: false);
+            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);
         }
     }
 }

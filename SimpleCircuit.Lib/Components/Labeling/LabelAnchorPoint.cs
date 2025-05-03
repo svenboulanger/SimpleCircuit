@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Components.Builders;
-
-namespace SimpleCircuit.Components.Labeling
+﻿namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// Describes the placement of a label.
@@ -10,7 +8,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Gets the default graphic options.
         /// </summary>
-        public static GraphicOptions DefaultOptions { get; } = new GraphicOptions(LabelClass);
+        public static AppearanceOptions DefaultOptions { get; } = new();
 
         /// <summary>
         /// Class name for labels.
@@ -30,7 +28,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Gets the options used for the label.
         /// </summary>
-        public GraphicOptions Options { get; }
+        public AppearanceOptions Appearance { get; }
 
         /// <summary>
         /// Creates a new <see cref="LabelAnchorPoint"/>.
@@ -39,7 +37,7 @@ namespace SimpleCircuit.Components.Labeling
         {
             Location = default;
             Expand = default;
-            Options = DefaultOptions;
+            Appearance = new();
         }
 
         /// <summary>
@@ -47,12 +45,12 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="location">The location.</param>
         /// <param name="expand">The expansion.</param>
-        /// <param name="options">The graphic options.</param>
-        public LabelAnchorPoint(Vector2 location, Vector2 expand, GraphicOptions options = null)
+        /// <param name="appearance">The appearance options.</param>
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, AppearanceOptions appearance = null)
         {
             Location = location;
             Expand = expand;
-            Options = options ?? DefaultOptions;
+            Appearance = appearance ?? DefaultOptions;
         }
     }
 }

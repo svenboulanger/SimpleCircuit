@@ -28,6 +28,16 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public double FontSize { get; set; } = 4.0;
 
         /// <summary>
+        /// Gets or sets the opacity.
+        /// </summary>
+        public double Opacity { get; set; } = 1.0;
+
+        /// <summary>
+        /// Gets or sets the color.
+        /// </summary>
+        public string Color { get; set; } = "black";
+
+        /// <summary>
         /// Gets or sets whether the text is bold.
         /// </summary>
         public bool IsBold { get; set; } = false;

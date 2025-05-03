@@ -73,24 +73,27 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.RequiredCSS.Add(".battery .neg { stroke-width: 0.75pt; }");
+                var options = Appearance.CreatePathOptions(this);
+                var negOptions = Appearance.Clone();
+                negOptions.LineThickness = 0.75;
+                var markerOptions = Appearance.CreateMarkerOptions();
 
                 // Wires
                 double offset = Length / 2;
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 // The cells
                 double x = -offset;
                 for (int i = 0; i < _cells; i++)
                 {
-                    builder.Line(new(x, -2), new(x, 2), new("neg"));
+                    builder.Line(new(x, -2), new(x, 2), negOptions.CreatePathOptions(this));
                     x += 2.0;
-                    builder.Line(new(x, -6), new(x, 6), new("pos"));
+                    builder.Line(new(x, -6), new(x, 6), options);
                     x += 2.0;
                 }
 
                 // Add a little plus and minus next to the terminals!
-                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), vertical: true);
+                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), markerOptions, vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
                 _anchors.Draw(builder, this);

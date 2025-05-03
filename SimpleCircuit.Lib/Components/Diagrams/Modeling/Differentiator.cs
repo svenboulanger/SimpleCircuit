@@ -26,26 +26,23 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-
+                var textAppearance = Appearance.Clone();
+                textAppearance.LineThickness = 0.1 * Scale;
+                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        builder.Text("s", new(), new(), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("s", new(), new(), textAppearance);
                         break;
 
                     case 1:
-                        builder.Text("z^{-1}", new(), new(), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("z^{-1}", new(), new(), textAppearance);
                         break;
 
                     default:
-                        var options = new GraphicOptions();
-                        options.Style["stroke"] = Foreground;
-                        options.Style["fill"] = "none";
-                        options.Style["stroke-width"] = $"{(0.1 * Scale).ToSVG()}pt";
-                        options.Style["stroke-linecap"] = "butt";
-                        builder.Text("d", new(), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
-                        builder.Line(new(-2, 0), new(2, 0), options);
-                        builder.Text("dt", new(), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("d", new(), new(0, -1), textAppearance);
+                        builder.Line(new(-2, 0), new(2, 0), textAppearance.CreatePathOptions());
+                        builder.Text("dt", new(), new(0, 1), textAppearance);
                         break;
                 }
                 DrawLabels(builder);

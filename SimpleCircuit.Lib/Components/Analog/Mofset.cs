@@ -87,8 +87,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 4, "s", "d");
-                builder.ExtendPin(Pins["g"]);
+                builder.ExtendPins(Pins, Appearance, this, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], Appearance, this);
 
                 // Gate
                 builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
@@ -98,7 +98,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -115,8 +115,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, 3, "s", "d");
-                drawing.ExtendPin(Pins["g"]);
+                drawing.ExtendPins(Pins, Appearance, this, 3, "s", "d");
+                drawing.ExtendPin(Pins["g"], Appearance, this);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
@@ -134,7 +134,7 @@ namespace SimpleCircuit.Components.Analog
                 ], new("bulk"));
 
                 var marker = new Arrow(new(0, 4), new(0, 1));
-                marker.Draw(drawing);
+                marker.Draw(drawing, Appearance);
 
                 // Packaged
                 drawing.Circle(new(0, 3), 8.0);
@@ -204,8 +204,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 4, "s", "d");
-                builder.ExtendPin(Pins["g"]);
+                builder.ExtendPins(Pins, Appearance, this, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], Appearance, this);
 
                 // Gate
                 builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
@@ -216,7 +216,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(4, 0), new(4, 4), new("drain"));
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, options: new("marker"));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -233,8 +233,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"]);
+                drawing.ExtendPins(Pins, Appearance, this, 4, "s", "d");
+                drawing.ExtendPin(Pins["g"], Appearance, this);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
@@ -245,7 +245,7 @@ namespace SimpleCircuit.Components.Analog
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), new("source"));
                 drawing.Line(new(5, 0), new(5, 4), new("drain"));
-                drawing.Arrow(new(0, 4), new(0, 0), new("bulk"));
+                drawing.Arrow(new(0, 4), new(0, 0), Appearance, this);
                 drawing.Line(new(0, 0), new(-5, 0), new("bulk"));
 
                 // Packaged

@@ -57,10 +57,11 @@ namespace SimpleCircuit.Components.Labeling
         /// Formats the labels.
         /// </summary>
         /// <param name="context">The context.</param>
-        public void Format(IPrepareContext context)
+        /// <param name="parentOptions">The appearance options of the parent drawable.</param>
+        public void Format(IPrepareContext context, AppearanceOptions parentOptions)
         {
             foreach (var label in _labels)
-                label.Format(context);
+                label.Format(context, parentOptions);
         }
 
         /// <inheritdoc />

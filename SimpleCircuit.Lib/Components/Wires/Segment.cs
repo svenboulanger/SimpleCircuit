@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 4);
+                builder.ExtendPins(Pins, Appearance, this, 4);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Wires
                 if (Multiple > 1)
                 {
                     builder.Line(new(0, -3.5), new(2.1, -5.6));
-                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1));
+                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                 }
             }

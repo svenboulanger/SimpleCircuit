@@ -61,11 +61,11 @@ namespace SimpleCircuit.Components
             }
             private void DrawGround(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, Variants.Contains(_protective) ? 9 : 3);
+                drawing.ExtendPins(Pins, Appearance, this, Variants.Contains(_protective) ? 9 : 3);
 
                 if (Variants.Contains(_noiseless))
                 {
-                    drawing.ExtendPins(Pins, 6);
+                    drawing.ExtendPins(Pins, Appearance, this, 6);
                     drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), new("shield"));
                     if (_anchors[0].Location.X > -9)
                         _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components
                 }
                 if (Variants.Contains(_protective))
                 {
-                    drawing.ExtendPins(Pins, 7.5);
+                    drawing.ExtendPins(Pins, Appearance, this, 7.5);
                     drawing.Circle(new(0, -1), 6.5, new("shield"));
                     if (_anchors[0].Location.X > -7.5) 
                         _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components
                 }
                 else
                 {
-                    drawing.ExtendPins(Pins, 3);
+                    drawing.ExtendPins(Pins, Appearance, this, 3);
                 }
                 drawing.Path(b => b
                     .MoveTo(new(-5, 0))
@@ -95,7 +95,7 @@ namespace SimpleCircuit.Components
             }
             private void DrawEarth(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, 3);
+                drawing.ExtendPins(Pins, Appearance, this, 3);
 
                 // Ground segments
                 drawing.Path(b => b
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components
             }
             private void DrawSignalGround(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, 3);
+                drawing.ExtendPins(Pins, Appearance, this, 3);
 
                 // Ground
                 drawing.Polygon([

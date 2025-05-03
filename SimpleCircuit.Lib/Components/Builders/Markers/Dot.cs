@@ -11,10 +11,10 @@
     public class Dot(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
-            builder.RequiredCSS.Add(".marker.dot { fill: black; }");
-            builder.Circle(new(), 1.0, new("marker", "dot"));
+            var options = appearance.CreateMarkerOptions(hasStroke: false);
+            builder.Circle(new(), 2.0 * appearance.LineThickness, options);
         }
     }
 }

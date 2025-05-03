@@ -108,27 +108,28 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var options = Appearance.CreatePathOptions(this);
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, 2, "inn", "inp");
+                    builder.ExtendPins(Pins, Appearance, this, 2, "inn", "inp");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-2, -4), new(-2, 4));
+                        builder.Signs(new(-2, -4), new(-2, 4), options);
                     else
-                        builder.Signs(new(-2, 4), new(-2, -4));
+                        builder.Signs(new(-2, 4), new(-2, -4), options);
                 }
                 else
-                    builder.ExtendPin(Pins["n"]);
+                    builder.ExtendPin(Pins["n"], Appearance, this);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, 3, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, this, 3, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, 7), new(6, -7));
+                        builder.Signs(new(6, 7), new(6, -7), options);
                     else
-                        builder.Signs(new(6, -7), new(6, 7));
+                        builder.Signs(new(6, -7), new(6, 7), options);
                 }
                 else
-                    builder.ExtendPin(Pins["o"]);
+                    builder.ExtendPin(Pins["o"], Appearance, this);
 
                 // The triangle
                 builder.Polygon([
@@ -136,10 +137,10 @@ namespace SimpleCircuit.Components.Analog
                     new(5, -5),
                     new(5, 5),
                     new(-5, 9)
-                ]);
+                ], options);
 
                 if (Variants.Contains(_programmable))
-                    builder.Arrow(new(-7, 10), new(6, -12));
+                    builder.Arrow(new(-7, 10), new(6, -12), Appearance, this);
 
                 _anchors.Draw(builder, Labels);
             }

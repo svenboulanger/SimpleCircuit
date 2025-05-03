@@ -70,33 +70,38 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 3.5);
+                builder.ExtendPins(Pins, Appearance, this, 3.5);
+                var options = Appearance.CreatePathOptions(this);
+                var markerOptions = Appearance.CreateMarkerOptions();
                 switch (Variants.Select(_curved, _electrolytic))
                 {
                     case 0:
                         // Plates
-                        builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));
+                        var planeAppearance = Appearance.Clone();
+                        planeAppearance.LineThickness = 1.0;
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance.CreatePathOptions());
                         builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), new("neg"));
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-4, 3), new(5, 3), vertical: true);
+                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), markerOptions, vertical: true);
                         break;
 
                     case 1:
                         // Assymetric plates
-                        builder.Rectangle(-2.25, -4, 1.5, 8, options: new("pos"));
-                        builder.Rectangle(0.75, -4, 1.5, 8, options: new("neg", "marker"));
+                        builder.Rectangle(-2.25, -4, 1.5, 8, options: markerOptions);
+                        builder.Rectangle(0.75, -4, 1.5, 8, options: markerOptions);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-5, 3), new(5, 3), vertical: true);
+                            builder.Signs(new(-5, 3), new(5, 3), markerOptions, vertical: true);
                         break;
 
                     default:
                         // Plates
-                        builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), new("pos", "plane"));
-                        builder.Line(new(1.5, -4), new(1.5, 4), new("neg", "plane"));
+                        var plateAppearance = Appearance.Clone();
+                        plateAppearance.LineThickness = 1.0;
+                        options = plateAppearance.CreatePathOptions(this);
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), options);
+                        builder.Line(new(1.5, -4), new(1.5, 4), options);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-4, 3), new(4, 3), vertical: true);
+                            builder.Signs(new(-4, 3), new(4, 3), markerOptions, vertical: true);
                         break;
                 }
 
@@ -105,7 +110,7 @@ namespace SimpleCircuit.Components.Analog
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
-                        builder.Arrow(new(-4, 4), new(6, -5));
+                        builder.Arrow(new(-4, 4), new(6, -5), Appearance, this);
                         _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                         break;
 
@@ -114,7 +119,7 @@ namespace SimpleCircuit.Components.Analog
                             new(-6, 6),
                             new(-4, 6),
                             new(4, -6)
-                        ]);
+                        ], options);
                         _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                         break;

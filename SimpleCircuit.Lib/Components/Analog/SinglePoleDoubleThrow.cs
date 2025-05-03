@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "p", "t1", "t2");
+                builder.ExtendPins(Pins, Appearance, this, 2, "p", "t1", "t2");
 
                 // Terminals
                 builder.Circle(new(-5, 0), 1);

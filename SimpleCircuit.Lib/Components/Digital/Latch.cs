@@ -42,18 +42,18 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, 2, "s", "r", "q");
+                builder.ExtendPins(Pins, Appearance, this, 2, "s", "r", "q");
 
                 // Body
                 builder.Rectangle(-9, -12, 18, 24, new());
 
                 // Labels
-                builder.Text("S", new Vector2(-8, -6), new Vector2(1, 0));
-                builder.Text("R", new Vector2(-8, 6), new Vector2(1, 0));
-                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0));
+                builder.Text("S", new Vector2(-8, -6), new Vector2(1, 0), Appearance);
+                builder.Text("R", new Vector2(-8, 6), new Vector2(1, 0), Appearance);
+                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0), Appearance);
 
                 if (Pins["nq"].Connections > 0)
-                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0));
+                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Crossings + 2);
+                builder.ExtendPins(Pins, Appearance, this, Crossings + 2);
 
                 bool straight = Variants.Contains(_straight);
                 if (Crossings > 0)

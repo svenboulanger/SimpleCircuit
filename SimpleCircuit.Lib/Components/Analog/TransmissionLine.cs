@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(IGraphicsBuilder builder)
             {
                 // Wire
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
 
                 // Transmission line
                 builder.Path(DrawShape);

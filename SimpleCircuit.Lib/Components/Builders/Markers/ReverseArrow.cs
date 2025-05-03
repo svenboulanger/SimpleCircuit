@@ -15,15 +15,9 @@ namespace SimpleCircuit.Components.Builders.Markers
         private readonly static Vector2[] _points = [new(0, -1), new(-2.5, 0), new(0, 1)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
-            var options = new GraphicOptions("marker", "arrow", "reverse");
-            options.Style["stroke"] = Foreground;
-            options.Style["fill"] = Foreground;
-            options.Style["stroke-width"] = $"{Thickness.ToSVG()}pt";
-            options.Style["stroke-linejoin"] = "round";
-            options.Style["stroke-linecap"] = "round";
-            builder.Polygon(_points.Select(pt => pt * 2.0 * Thickness), options);
+            builder.Polygon(_points.Select(pt => pt * 2.0 * appearance.LineThickness), appearance.CreateMarkerOptions());
         }
     }
 }

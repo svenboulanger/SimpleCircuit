@@ -31,29 +31,22 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var textAppearance = Appearance.Clone();
+                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
+                textAppearance.LineThickness = 0.1 * Scale;
 
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        var options = new GraphicOptions();
-                        options.Style["stroke"] = Foreground;
-                        options.Style["fill"] = "none";
-                        options.Style["stroke-width"] = $"{(0.1 * Scale).ToSVG()}pt";
-                        options.Style["stroke-linecap"] = "butt";
-                        builder.Text("1", new(), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
-                        builder.Line(new(-2, 0), new(2, 0), options);
-                        builder.Text("s", new(), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(), new(0, -1), textAppearance);
+                        builder.Line(new(-2, 0), new(2, 0), textAppearance.CreatePathOptions());
+                        builder.Text("s", new(), new(0, 1), textAppearance);
                         break;
 
                     case 1:
-                        options = new GraphicOptions();
-                        options.Style["stroke"] = Foreground;
-                        options.Style["fill"] = "none";
-                        options.Style["stroke-width"] = $"{(0.1 * Scale).ToSVG()}pt";
-                        options.Style["stroke-linecap"] = "butt";
-                        builder.Text("1", new(0, -1), new(0, -1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
-                        builder.Line(new(-2, -1), new(2, -1), options);
-                        builder.Text("z^{-1}", new(0, -1), new(0, 1), size: 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                        builder.Text("1", new(0, -1), new(0, -1), textAppearance);
+                        builder.Line(new(-2, -1), new(2, -1), textAppearance.CreatePathOptions());
+                        builder.Text("z^{-1}", new(0, -1), new(0, 1), textAppearance);
                         break;
 
                     default:
@@ -64,7 +57,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             var lexer = new SvgPathDataLexer(_pathData);
                             // b.WithTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
                             SvgPathDataParser.Parse(lexer, b, null);
-                        });
+                        }, Appearance.CreatePathOptions());
                         builder.EndTransform();
                         break;
                 }

@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Labeling
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label
-                drawing.Text(label.Value, location, expand, size: label.Size, options: anchor.Options);
+                drawing.Text(label.Value, location, expand, anchor.Appearance);
             }
         }
 

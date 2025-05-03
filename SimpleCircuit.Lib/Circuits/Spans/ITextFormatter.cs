@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 
 namespace SimpleCircuit.Circuits.Spans
 {
@@ -16,10 +17,8 @@ namespace SimpleCircuit.Circuits.Spans
         /// Formats text into a span.
         /// </summary>
         /// <param name="content">The content.</param>
-        /// <param name="fontSize">The font size.</param>
-        /// <param name="isBold">If <c>true</c>, the content is supposed to be bold.</param>
-        /// <param name="options">The graphic options.</param>
+        /// <param name="parentAppearance">The parent appearance options.</param>
         /// <returns>Returns the formatted content.</returns>
-        public Span Format(string content, double fontSize = 4.0, bool isBold = false, GraphicOptions options = null);
+        public Span Format(string content, AppearanceOptions parentAppearance);
     }
 }

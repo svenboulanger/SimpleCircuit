@@ -11,11 +11,13 @@
     public class ERDZeroOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
         {
             builder.RequiredCSS.Add(".marker.erd.zero { fill: white; }");
-            builder.Circle(new(-5.5, 0), 1.5, new("marker", "erd", "zero"));
-            builder.Line(new(-2, -1.5), new(-2, 1.5), new("marker", "erd", "one"));
+            GraphicOptions options = appearance.CreateMarkerOptions();
+            options.Style["fill"] = appearance.Background;
+            builder.Circle(new(-11 * appearance.LineThickness, 0), 3 * appearance.LineThickness, options);
+            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);
         }
     }
 }

@@ -42,16 +42,18 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 builder.Polygon([
                     new(-5, -8),
                     new(5, -4),
                     new(5, 4),
                     new(-5, 8)
-                ]);
+                ], Appearance.CreatePathOptions());
 
-                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
-                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), 0.8 * SvgBuilder.DefaultFontSize * Scale, options: new("small"));
+                var textAppearance = Appearance.Clone();
+                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
+                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), textAppearance);
+                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), textAppearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

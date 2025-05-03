@@ -76,7 +76,7 @@ namespace SimpleCircuit.Components.Wires
             private void DrawRegular(IGraphicsBuilder builder)
             {
                 // ANSI style circuit breaker
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
 
                 builder.Path(b => b
                     .MoveTo(new(-4, -2))
@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Wires
             private void DrawCircuitBreakerIec(IGraphicsBuilder builder)
             {
                 // IEC style circuit breaker
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
 
                 builder.Line(new(-4, 0), new(4, -4));
                 builder.Cross(new(4, 0), 2);
@@ -103,17 +103,17 @@ namespace SimpleCircuit.Components.Wires
             private void DrawCircuitBreakerArei(IGraphicsBuilder builder)
             {
                 // AREI style circuit breaker
-                builder.ExtendPins(Pins, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
 
                 builder.Line(new(-6, 0), new(-4, 0), new("wire"));
                 builder.Line(new(-4, 0), new(4, -4));
 
                 builder.RequiredCSS.Add(".marker { fill: black; }");
-                builder.Polygon(new Vector2[]
-                {
+                builder.Polygon(
+                [
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
-                }, new("marker"));
+                ], Appearance.CreateMarkerOptions());
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Parser.SimpleTexts;
 
 namespace SimpleCircuit.Circuits.Spans
@@ -22,15 +23,17 @@ namespace SimpleCircuit.Circuits.Spans
         public ITextMeasurer Measurer { get; } = measurer;
 
         /// <inheritdoc />
-        public Span Format(string content, double fontSize = 4, bool isBold = false, GraphicOptions options = null)
+        public Span Format(string content, AppearanceOptions appearance)
         {
             content = content.Replace("<", "&lt;").Replace(">", "&gt;");
 
             var lexer = new SimpleTextLexer(content);
             var context = new SimpleTextContext(Measurer)
             {
-                FontSize = fontSize,
-                IsBold = isBold
+                FontSize = appearance.FontSize,
+                IsBold = appearance.Bold,
+                Color = appearance.Color,
+                Opacity = appearance.Opacity,
             };
             return SimpleTextParser.Parse(lexer, context);
         }

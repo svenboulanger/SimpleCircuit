@@ -59,6 +59,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "amplifier";
 
+            /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 var result = base.Prepare(context);
@@ -117,45 +118,47 @@ namespace SimpleCircuit.Components.Analog
             {
                 _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
                 _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
+                var options = Appearance.CreatePathOptions(this);
 
                 // Differential input?
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-5.5, 4), new(-5.5, -4));
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4), options);
                     else
-                        builder.Signs(new(-5.5, -4), new(-5.5, 4));
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4), options);
                 }
                 else
-                    builder.ExtendPin(Pins["in"]);
+                    builder.ExtendPin(Pins["in"], Appearance, this);
 
                 // Differential output?
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, 5, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, this, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, -7), new(6, 7));
+                        builder.Signs(new(6, -7), new(6, 7), options);
                     else
-                        builder.Signs(new(6, 7), new(6, -7));
+                        builder.Signs(new(6, 7), new(6, -7), options);
 
                     // Give more breathing room to the labels
                     _anchors[0] = new LabelAnchorPoint(new(2, 7), new(1, 1));
                     _anchors[2] = new LabelAnchorPoint(new(2, -7), new(1, -1));
                 }
                 else
-                    builder.ExtendPin(Pins["out"]);
+                    builder.ExtendPin(Pins["out"], Appearance, this);
 
+                // The main triangle
                 builder.Polygon(
                 [
                     new(-8, -8),
                     new(8, 0),
                     new(-8, 8)
-                ]);
+                ], options);
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
-                    builder.Arrow(new(-7, 10), new(4, -8.5));
+                    builder.Arrow(new(-7, 10), new(4, -8.5), Appearance, this);
 
                 // Comparator
                 if (Variants.Contains(_comparator))
@@ -163,7 +166,7 @@ namespace SimpleCircuit.Components.Analog
                     builder.Path(b => b.MoveTo(new(-4, 2))
                         .LineTo(new(-2, 2))
                         .LineTo(new(-2, -2))
-                        .LineTo(new(0, -2)));
+                        .LineTo(new(0, -2)), options);
                 }
 
                 // Schmitt trigger
@@ -179,7 +182,7 @@ namespace SimpleCircuit.Components.Analog
                             .LineTo(new(-1, 2))
                             .LineTo(new(-1, -2))
                             .LineTo(new(1, -2));
-                    });
+                    }, options);
                 }
                 _anchors.Draw(builder, Labels);
             }

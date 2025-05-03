@@ -60,7 +60,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
 
                 double h = 0.5 * Height;
                 double w = 0.5 * Gap;

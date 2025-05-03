@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawOr(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 double w = Width * 0.5;
                 double h = Height * 0.5;
 
@@ -156,9 +156,9 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawOrIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins);
+                builder.ExtendPins(Pins, Appearance, this);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
-                builder.Text("&#8805;1", new(), new());
+                builder.Text("&#8805;1", new(), new(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

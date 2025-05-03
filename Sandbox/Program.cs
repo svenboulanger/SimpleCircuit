@@ -12,7 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-R <r +50 fg=""#aaa"" t=1 dotted arrow> C
+X <r> ADC(dashed, fg=""#11aaff"", ""help"") <r> X
 ";
 
             var logger = new Logger();

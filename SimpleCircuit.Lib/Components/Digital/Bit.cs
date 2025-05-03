@@ -133,7 +133,7 @@ namespace SimpleCircuit.Components.Digital
                         if (j < bits.Length || Variants.Contains(Full))
                             builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize);
                         if (j < bits.Length)
-                            builder.Text(bits[j], new(x, y), new());
+                            builder.Text(bits[j], new(x, y), new(), Appearance);
                         x += BlockSize;
                     }
                     y += BlockSize;

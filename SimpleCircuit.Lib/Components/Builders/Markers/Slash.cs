@@ -11,7 +11,7 @@
     public class Slash(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder)
-            => builder.Line(new(-1, 2), new(1, -2), new("marker", "slash"));
+        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
+            => builder.Line(new(-1, 2), new(1, -2), appearance.CreateMarkerOptions());
     }
 }

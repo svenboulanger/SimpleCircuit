@@ -157,7 +157,7 @@ namespace SimpleCircuit.Components.Builders
             return this;
         }
 
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand)
         {
             if (span is null)
                 return this;
@@ -167,7 +167,6 @@ namespace SimpleCircuit.Components.Builders
 
             // Create the text element
             var text = _document.CreateElement("text", Namespace);
-            options?.Apply(text);
             _current.AppendChild(text);
 
             // Compute the location based on the location and expansion
@@ -195,13 +194,13 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, double size = 4.0, double lineSpacing = 1.5, GraphicOptions options = null)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return this;
 
-            var span = _formatter.Format(value, size, false, options);
-            return Text(span, location, expand, options);
+            var span = _formatter.Format(value, appearance);
+            return Text(span, location, expand);
         }
 
         private void BuildTextSVG(Vector2 offset, Span span, XmlNode parent, XmlElement current)
@@ -214,7 +213,7 @@ namespace SimpleCircuit.Components.Builders
                     {
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
-                        element.SetAttribute("style", $"font-family:{textSpan.FontFamily};font-size:{textSpan.Size.ToSVG()}pt;font-weight:{(textSpan.Bold ? "bold" : "normal")};");
+                        element.SetAttribute("style", textSpan.Style);
                         element.SetAttribute("x", (offset.X + textSpan.Offset.X).ToSVG());
                         element.SetAttribute("y", (offset.Y + textSpan.Offset.Y).ToSVG());
                         element.InnerXml = textSpan.Content;

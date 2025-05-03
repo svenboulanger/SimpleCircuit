@@ -40,6 +40,11 @@ namespace SimpleCircuit.Components
         public Bounds Bounds { get; }
 
         /// <summary>
+        /// Gets the appearance options of the drawable.
+        /// </summary>
+        public AppearanceOptions Appearance { get; }
+
+        /// <summary>
         /// Sets a property.
         /// </summary>
         /// <param name="propertyToken">A token that contains the property name.</param>
