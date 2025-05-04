@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components.Outputs
                 builder.ExtendPin(Pins["a"], Appearance);
                 builder.Path(b => b
                     .MoveTo(new(4, -4))
-                    .ArcTo(4, 4, 0, true, false, new(4, 4)));
+                    .ArcTo(4, 4, 0, true, false, new(4, 4)), Appearance);
 
                 if (Variants.Contains(_earth))
                     DrawProtectiveConnection(builder);
@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Outputs
                     .LineTo(new(4, -4))
                     .MoveTo(new(4, 4))
                     .LineTo(new(4, 6)),
-                    new("child"));
+                    Appearance);
             }
             private void DrawSealed(IGraphicsBuilder builder)
             {

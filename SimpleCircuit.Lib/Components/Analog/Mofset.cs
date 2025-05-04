@@ -92,14 +92,14 @@ namespace SimpleCircuit.Components.Analog
                 builder.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
-                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), Appearance);
 
                 // Source and drain
                 builder.Line(new(-4, 0), new(-4, 4), Appearance);
                 builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance, options: Appearance.CreatePathOptions(this));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance);
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -123,7 +123,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
                     .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
                     .MoveTo(new(-2, 4)).LineTo(new(2, 4))
-                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), Appearance);
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), Appearance);
@@ -209,7 +209,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
-                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), Appearance);
                 builder.Circle(new Vector2(0, 7.5), 1.5, Appearance);
 
                 // Source and drain
@@ -217,7 +217,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance, options: Appearance.CreatePathOptions(this));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance);
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -241,7 +241,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
                     .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
                     .MoveTo(new(-2, 4)).LineTo(new(2, 4))
-                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), Appearance);
 
                 // Drain, source and gate
                 drawing.Line(new(-5, 0), new(-5, 4), Appearance);

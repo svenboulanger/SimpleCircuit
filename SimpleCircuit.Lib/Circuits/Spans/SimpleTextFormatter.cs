@@ -30,10 +30,7 @@ namespace SimpleCircuit.Circuits.Spans
             var lexer = new SimpleTextLexer(content);
             var context = new SimpleTextContext(Measurer)
             {
-                FontSize = appearance.FontSize,
-                IsBold = appearance.Bold,
-                Color = appearance.Color,
-                Opacity = appearance.Opacity,
+                Appearance = appearance
             };
             return SimpleTextParser.Parse(lexer, context);
         }

@@ -115,9 +115,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inn", "inp");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-2, -4), new(-2, 4), Appearance, options);
+                        builder.Signs(new(-2, -4), new(-2, 4), Appearance);
                     else
-                        builder.Signs(new(-2, 4), new(-2, -4), Appearance, options);
+                        builder.Signs(new(-2, 4), new(-2, -4), Appearance);
                 }
                 else
                     builder.ExtendPin(Pins["n"], Appearance);
@@ -126,9 +126,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, Appearance, 3, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, 7), new(6, -7), Appearance, options);
+                        builder.Signs(new(6, 7), new(6, -7), Appearance);
                     else
-                        builder.Signs(new(6, -7), new(6, 7), Appearance, options);
+                        builder.Signs(new(6, -7), new(6, 7), Appearance);
                 }
                 else
                     builder.ExtendPin(Pins["o"], Appearance);

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components.Appearance;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SimpleTexts
@@ -15,7 +16,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <param name="context">The context.</param>
         public static Span Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            var lines = new MultilineSpan(context.FontSize * context.LineSpacing, context.Align);
+            var lines = new MultilineSpan(context.Appearance.FontSize * context.Appearance.LineSpacing, context.Align);
 
             // Parse lines
             while (lexer.Type != TokenType.EndOfContent)
@@ -45,9 +46,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
             if (lexer.Check(TokenType.Superscript | TokenType.Subscript))
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
-                double oldFontSize = context.FontSize;
+                var oldAppearance = context.Appearance;
+                context.Appearance = new FontSizeAppearance(context.Appearance, context.Appearance.FontSize * 0.8);
                 Span sub = null, super = null;
-                context.FontSize *= 0.8;
                 if (lexer.Branch(TokenType.Subscript))
                 {
                     if (lexer.Branch(TokenType.OpenBracket))
@@ -88,8 +89,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             sub = ParseBlockSegment(lexer, context);
                     }
                 }
-                context.FontSize = oldFontSize;
-                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.FontSize, new(0, 0.05 * context.FontSize));
+                context.Appearance = oldAppearance;
+                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Appearance.FontSize, new(0, 0.05 * context.Appearance.FontSize));
             }
             return result;
         }
@@ -176,27 +177,25 @@ namespace SimpleCircuit.Parser.SimpleTexts
         }
         private static Span CreateOverline(Span @base, SimpleTextContext context)
         {
-            double margin = context.FontSize * 0.1;
-            double thickness = context.FontSize * 0.075;
-
-            return new OverlineSpan(@base, margin, thickness);
+            double margin = context.Appearance.FontSize * 0.1;
+            var appearance = new LineThicknessAppearance(context.Appearance, context.Appearance.FontSize * 0.075);
+            return new OverlineSpan(@base, margin, appearance);
         }
         private static Span CreateUnderline(Span @base, SimpleTextContext context)
         {
-            double margin = context.FontSize * 0.1;
-            double thickness = context.FontSize * 0.075;
-
-            return new UnderlineSpan(@base, margin, thickness);
+            double margin = context.Appearance.FontSize * 0.1;
+            var appearance = new LineThicknessAppearance(context.Appearance, context.Appearance.FontSize * 0.075);
+            return new UnderlineSpan(@base, margin, appearance);
         }
         private static Span CreateTextSpan(SimpleTextContext context)
         {
             // Measure the contents
             string content = context.Builder.ToString();
             context.Builder.Clear();
-            var bounds = context.Measurer.Measure(content, context.IsBold, context.FontSize);
+            var bounds = context.Measurer.Measure(content, context.Appearance.Bold, context.Appearance.FontSize);
 
             // Return the span
-            return new TextSpan(content, context.Color, context.Opacity, context.Measurer.FontFamily, false, context.FontSize, bounds);
+            return new TextSpan(content, context.Appearance, bounds);
         }
     }
 }

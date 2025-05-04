@@ -186,7 +186,7 @@ namespace SimpleCircuit.Components.Outputs
                     .CurveTo(new(scale * 0.5, _k * scale * 0.75), new(scale, _k * scale), new(scale, 0))
                     .CurveTo(new(scale, -_k * scale), new(scale * 0.5, -_k * scale * 0.75), new(0, 0))
                     .CurveTo(new(-scale * 0.5, _k * scale * 0.75), new(-scale, _k * scale), new(-scale, 0))
-                    .Close(), new("ventilator"));
+                    .Close(), Appearance);
                 builder.EndTransform();
             }
             private void DrawHeater(IGraphicsBuilder builder, double cx, double cy, double width, double height)
@@ -201,7 +201,7 @@ namespace SimpleCircuit.Components.Outputs
                         double xi = cx + (i - 4) / 4.0 * width;
                         b.MoveTo(new(xi, cy - height)).LineTo(new(xi, cy + height));
                     }
-                }, new("heater"));
+                }, Appearance);
             }
             private void DrawBoiler(IGraphicsBuilder builder, double cx, double cy, double r = 8)
             {
@@ -214,7 +214,7 @@ namespace SimpleCircuit.Components.Outputs
                         double yi = Math.Sqrt(r * r - xi * xi);
                         b.MoveTo(new(cx + xi, cy + yi)).LineTo(new(cx + xi, cy - yi));
                     }
-                }, new("boiler"));
+                }, Appearance);
             }
             private void DrawMicrowave(IGraphicsBuilder builder, double cx, double cy)
             {
@@ -224,7 +224,7 @@ namespace SimpleCircuit.Components.Outputs
                     builder.BeginTransform(new Transform(new(cx, cy), Matrix2.Identity));
                     builder.Path(b => b.MoveTo(new(-4, y))
                     .CurveTo(new(-3, y - _k * 3), new(-1, y - _k * 3), new(0, y))
-                    .CurveTo(new(1, y + _k * 3), new(3, y + _k * 3), new(4, y)), new("microwave"));
+                    .CurveTo(new(1, y + _k * 3), new(3, y + _k * 3), new(4, y)), Appearance);
                     builder.EndTransform();
                 }
             }
@@ -237,7 +237,7 @@ namespace SimpleCircuit.Components.Outputs
                     .MoveTo(new(-s, -s)).LineTo(new(-f, -f))
                     .MoveTo(new(s, -s)).LineTo(new(f, -f))
                     .MoveTo(new(s, s)).LineTo(new(f, f))
-                    .MoveTo(new(-s, s)).LineTo(new(-f, f)));
+                    .MoveTo(new(-s, s)).LineTo(new(-f, f)), Appearance);
                 builder.Circle(new(), 3, Appearance);
                 builder.EndTransform();
             }
@@ -263,7 +263,7 @@ namespace SimpleCircuit.Components.Outputs
                         var p = g.ToArray();
                         b.MoveTo(p[0]).LineTo(p[1]);
                     }
-                }, new("ice"));
+                }, Appearance);
                 builder.EndTransform();
             }
             private IEnumerable<Vector2> IceFractal(IEnumerable<Vector2> points, double angle)

@@ -40,8 +40,8 @@ namespace SimpleCircuit.Components.Analog
 
                 // The crystal
                 var options = Appearance.CreatePathOptions(this);
-                builder.Rectangle(-2.5, -5, 5, 10, Appearance, options: options);
-                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), Appearance.CreatePathOptions());
+                builder.Rectangle(-2.5, -5, 5, 10, Appearance);
+                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), Appearance);
 
                 _anchors.Draw(builder, Labels);
             }

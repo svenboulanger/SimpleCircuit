@@ -159,8 +159,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 if (Labels.Count > 1)
                 {
-                    var options = Appearance.CreatePathOptions(this);
-
                     // The header
                     double y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
                     builder.Path(b =>
@@ -174,12 +172,12 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(CornerRadius, 0));
                         b.Close();
-                    }, options);
+                    }, Appearance);
 
                     // The attributes
                     for (int i = 1; i < Labels.Count - 1; i++)
                     {
-                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, Appearance, options: options);
+                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, Appearance);
                         y += LineHeight * Labels[i].Size;
                     }
 
@@ -195,7 +193,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, options);
+                    }, Appearance);
 
                     // All attributes encapsulated
                     y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
@@ -210,11 +208,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, options);
+                    }, Appearance);
                 }
                 else
                 {
-                    builder.Rectangle(0, 0, _width, _height, Appearance, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
+                    builder.Rectangle(0, 0, _width, _height, Appearance, CornerRadius, CornerRadius);
                 }    
                 _anchors.Draw(builder, this);
             }

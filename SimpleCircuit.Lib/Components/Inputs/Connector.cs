@@ -144,7 +144,7 @@ namespace SimpleCircuit.Components.Inputs
                         builder.ExtendPin(Pins["p"], Appearance, 4);
                         builder.Circle(new(), 1.5, Appearance);
                         double s = Math.Sqrt(2) * 2;
-                        builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)));
+                        builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)), Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                         break;

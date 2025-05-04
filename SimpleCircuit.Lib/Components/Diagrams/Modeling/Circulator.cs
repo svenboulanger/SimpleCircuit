@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     b.Line(new(0.5, 2));
                     b.MoveTo(new(c, -s));
                     b.Line(new(2, 0));
-                });
+                }, Appearance);
                 DrawLabels(builder);
             }
         }

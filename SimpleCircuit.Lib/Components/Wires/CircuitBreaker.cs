@@ -81,7 +81,7 @@ namespace SimpleCircuit.Components.Wires
 
                 builder.Path(b => b
                     .MoveTo(new(-4, -2))
-                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)));
+                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Wires
                 builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 builder.Line(new(-4, 0), new(4, -4), Appearance);
-                builder.Cross(new(4, 0), 2);
+                builder.Cross(new(4, 0), 2, Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);

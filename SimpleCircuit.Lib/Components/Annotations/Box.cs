@@ -457,7 +457,7 @@ namespace SimpleCircuit.Components.Annotations
                     }
                     builder.Close();
                 }
-            });
+            }, Appearance);
 
             // Draw the labels
             if (Labels.Count == 0)

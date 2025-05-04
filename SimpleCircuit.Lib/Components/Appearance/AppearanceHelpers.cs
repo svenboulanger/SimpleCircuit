@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Builders;
+using System.Drawing;
 using System.Text;
 
 namespace SimpleCircuit.Components.Appearance
@@ -145,6 +146,28 @@ namespace SimpleCircuit.Components.Appearance
                 style.Append($"fill-opacity: {appearance.BackgroundOpacity.ToSVG()};");
             }
             return style.ToString();
+        }
+
+        /// <summary>
+        /// Creats a style attribute for text that represents the <see cref="IAppearanceOptions"/>.
+        /// </summary>
+        /// <param name="appearance">The style.</param>
+        /// <returns>Returns the style attribute value.</returns>
+        public static string CreateTextStyle(this IAppearanceOptions appearance)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"font-family: {appearance.FontFamily}; ");
+            sb.Append($"font-size: {appearance.FontSize.ToSVG()}pt; ");
+            if (appearance.Opacity.IsZero())
+                sb.Append($"fill: none; ");
+            else if ((appearance.Opacity - AppearanceOptions.Opaque).IsZero() || appearance.Opacity > AppearanceOptions.Opaque)
+                sb.Append($"fill: {appearance.Color}; ");
+            else
+                sb.Append($"fill: {appearance.Color}; fill-opacity: {appearance.Opacity}; ");
+            if (appearance.Bold)
+                sb.Append("font-weight: bold; ");
+            sb.Append("stroke: none;");
+            return sb.ToString();
         }
     }
 

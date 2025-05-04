@@ -134,11 +134,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     for (int i = 2; i >= 1; i--)
                     {
                         builder.BeginTransform(new(new(-i * 2, -i * 2), Matrix2.Identity));
-                        builder.Path(DrawPath);
+                        builder.Path(DrawPath, Appearance);
                         builder.EndTransform();
                     }
                 }
-                builder.Path(DrawPath);
+                builder.Path(DrawPath, Appearance);
                 BoxLabelAnchorPoints.Default.Draw(builder, this);
             }
 

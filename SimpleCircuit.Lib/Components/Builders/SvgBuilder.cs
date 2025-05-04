@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
+        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
@@ -214,7 +214,7 @@ namespace SimpleCircuit.Components.Builders
                     {
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
-                        element.SetAttribute("style", textSpan.Style);
+                        element.SetAttribute("style", textSpan.Appearance.CreateTextStyle());
                         element.SetAttribute("x", (offset.X + textSpan.Offset.X).ToSVG());
                         element.SetAttribute("y", (offset.Y + textSpan.Offset.Y).ToSVG());
                         element.InnerXml = textSpan.Content;
@@ -246,27 +246,19 @@ namespace SimpleCircuit.Components.Builders
 
                 case OverlineSpan overlineSpan:
                     {
-                        var options = new GraphicOptions();
-                        options.Style["stroke"] = "black";
-                        options.Style["fill"] = "none";
-                        options.Style["stroke-width"] = $"{overlineSpan.Thickness.ToSVG()}pt";
                         Path(b => b
                             .MoveTo(offset + overlineSpan.Start)
                             .LineTo(offset + overlineSpan.End),
-                            options);
+                            overlineSpan.Appearance);
                     }
                     break;
 
                 case UnderlineSpan underlineSpan:
                     {
-                        var options = new GraphicOptions();
-                        options.Style["stroke"] = "black";
-                        options.Style["fill"] = "none";
-                        options.Style["stroke-width"] = $"{underlineSpan.Thickness.ToSVG()}pt";
                         Path(b => b
                             .MoveTo(offset + underlineSpan.Start)
                             .LineTo(offset + underlineSpan.End),
-                            options);
+                            underlineSpan.Appearance);
                     }
                     break;
 
@@ -276,7 +268,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null)
+        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options)
         {
             if (pathBuild == null)
                 return this;
@@ -287,9 +279,9 @@ namespace SimpleCircuit.Components.Builders
 
             // Create the path element
             var path = _document.CreateElement("path", Namespace);
-            options?.Apply(path);
             _current.AppendChild(path);
             path.SetAttribute("d", builder.ToString());
+            path.SetAttribute("style", options.CreateStrokeFillStyle());
             return this;
         }
 

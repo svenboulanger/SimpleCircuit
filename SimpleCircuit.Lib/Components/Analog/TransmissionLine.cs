@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 // Transmission line
-                builder.Path(DrawShape);
+                builder.Path(DrawShape, Appearance);
 
                 _anchors.Draw(builder, Labels);
             }

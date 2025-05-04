@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Wires
                             else
                                 b.MoveTo(new(x - 1.5, 3)).Line(new(3, -6));
                         }
-                    });
+                    }, Appearance);
                 }
 
                 _anchors.Draw(builder, this);

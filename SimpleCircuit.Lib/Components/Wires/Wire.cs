@@ -491,7 +491,7 @@ namespace SimpleCircuit.Components.Wires
 
                         last = current;
                     }
-                }, Appearance.CreatePathOptions(this));
+                }, Appearance);
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)

@@ -149,15 +149,14 @@ namespace SimpleCircuit.Components.Digital
                     .CurveTo(new(xr + handle, h), new(w, handle), new(w, 0))
                     .SmoothTo(new(xr + handle, -h), new(xr, -h))
                     .LineTo(new(-w, -h))
-                    .Close()
-                );
+                    .Close(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
             private void DrawAndIEC(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, Appearance);
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance, options: Appearance.CreatePathOptions(this));
+                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance);
                 drawing.Text("&amp;", new(), new(), Appearance);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }

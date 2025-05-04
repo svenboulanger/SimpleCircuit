@@ -37,7 +37,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         {
                             var lexer = new SvgPathDataLexer(_pathData);
                             SvgPathDataParser.Parse(lexer, b, null);
-                        });
+                        }, Appearance);
                         builder.EndTransform();
                         break;
 

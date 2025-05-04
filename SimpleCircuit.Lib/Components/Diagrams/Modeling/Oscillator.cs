@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                builder.AC(new(), Size * 0.25);
+                builder.AC(Appearance, new(), Size * 0.25);
                 DrawLabels(builder);
             }
         }

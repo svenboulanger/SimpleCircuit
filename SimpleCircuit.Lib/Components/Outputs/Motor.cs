@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components.Outputs
                             .LineTo(new(-5, -4))
                             .MoveTo(new(-6, -3))
                             .LineTo(new(-6, -5)),
-                        new("plus"));
+                        Appearance);
                     builder.Line(new(5, -4), new(7, -4), Appearance);
                 }
 

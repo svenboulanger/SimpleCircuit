@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Appearance;
+using System;
 using System.Text;
 using System.Xml;
 
@@ -23,29 +24,9 @@ namespace SimpleCircuit.Parser.SimpleTexts
         public StringBuilder Builder { get; } = new();
 
         /// <summary>
-        /// Gets or sets the font size.
+        /// Gets or sets the current appearance.
         /// </summary>
-        public double FontSize { get; set; } = 4.0;
-
-        /// <summary>
-        /// Gets or sets the opacity.
-        /// </summary>
-        public double Opacity { get; set; } = 1.0;
-
-        /// <summary>
-        /// Gets or sets the color.
-        /// </summary>
-        public string Color { get; set; } = "black";
-
-        /// <summary>
-        /// Gets or sets whether the text is bold.
-        /// </summary>
-        public bool IsBold { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets the line spacing.
-        /// </summary>
-        public double LineSpacing { get; set; } = 1.5;
+        public IAppearanceOptions Appearance { get; set; }
 
         /// <summary>
         /// Gets or sets the expansion direction.

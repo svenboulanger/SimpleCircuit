@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Cross(new(), _sqrt2);
+                builder.Cross(new(), _sqrt2, Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components.Outputs
                     double s = Math.Sin(Math.PI * 0.95) * 6;
                     b.MoveTo(new(-c, -s));
                     b.ArcTo(6, 6, 0.0, false, false, new(c, -s));
-                }, new("projector"));
+                }, Appearance);
                 if (_anchors[0].Location.Y > -7)
                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
             }

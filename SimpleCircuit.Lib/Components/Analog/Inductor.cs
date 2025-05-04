@@ -136,7 +136,7 @@ namespace SimpleCircuit.Components.Analog
                                 b.CurveTo(new(x, -4), new(x + 3, -4), new(x + 3, 0));
                                 x += 3;
                             }
-                        });
+                        }, Appearance);
 
                         if (Variants.Contains(_dot))
                         {
@@ -187,7 +187,7 @@ namespace SimpleCircuit.Components.Analog
                             }
                             x += 4;
                             b.SmoothTo(new(x, -4), new(x, 0));
-                        });
+                        }, Appearance);
 
                         if (Variants.Contains(_dot))
                         {

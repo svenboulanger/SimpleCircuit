@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Diamond(0.0, 0.0, _width, _height, CornerRadiusX, CornerRadiusY);
+                builder.Diamond(0.0, 0.0, _width, _height, Appearance, CornerRadiusX, CornerRadiusY);
                 DiamondLabelAnchorPoints.Default.Draw(builder, this);
             }
 

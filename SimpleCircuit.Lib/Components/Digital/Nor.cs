@@ -151,7 +151,7 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w * 0.8, h))
                     .CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0))
                     .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h))
-                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)));
+                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)), Appearance);
                 builder.Circle(new(w + 1.5, 0), 1.5, Appearance);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

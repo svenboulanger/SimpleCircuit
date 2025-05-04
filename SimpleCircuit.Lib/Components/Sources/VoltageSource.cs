@@ -103,7 +103,7 @@ namespace SimpleCircuit.Components.Sources
                 {
                     case 0:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.AC();
+                        builder.AC(Appearance);
                         builder.EndTransform();
                         break;
 
@@ -144,7 +144,7 @@ namespace SimpleCircuit.Components.Sources
                         break;
 
                     default:
-                        builder.Signs(new(3, 0), new(-3, 0), Appearance, options, vertical: true);
+                        builder.Signs(new(3, 0), new(-3, 0), Appearance, vertical: true);
                         break;
                 }
 

@@ -69,7 +69,7 @@ namespace SimpleCircuit.Components.Wires
                     .MoveTo(new(-2.5, -3.5))
                     .Line(new(5, 0))
                     .MoveTo(new(-1, -2))
-                    .Line(new(2, 0)));
+                    .Line(new(2, 0)), Appearance);
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)

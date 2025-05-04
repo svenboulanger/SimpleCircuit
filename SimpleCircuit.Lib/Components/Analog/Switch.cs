@@ -194,7 +194,7 @@ namespace SimpleCircuit.Components.Analog
                     case 0:
                         builder.Path(b => b
                             .MoveTo(new(-3, -5))
-                            .CurveTo(new(1, -3), new(1, -2), new(2, 2)));
+                            .CurveTo(new(1, -3), new(1, -2), new(2, 2)), Appearance);
                         if (_anchors[0].Location.Y > -6)
                             _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 3)
@@ -206,7 +206,7 @@ namespace SimpleCircuit.Components.Analog
                     case 1:
                         builder.Path(b => b
                             .MoveTo(new(-4, -6))
-                            .CurveTo(new(1, -3), new(1, -2), new(2, 1)));
+                            .CurveTo(new(1, -3), new(1, -2), new(2, 1)), Appearance);
                         if (_anchors[0].Location.Y > -7)
                             _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 2)
@@ -228,7 +228,7 @@ namespace SimpleCircuit.Components.Analog
                         b.CurveTo(new(-8.3, 6), new(-11, 3.3), new(-11, 0));
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
-                    });
+                    }, Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 }
@@ -290,7 +290,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_lamp))
                 {
                     double x = 2 / Math.Sqrt(2);
-                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), new("lamp"));
+                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), Appearance);
                 }
 
                 if (Variants.Contains(_window))
@@ -331,7 +331,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_lamp))
                 {
                     double x = 2.0 / Math.Sqrt(2.0);
-                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), new("lamp"));
+                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), Appearance);
                 }
 
                 // Draw the poles
@@ -357,7 +357,7 @@ namespace SimpleCircuit.Components.Analog
                             }
                             length -= 2.0;
                         }
-                    });
+                    }, Appearance);
                 }
             }
         }

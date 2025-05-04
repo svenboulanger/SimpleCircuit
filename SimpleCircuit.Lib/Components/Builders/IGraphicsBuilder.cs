@@ -131,7 +131,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="ry">The radius along the Y-axis.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphic builder for chaining.</returns>
-        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null);
+        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options);
 
         /// <summary>
         /// Draws a path.
@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="pathBuild">The description of the path.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining methods.</returns>
-        public IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null);
+        public IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options);
 
         /// <summary>
         /// Draws text.

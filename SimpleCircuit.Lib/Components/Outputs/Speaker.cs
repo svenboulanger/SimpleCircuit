@@ -63,7 +63,7 @@ namespace SimpleCircuit.Components.Outputs
             {
                 builder.Path(b => b
                     .MoveTo(new(x, y - s))
-                    .CurveTo(new(x + s * 0.5, y - s * 0.5), new(x + s * 0.5, y + s * 0.5), new(x, y + s)));
+                    .CurveTo(new(x + s * 0.5, y - s * 0.5), new(x + s * 0.5, y + s * 0.5), new(x, y + s)), Appearance);
             }
         }
     }

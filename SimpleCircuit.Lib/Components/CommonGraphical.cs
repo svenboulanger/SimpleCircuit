@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components
         /// <param name="ry">The radius along the y-axis.</param>
         /// <param name="appearance">Path options.</param>
         public static void Rectangle(this IGraphicsBuilder builder, double x, double y, double width, double height, IAppearanceOptions appearance,
-            double rx = double.NaN, double ry = double.NaN, GraphicOptions options = null)
+            double rx = double.NaN, double ry = double.NaN)
         {
             // Deal with rounded corners
             if (double.IsNaN(rx) && double.IsNaN(ry))
@@ -120,7 +120,7 @@ namespace SimpleCircuit.Components
                     if (ry != 0)
                         b.Curve(new(0, -ky), new(rx - kx, -ry), new(rx, -ry));
                     b.Close();
-                }, options);
+                }, appearance);
             }
         }
 
@@ -135,8 +135,8 @@ namespace SimpleCircuit.Components
         /// <param name="rx">The radius for the left and right corners.</param>
         /// <param name="ry">The radius for the top and bottom corners.</param>
         /// <param name="options">The path options.</param>
-        public static void Diamond(this IGraphicsBuilder builder, double x, double y, double width, double height,
-            double rx = 0.0, double ry = 0.0, GraphicOptions options = null)
+        public static void Diamond(this IGraphicsBuilder builder, double x, double y, double width, double height, IAppearanceOptions options,
+            double rx = 0.0, double ry = 0.0)
         {
             DiamondSize(width, height, rx, ry, out var n, out var ox, out var oy);
             var loc = new Vector2(x, y);
@@ -245,7 +245,7 @@ namespace SimpleCircuit.Components
         /// <param name="radiusBlunt">The radius for the blunt corners.</param>
         /// <param name="options">The path options.</param>
         public static void Parallellogram(this IGraphicsBuilder builder, double x, double y, double width,
-            Vector2 edge, double radiusSharp = 0.0, double radiusBlunt = 0.0, GraphicOptions options = null)
+            Vector2 edge, IAppearanceOptions options, double radiusSharp = 0.0, double radiusBlunt = 0.0)
         {
             var pcorner = new Vector2(-width * 0.5, -edge.Y * 0.5);
             var horiz = new Vector2((width - edge.X) * 0.5, 0);
@@ -303,10 +303,10 @@ namespace SimpleCircuit.Components
         /// <param name="minus">The center of the minus sign.</param>
         /// <param name="size">The size of the signs. The default is 2.</param>
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
-        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IAppearanceOptions appearance, GraphicOptions options, double size = 2, bool vertical = false)
+        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IAppearanceOptions appearance, double size = 2, bool vertical = false)
         {
             // Plus sign
-            builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), options);
+            builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), appearance);
 
             // Minus sign
             size *= 0.5;
@@ -323,7 +323,7 @@ namespace SimpleCircuit.Components
         /// <param name="center">The center.</param>
         /// <param name="size">The size.</param>
         /// <param name="options">The options.</param>
-        public static void Cross(this IGraphicsBuilder builder, Vector2 center, double size, GraphicOptions options = null)
+        public static void Cross(this IGraphicsBuilder builder, Vector2 center, double size, IAppearanceOptions options)
         {
             builder.Path(b =>
                 b
@@ -340,7 +340,7 @@ namespace SimpleCircuit.Components
         /// <param name="center">The center of the AC wiggle.</param>
         /// <param name="size">The size of the AC wiggle.</param>
         /// <param name="vertical">If <c>true</c>, the wiggle is placed vertically.</param>
-        public static void AC(this IGraphicsBuilder builder, Vector2 center = new(), double size = 3, bool vertical = false)
+        public static void AC(this IGraphicsBuilder builder, IAppearanceOptions options, Vector2 center = new(), double size = 3, bool vertical = false)
         {
             builder.BeginTransform(new Transform(center, (vertical ? Matrix2.Identity : Matrix2.Rotate(Math.PI / 2)) * size / 3.0));
             builder.Path(b =>
@@ -349,7 +349,7 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(0, -3))
                     .CurveTo(new(1.414, -2.293), new(1.414, -0.707), new())
                     .CurveTo(new(-1.414, 0.707), new(-1.414, 2.293), new(0, 3));
-            });
+            }, options);
             builder.EndTransform();
         }
 

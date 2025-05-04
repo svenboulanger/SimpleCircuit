@@ -136,9 +136,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-5.5, 4), new(-5.5, -4), Appearance, markerAppearance.CreatePathOptions());
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4), Appearance);
                     else
-                        builder.Signs(new(-5.5, -4), new(-5.5, 4), Appearance, markerAppearance.CreatePathOptions());
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4), Appearance);
                 }
                 else
                     builder.ExtendPin(Pins["in"], Appearance);
@@ -148,9 +148,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, Appearance, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, -7), new(6, 7), Appearance, markerAppearance.CreatePathOptions());
+                        builder.Signs(new(6, -7), new(6, 7), Appearance);
                     else
-                        builder.Signs(new(6, 7), new(6, -7), Appearance, markerAppearance.CreatePathOptions());
+                        builder.Signs(new(6, 7), new(6, -7), Appearance);
 
                     // Give more breathing room to the labels
                     _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1), Appearance);
@@ -180,7 +180,7 @@ namespace SimpleCircuit.Components.Analog
                     builder.Path(b => b.MoveTo(new(-5, 2))
                         .LineTo(new(-3, 2))
                         .LineTo(new(-3, -2))
-                        .LineTo(new(-1, -2)), markerAppearance.CreatePathOptions());
+                        .LineTo(new(-1, -2)), markerAppearance);
                 }
 
                 // Schmitt trigger
@@ -196,7 +196,7 @@ namespace SimpleCircuit.Components.Analog
                             .LineTo(new(-2, 2))
                             .LineTo(new(-2, -2))
                             .LineTo(new(0, -2));
-                    }, markerAppearance.CreatePathOptions());
+                    }, markerAppearance);
                 }
                 _anchors.Draw(builder, Labels);
             }

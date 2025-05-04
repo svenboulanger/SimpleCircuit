@@ -135,7 +135,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 else
                 {
                     var edge = new Vector2(_height * _edgeSkew, -_height);
-                    builder.Parallellogram(0.0, 0.0, _width, edge, CornerRadiusSharp, CornerRadiusBlunt);
+                    builder.Parallellogram(0.0, 0.0, _width, edge, Appearance, CornerRadiusSharp, CornerRadiusBlunt);
                     _anchors[0] = new LabelAnchorPoint(new(), new(), Appearance);
                 }
                 _anchors.Draw(builder, this);
@@ -171,7 +171,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     if (cornerStraightLeft)
                         b.ArcTo(straightRadius, straightRadius, 0.0, false, true, pd2);
                     b.Close();
-                });
+                }, Appearance);
                 _anchors[0] = new LabelAnchorPoint(new(0, edge.Y / 2), new(), Appearance);
             }
 

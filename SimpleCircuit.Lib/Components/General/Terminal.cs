@@ -92,7 +92,7 @@ namespace SimpleCircuit.Components
                     case 6:
                         // pad
                         builder.Rectangle(-4, -2, 4, 4, Appearance);
-                        builder.Cross(new(-2, 0), 4);
+                        builder.Cross(new(-2, 0), 4, Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0), Appearance);
                         break;
 

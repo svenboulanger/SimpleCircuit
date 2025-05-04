@@ -98,7 +98,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Ellipse(new(), _width * 0.5, _height * 0.5);
+                builder.Ellipse(new(), _width * 0.5, _height * 0.5, Appearance);
                 EllipseLabelAnchorPoints.Default.Draw(builder, this);
             }
 

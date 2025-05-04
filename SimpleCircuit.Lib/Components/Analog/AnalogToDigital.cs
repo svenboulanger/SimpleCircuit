@@ -122,9 +122,9 @@ namespace SimpleCircuit.Components.Analog
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(x, y), new(x, -y), _signAppearance, _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance);
                     else
-                        builder.Signs(new(x, -y), new(x, y), _signAppearance, _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance);
                 }
                 else
                     builder.ExtendPin(Pins["in"], Appearance);
@@ -135,9 +135,9 @@ namespace SimpleCircuit.Components.Analog
                     double x = Width / 2 - Height / 4 + 2;
                     double y = Height / 4 + 2.0;
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(x, y), new(x, -y), _signAppearance, _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance);
                     else
-                        builder.Signs(new(x, -y), new(x, y), _signAppearance, _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance);
                 }
                 else
                     builder.ExtendPin(Pins["out"], Appearance);

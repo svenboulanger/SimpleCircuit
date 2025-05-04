@@ -1,4 +1,7 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Drawing;
+using System.Drawing;
+using System.Text;
 
 namespace SimpleCircuit.Circuits.Spans
 {
@@ -11,7 +14,7 @@ namespace SimpleCircuit.Circuits.Spans
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
     /// <param name="thickness">The thickness.</param>
-    public class OverlineSpan(Span @base, double margin, double thickness) : Span
+    public class OverlineSpan(Span @base, double margin, IAppearanceOptions appearance) : Span
     {
         /// <summary>
         /// Gets the content.
@@ -19,14 +22,14 @@ namespace SimpleCircuit.Circuits.Spans
         public Span Base { get; } = @base;
 
         /// <summary>
+        /// Gets the appearance.
+        /// </summary>
+        public IAppearanceOptions Appearance { get; } = appearance;
+
+        /// <summary>
         /// Gets the margin.
         /// </summary>
         public double Margin { get; } = margin;
-
-        /// <summary>
-        /// Gets the thickness.
-        /// </summary>
-        public double Thickness { get; } = thickness;
 
         /// <summary>
         /// Gets the starting point of the overline.
@@ -43,7 +46,7 @@ namespace SimpleCircuit.Circuits.Spans
         {
             return new SpanBounds(new Bounds(
                 Base.Bounds.Bounds.Left,
-                Base.Bounds.Bounds.Top - Margin - Thickness,
+                Base.Bounds.Bounds.Top - Margin - Appearance.LineThickness,
                 Base.Bounds.Bounds.Right,
                 Base.Bounds.Bounds.Bottom), Base.Bounds.Advance);
         }
@@ -54,7 +57,7 @@ namespace SimpleCircuit.Circuits.Spans
             Base.SetOffset(offset);
             Offset = offset;
 
-            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Thickness * 0.5;
+            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Appearance.LineThickness * 0.5;
             double x1 = offset.X + Base.Bounds.Bounds.Left;
             double x2 = offset.X + Base.Bounds.Bounds.Right;
             Start = new(x1, y);

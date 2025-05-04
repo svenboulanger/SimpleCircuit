@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components.Inputs
                         b.LineTo(new(-5, -10));
                         b.LineTo(new(5, -10));
                         b.LineTo(new(0, -3));
-                    });
+                    }, Appearance);
                 }
                 else
                 {
@@ -57,7 +57,7 @@ namespace SimpleCircuit.Components.Inputs
                         b.LineTo(new(-5, -10));
                         b.MoveTo(new(0, -3));
                         b.LineTo(new(5, -10));
-                    });
+                    }, Appearance);
                 }
 
                 _anchors.Draw(builder, this);

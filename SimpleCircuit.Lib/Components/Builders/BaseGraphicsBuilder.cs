@@ -300,7 +300,7 @@ namespace SimpleCircuit.Components.Builders
                     var lexer = new SvgPathDataLexer(pathData);
                     start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
                     end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
-                }, appearance.CreatePathOptions());
+                }, appearance);
                 DrawMarkers(startMarkers, start.Location, start.Normal, appearance);
                 DrawMarkers(endMarkers, end.Location, end.Normal, appearance);
             }
@@ -325,7 +325,7 @@ namespace SimpleCircuit.Components.Builders
             ParseAppearanceOptions(appearance, node);
 
             // Draw the rectangle
-            this.Rectangle(x, y, width, height, appearance, rx, ry, options: appearance.CreatePathOptions());
+            this.Rectangle(x, y, width, height, appearance, rx, ry);
         }
 
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
@@ -461,10 +461,10 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);

@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components
                 if (Variants.Contains(_noiseless))
                 {
                     drawing.ExtendPins(Pins, Appearance, 6);
-                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), new("shield"));
+                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), Appearance);
                     if (_anchors[0].Location.X > -9)
                         _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0), Appearance);
                     if (_anchors[0].Location.X < 9)
@@ -92,7 +92,7 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(-3, 2))
                     .LineTo(new(3, 2))
                     .MoveTo(new(-1, 4))
-                    .LineTo(new(1, 4)));
+                    .LineTo(new(1, 4)), Appearance);
             }
             private void DrawEarth(IGraphicsBuilder drawing)
             {
@@ -107,7 +107,7 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(0, 0))
                     .Line(new(-2, 4))
                     .MoveTo(new(5, 0))
-                    .Line(new(-2, 4)));
+                    .Line(new(-2, 4)), Appearance);
 
                 if (_anchors[0].Location.X > -7)
                     _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0), Appearance);

@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null)
+        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
@@ -71,7 +71,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, GraphicOptions options = null)
+        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options)
         {
             if (pathBuild is null)
                 return this;

@@ -107,7 +107,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .LineTo(new(a - b, -b))
                     .ArcTo(b, b, 0.0, false, true, new(a - b, b))
                     .LineTo(new(-a + b, b))
-                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close());
+                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close(), Appearance);
                 _anchors.Draw(builder, this);
             }
 

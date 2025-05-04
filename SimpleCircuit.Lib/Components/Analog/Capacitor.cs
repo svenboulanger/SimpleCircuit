@@ -81,17 +81,17 @@ namespace SimpleCircuit.Components.Analog
                         // Plates
                         var planeAppearance = new LineThicknessAppearance(Appearance, 1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance);
-                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.CreatePathOptions());
+                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, markerOptions, vertical: true);
+                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, vertical: true);
                         break;
 
                     case 1:
                         // Assymetric plates
-                        builder.Rectangle(-2.25, -4, 1.5, 8, Appearance, options: markerOptions);
-                        builder.Rectangle(0.75, -4, 1.5, 8, Appearance, options: markerOptions);
+                        builder.Rectangle(-2.25, -4, 1.5, 8, Appearance);
+                        builder.Rectangle(0.75, -4, 1.5, 8, Appearance);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-5, 3), new(5, 3), Appearance, markerOptions, vertical: true);
+                            builder.Signs(new(-5, 3), new(5, 3), Appearance, vertical: true);
                         break;
 
                     default:
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
                         builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-4, 3), new(4, 3), Appearance, markerOptions, vertical: true);
+                            builder.Signs(new(-4, 3), new(4, 3), Appearance, vertical: true);
                         break;
                 }
 
