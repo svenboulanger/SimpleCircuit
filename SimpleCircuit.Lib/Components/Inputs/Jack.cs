@@ -36,8 +36,8 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["p"], Appearance, this, 4);
-                builder.ExtendPin(Pins["n"], Appearance, this);
+                builder.ExtendPin(Pins["p"], Appearance, 4);
+                builder.ExtendPin(Pins["n"], Appearance);
                 builder.Circle(new(), 1.5);
                 builder.Circle(new(), 4);
                 builder.Circle(new(4, 0), 1, new("marker"));

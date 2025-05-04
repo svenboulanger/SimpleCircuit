@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 4);
+                builder.ExtendPins(Pins, Appearance, 4);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Wires
 
                 if (Multiple > 1)
                 {
-                    builder.Line(new(0, -3.5), new(2.1, -5.6));
+                    builder.Line(new(0, -3.5), new(2.1, -5.6), Appearance);
                     builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
                 }
@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Wires
                     new(3, -5),
                     new(3, -2)
                 ]);
-                builder.Line(new(0, -2), new(0, -5));
+                builder.Line(new(0, -2), new(0, -5), Appearance);
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)
@@ -120,7 +120,7 @@ namespace SimpleCircuit.Components.Wires
                     new(3, 2), 
                     new(3, 5)
                 ]);
-                builder.Line(new(0, 5), new(0, 2));
+                builder.Line(new(0, 5), new(0, 2), Appearance);
                 if (_anchors[0].Location.Y > -1)
                     _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 6)

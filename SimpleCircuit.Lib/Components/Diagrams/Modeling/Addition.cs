@@ -43,8 +43,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
 
                     default:
                         double s = Size * 0.3;
-                        builder.Line(new(-s, 0), new(s, 0));
-                        builder.Line(new(0, -s), new(0, s));
+                        builder.Line(new(-s, 0), new(s, 0), Appearance);
+                        builder.Line(new(0, -s), new(0, s), Appearance);
                         break;
                 }
 

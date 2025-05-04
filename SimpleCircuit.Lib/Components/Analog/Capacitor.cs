@@ -72,7 +72,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 3.5);
+                builder.ExtendPins(Pins, Appearance, 3.5);
                 var options = Appearance.CreatePathOptions(this);
                 var markerOptions = Appearance.CreateMarkerOptions();
                 switch (Variants.Select(_curved, _electrolytic))
@@ -80,10 +80,10 @@ namespace SimpleCircuit.Components.Analog
                     case 0:
                         // Plates
                         var planeAppearance = new LineThicknessAppearance(Appearance, 1.0);
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance.CreatePathOptions());
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance);
                         builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.CreatePathOptions());
                         if (Variants.Contains(_signs))
-                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), markerOptions, vertical: true);
+                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, markerOptions, vertical: true);
                         break;
 
                     case 1:
@@ -91,17 +91,17 @@ namespace SimpleCircuit.Components.Analog
                         builder.Rectangle(-2.25, -4, 1.5, 8, options: markerOptions);
                         builder.Rectangle(0.75, -4, 1.5, 8, options: markerOptions);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-5, 3), new(5, 3), markerOptions, vertical: true);
+                            builder.Signs(new(-5, 3), new(5, 3), Appearance, markerOptions, vertical: true);
                         break;
 
                     default:
                         // Plates
                         var plateAppearance = new LineThicknessAppearance(Appearance, 1.0);
                         options = plateAppearance.CreatePathOptions(this);
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), options);
-                        builder.Line(new(1.5, -4), new(1.5, 4), options);
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
+                        builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-4, 3), new(4, 3), markerOptions, vertical: true);
+                            builder.Signs(new(-4, 3), new(4, 3), Appearance, markerOptions, vertical: true);
                         break;
                 }
 
@@ -110,7 +110,7 @@ namespace SimpleCircuit.Components.Analog
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
-                        builder.Arrow(new(-4, 4), new(6, -5), Appearance, this);
+                        builder.Arrow(new(-4, 4), new(6, -5), Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         break;
 

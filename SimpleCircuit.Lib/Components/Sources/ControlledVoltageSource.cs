@@ -67,7 +67,7 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
@@ -93,13 +93,7 @@ namespace SimpleCircuit.Components.Sources
                 ]);
 
                 // Plus and minus
-                builder.Line(new(-3, -1), new(-3, 1), new("minus"));
-                builder.Path(b => b
-                    .MoveTo(new(3, -1))
-                    .Line(new(0, 2))
-                    .MoveTo(new(2, 0))
-                    .Line(new(2, 0)),
-                    new("plus"));
+                builder.Signs(new(3, 0), new(-3, 0), Appearance, new());
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
@@ -111,7 +105,7 @@ namespace SimpleCircuit.Components.Sources
                 [
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 ]);
-                builder.Line(new(-4, 0), new(4, 0));
+                builder.Line(new(-4, 0), new(4, 0), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);

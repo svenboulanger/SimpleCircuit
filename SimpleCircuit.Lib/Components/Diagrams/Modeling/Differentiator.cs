@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
 
                     default:
                         builder.Text("d", new(), new(0, -1), textAppearance);
-                        builder.Line(new(-2, 0), new(2, 0), textAppearance.CreatePathOptions());
+                        builder.Line(new(-2, 0), new(2, 0), textAppearance);
                         builder.Text("dt", new(), new(0, 1), textAppearance);
                         break;
                 }

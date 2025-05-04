@@ -113,25 +113,25 @@ namespace SimpleCircuit.Components.Analog
                 var options = Appearance.CreatePathOptions(this);
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 2, "inn", "inp");
+                    builder.ExtendPins(Pins, Appearance, 2, "inn", "inp");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-2, -4), new(-2, 4), options);
+                        builder.Signs(new(-2, -4), new(-2, 4), Appearance, options);
                     else
-                        builder.Signs(new(-2, 4), new(-2, -4), options);
+                        builder.Signs(new(-2, 4), new(-2, -4), Appearance, options);
                 }
                 else
-                    builder.ExtendPin(Pins["n"], Appearance, this);
+                    builder.ExtendPin(Pins["n"], Appearance);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 3, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, 3, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, 7), new(6, -7), options);
+                        builder.Signs(new(6, 7), new(6, -7), Appearance, options);
                     else
-                        builder.Signs(new(6, -7), new(6, 7), options);
+                        builder.Signs(new(6, -7), new(6, 7), Appearance, options);
                 }
                 else
-                    builder.ExtendPin(Pins["o"], Appearance, this);
+                    builder.ExtendPin(Pins["o"], Appearance);
 
                 // The triangle
                 builder.Polygon([
@@ -142,7 +142,7 @@ namespace SimpleCircuit.Components.Analog
                 ], options);
 
                 if (Variants.Contains(_programmable))
-                    builder.Arrow(new(-7, 10), new(6, -12), Appearance, this);
+                    builder.Arrow(new(-7, 10), new(6, -12), Appearance);
 
                 _anchors.Draw(builder, Labels);
             }

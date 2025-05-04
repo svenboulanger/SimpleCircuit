@@ -284,9 +284,9 @@ namespace SimpleCircuit.Components
         /// <param name="start">The start point.</param>
         /// <param name="end">The end point.</param>
         /// <param name="drawable">The drawable parent.</param>
-        public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, IAppearanceOptions appearance, IDrawable drawable)
+        public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, IAppearanceOptions appearance)
         {
-            builder.Line(start, end, appearance.CreatePathOptions(drawable));
+            builder.Line(start, end, appearance);
 
             // Draw the marker
             var normal = end - start;
@@ -303,7 +303,7 @@ namespace SimpleCircuit.Components
         /// <param name="minus">The center of the minus sign.</param>
         /// <param name="size">The size of the signs. The default is 2.</param>
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
-        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, GraphicOptions options, double size = 2, bool vertical = false)
+        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IAppearanceOptions appearance, GraphicOptions options, double size = 2, bool vertical = false)
         {
             // Plus sign
             builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), options);
@@ -311,9 +311,9 @@ namespace SimpleCircuit.Components
             // Minus sign
             size *= 0.5;
             if (vertical)
-                builder.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), options);
+                builder.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), appearance);
             else
-                builder.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), options);
+                builder.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), appearance);
         }
 
         /// <summary>
@@ -359,12 +359,12 @@ namespace SimpleCircuit.Components
         /// <param name="builder">The builder.</param>
         /// <param name="pin">The pin.</param>
         /// <param name="length">The length of the wire.</param>
-        public static void ExtendPin(this IGraphicsBuilder builder, IPin pin, IAppearanceOptions appearance, IDrawable drawable = null, double length = 2)
+        public static void ExtendPin(this IGraphicsBuilder builder, IPin pin, IAppearanceOptions appearance, double length = 2)
         {
             if (pin.Connections == 0)
             {
                 if (pin is FixedOrientedPin fop)
-                    builder.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, appearance.CreatePathOptions(drawable));
+                    builder.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, appearance);
                 else if (pin is FixedPin fp)
                 {
                     var marker = new Dot(fp.Offset, new(1, 0));
@@ -379,10 +379,10 @@ namespace SimpleCircuit.Components
         /// <param name="builder">The builder.</param>
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pin wire.</param>
-        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, IDrawable drawable = null, double length = 2)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, double length = 2)
         {
             foreach (var pin in pins)
-                builder.ExtendPin(pin, appearance, drawable, length);
+                builder.ExtendPin(pin, appearance, length);
         }
 
         /// <summary>
@@ -392,10 +392,10 @@ namespace SimpleCircuit.Components
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pins.</param>
         /// <param name="names">The names of the pins to extend.</param>
-        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, IDrawable drawable, double length, params string[] names)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, double length, params string[] names)
         {
             foreach (string name in names)
-                builder.ExtendPin(pins[name], appearance, drawable, length);
+                builder.ExtendPin(pins[name], appearance, length);
         }
 
         /// <summary>

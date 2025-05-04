@@ -122,8 +122,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 {
                     double a = _width * 0.5;
                     double b = _height * 0.5;
-                    builder.Line(new(-a + 3, -b), new(-a + 3, b));
-                    builder.Line(new(a - 3, -b), new(a - 3, b));
+                    builder.Line(new(-a + 3, -b), new(-a + 3, b), Appearance);
+                    builder.Line(new(a - 3, -b), new(a - 3, b), Appearance);
                 }
                 BoxLabelAnchorPoints.Default.Draw(builder, this);
             }

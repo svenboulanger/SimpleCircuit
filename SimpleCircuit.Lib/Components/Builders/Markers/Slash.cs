@@ -14,6 +14,6 @@ namespace SimpleCircuit.Components.Builders.Markers
     {
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
-            => builder.Line(new(-1, 2), new(1, -2), appearance.CreateMarkerOptions());
+            => builder.Line(new(-1, 2), new(1, -2), appearance);
     }
 }

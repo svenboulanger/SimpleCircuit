@@ -37,13 +37,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 {
                     case 0:
                         builder.Text("1", new(), new(0, -1), textAppearance);
-                        builder.Line(new(-2, 0), new(2, 0), textAppearance.CreatePathOptions());
+                        builder.Line(new(-2, 0), new(2, 0), textAppearance);
                         builder.Text("s", new(), new(0, 1), textAppearance);
                         break;
 
                     case 1:
                         builder.Text("1", new(0, -1), new(0, -1), textAppearance);
-                        builder.Line(new(-2, -1), new(2, -1), textAppearance.CreatePathOptions());
+                        builder.Line(new(-2, -1), new(2, -1), textAppearance);
                         builder.Text("z^{-1}", new(0, -1), new(0, 1), textAppearance);
                         break;
 

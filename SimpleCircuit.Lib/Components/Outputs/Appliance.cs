@@ -136,7 +136,7 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawOven(IGraphicsBuilder builder)
             {
                 DrawBox(builder, 8, 0, 16, 16);
-                builder.Line(new(0, -5), new(16, -5));
+                builder.Line(new(0, -5), new(16, -5), Appearance);
                 builder.Circle(new(8, 1.5), 2, new("marker"));
             }
             private void DrawWasher(IGraphicsBuilder builder)
@@ -170,7 +170,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDefault(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 DrawBox(builder, 8, 0, 16, 16);
             }
 

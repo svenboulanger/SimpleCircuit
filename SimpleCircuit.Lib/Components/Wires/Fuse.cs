@@ -57,7 +57,7 @@ namespace SimpleCircuit.Components.Wires
             }
             private void DrawIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
 
                 builder.Rectangle(-6, -3, 12, 6);
                 builder.Path(b => b.MoveTo(new(-3.5, -3)).Line(new(0, 6)).MoveTo(new(3.5, -3)).Line(new(0, 6)));
@@ -66,10 +66,10 @@ namespace SimpleCircuit.Components.Wires
             }
             private void DrawANSI(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
 
                 builder.Rectangle(-6, -3, 12, 6);
-                builder.Line(new(-6, 0), new(6, 0));
+                builder.Line(new(-6, 0), new(6, 0), Appearance);
 
                 _anchors.Draw(builder, this);
             }

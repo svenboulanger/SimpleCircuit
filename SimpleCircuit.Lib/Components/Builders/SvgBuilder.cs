@@ -62,7 +62,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
+        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -73,7 +73,7 @@ namespace SimpleCircuit.Components.Builders
             line.SetAttribute("y1", start.Y.ToSVG());
             line.SetAttribute("x2", end.X.ToSVG());
             line.SetAttribute("y2", end.Y.ToSVG());
-            options?.Apply(line);
+            line.SetAttribute("style", options.CreateStrokeStyle());
             _current.AppendChild(line);
 
             Expand(start, end);

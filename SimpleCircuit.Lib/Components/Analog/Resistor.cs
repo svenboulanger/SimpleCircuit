@@ -125,7 +125,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
@@ -165,14 +165,14 @@ namespace SimpleCircuit.Components.Analog
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor))
                 {
                     case 0:
-                        builder.Arrow(new(-5, w + 1), new(6, -w - 2), Appearance, this);
+                        builder.Arrow(new(-5, w + 1), new(6, -w - 2), Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
                         break;
 
                     case 1:
-                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance, this);
-                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance, this);
+                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance);
+                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
                         break;
 
@@ -196,21 +196,21 @@ namespace SimpleCircuit.Components.Analog
                 builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, options: options);
                 if (Variants.Contains(_x))
                 {
-                    builder.Line(new(-l, -w), new(l, w), options);
-                    builder.Line(new(-l, w), new(l, -w), options);
+                    builder.Line(new(-l, -w), new(l, w), Appearance);
+                    builder.Line(new(-l, w), new(l, -w), Appearance);
                 }
 
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor, _memristor))
                 {
                     case 0: // Programmable
-                        builder.Arrow(new(-5, w + 1), new(6, -w - 3), Appearance, this);
+                        builder.Arrow(new(-5, w + 1), new(6, -w - 3), Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
                         break;
 
                     case 1: // Photoresistor
-                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance, this);
-                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance, this);
+                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance);
+                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
                         break;
 

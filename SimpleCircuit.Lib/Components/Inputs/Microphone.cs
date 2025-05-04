@@ -40,11 +40,11 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Circle(new(), 4);
 
                 var appearance = new LineThicknessAppearance(Appearance, 1.0);
-                builder.Line(new(4, -4), new(4, 4), appearance.CreatePathOptions(this));
+                builder.Line(new(4, -4), new(4, 4), appearance);
                 _anchors.Draw(builder, this);
             }
         }

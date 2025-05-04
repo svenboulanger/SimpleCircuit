@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Polygon([
                     new(-5, -8),
                     new(5, -4),

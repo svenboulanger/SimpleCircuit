@@ -52,13 +52,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
-                var options = Appearance.CreatePathOptions(this);
+                builder.ExtendPins(Pins, Appearance);
 
                 // Transistor
-                builder.Arrow(new(-3, 4), new(-6, 0), Appearance, this);
-                builder.Line(new(3, 4), new(6, 0), options);
-                builder.Line(new(-6, 4), new(6, 4), options);
+                builder.Arrow(new(-3, 4), new(-6, 0), Appearance);
+                builder.Line(new(3, 4), new(6, 0), Appearance);
+                builder.Line(new(-6, 4), new(6, 4), Appearance);
 
                 // Package
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
@@ -94,13 +93,12 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
-                var options = Appearance.CreatePathOptions();
+                builder.ExtendPins(Pins, Appearance);
 
                 // Transistor
-                builder.Arrow(new(6, 0), new(3, 4), Appearance, this);
-                builder.Line(new(-3, 4), new(-6, 0), options);
-                builder.Line(new(-6, 4), new(6, 4), options);
+                builder.Arrow(new(6, 0), new(3, 4), Appearance);
+                builder.Line(new(-3, 4), new(-6, 0), Appearance);
+                builder.Line(new(-6, 4), new(6, 4), Appearance);
 
                 // Package
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);

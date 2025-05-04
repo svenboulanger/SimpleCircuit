@@ -142,7 +142,7 @@ namespace SimpleCircuit.Components.Digital
                 double xr = w - radius;
                 double h = Height * 0.5;
 
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Path(builder => builder
                     .MoveTo(new(-w, h))
                     .LineTo(new(xr, h))
@@ -156,7 +156,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawAndIEC(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, Appearance, this);
+                drawing.ExtendPins(Pins, Appearance);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: Appearance.CreatePathOptions(this));
                 drawing.Text("&amp;", new(), new(), Appearance);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);

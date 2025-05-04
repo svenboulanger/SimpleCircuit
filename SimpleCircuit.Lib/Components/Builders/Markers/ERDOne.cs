@@ -15,8 +15,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
-            var options = appearance.CreateMarkerOptions();
-            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);
+            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, appearance);
         }
     }
 }

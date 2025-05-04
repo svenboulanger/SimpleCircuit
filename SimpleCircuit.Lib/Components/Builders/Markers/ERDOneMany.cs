@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components.Builders.Markers
             options = appearance.CreateMarkerOptions();
 
             options.Style["fill"] = appearance.Background;
-            builder.Line(new(-3, -1.5), new(-3, 1.5), options);
+            builder.Line(new(-3, -1.5), new(-3, 1.5), appearance);
         }
     }
 }

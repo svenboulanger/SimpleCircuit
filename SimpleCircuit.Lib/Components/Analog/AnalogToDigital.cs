@@ -118,29 +118,29 @@ namespace SimpleCircuit.Components.Analog
             {
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(x, y), new(x, -y), _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance, _signAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(x, -y), new(x, y), _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance, _signAppearance.CreatePathOptions());
                 }
                 else
-                    builder.ExtendPin(Pins["in"], Appearance, this);
+                    builder.ExtendPin(Pins["in"], Appearance);
 
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 4, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, 4, "outp", "outn");
                     double x = Width / 2 - Height / 4 + 2;
                     double y = Height / 4 + 2.0;
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(x, y), new(x, -y), _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance, _signAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(x, -y), new(x, y), _signAppearance.CreatePathOptions());
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance, _signAppearance.CreatePathOptions());
                 }
                 else
-                    builder.ExtendPin(Pins["out"], Appearance, this);
+                    builder.ExtendPin(Pins["out"], Appearance);
 
                 builder.Polygon(
                 [

@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 if (!Variants.Contains(Options.Arei))
-                    builder.ExtendPins(Pins, Appearance, this);
+                    builder.ExtendPins(Pins, Appearance);
                 builder.Circle(new(), 5);
                 builder.Text("M", new(), new(), Appearance);
 
@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Outputs
                             .MoveTo(new(-6, -3))
                             .LineTo(new(-6, -5)),
                         new("plus"));
-                    builder.Line(new(5, -4), new(7, -4), new("minus"));
+                    builder.Line(new(5, -4), new(7, -4), Appearance);
                 }
 
                 _anchors.Draw(builder, this);

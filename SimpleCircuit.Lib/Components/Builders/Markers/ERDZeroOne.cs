@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Builders.Markers
             GraphicOptions options = appearance.CreateMarkerOptions();
             options.Style["fill"] = appearance.Background;
             builder.Circle(new(-11 * appearance.LineThickness, 0), 3 * appearance.LineThickness, options);
-            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);
+            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, appearance);
         }
     }
 }

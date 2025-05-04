@@ -138,7 +138,7 @@ namespace SimpleCircuit.Components.Digital
                 double xr = w - radius;
                 double h = Height * 0.5;
 
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Path(builder => builder
                     .MoveTo(new(-w, h))
                     .LineTo(new(xr, h))
@@ -153,7 +153,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawNandIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
                 builder.Text("&amp;", new(), new(), Appearance);

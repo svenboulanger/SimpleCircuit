@@ -134,30 +134,30 @@ namespace SimpleCircuit.Components.Analog
                 var markerAppearance = new LineMarkerAppearanceOptions(Appearance);
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-5.5, 4), new(-5.5, -4), markerAppearance.CreatePathOptions());
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4), Appearance, markerAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(-5.5, -4), new(-5.5, 4), markerAppearance.CreatePathOptions());
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4), Appearance, markerAppearance.CreatePathOptions());
                 }
                 else
-                    builder.ExtendPin(Pins["in"], Appearance, this);
+                    builder.ExtendPin(Pins["in"], Appearance);
 
                 // Differential output?
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, this, 5, "outp", "outn");
+                    builder.ExtendPins(Pins, Appearance, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, -7), new(6, 7), markerAppearance.CreatePathOptions());
+                        builder.Signs(new(6, -7), new(6, 7), Appearance, markerAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(6, 7), new(6, -7), markerAppearance.CreatePathOptions());
+                        builder.Signs(new(6, 7), new(6, -7), Appearance, markerAppearance.CreatePathOptions());
 
                     // Give more breathing room to the labels
                     _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1), Appearance);
                     _anchors[2] = new LabelAnchorPoint(new(2, -8.5), new(1, -1), Appearance);
                 }
                 else
-                    builder.ExtendPin(Pins["out"], Appearance, this);
+                    builder.ExtendPin(Pins["out"], Appearance);
 
                 // The main triangle
                 builder.Polygon(
@@ -170,7 +170,7 @@ namespace SimpleCircuit.Components.Analog
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-7, 10), new(4, -8.5), Appearance, this);
+                    builder.Arrow(new(-7, 10), new(4, -8.5), Appearance);
                     _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1), Appearance);
                 }
 

@@ -202,7 +202,7 @@ namespace SimpleCircuit.Components.Builders
             // Draw the line
             IAppearanceOptions appearance = new AppearanceOptions();
             ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
-            Line(new(x1, y1), new(x2, y2), appearance.CreatePathOptions());
+            Line(new(x1, y1), new(x2, y2), appearance);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), appearance);
             DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), appearance);
         }
@@ -449,7 +449,7 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder EndGroup();
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null);

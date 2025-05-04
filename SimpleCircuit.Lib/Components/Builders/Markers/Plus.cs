@@ -24,8 +24,8 @@ namespace SimpleCircuit.Components.Builders.Markers
             builder.BeginTransform(new(offset, builder.CurrentTransform.Matrix.Inverse));
             GraphicOptions options = appearance.CreateMarkerOptions();
             options.Style["stroke-width"] = $"{AppearanceOptions.DefaultLineThickness.ToSVG()}pt";
-            builder.Line(new(-1, 0), new(1, 0), options);
-            builder.Line(new(0, -1), new(0, 1), options);
+            builder.Line(new(-1, 0), new(1, 0), appearance);
+            builder.Line(new(0, -1), new(0, 1), appearance);
             builder.EndTransform();
         }
     }

@@ -27,8 +27,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 double s = Size * 0.5;
                 if (!Variants.Contains(Square))
                     s /= Math.Sqrt(2.0);
-                builder.Line(new(-s, -s), new(s, s));
-                builder.Line(new(-s, s), new(s, -s));
+                builder.Line(new(-s, -s), new(s, s), Appearance);
+                builder.Line(new(-s, s), new(s, -s), Appearance);
 
                 DrawLabels(builder);
             }

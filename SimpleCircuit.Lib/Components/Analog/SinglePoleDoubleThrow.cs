@@ -79,7 +79,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 2, "p", "t1", "t2");
+                builder.ExtendPins(Pins, Appearance, 2, "p", "t1", "t2");
 
                 // Terminals
                 builder.Circle(new(-5, 0), 1);
@@ -89,9 +89,9 @@ namespace SimpleCircuit.Components.Analog
                 // Switch position
                 switch (Variants.Select(_t1, _t2))
                 {
-                    case 0: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4)); break;
-                    case 1: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4)); break;
-                    default: builder.Line(new(-4, 0), new(5, 0)); break;
+                    case 0: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4), Appearance); break;
+                    case 1: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4), Appearance); break;
+                    default: builder.Line(new(-4, 0), new(5, 0), Appearance); break;
                 }
 
                 // Label

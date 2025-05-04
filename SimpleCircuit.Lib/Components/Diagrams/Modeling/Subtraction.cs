@@ -23,7 +23,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             {
                 base.Draw(builder);
                 double s = Size * 0.3;
-                builder.Line(new(-s, 0), new(s, 0));
+                builder.Line(new(-s, 0), new(s, 0), Appearance);
                 DrawLabels(builder);
             }
         }

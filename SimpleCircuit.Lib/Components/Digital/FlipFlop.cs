@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 2, "d", "c", "q");
+                builder.ExtendPins(Pins, Appearance, 2, "d", "c", "q");
 
                 // Body
                 builder.Rectangle(-9, -12, 18, 24, new());

@@ -38,7 +38,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
 
                 if (Variants.Contains(_anchor))
                     builder.Polyline([
@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components
                 else
                 {
                     var options = new LineThicknessAppearance(Appearance, 1.0);
-                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options.CreatePathOptions(this));
+                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options);
                 }
                 _anchors.Draw(builder, this);
             }

@@ -46,7 +46,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["a"], Appearance, this);
+                builder.ExtendPin(Pins["a"], Appearance);
                 builder.Path(b => b
                     .MoveTo(new(4, -4))
                     .ArcTo(4, 4, 0, true, false, new(4, 4)));
@@ -60,7 +60,7 @@ namespace SimpleCircuit.Components.Outputs
 
                 if (Multiple > 1)
                 {
-                    builder.Line(new(2.6, -1.4), new(-0.2, -4.2));
+                    builder.Line(new(2.6, -1.4), new(-0.2, -4.2), Appearance);
                     builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1), Appearance);
                 }
 
@@ -68,7 +68,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawProtectiveConnection(IGraphicsBuilder builder)
             {
-                builder.Line(new(0, 4), new(0, -4), new("earth"));
+                builder.Line(new(0, 4), new(0, -4), Appearance);
             }
             private void DrawChildProtection(IGraphicsBuilder builder)
             {

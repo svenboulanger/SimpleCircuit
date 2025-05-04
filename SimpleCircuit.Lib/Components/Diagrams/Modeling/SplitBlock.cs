@@ -36,7 +36,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 double s = Size * 0.5;
                 if (!Variants.Contains(Square))
                     s *= 0.70710678118;
-                builder.Line(new(-s, s), new(s, -s));
+                builder.Line(new(-s, s), new(s, -s), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new(), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new(), Appearance);

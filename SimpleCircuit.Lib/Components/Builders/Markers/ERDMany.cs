@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         {
             var options = appearance.CreateMarkerOptions();
             builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), options);
-            builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), options);
+            builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), appearance);
         }
     }
 }

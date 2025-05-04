@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Wires
             private void DrawRegular(IGraphicsBuilder builder)
             {
                 // ANSI style circuit breaker
-                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 builder.Path(b => b
                     .MoveTo(new(-4, -2))
@@ -91,9 +91,9 @@ namespace SimpleCircuit.Components.Wires
             private void DrawCircuitBreakerIec(IGraphicsBuilder builder)
             {
                 // IEC style circuit breaker
-                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
-                builder.Line(new(-4, 0), new(4, -4));
+                builder.Line(new(-4, 0), new(4, -4), Appearance);
                 builder.Cross(new(4, 0), 2);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance);
@@ -104,10 +104,10 @@ namespace SimpleCircuit.Components.Wires
             private void DrawCircuitBreakerArei(IGraphicsBuilder builder)
             {
                 // AREI style circuit breaker
-                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
-                builder.Line(new(-6, 0), new(-4, 0), new("wire"));
-                builder.Line(new(-4, 0), new(4, -4));
+                builder.Line(new(-6, 0), new(-4, 0), Appearance);
+                builder.Line(new(-4, 0), new(4, -4), Appearance);
 
                 builder.RequiredCSS.Add(".marker { fill: black; }");
                 builder.Polygon(

@@ -61,23 +61,23 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
 
                 double h = 0.5 * Height;
                 double w = 0.5 * Gap;
                 switch (Variants.Select(_straight, _none))
                 {
                     case 0:
-                        builder.Line(new(-w, -h), new(-w, h));
-                        builder.Line(new(w, -h), new(w, h));
+                        builder.Line(new(-w, -h), new(-w, h), Appearance);
+                        builder.Line(new(w, -h), new(w, h), Appearance);
                         break;
 
                     case 1:
                         break;
 
                     default:
-                        builder.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h));
-                        builder.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h));
+                        builder.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h), Appearance);
+                        builder.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h), Appearance);
                         break;
                 }
 

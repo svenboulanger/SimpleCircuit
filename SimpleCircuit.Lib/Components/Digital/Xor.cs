@@ -144,7 +144,7 @@ namespace SimpleCircuit.Components.Digital
             }
             private void DrawXor(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
 
                 double w = Width * 0.5;
                 double h = Height * 0.5;
@@ -164,7 +164,7 @@ namespace SimpleCircuit.Components.Digital
 
             private void DrawXorIEC(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 builder.Text("=1", new(), new(), Appearance);
 

@@ -88,15 +88,15 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 4, "s", "d");
-                builder.ExtendPin(Pins["g"], Appearance, this);
+                builder.ExtendPins(Pins, Appearance, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
                 builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
 
                 // Source and drain
-                builder.Line(new(-4, 0), new(-4, 4), new("source"));
-                builder.Line(new(4, 0), new(4, 4), new("drain"));
+                builder.Line(new(-4, 0), new(-4, 4), Appearance);
+                builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
                     builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
@@ -116,8 +116,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, Appearance, this, 3, "s", "d");
-                drawing.ExtendPin(Pins["g"], Appearance, this);
+                drawing.ExtendPins(Pins, Appearance, 3, "s", "d");
+                drawing.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
@@ -126,8 +126,8 @@ namespace SimpleCircuit.Components.Analog
                     .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
 
                 // Drain, source and gate
-                drawing.Line(new(-5, 0), new(-5, 4), new("source"));
-                drawing.Line(new(5, 0), new(5, 4), new("drain"));
+                drawing.Line(new(-5, 0), new(-5, 4), Appearance);
+                drawing.Line(new(5, 0), new(5, 4), Appearance);
                 drawing.Polyline([
                     new(-5, 0),
                     new(0, 0),
@@ -205,16 +205,16 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 4, "s", "d");
-                builder.ExtendPin(Pins["g"], Appearance, this);
+                builder.ExtendPins(Pins, Appearance, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
                 builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
                 builder.Circle(new Vector2(0, 7.5), 1.5);
 
                 // Source and drain
-                builder.Line(new(-4, 0), new(-4, 4), new("source"));
-                builder.Line(new(4, 0), new(4, 4), new("drain"));
+                builder.Line(new(-4, 0), new(-4, 4), Appearance);
+                builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
                     builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
@@ -234,8 +234,8 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
-                drawing.ExtendPins(Pins, Appearance, this, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"], Appearance, this);
+                drawing.ExtendPins(Pins, Appearance, 4, "s", "d");
+                drawing.ExtendPin(Pins["g"], Appearance);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
@@ -244,10 +244,10 @@ namespace SimpleCircuit.Components.Analog
                     .MoveTo(new(4, 4)).LineTo(new(7, 4)), new("gate"));
 
                 // Drain, source and gate
-                drawing.Line(new(-5, 0), new(-5, 4), new("source"));
-                drawing.Line(new(5, 0), new(5, 4), new("drain"));
-                drawing.Arrow(new(0, 4), new(0, 0), Appearance, this);
-                drawing.Line(new(0, 0), new(-5, 0), new("bulk"));
+                drawing.Line(new(-5, 0), new(-5, 4), Appearance);
+                drawing.Line(new(5, 0), new(5, 4), Appearance);
+                drawing.Arrow(new(0, 4), new(0, 0), Appearance);
+                drawing.Line(new(0, 0), new(-5, 0), Appearance);
 
                 // Packaged
                 drawing.Circle(new(0, 3), 8.0);

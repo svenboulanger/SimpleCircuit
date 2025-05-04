@@ -61,7 +61,7 @@ namespace SimpleCircuit.Components.Builders
         public override IGraphicsBuilder EndGroup() => this;
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null)
+        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options = null)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);

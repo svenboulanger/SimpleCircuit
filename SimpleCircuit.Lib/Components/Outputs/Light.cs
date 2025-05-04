@@ -99,7 +99,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawWall(IGraphicsBuilder builder)
             {
-                builder.Line(new Vector2(-3, 5), new Vector2(3, 5));
+                builder.Line(new Vector2(-3, 5), new Vector2(3, 5), Appearance);
                 if (_anchors[1].Location.Y < 6)
                     _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
             }
@@ -119,13 +119,13 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (diverging)
                 {
-                    builder.Arrow(new(-2, 6), new(-6, 12), Appearance, this);
-                    builder.Arrow(new(2, 6), new(6, 12), Appearance, this);
+                    builder.Arrow(new(-2, 6), new(-6, 12), Appearance);
+                    builder.Arrow(new(2, 6), new(6, 12), Appearance);
                 }
                 else
                 {
-                    builder.Arrow(new(-2, 6), new(-2, 12), Appearance, this);
-                    builder.Arrow(new(2, 6), new(2, 12), Appearance, this);
+                    builder.Arrow(new(-2, 6), new(-2, 12), Appearance);
+                    builder.Arrow(new(2, 6), new(2, 12), Appearance);
                 }
                 if (_anchors[1].Location.Y < 13)
                     _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1), Appearance);

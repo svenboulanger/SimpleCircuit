@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="end">The end.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Line(Vector2 start, Vector2 end, GraphicOptions options = null);
+        public IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options);
 
         /// <summary>
         /// Draws a circle.

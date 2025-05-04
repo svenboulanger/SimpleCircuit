@@ -106,36 +106,36 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         builder.AC(new(0, -s * 1.5), s);
                         builder.AC(new(0, 0), s);
                         builder.AC(new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2));
-                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5));
+                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), Appearance);
+                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), Appearance);
                         break;
 
                     case 1:
                         builder.AC(new(0, -s * 1.5), s);
                         builder.AC(new(0, 0), s);
                         builder.AC(new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2));
-                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s));
+                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), Appearance);
+                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), Appearance);
                         break;
 
                     case 2:
                         builder.AC(new(0, -s * 1.5), s);
                         builder.AC(new(0, 0), s);
                         builder.AC(new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5));
-                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s));
+                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), Appearance);
+                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), Appearance);
                         break;
 
                     case 3:
                         builder.AC(new(0, -s), s);
                         builder.AC(new(0, s), s);
-                        builder.Line(new(-s * 0.5, -s * 0.5), new(s * 0.5, -s * 1.5));
+                        builder.Line(new(-s * 0.5, -s * 0.5), new(s * 0.5, -s * 1.5), Appearance);
                         break;
 
                     case 4:
                         builder.AC(new(0, -s), s);
                         builder.AC(new(0, s), s);
-                        builder.Line(new(-s * 0.5, s * 1.5), new(s * 0.5, s * 0.5));
+                        builder.Line(new(-s * 0.5, s * 1.5), new(s * 0.5, s * 0.5), Appearance);
                         break;
 
                     default:

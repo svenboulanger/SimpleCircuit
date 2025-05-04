@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this);
+                builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-2, -4, 4, 8);
                 builder.Polygon([
                     new(2, -4),

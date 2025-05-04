@@ -149,14 +149,14 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.Circle(new(-5, 0), 1);
                     builder.Circle(new(5, 0), 1);
-                    builder.Line(new(-4, 0), new(4, 0), new("wire"));
-                    builder.Line(new(0, 2), new(0, -2));
+                    builder.Line(new(-4, 0), new(4, 0), Appearance);
+                    builder.Line(new(0, 2), new(0, -2), Appearance);
                 }
                 else
                 {
-                    builder.Polyline(new Vector2[] { new(-6, 0), new(-4, 0), new(2, -4) }, new("wire"));
-                    builder.Line(new(4, 0), new(6, 0), new("wire"));
-                    builder.Line(new(-0.5, -4), new(1.5, -1.5));
+                    builder.Polyline([new(-6, 0), new(-4, 0), new(2, -4)], new("wire"));
+                    builder.Line(new(4, 0), new(6, 0), Appearance);
+                    builder.Line(new(-0.5, -4), new(1.5, -1.5), Appearance);
                 }
 
                 _anchors[0] = new LabelAnchorPoint(new(3, -3), new(1, -1), Appearance);
@@ -164,7 +164,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegularSwitch(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, this, 2, "a", "b");
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 // Switch terminals
                 builder.Circle(new Vector2(-5, 0), 1);
@@ -179,13 +179,13 @@ namespace SimpleCircuit.Components.Analog
                         builder.Circle(new(0, -1), 1);
                         _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1), Appearance);
                     }
-                    builder.Line(new(-4, 0), new(4, 0), new("wire"));
+                    builder.Line(new(-4, 0), new(4, 0), Appearance);
                 }
                 else
                 {
                     if (Variants.Contains(_invert))
                         builder.Circle(new(0, -3.25), 1);
-                    builder.Line(new(-4, 0), new(4, -4), new("wire"));
+                    builder.Line(new(-4, 0), new(4, -4), Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 }
 
@@ -241,18 +241,18 @@ namespace SimpleCircuit.Components.Analog
 
                 if (Variants.Contains(_closed))
                 {
-                    builder.Line(new(-4, 0), new(4, 0));
+                    builder.Line(new(-4, 0), new(4, 0), Appearance);
                     if (Variants.Contains(_invert))
                     {
                         builder.Circle(new(0, -1), 1);
-                        builder.Line(new(0, -2), new(0, -6), new("wire"));
+                        builder.Line(new(0, -2), new(0, -6), Appearance);
                     }
                     else
-                        builder.Line(new(0, 0), new(0, -6), new("wire"));
+                        builder.Line(new(0, 0), new(0, -6), Appearance);
                 }
                 else
                 {
-                    builder.Line(new(-5, -4), new(5, -4));
+                    builder.Line(new(-5, -4), new(5, -4), Appearance);
                     if (Variants.Contains(_invert))
                     {
                         builder.Circle(new(0, -5), 1);
@@ -261,7 +261,7 @@ namespace SimpleCircuit.Components.Analog
                     }
                     else
                     {
-                        builder.Line(new(0, -4), new(0, -6), new("wire"));
+                        builder.Line(new(0, -4), new(0, -6), Appearance);
                         if (_anchors[0].Location.Y > -7)
                             _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     }
@@ -280,7 +280,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawAreiPushSwitch(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["a"], Appearance, this);
+                builder.ExtendPin(Pins["a"], Appearance);
                 builder.Circle(new(), 4);
                 builder.Circle(new(), 2);
 
@@ -312,15 +312,15 @@ namespace SimpleCircuit.Components.Analog
                 double length = Math.Max(8, 5 + Math.Max(1, Poles) * 2);
                 builder.Circle(new(), 2);
                 var n = Vector2.Normal(-Math.PI * 0.37);
-                builder.Line(n * 2, n * length);
+                builder.Line(n * 2, n * length, Appearance);
                 if (Variants.Contains(_toggle))
-                    builder.Line(-n * 2, -n * length);
+                    builder.Line(-n * 2, -n * length, Appearance);
                 if (Variants.Contains(_double))
                 {
                     Vector2 np = new(-n.X, n.Y);
-                    builder.Line(np * 2, np * length);
+                    builder.Line(np * 2, np * length, Appearance);
                     if (Variants.Contains(_toggle))
-                        builder.Line(-np * 2, -np * length);
+                        builder.Line(-np * 2, -np * length, Appearance);
                 }
 
                 // Label
