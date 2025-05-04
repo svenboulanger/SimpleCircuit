@@ -247,7 +247,7 @@ namespace SimpleCircuit.Components.Builders
             ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             // Draw the polyline
-            Polyline(points, appearance.CreatePathOptions());
+            Polyline(points, appearance);
             if (points.Count > 1)
             {
                 DrawMarkers(startMarkers, points[0], points[1] - points[0], appearance);
@@ -455,7 +455,7 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null);

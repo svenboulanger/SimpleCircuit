@@ -132,7 +132,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-5, 0),
                     new(0, 0),
                     new(0, 4)
-                ], new("bulk"));
+                ], Appearance);
 
                 var marker = new Arrow(new(0, 4), new(0, 1));
                 marker.Draw(drawing, Appearance);

@@ -59,12 +59,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s),
                             new(-s, s),
                             new(s, s)
-                        ]);
+                        ], Appearance);
                         builder.Polyline([
                             new(-s, -s * 0.6),
                             new(s * 0.1, -s * 0.6),
                             new(s * 0.6, s)
-                        ]);
+                        ], Appearance);
                         break;
 
                     case 1:
@@ -72,13 +72,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s),
                             new(-s, s),
                             new(s, s)
-                        ]);
+                        ], Appearance);
                         builder.Polyline([
                             new(-s, s),
                             new(-s * 0.45, -s * 0.6),
                             new(s * 0.15, -s * 0.6),
                             new(s * 0.6, s)
-                        ]);
+                        ], Appearance);
                         break;
 
                     case 2:
@@ -87,12 +87,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s), 
                             new(-s, s), 
                             new(s, s)
-                        ]);
+                        ], Appearance);
                         builder.Polyline([
                             new(-s, s), 
                             new(-s * 0.1, -s * 0.6), 
                             new(s * 0.6, -s * 0.6)
-                        ]);
+                        ], Appearance);
                         break;
                 }
             }

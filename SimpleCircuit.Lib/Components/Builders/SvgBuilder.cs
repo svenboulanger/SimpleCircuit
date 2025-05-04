@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -115,7 +115,7 @@ namespace SimpleCircuit.Components.Builders
 
             // Creates the poly
             var poly = _document.CreateElement("polyline", Namespace);
-            options?.Apply(poly);
+            poly.SetAttribute("style", options.CreateStrokeStyle());
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
             return this;

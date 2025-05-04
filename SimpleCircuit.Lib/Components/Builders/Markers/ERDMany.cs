@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
             var options = appearance.CreateMarkerOptions();
-            builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), options);
+            builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), appearance);
             builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), appearance);
         }
     }

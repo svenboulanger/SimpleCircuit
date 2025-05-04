@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 0), new(-3, 3), new(0, 3), new(0, -3), new(3, -3), new(3, 0)
-                        ]);
+                        ], Appearance);
                         builder.EndTransform();
                         break;
 
@@ -121,7 +121,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 0), new(-1.5, 1.5), new(1.5, -1.5), new(3, 0)
-                        ]);
+                        ], Appearance);
                         builder.EndTransform();
                         break;
 
@@ -130,7 +130,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 3), new(-1, 3), new(-1, -3), new(1, -3), new(1, 3), new(3, 3)
-                        ]);
+                        ], Appearance);
                         builder.EndTransform();
                         break;
 
@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 3), new(-1.5, 3), new(-1.5, -3), new(3, -3)
-                        ]);
+                        ], Appearance);
                         builder.EndTransform();
                         break;
 

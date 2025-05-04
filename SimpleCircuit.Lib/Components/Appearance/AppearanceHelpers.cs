@@ -92,6 +92,7 @@ namespace SimpleCircuit.Components.Appearance
             style.Append($"stroke-width: {appearance.LineThickness.ToSVG()}pt; ");
             style.Append("stroke-linecap: round; ");
             style.Append("stroke-linejoin: round; ");
+            style.Append("fill: none;");
 
             return style.ToString();
         }

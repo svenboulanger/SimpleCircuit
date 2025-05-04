@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components.Analog
                 }
                 x += increment * 0.5;
                 points.Add(new(x, 0));
-                builder.Polyline(points);
+                builder.Polyline(points, Appearance);
 
 
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor))
@@ -180,7 +180,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Polyline(
                         [
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
-                        ]);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(-3, w + 3), new(1, 1), Appearance);
                         break;
@@ -218,7 +218,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Polyline(
                         [
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
-                        ], options);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 2), new(1, 1), Appearance);
                         break;
@@ -232,7 +232,7 @@ namespace SimpleCircuit.Components.Analog
                             new(-l + 5 * t, -w * 0.5), new(-l + 5 * t, w * 0.5),
                             new(-l + 8 * t, w * 0.5), new(-l + 8 * t, -w * 0.5),
                             new(-l + 11 * t, -w * 0.5), new(-l + 11 * t, 0), new(-l + t * 13, 0)
-                        ], options);
+                        ], Appearance);
                         break;
                 }
             }

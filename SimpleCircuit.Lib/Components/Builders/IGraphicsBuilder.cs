@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="points">The points.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null);
+        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <summary>
         /// Draws a polygon.

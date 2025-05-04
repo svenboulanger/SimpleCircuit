@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components
                         new(-4, 4),
                         new(),
                         new(4, 4)
-                    ], Appearance.CreatePathOptions(this));
+                    ], Appearance);
                 else
                 {
                     var options = new LineThicknessAppearance(Appearance, 1.0);

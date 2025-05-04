@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         {
             var options = appearance.CreateMarkerOptions();
             
-            builder.Polyline(_points, options);
+            builder.Polyline(_points, appearance);
             options = appearance.CreateMarkerOptions();
 
             options.Style["fill"] = appearance.Background;

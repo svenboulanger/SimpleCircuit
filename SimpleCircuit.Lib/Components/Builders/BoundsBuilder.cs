@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options = null)
         {
             foreach (var pt in points)
             {

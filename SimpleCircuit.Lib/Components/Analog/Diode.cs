@@ -183,7 +183,7 @@ namespace SimpleCircuit.Components.Analog
                             new(2, -4),
                             new(4, -4),
                             new(4, 4)
-                        ], new("cathode"));
+                        ], Appearance);
                         break;
 
                     case 1:
@@ -192,7 +192,7 @@ namespace SimpleCircuit.Components.Analog
                             new(4, -4),
                             new(4, 4),
                             new(6, 5)
-                        ], new("cathode"));
+                        ], Appearance);
                         if (_anchors[0].Location.Y > -6)
                             _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 6)
@@ -205,7 +205,7 @@ namespace SimpleCircuit.Components.Analog
                             new(4, -4),
                             new(4, 4),
                             new(6, 4)
-                        ], new("cathode"));
+                        ], Appearance);
                         break;
                 }
             }
@@ -222,7 +222,7 @@ namespace SimpleCircuit.Components.Analog
                     new(4, -4),
                     new(4, 4),
                     new(2, 4)
-                ], new("cathode"));
+                ], Appearance);
             }
             private void DrawSchottkyDiode(IGraphicsBuilder builder)
             {
@@ -239,7 +239,7 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 4),
                     new(2, 4),
                     new(2, 3)
-                ], new("cathode"));
+                ], Appearance);
             }
             private void DrawShockleyDiode(IGraphicsBuilder builder)
             {
@@ -303,7 +303,7 @@ namespace SimpleCircuit.Components.Analog
                     new(4, -4),
                     new(4, 4),
                     new(6, 5)
-                ], new("cathode"));
+                ], Appearance);
                 if (_anchors[1].Location.Y < 6)
                     _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
             }

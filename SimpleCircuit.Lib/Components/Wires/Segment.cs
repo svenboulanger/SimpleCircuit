@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Wires
                     new(-3, -5),
                     new(3, -5),
                     new(3, -2)
-                ]);
+                ], Appearance);
                 builder.Line(new(0, -2), new(0, -5), Appearance);
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
@@ -119,7 +119,7 @@ namespace SimpleCircuit.Components.Wires
                     new(-3, 2), 
                     new(3, 2), 
                     new(3, 5)
-                ]);
+                ], Appearance);
                 builder.Line(new(0, 5), new(0, 2), Appearance);
                 if (_anchors[0].Location.Y > -1)
                     _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);

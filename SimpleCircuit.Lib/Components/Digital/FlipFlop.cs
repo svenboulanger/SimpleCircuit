@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-9, 4),
                     new Vector2(-7, 6),
                     new Vector2(-9, 8)
-                ], Appearance.CreatePathOptions(this));
+                ], Appearance);
                 builder.Text("D", new Vector2(-8, -6), new Vector2(1, 0), textAppearance);
                 builder.Text("C", new Vector2(-6, 6), new Vector2(1, 0), textAppearance);
                 builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0), textAppearance);

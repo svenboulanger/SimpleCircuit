@@ -91,7 +91,7 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-4, 4),
                                     new(),
                                     new(-4, -4)
-                                ]);
+                                ], Appearance);
                                 if (Pins["p"].Connections > 0)
                                 {
                                     _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1), Appearance);
@@ -109,7 +109,7 @@ namespace SimpleCircuit.Components.Inputs
                                     new(4, 4),
                                     new(),
                                     new(4, -4)
-                                ]);
+                                ], Appearance);
                                 if (Pins["p"].Connections > 0)
                                 {
                                     _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1), Appearance);
@@ -127,12 +127,12 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-6, 4),
                                     new(-2, 0),
                                     new(-6, -4)
-                                ]);
+                                ], Appearance);
                                 builder.Polyline([
                                     new(-2, 4),
                                     new(2, 0),
                                     new(-2, -4)
-                                ]);
+                                ], Appearance);
                                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                                 break;

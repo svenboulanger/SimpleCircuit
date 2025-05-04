@@ -154,7 +154,7 @@ namespace SimpleCircuit.Components.Analog
                 }
                 else
                 {
-                    builder.Polyline([new(-6, 0), new(-4, 0), new(2, -4)], new("wire"));
+                    builder.Polyline([new(-6, 0), new(-4, 0), new(2, -4)], Appearance);
                     builder.Line(new(4, 0), new(6, 0), Appearance);
                     builder.Line(new(-0.5, -4), new(1.5, -1.5), Appearance);
                 }
@@ -302,7 +302,7 @@ namespace SimpleCircuit.Components.Analog
                         new(4.5, 6),
                         new(4.5, 2.5),
                         new(6.5, 2.5)
-                    ], new("window"));
+                    ], Appearance);
                     if (_anchors[1].Location.Y < 7)
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 }

@@ -119,7 +119,7 @@ namespace SimpleCircuit.Components.Analog
                             new(-6, 6),
                             new(-4, 6),
                             new(4, -6)
-                        ], options);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                         _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                         break;

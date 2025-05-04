@@ -24,7 +24,7 @@ namespace SimpleCircuit.Components.Builders.Markers
             GraphicOptions options = appearance.CreateMarkerOptions();
             options.Style["fill"] = appearance.Background;
             
-            builder.Polyline(_points.Select(p => p * appearance.LineThickness), options);
+            builder.Polyline(_points.Select(p => p * appearance.LineThickness), appearance);
             builder.Circle(new Vector2(-9, 0) * appearance.LineThickness, 1.5, appearance);
         }
     }
