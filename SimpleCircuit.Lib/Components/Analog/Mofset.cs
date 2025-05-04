@@ -138,7 +138,7 @@ namespace SimpleCircuit.Components.Analog
                 marker.Draw(drawing, Appearance);
 
                 // Packaged
-                drawing.Circle(new(0, 3), 8.0);
+                drawing.Circle(new(0, 3), 8.0, Appearance);
 
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);
@@ -210,7 +210,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // Gate
                 builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), new("gate"));
-                builder.Circle(new Vector2(0, 7.5), 1.5);
+                builder.Circle(new Vector2(0, 7.5), 1.5, Appearance);
 
                 // Source and drain
                 builder.Line(new(-4, 0), new(-4, 4), Appearance);
@@ -250,7 +250,7 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(0, 0), new(-5, 0), Appearance);
 
                 // Packaged
-                drawing.Circle(new(0, 3), 8.0);
+                drawing.Circle(new(0, 3), 8.0, Appearance);
 
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);

@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="radius">The radius.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null);
+        public IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options);
 
         /// <summary>
         /// Draws a polyline.

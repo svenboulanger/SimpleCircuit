@@ -76,7 +76,7 @@ namespace SimpleCircuit.Components
                 if (Variants.Contains(_protective))
                 {
                     drawing.ExtendPins(Pins, Appearance, 7.5);
-                    drawing.Circle(new(0, -1), 6.5, new("shield"));
+                    drawing.Circle(new(0, -1), 6.5, Appearance);
                     if (_anchors[0].Location.X > -7.5) 
                         _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0), Appearance);
                     if (_anchors[1].Location.X < 7.5)

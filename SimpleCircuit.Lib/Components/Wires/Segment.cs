@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Wires
             }
             private void DrawAir(IGraphicsBuilder builder)
             {
-                builder.Circle(new(), 2);
+                builder.Circle(new(), 2, Appearance);
                 if (_anchors[0].Location.Y > -3)
                     _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 3)
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Wires
             }
             private void DrawTube(IGraphicsBuilder builder)
             {
-                builder.Circle(new(0, -3.5), 1.5);
+                builder.Circle(new(0, -3.5), 1.5, Appearance);
                 if (_anchors[0].Location.Y > -6)
                     _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)

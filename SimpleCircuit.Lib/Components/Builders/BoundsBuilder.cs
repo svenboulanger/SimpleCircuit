@@ -31,13 +31,14 @@ namespace SimpleCircuit.Components.Builders
         public override IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false) => this;
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null)
+        public override IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             center = CurrentTransform.Apply(center);
+            double m = options.LineThickness * 0.5;
             Expand(
-                center - new Vector2(radius, radius),
-                center + new Vector2(radius, radius));
+                center - new Vector2(radius + m, radius + m),
+                center + new Vector2(radius + m, radius + m));
             return this;
         }
 
@@ -48,11 +49,11 @@ namespace SimpleCircuit.Components.Builders
             double ky = ry * 0.552284749831;
             BeginTransform(new Transform(center, Matrix2.Identity));
             Path(b => b.MoveTo(new(-rx, 0))
-            .CurveTo(new(-rx, -ky), new(-kx, -ry), new(0, -ry))
-            .CurveTo(new(kx, -ry), new(rx, -ky), new(rx, 0))
-            .CurveTo(new(rx, ky), new(kx, ry), new(0, ry))
-            .CurveTo(new(-kx, ry), new(-rx, ky), new(-rx, 0)).Close(),
-            options);
+                .CurveTo(new(-rx, -ky), new(-kx, -ry), new(0, -ry))
+                .CurveTo(new(kx, -ry), new(rx, -ky), new(rx, 0))
+                .CurveTo(new(rx, ky), new(kx, ry), new(0, ry))
+                .CurveTo(new(-kx, ry), new(-rx, ky), new(-rx, 0)).Close(),
+                options);
             EndTransform();
             return this;
         }

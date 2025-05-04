@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components
                         break;
 
                     default:
-                        builder.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
+                        builder.Circle(new Vector2(-1.5, 0), 1.5, Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-4, 0), new(-1, 0), Appearance);
                         break;
                 }

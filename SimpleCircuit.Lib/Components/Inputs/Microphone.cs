@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components.Inputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
-                builder.Circle(new(), 4);
+                builder.Circle(new(), 4, Appearance);
 
                 var appearance = new LineThicknessAppearance(Appearance, 1.0);
                 builder.Line(new(4, -4), new(4, 4), appearance);

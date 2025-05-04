@@ -81,7 +81,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null)
+        public override IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             center = CurrentTransform.Apply(center);
@@ -91,7 +91,7 @@ namespace SimpleCircuit.Components.Builders
             circle.SetAttribute("cx", center.X.ToSVG());
             circle.SetAttribute("cy", center.Y.ToSVG());
             circle.SetAttribute("r", radius.ToSVG());
-            options?.Apply(circle);
+            circle.SetAttribute("style", options.CreateStrokeFillStyle());
             _current.AppendChild(circle);
 
             Expand(

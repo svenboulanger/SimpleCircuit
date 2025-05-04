@@ -38,9 +38,9 @@ namespace SimpleCircuit.Components.Inputs
             {
                 builder.ExtendPin(Pins["p"], Appearance, 4);
                 builder.ExtendPin(Pins["n"], Appearance);
-                builder.Circle(new(), 1.5);
-                builder.Circle(new(), 4);
-                builder.Circle(new(4, 0), 1, new("marker"));
+                builder.Circle(new(), 1.5, Appearance);
+                builder.Circle(new(), 4, Appearance);
+                builder.Circle(new(4, 0), 1, Appearance);
 
                 _anchors.Draw(builder, this);
             }

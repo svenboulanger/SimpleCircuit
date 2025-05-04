@@ -276,7 +276,7 @@ namespace SimpleCircuit.Components.Builders
             ParseAppearanceOptions(appearance, node);
 
             // Draw the circle
-            Circle(new(cx, cy), r, appearance.CreatePathOptions());
+            Circle(new(cx, cy), r, appearance);
         }
 
         private void DrawXmlPath(XmlNode node)
@@ -452,7 +452,7 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Circle(Vector2 center, double radius, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, GraphicOptions options = null);

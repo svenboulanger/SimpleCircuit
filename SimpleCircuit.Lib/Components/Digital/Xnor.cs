@@ -157,7 +157,7 @@ namespace SimpleCircuit.Components.Digital
                     .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h))
                     .MoveTo(new(-w * 1.3, h))
                     .CurveTo(new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)));
-                builder.Circle(new(w + 1.5, 0), 1.5);
+                builder.Circle(new(w + 1.5, 0), 1.5, Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
@@ -167,7 +167,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
                 builder.Text("=1", new(), new(), Appearance);
-                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

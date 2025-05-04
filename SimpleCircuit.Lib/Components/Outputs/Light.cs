@@ -81,7 +81,7 @@ namespace SimpleCircuit.Components.Outputs
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
 
                 if (!Variants.Contains(Options.Arei))
-                    builder.Circle(new Vector2(), 4);
+                    builder.Circle(new Vector2(), 4, Appearance);
                 else
                 {
                     if (Variants.Contains(_wall))
@@ -132,7 +132,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawEmergency(IGraphicsBuilder builder)
             {
-                builder.Circle(new(), 1.5, new("dot"));
+                builder.Circle(new(), 1.5, Appearance);
             }
         }
     }

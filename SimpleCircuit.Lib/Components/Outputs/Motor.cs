@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (!Variants.Contains(Options.Arei))
                     builder.ExtendPins(Pins, Appearance);
-                builder.Circle(new(), 5);
+                builder.Circle(new(), 5, Appearance);
                 builder.Text("M", new(), new(), Appearance);
 
                 if (Variants.Contains(_signs))

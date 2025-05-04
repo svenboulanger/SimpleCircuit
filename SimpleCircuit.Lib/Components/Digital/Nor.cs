@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Digital
                     .CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0))
                     .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h))
                     .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)));
-                builder.Circle(new(w + 1.5, 0), 1.5);
+                builder.Circle(new(w + 1.5, 0), 1.5, Appearance);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
             private void DrawNorIEC(IGraphicsBuilder builder)
@@ -160,7 +160,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
                 builder.Text("&#8805;1", new(), new(), Appearance);
-                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }

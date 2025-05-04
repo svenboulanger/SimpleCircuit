@@ -63,7 +63,7 @@ namespace SimpleCircuit.Components.Analog
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (Variants.Contains(_packaged))
                 {
-                    builder.Circle(new(), 8.0);
+                    builder.Circle(new(), 8.0, Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
                 _anchors.Draw(builder, Labels);
@@ -104,7 +104,7 @@ namespace SimpleCircuit.Components.Analog
                 _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (Variants.Contains(_packaged))
                 {
-                    builder.Circle(new(), 8.0);
+                    builder.Circle(new(), 8.0, Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
                 _anchors.Draw(builder, Labels);

@@ -147,7 +147,7 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close()
                 );
-                builder.Circle(new Vector2(w + 1.5, 0), 1.5);
+                builder.Circle(new Vector2(w + 1.5, 0), 1.5, Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
             }
@@ -155,7 +155,7 @@ namespace SimpleCircuit.Components.Digital
             {
                 builder.ExtendPins(Pins, Appearance);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
-                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5);
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
                 builder.Text("&amp;", new(), new(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);

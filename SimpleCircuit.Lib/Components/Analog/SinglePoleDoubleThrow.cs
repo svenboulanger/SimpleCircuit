@@ -82,9 +82,9 @@ namespace SimpleCircuit.Components.Analog
                 builder.ExtendPins(Pins, Appearance, 2, "p", "t1", "t2");
 
                 // Terminals
-                builder.Circle(new(-5, 0), 1);
-                builder.Circle(new(5, 4), 1);
-                builder.Circle(new(5, -4), 1);
+                builder.Circle(new(-5, 0), 1, Appearance);
+                builder.Circle(new(5, 4), 1, Appearance);
+                builder.Circle(new(5, -4), 1, Appearance);
 
                 // Switch position
                 switch (Variants.Select(_t1, _t2))

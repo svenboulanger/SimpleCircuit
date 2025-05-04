@@ -147,8 +147,8 @@ namespace SimpleCircuit.Components.Analog
             {
                 if (Variants.Contains(_closed))
                 {
-                    builder.Circle(new(-5, 0), 1);
-                    builder.Circle(new(5, 0), 1);
+                    builder.Circle(new(-5, 0), 1, Appearance);
+                    builder.Circle(new(5, 0), 1, Appearance);
                     builder.Line(new(-4, 0), new(4, 0), Appearance);
                     builder.Line(new(0, 2), new(0, -2), Appearance);
                 }
@@ -167,8 +167,8 @@ namespace SimpleCircuit.Components.Analog
                 builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 // Switch terminals
-                builder.Circle(new Vector2(-5, 0), 1);
-                builder.Circle(new Vector2(5, 0), 1);
+                builder.Circle(new Vector2(-5, 0), 1, Appearance);
+                builder.Circle(new Vector2(5, 0), 1, Appearance);
                 _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1), Appearance);
 
@@ -176,7 +176,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     if (Variants.Contains(_invert))
                     {
-                        builder.Circle(new(0, -1), 1);
+                        builder.Circle(new(0, -1), 1, Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1), Appearance);
                     }
                     builder.Line(new(-4, 0), new(4, 0), Appearance);
@@ -184,7 +184,7 @@ namespace SimpleCircuit.Components.Analog
                 else
                 {
                     if (Variants.Contains(_invert))
-                        builder.Circle(new(0, -3.25), 1);
+                        builder.Circle(new(0, -3.25), 1, Appearance);
                     builder.Line(new(-4, 0), new(4, -4), Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 }
@@ -236,15 +236,15 @@ namespace SimpleCircuit.Components.Analog
             private void DrawPushSwitch(IGraphicsBuilder builder)
             {
                 // Switch terminals
-                builder.Circle(new Vector2(-5, 0), 1);
-                builder.Circle(new Vector2(5, 0), 1);
+                builder.Circle(new Vector2(-5, 0), 1, Appearance);
+                builder.Circle(new Vector2(5, 0), 1, Appearance);
 
                 if (Variants.Contains(_closed))
                 {
                     builder.Line(new(-4, 0), new(4, 0), Appearance);
                     if (Variants.Contains(_invert))
                     {
-                        builder.Circle(new(0, -1), 1);
+                        builder.Circle(new(0, -1), 1, Appearance);
                         builder.Line(new(0, -2), new(0, -6), Appearance);
                     }
                     else
@@ -255,7 +255,7 @@ namespace SimpleCircuit.Components.Analog
                     builder.Line(new(-5, -4), new(5, -4), Appearance);
                     if (Variants.Contains(_invert))
                     {
-                        builder.Circle(new(0, -5), 1);
+                        builder.Circle(new(0, -5), 1, Appearance);
                         if (_anchors[0].Location.Y > -6)
                             _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                     }
@@ -281,8 +281,8 @@ namespace SimpleCircuit.Components.Analog
             private void DrawAreiPushSwitch(IGraphicsBuilder builder)
             {
                 builder.ExtendPin(Pins["a"], Appearance);
-                builder.Circle(new(), 4);
-                builder.Circle(new(), 2);
+                builder.Circle(new(), 4, Appearance);
+                builder.Circle(new(), 2, Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
@@ -310,7 +310,7 @@ namespace SimpleCircuit.Components.Analog
             private void DrawAreiRegularSwitch(IGraphicsBuilder builder)
             {
                 double length = Math.Max(8, 5 + Math.Max(1, Poles) * 2);
-                builder.Circle(new(), 2);
+                builder.Circle(new(), 2, Appearance);
                 var n = Vector2.Normal(-Math.PI * 0.37);
                 builder.Line(n * 2, n * length, Appearance);
                 if (Variants.Contains(_toggle))

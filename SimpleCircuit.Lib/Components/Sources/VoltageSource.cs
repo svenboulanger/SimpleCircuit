@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.Sources
                 var options = Appearance.CreatePathOptions(this);
 
                 // Circle
-                builder.Circle(new(0, 0), 6);
+                builder.Circle(new(0, 0), 6, Appearance);
 
                 // Waveform / inner graphic
                 switch (Variants.Select(_ac, _square, _tri, _pulse, _step))
@@ -161,7 +161,7 @@ namespace SimpleCircuit.Components.Sources
 
             private void DrawEuropeanSource(IGraphicsBuilder builder)
             {
-                builder.Circle(new(0, 0), 4);
+                builder.Circle(new(0, 0), 4, Appearance);
                 builder.Line(new(-4, 0), new(4, 0), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);

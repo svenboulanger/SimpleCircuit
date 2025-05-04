@@ -115,7 +115,7 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (accumulator)
                 {
-                    builder.Circle(new(8, 0), 8);
+                    builder.Circle(new(8, 0), 8, Appearance);
                     DrawBoiler(builder, 8, 0, 6);
                 }
                 else
@@ -124,9 +124,9 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawCooking(IGraphicsBuilder builder)
             {
                 DrawBox(builder, 8, 0, 16, 16);
-                builder.Circle(new(4, -4), 2, new("marker"));
-                builder.Circle(new(12, -4), 2, new("marker"));
-                builder.Circle(new(12, 4), 2, new("marker"));
+                builder.Circle(new(4, -4), 2, Appearance);
+                builder.Circle(new(12, -4), 2, Appearance);
+                builder.Circle(new(12, 4), 2, Appearance);
             }
             private void DrawMicroWave(IGraphicsBuilder builder)
             {
@@ -137,19 +137,19 @@ namespace SimpleCircuit.Components.Outputs
             {
                 DrawBox(builder, 8, 0, 16, 16);
                 builder.Line(new(0, -5), new(16, -5), Appearance);
-                builder.Circle(new(8, 1.5), 2, new("marker"));
+                builder.Circle(new(8, 1.5), 2, Appearance);
             }
             private void DrawWasher(IGraphicsBuilder builder)
             {
                 DrawBox(builder, 8, 0, 16, 16);
-                builder.Circle(new(8, 0), 6);
-                builder.Circle(new(8, 0), 1.5, new("marker"));
+                builder.Circle(new(8, 0), 6, Appearance);
+                builder.Circle(new(8, 0), 1.5, Appearance);
             }
             private void DrawDryer(IGraphicsBuilder builder)
             {
                 DrawBox(builder, 8, 0, 16, 16);
                 DrawVentilator(builder, 8, -3);
-                builder.Circle(new(8, 3), 1.5, new("marker"));
+                builder.Circle(new(8, 3), 1.5, Appearance);
             }
             private void DrawDishwasher(IGraphicsBuilder builder)
             {
@@ -205,7 +205,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawBoiler(IGraphicsBuilder builder, double cx, double cy, double r = 8)
             {
-                builder.Circle(new(cx, cy), r);
+                builder.Circle(new(cx, cy), r, Appearance);
                 builder.Path(b =>
                 {
                     for (int i = 1; i <= 7; i++)
@@ -238,7 +238,7 @@ namespace SimpleCircuit.Components.Outputs
                     .MoveTo(new(s, -s)).LineTo(new(f, -f))
                     .MoveTo(new(s, s)).LineTo(new(f, f))
                     .MoveTo(new(-s, s)).LineTo(new(-f, f)));
-                builder.Circle(new(), 3);
+                builder.Circle(new(), 3, Appearance);
                 builder.EndTransform();
             }
             private void DrawIce(IGraphicsBuilder builder, double cx, double cy, double scale = 6.0)

@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             if (Variants.Contains(Square))
                 builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
             else
-                builder.Circle(new(), Size * 0.5, Appearance.CreatePathOptions(this));
+                builder.Circle(new(), Size * 0.5, Appearance);
         }
 
         /// <summary>

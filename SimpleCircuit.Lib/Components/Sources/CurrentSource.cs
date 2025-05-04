@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Sources
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
-                builder.Circle(new(0, 0), 6);
+                builder.Circle(new(0, 0), 6, Appearance);
                 switch (Variants.Select("arrow", "ac"))
                 {
                     case 1:
@@ -119,7 +119,7 @@ namespace SimpleCircuit.Components.Sources
             }
             private void DrawEuropeanSource(IGraphicsBuilder builder)
             {
-                builder.Circle(new(), 4);
+                builder.Circle(new(), 4, Appearance);
                 builder.Line(new(0, -4), new(0, 4), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
