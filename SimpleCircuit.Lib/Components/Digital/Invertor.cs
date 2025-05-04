@@ -95,7 +95,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-6, 6),
                     new(6, 0),
                     new(-6, -6)
-                ]);
+                ], Appearance);
                 builder.Circle(new(7.5, 0), 1.5, Appearance);
 
                 _anchors.Draw(builder, this);
@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Digital
             {
                 builder.ExtendPins(Pins, Appearance, 2, "in", "out");
 
-                builder.Rectangle(-5, -5, 10, 10);
+                builder.Rectangle(-5, -5, 10, 10, Appearance);
                 builder.Circle(new(6.5, 0), 1.5, Appearance);
                 builder.Text("1", new Vector2(), new Vector2(), Appearance);
 

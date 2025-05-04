@@ -73,7 +73,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // The rectangle
                 double w = Width * 0.5;
-                builder.Rectangle(-Length * 0.5, -w, Length, Width);
+                builder.Rectangle(-Length * 0.5, -w, Length, Width, Appearance);
 
                 if (Variants.Contains(_programmable))
                 {

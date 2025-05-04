@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -136,9 +136,9 @@ namespace SimpleCircuit.Components.Builders
 
             // Create the element
             var poly = _document.CreateElement("polygon", Namespace);
-            options?.Apply(poly);
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
+            poly.SetAttribute("style", options.CreateStrokeFillStyle());
             return this;
         }
 

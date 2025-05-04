@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components.Analog
                     new(5, -5),
                     new(5, 5),
                     new(-5, 9)
-                ], options);
+                ], Appearance);
 
                 if (Variants.Contains(_programmable))
                     builder.Arrow(new(-7, 10), new(6, -12), Appearance);

@@ -192,7 +192,7 @@ namespace SimpleCircuit.Components.Annotations
             double y = total.Top;
             double width = total.Width;
             double height = total.Height;
-            builder.Rectangle(x, y, width, height, CornerRadius, CornerRadius);
+            builder.Rectangle(x, y, width, height, Appearance, CornerRadius, CornerRadius);
 
             _topLeft = new Vector2(total.Left, total.Top);
             _bottomRight = new Vector2(total.Right, total.Bottom);

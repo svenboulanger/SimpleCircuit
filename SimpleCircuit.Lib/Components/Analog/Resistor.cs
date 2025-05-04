@@ -193,7 +193,7 @@ namespace SimpleCircuit.Components.Analog
 
                 // The rectangle
                 var options = Appearance.CreatePathOptions(this);
-                builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, options: options);
+                builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, Appearance, options: options);
                 if (Variants.Contains(_x))
                 {
                     builder.Line(new(-l, -w), new(l, w), Appearance);
@@ -224,7 +224,7 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     case 3: // Memristor
-                        builder.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -w, Length * 0.15, Width, options: Appearance.CreateMarkerOptions());
+                        builder.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -w, Length * 0.15, Width, Appearance, options: Appearance.CreateMarkerOptions());
                         double t = Length * 0.85 / 13;
                         builder.Polyline(
                         [

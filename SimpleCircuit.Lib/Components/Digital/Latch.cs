@@ -45,7 +45,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.ExtendPins(Pins, Appearance, 2, "s", "r", "q");
 
                 // Body
-                builder.Rectangle(-9, -12, 18, 24, new());
+                builder.Rectangle(-9, -12, 18, 24, Appearance, new());
 
                 // Labels
                 builder.Text("S", new Vector2(-8, -6), new Vector2(1, 0), Appearance);

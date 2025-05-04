@@ -179,7 +179,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     // The attributes
                     for (int i = 1; i < Labels.Count - 1; i++)
                     {
-                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, options: options);
+                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, Appearance, options: options);
                         y += LineHeight * Labels[i].Size;
                     }
 
@@ -214,7 +214,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 }
                 else
                 {
-                    builder.Rectangle(0, 0, _width, _height, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
+                    builder.Rectangle(0, 0, _width, _height, Appearance, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
                 }    
                 _anchors.Draw(builder, this);
             }

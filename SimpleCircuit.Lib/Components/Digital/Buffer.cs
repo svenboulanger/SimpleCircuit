@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-6, 6),
                     new(6, 0),
                     new(-6, -6)
-                ]);
+                ], Appearance);
                 _anchors.Draw(builder, this);
             }
 
@@ -102,7 +102,7 @@ namespace SimpleCircuit.Components.Digital
             {
                 builder.ExtendPins(Pins, Appearance, 2, "in", "out");
 
-                builder.Rectangle(-5, -5, 10, 10, new());
+                builder.Rectangle(-5, -5, 10, 10, Appearance, new());
                 builder.Text("1", new(), new(), Appearance);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);

@@ -116,7 +116,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, CornerRadius, CornerRadius);
+                builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, Appearance, CornerRadius, CornerRadius);
 
                 if (Variants.Contains(Predefined))
                 {

@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components
                 go.Classes.Add("blackbox");
                 builder.BeginGroup(go);
                 var size = EndLocation - Location;
-                builder.Rectangle(Location.X, Location.Y, size.X, size.Y, CornerRadius, CornerRadius);
+                builder.Rectangle(Location.X, Location.Y, size.X, size.Y, Appearance, CornerRadius, CornerRadius);
 
                 // Draw the label
                 BoxLabelAnchorPoints.Default.Draw(builder, this);

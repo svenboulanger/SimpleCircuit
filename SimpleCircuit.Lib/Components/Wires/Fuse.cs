@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Wires
             {
                 builder.ExtendPins(Pins, Appearance);
 
-                builder.Rectangle(-6, -3, 12, 6);
+                builder.Rectangle(-6, -3, 12, 6, Appearance);
                 builder.Path(b => b.MoveTo(new(-3.5, -3)).Line(new(0, 6)).MoveTo(new(3.5, -3)).Line(new(0, 6)));
 
                 _anchors.Draw(builder, this);
@@ -68,7 +68,7 @@ namespace SimpleCircuit.Components.Wires
             {
                 builder.ExtendPins(Pins, Appearance);
 
-                builder.Rectangle(-6, -3, 12, 6);
+                builder.Rectangle(-6, -3, 12, 6, Appearance);
                 builder.Line(new(-6, 0), new(6, 0), Appearance);
 
                 _anchors.Draw(builder, this);

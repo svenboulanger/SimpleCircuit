@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.ExtendPins(Pins, Appearance, 2, "d", "c", "q");
 
                 // Body
-                builder.Rectangle(-9, -12, 18, 24, new());
+                builder.Rectangle(-9, -12, 18, 24, Appearance, new());
 
                 // Clock thingy
                 var textAppearance = new FixedTextAppearance(Appearance);

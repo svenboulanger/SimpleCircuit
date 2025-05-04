@@ -176,7 +176,7 @@ namespace SimpleCircuit.Components.Outputs
 
             private void DrawBox(IGraphicsBuilder builder, double cx, double cy, double width, double height)
             {
-                builder.Rectangle(cx - width * 0.5, cy - height * 0.5, width, height, CornerRadius, CornerRadius);
+                builder.Rectangle(cx - width * 0.5, cy - height * 0.5, width, height, Appearance, CornerRadius, CornerRadius);
             }
             private void DrawVentilator(IGraphicsBuilder builder, double x, double y, double scale = 4)
             {

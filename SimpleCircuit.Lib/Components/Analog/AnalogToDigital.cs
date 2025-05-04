@@ -147,7 +147,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-Width / 2, Height / 2), new(Width / 2 - Height / 2, Height / 2),
                     new(Width / 2, 0), new(Width / 2 - Height / 2, -Height / 2),
                     new(-Width / 2, -Height / 2)
-                ], Appearance.CreatePathOptions());
+                ], Appearance);
 
                 BoxLabelAnchorPoints.Default.Draw(builder, this);
             }

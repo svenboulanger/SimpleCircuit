@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-8, -8),
                     new(8, 0),
                     new(-8, 8)
-                ], Appearance.CreatePathOptions());
+                ], Appearance);
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))

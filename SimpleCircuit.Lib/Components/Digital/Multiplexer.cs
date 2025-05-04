@@ -49,7 +49,7 @@ namespace SimpleCircuit.Components.Digital
                     new(5, -4),
                     new(5, 4),
                     new(-5, 8)
-                ], Appearance.CreatePathOptions());
+                ], Appearance);
 
                 var textAppearance = new FixedTextAppearance(Appearance, 0.8 * AppearanceOptions.DefaultFontSize * Scale);
                 builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), textAppearance);

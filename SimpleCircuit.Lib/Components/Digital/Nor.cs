@@ -158,7 +158,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawNorIEC(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, new());
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance, new());
                 builder.Text("&#8805;1", new(), new(), Appearance);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
 

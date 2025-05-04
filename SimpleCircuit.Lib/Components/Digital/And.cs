@@ -157,7 +157,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawAndIEC(IGraphicsBuilder drawing)
             {
                 drawing.ExtendPins(Pins, Appearance);
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, options: Appearance.CreatePathOptions(this));
+                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance, options: Appearance.CreatePathOptions(this));
                 drawing.Text("&amp;", new(), new(), Appearance);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this);
             }

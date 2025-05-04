@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected override void Draw(IGraphicsBuilder builder)
         {
             if (Variants.Contains(Square))
-                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
+                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, Appearance, CornerRadius, CornerRadius, Appearance.CreatePathOptions(this));
             else
                 builder.Circle(new(), Size * 0.5, Appearance);
         }

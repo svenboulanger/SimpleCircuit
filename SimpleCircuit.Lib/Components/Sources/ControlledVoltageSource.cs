@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Sources
                     new(0, 6),
                     new(6, 0),
                     new(0, -6)
-                ]);
+                ], Appearance);
 
                 // Plus and minus
                 builder.Signs(new(3, 0), new(-3, 0), Appearance, new());
@@ -104,7 +104,7 @@ namespace SimpleCircuit.Components.Sources
                 builder.Polygon(
                 [
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
-                ]);
+                ], Appearance);
                 builder.Line(new(-4, 0), new(4, 0), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);

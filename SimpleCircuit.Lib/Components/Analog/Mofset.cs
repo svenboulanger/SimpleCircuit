@@ -99,7 +99,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance, options: Appearance.CreatePathOptions(this));
 
                 // Label
                 if (Pins["b"].Connections > 0)
@@ -217,7 +217,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(4, 0), new(4, 4), Appearance);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, options: Appearance.CreatePathOptions(this));
+                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance, options: Appearance.CreatePathOptions(this));
 
                 // Label
                 if (Pins["b"].Connections > 0)

@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Sources
                     new(0, 6),
                     new(6, 0),
                     new(0, -6)
-                ]);
+                ], Appearance);
 
                 // The circle with the arrow
                 drawing.Arrow(new(-3, 0), new(3, 0), Appearance);
@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Sources
                     new(0, 4),
                     new(4, 0),
                     new(0, -4)
-                ]);
+                ], Appearance);
                 drawing.Line(new(0, -4), new(0, 4), Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);

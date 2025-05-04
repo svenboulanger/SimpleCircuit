@@ -224,7 +224,7 @@ namespace SimpleCircuit.Components.Builders
             ParseAppearanceOptions(appearance, node);
 
             // Draw the polygon
-            Polygon(points, appearance.CreatePathOptions());
+            Polygon(points, appearance);
         }
 
         private void DrawXmlPolyline(XmlNode node)
@@ -325,7 +325,7 @@ namespace SimpleCircuit.Components.Builders
             ParseAppearanceOptions(appearance, node);
 
             // Draw the rectangle
-            this.Rectangle(x, y, width, height, rx, ry, options: appearance.CreatePathOptions());
+            this.Rectangle(x, y, width, height, appearance, rx, ry, options: appearance.CreatePathOptions());
         }
 
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
@@ -458,7 +458,7 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null);
+        public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, GraphicOptions options = null);

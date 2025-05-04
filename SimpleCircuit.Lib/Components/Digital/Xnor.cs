@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawXnorIEC(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance);
                 builder.Text("=1", new(), new(), Appearance);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
 

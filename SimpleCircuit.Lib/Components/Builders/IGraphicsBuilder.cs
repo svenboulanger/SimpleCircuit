@@ -121,7 +121,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="points">The points.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphic builder for chaining.</returns>
-        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null);
+        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options);
 
         /// <summary>
         /// Draws an ellipse.

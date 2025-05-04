@@ -114,7 +114,7 @@ namespace SimpleCircuit.Components.Wires
                 [
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
-                ], Appearance.CreateMarkerOptions());
+                ], Appearance);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);

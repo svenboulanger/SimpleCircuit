@@ -121,7 +121,7 @@ namespace SimpleCircuit.Components
                     new(-5, 0),
                     new(5, 0),
                     new(0, 4)
-                ]);
+                ], Appearance);
             }
         }
     }

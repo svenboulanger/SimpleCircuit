@@ -40,13 +40,13 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-2, -4, 4, 8);
+                builder.Rectangle(-2, -4, 4, 8, Appearance);
                 builder.Polygon([
                     new(2, -4),
                     new(6, -9),
                     new(6, 9),
                     new(2, 4)
-                ]);
+                ], Appearance);
 
                 if (!Variants.Contains(_off))
                     DrawOn(builder);

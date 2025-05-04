@@ -165,7 +165,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4), 
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Line(new(4, -4), new(4, 4), Appearance);
             }
             private void DrawZenerDiode(IGraphicsBuilder builder)
@@ -175,7 +175,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 switch (Variants.Select(_zenerSingle, _zenerSlanted))
                 {
                     case 0:
@@ -216,7 +216,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Polyline([
                     new(2, -4),
                     new(4, -4),
@@ -231,7 +231,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Polyline([
                     new(6, -3),
                     new(6, -4),
@@ -248,7 +248,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 0)
-                ], new("anode"));
+                ], Appearance);
                 builder.Line(new(-4, 0), new(-4, 4), Appearance);
                 builder.Line(new(4, -4), new(4, 4), Appearance);
             }
@@ -259,7 +259,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Line(new(4, -4), new(4, 4), Appearance);
                 builder.Line(new(6, -4), new(6, 4), Appearance);
             }
@@ -292,12 +292,12 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Polygon([
                     new(4, 0),
                     new(12, -4),
                     new(12, 4)
-                ], new("anode2"));
+                ], Appearance);
                 builder.Polyline([
                     new(2, -5),
                     new(4, -4),
@@ -314,12 +314,12 @@ namespace SimpleCircuit.Components.Analog
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], new("anode"));
+                ], Appearance);
                 builder.Polygon([
                     new(-4, -8),
                     new(4, -12),
                     new(4, -4)
-                ], new("anode2"));
+                ], Appearance);
                 builder.Line(new(-4, -4), new(-4, -12), Appearance);
                 builder.Line(new(4, -4), new(4, 4), Appearance);
                 if (_anchors[0].Location.Y > -13)

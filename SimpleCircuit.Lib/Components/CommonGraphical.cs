@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components
         /// <param name="rx">The radius along the x-axis.</param>
         /// <param name="ry">The radius along the y-axis.</param>
         /// <param name="appearance">Path options.</param>
-        public static void Rectangle(this IGraphicsBuilder builder, double x, double y, double width, double height,
+        public static void Rectangle(this IGraphicsBuilder builder, double x, double y, double width, double height, IAppearanceOptions appearance,
             double rx = double.NaN, double ry = double.NaN, GraphicOptions options = null)
         {
             // Deal with rounded corners
@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components
                     new Vector2(x + width, y),
                     new Vector2(x + width, y + height),
                     new Vector2(x, y + height)
-                ], options);
+                ], appearance);
             }
             else
             {

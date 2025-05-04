@@ -154,7 +154,7 @@ namespace SimpleCircuit.Components.Digital
             private void DrawNandIEC(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
                 builder.Text("&amp;", new(), new(), Appearance);
 

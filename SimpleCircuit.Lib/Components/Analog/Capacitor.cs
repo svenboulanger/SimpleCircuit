@@ -88,8 +88,8 @@ namespace SimpleCircuit.Components.Analog
 
                     case 1:
                         // Assymetric plates
-                        builder.Rectangle(-2.25, -4, 1.5, 8, options: markerOptions);
-                        builder.Rectangle(0.75, -4, 1.5, 8, options: markerOptions);
+                        builder.Rectangle(-2.25, -4, 1.5, 8, Appearance, options: markerOptions);
+                        builder.Rectangle(0.75, -4, 1.5, 8, Appearance, options: markerOptions);
                         if (Variants.Contains(_signs))
                             builder.Signs(new(-5, 3), new(5, 3), Appearance, markerOptions, vertical: true);
                         break;

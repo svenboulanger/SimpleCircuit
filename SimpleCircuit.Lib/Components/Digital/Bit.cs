@@ -131,7 +131,7 @@ namespace SimpleCircuit.Components.Digital
                     for (int j = 0; j < _maxWidth; j++)
                     {
                         if (j < bits.Length || Variants.Contains(Full))
-                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize);
+                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize, Appearance);
                         if (j < bits.Length)
                             builder.Text(bits[j], new(x, y), new(), Appearance);
                         x += BlockSize;

@@ -83,7 +83,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, GraphicOptions options = null)
+        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options)
         {
             foreach (var pt in points)
             {

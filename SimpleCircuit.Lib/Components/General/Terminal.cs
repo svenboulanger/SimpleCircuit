@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components
                             new(),
                             new(-2, 2),
                             new(-5, 2)
-                        ]);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
@@ -60,7 +60,7 @@ namespace SimpleCircuit.Components
                             new(0, -2),
                             new(0, 2),
                             new(-3, 2)
-                        ]);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components
                             new(),
                             new(-2, 2),
                             new(-5, 2)
-                        ]);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-8, 0), new(-1, 0), Appearance);
                         break;
 
@@ -85,20 +85,20 @@ namespace SimpleCircuit.Components
                             new(0, -2),
                             new(0, 2),
                             new(-5, 2)
-                        ]);
+                        ], Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
                     case 6:
                         // pad
-                        builder.Rectangle(-4, -2, 4, 4);
+                        builder.Rectangle(-4, -2, 4, 4, Appearance);
                         builder.Cross(new(-2, 0), 4);
                         _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0), Appearance);
                         break;
 
                     case 7:
                         // square
-                        builder.Rectangle(-4, -2, 4, 4);
+                        builder.Rectangle(-4, -2, 4, 4, Appearance);
                         _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0), Appearance);
                         break;
 
