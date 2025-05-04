@@ -159,8 +159,8 @@ namespace SimpleCircuit.Components.Analog
                     builder.Line(new(-0.5, -4), new(1.5, -1.5));
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(3, -3), new(1, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(3, -3), new(1, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
             }
             private void DrawRegularSwitch(IGraphicsBuilder builder)
             {
@@ -169,15 +169,15 @@ namespace SimpleCircuit.Components.Analog
                 // Switch terminals
                 builder.Circle(new Vector2(-5, 0), 1);
                 builder.Circle(new Vector2(5, 0), 1);
-                _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1), Appearance);
 
                 if (Variants.Contains(_closed))
                 {
                     if (Variants.Contains(_invert))
                     {
                         builder.Circle(new(0, -1), 1);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1), Appearance);
                     }
                     builder.Line(new(-4, 0), new(4, 0), new("wire"));
                 }
@@ -186,7 +186,7 @@ namespace SimpleCircuit.Components.Analog
                     if (Variants.Contains(_invert))
                         builder.Circle(new(0, -3.25), 1);
                     builder.Line(new(-4, 0), new(4, -4), new("wire"));
-                    _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                 }
 
                 switch (Variants.Select(_closing, _opening))
@@ -196,9 +196,9 @@ namespace SimpleCircuit.Components.Analog
                             .MoveTo(new(-3, -5))
                             .CurveTo(new(1, -3), new(1, -2), new(2, 2)));
                         if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 3)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
+                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
                         var marker = new Arrow(new(2, 2), new(0.24253562503, 0.97014250014));
                         marker.Draw(builder, Appearance);
                         break;
@@ -208,9 +208,9 @@ namespace SimpleCircuit.Components.Analog
                             .MoveTo(new(-4, -6))
                             .CurveTo(new(1, -3), new(1, -2), new(2, 1)));
                         if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 2)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
                         marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
                         marker.Draw(builder, Appearance);
                         break;
@@ -229,8 +229,8 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     });
-                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 }
             }
             private void DrawPushSwitch(IGraphicsBuilder builder)
@@ -257,18 +257,18 @@ namespace SimpleCircuit.Components.Analog
                     {
                         builder.Circle(new(0, -5), 1);
                         if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                     }
                     else
                     {
                         builder.Line(new(0, -4), new(0, -6), new("wire"));
                         if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     }
                 }
 
                 if (_anchors[1].Location.Y < 2)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
             }
 
             private void DrawAreiSwitch(IGraphicsBuilder builder)
@@ -284,8 +284,8 @@ namespace SimpleCircuit.Components.Analog
                 builder.Circle(new(), 4);
                 builder.Circle(new(), 2);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
 
                 if (Variants.Contains(_lamp))
                 {
@@ -304,7 +304,7 @@ namespace SimpleCircuit.Components.Analog
                         new(6.5, 2.5)
                     ], new("window"));
                     if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 }
             }
             private void DrawAreiRegularSwitch(IGraphicsBuilder builder)
@@ -324,8 +324,8 @@ namespace SimpleCircuit.Components.Analog
                 }
 
                 // Label
-                _anchors[0] = new LabelAnchorPoint(new(0, -length), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, length), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -length), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, length), new(0, 1), Appearance);
 
                 // Small cross for illuminator lamps
                 if (Variants.Contains(_lamp))

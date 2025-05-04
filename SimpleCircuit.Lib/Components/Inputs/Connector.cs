@@ -94,12 +94,12 @@ namespace SimpleCircuit.Components.Inputs
                                 ]);
                                 if (Pins["p"].Connections > 0)
                                 {
-                                    _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1));
-                                    _anchors[1] = new LabelAnchorPoint(new(1, -1), new(1, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1), Appearance);
+                                    _anchors[1] = new LabelAnchorPoint(new(1, -1), new(1, -1), Appearance);
                                 }
                                 else
                                 {
-                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(1, 0), new(1, 0));
+                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(1, 0), new(1, 0), Appearance);
                                 }
                                 break;
 
@@ -112,12 +112,12 @@ namespace SimpleCircuit.Components.Inputs
                                 ]);
                                 if (Pins["p"].Connections > 0)
                                 {
-                                    _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1));
-                                    _anchors[1] = new LabelAnchorPoint(new(5, -1), new(1, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1), Appearance);
+                                    _anchors[1] = new LabelAnchorPoint(new(5, -1), new(1, -1), Appearance);
                                 }
                                 else
                                 {
-                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(5, 0), new(1, 0));
+                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(5, 0), new(1, 0), Appearance);
                                 }
                                 break;
 
@@ -133,8 +133,8 @@ namespace SimpleCircuit.Components.Inputs
                                     new(2, 0),
                                     new(-2, -4)
                                 ]);
-                                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                                 break;
                         }
                         break;
@@ -145,8 +145,8 @@ namespace SimpleCircuit.Components.Inputs
                         builder.Circle(new(), 1.5);
                         double s = Math.Sqrt(2) * 2;
                         builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)));
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                         break;
                 }
 

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System;
@@ -40,7 +41,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             : base(name)
         {
             Size = size;
-            Appearance.Background = AppearanceOptions.White;
+            Appearance.Background = "white";
         }
 
         /// <inheritdoc />

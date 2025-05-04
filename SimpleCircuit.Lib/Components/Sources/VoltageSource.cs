@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -90,8 +91,8 @@ namespace SimpleCircuit.Components.Sources
 
             private void DrawAmericanSource(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 var options = Appearance.CreatePathOptions(this);
 
                 // Circle
@@ -151,9 +152,9 @@ namespace SimpleCircuit.Components.Sources
                 {
                     builder.Arrow(new(-6, -6), new(7.5, 7.5), Appearance, this);
                     if (_anchors[0].Location.Y > -7)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     if (_anchors[1].Location.Y < 8.5)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1), Appearance);
                 }
                 _anchors.Draw(builder, this);
             }
@@ -163,16 +164,16 @@ namespace SimpleCircuit.Components.Sources
                 builder.Circle(new(0, 0), 4);
                 builder.Line(new(-4, 0), new(4, 0));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
 
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-4, -4), new(6, 6), Appearance, this);
                     if (_anchors[0].Location.Y > -5)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
                     if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 }
                 _anchors.Draw(builder, this);
             }

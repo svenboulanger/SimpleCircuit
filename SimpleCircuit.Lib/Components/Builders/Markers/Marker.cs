@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using SimpleCircuit.Components.Appearance;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An abstract class representing a marker.
@@ -24,7 +26,7 @@
         /// Draws the marker to the given drawing.
         /// </summary>
         /// <param name="builder">The graphics builder.</param>
-        public void Draw(IGraphicsBuilder builder, AppearanceOptions appearance)
+        public void Draw(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
             var orientation = Orientation;
             if (orientation.IsZero())
@@ -40,6 +42,6 @@
         /// The location is at (0, 0).
         /// </summary>
         /// <param name="builder">The drawing.</param>
-        protected abstract void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance);
+        protected abstract void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance);
     }
 }

@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
@@ -31,10 +32,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                var textAppearance = Appearance.Clone();
-                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
-                textAppearance.LineThickness = 0.1 * Scale;
-
+                var textAppearance = new FixedTextAppearance(Appearance, 0.8 * AppearanceOptions.DefaultFontSize * Scale, 0.1 * Scale);
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:

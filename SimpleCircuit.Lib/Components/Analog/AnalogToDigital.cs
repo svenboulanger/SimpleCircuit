@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -17,6 +18,8 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
+            private readonly IAppearanceOptions _signAppearance;
+
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
             private const string _differentialOutput = "diffout";
@@ -51,6 +54,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, new(-9, 0), new(-1, 0)), "inn", "ni");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(9, 0), new(1, 0)), "outn", "no");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, new(9, 0), new(1, 0)), "output", "out", "po", "outp");
+                _signAppearance = new LineMarkerAppearanceOptions(Appearance);
             }
 
             /// <inheritdoc />
@@ -112,17 +116,15 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var options = Appearance.CreatePathOptions();
-                var signOptions = Appearance.CreateMarkerOptions();
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
                     double x = -Width / 2 + 3;
                     double y = Height / 4;
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(x, y), new(x, -y), signOptions);
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(x, -y), new(x, y), signOptions);
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance.CreatePathOptions());
                 }
                 else
                     builder.ExtendPin(Pins["in"], Appearance, this);
@@ -133,9 +135,9 @@ namespace SimpleCircuit.Components.Analog
                     double x = Width / 2 - Height / 4 + 2;
                     double y = Height / 4 + 2.0;
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(x, y), new(x, -y), signOptions);
+                        builder.Signs(new(x, y), new(x, -y), _signAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(x, -y), new(x, y), signOptions);
+                        builder.Signs(new(x, -y), new(x, y), _signAppearance.CreatePathOptions());
                 }
                 else
                     builder.ExtendPin(Pins["out"], Appearance, this);
@@ -145,7 +147,7 @@ namespace SimpleCircuit.Components.Analog
                     new(-Width / 2, Height / 2), new(Width / 2 - Height / 2, Height / 2),
                     new(Width / 2, 0), new(Width / 2 - Height / 2, -Height / 2),
                     new(-Width / 2, -Height / 2)
-                ], options);
+                ], Appearance.CreatePathOptions());
 
                 BoxLabelAnchorPoints.Default.Draw(builder, this);
             }

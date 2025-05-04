@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -11,7 +12,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static SimpleCircuit.Circuits.Contexts.DrawableGrouper;
 
 namespace SimpleCircuit.Components
 {
@@ -21,6 +21,9 @@ namespace SimpleCircuit.Components
     public abstract class Drawable : IDrawable
     {
         private readonly static ConcurrentDictionary<Type, Dictionary<string, Func<IDrawable, Token, object, bool>>> _cacheSetters = new();
+
+        public const string Dashed = "dashed";
+        public const string Dotted = "dotted";
 
         /// <inheritdoc />
         public VariantSet Variants { get; } = [];
@@ -332,8 +335,16 @@ namespace SimpleCircuit.Components
                     result = r;
             }
 
-            if (context.Mode == PreparationMode.Sizes)
-                Labels.Format(context, Appearance);
+            switch (context.Mode)
+            {
+                case PreparationMode.Reset:
+                    Appearance.Parent = context.GlobalAppearance;
+                    break;
+
+                case PreparationMode.Sizes:
+                    Labels.Format(context, Appearance);
+                    break;
+            }
             return result;
         }
 

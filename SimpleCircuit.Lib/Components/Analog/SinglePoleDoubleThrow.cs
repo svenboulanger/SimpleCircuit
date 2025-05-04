@@ -21,8 +21,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(-3, 3), new(-1, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "spdt";
@@ -39,6 +38,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control2", "The backside controlling pin.", this, new(0, 0), new(0, -1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("throw1", "The first throwing pin.", this, new(6, 4), new(1, 0)), "t1");
                 Pins.Add(new FixedOrientedPin("throw2", "The second throwing pin.", this, new(6, -4), new(1, 0)), "t2");
+                _anchors = new(
+                    new LabelAnchorPoint(new(-3, 3), new(-1, 1), Appearance));
             }
 
             /// <inheritdoc />

@@ -38,8 +38,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     s *= 0.70710678118;
                 builder.Line(new(-s, s), new(s, -s));
 
-                _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new());
-                _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new());
+                _anchors[0] = new LabelAnchorPoint(new(-s * 0.5, -s * 0.5), new(), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(s * 0.5, s * 0.5), new(), Appearance);
                 if (Variants.Contains(Square))
                     new AggregateAnchorPoints<IBoxDrawable>(_anchors,
                         new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1)).Draw(builder, this);

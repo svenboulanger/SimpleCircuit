@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -26,9 +27,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                var textAppearance = Appearance.Clone();
-                textAppearance.LineThickness = 0.1 * Scale;
-                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
+                var textAppearance = new FixedTextAppearance(Appearance, 0.8 * AppearanceOptions.DefaultFontSize * Scale, 0.1 * Scale);
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:

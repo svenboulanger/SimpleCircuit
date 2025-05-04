@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,9 @@ namespace SimpleCircuit.Circuits.Contexts
         /// Gets all drawn groups.
         /// </summary>
         public DrawableGrouper DrawnGroups { get; } = new();
+
+        /// <inheritdoc />
+        public IAppearanceOptions GlobalAppearance { get; } = new AppearanceOptions();
 
         /// <inheritdoc />
         public ICircuitPresence Find(string name)

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
@@ -194,7 +195,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IAppearanceOptions appearance)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return this;

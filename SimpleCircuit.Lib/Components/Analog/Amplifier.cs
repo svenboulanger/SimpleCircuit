@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -38,8 +39,7 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
-        /// <param name="name">The name of the instance.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name)
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly static Vector2
                 _supplyPos = new(-2, -5),
@@ -50,14 +50,23 @@ namespace SimpleCircuit.Components.Analog
                 _outputPos = new(0, 4),
                 _outputNeg = new(0, -4),
                 _outputCommon = new(8, 0);
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(2, 5), new(1, 1)),
-                new LabelAnchorPoint(new(-2.5, 0), new()),
-                new LabelAnchorPoint(new(2, -5), new(1, -1))
-                );
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "amplifier";
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name) : base(name)
+            {
+                _anchors = new(
+                    new LabelAnchorPoint(new(2, 5), new(1, 1), Appearance),
+                    new LabelAnchorPoint(new(-2.5, 0), new(), Appearance),
+                    new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance)
+                );
+            }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -108,6 +117,8 @@ namespace SimpleCircuit.Components.Analog
                         }
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
+
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted);
                         break;
                 }
                 return result;
@@ -116,18 +127,18 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
-                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
-                var options = Appearance.CreatePathOptions(this);
+                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1), Appearance);
+                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance);
 
                 // Differential input?
+                var markerAppearance = new LineMarkerAppearanceOptions(Appearance);
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, this, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-5.5, 4), new(-5.5, -4), options);
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4), markerAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(-5.5, -4), new(-5.5, 4), options);
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4), markerAppearance.CreatePathOptions());
                 }
                 else
                     builder.ExtendPin(Pins["in"], Appearance, this);
@@ -137,13 +148,13 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, Appearance, this, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, -7), new(6, 7), options);
+                        builder.Signs(new(6, -7), new(6, 7), markerAppearance.CreatePathOptions());
                     else
-                        builder.Signs(new(6, 7), new(6, -7), options);
+                        builder.Signs(new(6, 7), new(6, -7), markerAppearance.CreatePathOptions());
 
                     // Give more breathing room to the labels
-                    _anchors[0] = new LabelAnchorPoint(new(2, 7), new(1, 1));
-                    _anchors[2] = new LabelAnchorPoint(new(2, -7), new(1, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1), Appearance);
+                    _anchors[2] = new LabelAnchorPoint(new(2, -8.5), new(1, -1), Appearance);
                 }
                 else
                     builder.ExtendPin(Pins["out"], Appearance, this);
@@ -154,19 +165,22 @@ namespace SimpleCircuit.Components.Analog
                     new(-8, -8),
                     new(8, 0),
                     new(-8, 8)
-                ], options);
+                ], Appearance.CreatePathOptions());
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
+                {
                     builder.Arrow(new(-7, 10), new(4, -8.5), Appearance, this);
+                    _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1), Appearance);
+                }
 
                 // Comparator
                 if (Variants.Contains(_comparator))
                 {
-                    builder.Path(b => b.MoveTo(new(-4, 2))
-                        .LineTo(new(-2, 2))
-                        .LineTo(new(-2, -2))
-                        .LineTo(new(0, -2)), options);
+                    builder.Path(b => b.MoveTo(new(-5, 2))
+                        .LineTo(new(-3, 2))
+                        .LineTo(new(-3, -2))
+                        .LineTo(new(-1, -2)), markerAppearance.CreatePathOptions());
                 }
 
                 // Schmitt trigger
@@ -174,15 +188,15 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.Path(b =>
                     {
-                        b.MoveTo(new(-5, 2))
-                            .LineTo(new(-3, 2))
-                            .LineTo(new(-3, -2))
-                            .LineTo(new(-1, -2));
-                        b.MoveTo(new(-3, 2))
-                            .LineTo(new(-1, 2))
-                            .LineTo(new(-1, -2))
-                            .LineTo(new(1, -2));
-                    }, options);
+                        b.MoveTo(new(-6, 2))
+                            .LineTo(new(-4, 2))
+                            .LineTo(new(-4, -2))
+                            .LineTo(new(-2, -2));
+                        b.MoveTo(new(-4, 2))
+                            .LineTo(new(-2, 2))
+                            .LineTo(new(-2, -2))
+                            .LineTo(new(0, -2));
+                    }, markerAppearance.CreatePathOptions());
                 }
                 _anchors.Draw(builder, Labels);
             }

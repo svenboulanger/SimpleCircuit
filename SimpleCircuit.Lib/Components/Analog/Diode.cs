@@ -31,9 +31,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -5), new(0, -1)),
-                new LabelAnchorPoint(new(0, 5), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "diode";
@@ -47,6 +45,9 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-4, 0), new(-1, 0)), "p", "a", "anode");
                 Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(4, 0), new(1, 0)), "n", "c", "cathode");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance));
             }
 
             public override PresenceResult Prepare(IPrepareContext context)
@@ -58,8 +59,8 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                         switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                         {
                             case 0: // Varactor
@@ -193,9 +194,9 @@ namespace SimpleCircuit.Components.Analog
                             new(6, 5)
                         ], new("cathode"));
                         if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         if (_anchors[1].Location.Y < 6)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
                         break;
 
                     default:
@@ -267,14 +268,14 @@ namespace SimpleCircuit.Components.Analog
                 builder.Arrow(new(2, 7.5), new(1, 3.5), Appearance, this);
                 builder.Arrow(new(-1, 9.5), new(-2, 5.5), Appearance, this);
                 if (_anchors[1].Location.Y < 10.5)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1), Appearance);
             }
             private void DrawLed(IGraphicsBuilder builder)
             {
                 builder.Arrow(new(1, 3.5), new(2, 7.5), Appearance, this);
                 builder.Arrow(new(-2, 5.5), new(-1, 9.5), Appearance, this);
                 if (_anchors[1].Location.Y < 10.5)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1), Appearance);
             }
             private void DrawLaser(IGraphicsBuilder builder)
             {
@@ -282,7 +283,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Arrow(new(-2, 5), new(-2, 10), Appearance, this);
                 builder.Arrow(new(2, 5), new(2, 10), Appearance, this);
                 if (_anchors[1].Location.Y < 11)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1), Appearance);
             }
             private void DrawTVSDiode(IGraphicsBuilder builder)
             {
@@ -304,7 +305,7 @@ namespace SimpleCircuit.Components.Analog
                     new(6, 5)
                 ], new("cathode"));
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
             }
             private void DrawBidirectional(IGraphicsBuilder builder)
             {
@@ -322,7 +323,7 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(-4, -4), new(-4, -12));
                 builder.Line(new(4, -4), new(4, 4));
                 if (_anchors[0].Location.Y > -13)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1), Appearance);
             }
         }
     }

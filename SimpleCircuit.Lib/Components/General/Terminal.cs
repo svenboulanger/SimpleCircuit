@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components
                             new(-2, 2),
                             new(-5, 2)
                         ]);
-                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
                     case 2:
@@ -61,7 +61,7 @@ namespace SimpleCircuit.Components
                             new(0, 2),
                             new(-3, 2)
                         ]);
-                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
                     case 4:
@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components
                             new(-2, 2),
                             new(-5, 2)
                         ]);
-                        _anchors[0] = new LabelAnchorPoint(new(-8, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-8, 0), new(-1, 0), Appearance);
                         break;
 
                     case 5:
@@ -86,30 +86,30 @@ namespace SimpleCircuit.Components
                             new(0, 2),
                             new(-5, 2)
                         ]);
-                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
                         break;
 
                     case 6:
                         // pad
                         builder.Rectangle(-4, -2, 4, 4);
                         builder.Cross(new(-2, 0), 4);
-                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0), Appearance);
                         break;
 
                     case 7:
                         // square
                         builder.Rectangle(-4, -2, 4, 4);
-                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-5, 0), new(-1, 0), Appearance);
                         break;
 
                     case 8:
                         // None
-                        _anchors[0] = new LabelAnchorPoint(new(-1, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-1, 0), new(-1, 0), Appearance);
                         break;
 
                     default:
                         builder.Circle(new Vector2(-1.5, 0), 1.5, new("terminal"));
-                        _anchors[0] = new LabelAnchorPoint(new(-4, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-4, 0), new(-1, 0), Appearance);
                         break;
                 }
                 _anchors.Draw(builder, this);

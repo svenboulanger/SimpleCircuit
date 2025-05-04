@@ -17,9 +17,7 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IStandardizedDrawable, IBoxDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -4), new(0, -1)),
-                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "buffer";
@@ -45,6 +43,9 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(6, 0), new(1, 0)), "out", "output");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />

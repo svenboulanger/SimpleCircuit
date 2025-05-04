@@ -101,8 +101,8 @@ namespace SimpleCircuit.Components.Sources
                     .Line(new(2, 0)),
                     new("plus"));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
             private void DrawEuropeanSource(IGraphicsBuilder builder)
@@ -113,8 +113,8 @@ namespace SimpleCircuit.Components.Sources
                 ]);
                 builder.Line(new(-4, 0), new(4, 0));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
         }

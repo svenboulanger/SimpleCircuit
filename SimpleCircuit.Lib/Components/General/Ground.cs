@@ -28,9 +28,7 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
-                new LabelAnchorPoint(new(6, 0), new(1, 0)));
+            private readonly CustomLabelAnchorPoints _anchors;
             /// <inheritdoc />
             public override string Type => "ground";
 
@@ -42,13 +40,16 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
+                _anchors = new(
+                    new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance),
+                    new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
-                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
+                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance);
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
@@ -68,18 +69,18 @@ namespace SimpleCircuit.Components
                     drawing.ExtendPins(Pins, Appearance, this, 6);
                     drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), new("shield"));
                     if (_anchors[0].Location.X > -9)
-                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0), Appearance);
                     if (_anchors[0].Location.X < 9)
-                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
+                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0), Appearance);
                 }
                 if (Variants.Contains(_protective))
                 {
                     drawing.ExtendPins(Pins, Appearance, this, 7.5);
                     drawing.Circle(new(0, -1), 6.5, new("shield"));
                     if (_anchors[0].Location.X > -7.5) 
-                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
+                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0), Appearance);
                     if (_anchors[1].Location.X < 7.5)
-                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
+                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0), Appearance);
                 }
                 else
                 {
@@ -109,7 +110,7 @@ namespace SimpleCircuit.Components
                     .Line(new(-2, 4)));
 
                 if (_anchors[0].Location.X > -7)
-                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
+                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0), Appearance);
             }
             private void DrawSignalGround(IGraphicsBuilder drawing)
             {

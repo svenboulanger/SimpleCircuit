@@ -80,8 +80,8 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
 
                         // Let's clear the pins and re-add them correctly
                         Pins.Clear();
@@ -148,25 +148,25 @@ namespace SimpleCircuit.Components.Analog
                         {
                             builder.Line(new(-l, -4.5), new(l, -4.5), new("choke"));
                             if (_anchors[0].Location.Y > -5.5)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
                             if (!Variants.Contains(_singleLine))
                             {
                                 builder.Line(new(-l, -6), new(l, -6), new("choke"));
                                 if (_anchors[0].Location.Y > -7)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10), Appearance, this);
                                 if (_anchors[0].Location.Y > -11)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7), Appearance, this);
                             if (_anchors[0].Location.Y > -8)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance);
                         }
                         break;
 
@@ -202,20 +202,20 @@ namespace SimpleCircuit.Components.Analog
                             {
                                 builder.Line(new(-l, -6), new(l, -6), new("choke"));
                                 if (_anchors[0].Location.Y > -7)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 builder.Arrow(new(-l + 1, 5), new(l, -10), Appearance, this);
                                 if (_anchors[0].Location.Y > -11)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             builder.Arrow(new(-l + 1, 5), new(l, -7), Appearance, this);
                             if (_anchors[0].Location.Y > -8)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance);
                         }
                         break;
                 }

@@ -78,13 +78,13 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-5, w + 1), new(6, -w - 4), Appearance, this);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
                 }
                 else
                 {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1), Appearance);
                 }
 
                 _anchors.Draw(builder, Labels);

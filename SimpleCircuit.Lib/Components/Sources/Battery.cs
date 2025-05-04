@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -18,9 +19,7 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -8), new(0, -1)),
-                new LabelAnchorPoint(new(0, 8), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             private int _cells = 1;
             private double Length => _cells * 4 - 2;
@@ -50,6 +49,9 @@ namespace SimpleCircuit.Components.Sources
             {
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-1, 0), new(-1, 0)), "n", "neg", "b");
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(1, 0), new(1, 0)), "p", "pos", "a");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 8), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />
@@ -74,8 +76,7 @@ namespace SimpleCircuit.Components.Sources
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var options = Appearance.CreatePathOptions(this);
-                var negOptions = Appearance.Clone();
-                negOptions.LineThickness = 0.75;
+                var negOptions = new LineThicknessAppearance(Appearance, 0.75);
                 var markerOptions = Appearance.CreateMarkerOptions();
 
                 // Wires

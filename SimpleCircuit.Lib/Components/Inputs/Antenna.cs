@@ -14,9 +14,7 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(5, -5), new(1, 0)),
-                new LabelAnchorPoint(new(-5, -5), new(-1, 0)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "antenna";
@@ -29,6 +27,9 @@ namespace SimpleCircuit.Components.Inputs
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("pin", "The pin of the antenna.", this, new(), new(0, 1)), "p", "pin", "a");
+                _anchors = new(
+                    new LabelAnchorPoint(new(5, -5), new(1, 0), Appearance),
+                    new LabelAnchorPoint(new(-5, -5), new(-1, 0), Appearance));
             }
 
             /// <inheritdoc />

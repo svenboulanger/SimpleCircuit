@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -16,7 +17,7 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable
         {
-            private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             private const string _anchor = "anchor";
 
@@ -31,6 +32,7 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
+                _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance));
             }
 
             /// <inheritdoc />
@@ -46,8 +48,7 @@ namespace SimpleCircuit.Components
                     ], Appearance.CreatePathOptions(this));
                 else
                 {
-                    var options = Appearance.Clone();
-                    options.LineThickness = 1.0;
+                    var options = new LineThicknessAppearance(Appearance, 1.0);
                     builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options.CreatePathOptions(this));
                 }
                 _anchors.Draw(builder, this);

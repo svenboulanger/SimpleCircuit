@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -24,9 +25,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -5.5), new(0, -1)),
-                new LabelAnchorPoint(new(0, 5.5), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "capacitor";
@@ -40,6 +39,9 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-1.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(1.5, 0), new(1, 0)), "n", "neg", "b");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 5.5), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />
@@ -77,10 +79,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         // Plates
-                        var planeAppearance = Appearance.Clone();
-                        planeAppearance.LineThickness = 1.0;
+                        var planeAppearance = new LineThicknessAppearance(Appearance, 1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance.CreatePathOptions());
-                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), new("neg"));
+                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.CreatePathOptions());
                         if (Variants.Contains(_signs))
                             builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), markerOptions, vertical: true);
                         break;
@@ -95,8 +96,7 @@ namespace SimpleCircuit.Components.Analog
 
                     default:
                         // Plates
-                        var plateAppearance = Appearance.Clone();
-                        plateAppearance.LineThickness = 1.0;
+                        var plateAppearance = new LineThicknessAppearance(Appearance, 1.0);
                         options = plateAppearance.CreatePathOptions(this);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), options);
                         builder.Line(new(1.5, -4), new(1.5, 4), options);
@@ -105,13 +105,13 @@ namespace SimpleCircuit.Components.Analog
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1), Appearance);
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
                         builder.Arrow(new(-4, 4), new(6, -5), Appearance, this);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                         break;
 
                     case 1:
@@ -120,8 +120,8 @@ namespace SimpleCircuit.Components.Analog
                             new(-4, 6),
                             new(4, -6)
                         ], options);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
                         break;
                 }
                 _anchors.Draw(builder, Labels);

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using SimpleCircuit.Components.Appearance;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Builders.Markers
 {
@@ -15,7 +16,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         private readonly static Vector2[] _points = [new(0, -1), new(-2.5, 0), new(0, 1)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
             builder.Polygon(_points.Select(pt => pt * 2.0 * appearance.LineThickness), appearance.CreateMarkerOptions());
         }

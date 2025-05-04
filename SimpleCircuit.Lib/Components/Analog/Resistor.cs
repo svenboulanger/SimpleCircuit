@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -114,8 +115,8 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         double w = Width * 0.5;
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1), Appearance);
                         break;
                 }
                 return result;
@@ -165,14 +166,14 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         builder.Arrow(new(-5, w + 1), new(6, -w - 2), Appearance, this);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
                         break;
 
                     case 1:
                         builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance, this);
                         builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance, this);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
                         break;
 
                     case 2:
@@ -180,8 +181,8 @@ namespace SimpleCircuit.Components.Analog
                         [
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
                         ]);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 3), new(1, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 3), new(1, 1), Appearance);
                         break;
                 }
             }
@@ -203,14 +204,14 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0: // Programmable
                         builder.Arrow(new(-5, w + 1), new(6, -w - 3), Appearance, this);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
                         break;
 
                     case 1: // Photoresistor
                         builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance, this);
                         builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance, this);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
                         break;
 
                     case 2: // Thermistor
@@ -218,8 +219,8 @@ namespace SimpleCircuit.Components.Analog
                         [
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
                         ], options);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 2), new(1, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 2), new(1, 1), Appearance);
                         break;
 
                     case 3: // Memristor

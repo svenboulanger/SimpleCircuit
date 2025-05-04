@@ -16,9 +16,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             => new Instance(name);
 
         /// <inheritdoc />
-        private class Instance(string name) : DiagramBlockInstance(name)
+        private class Instance : DiagramBlockInstance
         {
-            private static readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
+            private readonly CustomLabelAnchorPoints _anchors;
             private double _width = 0, _height = 0;
 
             /// <inheritdoc />
@@ -53,6 +53,16 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             [Description("The margin of the label to the edge. Only used when sizing based on content.")]
             public double LabelMargin { get; set; } = 1.0;
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Instance(string name)
+                : base(name)
+            {
+                _anchors = new(new LabelAnchorPoint(new(), new(), Appearance));
+            }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)

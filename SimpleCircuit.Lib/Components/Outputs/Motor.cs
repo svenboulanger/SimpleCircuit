@@ -18,9 +18,7 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private static readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -6), new(0, -1)),
-                new LabelAnchorPoint(new(0, 6), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "motor";
@@ -34,6 +32,9 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(5, 0), new(1, 0)), "n", "neg", "b");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />

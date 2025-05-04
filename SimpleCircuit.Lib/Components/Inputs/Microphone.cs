@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using System.Collections.Generic;
@@ -17,9 +18,7 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
-                new LabelAnchorPoint(new(6, 0), new(1, 0)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "mic";
@@ -33,19 +32,19 @@ namespace SimpleCircuit.Components.Inputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, -4), new(0, -1)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(0, 4), new(0, 1)), "n", "neg", "b");
+                _anchors = new(
+                    new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance),
+                    new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.RequiredCSS.Add(".plane { stroke-width: 1pt; }");
-
                 builder.ExtendPins(Pins, Appearance, this);
                 builder.Circle(new(), 4);
 
-                var options = Appearance.Clone();
-                options.LineThickness = 1.0;
-                builder.Line(new(4, -4), new(4, 4), options.CreatePathOptions(this));
+                var appearance = new LineThicknessAppearance(Appearance, 1.0);
+                builder.Line(new(4, -4), new(4, 4), appearance.CreatePathOptions(this));
                 _anchors.Draw(builder, this);
             }
         }

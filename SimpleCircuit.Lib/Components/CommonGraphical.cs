@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
@@ -283,11 +284,9 @@ namespace SimpleCircuit.Components
         /// <param name="start">The start point.</param>
         /// <param name="end">The end point.</param>
         /// <param name="drawable">The drawable parent.</param>
-        /// <param name="allowDashed">If <c>true</c>, the arrow can be dashed or dotted.</param>
-        public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, AppearanceOptions appearance, IDrawable drawable = null)
+        public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, IAppearanceOptions appearance, IDrawable drawable)
         {
-            var options = appearance.CreatePathOptions(drawable);
-            builder.Line(start, end, options);
+            builder.Line(start, end, appearance.CreatePathOptions(drawable));
 
             // Draw the marker
             var normal = end - start;
@@ -360,7 +359,7 @@ namespace SimpleCircuit.Components
         /// <param name="builder">The builder.</param>
         /// <param name="pin">The pin.</param>
         /// <param name="length">The length of the wire.</param>
-        public static void ExtendPin(this IGraphicsBuilder builder, IPin pin, AppearanceOptions appearance, IDrawable drawable = null, double length = 2)
+        public static void ExtendPin(this IGraphicsBuilder builder, IPin pin, IAppearanceOptions appearance, IDrawable drawable = null, double length = 2)
         {
             if (pin.Connections == 0)
             {
@@ -380,7 +379,7 @@ namespace SimpleCircuit.Components
         /// <param name="builder">The builder.</param>
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pin wire.</param>
-        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, AppearanceOptions appearance, IDrawable drawable = null, double length = 2)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, IDrawable drawable = null, double length = 2)
         {
             foreach (var pin in pins)
                 builder.ExtendPin(pin, appearance, drawable, length);
@@ -393,7 +392,7 @@ namespace SimpleCircuit.Components
         /// <param name="pins">The pins.</param>
         /// <param name="length">The length of the pins.</param>
         /// <param name="names">The names of the pins to extend.</param>
-        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, AppearanceOptions appearance, IDrawable drawable, double length, params string[] names)
+        public static void ExtendPins(this IGraphicsBuilder builder, IPinCollection pins, IAppearanceOptions appearance, IDrawable drawable, double length, params string[] names)
         {
             foreach (string name in names)
                 builder.ExtendPin(pins[name], appearance, drawable, length);

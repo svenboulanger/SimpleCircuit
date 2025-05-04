@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Parser.SimpleTexts;
 
@@ -23,7 +23,7 @@ namespace SimpleCircuit.Circuits.Spans
         public ITextMeasurer Measurer { get; } = measurer;
 
         /// <inheritdoc />
-        public Span Format(string content, AppearanceOptions appearance)
+        public Span Format(string content, IAppearanceOptions appearance)
         {
             content = content.Replace("<", "&lt;").Replace(">", "&gt;");
 

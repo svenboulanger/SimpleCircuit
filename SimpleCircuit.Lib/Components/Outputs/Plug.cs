@@ -21,8 +21,7 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(6, -1), new(1, -1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "plug";
@@ -40,6 +39,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(), new(-1, 0)), "in", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(), new(1, 0)), "out", "b");
+                _anchors = new(
+                    new LabelAnchorPoint(new(6, -1), new(1, -1), Appearance));
             }
 
             /// <inheritdoc />

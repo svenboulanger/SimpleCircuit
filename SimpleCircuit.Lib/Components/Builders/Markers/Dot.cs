@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using SimpleCircuit.Components.Appearance;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// A dot marker.
@@ -11,9 +13,9 @@
     public class Dot(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
-            var options = appearance.CreateMarkerOptions(hasStroke: false);
+            var options = appearance.CreateMarkerOptions();
             builder.Circle(new(), 2.0 * appearance.LineThickness, options);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -30,10 +31,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(2, 8), new(1, 1)),
-                new LabelAnchorPoint(new(), new()),
-                new LabelAnchorPoint(new(2, -8), new(1, -1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "ota";
@@ -51,6 +49,10 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 0), new(1, 0)), "no", "outn");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
+                _anchors = new(
+                    new LabelAnchorPoint(new(2, 8), new(1, 1), Appearance),
+                    new LabelAnchorPoint(new(), new(), Appearance),
+                    new LabelAnchorPoint(new(2, -8), new(1, -1), Appearance));
             }
 
             /// <inheritdoc />

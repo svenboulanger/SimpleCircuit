@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -467,38 +468,38 @@ namespace SimpleCircuit.Components.Annotations
 
             // Points 0-11 are the outside points, add them here
             FindCenter(sortedPoints, out double xCenter, out double yCenter);
-            anchors[0] = new LabelAnchorPoint(new(xCenter, yCenter), new());
+            anchors[0] = new LabelAnchorPoint(new(xCenter, yCenter), new(), Appearance);
             FindTop(sortedPoints, bounds, out double xTop, out double yTop, out double lengthTop);
-            anchors[1] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop - LabelMargin), new(1, -1));
-            anchors[2] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop - LabelMargin), new(0, -1));
-            anchors[3] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop - LabelMargin), new(-1, -1));
+            anchors[1] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop - LabelMargin), new(1, -1), Appearance);
+            anchors[2] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop - LabelMargin), new(0, -1), Appearance);
+            anchors[3] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop - LabelMargin), new(-1, -1), Appearance);
             FindRight(sortedPoints, bounds, out double xRight, out double yRight, out double lengthRight);
-            anchors[4] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + CornerRadius), new(1, 1));
-            anchors[5] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + 0.5 * lengthRight), new(1, 0));
-            anchors[6] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + lengthRight - CornerRadius), new(1, -1));
+            anchors[4] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + CornerRadius), new(1, 1), Appearance);
+            anchors[5] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + 0.5 * lengthRight), new(1, 0), Appearance);
+            anchors[6] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + lengthRight - CornerRadius), new(1, -1), Appearance);
             FindBottom(sortedPoints, bounds, out double xBottom, out double yBottom, out double lengthBottom);
-            anchors[7] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + LabelMargin), new(-1, 1));
-            anchors[8] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + LabelMargin), new(0, 1));
-            anchors[9] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + LabelMargin), new(1, 1));
+            anchors[7] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + LabelMargin), new(-1, 1), Appearance);
+            anchors[8] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + LabelMargin), new(0, 1), Appearance);
+            anchors[9] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + LabelMargin), new(1, 1), Appearance);
             FindLeft(sortedPoints, bounds, out double xLeft, out double yLeft, out double lengthLeft);
-            anchors[10] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + lengthLeft - CornerRadius), new(-1, -1));
-            anchors[11] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + 0.5 * lengthLeft), new(-1, 0));
-            anchors[12] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + CornerRadius), new(-1, 1));
+            anchors[10] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + lengthLeft - CornerRadius), new(-1, -1), Appearance);
+            anchors[11] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + 0.5 * lengthLeft), new(-1, 0), Appearance);
+            anchors[12] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + CornerRadius), new(-1, 1), Appearance);
 
             // Points 12-23 are the inside points, add them here
             double s = Math.Max(CornerRadius, LabelMargin);
-            anchors[13] = new LabelAnchorPoint(new(xTop + s, yTop + LabelMargin), new(1, 1));
-            anchors[14] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop + LabelMargin), new(0, 1));
-            anchors[15] = new LabelAnchorPoint(new(xTop + lengthTop - s, yTop + LabelMargin), new(-1, 1));
-            anchors[16] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + s), new(-1, 1));
-            anchors[17] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + 0.5 * lengthRight), new(-1, 0));
-            anchors[18] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + lengthRight - s), new(-1, -1));
-            anchors[19] = new LabelAnchorPoint(new(xBottom + lengthBottom - s, yBottom - LabelMargin), new(-1, -1));
-            anchors[20] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom - LabelMargin), new(0, -1));
-            anchors[21] = new LabelAnchorPoint(new(xBottom + s, yBottom - LabelMargin), new(1, -1));
-            anchors[22] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + lengthLeft - s), new(1, -1));
-            anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0));
-            anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1));
+            anchors[13] = new LabelAnchorPoint(new(xTop + s, yTop + LabelMargin), new(1, 1), Appearance);
+            anchors[14] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop + LabelMargin), new(0, 1), Appearance);
+            anchors[15] = new LabelAnchorPoint(new(xTop + lengthTop - s, yTop + LabelMargin), new(-1, 1), Appearance);
+            anchors[16] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + s), new(-1, 1), Appearance);
+            anchors[17] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + 0.5 * lengthRight), new(-1, 0), Appearance);
+            anchors[18] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + lengthRight - s), new(-1, -1), Appearance);
+            anchors[19] = new LabelAnchorPoint(new(xBottom + lengthBottom - s, yBottom - LabelMargin), new(-1, -1), Appearance);
+            anchors[20] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom - LabelMargin), new(0, -1), Appearance);
+            anchors[21] = new LabelAnchorPoint(new(xBottom + s, yBottom - LabelMargin), new(1, -1), Appearance);
+            anchors[22] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + lengthLeft - s), new(1, -1), Appearance);
+            anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0), Appearance);
+            anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1), Appearance);
 
             new OffsetAnchorPoints<IDrawable>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this);
         }

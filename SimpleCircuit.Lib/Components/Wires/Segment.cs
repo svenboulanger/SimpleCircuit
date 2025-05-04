@@ -48,8 +48,8 @@ namespace SimpleCircuit.Components.Wires
             {
                 builder.ExtendPins(Pins, Appearance, this, 4);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
                 switch (Variants.Select(_underground, _air, _tube, _inwall, _onwall))
                 {
                     case 0: DrawUnderground(builder); break;
@@ -71,31 +71,31 @@ namespace SimpleCircuit.Components.Wires
                     .MoveTo(new(-1, -2))
                     .Line(new(2, 0)));
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
             }
             private void DrawAir(IGraphicsBuilder builder)
             {
                 builder.Circle(new(), 2);
                 if (_anchors[0].Location.Y > -3)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 3)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
             }
             private void DrawTube(IGraphicsBuilder builder)
             {
                 builder.Circle(new(0, -3.5), 1.5);
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
 
                 if (Multiple > 1)
                 {
                     builder.Line(new(0, -3.5), new(2.1, -5.6));
                     builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
                 }
             }
             private void DrawInWall(IGraphicsBuilder builder)
@@ -108,9 +108,9 @@ namespace SimpleCircuit.Components.Wires
                 ]);
                 builder.Line(new(0, -2), new(0, -5));
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
             }
             private void DrawOnWall(IGraphicsBuilder builder)
             {
@@ -122,9 +122,9 @@ namespace SimpleCircuit.Components.Wires
                 ]);
                 builder.Line(new(0, 5), new(0, 2));
                 if (_anchors[0].Location.Y > -1)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
             }
         }
     }

@@ -104,6 +104,19 @@ namespace SimpleCircuit.Components.Variants
             }
         }
 
+        /// <inheritdoc />
+        public bool Contains(params string[] variants)
+        {
+            foreach (string variant in variants)
+            {
+                if (_set.Contains(variant))
+                    return true;
+                else
+                    _checked.Add(variant);
+            }
+            return false;
+        }
+
         /// <summary>
         /// Find the index of the specified variant that is selected. Allows using variants inside a switch statement.
         /// </summary>

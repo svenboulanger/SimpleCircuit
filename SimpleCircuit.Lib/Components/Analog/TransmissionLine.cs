@@ -97,8 +97,8 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(2, new(x, _height));
                         SetPinOffset(3, new(_width + (Length - _width) / 2, 0));
 
-                        _anchors[0] = new LabelAnchorPoint(new(0, -_height - 1), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, _height + 1), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -_height - 1), new(0, -1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, _height + 1), new(0, 1), Appearance);
                         break;
                 }
                 return result;

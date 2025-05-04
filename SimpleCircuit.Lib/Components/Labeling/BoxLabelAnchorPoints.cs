@@ -172,7 +172,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "0":
                 case "c":
                 case "ci":
-                    value = new(0.5 * (subject.TopLeft + subject.BottomRight), new());
+                    value = new(0.5 * (subject.TopLeft + subject.BottomRight), new(), subject.Appearance);
                     return true; // Center
 
                 case "1":
@@ -180,7 +180,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "nwo":
                 case "nnw":
                 case "nnwo":
-                    value = new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1));
+                    value = new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1), subject.Appearance);
                     return true; // Top-left above box
 
                 case "2":
@@ -188,7 +188,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "no":
                 case "u":
                 case "up":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1));
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1), subject.Appearance);
                     return true; // Top center above box
 
                 case "3":
@@ -196,13 +196,13 @@ namespace SimpleCircuit.Components.Labeling
                 case "neo":
                 case "nne":
                 case "nneo":
-                    value = new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1));
+                    value = new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1), subject.Appearance);
                     return true; // Top-right above box
 
                 case "4":
                 case "ene":
                 case "eneo":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1));
+                    value = new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1), subject.Appearance);
                     return true; // Top-right right of box
 
                 case "5":
@@ -210,13 +210,13 @@ namespace SimpleCircuit.Components.Labeling
                 case "eo":
                 case "r":
                 case "right":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0), subject.Appearance);
                     return true; // Middle-right right of box
 
                 case "6":
                 case "ese":
                 case "eseo":
-                    value = new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1));
+                    value = new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1), subject.Appearance);
                     return true; // Bottom-right right of box
 
                 case "7":
@@ -224,7 +224,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "seo":
                 case "sse":
                 case "sseo":
-                    value = new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1));
+                    value = new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1), subject.Appearance);
                     return true; // Bottom-right below box
 
                 case "8":
@@ -232,7 +232,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "so":
                 case "d":
                 case "down":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1), subject.Appearance);
                     return true; // Bottom-center below box
 
                 case "9":
@@ -240,13 +240,13 @@ namespace SimpleCircuit.Components.Labeling
                 case "swo":
                 case "ssw":
                 case "sswo":
-                    value = new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1));
+                    value = new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1), subject.Appearance);
                     return true; // Bottom-right below box
 
                 case "10":
                 case "wsw":
                 case "wswo":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1));
+                    value = new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1), subject.Appearance);
                     return true; // Bottom-left left of box
 
                 case "11":
@@ -254,57 +254,57 @@ namespace SimpleCircuit.Components.Labeling
                 case "wo":
                 case "l":
                 case "left":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0), subject.Appearance);
                     return true; // Middle-left left of box
 
                 case "12":
                 case "wnw":
                 case "wnwo":
-                    value = new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1));
+                    value = new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1), subject.Appearance);
                     return true; // Top-left left of box
 
                 case "13":
                 case "nwi":
                     double f = r * 0.70710678118;
-                    value = new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1));
+                    value = new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1), subject.Appearance);
                     return true; // Top-left inside box
 
                 case "14":
                 case "ni":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y + subject.LabelMargin), new(0, 1));
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y + subject.LabelMargin), new(0, 1), subject.Appearance);
                     return true; // Top-center inside box
 
                 case "15":
                 case "nei":
                     f = r * 0.70710678118;
-                    value = new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1));
+                    value = new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1), subject.Appearance);
                     return true; // Top-right inside box
 
                 case "16":
                 case "ei":
-                    value = new(new(subject.BottomRight.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    value = new(new(subject.BottomRight.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0), subject.Appearance);
                     return true; // Middle-right inside box
 
                 case "17":
                 case "sei":
                     f = r * 0.70710678118;
-                    value = new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1));
+                    value = new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1), subject.Appearance);
                     return true; // Bottom-right inside box
 
                 case "18":
                 case "si":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y - subject.LabelMargin), new(0, -1));
+                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y - subject.LabelMargin), new(0, -1), subject.Appearance);
                     return true; // Bottom-center inside box
 
                 case "19":
                 case "swi":
                     f = r * 0.70710678118;
-                    value = new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1));
+                    value = new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1), subject.Appearance);
                     return true; // Bottom-left inside box
 
                 case "20":
                 case "wi":
-                    value = new(new(subject.TopLeft.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    value = new(new(subject.TopLeft.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0), subject.Appearance);
                     return true; // Middle-left inside box
 
                 default:

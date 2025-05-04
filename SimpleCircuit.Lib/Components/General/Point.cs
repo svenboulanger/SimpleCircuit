@@ -66,7 +66,7 @@ namespace SimpleCircuit.Components
                     builder.ExpandBounds(new());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                _anchors[0] = new LabelAnchorPoint(n * Distance, n);
+                _anchors[0] = new LabelAnchorPoint(n * Distance, n, Appearance);
                 _anchors.Draw(builder, this);
             }
         }

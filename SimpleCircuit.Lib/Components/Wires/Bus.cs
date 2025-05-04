@@ -16,9 +16,7 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -4), new(0, -1)),
-                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             private const string _straight = "straight";
 
@@ -38,6 +36,9 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />

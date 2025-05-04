@@ -77,8 +77,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 builder.Cross(new(), _sqrt2);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
 
                 if (!Variants.Contains(Options.Arei))
                     builder.Circle(new Vector2(), 4);
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Outputs
             {
                 builder.Line(new Vector2(-3, 5), new Vector2(3, 5));
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
             }
             private void DrawProjector(IGraphicsBuilder builder)
             {
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Outputs
                     b.ArcTo(6, 6, 0.0, false, false, new(c, -s));
                 }, new("projector"));
                 if (_anchors[0].Location.Y > -7)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
             }
             private void DrawDirectional(IGraphicsBuilder builder, bool diverging)
             {
@@ -128,7 +128,7 @@ namespace SimpleCircuit.Components.Outputs
                     builder.Arrow(new(2, 6), new(2, 12), Appearance, this);
                 }
                 if (_anchors[1].Location.Y < 13)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1), Appearance);
             }
             private void DrawEmergency(IGraphicsBuilder builder)
             {

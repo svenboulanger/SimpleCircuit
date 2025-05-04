@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using System;
@@ -158,6 +159,6 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="expand">The direction in which text can expand.</param>
         /// <param name="appearance">The parent appearance options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, AppearanceOptions appearance);
+        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IAppearanceOptions appearance);
     }
 }

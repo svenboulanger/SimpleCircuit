@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -82,8 +83,8 @@ namespace SimpleCircuit.Components.Wires
                     .MoveTo(new(-4, -2))
                     .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)));
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
 
@@ -95,8 +96,8 @@ namespace SimpleCircuit.Components.Wires
                 builder.Line(new(-4, 0), new(4, -4));
                 builder.Cross(new(4, 0), 2);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
 
@@ -115,8 +116,8 @@ namespace SimpleCircuit.Components.Wires
                     new(1.25, -4.5), new(2, -3)
                 ], Appearance.CreateMarkerOptions());
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using SimpleCircuit.Components.Appearance;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "only one".
@@ -11,7 +13,7 @@
     public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
             var options = appearance.CreateMarkerOptions();
             builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, options);

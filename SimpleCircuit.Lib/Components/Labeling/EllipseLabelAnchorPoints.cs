@@ -92,7 +92,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "0":
                 case "c":
                 case "ci":
-                    value = new(subject.Center, new());
+                    value = new(subject.Center, new(), subject.Appearance);
                     return true; // Center
 
                 case "1":
@@ -105,7 +105,7 @@ namespace SimpleCircuit.Components.Labeling
                     Vector2 pt = new(-subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
                     Vector2 n = new(pt.Y, pt.X);
                     n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n);
+                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
                     return true; // Top-left
 
                 case "2":
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "no":
                 case "u":
                 case "up":
-                    value = new(subject.Center + new Vector2(0, -subject.RadiusY - subject.LabelMargin), new(0, -1));
+                    value = new(subject.Center + new Vector2(0, -subject.RadiusY - subject.LabelMargin), new(0, -1), subject.Appearance);
                     return true; // Top
 
                 case "3":
@@ -126,7 +126,7 @@ namespace SimpleCircuit.Components.Labeling
                     pt = new(subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
                     n = new(-pt.Y, -pt.X);
                     n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n);
+                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
                     return true; // Top-right
 
                 case "4":
@@ -134,7 +134,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "eo":
                 case "r":
                 case "right":
-                    value = new(subject.Center + new Vector2(subject.RadiusX + subject.LabelMargin, 0), new(1, 0));
+                    value = new(subject.Center + new Vector2(subject.RadiusX + subject.LabelMargin, 0), new(1, 0), subject.Appearance);
                     return true; // Right
 
                 case "5":
@@ -147,7 +147,7 @@ namespace SimpleCircuit.Components.Labeling
                     pt = new(subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
                     n = new(pt.Y, pt.X);
                     n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n);
+                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
                     return true; // Bottom-right
 
                 case "6":
@@ -155,7 +155,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "so":
                 case "d":
                 case "down":
-                    value = new(subject.Center + new Vector2(0, subject.RadiusY + subject.LabelMargin), new(0, 1));
+                    value = new(subject.Center + new Vector2(0, subject.RadiusY + subject.LabelMargin), new(0, 1), subject.Appearance);
                     return true; // Bottom
 
                 case "7":
@@ -168,7 +168,7 @@ namespace SimpleCircuit.Components.Labeling
                     pt = new(-subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
                     n = new(-pt.Y, -pt.X);
                     n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n);
+                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
                     return true; // Bottom-left
 
                 case "8":
@@ -176,7 +176,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "wo":
                 case "l":
                 case "left":
-                    value = new(subject.Center + new Vector2(-subject.RadiusX - subject.LabelMargin, 0), new(-1, 0));
+                    value = new(subject.Center + new Vector2(-subject.RadiusX - subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
                     return true; // Left
 
                 default:

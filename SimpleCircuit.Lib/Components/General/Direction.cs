@@ -42,8 +42,8 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1), Appearance);
                 _anchors.Draw(builder, this);
             }
         }

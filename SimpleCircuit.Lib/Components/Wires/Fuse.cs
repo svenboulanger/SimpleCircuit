@@ -18,9 +18,7 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
         {
-            private readonly static CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -4), new(0, -1)),
-                new LabelAnchorPoint(new(0, 4), new(0, 1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public Standards Supported { get; } = Standards.American | Standards.European;
@@ -37,6 +35,9 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
             }
 
             /// <inheritdoc />

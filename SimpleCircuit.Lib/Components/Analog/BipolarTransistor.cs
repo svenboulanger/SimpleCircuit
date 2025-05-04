@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Appearance;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -29,8 +30,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Npn : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -3), new(0, -1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "npn";
@@ -45,6 +45,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance));
             }
 
             /// <inheritdoc />
@@ -59,19 +61,18 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(-6, 4), new(6, 4), options);
 
                 // Package
-                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
                 _anchors.Draw(builder, Labels);
             }
         }
         private class Pnp : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(new(0, -3), new(0, -1)));
+            private readonly CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "pnp";
@@ -86,6 +87,8 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
+                _anchors = new(
+                    new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance));
             }
 
             /// <inheritdoc />
@@ -100,11 +103,11 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(-6, 4), new(6, 4), options);
 
                 // Package
-                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
                 _anchors.Draw(builder, Labels);
             }

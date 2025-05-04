@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 
@@ -50,8 +51,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-5, 8)
                 ], Appearance.CreatePathOptions());
 
-                var textAppearance = Appearance.Clone();
-                textAppearance.FontSize = 0.8 * AppearanceOptions.DefaultFontSize * Scale;
+                var textAppearance = new FixedTextAppearance(Appearance, 0.8 * AppearanceOptions.DefaultFontSize * Scale);
                 builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), textAppearance);
                 builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), textAppearance);
 

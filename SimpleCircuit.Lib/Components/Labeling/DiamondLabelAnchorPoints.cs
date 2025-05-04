@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Labeling
                 Vector2 n = b - a;
                 n = new Vector2(n.Y, -n.X);
                 n /= n.Length;
-                return new(p + subject.LabelMargin * n, n);
+                return new(p + subject.LabelMargin * n, n, subject.Appearance);
             }
 
             switch (name.ToLower())
@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "0":
                 case "c":
                 case "ci":
-                    value = new(c, new());
+                    value = new(c, new(), subject.Appearance);
                     return true; // Center
 
                 case "1":
@@ -68,7 +68,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "no":
                 case "u":
                 case "up":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1), subject.Appearance);
                     return true; // Top
 
                 case "3":
@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "eo":
                 case "r":
                 case "right":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0), subject.Appearance);
                     return true; // Right
 
                 case "5":
@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "so":
                 case "d":
                 case "down":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1), subject.Appearance);
                     return true; // Bottom
 
                 case "7":
@@ -128,7 +128,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "wo":
                 case "l":
                 case "left":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
                     return true; // Left
 
                 case "9":
@@ -142,7 +142,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "10":
                 case "ni":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1), subject.Appearance);
                     return true; // Top inside
 
                 case "11":
@@ -156,7 +156,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "12":
                 case "ei":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
                     return true; // Right inside
 
                 case "13":
@@ -170,7 +170,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "14":
                 case "si":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1), subject.Appearance);
                     return true; // Bottom inside
 
                 case "15":
@@ -184,7 +184,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 case "16":
                 case "wi":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0));
+                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0), subject.Appearance);
                     return true; // Left inside
 
                 default:

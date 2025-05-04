@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Builders.Markers
+﻿using SimpleCircuit.Components.Appearance;
+
+namespace SimpleCircuit.Components.Builders.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "one or many".
@@ -13,9 +15,9 @@
         private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, AppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
-            var options = appearance.CreateMarkerOptions(hasFill: false);
+            var options = appearance.CreateMarkerOptions();
             
             builder.Polyline(_points, options);
             options = appearance.CreateMarkerOptions();
