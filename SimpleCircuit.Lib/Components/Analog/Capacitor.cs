@@ -73,8 +73,6 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance, 3.5);
-                var options = Appearance.CreatePathOptions(this);
-                var markerOptions = Appearance.CreateMarkerOptions();
                 switch (Variants.Select(_curved, _electrolytic))
                 {
                     case 0:
@@ -97,7 +95,6 @@ namespace SimpleCircuit.Components.Analog
                     default:
                         // Plates
                         var plateAppearance = new LineThicknessAppearance(Appearance, 1.0);
-                        options = plateAppearance.CreatePathOptions(this);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
                         builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))

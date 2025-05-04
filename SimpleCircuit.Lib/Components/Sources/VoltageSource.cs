@@ -93,7 +93,6 @@ namespace SimpleCircuit.Components.Sources
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
-                var options = Appearance.CreatePathOptions(this);
 
                 // Circle
                 builder.Circle(new(0, 0), 6, Appearance);

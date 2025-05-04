@@ -17,13 +17,7 @@ namespace SimpleCircuit.Components.Builders.Markers
 
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
-        {
-            builder.RequiredCSS.Add(".marker.erd.zero { fill: white; }");
-            builder.RequiredCSS.Add(".marker.erd.many { fill: transparent; }");
-
-            GraphicOptions options = appearance.CreateMarkerOptions();
-            options.Style["fill"] = appearance.Background;
-            
+        {   
             builder.Polyline(_points.Select(p => p * appearance.LineThickness), appearance);
             builder.Circle(new Vector2(-9, 0) * appearance.LineThickness, 1.5, appearance);
         }

@@ -76,7 +76,6 @@ namespace SimpleCircuit.Components.Sources
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var negOptions = new LineThicknessAppearance(Appearance, 0.75);
-                var markerOptions = Appearance.CreateMarkerOptions();
 
                 // Wires
                 double offset = Length / 2;

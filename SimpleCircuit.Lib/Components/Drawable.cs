@@ -364,19 +364,19 @@ namespace SimpleCircuit.Components
         public virtual void Render(IGraphicsBuilder builder)
         {
             // Group all elements
-            var go = new GraphicOptions() { Id = Name };
+            var classes = new HashSet<string>();
             if (!string.IsNullOrWhiteSpace(Type))
-                go.Classes.Add(Type.ToLower());
+                classes.Add(Type.ToLower());
             foreach (string name in Variants)
-                go.Classes.Add(name.ToLower());
+                classes.Add(name.ToLower());
             if (GroupClasses != null)
             {
                 foreach (string name in GroupClasses)
-                    go.Classes.Add(name);
+                    classes.Add(name);
             }
 
             builder.BeginBounds();
-            builder.BeginGroup(go);
+            builder.BeginGroup(Name, classes);
 
             // Transform all the elements inside the drawing method
             builder.BeginTransform(CreateTransform());

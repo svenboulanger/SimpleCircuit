@@ -161,9 +161,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
-                var go = new GraphicOptions(GetType().Name.ToLower()) { Id = Name };
-                go.Classes.Add("blackbox");
-                builder.BeginGroup(go);
+                builder.BeginGroup(Name, ["blackbox"]);
                 var size = EndLocation - Location;
                 builder.Rectangle(Location.X, Location.Y, size.X, size.Y, Appearance, CornerRadius, CornerRadius);
 

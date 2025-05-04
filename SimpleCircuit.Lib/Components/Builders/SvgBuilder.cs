@@ -289,14 +289,17 @@ namespace SimpleCircuit.Components.Builders
         /// Begins a new group.
         /// </summary>
         /// <param name="options">The options.</param>
-        public override IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false)
+        public override IGraphicsBuilder BeginGroup(string id = null, IEnumerable<string> classes = null, bool atStart = false)
         {
             var elt = _document.CreateElement("g", Namespace);
-            options?.Apply(elt);
             if (atStart)
                 _current.PrependChild(elt);
             else
                 _current.AppendChild(elt);
+            if (!string.IsNullOrWhiteSpace(id))
+                elt.SetAttribute("id", id);
+            if (classes is not null)
+                elt.SetAttribute("class", string.Join(" ", classes));
             _current = elt;
             return this;
         }

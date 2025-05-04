@@ -15,7 +15,6 @@ namespace SimpleCircuit.Components.Builders.Markers
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
-            var options = appearance.CreateMarkerOptions();
             builder.Circle(new(), 2.0 * appearance.LineThickness, appearance);
         }
     }

@@ -146,7 +146,7 @@ namespace SimpleCircuit.Components.Annotations
                 builder.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
 
                 // Expand the bounds by the margins
-                builder.BeginGroup(new("annotation") { Id = Name }, !Variants.Contains(_over));
+                builder.BeginGroup(Name, ["annotation"], !Variants.Contains(_over));
                 var matrix = builder.CurrentTransform.Matrix.Inverse;
                 builder.BeginTransform(new Transform(-matrix * builder.CurrentTransform.Offset, matrix));
                 switch (Variants.Select(Poly))

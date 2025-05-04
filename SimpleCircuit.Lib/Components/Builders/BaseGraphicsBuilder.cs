@@ -443,7 +443,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false);
+        public abstract IGraphicsBuilder BeginGroup(string id = null, IEnumerable<string> classes = null, bool atStart = false);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder EndGroup();

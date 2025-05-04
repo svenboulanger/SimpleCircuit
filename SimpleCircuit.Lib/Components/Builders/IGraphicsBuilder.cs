@@ -50,10 +50,11 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Begins a new group.
         /// </summary>
-        /// <param name="options">The graphic options.</param>
+        /// <param name="id">The identifier of the group.</param>
+        /// <param name="classes">The classes of the group.</param>
         /// <param name="atStart">If <c>true</c>, the graphics should be added to the start of the document.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false);
+        public IGraphicsBuilder BeginGroup(string id = null, IEnumerable<string> classes = null, bool atStart = false);
 
         /// <summary>
         /// Ends a group.

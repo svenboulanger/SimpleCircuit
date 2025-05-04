@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder BeginGroup(GraphicOptions options = null, bool atStart = false) => this;
+        public override IGraphicsBuilder BeginGroup(string id = null, IEnumerable<string> classes = null, bool atStart = false) => this;
 
         /// <inheritdoc />
         public override IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options)

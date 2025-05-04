@@ -22,7 +22,6 @@ namespace SimpleCircuit.Components.Sources
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
-            private GraphicOptions _options;
 
             private readonly string _programmable = "programmable";
 
@@ -63,7 +62,6 @@ namespace SimpleCircuit.Components.Sources
                                 SetPinOffset(1, new(6, 0));
                                 break;
                         }
-                        _options = Appearance.CreatePathOptions(this);
                         break;
                 }
                 return result;

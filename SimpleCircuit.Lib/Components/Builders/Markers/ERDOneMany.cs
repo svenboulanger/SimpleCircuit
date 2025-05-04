@@ -17,12 +17,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
         {
-            var options = appearance.CreateMarkerOptions();
-            
             builder.Polyline(_points, appearance);
-            options = appearance.CreateMarkerOptions();
-
-            options.Style["fill"] = appearance.Background;
             builder.Line(new(-3, -1.5), new(-3, 1.5), appearance);
         }
     }

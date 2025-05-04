@@ -110,7 +110,6 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var options = Appearance.CreatePathOptions(this);
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inn", "inp");

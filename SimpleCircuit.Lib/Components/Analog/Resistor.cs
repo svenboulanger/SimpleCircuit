@@ -192,7 +192,6 @@ namespace SimpleCircuit.Components.Analog
                 double l = Length * 0.5;
 
                 // The rectangle
-                var options = Appearance.CreatePathOptions(this);
                 builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, Appearance);
                 if (Variants.Contains(_x))
                 {

@@ -136,20 +136,18 @@ namespace SimpleCircuit.Components.Diagrams
         /// <inheritdoc />
         public void Render(IGraphicsBuilder builder)
         {
-            builder.RequiredCSS.Add(".diagram { fill: white; }");
-
             // Group all elements
-            var go = new GraphicOptions() { Id = Name };
+            var classes = new HashSet<string>();
             if (!string.IsNullOrWhiteSpace(Type))
-                go.Classes.Add(Type.ToLower());
+                classes.Add(Type.ToLower());
             foreach (string name in Variants)
-                go.Classes.Add(name.ToLower());
+                classes.Add(name.ToLower());
             if (GroupClasses != null)
             {
                 foreach (string name in GroupClasses)
-                    go.Classes.Add(name);
+                    classes.Add(name);
             }
-            builder.BeginGroup(go);
+            builder.BeginGroup(Name, classes);
 
             // Transform all the elements inside the drawing method
             builder.BeginTransform(new(Location, Matrix2.Scale(Scale)));
