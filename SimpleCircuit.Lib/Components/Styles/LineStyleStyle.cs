@@ -1,13 +1,14 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Styles;
+using System;
 
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// A font size modifier.
+    /// An appearance that only changes the line style.
     /// </summary>
-    /// <param name="parent"></param>
-    /// <param name="fontSize"></param>
-    public class FontSizeAppearance(IStyle parent, double fontSize) : IStyle
+    /// <param name="parent">The parent appearance.</param>
+    /// <param name="lineStyle">The line style.</param>
+    public class LineStyleStyle(IStyle parent, LineStyles lineStyle) : IStyle
     {
         private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -30,7 +31,7 @@ namespace SimpleCircuit.Components.Styles
         public string FontFamily => _parent.FontFamily;
 
         /// <inheritdoc />
-        public double FontSize => fontSize;
+        public double FontSize => _parent.FontSize;
 
         /// <inheritdoc />
         public bool Bold => _parent.Bold;
@@ -39,6 +40,6 @@ namespace SimpleCircuit.Components.Styles
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public LineStyles LineStyle => _parent.LineStyle;
+        public LineStyles LineStyle => lineStyle;
     }
 }

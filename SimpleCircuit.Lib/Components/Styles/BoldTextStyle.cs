@@ -1,13 +1,12 @@
-﻿using SimpleCircuit.Components.Styles;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Components.Styles
+﻿namespace SimpleCircuit.Components.Styles
 {
-    public class LineThicknessAppearance(IStyle parent, double lineThickness = Style.DefaultLineThickness) : IStyle
+    /// <summary>
+    /// A style that boldens text.
+    /// </summary>
+    /// <param name="parent">The parent style.</param>
+    public class BoldTextStyle(IStyle parent) : IStyle
     {
-        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent;
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -16,13 +15,13 @@ namespace SimpleCircuit.Components.Styles
         public double Opacity => _parent.Opacity;
 
         /// <inheritdoc />
-        public string Background => _parent.Color;
+        public string Background => _parent.Background;
 
         /// <inheritdoc />
-        public double BackgroundOpacity => _parent.Opacity;
+        public double BackgroundOpacity => _parent.BackgroundOpacity;
 
         /// <inheritdoc />
-        public double LineThickness => lineThickness;
+        public double LineThickness => _parent.LineThickness;
 
         /// <inheritdoc />
         public string FontFamily => _parent.FontFamily;
@@ -31,7 +30,7 @@ namespace SimpleCircuit.Components.Styles
         public double FontSize => _parent.FontSize;
 
         /// <inheritdoc />
-        public bool Bold => _parent.Bold;
+        public bool Bold => true;
 
         /// <inheritdoc />
         public double LineSpacing => _parent.LineSpacing;

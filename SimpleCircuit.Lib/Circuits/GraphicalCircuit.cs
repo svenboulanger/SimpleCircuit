@@ -51,7 +51,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets or sets the minimum spacing in X- and Y-direction.
         /// </summary>
-        public Vector2 Spacing { get; set; } = new(20.0, 20.0);
+        public Vector2 Spacing { get; set; } = new(10.0, 10.0);
 
         /// <summary>
         /// Gets or sets a flag that determines whether bounds are rendered.

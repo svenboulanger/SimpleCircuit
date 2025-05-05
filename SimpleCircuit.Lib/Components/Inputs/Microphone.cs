@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.Inputs
                 builder.ExtendPins(Pins, Appearance);
                 builder.Circle(new(), 4, Appearance);
 
-                var appearance = new LineThicknessAppearance(Appearance, 1.0);
+                var appearance = new StrokeWidthStyle(Appearance, 1.0);
                 builder.Line(new(4, -4), new(4, 4), appearance);
                 _anchors.Draw(builder, this);
             }

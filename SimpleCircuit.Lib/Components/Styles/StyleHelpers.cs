@@ -1,10 +1,31 @@
-﻿using SimpleCircuit.Components.Styles;
-using System.Text;
+﻿using System.Text;
 
 namespace SimpleCircuit.Components.Styles
 {
     public static class StyleHelpers
     {
+        /// <summary>
+        /// Gets a style that overrides another style to have the same fill as stroke color.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle AsFilled(this IStyle style) => new FilledMarkerStyle(style);
+
+        /// <summary>
+        /// Gets a style that overrides another style to have no fill.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle AsStroke(this IStyle style) => new NoFillStyle(style);
+
+        /// <summary>
+        /// Gets a style that overrides another style to have a fixed stroke width.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="strokeWidth">The stroke width.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle AsStrokeWidth(this IStyle style, double strokeWidth) => new StrokeWidthStyle(style, strokeWidth);
+
         /// <summary>
         /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.
         /// Lines do not need to have any background color.

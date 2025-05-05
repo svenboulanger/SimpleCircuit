@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components
                     ], Appearance);
                 else
                 {
-                    var options = new LineThicknessAppearance(Appearance, 1.0);
+                    var options = new StrokeWidthStyle(Appearance, 1.0);
                     builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options);
                 }
                 _anchors.Draw(builder, this);

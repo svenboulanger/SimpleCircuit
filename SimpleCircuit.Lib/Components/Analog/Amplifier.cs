@@ -136,7 +136,7 @@ namespace SimpleCircuit.Components.Analog
                 _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance);
 
                 // Differential input?
-                var markerAppearance = new LineMarkerAppearanceOptions(Appearance);
+                var markerAppearance = new NoFillStyle(Appearance);
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");

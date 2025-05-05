@@ -6,6 +6,7 @@ namespace SimpleCircuit.Components.Styles
     /// An <see cref="IStyle"/> that fills up any shapes with the foreground color. It combines the following modifications:
     /// the shape will have a fill, stroke and opacity as the foreground color and the line style is removed.
     /// </summary>
+    /// <param name="parent">The parent style.</param>
     public class FilledMarkerStyle(IStyle parent) : IStyle
     {
         private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));

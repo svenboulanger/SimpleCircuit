@@ -5,6 +5,7 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
 
@@ -247,20 +248,24 @@ namespace SimpleCircuit.Components.Builders
                 case OverlineSpan overlineSpan:
                     {
                         BuildTextSVG(offset, overlineSpan.Base, parent, current);
-                        Path(b => b
-                            .MoveTo(offset + overlineSpan.Start)
-                            .LineTo(offset + overlineSpan.End),
-                            overlineSpan.Appearance);
+
+                        // Make the line manually as it bypasses the transform step
+                        var path = _document.CreateElement("path", Namespace);
+                        _current.AppendChild(path);
+                        path.SetAttribute("d", $"M{(offset + overlineSpan.Start).ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
+                        path.SetAttribute("style", $"stroke: {overlineSpan.Appearance.Color}; stroke-width: {overlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
                     }
                     break;
 
                 case UnderlineSpan underlineSpan:
                     {
                         BuildTextSVG(offset, underlineSpan.Base, parent, current);
-                        Path(b => b
-                            .MoveTo(offset + underlineSpan.Start)
-                            .LineTo(offset + underlineSpan.End),
-                            underlineSpan.Appearance);
+
+                        // Make the line manually as it bypasses the transform step
+                        var path = _document.CreateElement("path", Namespace);
+                        _current.AppendChild(path);
+                        path.SetAttribute("d", $"M{(offset + underlineSpan.Start).ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
+                        path.SetAttribute("style", $"stroke: {underlineSpan.Appearance.Color}; stroke-width: {underlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
                     }
                     break;
 

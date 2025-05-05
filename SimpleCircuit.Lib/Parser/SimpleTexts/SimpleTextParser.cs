@@ -142,7 +142,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                                 ContinueText(lexer, context);
                                 return CreateTextSpan(context);
                             }
-
+                        
                         default:
                             context.Builder.Append(content);
                             lexer.Next();
@@ -177,13 +177,13 @@ namespace SimpleCircuit.Parser.SimpleTexts
         private static Span CreateOverline(Span @base, SimpleTextContext context)
         {
             double margin = context.Appearance.FontSize * 0.1;
-            var appearance = new LineThicknessAppearance(context.Appearance, context.Appearance.FontSize * 0.075);
+            var appearance = new StrokeWidthStyle(context.Appearance, context.Appearance.FontSize * 0.075);
             return new OverlineSpan(@base, margin, appearance);
         }
         private static Span CreateUnderline(Span @base, SimpleTextContext context)
         {
             double margin = context.Appearance.FontSize * 0.1;
-            var appearance = new LineThicknessAppearance(context.Appearance, context.Appearance.FontSize * 0.075);
+            var appearance = new StrokeWidthStyle(context.Appearance, context.Appearance.FontSize * 0.075);
             return new UnderlineSpan(@base, margin, appearance);
         }
         private static Span CreateTextSpan(SimpleTextContext context)

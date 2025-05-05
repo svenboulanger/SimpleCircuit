@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         // Plates
-                        var planeAppearance = new LineThicknessAppearance(Appearance, 1.0);
+                        var planeAppearance = new StrokeWidthStyle(Appearance, 1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance);
                         builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance);
                         if (Variants.Contains(_signs))
@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Analog
 
                     default:
                         // Plates
-                        var plateAppearance = new LineThicknessAppearance(Appearance, 1.0);
+                        var plateAppearance = new StrokeWidthStyle(Appearance, 1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
                         builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))

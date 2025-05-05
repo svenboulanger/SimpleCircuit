@@ -1,14 +1,13 @@
-﻿using SimpleCircuit.Components.Styles;
-using System;
+﻿using System;
 
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// A line marker appearance.
+    /// Represents a style based on a parent style that overrides the stroke width.
     /// </summary>
-    /// <param name="parent">The parent appearance.</param>
-    /// <param name="lineThickness">The line thickness.</param>
-    public class LineMarkerAppearanceOptions(IStyle parent, double? lineThickness = Style.DefaultLineThickness) : IStyle
+    /// <param name="parent">The parent style.</param>
+    /// <param name="lineThickness">The stroke width.</param>
+    public class StrokeWidthStyle(IStyle parent, double lineThickness = Style.DefaultLineThickness) : IStyle
     {
         private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -25,7 +24,7 @@ namespace SimpleCircuit.Components.Styles
         public double BackgroundOpacity => _parent.Opacity;
 
         /// <inheritdoc />
-        public double LineThickness => lineThickness ?? _parent.LineThickness;
+        public double LineThickness => lineThickness;
 
         /// <inheritdoc />
         public string FontFamily => _parent.FontFamily;
@@ -40,6 +39,6 @@ namespace SimpleCircuit.Components.Styles
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public LineStyles LineStyle => LineStyles.None;
+        public LineStyles LineStyle => _parent.LineStyle;
     }
 }
