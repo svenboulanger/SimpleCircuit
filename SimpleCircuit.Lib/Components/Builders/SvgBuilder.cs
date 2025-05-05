@@ -246,6 +246,7 @@ namespace SimpleCircuit.Components.Builders
 
                 case OverlineSpan overlineSpan:
                     {
+                        BuildTextSVG(offset, overlineSpan.Base, parent, current);
                         Path(b => b
                             .MoveTo(offset + overlineSpan.Start)
                             .LineTo(offset + overlineSpan.End),
@@ -255,6 +256,7 @@ namespace SimpleCircuit.Components.Builders
 
                 case UnderlineSpan underlineSpan:
                     {
+                        BuildTextSVG(offset, underlineSpan.Base, parent, current);
                         Path(b => b
                             .MoveTo(offset + underlineSpan.Start)
                             .LineTo(offset + underlineSpan.End),

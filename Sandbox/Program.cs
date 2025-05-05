@@ -12,7 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-X(""A_\overline{1}^2"")
+X(""A_\overline{1}^\underline{2}"")
 ";
 
             var logger = new Logger();

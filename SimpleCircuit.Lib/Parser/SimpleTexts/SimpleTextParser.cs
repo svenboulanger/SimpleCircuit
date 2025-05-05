@@ -89,7 +89,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                     }
                 }
                 context.Appearance = oldAppearance;
-                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Appearance.FontSize, new(0, 0.05 * context.Appearance.FontSize));
+                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Appearance.FontSize, new(0, 0.075 * context.Appearance.FontSize));
             }
             return result;
         }
