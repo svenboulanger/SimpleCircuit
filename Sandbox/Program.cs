@@ -12,16 +12,7 @@ namespace Sandbox
         static void Main()
         {
             string script = @"
-.property A t = 1 label1=""test"" label3=""test"" fg=""blue""
-A
-A(dashed)
-A(dashed, programmable, fg=""green"")
-A(diffin, diffout)
-A(dashed, diffin, diffout)
-A(dashed, diffin, diffout, programmable)
-A(dotted, schmitt)
-A(dotted, comparator)
-A(scale=5, dotted, schmitt)
+X(""A_\overline{1}^2"")
 ";
 
             var logger = new Logger();

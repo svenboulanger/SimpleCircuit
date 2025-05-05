@@ -1,25 +1,24 @@
-﻿using SimpleCircuit.Components.Builders;
-using System.Drawing;
+﻿using SimpleCircuit.Components.Styles;
 using System.Text;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
-    public static class AppearanceHelpers
+    public static class StyleHelpers
     {
         /// <summary>
-        /// Creates a style attribute value for strokes and no fill that represents the <see cref="IAppearanceOptions"/>.
+        /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.
         /// Lines do not need to have any background color.
         /// </summary>
         /// <param name="appearance">The appearance.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeStyle(this IAppearanceOptions appearance)
+        public static string CreateStrokeStyle(this IStyle appearance)
         {
             var style = new StringBuilder();
 
             // Deal with the foreground
             if (appearance.Opacity.IsZero())
                 style.Append("stroke: none; ");
-            else if ((appearance.Opacity - AppearanceOptions.Opaque).IsZero() || appearance.Opacity > AppearanceOptions.Opaque)
+            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
                 style.Append($"stroke: {appearance.Color}; ");
             else
             {
@@ -37,18 +36,18 @@ namespace SimpleCircuit.Components.Appearance
         }
 
         /// <summary>
-        /// Creates a style attribute value for strokes with fill that represents the <see cref="IAppearanceOptions"/>.
+        /// Creates a style attribute value for strokes with fill that represents the <see cref="IStyle"/>.
         /// </summary>
         /// <param name="appearance">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeFillStyle(this IAppearanceOptions appearance)
+        public static string CreateStrokeFillStyle(this IStyle appearance)
         {
             var style = new StringBuilder();
 
             // Deal with the foreground
             if (appearance.Opacity.IsZero())
                 style.Append("stroke: none; ");
-            else if ((appearance.Opacity - AppearanceOptions.Opaque).IsZero() || appearance.Opacity > AppearanceOptions.Opaque)
+            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
                 style.Append($"stroke: {appearance.Color}; ");
             else
             {
@@ -64,11 +63,11 @@ namespace SimpleCircuit.Components.Appearance
             // Allow other path options
             switch (appearance.LineStyle)
             {
-                case 0:
+                case LineStyles.Dashed:
                     style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 4).ToSVG()}; ");
                     break;
 
-                case 1:
+                case LineStyles.Dotted:
                     style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 4).ToSVG()}; ");
                     break;
             }
@@ -76,7 +75,7 @@ namespace SimpleCircuit.Components.Appearance
             // Deal with the background
             if (appearance.BackgroundOpacity.IsZero())
                 style.Append("fill: none;");
-            else if ((appearance.BackgroundOpacity - AppearanceOptions.Opaque).IsZero() || appearance.BackgroundOpacity > AppearanceOptions.Opaque)
+            else if ((appearance.BackgroundOpacity - Style.Opaque).IsZero() || appearance.BackgroundOpacity > Style.Opaque)
                 style.Append($"fill: {appearance.Background};");
             else
             {
@@ -87,18 +86,18 @@ namespace SimpleCircuit.Components.Appearance
         }
 
         /// <summary>
-        /// Creats a style attribute for text that represents the <see cref="IAppearanceOptions"/>.
+        /// Creats a style attribute for text that represents the <see cref="IStyle"/>.
         /// </summary>
         /// <param name="appearance">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateTextStyle(this IAppearanceOptions appearance)
+        public static string CreateTextStyle(this IStyle appearance)
         {
             var sb = new StringBuilder();
             sb.Append($"font-family: {appearance.FontFamily}; ");
             sb.Append($"font-size: {appearance.FontSize.ToSVG()}pt; ");
             if (appearance.Opacity.IsZero())
                 sb.Append($"fill: none; ");
-            else if ((appearance.Opacity - AppearanceOptions.Opaque).IsZero() || appearance.Opacity > AppearanceOptions.Opaque)
+            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
                 sb.Append($"fill: {appearance.Color}; ");
             else
                 sb.Append($"fill: {appearance.Color}; fill-opacity: {appearance.Opacity}; ");

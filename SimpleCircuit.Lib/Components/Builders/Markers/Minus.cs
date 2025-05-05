@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Builders.Markers
 {
@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         public bool OppositeSide { get; set; }
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
         {
             Vector2 offset = OppositeSide ? new(-2.5, 3) : new(-2.5, -3);
             builder.BeginTransform(new(offset, builder.CurrentTransform.Matrix.Inverse));

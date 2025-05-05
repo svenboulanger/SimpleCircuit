@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Annotations
         public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />
-        public AppearanceOptions Appearance { get; } = new();
+        public Style Appearance { get; } = new();
 
         Vector2 IBoxDrawable.TopLeft => _topLeft;
         Vector2 IBoxDrawable.BottomRight => _bottomRight;

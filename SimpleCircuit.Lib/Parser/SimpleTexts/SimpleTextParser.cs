@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Appearance;
-using System.Collections.Generic;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
@@ -47,7 +46,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
                 var oldAppearance = context.Appearance;
-                context.Appearance = new FontSizeAppearance(context.Appearance, context.Appearance.FontSize * 0.8);
+                context.Appearance = new FontSizeStyle(context.Appearance, context.Appearance.FontSize * 0.8);
                 Span sub = null, super = null;
                 if (lexer.Branch(TokenType.Subscript))
                 {

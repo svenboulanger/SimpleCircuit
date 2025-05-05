@@ -1,12 +1,13 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Styles;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
-    public class LineThicknessAppearance(IAppearanceOptions parent, double lineThickness = AppearanceOptions.DefaultLineThickness) : IAppearanceOptions
+    public class LineThicknessAppearance(IStyle parent, double lineThickness = Style.DefaultLineThickness) : IStyle
     {
-        private readonly IAppearanceOptions _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -36,6 +37,6 @@ namespace SimpleCircuit.Components.Appearance
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public int LineStyle => _parent.LineStyle;
+        public LineStyles LineStyle => _parent.LineStyle;
     }
 }

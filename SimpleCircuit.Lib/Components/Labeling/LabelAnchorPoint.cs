@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -25,7 +26,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Gets the options used for the label.
         /// </summary>
-        public IAppearanceOptions Appearance { get; }
+        public IStyle Appearance { get; }
 
         /// <summary>
         /// Creates a new <see cref="LabelAnchorPoint"/>.
@@ -34,7 +35,7 @@ namespace SimpleCircuit.Components.Labeling
         {
             Location = default;
             Expand = default;
-            Appearance = new AppearanceOptions();
+            Appearance = new Style();
         }
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="location">The location.</param>
         /// <param name="expand">The expansion.</param>
         /// <param name="appearance">The appearance options.</param>
-        public LabelAnchorPoint(Vector2 location, Vector2 expand, IAppearanceOptions appearance)
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, IStyle appearance)
         {
             Location = location;
             Expand = expand;

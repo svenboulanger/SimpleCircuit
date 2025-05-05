@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Circuits.Spans
@@ -12,7 +12,7 @@ namespace SimpleCircuit.Circuits.Spans
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
     /// <param name="thickness">The thickness.</param>
-    public class UnderlineSpan(Span @base, double margin, IAppearanceOptions appearance) : Span
+    public class UnderlineSpan(Span @base, double margin, IStyle appearance) : Span
     {
         /// <summary>
         /// Gets the content.
@@ -22,7 +22,7 @@ namespace SimpleCircuit.Circuits.Spans
         /// <summary>
         /// Gets the appearance.
         /// </summary>
-        public IAppearanceOptions Appearance { get; } = appearance;
+        public IStyle Appearance { get; } = appearance;
 
         /// <summary>
         /// Gets the margin.

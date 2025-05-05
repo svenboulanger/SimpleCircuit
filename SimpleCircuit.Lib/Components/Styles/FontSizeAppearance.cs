@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// A font size modifier.
     /// </summary>
     /// <param name="parent"></param>
     /// <param name="fontSize"></param>
-    public class FontSizeAppearance(IAppearanceOptions parent, double fontSize) : IAppearanceOptions
+    public class FontSizeAppearance(IStyle parent, double fontSize) : IStyle
     {
-        private readonly IAppearanceOptions _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -39,6 +39,6 @@ namespace SimpleCircuit.Components.Appearance
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public int LineStyle => _parent.LineStyle;
+        public LineStyles LineStyle => _parent.LineStyle;
     }
 }

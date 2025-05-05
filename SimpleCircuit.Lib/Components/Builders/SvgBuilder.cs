@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SimpleTexts;
@@ -62,7 +62,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options)
+        public override IGraphicsBuilder Line(Vector2 start, Vector2 end, IStyle options)
         {
             start = CurrentTransform.Apply(start);
             end = CurrentTransform.Apply(end);
@@ -81,7 +81,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options)
+        public override IGraphicsBuilder Circle(Vector2 center, double radius, IStyle options)
         {
             radius = CurrentTransform.ApplyDirection(new(radius, 0)).Length;
             center = CurrentTransform.Apply(center);
@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options)
+        public override IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IStyle options)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options)
+        public override IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IStyle options)
         {
             StringBuilder sb = new();
             foreach (var pt in points)
@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options)
+        public override IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IStyle options)
         {
             double kx = rx * 0.552284749831;
             double ky = ry * 0.552284749831;
@@ -195,7 +195,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IAppearanceOptions appearance)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return this;
@@ -268,7 +268,7 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options)
+        public override IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options)
         {
             if (pathBuild == null)
                 return this;

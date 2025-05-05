@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-9, -12, 18, 24, Appearance, new());
 
                 // Clock thingy
-                var textAppearance = new FixedTextAppearance(Appearance);
+                var textAppearance = new FontSizeStyle(Appearance);
                 builder.Polyline([
                     new Vector2(-9, 4),
                     new Vector2(-7, 6),
@@ -64,7 +64,7 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["nq"].Connections > 0)
                     builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0), textAppearance);
 
-                textAppearance = new FixedTextAppearance(Appearance, fontSize: 0.8 * AppearanceOptions.DefaultFontSize * 0.8);
+                textAppearance = new FontSizeStyle(Appearance, fontSize: 0.8 * Style.DefaultFontSize * 0.8);
                 if (Pins["s"].Connections > 0)
                     builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), textAppearance);
                 if (Pins["r"].Connections > 0)

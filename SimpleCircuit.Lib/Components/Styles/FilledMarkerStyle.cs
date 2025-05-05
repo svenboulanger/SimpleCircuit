@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
-    public class FixedTextAppearance(IAppearanceOptions parent, double? fontSize = AppearanceOptions.DefaultFontSize, double? lineThickness = 0.1) : IAppearanceOptions
+    /// <summary>
+    /// An <see cref="IStyle"/> that fills up any shapes with the foreground color. It combines the following modifications:
+    /// the shape will have a fill, stroke and opacity as the foreground color and the line style is removed.
+    /// </summary>
+    public class FilledMarkerStyle(IStyle parent) : IStyle
     {
-        private readonly IAppearanceOptions _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -21,13 +23,13 @@ namespace SimpleCircuit.Components.Appearance
         public double BackgroundOpacity => _parent.Opacity;
 
         /// <inheritdoc />
-        public double LineThickness => lineThickness ?? _parent.LineThickness;
+        public double LineThickness => _parent.LineThickness;
 
         /// <inheritdoc />
         public string FontFamily => _parent.FontFamily;
 
         /// <inheritdoc />
-        public double FontSize => fontSize ?? _parent.FontSize;
+        public double FontSize => _parent.FontSize;
 
         /// <inheritdoc />
         public bool Bold => _parent.Bold;
@@ -36,6 +38,6 @@ namespace SimpleCircuit.Components.Appearance
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public int LineStyle => _parent.LineStyle;
+        public LineStyles LineStyle => LineStyles.None;
     }
 }

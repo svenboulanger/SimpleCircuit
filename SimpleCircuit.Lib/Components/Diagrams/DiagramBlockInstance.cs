@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components.Diagrams
         public Labels Labels { get; } = new();
 
         /// <inheritdoc />
-        public AppearanceOptions Appearance { get; } = new();
+        public Style Appearance { get; } = new();
 
         /// <summary>
         /// Creates a new instance for a block diagram.

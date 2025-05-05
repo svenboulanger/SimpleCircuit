@@ -1,15 +1,16 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Styles;
+using System;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// A line marker appearance.
     /// </summary>
     /// <param name="parent">The parent appearance.</param>
     /// <param name="lineThickness">The line thickness.</param>
-    public class LineMarkerAppearanceOptions(IAppearanceOptions parent, double? lineThickness = AppearanceOptions.DefaultLineThickness) : IAppearanceOptions
+    public class LineMarkerAppearanceOptions(IStyle parent, double? lineThickness = Style.DefaultLineThickness) : IStyle
     {
-        private readonly IAppearanceOptions _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -39,6 +40,6 @@ namespace SimpleCircuit.Components.Appearance
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public int LineStyle => -1;
+        public LineStyles LineStyle => LineStyles.None;
     }
 }

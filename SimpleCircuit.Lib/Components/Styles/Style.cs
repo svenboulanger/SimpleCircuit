@@ -1,14 +1,14 @@
-﻿namespace SimpleCircuit.Components.Appearance
+﻿namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// Describes appearance options that are derived from another.
     /// </summary>
-    public class AppearanceOptions : IAppearanceOptions
+    public class Style : IStyle
     {
         private string _color, _background, _fontFamily;
         private double? _opacity, _backgroundOpacity, _lineThickness, _fontSize, _lineSpacing;
         private bool? _bold;
-        private int? _lineStyle;
+        private LineStyles? _lineStyle;
 
         public const string Black = "black";
         public const string None = "none";
@@ -17,10 +17,10 @@
         public const string DefaultFontFamily = "Arial";
         public const double DefaultFontSize = 4.0;
         public const double DefaultLineSpacing = 1.5;
-        public const int DefaultLineStyle = -1;
+        public const LineStyles DefaultLineStyle = LineStyles.None;
 
         /// <inheritdoc />
-        public IAppearanceOptions Parent { get; set; }
+        public IStyle Parent { get; set; }
 
         /// <inheritdoc />
         public string Color { get => _color ?? Parent?.Color ?? Black; set => _color = value; }
@@ -50,6 +50,6 @@
         public double LineSpacing { get => _lineSpacing ?? Parent?.LineSpacing ?? DefaultLineSpacing; set => _lineSpacing = value; }
 
         /// <inheritdoc />
-        public int LineStyle { get => _lineStyle ?? Parent?.LineStyle ?? DefaultLineStyle; set => _lineStyle = value; }
+        public LineStyles LineStyle { get => _lineStyle ?? Parent?.LineStyle ?? DefaultLineStyle; set => _lineStyle = value; }
     }
 }

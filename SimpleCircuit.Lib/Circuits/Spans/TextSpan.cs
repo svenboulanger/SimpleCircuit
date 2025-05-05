@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using System.Text;
 
 namespace SimpleCircuit.Circuits.Spans
@@ -14,7 +14,7 @@ namespace SimpleCircuit.Circuits.Spans
     /// <param name="fontFamily">The font family.</param>
     /// <param name="isBold">If <c>true</c>, the font weight is bold.</param>
     /// <param name="size">The size of the text.</param>
-    public class TextSpan(string content, IAppearanceOptions appearance, SpanBounds bounds) : Span
+    public class TextSpan(string content, IStyle appearance, SpanBounds bounds) : Span
     {
         private readonly SpanBounds _bounds = bounds;
 
@@ -26,7 +26,7 @@ namespace SimpleCircuit.Circuits.Spans
         /// <summary>
         /// Gets the appearance.
         /// </summary>
-        public IAppearanceOptions Appearance { get; } = appearance;
+        public IStyle Appearance { get; } = appearance;
 
         /// <inheritdoc />
         protected override SpanBounds ComputeBounds() => _bounds;

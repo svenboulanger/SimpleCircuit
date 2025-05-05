@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using System.Linq;
 
 namespace SimpleCircuit.Components.Builders.Markers
@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
         {
             builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), appearance);
             builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), appearance);

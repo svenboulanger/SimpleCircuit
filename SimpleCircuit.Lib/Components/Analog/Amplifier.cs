@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -118,7 +118,12 @@ namespace SimpleCircuit.Components.Analog
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
 
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted);
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            1 => LineStyles.Dashed,
+                            2 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;

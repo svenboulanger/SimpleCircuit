@@ -1,8 +1,9 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -18,7 +19,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
-            private readonly IAppearanceOptions _signAppearance;
+            private readonly IStyle _signAppearance;
 
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";

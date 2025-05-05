@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="parentOptions">The appearance options of the parent drawable.</param>
-        public void Format(IPrepareContext context, IAppearanceOptions parentOptions)
+        public void Format(IPrepareContext context, IStyle parentOptions)
         {
             foreach (var label in _labels)
                 label?.Format(context, parentOptions);

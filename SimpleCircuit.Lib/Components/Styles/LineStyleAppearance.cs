@@ -1,15 +1,16 @@
-﻿using System;
+﻿using SimpleCircuit.Components.Styles;
+using System;
 
-namespace SimpleCircuit.Components.Appearance
+namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// An appearance that only changes the line style.
     /// </summary>
     /// <param name="parent">The parent appearance.</param>
     /// <param name="lineStyle">The line style.</param>
-    public class LineStyleAppearance(IAppearanceOptions parent, int lineStyle) : IAppearanceOptions
+    public class LineStyleAppearance(IStyle parent, LineStyles lineStyle) : IStyle
     {
-        private readonly IAppearanceOptions _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         /// <inheritdoc />
         public string Color => _parent.Color;
@@ -39,6 +40,6 @@ namespace SimpleCircuit.Components.Appearance
         public double LineSpacing => _parent.LineSpacing;
 
         /// <inheritdoc />
-        public int LineStyle => lineStyle;
+        public LineStyles LineStyle => lineStyle;
     }
 }

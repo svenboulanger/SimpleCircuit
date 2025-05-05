@@ -1,9 +1,9 @@
-﻿namespace SimpleCircuit.Components.Appearance
+﻿namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// Describes the appearance of an item.
     /// </summary>
-    public interface IAppearanceOptions
+    public interface IStyle
     {
         /// <summary>
         /// Gets or sets the foreground color.
@@ -53,6 +53,6 @@
         /// <summary>
         /// Gets or sets the line style.
         /// </summary>
-        public int LineStyle { get; }
+        public LineStyles LineStyle { get; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components
         /// <summary>
         /// Gets the appearance options of the drawable.
         /// </summary>
-        public AppearanceOptions Appearance { get; }
+        public Style Appearance { get; }
 
         /// <summary>
         /// Sets a property.

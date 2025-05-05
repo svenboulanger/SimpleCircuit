@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 using System;
 using System.Text;
 using System.Xml;
@@ -26,7 +26,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <summary>
         /// Gets or sets the current appearance.
         /// </summary>
-        public IAppearanceOptions Appearance { get; set; }
+        public IStyle Appearance { get; set; }
 
         /// <summary>
         /// Gets or sets the expansion direction.

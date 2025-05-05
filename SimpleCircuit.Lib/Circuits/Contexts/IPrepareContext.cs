@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using System.Collections.Generic;
 
@@ -47,7 +47,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Gets the global appearance that any drawable may derive from.
         /// </summary>
-        public IAppearanceOptions GlobalAppearance { get; }
+        public IStyle GlobalAppearance { get; }
 
         /// <summary>
         /// Finds a circuit presence by a given name.

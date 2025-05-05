@@ -1,7 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Markers;
@@ -173,7 +174,7 @@ namespace SimpleCircuit.Components.Builders
                     case "group":
                     case "g":
                         // Parse options
-                        IAppearanceOptions options = new AppearanceOptions();
+                        IStyle options = new Style();
                         ParseAppearanceOptions(options, node);
                         BeginGroup();
                         DrawXmlActions(node, context);
@@ -200,7 +201,7 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             // Draw the line
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
             Line(new(x1, y1), new(x2, y2), appearance);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), appearance);
@@ -220,7 +221,7 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node);
 
             // Draw the polygon
@@ -243,7 +244,7 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             // Draw the polyline
@@ -272,7 +273,7 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node);
 
             // Draw the circle
@@ -289,7 +290,7 @@ namespace SimpleCircuit.Components.Builders
             if (string.IsNullOrWhiteSpace(pathData))
                 return;
 
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
 
             if (!string.IsNullOrWhiteSpace(pathData))
@@ -321,7 +322,7 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node);
 
             // Draw the rectangle
@@ -342,7 +343,7 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             string value = node.Attributes?["value"]?.Value;
-            IAppearanceOptions appearance = new AppearanceOptions();
+            IStyle appearance = new Style();
             ParseAppearanceOptions(appearance, node);
 
             if (value != null && context != null)
@@ -360,19 +361,19 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            var options = new AppearanceOptions();
+            var options = new Style();
             ParseAppearanceOptions(options, node);
             context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny), options));
         }
 
-        private void ParseAppearanceOptions(IAppearanceOptions options, XmlNode node)
+        private void ParseAppearanceOptions(IStyle options, XmlNode node)
         {
             // Parse the style
 
             // Stroke attributes
         }
 
-        private void ParseAppearanceOptions(IAppearanceOptions options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private void ParseAppearanceOptions(IStyle options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
             ParseAppearanceOptions(options, node);
 
@@ -416,7 +417,7 @@ namespace SimpleCircuit.Components.Builders
             }
         }
 
-        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation, IAppearanceOptions appearance)
+        private void DrawMarkers(HashSet<Marker> markers, Vector2 location, Vector2 orientation, IStyle appearance)
         {
             if (markers == null)
                 return;
@@ -449,27 +450,27 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder EndGroup();
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Line(Vector2 start, Vector2 end, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Circle(Vector2 center, double radius, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options);
+        public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
         public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IAppearanceOptions appearance);
+        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance);
     }
 }

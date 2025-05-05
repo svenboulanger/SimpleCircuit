@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Appearance;
+﻿using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Builders.Markers
 {
@@ -13,7 +13,7 @@ namespace SimpleCircuit.Components.Builders.Markers
     public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IAppearanceOptions appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
         {
             builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, appearance);
             builder.Line(new Vector2(-8, -3) * appearance.LineThickness, new Vector2(-8, 3) * appearance.LineThickness, appearance);

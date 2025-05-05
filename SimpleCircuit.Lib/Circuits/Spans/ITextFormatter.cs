@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Appearance;
-using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Circuits.Spans
 {
@@ -19,6 +19,6 @@ namespace SimpleCircuit.Circuits.Spans
         /// <param name="content">The content.</param>
         /// <param name="parentAppearance">The parent appearance options.</param>
         /// <returns>Returns the formatted content.</returns>
-        public Span Format(string content, IAppearanceOptions parentAppearance);
+        public Span Format(string content, IStyle parentAppearance);
     }
 }

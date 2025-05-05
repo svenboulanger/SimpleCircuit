@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using System;
@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="end">The end.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Line(Vector2 start, Vector2 end, IAppearanceOptions options);
+        public IGraphicsBuilder Line(Vector2 start, Vector2 end, IStyle options);
 
         /// <summary>
         /// Draws a circle.
@@ -106,7 +106,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="radius">The radius.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Circle(Vector2 center, double radius, IAppearanceOptions options);
+        public IGraphicsBuilder Circle(Vector2 center, double radius, IStyle options);
 
         /// <summary>
         /// Draws a polyline.
@@ -114,7 +114,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="points">The points.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IAppearanceOptions options);
+        public IGraphicsBuilder Polyline(IEnumerable<Vector2> points, IStyle options);
 
         /// <summary>
         /// Draws a polygon.
@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="points">The points.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphic builder for chaining.</returns>
-        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IAppearanceOptions options);
+        public IGraphicsBuilder Polygon(IEnumerable<Vector2> points, IStyle options);
 
         /// <summary>
         /// Draws an ellipse.
@@ -132,7 +132,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="ry">The radius along the Y-axis.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphic builder for chaining.</returns>
-        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IAppearanceOptions options);
+        public IGraphicsBuilder Ellipse(Vector2 center, double rx, double ry, IStyle options);
 
         /// <summary>
         /// Draws a path.
@@ -140,7 +140,7 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="pathBuild">The description of the path.</param>
         /// <param name="options">The graphic options.</param>
         /// <returns>Returns the graphics builder for chaining methods.</returns>
-        public IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IAppearanceOptions options);
+        public IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <summary>
         /// Draws text.
@@ -160,6 +160,6 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="expand">The direction in which text can expand.</param>
         /// <param name="appearance">The parent appearance options.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IAppearanceOptions appearance);
+        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="parentAppearance">The appearance options of the parent drawable.</param>
-        public void Format(IPrepareContext context, IAppearanceOptions parentAppearance)
+        public void Format(IPrepareContext context, IStyle parentAppearance)
         {
             Formatted = context.TextFormatter.Format(Value, parentAppearance);
         }

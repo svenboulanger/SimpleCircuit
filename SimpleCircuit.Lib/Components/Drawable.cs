@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Appearance;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
@@ -65,7 +65,7 @@ namespace SimpleCircuit.Components
         public Bounds Bounds { get; private set; }
 
         /// <inheritdoc />
-        public AppearanceOptions Appearance { get; } = new();
+        public Style Appearance { get; } = new();
 
         /// <summary>
         /// Creates a new component.
