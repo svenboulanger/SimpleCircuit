@@ -10,13 +10,6 @@ namespace SimpleCircuit.Circuits.Spans
     /// <param name="measurer">The text measurer.</param>
     public class SimpleTextFormatter(ITextMeasurer measurer) : ITextFormatter
     {
-        /// <inheritdoc />
-        public string FontFamily
-        {
-            get => Measurer.FontFamily;
-            set => Measurer.FontFamily = value;
-        }
-
         /// <summary>
         /// Gets the text measurer.
         /// </summary>

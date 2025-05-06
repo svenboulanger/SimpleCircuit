@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using Svg.Skia;
 using System.Text.RegularExpressions;
@@ -12,7 +13,7 @@ namespace SimpleCircuit
     public partial class Job
     {
         private readonly JobDiagnosticLogger _logger = new();
-        private ParsingContext? _context = null;
+        private EvaluationContext? _context = null;
 
         /// <summary>
         /// Gets the number of errors.
@@ -49,9 +50,16 @@ namespace SimpleCircuit
 
             // Now we can start parsing the input file
             {
-                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript.AsMemory(), Filename);
-                _context = new ParsingContext() { Diagnostics = _logger };
-                Parser.SimpleCircuitParser.Parse(lexer, _context);
+                var lexer = SimpleCircuitLexer.FromString(simpleCircuitScript, Filename);
+                
+                // Parse
+                var parsingContext = new ParsingContext() { Diagnostics = _logger };
+                if (!SimpleCircuitParser.Parse(lexer, parsingContext, out var statements))
+                    return;
+
+                // Evaluate
+                _context = new EvaluationContext(true, null, parsingContext.Options);
+                StatementEvaluator.Evaluate(statements, _context);
             }
         }
 
@@ -88,7 +96,7 @@ namespace SimpleCircuit
             // Render
             if (_context?.Circuit != null && _context.Circuit.Count > 0)
             {
-                var doc = _context.Circuit.Render(diagnostics, extraCss: _context.ExtraCss);
+                var doc = _context.Circuit.Render(diagnostics);
 
                 switch (Path.GetExtension(outputFilename).ToLower())
                 {

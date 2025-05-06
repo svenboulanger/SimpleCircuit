@@ -9,11 +9,6 @@ namespace SimpleCircuit.Circuits.Spans
     public interface ITextFormatter
     {
         /// <summary>
-        /// Gets or sets the font family of the formatter.
-        /// </summary>
-        public string FontFamily { get; set; }
-
-        /// <summary>
         /// Formats text into a span.
         /// </summary>
         /// <param name="content">The content.</param>

@@ -75,7 +75,7 @@ namespace SimpleCircuit
             {
                 Console.Write("> ");
                 string? arguments = Console.ReadLine();
-                string[] args = regex.Matches(arguments ?? string.Empty).Cast<Match>().Select(m => m.Groups["value"].Value).ToArray();
+                string[] args = [.. regex.Matches(arguments ?? string.Empty).Cast<Match>().Select(m => m.Groups["value"].Value)];
                 if (args.Length == 0 ||
                     args.Length == 1 && (
                         StringComparer.OrdinalIgnoreCase.Equals(args[0], "quit") ||

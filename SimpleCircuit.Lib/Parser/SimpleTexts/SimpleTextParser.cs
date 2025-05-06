@@ -142,6 +142,25 @@ namespace SimpleCircuit.Parser.SimpleTexts
                                 ContinueText(lexer, context);
                                 return CreateTextSpan(context);
                             }
+
+                        case "\\textb":
+                            lexer.Next();
+                            if (lexer.Branch(TokenType.OpenBracket))
+                            {
+                                var oldAppearance = context.Appearance;
+                                context.Appearance = new BoldTextStyle(oldAppearance);
+                                var b = ParseBlockSegment(lexer, context);
+                                lexer.Branch(TokenType.CloseBracket);
+                                context.Appearance = oldAppearance;
+                                return b;
+                            }
+                            else
+                            {
+                                context.Builder.Append(context);
+                                ContinueText(lexer, context);
+                                return CreateTextSpan(context);
+                            }
+                            break;
                         
                         default:
                             context.Builder.Append(content);
@@ -191,7 +210,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             // Measure the contents
             string content = context.Builder.ToString();
             context.Builder.Clear();
-            var bounds = context.Measurer.Measure(content, context.Appearance.Bold, context.Appearance.FontSize);
+            var bounds = context.Measurer.Measure(content, context.Appearance.FontFamily, context.Appearance.Bold, context.Appearance.FontSize);
 
             // Return the span
             return new TextSpan(content, context.Appearance, bounds);

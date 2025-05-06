@@ -17,6 +17,7 @@ X(""\overline{Overline Text}"")
 X(""\underline{Underline Text}"")
 X(""A_{sub}^{super}"")
 X(""\overline{\underline{Overline and Underline}}"")
+X(""\textb{This is bold text but a very long line to check stuff"")
 ";
 
             var logger = new Logger();
