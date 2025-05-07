@@ -13,18 +13,15 @@ namespace SimpleCircuitOnline
     /// Creates a new <see cref="TextMeasurer"/>.
     /// </remarks>
     /// <param name="js">The javascript runtime.</param>
-    public class TextMeasurer(IJSRuntime js, string fontFamily) : ITextMeasurer
+    public class TextMeasurer(IJSRuntime js) : ITextMeasurer
     {
         private readonly IJSRuntime _js = js;
 
         /// <inheritdoc />
-        public string FontFamily { get; set; } = fontFamily;
-
-        /// <inheritdoc />
-        public SpanBounds Measure(string text, bool isBold, double size)
+        public SpanBounds Measure(string text, string fontFamily, bool isBold, double size)
         {
             // Make a piece of XML that allows measuring this element
-            JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, FontFamily, isBold, size);
+            JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, fontFamily, isBold, size);
             double advance = obj2.GetProperty("a").GetDouble();
             double left = obj2.GetProperty("l").GetDouble();
             double right = obj2.GetProperty("r").GetDouble();

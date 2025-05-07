@@ -529,7 +529,6 @@ namespace SimpleCircuitOnline.Pages
                     // We now need the last things to have executed
                     if (ckt.Count > 0 && _logger.Errors == 0)
                     {
-                        _textFormatter.FontFamily = context.Options.FontFamily;
                         doc = ckt.Render(_logger, []); // context.ExtraCss);
 
                         // Update the style for our document

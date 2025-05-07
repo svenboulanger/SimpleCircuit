@@ -18,7 +18,7 @@ namespace SimpleCircuitOnline
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            builder.Services.AddSingleton<ITextMeasurer>(sp => new TextMeasurer(sp.GetService<IJSRuntime>(), "Tahoma"));
+            builder.Services.AddSingleton<ITextMeasurer>(sp => new TextMeasurer(sp.GetService<IJSRuntime>()));
             builder.Services.AddSingleton<ITextFormatter>(sp => new SimpleTextFormatter(sp.GetService<ITextMeasurer>()));
             builder.Services.AddBlazoredLocalStorage();
 
