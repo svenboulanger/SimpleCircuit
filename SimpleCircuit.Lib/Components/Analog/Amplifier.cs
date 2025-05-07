@@ -118,10 +118,11 @@ namespace SimpleCircuit.Components.Analog
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
 
+                        // Allow dashed/dotted lines
                         Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
                         {
-                            1 => LineStyles.Dashed,
-                            2 => LineStyles.Dotted,
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
                             _ => LineStyles.None
                         };
                         break;
@@ -135,8 +136,16 @@ namespace SimpleCircuit.Components.Analog
                 _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1), Appearance);
                 _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance);
 
+                // The main triangle
+                builder.Polygon(
+                [
+                    new(-8, -8),
+                    new(8, 0),
+                    new(-8, 8)
+                ], Appearance);
+
                 // Differential input?
-                var markerAppearance = new NoFillStyle(Appearance);
+                var markerAppearance = Appearance.CreateStrokeStyle();
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
@@ -164,14 +173,6 @@ namespace SimpleCircuit.Components.Analog
                 else
                     builder.ExtendPin(Pins["out"], Appearance);
 
-                // The main triangle
-                builder.Polygon(
-                [
-                    new(-8, -8),
-                    new(8, 0),
-                    new(-8, 8)
-                ], Appearance);
-
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
                 {
@@ -179,30 +180,31 @@ namespace SimpleCircuit.Components.Analog
                     _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1), Appearance);
                 }
 
-                // Comparator
-                if (Variants.Contains(_comparator))
+                // Comparator or schmitt trigger
+                switch (Variants.Select(_comparator, _schmitt))
                 {
-                    builder.Path(b => b.MoveTo(new(-5, 2))
+                    case 0: // Comparator
+                        builder.Path(b => b.MoveTo(new(-5, 2))
                         .LineTo(new(-3, 2))
                         .LineTo(new(-3, -2))
-                        .LineTo(new(-1, -2)), markerAppearance);
+                        .LineTo(new(-1, -2)), Appearance.AsStroke());
+                        break;
+
+                    case 1: // Schmitt trigger
+                        builder.Path(b =>
+                        {
+                            b.MoveTo(new(-6, 2))
+                                .LineTo(new(-4, 2))
+                                .LineTo(new(-4, -2))
+                                .LineTo(new(-2, -2));
+                            b.MoveTo(new(-4, 2))
+                                .LineTo(new(-2, 2))
+                                .LineTo(new(-2, -2))
+                                .LineTo(new(0, -2));
+                        }, Appearance.AsStroke());
+                        break;
                 }
 
-                // Schmitt trigger
-                if (Variants.Contains(_schmitt))
-                {
-                    builder.Path(b =>
-                    {
-                        b.MoveTo(new(-6, 2))
-                            .LineTo(new(-4, 2))
-                            .LineTo(new(-4, -2))
-                            .LineTo(new(-2, -2));
-                        b.MoveTo(new(-4, 2))
-                            .LineTo(new(-2, 2))
-                            .LineTo(new(-2, -2))
-                            .LineTo(new(0, -2));
-                    }, markerAppearance);
-                }
                 _anchors.Draw(builder, Labels);
             }
         }

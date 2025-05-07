@@ -1,4 +1,8 @@
-﻿namespace SimpleCircuit.Components.Styles
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+
+namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// Describes appearance options that are derived from another.
@@ -51,5 +55,31 @@
 
         /// <inheritdoc />
         public LineStyles LineStyle { get => _lineStyle ?? Parent?.LineStyle ?? DefaultLineStyle; set => _lineStyle = value; }
+
+        public override string ToString()
+        {
+            var items = new List<string>();
+            if (_color is not null)
+                items.Add($"color=\"{_color}\"");
+            if (_opacity is not null)
+                items.Add($"opacity=\"{_opacity.Value.ToString(CultureInfo.InvariantCulture)}\"");
+            if (_background is not null)
+                items.Add($"bg=\"{_background}\"");
+            if (_backgroundOpacity is not null)
+                items.Add($"bgo=\"{_backgroundOpacity.Value.ToString(CultureInfo.InvariantCulture)}\"");
+            if (_lineThickness is not null)
+                items.Add($"thickness={_lineThickness.Value.ToString(CultureInfo.InvariantCulture)}");
+            if (_fontFamily is not null)
+                items.Add($"fontfamily=\"{_fontFamily}\"");
+            if (_fontSize is not null)
+                items.Add($"fontsize=\"{_fontSize}\"");
+            if (_bold is not null)
+                items.Add($"bold={_bold}");
+            if (_lineSpacing is not null)
+                items.Add($"linespacing={_lineSpacing.Value.ToString(CultureInfo.InvariantCulture)}");
+            if (_lineStyle is not null)
+                items.Add(_lineStyle.ToString().ToLower());
+            return string.Join(", ", items);
+        }
     }
 }

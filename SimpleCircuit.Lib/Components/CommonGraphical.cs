@@ -4,7 +4,6 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SimpleCircuit.Components
 {
@@ -286,7 +285,7 @@ namespace SimpleCircuit.Components
         /// <param name="drawable">The drawable parent.</param>
         public static void Arrow(this IGraphicsBuilder builder, Vector2 start, Vector2 end, IStyle appearance)
         {
-            builder.Line(start, end, appearance);
+            builder.Line(start, end, appearance.AsStroke());
 
             // Draw the marker
             var normal = end - start;
@@ -305,6 +304,8 @@ namespace SimpleCircuit.Components
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
         public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IStyle appearance, double size = 2, bool vertical = false)
         {
+            appearance = appearance.AsStroke().AsStrokeWidth(Style.DefaultLineThickness);
+
             // Plus sign
             builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), appearance);
 

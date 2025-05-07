@@ -196,6 +196,10 @@ namespace SimpleCircuit.Components
                             drawable.Appearance.LineThickness = number;
                             return true;
 
+                        case "fontsize":
+                            drawable.Appearance.FontSize = number;
+                            return true;
+
                         default:
                             if ((number - Math.Round(number)).IsZero())
                             {
@@ -235,6 +239,10 @@ namespace SimpleCircuit.Components
                             drawable.Appearance.Background = label;
                             return true;
 
+                        case "fontfamily":
+                            drawable.Appearance.FontFamily = label;
+                            return true;
+
                         default:
                             if (TryMatchIndexedProperty(property, "label", out index))
                             {
@@ -253,11 +261,19 @@ namespace SimpleCircuit.Components
                 // No property or label, if the value is a boolean, we can add a variant instead
                 if (value is bool b)
                 {
-                    if (b)
-                        drawable.Variants.Add(property);
-                    else
-                        drawable.Variants.Remove(property);
-                    return true;
+                    switch (property)
+                    {
+                        case "bold":
+                            drawable.Appearance.Bold = b;
+                            return true;
+
+                        default:
+                            if (b)
+                                drawable.Variants.Add(property);
+                            else
+                                drawable.Variants.Remove(property);
+                            return true;
+                    }
                 }
                 else
                 {

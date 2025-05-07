@@ -1,0 +1,136 @@
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Parser.SimpleTexts;
+using SkiaSharp;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace SimpleCircuit
+{
+    /// <summary>
+    /// Helper class for demonstrating certain aspects of SimpleCircuit.
+    /// </summary>
+    public static class DemoHelper
+    {
+        private class VariantCombination : IEquatable<VariantCombination>
+        {
+            public HashSet<string> Set { get; }
+
+            public VariantCombination(IEnumerable<string> items)
+            {
+                Set = [.. items];
+            }
+
+            public override int GetHashCode()
+            {
+                int hash = 0;
+                foreach (string item in Set)
+                    hash ^= item.GetHashCode();
+                return hash;
+            }
+
+            public override bool Equals(object obj) => obj is VariantCombination vc && Equals(vc);
+
+            public bool Equals(VariantCombination other)
+            {
+                if (ReferenceEquals(this, other))
+                    return true;
+                if (Set.Count != other.Set.Count)
+                    return false;
+                return Set.SetEquals(other.Set);
+            }
+        }
+
+        /// <summary>
+        /// Make a
+        /// </summary>
+        /// <param name="drawable"></param>
+        /// <returns></returns>
+        public static string CreateDemo(string key, DrawableFactoryDictionary factory)
+        {
+            var options = new Options();
+            var representative = factory.Create(key, options, null);
+            string[] labels = [];
+            if (string.IsNullOrWhiteSpace(representative.Labels[0]?.Value))
+                labels = ["\"label\""];
+
+            // Each column will represent a styling thing
+            List<IStyle> styles = [
+                new Style(), // Default
+                new Style { Color = "red" }, // Different foreground color
+                new Style { Background = "red" }, // Different background color
+                new Style { LineStyle = LineStyles.Dashed }, // Dashed
+                new Style { LineStyle = LineStyles.Dotted }, // Dotted
+                new Style { Color = "green", Background = "blue", LineStyle = LineStyles.Dashed, LineThickness = 1.0 }, // Different color vs. background color
+                new Style { FontFamily = "Times New Roman" }
+                ];
+
+            // Each row represents possible variants
+            var formatter = new SimpleTextFormatter(new SkiaTextMeasurer());
+            var builder = new BoundsBuilder(formatter, null);
+            var context = new PrepareContext(new GraphicalCircuit(formatter), formatter, null)
+            {
+                Mode = PreparationMode.Reset
+            };
+            representative.Prepare(context);
+            representative.Render(builder);
+            var variantSet = new HashSet<VariantCombination>();
+            ExploreVariants(representative, context, builder, [], variantSet);
+            var variants = variantSet.ToList();
+
+            var sb = new StringBuilder();
+            for (int row = 0; row < variants.Count; row++)
+            {
+                for (int col = 0; col < styles.Count; col++)
+                {
+                    var style = styles[col];
+                    sb.AppendLine($"{key}_{col}_{row}({style} {string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                }
+                sb.AppendLine($"(y {key}_*_{row})");
+            }
+            for (int col = 0; col < styles.Count; col++)
+                sb.AppendLine($"(x {key}_{col}_*)");
+            return sb.ToString();
+        }
+
+        private static void ExploreVariants(IDrawable drawable, IPrepareContext context, IGraphicsBuilder builder, LinkedList<string> variantPath, HashSet<VariantCombination> collected)
+        {
+            // Just these variables are OK
+            collected.Add(new(variantPath));
+
+            foreach (string variant in drawable.Variants.Branches.ToList())
+            {
+                switch (variant)
+                {
+                    case Drawable.Dashed:
+                    case Drawable.Dotted:
+                    case "flip":
+                        continue;
+                }
+
+                // Start a new item in the path
+                drawable.Variants.Add(variant);
+                drawable.Variants.Reset();
+                foreach (string v in variantPath)
+                    drawable.Variants.Add(v);
+
+                drawable.Prepare(context);
+                drawable.Render(builder);
+                variantPath.AddLast(variant);
+
+                ExploreVariants(drawable, context, builder, variantPath, collected);
+
+                // Remove the item from the path again
+                variantPath.RemoveLast();
+                drawable.Variants.Remove(variant);
+            }
+        }
+    }
+}

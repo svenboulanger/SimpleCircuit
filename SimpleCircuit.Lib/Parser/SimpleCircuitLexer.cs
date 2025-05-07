@@ -211,7 +211,7 @@ namespace SimpleCircuit.Parser
                         ContinueToken();
                         break;
 
-                    case char w when char.IsLetter(w):
+                    case char w when char.IsLetter(w) || w == '_':
                         NextType = TokenType.Word;
                         ContinueWord();
                         break;

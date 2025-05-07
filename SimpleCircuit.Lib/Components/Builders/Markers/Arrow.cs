@@ -18,6 +18,7 @@ namespace SimpleCircuit.Components.Builders.Markers
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
         {
+            appearance = appearance.AsFilled();
             builder.Polygon(_points.Select(pt => pt * 2.0 * appearance.LineThickness), appearance);
         }
     }

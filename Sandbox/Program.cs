@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Evaluator;
+﻿using SimpleCircuit;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using System;
 using System.Diagnostics;
@@ -11,25 +12,19 @@ namespace Sandbox
     {
         static void Main()
         {
-            string script = @"
-X(""Normal text"")
-X(""\overline{Overline Text}"")
-X(""\underline{Underline Text}"")
-X(""A_{sub}^{super}"")
-X(""\overline{\underline{Overline and Underline}}"")
-X(""\textb{This is bold text but a very long line to check stuff"")
-";
-
             var logger = new Logger();
-            var lexer = SimpleCircuitLexer.FromString(script);
             var context = new ParsingContext
             {
                 Diagnostics = logger
             };
+            var evalContext = new EvaluationContext() { Diagnostics = logger };
+
+            string script = DemoHelper.CreateDemo("NMOS", evalContext.Factory);
+            var lexer = SimpleCircuitLexer.FromString(script);
+
             SimpleCircuitParser.Parse(lexer, context, out var statements);
             Console.WriteLine(statements.ToString());
 
-            var evalContext = new EvaluationContext() { Diagnostics = logger };
             StatementEvaluator.Evaluate(statements, evalContext);
 
             evalContext.Circuit.Metadata.Add("script", script);

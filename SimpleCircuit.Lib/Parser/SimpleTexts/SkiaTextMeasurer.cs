@@ -41,6 +41,12 @@ namespace SimpleCircuit.Parser.SimpleTexts
             if (!_fonts.TryGetValue(key, out var font))
             {
                 var typeface = SKFontManager.Default.MatchFamily(fontFamily, isBold ? SKFontStyle.Bold : SKFontStyle.Normal);
+                if (typeface is null)
+                {
+                    // Just use a default typeface
+                    string family = SKFontManager.Default.GetFamilyName(0);
+                    typeface = SKFontManager.Default.MatchFamily(family, isBold ? SKFontStyle.Bold : SKFontStyle.Normal);
+                }
                 font = (typeface, new SKFont(typeface));
                 _fonts[key] = font;
             }
