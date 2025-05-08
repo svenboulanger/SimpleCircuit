@@ -53,13 +53,20 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="drawable"></param>
         /// <returns></returns>
-        public static string CreateDemo(string key, DrawableFactoryDictionary factory)
+        public static string CreateDemo(string key, DrawableFactoryDictionary factory, string[] labels = null)
         {
             var options = new Options();
             var representative = factory.Create(key, options, null);
-            string[] labels = [];
-            if (string.IsNullOrWhiteSpace(representative.Labels[0]?.Value))
-                labels = ["\"label\""];
+            if (labels is null)
+            {
+                if (string.IsNullOrWhiteSpace(representative.Labels[0]?.Value))
+                    labels = ["\"label\""];
+            }
+            else
+            {
+                for (int i = 0; i < labels.Length; i++)
+                    labels[i] = $"\"{labels[i]}\"";
+            }
 
             // Each column will represent a styling thing
             List<IStyle> styles = [
