@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Analog
 
                             // The true width adds half of the height
                             if (Height.IsZero())
-                                _height = Math.Min(_height + Margin.Top + Margin.Bottom, MinHeight);
+                                _height = Math.Max(_height + Margin.Top + Margin.Bottom, MinHeight);
                             else
                                 _height = Height;
                             if (Width.IsZero())
