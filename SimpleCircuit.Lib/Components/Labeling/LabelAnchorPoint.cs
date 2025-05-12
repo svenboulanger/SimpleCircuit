@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -29,6 +28,11 @@ namespace SimpleCircuit.Components.Labeling
         public IStyle Appearance { get; }
 
         /// <summary>
+        /// Gets or sets whether the label should be oriented.
+        /// </summary>
+        public bool Oriented { get; }
+
+        /// <summary>
         /// Creates a new <see cref="LabelAnchorPoint"/>.
         /// </summary>
         public LabelAnchorPoint()
@@ -44,11 +48,12 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="location">The location.</param>
         /// <param name="expand">The expansion.</param>
         /// <param name="appearance">The appearance options.</param>
-        public LabelAnchorPoint(Vector2 location, Vector2 expand, IStyle appearance)
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false)
         {
             Location = location;
             Expand = expand;
             Appearance = appearance;
+            Oriented = oriented;
         }
     }
 }

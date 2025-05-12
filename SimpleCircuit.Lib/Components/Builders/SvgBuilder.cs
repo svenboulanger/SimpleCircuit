@@ -159,7 +159,7 @@ namespace SimpleCircuit.Components.Builders
             return this;
         }
 
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false)
         {
             if (span is null)
                 return this;
@@ -167,45 +167,71 @@ namespace SimpleCircuit.Components.Builders
             location = CurrentTransform.Apply(location);
             expand = CurrentTransform.ApplyDirection(expand);
 
+            // Create the group
+            var g = _document.CreateElement("g", Namespace);
+            _current.AppendChild(g);
+            if (oriented)
+            {
+                // Modify the expansion and location such that the text is always upright
+                if (expand.X < 0)
+                {
+                    // Orientation is towards the left, so this will cause the text to be upside-down
+                    // We will flip the orientation and make the text location start from the other end
+                    location += expand * (span.Bounds.Bounds.Right + span.Bounds.Bounds.Left) + expand.Perpendicular * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
+                    expand = -expand;
+                }
+
+                // Apply orientation and location
+                double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
+                if (angle.IsZero())
+                    g.SetAttribute("transform", $"translate({location.ToSVG()})");
+                else
+                    g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
+            }
+            else
+            {
+                // Compute the location based on the location and expansion
+                var bounds = span.Bounds.Bounds;
+                double y = location.Y, x = location.X;
+                if (expand.Y.IsZero())
+                    y = y - bounds.Height * 0.5 - bounds.Top;
+                else if (expand.Y < 0)
+                    y -= bounds.Bottom;
+                else
+                    y -= bounds.Top;
+                if (expand.X.IsZero())
+                    x = x - bounds.Width * 0.5 - bounds.Left;
+                else if (expand.X < 0)
+                    x -= bounds.Right;
+                else
+                    x -= bounds.Left;
+
+                g.SetAttribute("transform", $"translate({location.ToSVG()})");
+
+                // Return the offset bounds
+                Expand(bounds + new Vector2(x, y));
+            }
+
             // Create the text element
             var text = _document.CreateElement("text", Namespace);
-            _current.AppendChild(text);
-
-            // Compute the location based on the location and expansion
-            var bounds = span.Bounds.Bounds;
-            double y = location.Y, x = location.X;
-            if (expand.Y.IsZero())
-                y = y - bounds.Height * 0.5 - bounds.Top;
-            else if (expand.Y < 0)
-                y -= bounds.Bottom;
-            else
-                y -= bounds.Top;
-            if (expand.X.IsZero())
-                x = x - bounds.Width * 0.5 - bounds.Left;
-            else if (expand.X < 0)
-                x -= bounds.Right;
-            else
-                x -= bounds.Left;
+            g.AppendChild(text);
 
             // Make the SVG for the text
-            BuildTextSVG(new(x, y), span, _current, text);
-
-            // Return the offset bounds
-            Expand(bounds + new Vector2(x, y));
+            BuildTextSVG(span, g, text);
             return this;
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance)
+        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return this;
 
             var span = _formatter.Format(value, appearance);
-            return Text(span, location, expand);
+            return Text(span, location, expand, oriented);
         }
 
-        private void BuildTextSVG(Vector2 offset, Span span, XmlNode parent, XmlElement current)
+        private void BuildTextSVG(Span span, XmlNode groupElement, XmlElement textElement)
         {
             if (span is null)
                 return;
@@ -216,56 +242,57 @@ namespace SimpleCircuit.Components.Builders
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
                         element.SetAttribute("style", textSpan.Appearance.CreateTextStyle());
-                        element.SetAttribute("x", (offset.X + textSpan.Offset.X).ToSVG());
-                        element.SetAttribute("y", (offset.Y + textSpan.Offset.Y).ToSVG());
+                        element.SetAttribute("x", textSpan.Offset.X.ToSVG());
+                        element.SetAttribute("y", textSpan.Offset.Y.ToSVG());
                         element.InnerXml = textSpan.Content;
-                        current.AppendChild(element);
+                        textElement.AppendChild(element);
                     }
                     break;
 
                 case LineSpan lineSpan:
                     {
                         foreach (var s in lineSpan)
-                            BuildTextSVG(offset, s, parent, current);
+                            BuildTextSVG(s, groupElement, textElement);
                     }
                     break;
 
                 case MultilineSpan multilineSpan:
                     {
                         foreach (var s in multilineSpan)
-                            BuildTextSVG(offset, s, parent, current);
+                            BuildTextSVG(s, groupElement, textElement);
                     }
                     break;
 
                 case SubscriptSuperscriptSpan subSuperSpan:
                     {
-                        BuildTextSVG(offset, subSuperSpan.Base, parent, current);
-                        BuildTextSVG(offset, subSuperSpan.Sub, parent, current);
-                        BuildTextSVG(offset, subSuperSpan.Super, parent, current);
+                        BuildTextSVG(subSuperSpan.Base, groupElement, textElement);
+                        BuildTextSVG(subSuperSpan.Sub, groupElement, textElement);
+                        BuildTextSVG(subSuperSpan.Super, groupElement, textElement);
                     }
                     break;
 
                 case OverlineSpan overlineSpan:
                     {
-                        BuildTextSVG(offset, overlineSpan.Base, parent, current);
+                        BuildTextSVG(overlineSpan.Base, groupElement, textElement);
 
                         // Make the line manually as it bypasses the transform step
                         var path = _document.CreateElement("path", Namespace);
-                        _current.AppendChild(path);
-                        path.SetAttribute("d", $"M{(offset + overlineSpan.Start).ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
+                        groupElement.AppendChild(path);
+                        path.SetAttribute("d", $"M{overlineSpan.Start.ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
                         path.SetAttribute("style", $"stroke: {overlineSpan.Appearance.Color}; stroke-width: {overlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
                     }
                     break;
 
                 case UnderlineSpan underlineSpan:
                     {
-                        BuildTextSVG(offset, underlineSpan.Base, parent, current);
+                        BuildTextSVG(underlineSpan.Base, groupElement, textElement);
 
                         // Make the line manually as it bypasses the transform step
                         var path = _document.CreateElement("path", Namespace);
-                        _current.AppendChild(path);
-                        path.SetAttribute("d", $"M{(offset + underlineSpan.Start).ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
+                        groupElement.AppendChild(path);
+                        path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
                         path.SetAttribute("style", $"stroke: {underlineSpan.Appearance.Color}; stroke-width: {underlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
+                        path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;
 

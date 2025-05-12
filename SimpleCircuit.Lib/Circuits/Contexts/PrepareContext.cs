@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections.Generic;

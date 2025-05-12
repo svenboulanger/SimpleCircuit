@@ -22,7 +22,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                 IsBold = isBold;
             }
             public override int GetHashCode() => (FontFamily.GetHashCode() * 1021) ^ IsBold.GetHashCode();
-            public override bool Equals(object? other) => other is TypefaceKey tk && Equals(tk);
+            public override bool Equals(object other) => other is TypefaceKey tk && Equals(tk);
             public bool Equals(TypefaceKey other) => other.FontFamily.Equals(FontFamily) && IsBold == other.IsBold;
         }
 

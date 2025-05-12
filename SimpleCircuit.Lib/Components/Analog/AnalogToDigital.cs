@@ -3,7 +3,6 @@ using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 
@@ -98,9 +97,10 @@ namespace SimpleCircuit.Components.Analog
 
                     case PreparationMode.Sizes:
                         // Calculate the size of the total entity
+                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            // Go through the labels and find the one 
+                            // Go through the labels and find the one in the middle that will determine the height/width
                             for (int i = 0; i < Labels.Count; i++)
                             {
                                 var bounds = Labels[i].Formatted.Bounds.Bounds;
@@ -108,6 +108,8 @@ namespace SimpleCircuit.Components.Analog
                                     _width = Math.Max(_width, bounds.Width);
                                 if (Height.IsZero())
                                     _height = Math.Max(_height, bounds.Height);
+                                labelX = Math.Min(labelX, bounds.Left);
+                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
                             }
 
                             // The true width adds half of the height
@@ -133,6 +135,13 @@ namespace SimpleCircuit.Components.Analog
                         {
                             _width = Width;
                             _height = Height;
+
+                            for (int i = 0; i < Labels.Count; i++)
+                            {
+                                var bounds = Labels[i].Formatted.Bounds.Bounds;
+                                labelX = Math.Min(labelX, bounds.Left);
+                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
+                            }
                         }
 
                         // Update the pins
@@ -176,7 +185,7 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        _anchors[0] = new LabelAnchorPoint(new(x, 0), new(1, 0), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(x - labelX, labelY), new(1, 0), Appearance, true);
                         _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1), Appearance);
                         _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1), Appearance);
                         break;

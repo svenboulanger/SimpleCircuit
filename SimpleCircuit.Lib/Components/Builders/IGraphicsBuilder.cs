@@ -148,9 +148,9 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="span">The span to be drawn.</param>
         /// <param name="location">The location where the span should be.</param>
         /// <param name="expand">The direction in which the text can overflow.</param>
-        /// <param name="options">The graphic options.</param>
+        /// <param name="oriented">If <c>true</c>, the text is oriented according to <paramref name="expand"/> instead of kept inside the quadrant.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false);
 
         /// <summary>
         /// Draws text.
@@ -159,7 +159,8 @@ namespace SimpleCircuit.Components.Builders
         /// <param name="location">The location.</param>
         /// <param name="expand">The direction in which text can expand.</param>
         /// <param name="appearance">The parent appearance options.</param>
+        /// <param name="oriented">If <c>true</c>, the text is oriented according to <paramref name="expand"/> instead of kept inside the quadrant.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance);
+        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false);
     }
 }

@@ -2,7 +2,6 @@
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Markers;
@@ -468,9 +467,9 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand);
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance);
+        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false);
     }
 }
