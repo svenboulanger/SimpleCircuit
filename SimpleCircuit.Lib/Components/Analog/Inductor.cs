@@ -3,6 +3,7 @@ using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -136,14 +137,17 @@ namespace SimpleCircuit.Components.Analog
                                 b.CurveTo(new(x, -4), new(x + 3, -4), new(x + 3, 0));
                                 x += 3;
                             }
-                        }, Appearance);
+                        }, Appearance.AsStroke());
 
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l, 3.5), new(1, 0));
-                            marker.Draw(builder, Appearance);
+                            marker.Draw(builder, Appearance.AsStrokeWidth(Style.DefaultLineThickness));
+                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
                         }
-                        
+                        else
+                            _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
+
                         if (Variants.Contains(_choke))
                         {
                             builder.Line(new(-l, -4.5), new(l, -4.5), Appearance);
@@ -160,6 +164,8 @@ namespace SimpleCircuit.Components.Analog
                                 builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10), Appearance);
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
+                                if (_anchors[1].Location.Y < 3)
+                                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
                             }
                         }
                         else if (Variants.Contains(_programmable))
@@ -167,6 +173,8 @@ namespace SimpleCircuit.Components.Analog
                             builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7), Appearance);
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance);
+                            if (_anchors[1].Location.Y < 3)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
                         }
                         break;
 
@@ -187,14 +195,17 @@ namespace SimpleCircuit.Components.Analog
                             }
                             x += 4;
                             b.SmoothTo(new(x, -4), new(x, 0));
-                        }, Appearance);
+                        }, Appearance.AsStroke());
 
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
-                            marker.Draw(builder, Appearance);
+                            marker.Draw(builder, Appearance.AsStrokeWidth(Style.DefaultLineThickness));
+                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
                         }
-                        
+                        else
+                            _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
+
                         if (Variants.Contains(_choke))
                         {
                             builder.Line(new(-l, -4.5), new(l, -4.5), Appearance);
@@ -209,6 +220,8 @@ namespace SimpleCircuit.Components.Analog
                                 builder.Arrow(new(-l + 1, 5), new(l, -10), Appearance);
                                 if (_anchors[0].Location.Y > -11)
                                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
+                                if (_anchors[1].Location.Y < 6)
+                                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
                             }
                         }
                         else if (Variants.Contains(_programmable))
@@ -216,6 +229,8 @@ namespace SimpleCircuit.Components.Analog
                             builder.Arrow(new(-l + 1, 5), new(l, -7), Appearance);
                             if (_anchors[0].Location.Y > -8)
                                 _anchors[0] = new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance);
+                            if (_anchors[1].Location.Y < 6)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
                         }
                         break;
                 }
