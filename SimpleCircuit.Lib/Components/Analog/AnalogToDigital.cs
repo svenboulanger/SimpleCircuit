@@ -93,6 +93,14 @@ namespace SimpleCircuit.Components.Analog
                         }
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, default, new(1, 0)), "o", "out", "outp", "po");
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
 
                     case PreparationMode.Sizes:

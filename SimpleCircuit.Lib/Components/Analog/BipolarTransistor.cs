@@ -50,6 +50,22 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                if (context.Mode == PreparationMode.Reset)
+                {
+                    // Allow dashed/dotted lines
+                    Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                    {
+                        0 => LineStyles.Dashed,
+                        1 => LineStyles.Dotted,
+                        _ => LineStyles.None
+                    };
+                }
+                return base.Prepare(context);
+            }
+
+            /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
                 // Package background
@@ -91,9 +107,24 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                if (context.Mode == PreparationMode.Reset)
+                {
+                    // Allow dashed/dotted lines
+                    Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                    {
+                        0 => LineStyles.Dashed,
+                        1 => LineStyles.Dotted,
+                        _ => LineStyles.None
+                    };
+                }
+                return base.Prepare(context);
+            }
+
+            /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-
                 // Draw background package
                 if (Variants.Contains(_packaged))
                 {

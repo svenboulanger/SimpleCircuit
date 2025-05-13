@@ -47,6 +47,18 @@ namespace SimpleCircuit.Components.Styles
                 style.Append($"stroke-opacity: {appearance.Opacity.ToSVG()};");
             }
 
+            // Allow other path options
+            switch (appearance.LineStyle)
+            {
+                case LineStyles.Dashed:
+                    style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
+                    break;
+
+                case LineStyles.Dotted:
+                    style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
+                    break;
+            }
+
             // Path options
             style.Append($"stroke-width: {appearance.LineThickness.ToSVG()}pt; ");
             style.Append("stroke-linecap: round; ");

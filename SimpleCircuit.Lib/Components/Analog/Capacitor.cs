@@ -63,6 +63,14 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(Pins["a"], new(-1.5, 0));
                             SetPinOffset(Pins["b"], new(1.5, 0));
                         }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;
@@ -76,7 +84,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         // Plates
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), Appearance.AsStroke().AsStrokeWidth(1.0));
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), Appearance.AsStrokeWidth(1.0));
                         builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.AsStroke());
                         if (Variants.Contains(_signs))
                             builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, vertical: true);
@@ -92,7 +100,7 @@ namespace SimpleCircuit.Components.Analog
 
                     default:
                         // Plates
-                        var plateAppearance = Appearance.AsStroke().AsStrokeWidth(1.0);
+                        var plateAppearance = Appearance.AsStrokeWidth(1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
                         builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))

@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -98,6 +99,14 @@ namespace SimpleCircuit.Components.Analog
                             case 1: break;
                             case 2: break;
                         }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;
