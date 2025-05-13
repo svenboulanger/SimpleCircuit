@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.Analog
 
                     case PreparationMode.Sizes:
                         // Calculate the size of the total entity
-                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
+                        double labelX = 0.0, labelY = Math.Max(Height, MinHeight);
                         if (Width.IsZero() || Height.IsZero())
                         {
                             // Go through the labels and find the one in the middle that will determine the height/width

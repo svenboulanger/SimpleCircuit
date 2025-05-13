@@ -187,6 +187,12 @@ namespace SimpleCircuit.Components.Builders
                     g.SetAttribute("transform", $"translate({location.ToSVG()})");
                 else
                     g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
+
+                var b = span.Bounds.Bounds;
+                Expand(expand * b.Right + expand.Perpendicular * b.Top);
+                Expand(expand * b.Left + expand.Perpendicular * b.Top);
+                Expand(expand * b.Right + expand.Perpendicular * b.Bottom);
+                Expand(expand * b.Left + expand.Perpendicular * b.Bottom);
             }
             else
             {
@@ -206,7 +212,7 @@ namespace SimpleCircuit.Components.Builders
                 else
                     x -= bounds.Left;
 
-                g.SetAttribute("transform", $"translate({location.ToSVG()})");
+                g.SetAttribute("transform", $"translate({new Vector2(x, y).ToSVG()})");
 
                 // Return the offset bounds
                 Expand(bounds + new Vector2(x, y));

@@ -52,20 +52,20 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
-
-                // Transistor
-                builder.Arrow(new(-3, 4), new(-6, 0), Appearance);
-                builder.Line(new(3, 4), new(6, 0), Appearance);
-                builder.Line(new(-6, 4), new(6, 4), Appearance);
-
-                // Package
-                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                // Package background
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0, Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
+                else
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+
+                // Transistor
+                builder.ExtendPins(Pins, Appearance);
+                builder.Arrow(new(-3, 4), new(-6, 0), Appearance);
+                builder.Line(new(3, 4), new(6, 0), Appearance);
+                builder.Line(new(-6, 4), new(6, 4), Appearance);
                 _anchors.Draw(builder, Labels);
             }
         }
@@ -93,20 +93,21 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
 
-                // Transistor
-                builder.Arrow(new(6, 0), new(3, 4), Appearance);
-                builder.Line(new(-3, 4), new(-6, 0), Appearance);
-                builder.Line(new(-6, 4), new(6, 4), Appearance);
-
-                // Package
-                _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                // Draw background package
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0, Appearance);
                     _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
                 }
+                else
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+
+                // Transistor
+                builder.ExtendPins(Pins, Appearance);
+                builder.Arrow(new(6, 0), new(3, 4), Appearance);
+                builder.Line(new(-3, 4), new(-6, 0), Appearance);
+                builder.Line(new(-6, 4), new(6, 4), Appearance);
                 _anchors.Draw(builder, Labels);
             }
         }

@@ -19,15 +19,8 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            // string script = DemoHelper.CreateDemo("ADC", evalContext.Factory, ["Longer text", "ADC 1", "ADC2"]);
-            string script = @"
-X1 <se> ADC(""\overline{Longer text}\nAnother line"")
-X1 <sw> ADC(""Test"")
-X1 <ne> ADC(""\textb{BBB}"")
-X1 <nw> ADC(""\overline{Hey}"")
-X1 <r +50> ADC(""BBB"", h=50)
-X1 <d +50> ADC(""This is vertical text"")
-";
+            string script = DemoHelper.CreateDemo("NPN", evalContext.Factory);
+            // string script = @"";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);
