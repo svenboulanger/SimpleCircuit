@@ -105,12 +105,17 @@ namespace SimpleCircuit.Components.Analog
 
                     case PreparationMode.Sizes:
                         // Calculate the size of the total entity
-                        double labelX = 0.0, labelY = Math.Max(Height, MinHeight);
+                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
                         if (Width.IsZero() || Height.IsZero())
                         {
                             // Go through the labels and find the one in the middle that will determine the height/width
+                            _width = 0.0;
+                            _height = 0.0;
                             for (int i = 0; i < Labels.Count; i++)
                             {
+                                // Ignore labels not in the center
+                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
+                                    continue;
                                 var bounds = Labels[i].Formatted.Bounds.Bounds;
                                 if (Width.IsZero())
                                     _width = Math.Max(_width, bounds.Width);
@@ -146,8 +151,11 @@ namespace SimpleCircuit.Components.Analog
 
                             for (int i = 0; i < Labels.Count; i++)
                             {
+                                // Ignore labels not in the center
+                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
+                                    continue;
                                 var bounds = Labels[i].Formatted.Bounds.Bounds;
-                                labelX = Math.Min(labelX, bounds.Left);
+                                labelX = Math.Min(labelX, -bounds.Left);
                                 labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
                             }
                         }
@@ -193,7 +201,11 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        _anchors[0] = new LabelAnchorPoint(new(x - labelX, labelY), new(1, 0), Appearance, true);
+                        if (double.IsInfinity(labelX))
+                            labelX = 0.0;
+                        if (double.IsInfinity(labelY))
+                            labelY = 0.0;
+                        _anchors[0] = new LabelAnchorPoint(new(x + labelX, labelY), new(1, 0), Appearance, true);
                         _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1), Appearance);
                         _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1), Appearance);
                         break;

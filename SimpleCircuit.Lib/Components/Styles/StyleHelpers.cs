@@ -97,11 +97,11 @@ namespace SimpleCircuit.Components.Styles
             switch (appearance.LineStyle)
             {
                 case LineStyles.Dashed:
-                    style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 4).ToSVG()}; ");
+                    style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
                     break;
 
                 case LineStyles.Dotted:
-                    style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 4).ToSVG()}; ");
+                    style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
                     break;
             }
 

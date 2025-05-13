@@ -50,8 +50,28 @@ namespace SimpleCircuit.Components.Labeling
                 var expand = label.Expand ?? anchor.Expand;
 
                 // Draw the label
-                drawing.Text(label.Value, location, expand, anchor.Appearance);
+                drawing.Text(label.Value, location, expand, anchor.Appearance, anchor.Oriented);
             }
+        }
+
+        /// <summary>
+        /// Tries to calculate the index of the anchor point based on the anchor name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>Returns <c>true</c> if the index could be calculated; otherwise, <c>false</c>.</returns>
+        public bool TryCalculateIndex(string name, out int index)
+        {
+            if (name.All(char.IsDigit))
+            {
+                index = int.Parse(name);
+                index %= Count;
+                if (index < 0)
+                    index += Count;
+                return true;
+            }
+            index = -1;
+            return false;
         }
 
         /// <inheritdoc />
@@ -66,16 +86,11 @@ namespace SimpleCircuit.Components.Labeling
         /// <returns>Returns <c>true</c> if the label anchor point was found; otherwise, <c>false</c>.</returns>
         protected bool TryCalculate(string name, out LabelAnchorPoint value)
         {
-            if (name.All(char.IsDigit))
+            if (TryCalculateIndex(name, out int index))
             {
-                int index = int.Parse(name);
-                index %= Count;
-                if (index < 0)
-                    index += Count;
                 value = _points[index];
                 return true;
             }
-
             value = default;
             return false;
         }

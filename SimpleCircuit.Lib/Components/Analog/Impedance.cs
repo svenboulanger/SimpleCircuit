@@ -1,6 +1,10 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing;
+using System;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -19,39 +23,33 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private double _width = 6, _length = 12;
+            private double _width, _length;
             private readonly CustomLabelAnchorPoints _anchors = new(
+                new LabelAnchorPoint(),
                 new LabelAnchorPoint(),
                 new LabelAnchorPoint());
 
             /// <inheritdoc />
             public override string Type { get; }
 
-            [Description("The length of the element")]
-            [Alias("l")]
-            public double Length
-            {
-                get => _length;
-                set
-                {
-                    _length = value;
-                    if (_length < 6)
-                        _length = 6;
-                }
-            }
+            [Description("The margin of the label inside the ADC when sizing.")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
-            [Description("The width of the element")]
+            [Description("The length of the impedance symbol. If 0, the length is computed based on the center label and the minimum length.")]
+            [Alias("l")]
+            public double Length { get; set; } = 0;
+
+            [Description("The width of the impedance symbol. If 0, the width is computed based on the center label and the minimum width.")]
             [Alias("w")]
-            public double Width
-            {
-                get => _width;
-                set
-                {
-                    _width = value;
-                    if (_width < 4)
-                        _width = 4;
-                }
-            }
+            public double Width { get; set; } = 0;
+
+            [Description("The minimum length of the symbol. The default is 6.")]
+            [Alias("ml")]
+            public double MinLength { get; set; } = 6;
+
+            [Description("The minimum width of the symbol. The default is 4.")]
+            [Alias("mw")]
+            public double MinWidth { get; set; } = 4.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -66,27 +64,102 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
             }
 
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
+                        break;
+
+                    case PreparationMode.Sizes:
+                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
+                        _length = 0;
+                        _width = 0;
+                        if (Length.IsZero() || Width.IsZero())
+                        {
+                            // Go through the labels and find the one in the center
+                            for (int i = 0; i < Labels.Count; i++)
+                            {
+                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
+                                    continue;
+                                var bounds = Labels[i].Formatted.Bounds.Bounds;
+                                if (Length.IsZero())
+                                    _length = Math.Max(_length, bounds.Width);
+                                if (Width.IsZero())
+                                    _width = Math.Max(_width, bounds.Height);
+                                labelX = Math.Min(labelX, -bounds.Width * 0.5 - bounds.Left);
+                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
+                            }
+
+                            if (Length.IsZero())
+                                _length = Math.Max(_length + Margin.Left + Margin.Right, MinLength);
+                            else
+                                _length = Length;
+                            if (Width.IsZero())
+                                _width = Math.Max(_width + Margin.Top + Margin.Bottom, MinWidth);
+                            else
+                                _width = Width;
+                        }
+                        else
+                        {
+                            _length = Length;
+                            _width = Width;
+
+                            for (int i = 0; i < Labels.Count; i++)
+                            {
+                                // Ignore labels not in the center
+                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
+                                    continue;
+                            }
+                        }
+
+                        // Update the pins
+                        SetPinOffset(0, new(-_length * 0.5, 0.0));
+                        SetPinOffset(1, new(_length * 0.5, 0.0));
+
+                        // Set the anchors
+                        if (double.IsInfinity(labelX))
+                            labelX = 0.0;
+                        if (double.IsInfinity(labelY))
+                            labelY = 0.0;
+                        _anchors[0] = new(new(labelX, labelY), new(1, 0), Appearance, true);
+                        if (Variants.Contains(_programmable))
+                        {
+                            _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1), Appearance);
+                            _anchors[2] = new(new(0, _width * 0.5 + 2), new(0, 1), Appearance);
+                        }
+                        else
+                        {
+                            _anchors[1] = new(new(0, -_width * 0.5 - 1), new(0, -1), Appearance);
+                            _anchors[2] = new(new(0, _width * 0.5 + 1), new(0, 1), Appearance);
+                        }
+                        break;
+                }
+                return result;
+            }
+
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
                 builder.ExtendPins(Pins, Appearance);
 
                 // The rectangle
-                double w = Width * 0.5;
-                builder.Rectangle(-Length * 0.5, -w, Length, Width, Appearance);
+                double w = _width * 0.5;
+                builder.Rectangle(-_length * 0.5, -w, _length, _width, Appearance);
 
                 if (Variants.Contains(_programmable))
-                {
                     builder.Arrow(new(-5, w + 1), new(6, -w - 4), Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
-                }
-                else
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1), Appearance);
-                }
-
                 _anchors.Draw(builder, Labels);
             }
         }
