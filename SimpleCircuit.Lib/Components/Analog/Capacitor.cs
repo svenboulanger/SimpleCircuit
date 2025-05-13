@@ -3,7 +3,6 @@ using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -77,9 +76,8 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case 0:
                         // Plates
-                        var planeAppearance = new StrokeWidthStyle(Appearance, 1.0);
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), planeAppearance);
-                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance);
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), Appearance.AsStroke().AsStrokeWidth(1.0));
+                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.AsStroke());
                         if (Variants.Contains(_signs))
                             builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, vertical: true);
                         break;
@@ -94,7 +92,7 @@ namespace SimpleCircuit.Components.Analog
 
                     default:
                         // Plates
-                        var plateAppearance = new StrokeWidthStyle(Appearance, 1.0);
+                        var plateAppearance = Appearance.AsStroke().AsStrokeWidth(1.0);
                         builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
                         builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
                         if (Variants.Contains(_signs))
