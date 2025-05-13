@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
@@ -116,6 +115,9 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
+                // Packaged
+                drawing.Circle(new(0, 3), 8.0, Appearance);
+
                 drawing.ExtendPins(Pins, Appearance, 3, "s", "d");
                 drawing.ExtendPin(Pins["g"], Appearance);
 
@@ -137,8 +139,6 @@ namespace SimpleCircuit.Components.Analog
                 var marker = new Arrow(new(0, 4), new(0, 1));
                 marker.Draw(drawing, Appearance);
 
-                // Packaged
-                drawing.Circle(new(0, 3), 8.0, Appearance);
 
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);
@@ -234,6 +234,9 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
+                // Packaged
+                drawing.Circle(new(0, 3), 8.0, Appearance);
+
                 drawing.ExtendPins(Pins, Appearance, 4, "s", "d");
                 drawing.ExtendPin(Pins["g"], Appearance);
 
@@ -248,9 +251,6 @@ namespace SimpleCircuit.Components.Analog
                 drawing.Line(new(5, 0), new(5, 4), Appearance);
                 drawing.Arrow(new(0, 4), new(0, 0), Appearance);
                 drawing.Line(new(0, 0), new(-5, 0), Appearance);
-
-                // Packaged
-                drawing.Circle(new(0, 3), 8.0, Appearance);
 
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);
