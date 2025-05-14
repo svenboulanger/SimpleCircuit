@@ -3,8 +3,7 @@ using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using System;
-using System.Collections.Generic;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -17,10 +16,6 @@ namespace SimpleCircuit.Components.Analog
         private const string _closed = "closed";
         private const string _invert = "invert";
         private const string _push = "push";
-        private const string _lamp = "lamp";
-        private const string _window = "window";
-        private const string _toggle = "toggle";
-        private const string _double = "double";
         private const string _knife = "knife";
         private const string _closing = "closing";
         private const string _opening = "opening";
@@ -30,7 +25,7 @@ namespace SimpleCircuit.Components.Analog
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(
                 new LabelAnchorPoint(),
@@ -39,9 +34,6 @@ namespace SimpleCircuit.Components.Analog
             [Description("The number of poles on the switch.")]
             [Alias("p")]
             public int Poles { get; set; }
-
-            /// <inheritdoc />
-            public Standards Supported { get; } = Standards.AREI;
 
             /// <inheritdoc />
             public override string Type => "switch";
@@ -69,53 +61,42 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        switch (Variants.Select(Options.Arei))
+                        SetPinOffset(0, new(-6, 0));
+                        SetPinOffset(3, new(6, 0));
+                        if (Variants.Contains(_invert))
                         {
-                            case 0:
-                                if (Variants.Contains(_push))
-                                {
-                                    SetPinOffset(0, new(-4, 0));
-                                    SetPinOffset(3, new(4, 0));
-                                }
-                                else
-                                {
-                                    SetPinOffset(0, new(-2, 0));
-                                    SetPinOffset(3, new(2, 0));
-                                }
-                                break;
-
-                            default:
-                                SetPinOffset(0, new(-6, 0));
-                                SetPinOffset(3, new(6, 0));
-
-                                if (Variants.Contains(_invert))
-                                {
-                                    if (Variants.Contains(_closed))
-                                    {
-                                        SetPinOffset(1, new(0, -2));
-                                        SetPinOffset(2, new());
-                                    }
-                                    else
-                                    {
-                                        SetPinOffset(1, new(0, -4.25));
-                                        SetPinOffset(2, new(0, -2));
-                                    }
-                                }
-                                else
-                                {
-                                    if (Variants.Contains(_closed))
-                                    {
-                                        SetPinOffset(1, new());
-                                        SetPinOffset(2, new());
-                                    }
-                                    else
-                                    {
-                                        SetPinOffset(1, new(0, -2));
-                                        SetPinOffset(2, new(0, -2));
-                                    }
-                                }
-                                break;
+                            if (Variants.Contains(_closed))
+                            {
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new());
+                            }
+                            else
+                            {
+                                SetPinOffset(1, new(0, -4.25));
+                                SetPinOffset(2, new(0, -2));
+                            }
                         }
+                        else
+                        {
+                            if (Variants.Contains(_closed))
+                            {
+                                SetPinOffset(1, new());
+                                SetPinOffset(2, new());
+                            }
+                            else
+                            {
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new(0, -2));
+                            }
+                        }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;
@@ -124,25 +105,23 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                switch (Variants.Select(Options.Arei, Options.American))
+                switch (Variants.Select(_knife, _push))
                 {
-                    case 0: DrawAreiSwitch(builder); break;
-                    case 1:
-                    default: DrawSwitch(builder); break;
-                }
+                    case 0: // Knife switch
+                        DrawKnifeSwitch(builder);
+                        break;
 
+                    case 1: // Push switch
+                        DrawPushSwitch(builder);
+                        break;
+
+                    default:
+                        DrawRegularSwitch(builder);
+                        break;
+                }
                 _anchors.Draw(builder, Labels);
             }
 
-            private void DrawSwitch(IGraphicsBuilder builder)
-            {
-                if (Variants.Contains(_knife))
-                    DrawKnifeSwitch(builder);
-                else if (Variants.Contains(_push))
-                    DrawPushSwitch(builder);
-                else
-                    DrawRegularSwitch(builder);
-            }
             private void DrawKnifeSwitch(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_closed))
@@ -164,60 +143,9 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegularSwitch(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
-
-                // Switch terminals
-                builder.Circle(new Vector2(-5, 0), 1, Appearance);
-                builder.Circle(new Vector2(5, 0), 1, Appearance);
-                _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1), Appearance);
-
-                if (Variants.Contains(_closed))
-                {
-                    if (Variants.Contains(_invert))
-                    {
-                        builder.Circle(new(0, -1), 1, Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1), Appearance);
-                    }
-                    builder.Line(new(-4, 0), new(4, 0), Appearance);
-                }
-                else
-                {
-                    if (Variants.Contains(_invert))
-                        builder.Circle(new(0, -3.25), 1, Appearance);
-                    builder.Line(new(-4, 0), new(4, -4), Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                }
-
-                switch (Variants.Select(_closing, _opening))
-                {
-                    case 0:
-                        builder.Path(b => b
-                            .MoveTo(new(-3, -5))
-                            .CurveTo(new(1, -3), new(1, -2), new(2, 2)), Appearance);
-                        if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
-                        if (_anchors[1].Location.Y < 3)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
-                        var marker = new Arrow(new(2, 2), new(0.24253562503, 0.97014250014));
-                        marker.Draw(builder, Appearance);
-                        break;
-
-                    case 1:
-                        builder.Path(b => b
-                            .MoveTo(new(-4, -6))
-                            .CurveTo(new(1, -3), new(1, -2), new(2, 1)), Appearance);
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
-                        if (_anchors[1].Location.Y < 2)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
-                        marker = new Arrow(new(-4, -6), new(-0.80873608430318844, -0.58817169767504618));
-                        marker.Draw(builder, Appearance);
-                        break;
-                }
-
                 if (Variants.Contains(_reed))
                 {
+                    // Reed switch / pill shape (background)
                     builder.Path(b =>
                     {
                         b.MoveTo(new(-5, -6));
@@ -229,8 +157,88 @@ namespace SimpleCircuit.Components.Analog
                         b.SmoothTo(new(-8.3, -6), new(-5, -6));
                         b.Close();
                     }, Appearance);
+
+                    // Update labels
                     _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
+                }
+                else
+                {
+                    // Default labels
+                    _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1), Appearance);
+                }
+
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+
+                // Switch terminals
+                builder.Circle(new Vector2(-5, 0), 1, Appearance);
+                builder.Circle(new Vector2(5, 0), 1, Appearance);
+
+                if (Variants.Contains(_closed))
+                {
+                    // Closed switch
+                    if (Variants.Contains(_invert))
+                    {
+                        // Inverted switch
+                        builder.Circle(new(0, -1), 1, Appearance);
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -2.5)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1), Appearance);
+                    }
+
+                    // The switch
+                    builder.Line(new(-4, 0), new(4, 0), Appearance);
+                }
+                else
+                {
+                    // Open switch
+                    if (Variants.Contains(_invert))
+                        builder.Circle(new(0, -3.25), 1, Appearance);
+
+                    // The switch
+                    builder.Line(new(-4, 0), new(4, -4), Appearance);
+
+                    // Update labels
+                    if (_anchors[0].Location.Y > -5)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                }
+
+                switch (Variants.Select(_closing, _opening))
+                {
+                    case 0:
+                        // Close arrow
+                        builder.Path(b =>
+                        {
+                            b.MoveTo(new(-3, -5))
+                            .CurveTo(new(1, -3), new(1, -2), new(2, 2));
+                            var marker = new Arrow(b.End, b.EndNormal);
+                            marker.Draw(builder, Appearance);
+                        }, Appearance.AsStroke());
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -6)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                        if (_anchors[1].Location.Y < 3)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
+                        break;
+
+                    case 1:
+                        // Open arrow
+                        builder.Path(b =>
+                        {
+                            b.MoveTo(new(-4, -6)).CurveTo(new(1, -3), new(1, -2), new(2, 1));
+                            var marker = new Arrow(b.End, b.EndNormal);
+                            marker.Draw(builder, Appearance);
+                        }, Appearance.AsStroke());
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                        if (_anchors[1].Location.Y < 2)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
+                        break;
                 }
             }
             private void DrawPushSwitch(IGraphicsBuilder builder)
@@ -239,29 +247,51 @@ namespace SimpleCircuit.Components.Analog
                 builder.Circle(new Vector2(-5, 0), 1, Appearance);
                 builder.Circle(new Vector2(5, 0), 1, Appearance);
 
+                // Initialize labels
+                _anchors[0] = new LabelAnchorPoint(new(0, -2), new(0, -1), Appearance);
+                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
+
                 if (Variants.Contains(_closed))
                 {
                     builder.Line(new(-4, 0), new(4, 0), Appearance);
                     if (Variants.Contains(_invert))
                     {
+                        // Inverted
                         builder.Circle(new(0, -1), 1, Appearance);
                         builder.Line(new(0, -2), new(0, -6), Appearance);
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     }
                     else
+                    {
+                        // Non-inverted
                         builder.Line(new(0, 0), new(0, -6), Appearance);
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                    }
                 }
                 else
                 {
                     builder.Line(new(-5, -4), new(5, -4), Appearance);
                     if (Variants.Contains(_invert))
                     {
+                        // Inverted
                         builder.Circle(new(0, -5), 1, Appearance);
-                        if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+
+                        // Update labels
+                        if (_anchors[0].Location.Y > -7)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     }
                     else
                     {
+                        // Non-inverted
                         builder.Line(new(0, -4), new(0, -6), Appearance);
+
+                        // Update labels
                         if (_anchors[0].Location.Y > -7)
                             _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
                     }
@@ -269,96 +299,6 @@ namespace SimpleCircuit.Components.Analog
 
                 if (_anchors[1].Location.Y < 2)
                     _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
-            }
-
-            private void DrawAreiSwitch(IGraphicsBuilder builder)
-            {
-                if (Variants.Contains(_push))
-                    DrawAreiPushSwitch(builder);
-                else
-                    DrawAreiRegularSwitch(builder);
-            }
-            private void DrawAreiPushSwitch(IGraphicsBuilder builder)
-            {
-                builder.ExtendPin(Pins["a"], Appearance);
-                builder.Circle(new(), 4, Appearance);
-                builder.Circle(new(), 2, Appearance);
-
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
-
-                if (Variants.Contains(_lamp))
-                {
-                    double x = 2 / Math.Sqrt(2);
-                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), Appearance);
-                }
-
-                if (Variants.Contains(_window))
-                {
-                    builder.Polyline([
-                        new(-6.5, 2.5),
-                        new(-4.5, 2.5),
-                        new(-4.5, 6),
-                        new(4.5, 6),
-                        new(4.5, 2.5),
-                        new(6.5, 2.5)
-                    ], Appearance);
-                    if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
-                }
-            }
-            private void DrawAreiRegularSwitch(IGraphicsBuilder builder)
-            {
-                double length = Math.Max(8, 5 + Math.Max(1, Poles) * 2);
-                builder.Circle(new(), 2, Appearance);
-                var n = Vector2.Normal(-Math.PI * 0.37);
-                builder.Line(n * 2, n * length, Appearance);
-                if (Variants.Contains(_toggle))
-                    builder.Line(-n * 2, -n * length, Appearance);
-                if (Variants.Contains(_double))
-                {
-                    Vector2 np = new(-n.X, n.Y);
-                    builder.Line(np * 2, np * length, Appearance);
-                    if (Variants.Contains(_toggle))
-                        builder.Line(-np * 2, -np * length, Appearance);
-                }
-
-                // Label
-                _anchors[0] = new LabelAnchorPoint(new(0, -length), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, length), new(0, 1), Appearance);
-
-                // Small cross for illuminator lamps
-                if (Variants.Contains(_lamp))
-                {
-                    double x = 2.0 / Math.Sqrt(2.0);
-                    builder.Path(b => b.MoveTo(new(-x, -x)).LineTo(new(x, x)).MoveTo(new(-x, x)).LineTo(new(x, -x)), Appearance);
-                }
-
-                // Draw the poles
-                if (Poles > 0)
-                {
-                    var p = n.Perpendicular;
-                    builder.Path(b =>
-                    {
-                        var pts = new List<Vector2>(Poles * 2);
-                        for (int i = 0; i < Poles; i++)
-                        {
-                            // Draw from out to in
-                            var r = n * length;
-                            var end = r + p * 3;
-                            b.MoveTo(r).LineTo(end);
-                            if (Variants.Contains(_toggle))
-                                b.MoveTo(-r).LineTo(-end);
-                            if (Variants.Contains(_double))
-                            {
-                                b.MoveTo(new(-r.X, r.Y)).LineTo(new(-end.X, end.Y));
-                                if (Variants.Contains(_toggle))
-                                    b.MoveTo(new(r.X, -r.Y)).LineTo(new(end.X, -end.Y));
-                            }
-                            length -= 2.0;
-                        }
-                    }, Appearance);
-                }
             }
         }
     }
