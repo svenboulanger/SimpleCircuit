@@ -3,6 +3,7 @@ using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using System;
 
 namespace SimpleCircuit.Components.Analog
@@ -72,6 +73,14 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(0, new(-4, 0));
                             SetPinOffset(3, new(4, 0));
                         }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;
@@ -190,6 +199,14 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(1, new(0, 9));
                             SetPinOffset(3, new(-4, 0));
                         }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;

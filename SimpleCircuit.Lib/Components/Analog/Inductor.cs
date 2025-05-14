@@ -114,6 +114,14 @@ namespace SimpleCircuit.Components.Analog
                                 break;
                         }
                         Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;

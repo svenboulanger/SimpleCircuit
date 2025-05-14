@@ -102,6 +102,14 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(4, new(5, 0));
                             SetPinOffset(5, new(5, 0));
                         }
+
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
                         break;
                 }
                 return result;
@@ -110,6 +118,15 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                // The triangle
+                builder.Polygon([
+                    new(-5, -9),
+                    new(5, -5),
+                    new(5, 5),
+                    new(-5, 9)
+                ], Appearance);
+
+                // Pins and signs of the input
                 if (Variants.Contains(_differentialInput))
                 {
                     builder.ExtendPins(Pins, Appearance, 2, "inn", "inp");
@@ -121,6 +138,7 @@ namespace SimpleCircuit.Components.Analog
                 else
                     builder.ExtendPin(Pins["n"], Appearance);
 
+                // Pins and signs of the output
                 if (Variants.Contains(_differentialOutput))
                 {
                     builder.ExtendPins(Pins, Appearance, 3, "outp", "outn");
@@ -132,17 +150,11 @@ namespace SimpleCircuit.Components.Analog
                 else
                     builder.ExtendPin(Pins["o"], Appearance);
 
-                // The triangle
-                builder.Polygon([
-                    new(-5, -9),
-                    new(5, -5),
-                    new(5, 5),
-                    new(-5, 9)
-                ], Appearance);
-
+                // Programmable
                 if (Variants.Contains(_programmable))
                     builder.Arrow(new(-7, 10), new(6, -12), Appearance);
 
+                // Labels
                 _anchors.Draw(builder, Labels);
             }
         }

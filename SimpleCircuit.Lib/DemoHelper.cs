@@ -57,6 +57,12 @@ namespace SimpleCircuit
         {
             var options = new Options();
             var representative = factory.Create(key, options, null);
+
+            // Remove all variants first (some elements add variants at creation)
+            foreach (string v in representative.Variants.ToList())
+                representative.Variants.Add(v);
+
+            // Specify labels
             if (labels is null)
             {
                 if (string.IsNullOrWhiteSpace(representative.Labels[0]?.Value))

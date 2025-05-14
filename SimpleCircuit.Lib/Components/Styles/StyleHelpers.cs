@@ -8,8 +8,17 @@ namespace SimpleCircuit.Components.Styles
         /// Gets a style that overrides another style to have the same fill as stroke color.
         /// </summary>
         /// <param name="style">The style.</param>
+        /// <param name="lineThickness">An optional line thickness.</param>
         /// <returns>Returns the style.</returns>
-        public static IStyle AsFilled(this IStyle style) => new FilledMarkerStyle(style);
+        public static IStyle AsFilledMarker(this IStyle style, double? lineThickness = null) => new FilledMarkerStyle(style, lineThickness);
+
+        /// <summary>
+        /// Gets a style that overrides another style to have no fill and no line style.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="lineThickness">An optional line thickness.</param>
+        /// <returns></returns>
+        public static IStyle AsStrokeMarker(this IStyle style, double? lineThickness = null) => new StrokeMarkerStyle(style, lineThickness);
 
         /// <summary>
         /// Gets a style that overrides another style to have no fill.

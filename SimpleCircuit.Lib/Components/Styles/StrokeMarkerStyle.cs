@@ -3,12 +3,10 @@
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// An <see cref="IStyle"/> that fills up any shapes with the foreground color. It combines the following modifications:
-    /// the shape will have a fill, stroke and opacity as the foreground color and the line style is removed.
+    /// An <see cref="IStyle"/> that has no fill, and no line style.
     /// </summary>
-    /// <param name="parent">The parent style.</param>
-    /// <param name="lineThickness">An optional line thickness.</param>
-    public class FilledMarkerStyle(IStyle parent, double? lineThickness = null) : IStyle
+    /// <param name="parent"></param>
+    public class StrokeMarkerStyle(IStyle parent, double? lineThickness = null) : IStyle
     {
         private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -19,10 +17,10 @@ namespace SimpleCircuit.Components.Styles
         public double Opacity => _parent.Opacity;
 
         /// <inheritdoc />
-        public string Background => _parent.Color;
+        public string Background => Style.None;
 
         /// <inheritdoc />
-        public double BackgroundOpacity => _parent.Opacity;
+        public double BackgroundOpacity => Style.Opaque;
 
         /// <inheritdoc />
         public double LineThickness => lineThickness ?? _parent.LineThickness;
