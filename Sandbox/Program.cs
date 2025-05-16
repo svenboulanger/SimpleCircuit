@@ -19,8 +19,8 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            string script = DemoHelper.CreateDemo("S", evalContext.Factory, ["A", "B"]);
-            // string script = @"X <sw> Z(""hello"", l=50)";
+            string script = DemoHelper.CreateDemo("TL", evalContext.Factory, ["A", "B", "C"]);
+            // string script = @"X <sw> TL(""a"", ""b"", ""c"")";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);

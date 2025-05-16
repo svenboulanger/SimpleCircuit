@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Linq;
 using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// A list of custom label anchor points.
     /// </summary>
-    /// <remarks>
-    /// Creates a new list of anchor points.
-    /// </remarks>
-    /// <param name="points">The points.</param>
-    public class CustomLabelAnchorPoints(params LabelAnchorPoint[] points) : LabelAnchorPoints<IDrawable>
+    public class CustomLabelAnchorPoints : LabelAnchorPoints<IDrawable>
     {
-        private readonly LabelAnchorPoint[] _points = points ?? throw new ArgumentNullException(nameof(points));
+        private readonly LabelAnchorPoint[] _points;
 
         /// <summary>
         /// Gets or sets the label anchor point at the specified index.
@@ -28,6 +25,24 @@ namespace SimpleCircuit.Components.Labeling
 
         /// <inheritdoc />
         public override int Count => _points.Length;
+
+        /// <summary>
+        /// Creates a new <see cref="CustomLabelAnchorPoints"/>.
+        /// </summary>
+        /// <param name="points">The points.</param>
+        public CustomLabelAnchorPoints(params LabelAnchorPoint[] points)
+        {
+            _points = points ?? throw new ArgumentNullException(nameof(points));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="CustomLabelAnchorPoints"/>.
+        /// </summary>
+        /// <param name="count">The number of label anchors.</param>
+        public CustomLabelAnchorPoints(int count)
+        {
+            _points = new LabelAnchorPoint[count];
+        }
 
         /// <inheritdoc />
         public void Draw(IGraphicsBuilder drawing, Labels labels)
@@ -52,6 +67,27 @@ namespace SimpleCircuit.Components.Labeling
                 // Draw the label
                 drawing.Text(label.Value, location, expand, anchor.Appearance, anchor.Oriented);
             }
+        }
+
+        /// <summary>
+        /// Calculates the bounds of all potentially overlapping labels at a given anchor.
+        /// </summary>
+        /// <param name="labels">The labels.</param>
+        /// <param name="anchorIndex">The anchor index.</param>
+        /// <returns>The bounds when all labels at the given anchor overlap.</returns>
+        public Bounds CalculateBounds(Labels labels, int anchorIndex)
+        {
+            var bounds = new ExpandableBounds();
+            for (int i = 0; i < labels.Count; i++)
+            {
+                string name = labels[i].Location ?? i.ToString();
+                if (!TryCalculateIndex(name, out int index) || index != anchorIndex)
+                    continue;
+                bounds.Expand(labels[i].Formatted.Bounds.Bounds);
+            }
+            if (double.IsInfinity(bounds.Bounds.Width))
+                bounds.Expand(new Vector2());
+            return bounds.Bounds;
         }
 
         /// <summary>

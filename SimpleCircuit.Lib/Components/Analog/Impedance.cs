@@ -24,10 +24,7 @@ namespace SimpleCircuit.Components.Analog
         private class Instance : ScaledOrientedDrawable
         {
             private double _width, _length;
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(3);
 
             /// <inheritdoc />
             public override string Type { get; }
@@ -83,57 +80,21 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     case PreparationMode.Sizes:
-                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
-                        _length = 0;
-                        _width = 0;
-                        if (Length.IsZero() || Width.IsZero())
-                        {
-                            // Go through the labels and find the one in the center
-                            for (int i = 0; i < Labels.Count; i++)
-                            {
-                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
-                                    continue;
-                                var bounds = Labels[i].Formatted.Bounds.Bounds;
-                                if (Length.IsZero())
-                                    _length = Math.Max(_length, bounds.Width);
-                                if (Width.IsZero())
-                                    _width = Math.Max(_width, bounds.Height);
-                                labelX = Math.Min(labelX, -bounds.Width * 0.5 - bounds.Left);
-                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
-                            }
+                        // Calculate the label bounds
+                        var labelBounds = _anchors.CalculateBounds(Labels, 0);
 
-                            if (Length.IsZero())
-                                _length = Math.Max(_length + Margin.Left + Margin.Right, MinLength);
-                            else
-                                _length = Length;
-                            if (Width.IsZero())
-                                _width = Math.Max(_width + Margin.Top + Margin.Bottom, MinWidth);
-                            else
-                                _width = Width;
-                        }
-                        else
-                        {
-                            _length = Length;
-                            _width = Width;
+                        // Determine the height
+                        _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
 
-                            for (int i = 0; i < Labels.Count; i++)
-                            {
-                                // Ignore labels not in the center
-                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
-                                    continue;
-                            }
-                        }
+                        // Determine the length
+                        _length = Length.IsZero() ? Math.Max(labelBounds.Width + Margin.Left + Margin.Right, MinLength) : Length;
 
                         // Update the pins
                         SetPinOffset(0, new(-_length * 0.5, 0.0));
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
-                        if (double.IsInfinity(labelX))
-                            labelX = 0.0;
-                        if (double.IsInfinity(labelY))
-                            labelY = 0.0;
-                        _anchors[0] = new(new(labelX, labelY), new(1, 0), Appearance, true);
+                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(1, 0), Appearance, true);
                         if (Variants.Contains(_programmable))
                         {
                             _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1), Appearance);

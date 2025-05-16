@@ -2,6 +2,9 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing;
+using System;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -17,18 +20,26 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
-            private const double _width = 12.0;
-            private const double _height = 3.0;
-            private const double _rx = _height * 0.5;
-            private const double _ry = _height;
-            private const double _kx = 0.5522847498 * _rx;
-            private const double _ky = 0.5522847498 * _ry;
-            private const double _inner = _width - _rx;
-            private double _length = _width;
+            private readonly CustomLabelAnchorPoints _anchors = new(3);
+            private double _width, _length, _rx;
+
+            [Description("The margin used for the center label if the size of the transmission line is calculated from the center label.")]
+            [Alias("m")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
+
+            [Description("The length of the transmission line. If 0, the length is based on the center label and the minimum length.")]
+            [Alias("l")]
+            public double Length { get; set; }
+
+            [Description("The minimum length of the transmission line. Default is 24.")]
+            public double MinLength { get; set; } = 24.0;
+
+            [Description("The width of the transmission line. If 0, the width is based on the center label and the minimum width.")]
+            [Alias("w")]
+            public double Width { get; set; }
+
+            [Description("The minimum width of the transmission line. Default is 6.")]
+            public double MinWidth { get; set; } = 6.0;
 
             /// <summary>
             /// Draws the transmission line shape.
@@ -36,31 +47,26 @@ namespace SimpleCircuit.Components.Analog
             /// <param name="builder">The path builder.</param>
             private void DrawShape(IPathBuilder builder)
             {
-                double offset = 0.5 * (Length - _width);
-                double inner = _inner + offset;
-                double width = _width + offset;
-                builder
-                    .MoveTo(new(-inner, _height)).LineTo(new(inner, _height))
-                    .CurveTo(new(inner + _kx, _height), new(width, _ky), new(width, 0))
-                    .SmoothTo(new(inner + _kx, -_height), new(inner, -_height))
-                    .LineTo(new(-inner, -_height))
-                    .CurveTo(new(-inner - _kx, -_height), new(-width, -_ky), new(-width, 0))
-                    .SmoothTo(new(-inner - _kx, _height), new(-inner, _height))
-                    .SmoothTo(new(-inner + _rx, _ky), new(-inner + _rx, 0))
-                    .SmoothTo(new(-inner + _kx, -_height), new(-inner, -_height));
-            }
+                builder.MoveTo(new(-_length * 0.5 + _rx, _width * 0.5));
+                builder.LineTo(new(_length * 0.5 - _rx, _width * 0.5));
+                builder.ArcTo(_rx, _width * 0.5, 0.0, false, false, new(_length * 0.5 - _rx, -_width * 0.5));
+                builder.LineTo(new(-_length * 0.5 + _rx, -_width * 0.5));
+                builder.ArcTo(_rx, _width * 0.5, 0.0, false, false, new(-_length * 0.5 + _rx, _width * 0.5));
+                builder.ArcTo(_rx, _width * 0.5, 0.0, false, false, new(-_length * 0.5 + _rx, -_width * 0.5));
+                // builder.ArcTo(_rx, _width * 0.5, 0.0, false, true, new(-_length * 0.5 + _rx, -_width * 0.5));
 
-            [Description("The length of the transmission line.")]
-            [Alias("l")]
-            public double Length
-            {
-                get => _length;
-                set
-                {
-                    _length = value;
-                    if (_length < 8.0)
-                        _length = 8.0;
-                }
+                //double offset = 0.5 * (Length - _width);
+                //double inner = _inner + offset;
+                //double width = _width + offset;
+                //builder
+                //    .MoveTo(new(-inner, _height)).LineTo(new(inner, _height))
+                //    .CurveTo(new(inner + _kx, _height), new(width, _ky), new(width, 0))
+                //    .SmoothTo(new(inner + _kx, -_height), new(inner, -_height))
+                //    .LineTo(new(-inner, -_height))
+                //    .CurveTo(new(-inner - _kx, -_height), new(-width, -_ky), new(-width, 0))
+                //    .SmoothTo(new(-inner - _kx, _height), new(-inner, _height))
+                //    .SmoothTo(new(-inner + _rx, _ky), new(-inner + _rx, 0))
+                //    .SmoothTo(new(-inner + _kx, -_height), new(-inner, -_height));
             }
 
             /// <inheritdoc />
@@ -73,10 +79,10 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("left", "The left signal.", this, new(-_inner, 0), new(-1, 0)), "a", "l");
-                Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(-_inner, _height), new(0, 1)), "ga", "gl");
-                Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(_inner, _height), new(0, 1)), "gb", "gr");
-                Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(_width, 0), new(1, 0)), "b", "r");
+                Pins.Add(new FixedOrientedPin("left", "The left signal.", this, new(), new(-1, 0)), "a", "l");
+                Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(), new(0, 1)), "ga", "gl");
+                Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(), new(0, 1)), "gb", "gr");
+                Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(), new(1, 0)), "b", "r");
             }
 
             /// <inheritdoc />
@@ -89,29 +95,48 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        double x = -_inner - (Length - _width) / 2;
-                        SetPinOffset(0, new(x, 0));
-                        SetPinOffset(1, new(x, _height));
 
-                        x = _inner + (Length - _width) / 2;
-                        SetPinOffset(2, new(x, _height));
-                        SetPinOffset(3, new(_width + (Length - _width) / 2, 0));
+                        // Allow dashed/dotted lines
+                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
+                        {
+                            0 => LineStyles.Dashed,
+                            1 => LineStyles.Dotted,
+                            _ => LineStyles.None
+                        };
+                        break;
 
-                        _anchors[0] = new LabelAnchorPoint(new(0, -_height - 1), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, _height + 1), new(0, 1), Appearance);
+                    case PreparationMode.Sizes:
+
+                        // Calculate sizes
+                        var labelBounds = _anchors.CalculateBounds(Labels, 2);
+                        _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
+                        _rx = _width * 0.25;
+                        _length = Length.IsZero() ? Math.Max(labelBounds.Width + Margin.Left + Margin.Right + 2 * _rx, MinLength) : Length;
+
+                        // Update the pins
+                        SetPinOffset(0, new(_rx - _length * 0.5, 0.0));
+                        SetPinOffset(1, new(_rx - _length * 0.5, _width * 0.5));
+                        SetPinOffset(2, new(_length * 0.5, _width * 0.5));
+                        SetPinOffset(3, new(_length * 0.5, 0.0));
+
+                        // Calculate the anchor positions
+                        _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1), Appearance);
+                        _anchors[1] = new(new(0, _width * 0.5 + 1), new(0, 1), Appearance);
+                        _anchors[2] = new(new(-0.5 * labelBounds.Width - labelBounds.Left, -0.5 * labelBounds.Height - labelBounds.Top), new(1, 0), Appearance, true);
                         break;
                 }
+
                 return result;
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                // Wire
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
-
                 // Transmission line
                 builder.Path(DrawShape, Appearance);
+
+                // Wire
+                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
 
                 _anchors.Draw(builder, Labels);
             }

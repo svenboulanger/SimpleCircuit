@@ -20,10 +20,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(3);
 
             private const string _differentialInput = "diffin";
             private const string _swapInput = "swapin";
@@ -104,61 +101,22 @@ namespace SimpleCircuit.Components.Analog
                         break;
 
                     case PreparationMode.Sizes:
-                        // Calculate the size of the total entity
-                        double labelX = double.PositiveInfinity, labelY = double.PositiveInfinity;
-                        if (Width.IsZero() || Height.IsZero())
-                        {
-                            // Go through the labels and find the one in the middle that will determine the height/width
-                            _width = 0.0;
-                            _height = 0.0;
-                            for (int i = 0; i < Labels.Count; i++)
-                            {
-                                // Ignore labels not in the center
-                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
-                                    continue;
-                                var bounds = Labels[i].Formatted.Bounds.Bounds;
-                                if (Width.IsZero())
-                                    _width = Math.Max(_width, bounds.Width);
-                                if (Height.IsZero())
-                                    _height = Math.Max(_height, bounds.Height);
-                                labelX = Math.Min(labelX, bounds.Left);
-                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
-                            }
+                        // Calculate the label bounds
+                        var labelBounds = _anchors.CalculateBounds(Labels, 0);
 
-                            // The true width adds half of the height
-                            if (Height.IsZero())
-                                _height = Math.Max(_height + Margin.Top + Margin.Bottom, MinHeight);
-                            else
-                                _height = Height;
-                            if (Width.IsZero())
-                            {
-                                if (Variants.Contains(_differentialInput))
-                                    _width += 4.0; // Accommodate for the signs
-                                _width += 0.5 * _height; // Accommodate for the triangle output shape
-                                _width = Math.Max(_width + Margin.Left + Margin.Right, MinWidth);
-                            }
-                            else
-                            {
-                                _width = Width;
-                                if (_width < _height * 0.5)
-                                    _width = _height * 0.5;
-                            }
+                        // Determine the height
+                        _height = Height.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinHeight) : Height;
+
+                        // Determine the width
+                        if (Width.IsZero())
+                        {
+                            _width = Math.Max(labelBounds.Width + Margin.Left + Margin.Right, MinWidth);
+                            if (Variants.Contains(_differentialInput))
+                                _width += 4.0;
+                            _width += 0.5 * _height;
                         }
                         else
-                        {
                             _width = Width;
-                            _height = Height;
-
-                            for (int i = 0; i < Labels.Count; i++)
-                            {
-                                // Ignore labels not in the center
-                                if (!_anchors.TryCalculateIndex(Labels[i].Location ?? i.ToString(), out int lblIndex) || lblIndex != 0)
-                                    continue;
-                                var bounds = Labels[i].Formatted.Bounds.Bounds;
-                                labelX = Math.Min(labelX, -bounds.Left);
-                                labelY = Math.Min(labelY, bounds.Height * 0.5 - bounds.Bottom);
-                            }
-                        }
 
                         // Update the pins
                         int index = 0;
@@ -201,11 +159,7 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        if (double.IsInfinity(labelX))
-                            labelX = 0.0;
-                        if (double.IsInfinity(labelY))
-                            labelY = 0.0;
-                        _anchors[0] = new LabelAnchorPoint(new(x + labelX, labelY), new(1, 0), Appearance, true);
+                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), new(1, 0), Appearance, true);
                         _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1), Appearance);
                         _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1), Appearance);
                         break;

@@ -160,7 +160,6 @@ namespace SimpleCircuit.Parser.SimpleTexts
                                 ContinueText(lexer, context);
                                 return CreateTextSpan(context);
                             }
-                            break;
                         
                         default:
                             context.Builder.Append(content);
