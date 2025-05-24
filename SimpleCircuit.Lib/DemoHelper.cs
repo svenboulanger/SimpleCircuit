@@ -109,9 +109,10 @@ namespace SimpleCircuit
 
                 // Also do a different orientation
                 sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <ne 5 color=\"red\"> {key}_{styles.Count + 1}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
                 sb.AppendLine($"(y {key}_*_{row})");
             }
-            for (int col = 0; col < styles.Count; col++)
+            for (int col = 0; col < styles.Count + 2; col++)
                 sb.AppendLine($"(x {key}_{col}_*)");
             return sb.ToString();
         }

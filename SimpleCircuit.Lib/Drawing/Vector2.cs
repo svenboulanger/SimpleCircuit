@@ -16,6 +16,11 @@ namespace SimpleCircuit
         private const double _dblPrecision = 1e-9;
 
         /// <summary>
+        /// A zero vector.
+        /// </summary>
+        public static Vector2 Zero { get; } = new Vector2(0, 0);
+
+        /// <summary>
         /// A unit vector along the X-axis.
         /// </summary>
         public static Vector2 UX { get; } = new Vector2(1, 0);

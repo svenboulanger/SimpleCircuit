@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Analog
                 _outputPos = new(0, 4),
                 _outputNeg = new(0, -4),
                 _outputCommon = new(8, 0);
-            private readonly CustomLabelAnchorPoints _anchors;
+            private CustomLabelAnchorPoints _anchors = null;
 
             /// <inheritdoc />
             public override string Type => "amplifier";
@@ -61,11 +61,6 @@ namespace SimpleCircuit.Components.Analog
             /// <param name="name">The name.</param>
             public Instance(string name) : base(name)
             {
-                _anchors = new(
-                    new LabelAnchorPoint(new(2, 5), new(1, 1)),
-                    new LabelAnchorPoint(new(-2.5, 0), new()),
-                    new LabelAnchorPoint(new(2, -5), new(1, -1))
-                );
             }
 
             /// <inheritdoc />
@@ -118,6 +113,19 @@ namespace SimpleCircuit.Components.Analog
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
 
+                        switch (Variants.Select(_schmitt, _comparator))
+                        {
+                            case 0:
+                            case 1:
+                                _anchors = new(2);
+                                break;
+
+                            default:
+                                _anchors = new(3);
+                                _anchors[1] = new LabelAnchorPoint(new(-2.5, 0), Vector2.Zero, new(Vector2.UX, TextOrientationTypes.Transformed));
+                                break;
+                        }
+
                         // Allow dashed/dotted lines
                         this.ApplyDrawableLineStyle();
                         break;
@@ -128,9 +136,9 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = Style?.Apply(builder.Style) ?? builder.Style;
+                var style = builder.Style.Modify(Style);
                 _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
-                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
+                _anchors[^1] = new LabelAnchorPoint(new(2, -5), new(1, -1));
 
                 // The main triangle
                 builder.Polygon(
@@ -164,7 +172,7 @@ namespace SimpleCircuit.Components.Analog
 
                     // Give more breathing room to the labels
                     _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1));
-                    _anchors[2] = new LabelAnchorPoint(new(2, -8.5), new(1, -1));
+                    _anchors[^1] = new LabelAnchorPoint(new(2, -8.5), new(1, -1));
                 }
                 else
                     builder.ExtendPin(Pins["out"], style);
@@ -173,7 +181,7 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-7, 10), new(4, -8.5), style);
-                    _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1));
+                    _anchors[^1] = new LabelAnchorPoint(new(2, -10), new(1, -1));
                 }
 
                 // Comparator or schmitt trigger

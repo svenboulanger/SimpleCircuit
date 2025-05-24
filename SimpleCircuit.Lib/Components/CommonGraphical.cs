@@ -302,19 +302,26 @@ namespace SimpleCircuit.Components
         /// <param name="minus">The center of the minus sign.</param>
         /// <param name="size">The size of the signs. The default is 2.</param>
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
-        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IStyle appearance, double size = 2, bool vertical = false)
+        public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IStyle style, double size = 2, bool vertical = false, bool upright=false)
         {
-            appearance = appearance.AsStrokeMarker(Styles.Style.DefaultLineThickness);
+            style = style.AsStrokeMarker(Style.DefaultLineThickness);
+            size *= 0.5;
+
+            // Make sure the plus and minus are upright
+            var invMatrix = upright ? builder.CurrentTransform.Matrix.Inverse : Matrix2.Identity;
 
             // Plus sign
-            builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), appearance);
+            builder.BeginTransform(new(plus, invMatrix));
+            builder.Path(b => b.MoveTo(new(0, -size)).Vertical(2 * size).MoveTo(new(-size, 0)).Horizontal(2 * size), style);
+            builder.EndTransform();
 
             // Minus sign
-            size *= 0.5;
+            builder.BeginTransform(new(minus, invMatrix));
             if (vertical)
-                builder.Line(new(minus.X, minus.Y - size), new(minus.X, minus.Y + size), appearance);
+                builder.Line(new(0, -size), new(0, size), style);
             else
-                builder.Line(new(minus.X - size, minus.Y), new(minus.X + size, minus.Y), appearance);
+                builder.Line(new(-size, 0), new(size, 0), style);
+            builder.EndTransform();
         }
 
         /// <summary>
