@@ -3,14 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using SimpleCircuit.Circuits;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 
@@ -19,9 +18,9 @@ namespace SimpleCircuit
     /// <summary>
     /// Represents a circuit of interconnected components.
     /// </summary>
-    /// <param name="formatter">A text formatter.</param>
     /// <param name="style">The style.</param>
-    public class GraphicalCircuit(ITextFormatter formatter, IStyle style) : IEnumerable<ICircuitPresence>
+    /// <param name="formatter">A text formatter.</param>
+    public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = null) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
 
@@ -63,12 +62,12 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets the text formatter.
         /// </summary>
-        public ITextFormatter TextFormatter => formatter;
+        public ITextFormatter TextFormatter => formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
 
         /// <summary>
         /// Gets the style.
         /// </summary>
-        public IStyle Style { get; } = style ?? throw new ArgumentNullException(nameof(style));
+        public IStyle Style { get; } = style ?? new Style();
 
         /// <summary>
         /// Adds the specified component.
@@ -149,7 +148,7 @@ namespace SimpleCircuit
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
 
             // Prepare the circuit (first constrain orientations, then prepare offsets)
-            var prepareContext = new PrepareContext(this, TextFormatter, Style, diagnostics);
+            var prepareContext = new PrepareContext(this, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 

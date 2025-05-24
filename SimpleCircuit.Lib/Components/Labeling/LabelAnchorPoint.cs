@@ -34,6 +34,19 @@ namespace SimpleCircuit.Components.Labeling
         public LabelAnchorPoint()
         {
             Location = default;
+            Expand = default;
+            Orientation = TextOrientation.Normal;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="LabelAnchorPoint"/>.
+        /// </summary>
+        /// <param name="location">The location.</param>
+        /// <param name="expand">The expansion direction.</param>
+        public LabelAnchorPoint(Vector2 location, Vector2 expand)
+        {
+            Location = location;
+            Expand = expand;
             Orientation = TextOrientation.Normal;
         }
 
@@ -42,9 +55,10 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="location">The location.</param>
         /// <param name="orientation">The label orientation.</param>
-        public LabelAnchorPoint(Vector2 location, TextOrientation orientation)
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, TextOrientation orientation)
         {
             Location = location;
+            Expand = expand;
             Orientation = orientation;
         }
     }

@@ -82,8 +82,10 @@ namespace SimpleCircuit.Evaluator
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
+        /// <param name="style">The style.</param>
         /// <param name="formatter">The text formatter used for the graphical circuit.</param>
-        public EvaluationContext(bool loadAssembly = true, ITextFormatter formatter = null, Options options = null)
+        /// <param name="options">The options.</param>
+        public EvaluationContext(bool loadAssembly = true, IStyle style = null, ITextFormatter formatter = null, Options options = null)
         {
             if (loadAssembly)
             {
@@ -91,7 +93,7 @@ namespace SimpleCircuit.Evaluator
                 Markers.Add("arrow", () => new Arrow());
                 Markers.Add("rarrow", () => new ReverseArrow());
             }
-            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()), new Style());
+            Circuit = new GraphicalCircuit(style, formatter);
             Options = options ?? new Options();
             CurrentScope = new();
         }

@@ -75,20 +75,20 @@ namespace SimpleCircuit
             }
 
             // Each column will represent a styling thing
-            List<IStyle> styles = [
-                new Style(), // Default
-                new Style { Color = "red" }, // Different foreground color
-                new Style { Background = "red" }, // Different background color
-                new Style { LineStyle = LineStyles.Dashed }, // Dashed
-                new Style { LineStyle = LineStyles.Dotted }, // Dotted
-                new Style { Color = "green", Background = "blue", LineStyle = LineStyles.Dashed, LineThickness = 1.0 }, // Different color vs. background color
-                new Style { FontFamily = "Times New Roman" }
+            List<string> styles = [
+                "",
+                "color=\"red\"",
+                "background=\"red\"",
+                "dashed",
+                "dotted",
+                "color=\"green\", background=\"blue\", dashed, thickness=1",
+                "fontfamily=\"Times New Roman\""
                 ];
 
             // Each row represents possible variants
-            var formatter = new SimpleTextFormatter(new SkiaTextMeasurer());
-            var builder = new BoundsBuilder(formatter, styles[0], null);
-            var context = new PrepareContext(new GraphicalCircuit(formatter, styles[0]), formatter, styles[0], null)
+            var ckt = new GraphicalCircuit();
+            var builder = new BoundsBuilder(ckt.TextFormatter, ckt.Style, null);
+            var context = new PrepareContext(ckt, null)
             {
                 Mode = PreparationMode.Reset
             };
@@ -106,6 +106,9 @@ namespace SimpleCircuit
                     var style = styles[col];
                     sb.AppendLine($"{key}_{col}_{row}({style} {string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
                 }
+
+                // Also do a different orientation
+                sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
                 sb.AppendLine($"(y {key}_*_{row})");
             }
             for (int col = 0; col < styles.Count; col++)

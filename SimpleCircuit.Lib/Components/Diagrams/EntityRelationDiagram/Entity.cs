@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     case PreparationMode.Offsets:
 
                         // Place the header
-                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), new(_anchors[0].Expand, TextOrientationTypes.Normal));
+                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), new(1, 0), new(_anchors[0].Expand, TextOrientationTypes.Normal));
 
                         ((FixedOrientedPin)Pins[1]).Offset = new(_width * 0.5, 0);
                         ((FixedOrientedPin)Pins[2]).Offset = new(_width * 0.5, _height);

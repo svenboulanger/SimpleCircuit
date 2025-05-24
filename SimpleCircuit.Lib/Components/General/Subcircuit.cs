@@ -166,7 +166,7 @@ namespace SimpleCircuit.Components
                         var state = new SubcircuitState(_properties);
                         if (!_parentFactory._versions.TryGetValue(state, out var version))
                         {
-                            var circuit = new GraphicalCircuit(context.TextFormatter, context.Style.Modify(Style));
+                            var circuit = new GraphicalCircuit(context.Style.Modify(Style), context.TextFormatter);
                             var evalContext = new EvaluationContext(_parentFactory._factories, circuit, _parentFactory._options)
                             {
                                 Diagnostics = context.Diagnostics

@@ -11,18 +11,12 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <summary>
     /// An implementation of the <see cref="IPrepareContext"/>.
     /// </summary>
-    /// <remarks>
-    /// Creates a new <see cref="PrepareContext"/>.
-    /// </remarks>
-    /// <param name="circuit">The circuit.</param>
-    /// <param name="formatter">The text formatter.</param>
-    /// <param name="diagnostics">The diagnostics.</param>
-    public class PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics) : IPrepareContext
+    public class PrepareContext : IPrepareContext
     {
-        private readonly GraphicalCircuit _circuit = circuit;
+        private readonly GraphicalCircuit _circuit;
 
         /// <inheritdoc />
-        public IDiagnosticHandler Diagnostics { get; } = diagnostics;
+        public IDiagnosticHandler Diagnostics { get; }
 
         /// <inheritdoc />
         public DesperatenessLevel Desparateness { get; set; } = DesperatenessLevel.Normal;
@@ -31,7 +25,7 @@ namespace SimpleCircuit.Circuits.Contexts
         public PreparationMode Mode { get; set; }
 
         /// <inheritdoc />
-        public ITextFormatter TextFormatter { get; } = formatter ?? throw new ArgumentNullException(nameof(formatter));
+        public ITextFormatter TextFormatter { get; }
 
         /// <inheritdoc />
         public NodeOffsetGrouper Offsets { get; } = new();
@@ -45,7 +39,35 @@ namespace SimpleCircuit.Circuits.Contexts
         public DrawableGrouper DrawnGroups { get; } = new();
 
         /// <inheritdoc />
-        public IStyle Style { get; } = style ?? throw new ArgumentNullException(nameof(style));
+        public IStyle Style { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="PrepareContext"/>.
+        /// </summary>
+        /// <param name="circuit">The graphical circuit.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        public PrepareContext(GraphicalCircuit circuit, IDiagnosticHandler diagnostics)
+        {
+            _circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
+            Style = circuit.Style;
+            TextFormatter = circuit.TextFormatter;
+            Diagnostics = diagnostics;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="PrepareContext"/>.
+        /// </summary>
+        /// <param name="formatter">The formatter.</param>
+        /// <param name="style">The style.</param>
+        /// <param name="diagnostics">the diagnostics handler.</param>
+        public PrepareContext(ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics)
+        {
+            _circuit = null;
+            Style = style ?? throw new ArgumentNullException(nameof(style));
+            TextFormatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
+            Diagnostics = diagnostics;
+
+        }
 
         /// <inheritdoc />
         public ICircuitPresence Find(string name)

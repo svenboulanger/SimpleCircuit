@@ -50,7 +50,7 @@ namespace SimpleCircuit.Components.Labeling
         public void Draw(IGraphicsBuilder builder, T subject, IStyle parentStyle)
         {
             // Calculate the bounds and indices
-            var anchorBounds = new Dictionary<int, (ExpandableBounds Bounds, List<Span> Labels)>();
+            var anchorBounds = new Dictionary<int, (ExpandableBounds Bounds, List<Label> Labels)>();
             for (int i = 0; i < subject.Labels.Count; i++)
             {
                 // Get the label
@@ -75,20 +75,43 @@ namespace SimpleCircuit.Components.Labeling
                     anchorBounds.Add(anchorIndex, bounds);
                 }
                 bounds.Bounds.Expand(anchor.Orientation.TransformTextBounds(label.Formatted.Bounds.Bounds, builder.CurrentTransform));
-                bounds.Labels.Add(label.Formatted);
+                bounds.Labels.Add(label);
 
             }
 
             // Draw the labels
+            var invMatrix = builder.CurrentTransform.Matrix.Inverse;
             foreach (var pair in anchorBounds)
             {
                 // Get the anchor
                 var anchor = GetAnchorPoint(subject, pair.Key);
+                var bounds = pair.Value.Bounds.Bounds;
 
-                // Determine the location
-                var location = anchor.Location;
-                foreach (var span in pair.Value.Labels)
-                    builder.Text(span, location, anchor.Orientation);
+                // Determine the location based on the found bounds
+                Vector2 offset;
+                if (anchor.Expand.IsNaN()) // No keeping to a quadrant
+                    offset = default;
+                else
+                {
+                    // Stick to a quadrant
+                    var expand = builder.CurrentTransform.ApplyDirection(anchor.Expand);
+                    double x, y;
+                    if (expand.X.IsZero())
+                        x = - bounds.Left - 0.5 * bounds.Width;
+                    else if (expand.X > 0)
+                        x = - bounds.Left;
+                    else
+                        x = - bounds.Right;
+                    if (expand.Y.IsZero())
+                        y = - bounds.Top - 0.5 * bounds.Height;
+                    else if (expand.Y > 0)
+                        y = - bounds.Top;
+                    else
+                        y = - bounds.Bottom;
+                    offset = invMatrix * new Vector2(x, y);
+                }
+                foreach (var label in pair.Value.Labels)
+                    builder.Text(label.Formatted, anchor.Location + offset + invMatrix * label.Offset, anchor.Orientation);
             }
         }
 

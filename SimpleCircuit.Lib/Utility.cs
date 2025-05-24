@@ -21,7 +21,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>
-        ///   <c>true</c> if the specified value is zero; otherwise, <c>false</c>.
+        /// Returns <c>true</c> if the specified value is zero; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsZero(this double value) => Math.Abs(value) < 1e-9;
 
@@ -30,9 +30,20 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="vector">The value.</param>
         /// <returns>
-        ///     <c>true</c> if the specified value is zero; otherwise, <c>false</c>.
+        /// Return <c>true</c> if the specified value is zero; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsZero(this Vector2 vector) => vector.X.IsZero() && vector.Y.IsZero();
+
+        public static bool IsNaN(this double value) => double.IsNaN(value);
+
+        /// <summary>
+        /// Determines whether the specified vector has a coordinate that is not a number.
+        /// </summary>
+        /// <param name="vector">The vector.</param>
+        /// <returns>
+        /// Returns <c>true</c> if one of the vector coordinates is not a number; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsNaN(this Vector2 vector) => vector.X.IsNaN() || vector.Y.IsNaN();
 
         /// <summary>
         /// Parses a scalar attribute of an XML ndoe.

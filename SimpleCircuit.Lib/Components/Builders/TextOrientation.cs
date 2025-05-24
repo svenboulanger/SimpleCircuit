@@ -60,10 +60,10 @@ namespace SimpleCircuit.Components.Builders
 
                 case TextOrientationTypes.Transformed:
                     var b = new ExpandableBounds();
-                    b.Expand(transform.Apply(new Vector2(bounds.Left, bounds.Bottom)));
-                    b.Expand(transform.Apply(new Vector2(bounds.Left, bounds.Top)));
-                    b.Expand(transform.Apply(new Vector2(bounds.Right, bounds.Top)));
-                    b.Expand(transform.Apply(new Vector2(bounds.Right, bounds.Bottom)));
+                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Left, bounds.Bottom)));
+                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Left, bounds.Top)));
+                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Right, bounds.Top)));
+                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Right, bounds.Bottom)));
                     return b.Bounds;
 
                 default:

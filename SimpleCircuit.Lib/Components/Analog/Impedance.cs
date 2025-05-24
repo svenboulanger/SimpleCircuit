@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
-                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(new(1, 0), TextOrientationTypes.Transformed));
+                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(1,0), new(new(1, 0), TextOrientationTypes.Transformed));
                         if (Variants.Contains(_programmable))
                         {
                             _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1));
