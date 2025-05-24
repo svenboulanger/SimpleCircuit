@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components.Analog
 
             [Description("The minimum length of the symbol. The default is 6.")]
             [Alias("ml")]
-            public double MinLength { get; set; } = 6;
+            public double MinLength { get; set; } = 10.0;
 
             [Description("The minimum width of the symbol. The default is 4.")]
             [Alias("mw")]
@@ -77,7 +77,7 @@ namespace SimpleCircuit.Components.Analog
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
                         var style = context.Style.Modify(Style);
-                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 1, _anchors, style);
 
                         // Determine the height
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
@@ -90,15 +90,15 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
-                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(1,0), new(new(1, 0), TextOrientationTypes.Transformed));
+                        _anchors[1] = new(default, default, TextOrientation.Transformed);
                         if (Variants.Contains(_programmable))
                         {
-                            _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1));
+                            _anchors[0] = new(new(0, -_width * 0.5 - 5), new(0, -1));
                             _anchors[2] = new(new(0, _width * 0.5 + 2), new(0, 1));
                         }
                         else
                         {
-                            _anchors[1] = new(new(0, -_width * 0.5 - 1), new(0, -1));
+                            _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1));
                             _anchors[2] = new(new(0, _width * 0.5 + 1), new(0, 1));
                         }
                         break;

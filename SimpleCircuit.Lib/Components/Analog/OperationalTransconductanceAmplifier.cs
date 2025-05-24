@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
                 _anchors = new(
                     new LabelAnchorPoint(new(2, 8), new(1, 1)),
-                    new LabelAnchorPoint(new(), new()),
+                    new LabelAnchorPoint(new(), new(), TextOrientation.Transformed),
                     new LabelAnchorPoint(new(2, -8), new(1, -1)));
             }
 
@@ -102,6 +102,13 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(4, new(5, 0));
                             SetPinOffset(5, new(5, 0));
                         }
+
+
+                        // Update anchors
+                        _anchors[0] = new LabelAnchorPoint(new(2, 8), new(1, 1));
+                        _anchors[2] = new LabelAnchorPoint(new(2, -8), new(1, -1));
+                        if (Variants.Contains(_programmable))
+                            _anchors[2] = new LabelAnchorPoint(new(2, -13), new(1, -1));
 
                         // Allow dashed/dotted lines
                         this.ApplyDrawableLineStyle();
