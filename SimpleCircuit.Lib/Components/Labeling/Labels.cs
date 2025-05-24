@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Circuits.Contexts;
+﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components.Styles;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,41 +8,33 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// A class for managing the labels of a component.
     /// </summary>
-    public class Labels : IReadOnlyList<LabelInfo>
+    public class Labels : IReadOnlyList<Label>
     {
-        private readonly List<LabelInfo> _labels = [];
-
-        /// <summary>
-        /// Gets or sets the default text size.
-        /// </summary>
-        public double FontSize { get; set; } = 4.0;
-
-        /// <summary>
-        /// Gets or sets the default line spacing for labels.
-        /// </summary>
-        public double LineSpacing { get; set; } = 1.5;
+        private readonly List<Label> _labels = [];
 
         /// <inheritdoc />
-        public LabelInfo this[int index]
+        public int Count => _labels.Count;
+
+        /// <inheritdoc />
+        public Label this[int index]
         {
             get
             {
                 if (index < 0)
                     return null;
+
+                // Pad with more labels if necessary
                 if (index >= _labels.Count)
                 {
                     for (int i = _labels.Count; i <= index; i++)
                         _labels.Add(null);
                 }
 
-                LabelInfo result;
+                // Create a new label if it doesn't exist yet
+                Label result;
                 if (_labels[index] == null)
                 {
-                    result = new LabelInfo()
-                    {
-                        Size = FontSize,
-                        LineSpacing = LineSpacing
-                    };
+                    result = new Label();
                     _labels[index] = result;
                 }
                 else
@@ -51,22 +43,19 @@ namespace SimpleCircuit.Components.Labeling
             }
         }
 
-        /// <inheritdoc />
-        public int Count => _labels.Count;
-
         /// <summary>
-        /// Formats the labels.
+        /// Formats all labels.
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="parentOptions">The appearance options of the parent drawable.</param>
-        public void Format(IPrepareContext context, IStyle parentOptions)
+        /// <param name="formatter">The text formatter.</param>
+        /// <param name="parentStyle">The parent style.</param>
+        public void Format(ITextFormatter formatter, IStyle parentStyle)
         {
             foreach (var label in _labels)
-                label?.Format(context, parentOptions);
+                label?.Format(formatter, parentStyle);
         }
 
         /// <inheritdoc />
-        public IEnumerator<LabelInfo> GetEnumerator() => _labels.GetEnumerator();
+        public IEnumerator<Label> GetEnumerator() => _labels.GetEnumerator();
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

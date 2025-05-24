@@ -1,8 +1,6 @@
 ﻿using SimpleCircuit.Drawing;
 using System;
-using System.Collections;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -24,6 +22,137 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         protected BoxLabelAnchorPoints()
         {
+        }
+
+        /// <inheritdoc />
+        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index)
+        {
+            // Normalize the index
+            index %= Count;
+            if (index < 0)
+                index += Count;
+
+            double r = 0.0;
+            if (subject is IRoundedBox rb)
+                r = rb.CornerRadius;
+
+            switch (index)
+            {
+                case 0: // Center
+                    return new(0.5 * (subject.TopLeft + subject.BottomRight), new());
+
+                case 1: // Top-left above box
+                    return new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1));
+
+                case 2: // Top center above box
+                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1));
+
+                case 3: // Top-right above box
+                    return new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1));
+
+                case 4: // Top-right right of box
+                    return new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1));
+
+                case 5: // Middle-right right of box
+                    return new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+
+                case 6: // Bottom-right right of box
+                    return new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1));
+
+                case 7: // Bottom-right below box
+                    return new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1));
+                     
+                case 8: // Bottom-center below box
+                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
+
+                case 9: // Bottom-right below box
+                    return new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1));
+
+                case 10: // Bottom-left left of box
+                    return new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1));
+
+                case 11: // Middle-left left of box
+                    return new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+
+                case 12: // Top-left left of box
+                    return new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1));
+
+                case 13: // Top-left inside box
+                    double f = r * 0.70710678118;
+                    return new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1));
+
+                case 14: // Top-center inside box
+                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y + subject.LabelMargin), new(0, 1));
+
+                case 15: // Top-right inside box
+                    f = r * 0.70710678118;
+                    return new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1));
+
+                case 16: // Middle-right inside box
+                    return new(new(subject.BottomRight.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+
+                case 17: // Bottom-right inside box
+                    f = r * 0.70710678118;
+                    return new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1));
+                    
+                case 18: // Bottom-center inside box
+                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y - subject.LabelMargin), new(0, -1));
+
+                case 19: // Bottom-left inside box
+                    f = r * 0.70710678118;
+                    return new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1));
+
+                case 20: // Middle-left inside box
+                    return new(new(subject.TopLeft.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+            }
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override bool TryGetAnchorIndex(string name, out int index)
+        {
+            switch (name)
+            {
+                case "0":
+                case "c":
+                case "ci": index = 0; return true;
+
+                case "13":
+                case "nwi": index = 13; return true;
+
+                case "14":
+                case "ni": index = 14; return true;
+
+                case "15":
+                case "nei": index = 15; return true;
+
+                case "16":
+                case "ei": index = 16; return true;
+
+                case "17":
+                case "sei": index = 17; return true;
+
+                case "18":
+                case "si": index = 18; return true;
+
+                case "19":
+                case "swi": index = 19; return true;
+
+                case "20":
+                case "wi": index = 20; return true;
+
+                default:
+                    if (name.All(char.IsDigit))
+                    {
+                        index = int.Parse(name);
+                        index %= Count;
+                        if (index < 0)
+                            index += Count;
+                        return true;
+                    }
+                    index = -1;
+                    return false;
+            }
         }
 
         /// <summary>
@@ -92,50 +221,13 @@ namespace SimpleCircuit.Components.Labeling
                 var label = subject.Labels[i];
                 if (label?.Formatted is null)
                     continue;
-                string name = label.Location ?? i.ToString();
+                if (!TryGetAnchorIndex(label.Anchor ?? i.ToString(), out int anchorIndex))
+                    continue;
                 var bounds = label.Formatted.Bounds.Bounds;
 
-                switch (name)
-                {
-                    case "0":
-                    case "c":
-                    case "ci": Expand(0, bounds); break;
-
-                    case "13":
-                    case "nwi": Expand(13, bounds); break;
-
-                    case "14":
-                    case "ni": Expand(14, bounds); break;
-
-                    case "15":
-                    case "nei": Expand(15, bounds); break;
-
-                    case "16":
-                    case "ei": Expand(16, bounds); break;
-
-                    case "17":
-                    case "sei": Expand(17, bounds); break;
-
-                    case "18":
-                    case "si": Expand(18, bounds); break;
-
-                    case "19":
-                    case "swi": Expand(19, bounds); break;
-
-                    case "20":
-                    case "wi": Expand(20, bounds); break;
-
-                    default:
-                        if (label.Location.All(char.IsDigit))
-                        {
-                            int index = int.Parse(label.Location);
-                            index %= Count;
-                            if (index < 0)
-                                index += Count;
-                            Expand(index, bounds);
-                        }
-                        break;
-                }
+                // Expand
+                if (anchorIndex == 0 || anchorIndex >= 13 && anchorIndex <= 19)
+                    Expand(anchorIndex, bounds); break;
             }
 
             // Calculate the total width and height
@@ -158,170 +250,6 @@ namespace SimpleCircuit.Components.Labeling
             height += subject.LabelMargin;
 
             return new(width, height);
-        }
-
-        /// <inheritdoc />
-        public override bool TryCalculate(IBoxDrawable subject, string name, out LabelAnchorPoint value)
-        {
-            double r = 0.0;
-            if (subject is IRoundedBox rb)
-                r = rb.CornerRadius;
-
-            switch (name.ToLower())
-            {
-                case "0":
-                case "c":
-                case "ci":
-                    value = new(0.5 * (subject.TopLeft + subject.BottomRight), new(), subject.Appearance);
-                    return true; // Center
-
-                case "1":
-                case "nw":
-                case "nwo":
-                case "nnw":
-                case "nnwo":
-                    value = new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1), subject.Appearance);
-                    return true; // Top-left above box
-
-                case "2":
-                case "n":
-                case "no":
-                case "u":
-                case "up":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1), subject.Appearance);
-                    return true; // Top center above box
-
-                case "3":
-                case "ne":
-                case "neo":
-                case "nne":
-                case "nneo":
-                    value = new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1), subject.Appearance);
-                    return true; // Top-right above box
-
-                case "4":
-                case "ene":
-                case "eneo":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1), subject.Appearance);
-                    return true; // Top-right right of box
-
-                case "5":
-                case "e":
-                case "eo":
-                case "r":
-                case "right":
-                    value = new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0), subject.Appearance);
-                    return true; // Middle-right right of box
-
-                case "6":
-                case "ese":
-                case "eseo":
-                    value = new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1), subject.Appearance);
-                    return true; // Bottom-right right of box
-
-                case "7":
-                case "se":
-                case "seo":
-                case "sse":
-                case "sseo":
-                    value = new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1), subject.Appearance);
-                    return true; // Bottom-right below box
-
-                case "8":
-                case "s":
-                case "so":
-                case "d":
-                case "down":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1), subject.Appearance);
-                    return true; // Bottom-center below box
-
-                case "9":
-                case "sw":
-                case "swo":
-                case "ssw":
-                case "sswo":
-                    value = new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1), subject.Appearance);
-                    return true; // Bottom-right below box
-
-                case "10":
-                case "wsw":
-                case "wswo":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1), subject.Appearance);
-                    return true; // Bottom-left left of box
-
-                case "11":
-                case "w":
-                case "wo":
-                case "l":
-                case "left":
-                    value = new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0), subject.Appearance);
-                    return true; // Middle-left left of box
-
-                case "12":
-                case "wnw":
-                case "wnwo":
-                    value = new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1), subject.Appearance);
-                    return true; // Top-left left of box
-
-                case "13":
-                case "nwi":
-                    double f = r * 0.70710678118;
-                    value = new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1), subject.Appearance);
-                    return true; // Top-left inside box
-
-                case "14":
-                case "ni":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y + subject.LabelMargin), new(0, 1), subject.Appearance);
-                    return true; // Top-center inside box
-
-                case "15":
-                case "nei":
-                    f = r * 0.70710678118;
-                    value = new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1), subject.Appearance);
-                    return true; // Top-right inside box
-
-                case "16":
-                case "ei":
-                    value = new(new(subject.BottomRight.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0), subject.Appearance);
-                    return true; // Middle-right inside box
-
-                case "17":
-                case "sei":
-                    f = r * 0.70710678118;
-                    value = new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1), subject.Appearance);
-                    return true; // Bottom-right inside box
-
-                case "18":
-                case "si":
-                    value = new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y - subject.LabelMargin), new(0, -1), subject.Appearance);
-                    return true; // Bottom-center inside box
-
-                case "19":
-                case "swi":
-                    f = r * 0.70710678118;
-                    value = new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1), subject.Appearance);
-                    return true; // Bottom-left inside box
-
-                case "20":
-                case "wi":
-                    value = new(new(subject.TopLeft.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0), subject.Appearance);
-                    return true; // Middle-left inside box
-
-                default:
-                    if (name.All(char.IsDigit))
-                    {
-                        int index = int.Parse(name);
-                        index %= Count;
-                        if (index < 0)
-                            index += Count;
-                        return TryCalculate(subject, index.ToString(), out value);
-                    }
-                    break;
-            }
-
-            // Nothing found
-            value = default;
-            return false;
         }
     }
 }

@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -45,8 +46,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(1, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 4), new(1, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -4), new(1, -1)),
+                    new LabelAnchorPoint(new(0, 4), new(1, 1)));
             }
 
             /// <inheritdoc />
@@ -81,35 +82,38 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawInverterIEC(builder); break;
+                    case 0: DrawInverterIEC(builder, style); break;
                     case 1:
-                    default: DrawInverter(builder); break;
+                    default: DrawInverter(builder, style); break;
                 }
             }
-            private void DrawInverter(IGraphicsBuilder builder)
+            private void DrawInverter(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "in", "out");
+                builder.ExtendPins(Pins, style, 2, "in", "out");
                 builder.Polygon([
                     new(-6, 6),
                     new(6, 0),
                     new(-6, -6)
-                ], Appearance);
-                builder.Circle(new(7.5, 0), 1.5, Appearance);
+                ], style);
+                builder.Circle(new(7.5, 0), 1.5, style);
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawInverterIEC(IGraphicsBuilder builder)
+            private void DrawInverterIEC(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "in", "out");
+                builder.ExtendPins(Pins, style, 2, "in", "out");
 
-                builder.Rectangle(-5, -5, 10, 10, Appearance);
-                builder.Circle(new(6.5, 0), 1.5, Appearance);
-                builder.Text("1", new Vector2(), new Vector2(), Appearance);
+                builder.Rectangle(-5, -5, 10, 10, style);
+                builder.Circle(new(6.5, 0), 1.5, style);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                var span = builder.TextFormatter.Format("1", style);
+                builder.Text(span, new Vector2(), new(default, TextOrientationTypes.Transformed));
+
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

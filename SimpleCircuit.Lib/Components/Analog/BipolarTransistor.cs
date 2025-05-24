@@ -45,44 +45,37 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance));
+                _anchors = new(1);
             }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 if (context.Mode == PreparationMode.Reset)
-                {
-                    // Allow dashed/dotted lines
-                    Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                    {
-                        0 => LineStyles.Dashed,
-                        1 => LineStyles.Dotted,
-                        _ => LineStyles.None
-                    };
-                }
+                    this.ApplyDrawableLineStyle();
                 return base.Prepare(context);
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 // Package background
                 if (Variants.Contains(_packaged))
                 {
-                    builder.Circle(new(), 8.0, Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
+                    builder.Circle(new(), 8.0, style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
                 else
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
 
                 // Transistor
-                builder.ExtendPins(Pins, Appearance);
-                builder.Arrow(new(-3, 4), new(-6, 0), Appearance);
-                builder.Line(new(3, 4), new(6, 0), Appearance);
-                builder.Line(new(-6, 4), new(6, 4), Appearance);
-                _anchors.Draw(builder, Labels);
+                builder.ExtendPins(Pins, style);
+                builder.Arrow(new(-3, 4), new(-6, 0), style);
+                builder.Line(new(3, 4), new(6, 0), style);
+                builder.Line(new(-6, 4), new(6, 4), style);
+                _anchors.Draw(builder, this, style);
             }
         }
         private class Pnp : ScaledOrientedDrawable
@@ -102,44 +95,37 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance));
+                _anchors = new(1);
             }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 if (context.Mode == PreparationMode.Reset)
-                {
-                    // Allow dashed/dotted lines
-                    Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                    {
-                        0 => LineStyles.Dashed,
-                        1 => LineStyles.Dotted,
-                        _ => LineStyles.None
-                    };
-                }
+                    this.ApplyDrawableLineStyle();
                 return base.Prepare(context);
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 // Draw background package
                 if (Variants.Contains(_packaged))
                 {
-                    builder.Circle(new(), 8.0, Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1), Appearance);
+                    builder.Circle(new(), 8.0, style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
                 }
                 else
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
 
                 // Transistor
-                builder.ExtendPins(Pins, Appearance);
-                builder.Arrow(new(6, 0), new(3, 4), Appearance);
-                builder.Line(new(-3, 4), new(-6, 0), Appearance);
-                builder.Line(new(-6, 4), new(6, 4), Appearance);
-                _anchors.Draw(builder, Labels);
+                builder.ExtendPins(Pins, style);
+                builder.Arrow(new(6, 0), new(3, 4), style);
+                builder.Line(new(-3, 4), new(-6, 0), style);
+                builder.Line(new(-6, 4), new(6, 4), style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

@@ -87,8 +87,8 @@ namespace SimpleCircuit
 
             // Each row represents possible variants
             var formatter = new SimpleTextFormatter(new SkiaTextMeasurer());
-            var builder = new BoundsBuilder(formatter, null);
-            var context = new PrepareContext(new GraphicalCircuit(formatter), formatter, null)
+            var builder = new BoundsBuilder(formatter, styles[0], null);
+            var context = new PrepareContext(new GraphicalCircuit(formatter, styles[0]), formatter, styles[0], null)
             {
                 Mode = PreparationMode.Reset
             };

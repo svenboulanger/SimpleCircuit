@@ -71,17 +71,13 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case PreparationMode.Reset:
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
 
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
-                        var labelBounds = _anchors.CalculateBounds(Labels, 0);
+                        var style = context.Style.Modify(Style);
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
 
                         // Determine the height
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
@@ -94,16 +90,16 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
-                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(1, 0), Appearance, true);
+                        _anchors[0] = new(new(-labelBounds.Width * 0.5 - labelBounds.Left, -labelBounds.Height * 0.5 - labelBounds.Top), new(new(1, 0), TextOrientationTypes.Transformed));
                         if (Variants.Contains(_programmable))
                         {
-                            _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1), Appearance);
-                            _anchors[2] = new(new(0, _width * 0.5 + 2), new(0, 1), Appearance);
+                            _anchors[1] = new(new(0, -_width * 0.5 - 4), new(0, -1));
+                            _anchors[2] = new(new(0, _width * 0.5 + 2), new(0, 1));
                         }
                         else
                         {
-                            _anchors[1] = new(new(0, -_width * 0.5 - 1), new(0, -1), Appearance);
-                            _anchors[2] = new(new(0, _width * 0.5 + 1), new(0, 1), Appearance);
+                            _anchors[1] = new(new(0, -_width * 0.5 - 1), new(0, -1));
+                            _anchors[2] = new(new(0, _width * 0.5 + 1), new(0, 1));
                         }
                         break;
                 }
@@ -113,15 +109,16 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
 
                 // The rectangle
                 double w = _width * 0.5;
-                builder.Rectangle(-_length * 0.5, -w, _length, _width, Appearance);
+                builder.Rectangle(-_length * 0.5, -w, _length, _width, style);
 
                 if (Variants.Contains(_programmable))
-                    builder.Arrow(new(-5, w + 1), new(6, -w - 4), Appearance);
-                _anchors.Draw(builder, Labels);
+                    builder.Arrow(new(-5, w + 1), new(6, -w - 4), style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

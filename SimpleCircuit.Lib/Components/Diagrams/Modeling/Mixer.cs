@@ -1,5 +1,6 @@
-﻿using System;
-using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
+using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -23,14 +24,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var style = builder.Style.Modify(Style);
 
                 double s = Size * 0.5;
                 if (!Variants.Contains(Square))
                     s /= Math.Sqrt(2.0);
-                builder.Line(new(-s, -s), new(s, s), Appearance);
-                builder.Line(new(-s, s), new(s, -s), Appearance);
+                builder.Line(new(-s, -s), new(s, s), style);
+                builder.Line(new(-s, s), new(s, -s), style);
 
-                DrawLabels(builder);
+                DrawLabels(builder, style);
             }
         }
     }

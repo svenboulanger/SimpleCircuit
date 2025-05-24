@@ -21,15 +21,23 @@ namespace SimpleCircuit.Components.Labeling
         public override int Count => _anchors.Count;
 
         /// <inheritdoc />
-        public override bool TryCalculate(T subject, string name, out LabelAnchorPoint value)
+        public override bool TryGetAnchorIndex(string name, out int index)
         {
             if (name.All(char.IsDigit))
             {
-                int index = int.Parse(name);
-                return _anchors.TryCalculate(subject, (index + _offset).ToString(), out value);
+                index = int.Parse(name);
+                index = index + _offset;
+                index %= Count;
+                if (index < 0)
+                    index += Count;
+                return true;
             }
             else
-                return _anchors.TryCalculate(subject, name, out value);
+                return _anchors.TryGetAnchorIndex(name, out index);
         }
+
+        /// <inheritdoc />
+        public override LabelAnchorPoint GetAnchorPoint(T subject, int index)
+            => _anchors.GetAnchorPoint(subject, index);
     }
 }

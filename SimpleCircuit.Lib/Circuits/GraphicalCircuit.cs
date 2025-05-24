@@ -8,6 +8,7 @@ using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SpiceSharp.Components;
@@ -19,7 +20,8 @@ namespace SimpleCircuit
     /// Represents a circuit of interconnected components.
     /// </summary>
     /// <param name="formatter">A text formatter.</param>
-    public class GraphicalCircuit(ITextFormatter formatter) : IEnumerable<ICircuitPresence>
+    /// <param name="style">The style.</param>
+    public class GraphicalCircuit(ITextFormatter formatter, IStyle style) : IEnumerable<ICircuitPresence>
     {
         private readonly Dictionary<string, ICircuitPresence> _presences = new(StringComparer.OrdinalIgnoreCase);
 
@@ -62,6 +64,11 @@ namespace SimpleCircuit
         /// Gets the text formatter.
         /// </summary>
         public ITextFormatter TextFormatter => formatter;
+
+        /// <summary>
+        /// Gets the style.
+        /// </summary>
+        public IStyle Style { get; } = style ?? throw new ArgumentNullException(nameof(style));
 
         /// <summary>
         /// Adds the specified component.
@@ -142,7 +149,7 @@ namespace SimpleCircuit
             var presences = _presences.Values.OrderBy(p => p.Order).ToList();
 
             // Prepare the circuit (first constrain orientations, then prepare offsets)
-            var prepareContext = new PrepareContext(this, TextFormatter, diagnostics);
+            var prepareContext = new PrepareContext(this, TextFormatter, Style, diagnostics);
             if (!Prepare(presences, prepareContext))
                 return false;
 
@@ -335,7 +342,7 @@ namespace SimpleCircuit
             // Prepare information for figuring out the locations of the groups
             HashSet<string> groupsX = [], groupsY = [];
             Dictionary<string, double> sizes = [], offset = [];
-            var builder = new BoundsBuilder(TextFormatter);
+            var builder = new BoundsBuilder(TextFormatter, prepareContext.Style, updateContext.Diagnostics);
             foreach (var pair in prepareContext.DrawnGroups.Groups)
             {
                 // Initialize
@@ -432,7 +439,7 @@ namespace SimpleCircuit
             }
 
             // Create our drawing
-            var drawing = new SvgBuilder(TextFormatter, diagnostics);
+            var drawing = new SvgBuilder(TextFormatter, Style, diagnostics);
             if (extraCss != null)
             {
                 foreach (var ec in extraCss)

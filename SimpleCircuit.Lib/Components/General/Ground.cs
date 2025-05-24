@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components
 {
@@ -41,50 +42,51 @@ namespace SimpleCircuit.Components
             {
                 Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
                 _anchors = new(
-                    new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance),
-                    new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance));
+                    new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
+                    new LabelAnchorPoint(new(6, 0), new(1, 0)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance);
+                var style = builder.Style.Modify(Style);
+                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
+                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
-                    case 1: DrawEarth(builder); break;
-                    case 2: DrawSignalGround(builder); break;
-                    default: DrawGround(builder); break;
+                    case 1: DrawEarth(builder, style); break;
+                    case 2: DrawSignalGround(builder, style); break;
+                    default: DrawGround(builder, style); break;
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
-            private void DrawGround(IGraphicsBuilder drawing)
+            private void DrawGround(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, Appearance, Variants.Contains(_protective) ? 9 : 3);
+                drawing.ExtendPins(Pins, style, Variants.Contains(_protective) ? 9 : 3);
 
                 if (Variants.Contains(_noiseless))
                 {
-                    drawing.ExtendPins(Pins, Appearance, 6);
-                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), Appearance);
+                    drawing.ExtendPins(Pins, style, 6);
+                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), style);
                     if (_anchors[0].Location.X > -9)
-                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
                     if (_anchors[0].Location.X < 9)
-                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
                 }
                 if (Variants.Contains(_protective))
                 {
-                    drawing.ExtendPins(Pins, Appearance, 7.5);
-                    drawing.Circle(new(0, -1), 6.5, Appearance);
+                    drawing.ExtendPins(Pins, style, 7.5);
+                    drawing.Circle(new(0, -1), 6.5, style);
                     if (_anchors[0].Location.X > -7.5) 
-                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
                     if (_anchors[1].Location.X < 7.5)
-                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
                 }
                 else
                 {
-                    drawing.ExtendPins(Pins, Appearance, 3);
+                    drawing.ExtendPins(Pins, style, 3);
                 }
                 drawing.Path(b => b
                     .MoveTo(new(-5, 0))
@@ -92,11 +94,11 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(-3, 2))
                     .LineTo(new(3, 2))
                     .MoveTo(new(-1, 4))
-                    .LineTo(new(1, 4)), Appearance);
+                    .LineTo(new(1, 4)), style);
             }
-            private void DrawEarth(IGraphicsBuilder drawing)
+            private void DrawEarth(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, Appearance, 3);
+                drawing.ExtendPins(Pins, style, 3);
 
                 // Ground segments
                 drawing.Path(b => b
@@ -107,21 +109,21 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(0, 0))
                     .Line(new(-2, 4))
                     .MoveTo(new(5, 0))
-                    .Line(new(-2, 4)), Appearance);
+                    .Line(new(-2, 4)), style);
 
                 if (_anchors[0].Location.X > -7)
-                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
             }
-            private void DrawSignalGround(IGraphicsBuilder drawing)
+            private void DrawSignalGround(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, Appearance, 3);
+                drawing.ExtendPins(Pins, style, 3);
 
                 // Ground
                 drawing.Polygon([
                     new(-5, 0),
                     new(5, 0),
                     new(0, 4)
-                ], Appearance);
+                ], style);
             }
         }
     }

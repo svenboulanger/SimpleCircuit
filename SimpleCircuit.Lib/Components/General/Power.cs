@@ -32,26 +32,26 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
-                _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1), Appearance));
+                _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
 
                 if (Variants.Contains(_anchor))
                     builder.Polyline([
                         new(-4, 4),
                         new(),
                         new(4, 4)
-                    ], Appearance);
+                    ], style);
                 else
                 {
-                    var options = new StrokeWidthStyle(Appearance, 1.0);
-                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), options);
+                    builder.Line(new Vector2(-5, 0), new Vector2(5, 0), style.AsLineThickness(1.0));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

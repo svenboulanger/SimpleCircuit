@@ -13,7 +13,7 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// Describes a component with a graphical representation, and pins that can be interconnected.
     /// </summary>
-    public interface IDrawable : ICircuitSolverPresence
+    public interface IDrawable : ICircuitSolverPresence, IStyled
     {
         /// <summary>
         /// Gets the variants.
@@ -39,11 +39,6 @@ namespace SimpleCircuit.Components
         /// Gets the bounds of the drawable.
         /// </summary>
         public Bounds Bounds { get; }
-
-        /// <summary>
-        /// Gets the appearance options of the drawable.
-        /// </summary>
-        public Style Appearance { get; }
 
         /// <summary>
         /// Sets a property.

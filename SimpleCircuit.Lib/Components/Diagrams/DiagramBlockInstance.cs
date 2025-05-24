@@ -72,10 +72,10 @@ namespace SimpleCircuit.Components.Diagrams
         public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
 
         /// <inheritdoc />
-        public Labels Labels { get; } = new();
+        public Labels Labels { get; }
 
         /// <inheritdoc />
-        public Style Appearance { get; } = new();
+        public IStyleModifier Style { get; set; }
 
         /// <summary>
         /// Creates a new instance for a block diagram.
@@ -86,6 +86,7 @@ namespace SimpleCircuit.Components.Diagrams
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
+            Labels = new();
             Name = name;
             _pins = new(this);
             X = $"{Name}.x";
@@ -113,7 +114,7 @@ namespace SimpleCircuit.Components.Diagrams
                     break;
 
                 case PreparationMode.Sizes:
-                    Labels.Format(context, Appearance);
+                    Labels.Format(context.TextFormatter, Style?.Apply(context.Style) ?? context.Style);
                     break;
 
                 case PreparationMode.DrawableGroups:

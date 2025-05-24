@@ -5,6 +5,7 @@ using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
@@ -98,8 +99,9 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Ellipse(new(), _width * 0.5, _height * 0.5, Appearance);
-                EllipseLabelAnchorPoints.Default.Draw(builder, this);
+                var style = builder.Style.Modify(Style);
+                builder.Ellipse(new(), _width * 0.5, _height * 0.5, style);
+                EllipseLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

@@ -2,6 +2,7 @@
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
@@ -90,7 +91,7 @@ namespace SimpleCircuit.Evaluator
                 Markers.Add("arrow", () => new Arrow());
                 Markers.Add("rarrow", () => new ReverseArrow());
             }
-            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()));
+            Circuit = new GraphicalCircuit(formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer()), new Style());
             Options = options ?? new Options();
             CurrentScope = new();
         }

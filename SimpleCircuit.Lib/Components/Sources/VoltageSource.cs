@@ -74,35 +74,36 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(builder);
+                        DrawEuropeanSource(builder, style);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(builder);
+                        DrawAmericanSource(builder, style);
                         break;
                 }
             }
 
-            private void DrawAmericanSource(IGraphicsBuilder builder)
+            private void DrawAmericanSource(IGraphicsBuilder builder, IStyle style)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
 
                 // Circle
-                builder.Circle(new(0, 0), 6, Appearance);
+                builder.Circle(new(0, 0), 6, style);
 
                 // Waveform / inner graphic
                 switch (Variants.Select(_ac, _square, _tri, _pulse, _step))
                 {
                     case 0:
                         builder.BeginTransform(new(new(), builder.CurrentTransform.Matrix.Inverse));
-                        builder.AC(Appearance);
+                        builder.AC(style);
                         builder.EndTransform();
                         break;
 
@@ -111,7 +112,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 0), new(-3, 3), new(0, 3), new(0, -3), new(3, -3), new(3, 0)
-                        ], Appearance);
+                        ], style);
                         builder.EndTransform();
                         break;
 
@@ -120,7 +121,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 0), new(-1.5, 1.5), new(1.5, -1.5), new(3, 0)
-                        ], Appearance);
+                        ], style);
                         builder.EndTransform();
                         break;
 
@@ -129,7 +130,7 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 3), new(-1, 3), new(-1, -3), new(1, -3), new(1, 3), new(3, 3)
-                        ], Appearance);
+                        ], style);
                         builder.EndTransform();
                         break;
 
@@ -138,43 +139,43 @@ namespace SimpleCircuit.Components.Sources
                         builder.Polyline(
                         [
                             new(-3, 3), new(-1.5, 3), new(-1.5, -3), new(3, -3)
-                        ], Appearance);
+                        ], style);
                         builder.EndTransform();
                         break;
 
                     default:
-                        builder.Signs(new(3, 0), new(-3, 0), Appearance, vertical: true);
+                        builder.Signs(new(3, 0), new(-3, 0), style, vertical: true);
                         break;
                 }
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-6, -6), new(7.5, 7.5), Appearance);
+                    builder.Arrow(new(-6, -6), new(7.5, 7.5), style);
                     if (_anchors[0].Location.Y > -7)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                     if (_anchors[1].Location.Y < 8.5)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawEuropeanSource(IGraphicsBuilder builder)
+            private void DrawEuropeanSource(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Circle(new(0, 0), 4, Appearance);
-                builder.Line(new(-4, 0), new(4, 0), Appearance);
+                builder.Circle(new(0, 0), 4, style);
+                builder.Line(new(-4, 0), new(4, 0), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-4, -4), new(6, 6), Appearance);
+                    builder.Arrow(new(-4, -4), new(6, 6), style);
                     if (_anchors[0].Location.Y > -5)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                     if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

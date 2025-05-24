@@ -45,32 +45,47 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "d", "c", "q");
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style, 2, "d", "c", "q");
 
                 // Body
-                builder.Rectangle(-9, -12, 18, 24, Appearance, new());
+                builder.Rectangle(-9, -12, 18, 24, style, new());
 
                 // Clock thingy
-                var textAppearance = new FontSizeStyle(Appearance);
                 builder.Polyline([
                     new Vector2(-9, 4),
                     new Vector2(-7, 6),
                     new Vector2(-9, 8)
-                ], Appearance);
-                builder.Text("D", new Vector2(-8, -6), new Vector2(1, 0), textAppearance);
-                builder.Text("C", new Vector2(-6, 6), new Vector2(1, 0), textAppearance);
-                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0), textAppearance);
+                ], style);
+
+                var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
+                var span = builder.TextFormatter.Format("D", textStyle);
+                builder.Text(span, new Vector2(-8, -6), new(new Vector2(1, 0), TextOrientationTypes.Transformed));
+                span = builder.TextFormatter.Format("C", textStyle);
+                builder.Text(span, new Vector2(-6, 6), new(new Vector2(1, 0), TextOrientationTypes.Transformed));
+                span = builder.TextFormatter.Format("Q", textStyle);
+                builder.Text(span, new Vector2(8, -6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed));
 
                 if (Pins["nq"].Connections > 0)
-                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0), textAppearance);
+                {
+                    span = builder.TextFormatter.Format("\\overline{Q}", textStyle);
+                    builder.Text(span, new Vector2(8, 6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed));
+                }
 
-                textAppearance = new FontSizeStyle(Appearance, fontSize: 0.8 * Style.DefaultFontSize * 0.8);
+                // Smaller text for asynchronous set and reset
+                textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize);
                 if (Pins["s"].Connections > 0)
-                    builder.Text("set", new Vector2(0, -11.5), new Vector2(0, 1), textAppearance);
+                {
+                    span = builder.TextFormatter.Format("set", textStyle);
+                    builder.Text(span, new Vector2(0, -11.5), new(new Vector2(0, 1), TextOrientationTypes.Transformed));
+                }
                 if (Pins["r"].Connections > 0)
-                    builder.Text("rst", new Vector2(0, 11.5), new Vector2(0, -1), textAppearance);
+                {
+                    span = builder.TextFormatter.Format("rst", textStyle);
+                    builder.Text(span, new Vector2(0, 11.5), new(new Vector2(0, -1), TextOrientationTypes.Transformed));
+                }
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

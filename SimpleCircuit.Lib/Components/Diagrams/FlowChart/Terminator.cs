@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             public Instance(string name)
                 : base(name)
             {
-                _anchors = new(new LabelAnchorPoint(new(), new(), Appearance));
+                _anchors = new(new LabelAnchorPoint(new(), new()));
             }
 
             /// <inheritdoc />
@@ -100,6 +101,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 double a = _width * 0.5;
                 double b = _height * 0.5;
 
@@ -107,8 +109,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .LineTo(new(a - b, -b))
                     .ArcTo(b, b, 0.0, false, true, new(a - b, b))
                     .LineTo(new(-a + b, b))
-                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close(), Appearance);
-                _anchors.Draw(builder, this);
+                    .ArcTo(b, b, 0.0, false, true, new(-a + b, -b)).Close(), style);
+                _anchors.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

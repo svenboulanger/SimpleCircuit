@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
@@ -176,11 +177,13 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 foreach (var pin in _extend)
-                    builder.ExtendPin(Pins[pin], Appearance);
+                    builder.ExtendPin(Pins[pin], style);
                 if (_drawing != null)
                 {
-                    var context = new XmlDrawingContext(Labels, Variants);
+                    var context = new XmlDrawingContext(Labels, Variants) { Style = Style };
                     builder.DrawXml(_drawing, context);
                 }
             }

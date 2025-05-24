@@ -17,7 +17,7 @@ namespace SimpleCircuit.Circuits.Contexts
     /// <param name="circuit">The circuit.</param>
     /// <param name="formatter">The text formatter.</param>
     /// <param name="diagnostics">The diagnostics.</param>
-    public class PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IDiagnosticHandler diagnostics) : IPrepareContext
+    public class PrepareContext(GraphicalCircuit circuit, ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics) : IPrepareContext
     {
         private readonly GraphicalCircuit _circuit = circuit;
 
@@ -45,7 +45,7 @@ namespace SimpleCircuit.Circuits.Contexts
         public DrawableGrouper DrawnGroups { get; } = new();
 
         /// <inheritdoc />
-        public IStyle GlobalAppearance { get; } = new Style();
+        public IStyle Style { get; } = style ?? throw new ArgumentNullException(nameof(style));
 
         /// <inheritdoc />
         public ICircuitPresence Find(string name)

@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -128,18 +129,20 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 if (Variants.Contains(Multiple))
                 {
                     // Draw multiple paths behind it
                     for (int i = 2; i >= 1; i--)
                     {
                         builder.BeginTransform(new(new(-i * 2, -i * 2), Matrix2.Identity));
-                        builder.Path(DrawPath, Appearance);
+                        builder.Path(DrawPath, style);
                         builder.EndTransform();
                     }
                 }
-                builder.Path(DrawPath, Appearance);
-                BoxLabelAnchorPoints.Default.Draw(builder, this);
+                builder.Path(DrawPath, style);
+                BoxLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

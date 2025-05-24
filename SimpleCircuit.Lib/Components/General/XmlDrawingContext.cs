@@ -1,6 +1,12 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Variants;
+using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -20,10 +26,37 @@ namespace SimpleCircuit.Components.General
         private readonly VariantSet _variants = variants;
 
         /// <inheritdoc />
-        public IList<LabelAnchorPoint> Anchors { get; } = new List<LabelAnchorPoint>();
+        public IList<LabelAnchorPoint> Anchors { get; } = [];
 
         /// <inheritdoc />
         public Labels Labels { get; } = labels ?? throw new ArgumentNullException(nameof(labels));
+
+        /// <inheritdoc />
+        public VariantSet Variants => _variants;
+
+        /// <inheritdoc />
+        public IPinCollection Pins => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IEnumerable<string[]> Properties => [];
+
+        /// <inheritdoc />
+        public Bounds Bounds => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        /// <remarks>Not used.</remarks>
+        public string Name => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        /// <remarks>Not used.</remarks>
+        public List<TextLocation> Sources => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        /// <remarks>Not used.</remarks>
+        public int Order => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IStyleModifier Style { get; set; }
 
         /// <inheritdoc />
         public string TransformText(string input)
@@ -38,5 +71,35 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public bool Contains(string variant) => _variants?.Contains(variant) ?? false;
+
+        /// <inheritdoc />
+        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void Render(IGraphicsBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void Register(IRegisterContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void Update(IUpdateContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public PresenceResult Prepare(IPrepareContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -34,7 +34,6 @@ namespace SimpleCircuit.Components.Builders
         private readonly XmlDocument _document;
         private XmlNode _current;
         private readonly Stack<Transform> _tf = new();
-        private readonly ITextFormatter _formatter;
 
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
@@ -50,16 +49,13 @@ namespace SimpleCircuit.Components.Builders
         /// Creates a new SVG drawing instance.
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        public SvgBuilder(ITextFormatter formatter, IDiagnosticHandler diagnostics = null)
-            : base(diagnostics)
+        public SvgBuilder(ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics)
+            : base(formatter, style, diagnostics)
         {
             _document = new XmlDocument();
             _current = _document.CreateElement("svg", Namespace);
             _document.AppendChild(_current);
             _tf.Push(Transform.Identity);
-
-            // Make sure we can track the bounds of our vector image
-            _formatter = formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
         }
 
         /// <inheritdoc />
@@ -159,63 +155,56 @@ namespace SimpleCircuit.Components.Builders
             return this;
         }
 
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false)
+        /// <inheritdoc />
+        public override IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation)
         {
             if (span is null)
                 return this;
 
-            location = CurrentTransform.Apply(location);
-            expand = CurrentTransform.ApplyDirection(expand);
-
             // Create the group
             var g = _document.CreateElement("g", Namespace);
             _current.AppendChild(g);
-            if (oriented)
+
+            location = CurrentTransform.Apply(location);
+            var bounds = span.Bounds.Bounds;
+            switch (orientation.Type)
             {
-                // Modify the expansion and location such that the text is always upright
-                if (expand.X < 0)
-                {
-                    // Orientation is towards the left, so this will cause the text to be upside-down
-                    // We will flip the orientation and make the text location start from the other end
-                    location += expand * (span.Bounds.Bounds.Right + span.Bounds.Bounds.Left) + expand.Perpendicular * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
-                    expand = -expand;
-                }
+                case TextOrientationTypes.Normal:
+                    {
+                        // Apply the transform to the group
+                        g.SetAttribute("transform", $"translate({location.ToSVG()})");
 
-                // Apply orientation and location
-                double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
-                if (angle.IsZero())
-                    g.SetAttribute("transform", $"translate({location.ToSVG()})");
-                else
-                    g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
+                        // Expand bounds
+                        Expand(location + bounds);
+                    }
+                    break;
 
-                var b = span.Bounds.Bounds;
-                Expand(expand * b.Right + expand.Perpendicular * b.Top);
-                Expand(expand * b.Left + expand.Perpendicular * b.Top);
-                Expand(expand * b.Right + expand.Perpendicular * b.Bottom);
-                Expand(expand * b.Left + expand.Perpendicular * b.Bottom);
-            }
-            else
-            {
-                // Compute the location based on the location and expansion
-                var bounds = span.Bounds.Bounds;
-                double y = location.Y, x = location.X;
-                if (expand.Y.IsZero())
-                    y = y - bounds.Height * 0.5 - bounds.Top;
-                else if (expand.Y < 0)
-                    y -= bounds.Bottom;
-                else
-                    y -= bounds.Top;
-                if (expand.X.IsZero())
-                    x = x - bounds.Width * 0.5 - bounds.Left;
-                else if (expand.X < 0)
-                    x -= bounds.Right;
-                else
-                    x -= bounds.Left;
+                case TextOrientationTypes.Transformed:
+                    {
+                        // Modify the expansion and location such that the text is always upright
+                        var expand = CurrentTransform.ApplyDirection(orientation.Orientation);
+                        if (expand.X < 0)
+                        {
+                            // Orientation is towards the left, so this will cause the text to be upside-down
+                            // We will flip the orientation and make the text location start from the other end
+                            location += expand * (span.Bounds.Bounds.Right + span.Bounds.Bounds.Left) + expand.Perpendicular * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
+                            expand = -expand;
+                        }
 
-                g.SetAttribute("transform", $"translate({new Vector2(x, y).ToSVG()})");
+                        // Apply orientation and location to the containing group
+                        double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
+                        if (angle.IsZero())
+                            g.SetAttribute("transform", $"translate({location.ToSVG()})");
+                        else
+                            g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
 
-                // Return the offset bounds
-                Expand(bounds + new Vector2(x, y));
+                        // Expand bounds
+                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Top);
+                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Top);
+                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
+                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
+                    }
+                    break;
             }
 
             // Create the text element
@@ -225,16 +214,6 @@ namespace SimpleCircuit.Components.Builders
             // Make the SVG for the text
             BuildTextSVG(span, g, text);
             return this;
-        }
-
-        /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return this;
-
-            var span = _formatter.Format(value, appearance);
-            return Text(span, location, expand, oriented);
         }
 
         private void BuildTextSVG(Span span, XmlNode groupElement, XmlElement textElement)

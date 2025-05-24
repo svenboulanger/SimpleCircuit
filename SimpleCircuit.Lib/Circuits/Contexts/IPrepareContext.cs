@@ -47,7 +47,7 @@ namespace SimpleCircuit.Circuits.Contexts
         /// <summary>
         /// Gets the global appearance that any drawable may derive from.
         /// </summary>
-        public IStyle GlobalAppearance { get; }
+        public IStyle Style { get; }
 
         /// <summary>
         /// Finds a circuit presence by a given name.

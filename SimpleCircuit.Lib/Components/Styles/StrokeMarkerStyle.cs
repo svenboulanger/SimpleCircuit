@@ -3,41 +3,57 @@
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// An <see cref="IStyle"/> that has no fill, and no line style.
+    /// A style modifier that turns a style suitable for non-filled markers.
     /// </summary>
-    /// <param name="parent"></param>
-    public class StrokeMarkerStyle(IStyle parent, double? lineThickness = null) : IStyle
+    /// <param name="lineThickness">The line thickness.</param>
+    public class StrokeMarkerStyleModifier(double? lineThickness) : IStyleModifier
     {
-        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        /// <summary>
+        /// A stroke marker with default line thickness.
+        /// </summary>
+        public static StrokeMarkerStyleModifier Default { get; } = new StrokeMarkerStyleModifier(Styles.Style.DefaultLineThickness);
+
+        /// <summary>
+        /// A style for a <see cref="StrokeMarkerStyleModifier"/>.
+        /// </summary>
+        /// <param name="parent">The parent style.</param>
+        /// <param name="lineThickness">The line thickness.</param>
+        public class Style(IStyle parent, double? lineThickness = null) : IStyle
+        {
+            private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+
+            /// <inheritdoc />
+            public string Color => _parent.Color;
+
+            /// <inheritdoc />
+            public double Opacity => _parent.Opacity;
+
+            /// <inheritdoc />
+            public string Background => Styles.Style.None;
+
+            /// <inheritdoc />
+            public double BackgroundOpacity => Styles.Style.Opaque;
+
+            /// <inheritdoc />
+            public double LineThickness => lineThickness ?? _parent.LineThickness;
+
+            /// <inheritdoc />
+            public string FontFamily => _parent.FontFamily;
+
+            /// <inheritdoc />
+            public double FontSize => _parent.FontSize;
+
+            /// <inheritdoc />
+            public bool Bold => _parent.Bold;
+
+            /// <inheritdoc />
+            public double LineSpacing => _parent.LineSpacing;
+
+            /// <inheritdoc />
+            public LineStyles LineStyle => LineStyles.None;
+        }
 
         /// <inheritdoc />
-        public string Color => _parent.Color;
-
-        /// <inheritdoc />
-        public double Opacity => _parent.Opacity;
-
-        /// <inheritdoc />
-        public string Background => Style.None;
-
-        /// <inheritdoc />
-        public double BackgroundOpacity => Style.Opaque;
-
-        /// <inheritdoc />
-        public double LineThickness => lineThickness ?? _parent.LineThickness;
-
-        /// <inheritdoc />
-        public string FontFamily => _parent.FontFamily;
-
-        /// <inheritdoc />
-        public double FontSize => _parent.FontSize;
-
-        /// <inheritdoc />
-        public bool Bold => _parent.Bold;
-
-        /// <inheritdoc />
-        public double LineSpacing => _parent.LineSpacing;
-
-        /// <inheritdoc />
-        public LineStyles LineStyle => LineStyles.None;
+        public IStyle Apply(IStyle parent) => new Style(parent, lineThickness);
     }
 }

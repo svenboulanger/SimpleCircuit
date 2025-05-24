@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Sources
 {
@@ -67,22 +68,23 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(builder);
+                        DrawEuropeanSource(builder, style);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(builder);
+                        DrawAmericanSource(builder, style);
                         break;
                 }
             }
 
             /// <inheritdoc/>
-            private void DrawAmericanSource(IGraphicsBuilder drawing)
+            private void DrawAmericanSource(IGraphicsBuilder drawing, IStyle style)
             {
                 // Diamond
                 drawing.Polygon([
@@ -90,28 +92,28 @@ namespace SimpleCircuit.Components.Sources
                     new(0, 6),
                     new(6, 0),
                     new(0, -6)
-                ], Appearance);
+                ], style);
 
                 // The circle with the arrow
-                drawing.Arrow(new(-3, 0), new(3, 0), Appearance);
+                drawing.Arrow(new(-3, 0), new(3, 0), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
-                _anchors.Draw(drawing, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                _anchors.Draw(drawing, this, style);
             }
-            private void DrawEuropeanSource(IGraphicsBuilder drawing)
+            private void DrawEuropeanSource(IGraphicsBuilder drawing, IStyle style)
             {
                 drawing.Polygon([
                     new(-4, 0),
                     new(0, 4),
                     new(4, 0),
                     new(0, -4)
-                ], Appearance);
-                drawing.Line(new(0, -4), new(0, 4), Appearance);
+                ], style);
+                drawing.Line(new(0, -4), new(0, 4), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
-                _anchors.Draw(drawing, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors.Draw(drawing, this, style);
             }
         }
     }

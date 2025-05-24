@@ -92,17 +92,13 @@ namespace SimpleCircuit.Components.Analog
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, default, new(1, 0)), "o", "out", "outp", "po");
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
 
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
-                        var labelBounds = _anchors.CalculateBounds(Labels, 0);
+                        var style = Style?.Apply(context.Style) ?? context.Style;
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
 
                         // Determine the height
                         _height = Height.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinHeight) : Height;
@@ -159,9 +155,9 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), new(1, 0), Appearance, true);
-                        _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1), Appearance);
-                        _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), new(new(1, 0), TextOrientationTypes.Transformed));
+                        _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1));
+                        _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1));
                         break;
                 }
                 return result;
@@ -170,6 +166,8 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 // ADC base shape
                 double w = 0.5 * _width;
                 double h = 0.5 * _height;
@@ -181,36 +179,36 @@ namespace SimpleCircuit.Components.Analog
                     new(w, 0),
                     new(x, -h),
                     new(-w, -h)
-                ], Appearance);
+                ], style);
 
                 // Inputs
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, style, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-w + 3, 0.5 * h), new(-w + 3, -0.5 * h), Appearance);
+                        builder.Signs(new(-w + 3, 0.5 * h), new(-w + 3, -0.5 * h), style);
                     else
-                        builder.Signs(new(-w + 3, -0.5 * h), new(-w + 3, 0.5 * h), Appearance);
+                        builder.Signs(new(-w + 3, -0.5 * h), new(-w + 3, 0.5 * h), style);
                 }
                 else
-                    builder.ExtendPin(Pins["in"], Appearance);
+                    builder.ExtendPin(Pins["in"], style);
 
                 // Outputs
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 4, "outp", "outn");
+                    builder.ExtendPins(Pins, style, 4, "outp", "outn");
                     x = w - 0.25 * h;
                     double y = 0.25 * h + 3;
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(x, y), new(x, -y), Appearance);
+                        builder.Signs(new(x, y), new(x, -y), style);
                     else
-                        builder.Signs(new(x, -y), new(x, y), Appearance);
+                        builder.Signs(new(x, -y), new(x, y), style);
                 }
                 else
-                    builder.ExtendPin(Pins["out"], Appearance);
+                    builder.ExtendPin(Pins["out"], style);
 
                 // Labels
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -143,8 +144,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Diamond(0.0, 0.0, _width, _height, Appearance, CornerRadiusX, CornerRadiusY);
-                DiamondLabelAnchorPoints.Default.Draw(builder, this);
+                var style = builder.Style.Modify(Style);
+                builder.Diamond(0.0, 0.0, _width, _height, style, CornerRadiusX, CornerRadiusY);
+                DiamondLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

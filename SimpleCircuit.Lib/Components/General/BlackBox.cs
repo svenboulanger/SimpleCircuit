@@ -26,11 +26,6 @@ namespace SimpleCircuit.Components
         public override IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
         {
             var instance = (Instance)base.Create(key, name, options, diagnostics);
-            if (options != null)
-            {
-                instance.Labels.FontSize = options.FontSize;
-                instance.TextSize = options.FontSize;
-            }
             return instance;
         }
 
@@ -114,7 +109,7 @@ namespace SimpleCircuit.Components
             public Bounds Bounds { get; private set; }
 
             /// <inheritdoc />
-            public Style Appearance { get; } = new();
+            public IStyleModifier Style { get; set; }
 
             /// <summary>
             /// Creates a new black box.
@@ -161,12 +156,14 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
+                var style = Style?.Apply(builder.Style) ?? builder.Style;
+
                 builder.BeginGroup(Name, ["blackbox"]);
                 var size = EndLocation - Location;
-                builder.Rectangle(Location.X, Location.Y, size.X, size.Y, Appearance, CornerRadius, CornerRadius);
+                builder.Rectangle(Location.X, Location.Y, size.X, size.Y, style, CornerRadius, CornerRadius);
 
                 // Draw the label
-                BoxLabelAnchorPoints.Default.Draw(builder, this);
+                BoxLabelAnchorPoints.Default.Draw(builder, this, style);
 
                 // Draw the port names
                 _pins.Render(builder);

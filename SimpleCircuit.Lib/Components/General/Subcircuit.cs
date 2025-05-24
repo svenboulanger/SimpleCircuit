@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
@@ -165,7 +166,7 @@ namespace SimpleCircuit.Components
                         var state = new SubcircuitState(_properties);
                         if (!_parentFactory._versions.TryGetValue(state, out var version))
                         {
-                            var circuit = new GraphicalCircuit(context.TextFormatter);
+                            var circuit = new GraphicalCircuit(context.TextFormatter, context.Style.Modify(Style));
                             var evalContext = new EvaluationContext(_parentFactory._factories, circuit, _parentFactory._options)
                             {
                                 Diagnostics = context.Diagnostics

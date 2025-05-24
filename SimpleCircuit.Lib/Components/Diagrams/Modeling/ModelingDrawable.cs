@@ -41,28 +41,29 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             : base(name)
         {
             Size = size;
-            Appearance.Background = "white";
+            Style = new ColorStyleModifier(null, "white");
         }
 
         /// <inheritdoc />
         protected override void Draw(IGraphicsBuilder builder)
         {
+            var style = builder.Style.Modify(Style);
             if (Variants.Contains(Square))
-                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, Appearance, CornerRadius, CornerRadius);
+                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, style, CornerRadius, CornerRadius);
             else
-                builder.Circle(new(), Size * 0.5, Appearance);
+                builder.Circle(new(), Size * 0.5, style);
         }
 
         /// <summary>
         /// Draws the labels for the drawable.
         /// </summary>
         /// <param name="builder">The builder.</param>
-        protected void DrawLabels(IGraphicsBuilder builder)
+        protected void DrawLabels(IGraphicsBuilder builder, IStyle style)
         {
             if (Variants.Contains(Square))
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             else
-                new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this, style);
         }
 
         /// <inheritdoc />

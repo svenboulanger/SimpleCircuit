@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,6 +123,8 @@ namespace SimpleCircuit.Components.Digital
                 if (_bits == null)
                     return;
 
+                var style = builder.Style.Modify(Style);
+
                 double hw = 0.5 * BlockSize;
                 double y = 0.0;
                 for (int i = 0; i < _bits.Count; i++)
@@ -131,9 +134,12 @@ namespace SimpleCircuit.Components.Digital
                     for (int j = 0; j < _maxWidth; j++)
                     {
                         if (j < bits.Length || Variants.Contains(Full))
-                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize, Appearance);
+                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize, style);
                         if (j < bits.Length)
-                            builder.Text(bits[j], new(x, y), new(), Appearance);
+                        {
+                            var span = builder.TextFormatter.Format(bits[j], style);
+                            builder.Text(span, new(x, y), new());
+                        }
                         x += BlockSize;
                     }
                     y += BlockSize;

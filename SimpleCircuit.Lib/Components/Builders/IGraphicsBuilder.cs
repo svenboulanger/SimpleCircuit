@@ -34,6 +34,16 @@ namespace SimpleCircuit.Components.Builders
         public Bounds Bounds { get; }
 
         /// <summary>
+        /// Gets a text formatter.
+        /// </summary>
+        public ITextFormatter TextFormatter { get; }
+
+        /// <summary>
+        /// Gets the base style.
+        /// </summary>
+        public IStyle Style { get; }
+
+        /// <summary>
         /// Begins a new transform on top of previous transforms.
         /// </summary>
         /// <param name="tf">The transform.</param>
@@ -145,22 +155,13 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Draws text.
         /// </summary>
+        /// <remarks>
+        /// Use <see cref="TextFormatter"/> if you need to convert a string to a <see cref="Span"/>.
+        /// </remarks>
         /// <param name="span">The span to be drawn.</param>
         /// <param name="location">The location where the span should be.</param>
-        /// <param name="expand">The direction in which the text can overflow.</param>
-        /// <param name="oriented">If <c>true</c>, the text is oriented according to <paramref name="expand"/> instead of kept inside the quadrant.</param>
+        /// <param name="orientation">The text orientation.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false);
-
-        /// <summary>
-        /// Draws text.
-        /// </summary>
-        /// <param name="value">The text.</param>
-        /// <param name="location">The location.</param>
-        /// <param name="expand">The direction in which text can expand.</param>
-        /// <param name="appearance">The parent appearance options.</param>
-        /// <param name="oriented">If <c>true</c>, the text is oriented according to <paramref name="expand"/> instead of kept inside the quadrant.</param>
-        /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false);
+        public IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation);
     }
 }

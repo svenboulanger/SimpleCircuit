@@ -38,9 +38,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("pos", "The positive pin", this, new(-1.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("neg", "the negative pin", this, new(1.5, 0), new(1, 0)), "n", "neg", "b");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 5.5), new(0, 1), Appearance));
+                _anchors = new(2);
             }
 
             /// <inheritdoc />
@@ -65,12 +63,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -79,42 +72,44 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 3.5);
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style, 3.5);
                 switch (Variants.Select(_curved, _electrolytic))
                 {
                     case 0:
                         // Plates
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), Appearance.AsStrokeWidth(1.0));
-                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), Appearance.AsStroke());
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), style.AsLineThickness(1.0));
+                        builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), style.AsStroke());
                         if (Variants.Contains(_signs))
-                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), Appearance, vertical: true);
+                            builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), style, vertical: true);
                         break;
 
                     case 1:
                         // Assymetric plates
-                        builder.Rectangle(-2.25, -4, 1.5, 8, Appearance);
-                        builder.Rectangle(0.75, -4, 1.5, 8, Appearance);
+                        builder.Rectangle(-2.25, -4, 1.5, 8, style);
+                        builder.Rectangle(0.75, -4, 1.5, 8, style);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-5, 3), new(5, 3), Appearance, vertical: true);
+                            builder.Signs(new(-5, 3), new(5, 3), style, vertical: true);
                         break;
 
                     default:
                         // Plates
-                        var plateAppearance = Appearance.AsStrokeWidth(1.0);
-                        builder.Line(new(-1.5, -4), new(-1.5, 4), plateAppearance);
-                        builder.Line(new(1.5, -4), new(1.5, 4), plateAppearance);
+                        var plateStyle = style.AsLineThickness(1.0);
+                        builder.Line(new(-1.5, -4), new(-1.5, 4), plateStyle);
+                        builder.Line(new(1.5, -4), new(1.5, 4), plateStyle);
                         if (Variants.Contains(_signs))
-                            builder.Signs(new(-4, 3), new(4, 3), Appearance, vertical: true);
+                            builder.Signs(new(-4, 3), new(4, 3), style, vertical: true);
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1), Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1));
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
-                        builder.Arrow(new(-4, 4), new(6, -5), Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                        builder.Arrow(new(-4, 4), new(6, -5), style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                         break;
 
                     case 1:
@@ -122,12 +117,12 @@ namespace SimpleCircuit.Components.Analog
                             new(-6, 6),
                             new(-4, 6),
                             new(4, -6)
-                        ], Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
+                        ], style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                         break;
                 }
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

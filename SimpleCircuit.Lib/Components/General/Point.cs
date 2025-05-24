@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using System;
 
 namespace SimpleCircuit.Components
@@ -51,13 +52,15 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 if (Variants.Contains("dot"))
                 {
                     int connections = Pins[0].Connections;
                     if (Variants.Contains("forced") || connections == 0 || connections > 2)
                     {
                         var marker = new Dot(new(), new(1, 0));
-                        marker.Draw(builder, Appearance);
+                        marker.Draw(builder, style);
                     }
                     else
                         builder.ExpandBounds(new());
@@ -66,8 +69,8 @@ namespace SimpleCircuit.Components
                     builder.ExpandBounds(new());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                _anchors[0] = new LabelAnchorPoint(n * Distance, n, Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(n * Distance, new(n, TextOrientationTypes.Normal));
+                _anchors.Draw(builder, this, style);
             }
         }
     }

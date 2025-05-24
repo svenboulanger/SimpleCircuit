@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -42,20 +43,22 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "s", "r", "q");
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style, 2, "s", "r", "q");
 
                 // Body
-                builder.Rectangle(-9, -12, 18, 24, Appearance, new());
+                builder.Rectangle(-9, -12, 18, 24, style, new());
 
                 // Labels
-                builder.Text("S", new Vector2(-8, -6), new Vector2(1, 0), Appearance);
-                builder.Text("R", new Vector2(-8, 6), new Vector2(1, 0), Appearance);
-                builder.Text("Q", new Vector2(8, -6), new Vector2(-1, 0), Appearance);
+                var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
+                builder.Text("S", new Vector2(-8, -6), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
+                builder.Text("R", new Vector2(-8, 6), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
+                builder.Text("Q", new Vector2(8, -6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed), textStyle);
 
                 if (Pins["nq"].Connections > 0)
-                    builder.Text("\\overline{Q}", new Vector2(8, 6), new Vector2(-1, 0), Appearance);
+                    builder.Text("\\overline{Q}", new Vector2(8, 6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed), textStyle);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

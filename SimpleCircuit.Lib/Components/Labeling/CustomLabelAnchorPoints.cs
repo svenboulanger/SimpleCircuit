@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -45,58 +43,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public void Draw(IGraphicsBuilder drawing, Labels labels)
-        {
-            for (int i = 0; i < labels.Count; i++)
-            {
-                // Get the label
-                var label = labels[i];
-                if (label is null)
-                    continue;
-
-                // Get the anchor point
-                if (!TryCalculate(label.Location ?? i.ToString(), out var anchor))
-                    TryCalculate("0", out anchor); // Default to index 0
-
-                // Determine the final values
-                var location = anchor.Location;
-                if (!label.Offset.IsZero())
-                    location += drawing.CurrentTransform.Matrix.Inverse * label.Offset;
-                var expand = label.Expand ?? anchor.Expand;
-
-                // Draw the label
-                drawing.Text(label.Value, location, expand, anchor.Appearance, anchor.Oriented);
-            }
-        }
-
-        /// <summary>
-        /// Calculates the bounds of all potentially overlapping labels at a given anchor.
-        /// </summary>
-        /// <param name="labels">The labels.</param>
-        /// <param name="anchorIndex">The anchor index.</param>
-        /// <returns>The bounds when all labels at the given anchor overlap.</returns>
-        public Bounds CalculateBounds(Labels labels, int anchorIndex)
-        {
-            var bounds = new ExpandableBounds();
-            for (int i = 0; i < labels.Count; i++)
-            {
-                string name = labels[i].Location ?? i.ToString();
-                if (!TryCalculateIndex(name, out int index) || index != anchorIndex)
-                    continue;
-                bounds.Expand(labels[i].Formatted.Bounds.Bounds);
-            }
-            if (double.IsInfinity(bounds.Bounds.Width))
-                bounds.Expand(new Vector2());
-            return bounds.Bounds;
-        }
-
-        /// <summary>
-        /// Tries to calculate the index of the anchor point based on the anchor name.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="index">The index.</param>
-        /// <returns>Returns <c>true</c> if the index could be calculated; otherwise, <c>false</c>.</returns>
-        public bool TryCalculateIndex(string name, out int index)
+        public override bool TryGetAnchorIndex(string name, out int index)
         {
             if (name.All(char.IsDigit))
             {
@@ -111,8 +58,13 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IDrawable subject, string name, out LabelAnchorPoint value)
-            => TryCalculate(name, out value);
+        public override LabelAnchorPoint GetAnchorPoint(IDrawable subject, int index)
+        {
+            index %= Count;
+            if (index < 0)
+                index += Count;
+            return _points[index];
+        }
 
         /// <summary>
         /// Tries to calculate the label anchor point just based on index.
@@ -122,7 +74,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <returns>Returns <c>true</c> if the label anchor point was found; otherwise, <c>false</c>.</returns>
         protected bool TryCalculate(string name, out LabelAnchorPoint value)
         {
-            if (TryCalculateIndex(name, out int index))
+            if (TryGetAnchorIndex(name, out int index))
             {
                 value = _points[index];
                 return true;

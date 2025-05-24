@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Inputs
 {
@@ -28,13 +29,14 @@ namespace SimpleCircuit.Components.Inputs
             {
                 Pins.Add(new FixedOrientedPin("pin", "The pin of the antenna.", this, new(), new(0, 1)), "p", "pin", "a");
                 _anchors = new(
-                    new LabelAnchorPoint(new(5, -5), new(1, 0), Appearance),
-                    new LabelAnchorPoint(new(-5, -5), new(-1, 0), Appearance));
+                    new LabelAnchorPoint(new(5, -5), new(1, 0)),
+                    new LabelAnchorPoint(new(-5, -5), new(-1, 0)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 if (Variants.Contains(_alt))
                 {
                     builder.Path(b =>
@@ -45,7 +47,7 @@ namespace SimpleCircuit.Components.Inputs
                         b.LineTo(new(-5, -10));
                         b.LineTo(new(5, -10));
                         b.LineTo(new(0, -3));
-                    }, Appearance);
+                    }, style);
                 }
                 else
                 {
@@ -57,10 +59,10 @@ namespace SimpleCircuit.Components.Inputs
                         b.LineTo(new(-5, -10));
                         b.MoveTo(new(0, -3));
                         b.LineTo(new(5, -10));
-                    }, Appearance);
+                    }, style);
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

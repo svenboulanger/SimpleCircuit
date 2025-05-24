@@ -70,68 +70,69 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanSource(builder);
+                        DrawEuropeanSource(builder, style);
                         break;
 
                     case 0:
                     default:
-                        DrawAmericanSource(builder);
+                        DrawAmericanSource(builder, style);
                         break;
                 }
             }
 
-            private void DrawAmericanSource(IGraphicsBuilder builder)
+            private void DrawAmericanSource(IGraphicsBuilder builder, IStyle style)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
-                builder.Circle(new(0, 0), 6, Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                builder.Circle(new(0, 0), 6, style);
                 switch (Variants.Select("arrow", "ac"))
                 {
                     case 1:
-                        builder.Line(new(-3.5, 0), new(3.5, 0), Appearance);
+                        builder.Line(new(-3.5, 0), new(3.5, 0), style);
                         var marker = new Arrow(new(-3.5, 0), new(-1, 0));
-                        marker.Draw(builder, Appearance);
+                        marker.Draw(builder, style);
                         marker.Location = new(3.5, 0);
                         marker.Orientation = new(1, 0);
-                        marker.Draw(builder, Appearance);
+                        marker.Draw(builder, style);
                         break;
 
                     default:
-                        builder.Arrow(new(-3, 0), new(3, 0), Appearance);
+                        builder.Arrow(new(-3, 0), new(3, 0), style);
                         break;
                 }
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-6, -6), new(7.5, 7.5), Appearance);
+                    builder.Arrow(new(-6, -6), new(7.5, 7.5), style);
                     if (_anchors[0].Location.Y > -7)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                     if (_anchors[1].Location.Y < 8.5)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
-            private void DrawEuropeanSource(IGraphicsBuilder builder)
+            private void DrawEuropeanSource(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Circle(new(), 4, Appearance);
-                builder.Line(new(0, -4), new(0, 4), Appearance);
+                builder.Circle(new(), 4, style);
+                builder.Line(new(0, -4), new(0, 4), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
 
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-4, -4), new(6, 6), Appearance);
+                    builder.Arrow(new(-4, -4), new(6, 6), style);
                     if (_anchors[0].Location.Y > -5)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                     if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1), Appearance);
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

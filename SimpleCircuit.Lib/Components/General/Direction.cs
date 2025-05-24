@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.General
 {
@@ -16,9 +17,7 @@ namespace SimpleCircuit.Components.General
 
         private class Instance : OrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             [Description("The distance of the text to the point.")]
             [Alias("l")]
@@ -42,9 +41,9 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1), Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
+                _anchors.Draw(builder, this, builder.Style.Modify(Style));
             }
         }
     }

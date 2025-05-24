@@ -8,38 +8,49 @@ namespace SimpleCircuit.Components.Styles
     /// </summary>
     /// <param name="parent">The parent.</param>
     /// <param name="fontSize">The font size.</param>
-    public class FontSizeStyle(IStyle parent, double fontSize = Style.DefaultFontSize) : IStyle
-    {
-        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+    public class FontSizeStyleModifier(double fontSize = Style.DefaultFontSize) : IStyleModifier
+    {   
+        /// <summary>
+        /// The style for a <see cref="FontSizeStyleModifier"/>.
+        /// </summary>
+        /// <param name="parent">The parent style.</param>
+        /// <param name="fontSize">The font size.</param>
+        public class Style(IStyle parent, double fontSize) : IStyle
+        {
+            private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+
+            /// <inheritdoc />
+            public string Color => _parent.Color;
+
+            /// <inheritdoc />
+            public double Opacity => _parent.Opacity;
+
+            /// <inheritdoc />
+            public string Background => _parent.Color;
+
+            /// <inheritdoc />
+            public double BackgroundOpacity => _parent.Opacity;
+
+            /// <inheritdoc />
+            public double LineThickness => 0.1 * FontSize;
+
+            /// <inheritdoc />
+            public string FontFamily => _parent.FontFamily;
+
+            /// <inheritdoc />
+            public double FontSize => fontSize;
+
+            /// <inheritdoc />
+            public bool Bold => _parent.Bold;
+
+            /// <inheritdoc />
+            public double LineSpacing => _parent.LineSpacing;
+
+            /// <inheritdoc />
+            public LineStyles LineStyle => _parent.LineStyle;
+        }
 
         /// <inheritdoc />
-        public string Color => _parent.Color;
-
-        /// <inheritdoc />
-        public double Opacity => _parent.Opacity;
-
-        /// <inheritdoc />
-        public string Background => _parent.Color;
-
-        /// <inheritdoc />
-        public double BackgroundOpacity => _parent.Opacity;
-
-        /// <inheritdoc />
-        public double LineThickness => 0.1 * FontSize;
-
-        /// <inheritdoc />
-        public string FontFamily => _parent.FontFamily;
-
-        /// <inheritdoc />
-        public double FontSize => fontSize;
-
-        /// <inheritdoc />
-        public bool Bold => _parent.Bold;
-
-        /// <inheritdoc />
-        public double LineSpacing => _parent.LineSpacing;
-
-        /// <inheritdoc />
-        public LineStyles LineStyle => _parent.LineStyle;
+        public IStyle Apply(IStyle parent) => new Style(parent, fontSize);
     }
 }

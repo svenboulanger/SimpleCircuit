@@ -39,8 +39,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control2", "The backside controlling pin.", this, new(0, 0), new(0, -1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("throw1", "The first throwing pin.", this, new(6, 4), new(1, 0)), "t1");
                 Pins.Add(new FixedOrientedPin("throw2", "The second throwing pin.", this, new(6, -4), new(1, 0)), "t2");
-                _anchors = new(
-                    new LabelAnchorPoint(new(-3, 3), new(-1, 1), Appearance));
+                _anchors = new(new LabelAnchorPoint(new(-3, 3), new(-1, 1)));
             }
 
             /// <inheritdoc />
@@ -74,12 +73,7 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(2, loc);
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -88,23 +82,24 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "p", "t1", "t2");
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style, 2, "p", "t1", "t2");
 
                 // Terminals
-                builder.Circle(new(-5, 0), 1, Appearance);
-                builder.Circle(new(5, 4), 1, Appearance);
-                builder.Circle(new(5, -4), 1, Appearance);
+                builder.Circle(new(-5, 0), 1, style);
+                builder.Circle(new(5, 4), 1, style);
+                builder.Circle(new(5, -4), 1, style);
 
                 // Switch position
                 switch (Variants.Select(_t1, _t2))
                 {
-                    case 0: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4), Appearance); break;
-                    case 1: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4), Appearance); break;
-                    default: builder.Line(new(-4, 0), new(5, 0), Appearance); break;
+                    case 0: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? -4 : 4), style); break;
+                    case 1: builder.Line(new(-4, 0), new(4, Variants.Contains(_swap) ? 4 : -4), style); break;
+                    default: builder.Line(new(-4, 0), new(5, 0), style); break;
                 }
 
                 // Label
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

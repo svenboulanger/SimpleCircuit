@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using SimpleCircuit.Circuits.Spans;
 
 namespace SimpleCircuit.Components
 {
@@ -65,7 +66,7 @@ namespace SimpleCircuit.Components
         public Bounds Bounds { get; private set; }
 
         /// <inheritdoc />
-        public Style Appearance { get; } = new();
+        public IStyleModifier Style { get; set; }
 
         /// <summary>
         /// Creates a new component.
@@ -164,11 +165,6 @@ namespace SimpleCircuit.Components
                         drawable.Labels[index].Offset = vector;
                         return true;
                     }
-                    if (TryMatchIndexedProperty(property, "expand", out index))
-                    {
-                        drawable.Labels[index].Expand = vector / vector.Length;
-                        return true;
-                    }
                 }
                 else if (value is double number)
                 {
@@ -177,27 +173,26 @@ namespace SimpleCircuit.Components
                         case "transparency":
                         case "opacity":
                         case "alpha":
-                            drawable.Appearance.Opacity = number;
-                            drawable.Appearance.BackgroundOpacity = number;
+                            drawable.AppendStyle(new OpacityStyleModifier(number, number));
                             return true;
 
                         case "foregroundopacity":
                         case "fgo":
-                            drawable.Appearance.Opacity = number;
+                            drawable.AppendStyle(new OpacityStyleModifier(number, null));
                             return true;
 
                         case "backgroundopacity":
                         case "bgo":
-                            drawable.Appearance.Opacity = number;
+                            drawable.AppendStyle(new OpacityStyleModifier(null, number));
                             return true;
 
                         case "thickness":
                         case "t":
-                            drawable.Appearance.LineThickness = number;
+                            drawable.AppendStyle(new StrokeWidthStyleModifier(number));
                             return true;
 
                         case "fontsize":
-                            drawable.Appearance.FontSize = number;
+                            drawable.AppendStyle(new FontSizeStyleModifier(number));
                             return true;
 
                         default:
@@ -206,19 +201,19 @@ namespace SimpleCircuit.Components
                                 // Integer-only
                                 if (TryMatchIndexedProperty(property, "anchor", out index))
                                 {
-                                    drawable.Labels[index].Location = ((int)Math.Round(number)).ToString();
+                                    drawable.Labels[index].Anchor = ((int)Math.Round(number)).ToString();
                                     return true;
                                 }
                             }
                             if (TryMatchIndexedProperty(property, "size", out index))
                             {
-                                drawable.Labels[index].Size = number;
+                                drawable.Labels[index].AppendStyle(new FontSizeStyleModifier(number));
                                 return true;
                             }
                             if (TryMatchIndexedProperty(property, "linespacing", out index) ||
                                 TryMatchIndexedProperty(property, "ls", out index))
                             {
-                                drawable.Labels[index].LineSpacing = number;
+                                drawable.Labels[index].AppendStyle(new LineSpacingStyleModifier(number));
                                 return true;
                             }
                             break;
@@ -231,16 +226,16 @@ namespace SimpleCircuit.Components
                         case "color":
                         case "foreground":
                         case "fg":
-                            drawable.Appearance.Color = label;
+                            drawable.AppendStyle(new ColorStyleModifier(label, null));
                             return true;
 
                         case "background":
                         case "bg":
-                            drawable.Appearance.Background = label;
+                            drawable.AppendStyle(new ColorStyleModifier(null, label));
                             return true;
 
                         case "fontfamily":
-                            drawable.Appearance.FontFamily = label;
+                            drawable.AppendStyle(new FontFamilyStyleModifier(label));
                             return true;
 
                         default:
@@ -251,7 +246,7 @@ namespace SimpleCircuit.Components
                             }
                             if (TryMatchIndexedProperty(property, "anchor", out index))
                             {
-                                drawable.Labels[index].Location = label;
+                                drawable.Labels[index].Anchor = label;
                                 return true;
                             }
                             break;
@@ -264,7 +259,7 @@ namespace SimpleCircuit.Components
                     switch (property)
                     {
                         case "bold":
-                            drawable.Appearance.Bold = b;
+                            drawable.AppendStyle(BoldTextStyleModifier.Default);
                             return true;
 
                         default:
@@ -353,12 +348,8 @@ namespace SimpleCircuit.Components
 
             switch (context.Mode)
             {
-                case PreparationMode.Reset:
-                    Appearance.Parent = context.GlobalAppearance;
-                    break;
-
                 case PreparationMode.Sizes:
-                    Labels.Format(context, Appearance);
+                    Labels.Format(context.TextFormatter, Style?.Apply(context.Style) ?? context.Style);
                     break;
             }
             return result;

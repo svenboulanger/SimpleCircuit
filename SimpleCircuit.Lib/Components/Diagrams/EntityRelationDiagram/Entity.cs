@@ -101,7 +101,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     case PreparationMode.Offsets:
 
                         // Place the header
-                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), _anchors[0].Expand, Appearance);
+                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), new(_anchors[0].Expand, TextOrientationTypes.Normal));
 
                         ((FixedOrientedPin)Pins[1]).Offset = new(_width * 0.5, 0);
                         ((FixedOrientedPin)Pins[2]).Offset = new(_width * 0.5, _height);
@@ -119,33 +119,35 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 {
                     case PreparationMode.Sizes:
                         // Calculate the size of the total entity, update accordingly
+                        var style = context.Style.Modify(Style);
                         _anchors = new CustomLabelAnchorPoints(new LabelAnchorPoint[Labels.Count]);
                         _height = Margin.Top;
                         _width = 0.0;
                         for (int i = 0; i < Labels.Count; i++)
                         {
                             var bounds = Labels[i].Formatted.Bounds.Bounds;
+                            var labelStyle = style.Modify(Labels[i].Style);
 
                             if (i == 0)
                             {
                                 // This is the header, we will center it according to the line height
                                 _anchors[0] = new LabelAnchorPoint(
-                                    new(0, _height + LineHeight * (1 - BaseLine) * Labels[0].Size + bounds.Top),
-                                    new(0, 1), Appearance);
-                                ((FixedOrientedPin)Pins[0]).Offset = new(0, _height + LineHeight * Labels[0].Size * 0.5);
+                                    new(0, _height + LineHeight * (1 - BaseLine) * style.FontSize + bounds.Top),
+                                    new(0, 1));
+                                ((FixedOrientedPin)Pins[0]).Offset = new(0, _height + LineHeight * style.FontSize * 0.5);
                                 _height += Margin.Bottom;
                             }
                             else
                             {
                                 // These are attributes, we will simply follow the line height given
                                 _anchors[i] = new LabelAnchorPoint(
-                                    new(Margin.Left + bounds.Left, _height + LineHeight * (1 - BaseLine) * Labels[i].Size + bounds.Top),
-                                    new(1, 1), Appearance);
+                                    new(Margin.Left + bounds.Left, _height + LineHeight * (1 - BaseLine) * labelStyle.FontSize + bounds.Top),
+                                    new(1, 1));
 
                                 // We can already update the left-side pins (we will u
-                                ((FixedOrientedPin)Pins[i * 2 + 1]).Offset = new(0, _height + LineHeight * Labels[i].Size * 0.5);
+                                ((FixedOrientedPin)Pins[i * 2 + 1]).Offset = new(0, _height + LineHeight * labelStyle.FontSize * 0.5);
                             }    
-                            _height += LineHeight * Labels[i].Size;
+                            _height += LineHeight * labelStyle.FontSize;
                             _width = Math.Max(_width, bounds.Width + Margin.Left + Margin.Right);
                         }
                         break;
@@ -157,10 +159,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 if (Labels.Count > 1)
                 {
                     // The header
-                    double y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
+                    var headerStyle = style.Modify(Labels[0].Style);
+                    double y = Margin.Top + Margin.Bottom + LineHeight * headerStyle.FontSize;
                     builder.Path(b =>
                     {
                         b.MoveTo(new(_width - CornerRadius, 0));
@@ -172,13 +177,14 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(CornerRadius, 0));
                         b.Close();
-                    }, Appearance);
+                    }, style);
 
                     // The attributes
                     for (int i = 1; i < Labels.Count - 1; i++)
                     {
-                        builder.Rectangle(0.0, y, _width, LineHeight * Labels[i].Size, Appearance);
-                        y += LineHeight * Labels[i].Size;
+                        var labelStyle = style.Modify(Labels[i].Style);
+                        builder.Rectangle(0.0, y, _width, LineHeight * labelStyle.FontSize, style);
+                        y += LineHeight * labelStyle.FontSize;
                     }
 
                     // Last attribute
@@ -193,10 +199,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, Appearance);
+                    }, style);
 
                     // All attributes encapsulated
-                    y = Margin.Top + Margin.Bottom + LineHeight * Labels[0].Size;
+                    y = Margin.Top + Margin.Bottom + LineHeight * headerStyle.FontSize;
                     builder.Path(b =>
                     {
                         b.MoveTo(new(0, y));
@@ -208,13 +214,13 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         if (!CornerRadius.Equals(0.0))
                             b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
                         b.Close();
-                    }, Appearance);
+                    }, style);
                 }
                 else
                 {
-                    builder.Rectangle(0, 0, _width, _height, Appearance, CornerRadius, CornerRadius);
+                    builder.Rectangle(0, 0, _width, _height, style, CornerRadius, CornerRadius);
                 }    
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

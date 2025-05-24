@@ -97,18 +97,14 @@ namespace SimpleCircuit.Components.Analog
                     case PreparationMode.Reset:
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
 
                     case PreparationMode.Sizes:
 
                         // Calculate sizes
-                        var labelBounds = _anchors.CalculateBounds(Labels, 2);
+                        var style = context.Style.Modify(Style);
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 2, _anchors, style);
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
                         _rx = _width * 0.25;
                         _length = Length.IsZero() ? Math.Max(labelBounds.Width + Margin.Left + Margin.Right + 2 * _rx, MinLength) : Length;
@@ -120,9 +116,9 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(3, new(_length * 0.5, 0.0));
 
                         // Calculate the anchor positions
-                        _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1), Appearance);
-                        _anchors[1] = new(new(0, _width * 0.5 + 1), new(0, 1), Appearance);
-                        _anchors[2] = new(new(-0.5 * labelBounds.Width - labelBounds.Left, -0.5 * labelBounds.Height - labelBounds.Top), new(1, 0), Appearance, true);
+                        _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1));
+                        _anchors[1] = new(new(0, _width * 0.5 + 1), new(0, 1));
+                        _anchors[2] = new(new(-0.5 * labelBounds.Width - labelBounds.Left, -0.5 * labelBounds.Height - labelBounds.Top), new(1, 0));
                         break;
                 }
 
@@ -132,13 +128,15 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 // Transmission line
-                builder.Path(DrawShape, Appearance);
+                builder.Path(DrawShape, style);
 
                 // Wire
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+                builder.ExtendPins(Pins, style, 2, "a", "b");
 
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

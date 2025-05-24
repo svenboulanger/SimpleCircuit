@@ -46,7 +46,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
                 var oldAppearance = context.Appearance;
-                context.Appearance = new FontSizeStyle(context.Appearance, context.Appearance.FontSize * 0.8);
+                context.Appearance = new FontSizeStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.8);
                 Span sub = null, super = null;
                 if (lexer.Branch(TokenType.Subscript))
                 {
@@ -148,7 +148,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             if (lexer.Branch(TokenType.OpenBracket))
                             {
                                 var oldAppearance = context.Appearance;
-                                context.Appearance = new BoldTextStyle(oldAppearance);
+                                context.Appearance = new BoldTextStyleModifier.Style(oldAppearance);
                                 var b = ParseBlockSegment(lexer, context);
                                 lexer.Branch(TokenType.CloseBracket);
                                 context.Appearance = oldAppearance;
@@ -195,14 +195,14 @@ namespace SimpleCircuit.Parser.SimpleTexts
         private static Span CreateOverline(Span @base, SimpleTextContext context)
         {
             double margin = context.Appearance.FontSize * 0.1;
-            var appearance = new StrokeWidthStyle(context.Appearance, context.Appearance.FontSize * 0.075);
-            return new OverlineSpan(@base, margin, appearance);
+            var style = new StrokeWidthStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.075);
+            return new OverlineSpan(@base, margin, style);
         }
         private static Span CreateUnderline(Span @base, SimpleTextContext context)
         {
             double margin = context.Appearance.FontSize * 0.1;
-            var appearance = new StrokeWidthStyle(context.Appearance, context.Appearance.FontSize * 0.075);
-            return new UnderlineSpan(@base, margin, appearance);
+            var style = new StrokeWidthStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.075);
+            return new UnderlineSpan(@base, margin, style);
         }
         private static Span CreateTextSpan(SimpleTextContext context)
         {

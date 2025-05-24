@@ -1,4 +1,7 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -14,19 +17,36 @@ namespace SimpleCircuit.Components.Labeling
         public int Count { get; }
 
         /// <summary>
-        /// Calculates the anchor point at the given index for the subject.
+        /// Tries to assign an anchor index for a given anchor name.
         /// </summary>
-        /// <param name="subject">The subject.</param>
-        /// <param name="name">The anchor name.</param>
-        /// <param name="value">the anchor point value.</param>
-        /// <returns>Returns <c>true</c> if the anchor point exists.</returns>
-        public bool TryCalculate(T subject, string name, out LabelAnchorPoint value);
+        /// <param name="name">The name.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>Returns <c>true</c> if the index could be found; otherwise, <c>false</c>.</returns>
+        public bool TryGetAnchorIndex(string name, out int index);
 
         /// <summary>
-        /// Draws labels using the current set of label anchor points.
+        /// Calculates the bounds of all labels placed at the given anchor index, assuming each label would be located at (0, 0).
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="index">The anchor index.</param>
+        /// <param name="context">The text formatter that can be used to determine text format.</param>
+        /// <returns>Returns the bounds.</returns>
+        public Bounds GetBounds(T subject, int index, ITextFormatter context, IStyle style);
+
+        /// <summary>
+        /// Gets a <see cref="LabelAnchorPoint"/> for the given anchor index.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="index">The index.</param>
+        /// <returns>Returns the label anchor point.</returns>
+        public LabelAnchorPoint GetAnchorPoint(T subject, int index);
+
+        /// <summary>
+        /// Draws all labels of a <paramref name="subject"/> using the current set of label anchor points.
         /// </summary>
         /// <param name="builder">The graphics builder.</param>
         /// <param name="subject">The subject.</param>
-        public void Draw(IGraphicsBuilder builder, T subject);
+        /// <param name="parentStyle">The parent style.</param>
+        public void Draw(IGraphicsBuilder builder, T subject, IStyle parentStyle);
     }
 }

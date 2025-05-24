@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -134,16 +135,17 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawOrIEC(builder); break;
+                    case 0: DrawOrIEC(builder, style); break;
                     case 1:
-                    default: DrawOr(builder); break;
+                    default: DrawOr(builder, style); break;
                 }
             }
-            private void DrawOr(IGraphicsBuilder builder)
+            private void DrawOr(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance);
+                builder.ExtendPins(Pins, style);
                 double w = Width * 0.5;
                 double h = Height * 0.5;
 
@@ -151,16 +153,16 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w * 0.8, h))
                     .CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0))
                     .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h))
-                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)), Appearance);
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)), style);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
-            private void DrawOrIEC(IGraphicsBuilder builder)
+            private void DrawOrIEC(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance, new());
-                builder.Text("&#8805;1", new(), new(), Appearance);
+                builder.ExtendPins(Pins, style);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style, new());
+                builder.Text("&#8805;1", new(), new(), style);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

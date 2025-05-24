@@ -46,9 +46,7 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("anode", "The anode.", this, new(-4, 0), new(-1, 0)), "p", "a", "anode");
                 Pins.Add(new FixedOrientedPin("cathode", "The cathode.", this, new(4, 0), new(1, 0)), "n", "c", "cathode");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance));
+                _anchors = new(2);
             }
 
             public override PresenceResult Prepare(IPrepareContext context)
@@ -60,8 +58,8 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                         switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                         {
                             case 0: // Varactor
@@ -101,12 +99,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -115,76 +108,78 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                 {
                     case 0: // Varactor
-                        DrawVaractor(builder);
+                        DrawVaractor(builder, style);
                         break;
 
                     case 1: // Zener
-                        DrawZenerDiode(builder);
+                        DrawZenerDiode(builder, style);
                         break;
 
                     case 2: // Tunnel
-                        DrawTunnelDiode(builder);
+                        DrawTunnelDiode(builder, style);
                         break;
 
                     case 3: // Schottky
-                        DrawSchottkyDiode(builder);
+                        DrawSchottkyDiode(builder, style);
                         break;
 
                     case 4: // Shockley
-                        DrawShockleyDiode(builder);
+                        DrawShockleyDiode(builder, style);
                         break;
 
                     case 5: // TVS
-                        DrawTVSDiode(builder);
+                        DrawTVSDiode(builder, style);
                         break;
 
                     case 6: // Bidirectional
-                        DrawBidirectional(builder);
+                        DrawBidirectional(builder, style);
                         break;
 
                     default: // Just a regular diode
-                        DrawJunctionDiode(builder);
+                        DrawJunctionDiode(builder, style);
                         break;
                 }
 
                 switch (Variants.Select(_photodiode, _led, _laser))
                 {
-                    case 0: DrawPhotodiode(builder); break;
-                    case 1: DrawLed(builder); break;
-                    case 2: DrawLaser(builder); break;
+                    case 0: DrawPhotodiode(builder, style); break;
+                    case 1: DrawLed(builder, style); break;
+                    case 2: DrawLaser(builder, style); break;
                 }
                 if (Variants.Contains(_stroke))
                 {
                     var p1 = (FixedOrientedPin)Pins["anode"];
                     var p2 = (FixedOrientedPin)Pins["cathode"];
-                    builder.Line(p1.Offset, p2.Offset, Appearance);
+                    builder.Line(p1.Offset, p2.Offset, style);
                 }
 
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawJunctionDiode(IGraphicsBuilder builder)
+            private void DrawJunctionDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4), 
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
-                builder.Line(new(4, -4), new(4, 4), Appearance);
+                ], style);
+                builder.Line(new(4, -4), new(4, 4), style);
             }
-            private void DrawZenerDiode(IGraphicsBuilder builder)
+            private void DrawZenerDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
+                ], style);
                 switch (Variants.Select(_zenerSingle, _zenerSlanted))
                 {
                     case 0:
@@ -192,7 +187,7 @@ namespace SimpleCircuit.Components.Analog
                             new(2, -4),
                             new(4, -4),
                             new(4, 4)
-                        ], Appearance);
+                        ], style);
                         break;
 
                     case 1:
@@ -201,11 +196,11 @@ namespace SimpleCircuit.Components.Analog
                             new(4, -4),
                             new(4, 4),
                             new(6, 5)
-                        ], Appearance);
+                        ], style);
                         if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                         if (_anchors[1].Location.Y < 6)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
+                            _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
                         break;
 
                     default:
@@ -214,33 +209,33 @@ namespace SimpleCircuit.Components.Analog
                             new(4, -4),
                             new(4, 4),
                             new(6, 4)
-                        ], Appearance);
+                        ], style);
                         break;
                 }
             }
-            private void DrawTunnelDiode(IGraphicsBuilder builder)
+            private void DrawTunnelDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
+                ], style);
                 builder.Polyline([
                     new(2, -4),
                     new(4, -4),
                     new(4, 4),
                     new(2, 4)
-                ], Appearance);
+                ], style);
             }
-            private void DrawSchottkyDiode(IGraphicsBuilder builder)
+            private void DrawSchottkyDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
+                ], style);
                 builder.Polyline([
                     new(6, -3),
                     new(6, -4),
@@ -248,91 +243,91 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 4),
                     new(2, 4),
                     new(2, 3)
-                ], Appearance);
+                ], style);
             }
-            private void DrawShockleyDiode(IGraphicsBuilder builder)
+            private void DrawShockleyDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 0)
-                ], Appearance);
-                builder.Line(new(-4, 0), new(-4, 4), Appearance);
-                builder.Line(new(4, -4), new(4, 4), Appearance);
+                ], style);
+                builder.Line(new(-4, 0), new(-4, 4), style);
+                builder.Line(new(4, -4), new(4, 4), style);
             }
-            private void DrawVaractor(IGraphicsBuilder builder)
+            private void DrawVaractor(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
-                builder.Line(new(4, -4), new(4, 4), Appearance);
-                builder.Line(new(6, -4), new(6, 4), Appearance);
+                ], style);
+                builder.Line(new(4, -4), new(4, 4), style);
+                builder.Line(new(6, -4), new(6, 4), style);
             }
-            private void DrawPhotodiode(IGraphicsBuilder builder)
+            private void DrawPhotodiode(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Arrow(new(2, 7.5), new(1, 3.5), Appearance);
-                builder.Arrow(new(-1, 9.5), new(-2, 5.5), Appearance);
+                builder.Arrow(new(2, 7.5), new(1, 3.5), style);
+                builder.Arrow(new(-1, 9.5), new(-2, 5.5), style);
                 if (_anchors[1].Location.Y < 10.5)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
-            private void DrawLed(IGraphicsBuilder builder)
+            private void DrawLed(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Arrow(new(1, 3.5), new(2, 7.5), Appearance);
-                builder.Arrow(new(-2, 5.5), new(-1, 9.5), Appearance);
+                builder.Arrow(new(1, 3.5), new(2, 7.5), style);
+                builder.Arrow(new(-2, 5.5), new(-1, 9.5), style);
                 if (_anchors[1].Location.Y < 10.5)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10.5), new(0, 1));
             }
-            private void DrawLaser(IGraphicsBuilder builder)
+            private void DrawLaser(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Line(new(0, -4), new(0, 4), Appearance);
-                builder.Arrow(new(-2, 5), new(-2, 10), Appearance);
-                builder.Arrow(new(2, 5), new(2, 10), Appearance);
+                builder.Line(new(0, -4), new(0, 4), style);
+                builder.Arrow(new(-2, 5), new(-2, 10), style);
+                builder.Arrow(new(2, 5), new(2, 10), style);
                 if (_anchors[1].Location.Y < 11)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
             }
-            private void DrawTVSDiode(IGraphicsBuilder builder)
+            private void DrawTVSDiode(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
+                ], style);
                 builder.Polygon([
                     new(4, 0),
                     new(12, -4),
                     new(12, 4)
-                ], Appearance);
+                ], style);
                 builder.Polyline([
                     new(2, -5),
                     new(4, -4),
                     new(4, 4),
                     new(6, 5)
-                ], Appearance);
+                ], style);
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
-            private void DrawBidirectional(IGraphicsBuilder builder)
+            private void DrawBidirectional(IGraphicsBuilder builder, IStyle style)
             {
                 // The diode
                 builder.Polygon([
                     new(-4, -4),
                     new(4, 0),
                     new(-4, 4)
-                ], Appearance);
+                ], style);
                 builder.Polygon([
                     new(-4, -8),
                     new(4, -12),
                     new(4, -4)
-                ], Appearance);
-                builder.Line(new(-4, -4), new(-4, -12), Appearance);
-                builder.Line(new(4, -4), new(4, 4), Appearance);
+                ], style);
+                builder.Line(new(-4, -4), new(-4, -12), style);
+                builder.Line(new(4, -4), new(4, 4), style);
                 if (_anchors[0].Location.Y > -13)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -13), new(0, -1));
             }
         }
     }

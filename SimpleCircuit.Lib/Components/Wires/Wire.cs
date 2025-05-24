@@ -375,7 +375,7 @@ namespace SimpleCircuit.Components.Wires
         /// <inheritdoc />
         protected override void Draw(IGraphicsBuilder builder)
         {
-            var style = new StringBuilder();
+            var style = builder.Style.Modify(Style);
             List<Marker> markers = [];
             if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
             {
@@ -491,11 +491,11 @@ namespace SimpleCircuit.Components.Wires
 
                         last = current;
                     }
-                }, Appearance);
+                }, style);
 
                 // Draw the markers (if any)
                 foreach (var marker in markers)
-                    marker?.Draw(builder, Appearance);
+                    marker?.Draw(builder, style);
             }
         }
 

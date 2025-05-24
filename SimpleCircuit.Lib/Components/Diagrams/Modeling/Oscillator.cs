@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -22,8 +23,10 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                builder.AC(Appearance, new(), Size * 0.25);
-                DrawLabels(builder);
+                var style = builder.Style.Modify(Style);
+
+                builder.AC(style, new(), Size * 0.25);
+                DrawLabels(builder, style);
             }
         }
     }

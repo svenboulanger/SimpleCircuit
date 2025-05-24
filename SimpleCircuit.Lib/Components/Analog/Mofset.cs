@@ -33,9 +33,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Nmos : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "nmos";
@@ -75,12 +73,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -96,70 +89,72 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 4, "s", "d");
-                builder.ExtendPin(Pins["g"], Appearance);
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], style);
 
                 // Gate
-                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), Appearance);
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), style);
 
                 // Source and drain
-                builder.Line(new(-4, 0), new(-4, 4), Appearance);
-                builder.Line(new(4, 0), new(4, 4), Appearance);
+                builder.Line(new(-4, 0), new(-4, 4), style);
+                builder.Line(new(4, 0), new(4, 4), style);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance);
+                    builder.Rectangle(-4, 2.5, 8, 1.5, style);
 
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
                 }
                 else
                 {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
-            private void DrawPackaged(IGraphicsBuilder drawing)
+            private void DrawPackaged(IGraphicsBuilder builder)
             {
-                // Packaged
-                drawing.Circle(new(0, 3), 8.0, Appearance);
+                var style = builder.Style.Modify(Style);
 
-                drawing.ExtendPins(Pins, Appearance, 3, "s", "d");
-                drawing.ExtendPin(Pins["g"], Appearance);
+                // Packaged
+                builder.Circle(new(0, 3), 8.0, style);
+
+                builder.ExtendPins(Pins, style, 3, "s", "d");
+                builder.ExtendPin(Pins["g"], style);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
+                builder.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
                     .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
                     .MoveTo(new(-2, 4)).LineTo(new(2, 4))
-                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), Appearance);
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), style);
 
                 // Drain, source and gate
-                drawing.Line(new(-5, 0), new(-5, 4), Appearance);
-                drawing.Line(new(5, 0), new(5, 4), Appearance);
-                drawing.Polyline([
+                builder.Line(new(-5, 0), new(-5, 4), style);
+                builder.Line(new(5, 0), new(5, 4), style);
+                builder.Polyline([
                     new(-5, 0),
                     new(0, 0),
                     new(0, 4)
-                ], Appearance);
+                ], style);
 
                 var marker = new Arrow(new(0, 4), new(0, 1));
-                marker.Draw(drawing, Appearance);
+                marker.Draw(builder, style);
 
 
                 // Label
-                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1), Appearance);
-                _anchors.Draw(drawing, Labels);
+                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
+                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
+                _anchors.Draw(builder, this, style);
             }
         }
         private class Pmos : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "pmos";
@@ -201,12 +196,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -222,57 +212,61 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 4, "s", "d");
-                builder.ExtendPin(Pins["g"], Appearance);
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], style);
 
                 // Gate
-                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), Appearance);
-                builder.Circle(new Vector2(0, 7.5), 1.5, Appearance);
+                builder.Path(b => b.MoveTo(new(-6, 4)).LineTo(new(6, 4)).MoveTo(new(-6, 6)).LineTo(new(6, 6)), style);
+                builder.Circle(new Vector2(0, 7.5), 1.5, style);
 
                 // Source and drain
-                builder.Line(new(-4, 0), new(-4, 4), Appearance);
-                builder.Line(new(4, 0), new(4, 4), Appearance);
+                builder.Line(new(-4, 0), new(-4, 4), style);
+                builder.Line(new(4, 0), new(4, 4), style);
 
                 if (Variants.Contains(_depletion))
-                    builder.Rectangle(-4, 2.5, 8, 1.5, Appearance);
+                    builder.Rectangle(-4, 2.5, 8, 1.5, style);
 
                 // Label
                 if (Pins["b"].Connections > 0)
                 {
-                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
                 }
                 else
                 {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
-                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 }
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
             private void DrawPackaged(IGraphicsBuilder drawing)
             {
-                // Packaged
-                drawing.Circle(new(0, 3), 8.0, Appearance);
+                var style = drawing.Style.Modify(Style);
 
-                drawing.ExtendPins(Pins, Appearance, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"], Appearance);
+                // Packaged
+                drawing.Circle(new(0, 3), 8.0, style);
+
+                drawing.ExtendPins(Pins, style, 4, "s", "d");
+                drawing.ExtendPin(Pins["g"], style);
 
                 // Gate
                 drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
                     .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
                     .MoveTo(new(-2, 4)).LineTo(new(2, 4))
-                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), Appearance);
+                    .MoveTo(new(4, 4)).LineTo(new(7, 4)), style);
 
                 // Drain, source and gate
-                drawing.Line(new(-5, 0), new(-5, 4), Appearance);
-                drawing.Line(new(5, 0), new(5, 4), Appearance);
-                drawing.Arrow(new(0, 4), new(0, 0), Appearance);
-                drawing.Line(new(0, 0), new(-5, 0), Appearance);
+                drawing.Line(new(-5, 0), new(-5, 4), style);
+                drawing.Line(new(5, 0), new(5, 4), style);
+                drawing.Arrow(new(0, 4), new(0, 0), style);
+                drawing.Line(new(0, 0), new(-5, 0), style);
 
                 // Label
-                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1), Appearance);
-                _anchors.Draw(drawing, Labels);
+                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
+                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
+                _anchors.Draw(drawing, this, style);
             }
         }
     }

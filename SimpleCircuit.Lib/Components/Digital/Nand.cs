@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -123,14 +124,15 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawNandIEC(builder); break;
+                    case 0: DrawNandIEC(builder, style); break;
                     case 1:
-                    default: DrawNand(builder); break;
+                    default: DrawNand(builder, style); break;
                 }
             }
-            private void DrawNand(IGraphicsBuilder builder)
+            private void DrawNand(IGraphicsBuilder builder, IStyle style)
             {
                 double radius = Height * 0.5;
                 double handle = 0.55 * radius;
@@ -138,26 +140,26 @@ namespace SimpleCircuit.Components.Digital
                 double xr = w - radius;
                 double h = Height * 0.5;
 
-                builder.ExtendPins(Pins, Appearance);
+                builder.ExtendPins(Pins, style);
                 builder.Path(builder => builder
                     .MoveTo(new(-w, h))
                     .LineTo(new(xr, h))
                     .CurveTo(new(xr + handle, h), new(w, handle), new(w, 0))
                     .SmoothTo(new(xr + handle, -h), new(xr, -h))
                     .LineTo(new(-w, -h))
-                    .Close(), Appearance);
-                builder.Circle(new Vector2(w + 1.5, 0), 1.5, Appearance);
+                    .Close(), style);
+                builder.Circle(new Vector2(w + 1.5, 0), 1.5, style);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
-            private void DrawNandIEC(IGraphicsBuilder builder)
+            private void DrawNandIEC(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance);
-                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, Appearance);
-                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, Appearance);
-                builder.Text("&amp;", new(), new(), Appearance);
+                builder.ExtendPins(Pins, style);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
+                builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
+                builder.Text("&amp;", new(), new(), style);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

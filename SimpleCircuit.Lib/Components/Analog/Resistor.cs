@@ -115,16 +115,11 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         double w = Width * 0.5;
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1), Appearance);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -133,21 +128,23 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style, 2, "a", "b");
 
                 switch (Variants.Select(Options.American, Options.European))
                 {
                     case 1:
-                        DrawEuropeanResistor(builder);
+                        DrawEuropeanResistor(builder, style);
                         break;
                     case 0:
                     default:
-                        DrawAmericanResistor(builder);
+                        DrawAmericanResistor(builder, style);
                         break;
                 }
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
-            private void DrawAmericanResistor(IGraphicsBuilder builder)
+            private void DrawAmericanResistor(IGraphicsBuilder builder, IStyle style)
             {
                 double w = Width * 0.5;
                 double l = Length * 0.5;
@@ -167,40 +164,40 @@ namespace SimpleCircuit.Components.Analog
                 }
                 x += increment * 0.5;
                 points.Add(new(x, 0));
-                builder.Polyline(points, Appearance);
+                builder.Polyline(points, style);
 
 
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor))
                 {
                     case 0:
-                        builder.Arrow(new(-5, w + 1), new(6, -w - 2), Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
+                        builder.Arrow(new(-5, w + 1), new(6, -w - 2), style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1:
-                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance);
-                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
+                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), style);
+                        builder.Arrow(new(0, w + 5), new(2, w + 1), style);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2:
                         builder.Polyline(
                         [
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
-                        ], Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 4), new(1, 1), Appearance);
+                        ], style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 4), new(1, 1));
                         break;
                 }
             }
-            private void DrawEuropeanResistor(IGraphicsBuilder builder)
+            private void DrawEuropeanResistor(IGraphicsBuilder builder, IStyle style)
             {
                 double w = Width * 0.5;
                 double l = Length * 0.5;
 
                 // The rectangle
-                builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, Appearance);
+                builder.Rectangle(-Length * 0.5, -Width * 0.5, Length, Width, style);
 
                 // Variants
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor, _memristor))
@@ -208,44 +205,44 @@ namespace SimpleCircuit.Components.Analog
                     case 0: // Programmable
                         if (Variants.Contains(_x))
                         {
-                            builder.Line(new(-l, -w), new(l, w), Appearance);
-                            builder.Line(new(-l, w), new(l, -w), Appearance);
+                            builder.Line(new(-l, -w), new(l, w), style);
+                            builder.Line(new(-l, w), new(l, -w), style);
                         }
 
-                        builder.Arrow(new(-5, w + 1), new(6, -w - 3), Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1), Appearance);
+                        builder.Arrow(new(-5, w + 1), new(6, -w - 3), style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1: // Photoresistor
                         if (Variants.Contains(_x))
                         {
-                            builder.Line(new(-l, -w), new(l, w), Appearance);
-                            builder.Line(new(-l, w), new(l, -w), Appearance);
+                            builder.Line(new(-l, -w), new(l, w), style);
+                            builder.Line(new(-l, w), new(l, -w), style);
                         }
 
-                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), Appearance);
-                        builder.Arrow(new(0, w + 5), new(2, w + 1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1), Appearance);
+                        builder.Arrow(new(-4, w + 5), new(-2, w + 1), style);
+                        builder.Arrow(new(0, w + 5), new(2, w + 1), style);
+                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2: // Thermistor
                         if (Variants.Contains(_x))
                         {
-                            builder.Line(new(-l, -w), new(l, w), Appearance);
-                            builder.Line(new(-l, w), new(l, -w), Appearance);
+                            builder.Line(new(-l, -w), new(l, w), style);
+                            builder.Line(new(-l, w), new(l, -w), style);
                         }
 
                         builder.Polyline(
                         [
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
-                        ], Appearance);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1), Appearance);
-                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 3), new(1, 1), Appearance);
+                        ], style);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 3), new(1, 1));
                         break;
 
                     case 3: // Memristor
-                        builder.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -w, Length * 0.15, Width, Appearance);
+                        builder.Rectangle(Length * 0.425 - Length * 0.15 * 0.5, -w, Length * 0.15, Width, style);
                         double t = Length * 0.85 / 13;
                         builder.Polyline(
                         [
@@ -253,7 +250,7 @@ namespace SimpleCircuit.Components.Analog
                             new(-l + 5 * t, -w * 0.5), new(-l + 5 * t, w * 0.5),
                             new(-l + 8 * t, w * 0.5), new(-l + 8 * t, -w * 0.5),
                             new(-l + 11 * t, -w * 0.5), new(-l + 11 * t, 0), new(-l + t * 13, 0)
-                        ], Appearance);
+                        ], style);
                         break;
                 }
             }

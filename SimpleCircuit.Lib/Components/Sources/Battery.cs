@@ -50,8 +50,8 @@ namespace SimpleCircuit.Components.Sources
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin", this, new(-1, 0), new(-1, 0)), "n", "neg", "b");
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin", this, new(1, 0), new(1, 0)), "p", "pos", "a");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -8), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 8), new(0, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -8), new(0, -1)),
+                    new LabelAnchorPoint(new(0, 8), new(0, 1)));
             }
 
             /// <inheritdoc />
@@ -75,27 +75,28 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var negOptions = new StrokeWidthStyle(Appearance, 0.75);
+                var style = builder.Style.Modify(Style);
+                var negStyle = style.AsLineThickness(0.75);
 
                 // Wires
                 double offset = Length / 2;
-                builder.ExtendPins(Pins, Appearance);
+                builder.ExtendPins(Pins, style);
 
                 // The cells
                 double x = -offset;
                 for (int i = 0; i < _cells; i++)
                 {
-                    builder.Line(new(x, -2), new(x, 2), negOptions);
+                    builder.Line(new(x, -2), new(x, 2), negStyle);
                     x += 2.0;
-                    builder.Line(new(x, -6), new(x, 6), Appearance);
+                    builder.Line(new(x, -6), new(x, 6), style);
                     x += 2.0;
                 }
 
                 // Add a little plus and minus next to the terminals!
-                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), Appearance, vertical: true);
+                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), style, vertical: true);
 
                 // Depending on the orientation, let's anchor the text differently
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

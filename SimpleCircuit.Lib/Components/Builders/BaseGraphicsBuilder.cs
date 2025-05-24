@@ -39,12 +39,20 @@ namespace SimpleCircuit.Components.Builders
         /// <inheritdoc />
         public Bounds Bounds => _globalBounds.Bounds;
 
+        /// <inheritdoc />
+        public ITextFormatter TextFormatter { get; }
+
+        /// <inheritdoc />
+        public IStyle Style { get; private set; }
+
         /// <summary>
         /// Creates a new <see cref="BaseGraphicsBuilder"/>.
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
-        protected BaseGraphicsBuilder(IDiagnosticHandler diagnostics)
+        protected BaseGraphicsBuilder(ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics)
         {
+            TextFormatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
+            Style = style ?? throw new ArgumentNullException(nameof(style));
             Diagnostics = diagnostics;
             _tf.Push(Transform.Identity);
             _bounds.Push(new());
@@ -139,7 +147,7 @@ namespace SimpleCircuit.Components.Builders
 
             // If labels were found, let's try drawing the labels
             if (context.Anchors.Count > 0 && context.Labels != null && context.Labels.Count > 0)
-                new CustomLabelAnchorPoints([.. context.Anchors]).Draw(this, context.Labels);
+                new CustomLabelAnchorPoints([.. context.Anchors]).Draw(this, context, Style);
 
             if (transform)
                 EndTransform();
@@ -173,11 +181,13 @@ namespace SimpleCircuit.Components.Builders
                     case "group":
                     case "g":
                         // Parse options
-                        IStyle options = new Style();
-                        ParseAppearanceOptions(options, node);
+                        var style = ParseStyleModifier(node);
+                        var oldStyle = Style;
+                        Style = style?.Apply(Style) ?? Style;
                         BeginGroup();
                         DrawXmlActions(node, context);
                         EndGroup();
+                        Style = oldStyle;
                         break;
                     default:
                         Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
@@ -200,11 +210,11 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             // Draw the line
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
-            Line(new(x1, y1), new(x2, y2), appearance);
-            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), appearance);
-            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), appearance);
+            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var style = modifier?.Apply(Style) ?? Style;
+            Line(new(x1, y1), new(x2, y2), style);
+            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), style);
+            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), style);
         }
 
         private void DrawXmlPolygon(XmlNode node)
@@ -220,11 +230,11 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node);
+            var modifier = ParseStyleModifier(node);
+            var style = modifier?.Apply(Style) ?? Style;
 
             // Draw the polygon
-            Polygon(points, appearance);
+            Polygon(points, style);
         }
 
         private void DrawXmlPolyline(XmlNode node)
@@ -243,20 +253,20 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
+            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var style = modifier?.Apply(Style) ?? Style;
 
             // Draw the polyline
-            Polyline(points, appearance);
+            Polyline(points, style);
             if (points.Count > 1)
             {
-                DrawMarkers(startMarkers, points[0], points[1] - points[0], appearance);
-                DrawMarkers(endMarkers, points[0], points[0] - points[^1], appearance);
+                DrawMarkers(startMarkers, points[0], points[1] - points[0], style);
+                DrawMarkers(endMarkers, points[0], points[0] - points[^1], style);
             }
             else
             {
-                DrawMarkers(startMarkers, points[0], new(1, 0), appearance);
-                DrawMarkers(endMarkers, points[0], new(1, 0), appearance);
+                DrawMarkers(startMarkers, points[0], new(1, 0), style);
+                DrawMarkers(endMarkers, points[0], new(1, 0), style);
             }
         }
 
@@ -272,11 +282,11 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node);
+            var modifier = ParseStyleModifier(node);
+            var style = modifier?.Apply(Style) ?? Style;
 
             // Draw the circle
-            Circle(new(cx, cy), r, appearance);
+            Circle(new(cx, cy), r, style);
         }
 
         private void DrawXmlPath(XmlNode node)
@@ -289,8 +299,8 @@ namespace SimpleCircuit.Components.Builders
             if (string.IsNullOrWhiteSpace(pathData))
                 return;
 
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node, Diagnostics, ref startMarkers, ref endMarkers);
+            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var style = modifier?.Apply(Style) ?? Style;
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
@@ -300,9 +310,9 @@ namespace SimpleCircuit.Components.Builders
                     var lexer = new SvgPathDataLexer(pathData);
                     start = SvgPathDataParser.Parse(lexer, b, Diagnostics);
                     end = new SvgPathDataParser.MarkerLocation(b.End, b.EndNormal);
-                }, appearance);
-                DrawMarkers(startMarkers, start.Location, start.Normal, appearance);
-                DrawMarkers(endMarkers, end.Location, end.Normal, appearance);
+                }, style);
+                DrawMarkers(startMarkers, start.Location, start.Normal, style);
+                DrawMarkers(endMarkers, end.Location, end.Normal, style);
             }
         }
 
@@ -321,11 +331,11 @@ namespace SimpleCircuit.Components.Builders
             if (!success)
                 return;
 
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node);
+            var modifier = ParseStyleModifier(node);
+            var style = modifier?.Apply(Style) ?? Style;
 
             // Draw the rectangle
-            this.Rectangle(x, y, width, height, appearance, rx, ry);
+            this.Rectangle(x, y, width, height, style, rx, ry);
         }
 
         private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
@@ -342,12 +352,12 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             string value = node.Attributes?["value"]?.Value;
-            IStyle appearance = new Style();
-            ParseAppearanceOptions(appearance, node);
+            var modifier = ParseStyleModifier(node);
+            var style = modifier?.Apply(Style) ?? Style;
 
             if (value != null && context != null)
                 value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new Vector2(nx, ny), appearance);
+            Text(value, new Vector2(x, y), new(nx, ny), style);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
@@ -359,23 +369,22 @@ namespace SimpleCircuit.Components.Builders
             success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
             if (!success)
                 return;
-
-            var options = new Style();
-            ParseAppearanceOptions(options, node);
-            context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny), options));
+            context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny)));
         }
 
-        private void ParseAppearanceOptions(IStyle options, XmlNode node)
+        private IStyleModifier ParseStyleModifier(XmlNode node)
         {
             // Parse the style
 
             // Stroke attributes
+            return null;
         }
 
-        private void ParseAppearanceOptions(IStyle options, XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private IStyleModifier ParseStyleModifier(XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
-            ParseAppearanceOptions(options, node);
+            var style = ParseStyleModifier(node);
 
+            // Read start markers
             string markers = node.Attributes?["marker-start"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
@@ -385,6 +394,7 @@ namespace SimpleCircuit.Components.Builders
                     AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
             }
 
+            // Read end markers
             markers = node.Attributes?["marker-end"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
@@ -393,6 +403,8 @@ namespace SimpleCircuit.Components.Builders
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
                     AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
             }
+
+            return style;
         }
 
         private void AddMarker(HashSet<Marker> markers, string value, IDiagnosticHandler diagnostics)
@@ -467,9 +479,16 @@ namespace SimpleCircuit.Components.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false);
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false);
+        public virtual IGraphicsBuilder Text(string value, Vector2 location, TextOrientation orientation, IStyle appearance)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return this;
+
+            var span = TextFormatter.Format(value, appearance);
+            return Text(span, location, orientation);
+        }
     }
 }

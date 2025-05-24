@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using static SimpleCircuit.Components.CommonGraphical;
 
 namespace SimpleCircuit.Components.Labeling
@@ -24,8 +25,158 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IBoxDrawable subject, string name, out LabelAnchorPoint value)
+        public override bool TryGetAnchorIndex(string name, out int index)
         {
+            switch (name.ToLower())
+            {
+                case "0":
+                case "c":
+                case "ci":
+                    index = 0;
+                    return true; // Center
+
+                case "1":
+                case "nw":
+                case "nwo":
+                case "nnw":
+                case "nnwo":
+                case "wnw":
+                case "wnwo":
+                    index = 1;
+                    return true; // Top-left outside
+
+                case "2":
+                case "n":
+                case "no":
+                case "u":
+                case "up":
+                    index = 2;
+                    return true; // Top
+
+                case "3":
+                case "ne":
+                case "neo":
+                case "ene":
+                case "eneo":
+                case "nne":
+                case "nneo":
+                    index = 3;
+                    return true; // Top-right outside
+
+                case "4":
+                case "e":
+                case "eo":
+                case "r":
+                case "right":
+                    index = 4;
+                    return true; // Right
+
+                case "5":
+                case "se":
+                case "seo":
+                case "sse":
+                case "sseo":
+                case "ese":
+                case "eseo":
+                    index = 5;
+                    return true; // Bottom-right outside
+
+                case "6":
+                case "s":
+                case "so":
+                case "d":
+                case "down":
+                    index = 6;
+                    return true; // Bottom
+
+                case "7":
+                case "sw":
+                case "swo":
+                case "ssw":
+                case "sswo":
+                case "wsw":
+                case "wswo":
+                    index = 7;
+                    return true; // Bottom-left outside
+
+                case "8":
+                case "w":
+                case "wo":
+                case "l":
+                case "left":
+                    index = 8;
+                    return true; // Left
+
+                case "9":
+                case "nwi":
+                case "nnwi":
+                case "wnwi":
+                    index = 9;
+                    return true; // Top-left inside
+
+                case "10":
+                case "ni":
+                    index = 10;
+                    return true; // Top inside
+
+                case "11":
+                case "nei":
+                case "enei":
+                case "nnei":
+                    index = 11;
+                    return true; // Top-right inside
+
+                case "12":
+                case "ei":
+                    index = 12;
+                    return true; // Right inside
+
+                case "13":
+                case "sei":
+                case "ssei":
+                case "esei":
+                    index = 13;
+                    return true; // Bottom-right outside
+
+                case "14":
+                case "si":
+                    index = 14;
+                    return true; // Bottom inside
+
+                case "15":
+                case "swi":
+                case "sswi":
+                case "wswi":
+                    index = 15;
+                    return true; // Bottom-left outside
+
+                case "16":
+                case "wi":
+                    index = 16;
+                    return true; // Left inside
+
+                default:
+                    if (name.All(char.IsDigit))
+                    {
+                        index = int.Parse(name);
+                        index %= Count;
+                        if (index < 0)
+                            index += Count;
+                        return true;
+                    }
+                    break;
+            }
+            index = -1;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index)
+        {
+            index %= Count;
+            if (index < 0)
+                index += Count;
+
             Vector2 c = 0.5 * (subject.TopLeft + subject.BottomRight);
             Vector2 size = subject.BottomRight - subject.TopLeft;
             Vector2 n, ox, oy;
@@ -40,167 +191,98 @@ namespace SimpleCircuit.Components.Labeling
                 Vector2 n = b - a;
                 n = new Vector2(n.Y, -n.X);
                 n /= n.Length;
-                return new(p + subject.LabelMargin * n, n, subject.Appearance);
+                return new(p + subject.LabelMargin * n, new(n.X, n.Y));
             }
 
-            switch (name.ToLower())
+            switch (index)
             {
-                case "0":
-                case "c":
-                case "ci":
-                    value = new(c, new(), subject.Appearance);
-                    return true; // Center
+                case 0:
+                    // Center
+                    return new(c, new()); 
 
-                case "1":
-                case "nw":
-                case "nwo":
-                case "nnw":
-                case "nnwo":
-                case "wnw":
-                case "wnwo":
-                    value = ComputeMidLocation(
+                case 1:
+                    // Top-left outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop));
-                    return true; // Top-left outside
 
-                case "2":
-                case "n":
-                case "no":
-                case "u":
-                case "up":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1), subject.Appearance);
-                    return true; // Top
+                case 2:
+                    // Top
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1));
 
-                case "3":
-                case "ne":
-                case "neo":
-                case "ene":
-                case "eneo":
-                case "nne":
-                case "nneo":
-                    value = ComputeMidLocation(
+                case 3:
+                    // Top-right outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight));
-                    return true; // Top-right outside
 
-                case "4":
-                case "e":
-                case "eo":
-                case "r":
-                case "right":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0), subject.Appearance);
-                    return true; // Right
+                case 4:
+                    // Right
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0));
 
-                case "5":
-                case "se":
-                case "seo":
-                case "sse":
-                case "sseo":
-                case "ese":
-                case "eseo":
-                    value = ComputeMidLocation(
+                case 5:
+                    // Bottom-right outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom));
-                    return true; // Bottom-right outside
 
-                case "6":
-                case "s":
-                case "so":
-                case "d":
-                case "down":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1), subject.Appearance);
-                    return true; // Bottom
+                case 6:
+                    // Bottom
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1));
 
-                case "7":
-                case "sw":
-                case "swo":
-                case "ssw":
-                case "sswo":
-                case "wsw":
-                case "wswo":
-                    value = ComputeMidLocation(
+                case 7:
+                    // Bottom-left outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft));
-                    return true; // Bottom-left outside
 
-                case "8":
-                case "w":
-                case "wo":
-                case "l":
-                case "left":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
-                    return true; // Left
+                case 8:
+                    // Left
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
 
-                case "9":
-                case "nwi":
-                case "nnwi":
-                case "wnwi":
-                    value = ComputeMidLocation(
+                case 9:
+                    // Top-left inside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft));
-                    return true; // Top-left inside
 
-                case "10":
-                case "ni":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1), subject.Appearance);
-                    return true; // Top inside
+                case 10:
+                    // Top inside
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1));
 
-                case "11":
-                case "nei":
-                case "enei":
-                case "nnei":
-                    value = ComputeMidLocation(
+                case 11:
+                    // Top-right inside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop));
-                    return true; // Top-right inside
 
-                case "12":
-                case "ei":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
-                    return true; // Right inside
+                case 12:
+                    // Right inside
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
 
-                case "13":
-                case "sei":
-                case "ssei":
-                case "esei":
-                    value = ComputeMidLocation(
+                case 13:
+                    // Bottom-right outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight));
-                    return true; // Bottom-right outside
 
-                case "14":
-                case "si":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1), subject.Appearance);
-                    return true; // Bottom inside
+                case 14:
+                    // Bottom inside
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1));
 
-                case "15":
-                case "swi":
-                case "sswi":
-                case "wswi":
-                    value = ComputeMidLocation(
+                case 15:
+                    // Bottom-left outside
+                    return ComputeMidLocation(
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft),
                         c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom));
-                    return true; // Bottom-left outside
 
-                case "16":
-                case "wi":
-                    value = new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0), subject.Appearance);
-                    return true; // Left inside
+                case 16:
+                    // Left inside
+                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0));
 
                 default:
-                    if (name.All(char.IsDigit))
-                    {
-                        int index = int.Parse(name);
-                        index %= Count;
-                        if (index < 0)
-                            index += Count;
-                        return TryCalculate(subject, index.ToString(), out value);
-                    }
-                    break;
+                    throw new NotImplementedException();
             }
-
-            value = default;
-            return false;
         }
     }
 }

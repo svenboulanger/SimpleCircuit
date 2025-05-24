@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -116,16 +117,18 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, Appearance, CornerRadius, CornerRadius);
+                var style = builder.Style.Modify(Style);
+
+                builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, style, CornerRadius, CornerRadius);
 
                 if (Variants.Contains(Predefined))
                 {
                     double a = _width * 0.5;
                     double b = _height * 0.5;
-                    builder.Line(new(-a + 3, -b), new(-a + 3, b), Appearance);
-                    builder.Line(new(a - 3, -b), new(a - 3, b), Appearance);
+                    builder.Line(new(-a + 3, -b), new(-a + 3, b), style);
+                    builder.Line(new(a - 3, -b), new(a - 3, b), style);
                 }
-                BoxLabelAnchorPoints.Default.Draw(builder, this);
+                BoxLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

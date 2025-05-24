@@ -7,17 +7,12 @@ namespace SimpleCircuit.Components.Builders
     /// <summary>
     /// Describes a context that can be used when drawing XML.
     /// </summary>
-    public interface IXmlDrawingContext : IVariantContext
+    public interface IXmlDrawingContext : IVariantContext, IDrawable
     {
         /// <summary>
         /// Gets the label anchor points, if defined.
         /// </summary>
         public IList<LabelAnchorPoint> Anchors { get; }
-
-        /// <summary>
-        /// Gets the labels, if defined.
-        /// </summary>
-        public Labels Labels { get; }
 
         /// <summary>
         /// Transforms a string.

@@ -16,11 +16,7 @@ namespace SimpleCircuit.Components.Annotations
     /// <summary>
     /// An annotation box.
     /// </summary>
-    /// <remarks>
-    /// Creates a new <see cref="Box"/>.
-    /// </remarks>'
-    /// <param name="name">The name of the box.</param>
-    public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
+    public class Box : IAnnotation, IBoxDrawable, IRoundedBox
     {
         private readonly HashSet<IDrawable> _drawables = [];
         private Vector2 _topLeft, _bottomRight;
@@ -30,7 +26,7 @@ namespace SimpleCircuit.Components.Annotations
         private static readonly string _over = "over";
 
         /// <inheritdoc />
-        public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
+        public string Name { get; }
 
         /// <inheritdoc />
         public List<TextLocation> Sources { get; } = [];
@@ -54,7 +50,7 @@ namespace SimpleCircuit.Components.Annotations
         public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
 
         /// <inheritdoc />
-        public Labels Labels { get; } = new Labels();
+        public Labels Labels { get; }
 
         [Description("The margin for the annotation box on the left side.")]
         [Alias("ml")]
@@ -112,10 +108,20 @@ namespace SimpleCircuit.Components.Annotations
         public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />
-        public Style Appearance { get; } = new();
+        public IStyleModifier Style { get; set; }
 
         Vector2 IBoxDrawable.TopLeft => _topLeft;
         Vector2 IBoxDrawable.BottomRight => _bottomRight;
+
+        /// <summary>
+        /// Creates a new <see cref="Box"/>.
+        /// </summary>
+        /// <param name="name">The name of the box.</param>
+        public Box(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Labels = new();
+        }
 
         /// <inheritdoc />
         public void Add(IDrawable drawable)
@@ -145,6 +151,8 @@ namespace SimpleCircuit.Components.Annotations
                 builder.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
                 builder.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
 
+                var style = Style?.Apply(builder.Style) ?? builder.Style;
+
                 // Expand the bounds by the margins
                 builder.BeginGroup(Name, ["annotation"], !Variants.Contains(_over));
                 var matrix = builder.CurrentTransform.Matrix.Inverse;
@@ -152,11 +160,11 @@ namespace SimpleCircuit.Components.Annotations
                 switch (Variants.Select(Poly))
                 {
                     case 0:
-                        DrawPolygon(builder);
+                        DrawPolygon(builder, style);
                         break;
 
                     default:
-                        DrawBox(builder);
+                        DrawBox(builder, style);
                         break;
                 }
                 builder.EndTransform();
@@ -168,7 +176,7 @@ namespace SimpleCircuit.Components.Annotations
         /// Draws a simple box around what needs to be annotated.
         /// </summary>
         /// <param name="builder">The builder.</param>
-        private void DrawBox(IGraphicsBuilder builder)
+        private void DrawBox(IGraphicsBuilder builder, IStyle style)
         {
             // Compute the boxes
             var bounds = new ExpandableBounds();
@@ -192,18 +200,18 @@ namespace SimpleCircuit.Components.Annotations
             double y = total.Top;
             double width = total.Width;
             double height = total.Height;
-            builder.Rectangle(x, y, width, height, Appearance, CornerRadius, CornerRadius);
+            builder.Rectangle(x, y, width, height, style, CornerRadius, CornerRadius);
 
             _topLeft = new Vector2(total.Left, total.Top);
             _bottomRight = new Vector2(total.Right, total.Bottom);
-            _anchors.Draw(builder, this);
+            _anchors.Draw(builder, this, style);
         }
 
         /// <summary>
         /// Draws a concave polygon around what needs to be annotated.
         /// </summary>
         /// <param name="builder"></param>
-        private void DrawPolygon(IGraphicsBuilder builder)
+        private void DrawPolygon(IGraphicsBuilder builder, IStyle style)
         {
             // Track the point cloud
             var sortedPoints = new SortedDictionary<double, ExpandableLine>();
@@ -457,7 +465,7 @@ namespace SimpleCircuit.Components.Annotations
                     }
                     builder.Close();
                 }
-            }, Appearance);
+            }, style);
 
             // Draw the labels
             if (Labels.Count == 0)
@@ -468,40 +476,40 @@ namespace SimpleCircuit.Components.Annotations
 
             // Points 0-11 are the outside points, add them here
             FindCenter(sortedPoints, out double xCenter, out double yCenter);
-            anchors[0] = new LabelAnchorPoint(new(xCenter, yCenter), new(), Appearance);
+            anchors[0] = new LabelAnchorPoint(new(xCenter, yCenter), new());
             FindTop(sortedPoints, bounds, out double xTop, out double yTop, out double lengthTop);
-            anchors[1] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop - LabelMargin), new(1, -1), Appearance);
-            anchors[2] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop - LabelMargin), new(0, -1), Appearance);
-            anchors[3] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop - LabelMargin), new(-1, -1), Appearance);
+            anchors[1] = new LabelAnchorPoint(new(xTop + CornerRadius, yTop - LabelMargin), new(1, -1));
+            anchors[2] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop - LabelMargin), new(0, -1));
+            anchors[3] = new LabelAnchorPoint(new(xTop + lengthTop - CornerRadius, yTop - LabelMargin), new(-1, -1));
             FindRight(sortedPoints, bounds, out double xRight, out double yRight, out double lengthRight);
-            anchors[4] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + CornerRadius), new(1, 1), Appearance);
-            anchors[5] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + 0.5 * lengthRight), new(1, 0), Appearance);
-            anchors[6] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + lengthRight - CornerRadius), new(1, -1), Appearance);
+            anchors[4] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + CornerRadius), new(1, 1));
+            anchors[5] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + 0.5 * lengthRight), new(1, 0));
+            anchors[6] = new LabelAnchorPoint(new(xRight + LabelMargin, yRight + lengthRight - CornerRadius), new(1, -1));
             FindBottom(sortedPoints, bounds, out double xBottom, out double yBottom, out double lengthBottom);
-            anchors[7] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + LabelMargin), new(-1, 1), Appearance);
-            anchors[8] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + LabelMargin), new(0, 1), Appearance);
-            anchors[9] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + LabelMargin), new(1, 1), Appearance);
+            anchors[7] = new LabelAnchorPoint(new(xBottom + lengthBottom - CornerRadius, yBottom + LabelMargin), new(-1, 1));
+            anchors[8] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom + LabelMargin), new(0, 1));
+            anchors[9] = new LabelAnchorPoint(new(xBottom + CornerRadius, yBottom + LabelMargin), new(1, 1));
             FindLeft(sortedPoints, bounds, out double xLeft, out double yLeft, out double lengthLeft);
-            anchors[10] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + lengthLeft - CornerRadius), new(-1, -1), Appearance);
-            anchors[11] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + 0.5 * lengthLeft), new(-1, 0), Appearance);
-            anchors[12] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + CornerRadius), new(-1, 1), Appearance);
+            anchors[10] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + lengthLeft - CornerRadius), new(-1, -1));
+            anchors[11] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + 0.5 * lengthLeft), new(-1, 0));
+            anchors[12] = new LabelAnchorPoint(new(xLeft - LabelMargin, yLeft + CornerRadius), new(-1, 1));
 
             // Points 12-23 are the inside points, add them here
             double s = Math.Max(CornerRadius, LabelMargin);
-            anchors[13] = new LabelAnchorPoint(new(xTop + s, yTop + LabelMargin), new(1, 1), Appearance);
-            anchors[14] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop + LabelMargin), new(0, 1), Appearance);
-            anchors[15] = new LabelAnchorPoint(new(xTop + lengthTop - s, yTop + LabelMargin), new(-1, 1), Appearance);
-            anchors[16] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + s), new(-1, 1), Appearance);
-            anchors[17] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + 0.5 * lengthRight), new(-1, 0), Appearance);
-            anchors[18] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + lengthRight - s), new(-1, -1), Appearance);
-            anchors[19] = new LabelAnchorPoint(new(xBottom + lengthBottom - s, yBottom - LabelMargin), new(-1, -1), Appearance);
-            anchors[20] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom - LabelMargin), new(0, -1), Appearance);
-            anchors[21] = new LabelAnchorPoint(new(xBottom + s, yBottom - LabelMargin), new(1, -1), Appearance);
-            anchors[22] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + lengthLeft - s), new(1, -1), Appearance);
-            anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0), Appearance);
-            anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1), Appearance);
+            anchors[13] = new LabelAnchorPoint(new(xTop + s, yTop + LabelMargin), new(1, 1));
+            anchors[14] = new LabelAnchorPoint(new(xTop + 0.5 * lengthTop, yTop + LabelMargin), new(0, 1));
+            anchors[15] = new LabelAnchorPoint(new(xTop + lengthTop - s, yTop + LabelMargin), new(-1, 1));
+            anchors[16] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + s), new(-1, 1));
+            anchors[17] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + 0.5 * lengthRight), new(-1, 0));
+            anchors[18] = new LabelAnchorPoint(new(xRight - LabelMargin, yRight + lengthRight - s), new(-1, -1));
+            anchors[19] = new LabelAnchorPoint(new(xBottom + lengthBottom - s, yBottom - LabelMargin), new(-1, -1));
+            anchors[20] = new LabelAnchorPoint(new(xBottom + 0.5 * lengthBottom, yBottom - LabelMargin), new(0, -1));
+            anchors[21] = new LabelAnchorPoint(new(xBottom + s, yBottom - LabelMargin), new(1, -1));
+            anchors[22] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + lengthLeft - s), new(1, -1));
+            anchors[23] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + 0.5 * lengthLeft), new(1, 0));
+            anchors[24] = new LabelAnchorPoint(new(xLeft + LabelMargin, yLeft + s), new(1, 1));
 
-            new OffsetAnchorPoints<IDrawable>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this);
+            new OffsetAnchorPoints<IDrawable>(new CustomLabelAnchorPoints(anchors), 1).Draw(builder, this, style);
         }
 
         /// <summary>

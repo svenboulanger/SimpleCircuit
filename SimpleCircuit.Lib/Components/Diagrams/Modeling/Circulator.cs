@@ -1,6 +1,7 @@
 ﻿using System;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -24,6 +25,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var style = builder.Style.Modify(Style);
 
                 builder.Path(b =>
                 {
@@ -35,8 +37,8 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                     b.Line(new(0.5, 2));
                     b.MoveTo(new(c, -s));
                     b.Line(new(2, 0));
-                }, Appearance);
-                DrawLabels(builder);
+                }, style);
+                DrawLabels(builder, style);
             }
         }
     }

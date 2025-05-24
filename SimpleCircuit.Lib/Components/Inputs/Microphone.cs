@@ -33,19 +33,19 @@ namespace SimpleCircuit.Components.Inputs
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, -4), new(0, -1)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(0, 4), new(0, 1)), "n", "neg", "b");
                 _anchors = new(
-                    new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance),
-                    new LabelAnchorPoint(new(6, 0), new(1, 0), Appearance));
+                    new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
+                    new LabelAnchorPoint(new(6, 0), new(1, 0)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
-                builder.Circle(new(), 4, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
+                builder.Circle(new(), 4, style);
 
-                var appearance = new StrokeWidthStyle(Appearance, 1.0);
-                builder.Line(new(4, -4), new(4, 4), appearance);
-                _anchors.Draw(builder, this);
+                builder.Line(new(4, -4), new(4, 4), style.AsLineThickness(1.0));
+                _anchors.Draw(builder, this, style);
             }
         }
     }

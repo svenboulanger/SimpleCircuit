@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
@@ -130,18 +131,20 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 if (Variants.Contains(Manual))
-                    Trapezoid(builder);
+                    Trapezoid(builder, style);
                 else
                 {
                     var edge = new Vector2(_height * _edgeSkew, -_height);
-                    builder.Parallellogram(0.0, 0.0, _width, edge, Appearance, CornerRadiusSharp, CornerRadiusBlunt);
-                    _anchors[0] = new LabelAnchorPoint(new(), new(), Appearance);
+                    builder.Parallellogram(0.0, 0.0, _width, edge, style, CornerRadiusSharp, CornerRadiusBlunt);
+                    _anchors[0] = new LabelAnchorPoint(new(), new());
                 }
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
 
-            private void Trapezoid(IGraphicsBuilder drawing)
+            private void Trapezoid(IGraphicsBuilder drawing, IStyle style)
             {
                 var pcorner = new Vector2(-_width * 0.5, -_height * 0.5);
                 var edge = new Vector2(_width, _height * 0.25);
@@ -171,8 +174,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     if (cornerStraightLeft)
                         b.ArcTo(straightRadius, straightRadius, 0.0, false, true, pd2);
                     b.Close();
-                }, Appearance);
-                _anchors[0] = new LabelAnchorPoint(new(0, edge.Y / 2), new(), Appearance);
+                }, style);
+                _anchors[0] = new LabelAnchorPoint(new(0, edge.Y / 2), new());
             }
 
             /// <inheritdoc />

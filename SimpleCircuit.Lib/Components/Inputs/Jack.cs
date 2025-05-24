@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Inputs
 {
@@ -30,19 +31,20 @@ namespace SimpleCircuit.Components.Inputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(0, 1.5), new(0, 1)), "p", "a", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4, 0), new(1, 0)), "n", "b", "neg");
-                _anchors = new(new LabelAnchorPoint(new(-6, 0), new(-1, 0), Appearance));
+                _anchors = new(new LabelAnchorPoint(new(-6, 0), new(-1, 0)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPin(Pins["p"], Appearance, 4);
-                builder.ExtendPin(Pins["n"], Appearance);
-                builder.Circle(new(), 1.5, Appearance);
-                builder.Circle(new(), 4, Appearance);
-                builder.Circle(new(4, 0), 1, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPin(Pins["p"], style, 4);
+                builder.ExtendPin(Pins["n"], style);
+                builder.Circle(new(), 1.5, style);
+                builder.Circle(new(), 4, style);
+                builder.Circle(new(4, 0), 1, style);
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

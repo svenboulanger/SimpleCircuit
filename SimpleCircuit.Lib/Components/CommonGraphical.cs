@@ -240,11 +240,11 @@ namespace SimpleCircuit.Components
         /// <param name="y">The center Y-coordinate.</param>
         /// <param name="width">The width.</param>
         /// <param name="edge">The slanted edge.</param>
+        /// <param name="style">The path options.</param>
         /// <param name="radiusSharp">The radius for the sharp corners.</param>
         /// <param name="radiusBlunt">The radius for the blunt corners.</param>
-        /// <param name="options">The path options.</param>
         public static void Parallellogram(this IGraphicsBuilder builder, double x, double y, double width,
-            Vector2 edge, IStyle options, double radiusSharp = 0.0, double radiusBlunt = 0.0)
+            Vector2 edge, IStyle style, double radiusSharp = 0.0, double radiusBlunt = 0.0)
         {
             var pcorner = new Vector2(-width * 0.5, -edge.Y * 0.5);
             var horiz = new Vector2((width - edge.X) * 0.5, 0);
@@ -272,7 +272,7 @@ namespace SimpleCircuit.Components
                 if (cornerBlunt)
                     b.ArcTo(radiusBlunt, radiusBlunt, 0.0, false, true, -pb2);
                 b.Close();
-            }, options);
+            }, style);
             builder.EndTransform();
         }
 
@@ -304,7 +304,7 @@ namespace SimpleCircuit.Components
         /// <param name="vertical">If <c>true</c>, the minus sign is drawn vertically.</param>
         public static void Signs(this IGraphicsBuilder builder, Vector2 plus, Vector2 minus, IStyle appearance, double size = 2, bool vertical = false)
         {
-            appearance = appearance.AsStrokeMarker(Style.DefaultLineThickness);
+            appearance = appearance.AsStrokeMarker(Styles.Style.DefaultLineThickness);
 
             // Plus sign
             builder.Path(b => b.MoveTo(new(plus.X, plus.Y - size * 0.5)).Vertical(size).MoveTo(new(plus.X - size * 0.5, plus.Y)).Horizontal(size), appearance);
@@ -515,6 +515,23 @@ namespace SimpleCircuit.Components
                 if (a1 < 0)
                     a1 += 2 * Math.PI;
                 p = center + Vector2.Normal(a0 + fraction * (a1 - a0)) * radius;
+            }
+        }
+
+        /// <summary>
+        /// Formats and draws the text.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="location">The location.</param>
+        /// <param name="orientation">The orientation.</param>
+        /// <param name="style">The style.</param>
+        public static void Text(this IGraphicsBuilder builder, string value, Vector2 location, TextOrientation orientation, IStyle style)
+        {
+            var span = builder.TextFormatter.Format(value, style);
+            if (span is not null)
+            {
+                builder.Text(span, location, orientation);
             }
         }
     }

@@ -66,59 +66,61 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 switch (Variants.Select(Options.Arei, Options.European, Options.American))
                 {
-                    case 0: DrawCircuitBreakerArei(builder); break;
-                    case 1: DrawCircuitBreakerIec(builder); break;
+                    case 0: DrawCircuitBreakerArei(builder, style); break;
+                    case 1: DrawCircuitBreakerIec(builder, style); break;
                     case 2:
-                    default: DrawRegular(builder); break;
+                    default: DrawRegular(builder, style); break;
                 }
             }
-            private void DrawRegular(IGraphicsBuilder builder)
+            private void DrawRegular(IGraphicsBuilder builder, IStyle style)
             {
                 // ANSI style circuit breaker
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+                builder.ExtendPins(Pins, style, 2, "a", "b");
 
                 builder.Path(b => b
                     .MoveTo(new(-4, -2))
-                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), Appearance);
+                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawCircuitBreakerIec(IGraphicsBuilder builder)
+            private void DrawCircuitBreakerIec(IGraphicsBuilder builder, IStyle style)
             {
                 // IEC style circuit breaker
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+                builder.ExtendPins(Pins, style, 2, "a", "b");
 
-                builder.Line(new(-4, 0), new(4, -4), Appearance);
-                builder.Cross(new(4, 0), 2, Appearance);
+                builder.Line(new(-4, 0), new(4, -4), style);
+                builder.Cross(new(4, 0), 2, style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1), Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawCircuitBreakerArei(IGraphicsBuilder builder)
+            private void DrawCircuitBreakerArei(IGraphicsBuilder builder, IStyle style)
             {
                 // AREI style circuit breaker
-                builder.ExtendPins(Pins, Appearance, 2, "a", "b");
+                builder.ExtendPins(Pins, style, 2, "a", "b");
 
-                builder.Line(new(-6, 0), new(-4, 0), Appearance);
-                builder.Line(new(-4, 0), new(4, -4), Appearance);
+                builder.Line(new(-6, 0), new(-4, 0), style);
+                builder.Line(new(-4, 0), new(4, -4), style);
 
                 builder.RequiredCSS.Add(".marker { fill: black; }");
                 builder.Polygon(
                 [
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
-                ], Appearance);
+                ], style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
+                _anchors.Draw(builder, this, style);
             }
         }
     }

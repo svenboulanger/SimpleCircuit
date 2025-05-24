@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -33,20 +34,22 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var style = builder.Style.Modify(Style);
+
                 switch (Variants.Select(_graph))
                 {
                     case 0:
-                        DrawGraphs(builder);
+                        DrawGraphs(builder, style);
                         break;
 
                     default:
-                        DrawSquigglies(builder);
+                        DrawSquigglies(builder, style);
                         break;
                 }
-                DrawLabels(builder);
+                DrawLabels(builder, style);
             }
 
-            private void DrawGraphs(IGraphicsBuilder builder)
+            private void DrawGraphs(IGraphicsBuilder builder, IStyle style)
             {
                 double s = Size * 0.25;
 
@@ -59,12 +62,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s),
                             new(-s, s),
                             new(s, s)
-                        ], Appearance);
+                        ], style);
                         builder.Polyline([
                             new(-s, -s * 0.6),
                             new(s * 0.1, -s * 0.6),
                             new(s * 0.6, s)
-                        ], Appearance);
+                        ], style);
                         break;
 
                     case 1:
@@ -72,13 +75,13 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s),
                             new(-s, s),
                             new(s, s)
-                        ], Appearance);
+                        ], style);
                         builder.Polyline([
                             new(-s, s),
                             new(-s * 0.45, -s * 0.6),
                             new(s * 0.15, -s * 0.6),
                             new(s * 0.6, s)
-                        ], Appearance);
+                        ], style);
                         break;
 
                     case 2:
@@ -87,59 +90,59 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             new(-s, -s), 
                             new(-s, s), 
                             new(s, s)
-                        ], Appearance);
+                        ], style);
                         builder.Polyline([
                             new(-s, s), 
                             new(-s * 0.1, -s * 0.6), 
                             new(s * 0.6, -s * 0.6)
-                        ], Appearance);
+                        ], style);
                         break;
                 }
             }
 
-            private void DrawSquigglies(IGraphicsBuilder builder)
+            private void DrawSquigglies(IGraphicsBuilder builder, IStyle style)
             {
                 double s = Size * 0.2;
                 switch (Variants.Select(_lp, _bp, _hp, _lp2, _hp2))
                 {
                     case 0:
-                        builder.AC(Appearance, new(0, -s * 1.5), s);
-                        builder.AC(Appearance, new(0, 0), s);
-                        builder.AC(Appearance, new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), Appearance);
-                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), Appearance);
+                        builder.AC(style, new(0, -s * 1.5), s);
+                        builder.AC(style, new(0, 0), s);
+                        builder.AC(style, new(0, s * 1.5), s);
+                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), style);
+                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), style);
                         break;
 
                     case 1:
-                        builder.AC(Appearance, new(0, -s * 1.5), s);
-                        builder.AC(Appearance, new(0, 0), s);
-                        builder.AC(Appearance, new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), Appearance);
-                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), Appearance);
+                        builder.AC(style, new(0, -s * 1.5), s);
+                        builder.AC(style, new(0, 0), s);
+                        builder.AC(style, new(0, s * 1.5), s);
+                        builder.Line(new(-s * 0.5, -s), new(s * 0.5, -s * 2), style);
+                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), style);
                         break;
 
                     case 2:
-                        builder.AC(Appearance, new(0, -s * 1.5), s);
-                        builder.AC(Appearance, new(0, 0), s);
-                        builder.AC(Appearance, new(0, s * 1.5), s);
-                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), Appearance);
-                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), Appearance);
+                        builder.AC(style, new(0, -s * 1.5), s);
+                        builder.AC(style, new(0, 0), s);
+                        builder.AC(style, new(0, s * 1.5), s);
+                        builder.Line(new(-s * 0.5, s * 0.5), new(s * 0.5, -s * 0.5), style);
+                        builder.Line(new(-s * 0.5, s * 2), new(s * 0.5, s), style);
                         break;
 
                     case 3:
-                        builder.AC(Appearance, new(0, -s), s);
-                        builder.AC(Appearance, new(0, s), s);
-                        builder.Line(new(-s * 0.5, -s * 0.5), new(s * 0.5, -s * 1.5), Appearance);
+                        builder.AC(style, new(0, -s), s);
+                        builder.AC(style, new(0, s), s);
+                        builder.Line(new(-s * 0.5, -s * 0.5), new(s * 0.5, -s * 1.5), style);
                         break;
 
                     case 4:
-                        builder.AC(Appearance, new(0, -s), s);
-                        builder.AC(Appearance, new(0, s), s);
-                        builder.Line(new(-s * 0.5, s * 1.5), new(s * 0.5, s * 0.5), Appearance);
+                        builder.AC(style, new(0, -s), s);
+                        builder.AC(style, new(0, s), s);
+                        builder.Line(new(-s * 0.5, s * 1.5), new(s * 0.5, s * 0.5), style);
                         break;
 
                     default:
-                        builder.AC(Appearance, new(), s);
+                        builder.AC(style, new(), s);
                         break;
                 }
             }

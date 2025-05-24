@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -28,20 +29,21 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4.5, 0), new(1, 0)), "n", "neg", "b");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -6), new(0, -1)),
+                    new LabelAnchorPoint(new(0, 6), new(0, 1)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
 
                 // The crystal
-                builder.Rectangle(-2.5, -5, 5, 10, Appearance);
-                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), Appearance);
+                builder.Rectangle(-2.5, -5, 5, 10, style);
+                builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), style);
 
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

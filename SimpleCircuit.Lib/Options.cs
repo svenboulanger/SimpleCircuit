@@ -35,15 +35,6 @@ namespace SimpleCircuit
         /// </summary>
         public const string European = "euro";
 
-        [Description("The font family for text. The default is 'Arial'.")]
-        public string FontFamily { get; set; } = "Arial";
-
-        [Description("The default font size for text. The default is 4.")]
-        public double FontSize { get; set; } = 4.0;
-
-        [Description("The default line spacing for text. The default is 1.5.")]
-        public double LineSpacing { get; set; } = 1.5;
-
         /// <summary>
         /// Gets the current style.
         /// </summary>
@@ -178,8 +169,6 @@ namespace SimpleCircuit
                 bl.LabelMargin = LabelMargin;
             if (drawable is IEllipseDrawable el)
                 el.LabelMargin = LabelMargin;
-            drawable.Labels.FontSize = FontSize;
-            drawable.Labels.LineSpacing = LineSpacing;
 
             // Handle default variants
             if (_includes.TryGetValue(key, out var set))

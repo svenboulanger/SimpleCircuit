@@ -50,9 +50,9 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 0), new(1, 0)), "no", "outn");
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
                 _anchors = new(
-                    new LabelAnchorPoint(new(2, 8), new(1, 1), Appearance),
-                    new LabelAnchorPoint(new(), new(), Appearance),
-                    new LabelAnchorPoint(new(2, -8), new(1, -1), Appearance));
+                    new LabelAnchorPoint(new(2, 8), new(1, 1)),
+                    new LabelAnchorPoint(new(), new()),
+                    new LabelAnchorPoint(new(2, -8), new(1, -1)));
             }
 
             /// <inheritdoc />
@@ -104,12 +104,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -118,44 +113,46 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
+
                 // The triangle
                 builder.Polygon([
                     new(-5, -9),
                     new(5, -5),
                     new(5, 5),
                     new(-5, 9)
-                ], Appearance);
+                ], style);
 
                 // Pins and signs of the input
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 2, "inn", "inp");
+                    builder.ExtendPins(Pins, style, 2, "inn", "inp");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-2, -4), new(-2, 4), Appearance);
+                        builder.Signs(new(-2, -4), new(-2, 4), style);
                     else
-                        builder.Signs(new(-2, 4), new(-2, -4), Appearance);
+                        builder.Signs(new(-2, 4), new(-2, -4), style);
                 }
                 else
-                    builder.ExtendPin(Pins["n"], Appearance);
+                    builder.ExtendPin(Pins["n"], style);
 
                 // Pins and signs of the output
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 3, "outp", "outn");
+                    builder.ExtendPins(Pins, style, 3, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, 7), new(6, -7), Appearance);
+                        builder.Signs(new(6, 7), new(6, -7), style);
                     else
-                        builder.Signs(new(6, -7), new(6, 7), Appearance);
+                        builder.Signs(new(6, -7), new(6, 7), style);
                 }
                 else
-                    builder.ExtendPin(Pins["o"], Appearance);
+                    builder.ExtendPin(Pins["o"], style);
 
                 // Programmable
                 if (Variants.Contains(_programmable))
-                    builder.Arrow(new(-7, 10), new(6, -12), Appearance);
+                    builder.Arrow(new(-7, 10), new(6, -12), style);
 
                 // Labels
-                _anchors.Draw(builder, Labels);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

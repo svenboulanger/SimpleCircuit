@@ -32,19 +32,24 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                var textAppearance = new FontSizeStyle(Appearance, 0.8 * Style.DefaultFontSize * Scale);
+                var style = builder.Style.Modify(Style);
+                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize * Scale);
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        builder.Text("1", new(), new(0, -1), textAppearance);
-                        builder.Line(new(-2, 0), new(2, 0), textAppearance);
-                        builder.Text("s", new(), new(0, 1), textAppearance);
+                        var span = builder.TextFormatter.Format("1", textStyle);
+                        builder.Text(span, new(), new(0, -1));
+                        builder.Line(new(-2, 0), new(2, 0), textStyle);
+                        span = builder.TextFormatter.Format("s", textStyle);
+                        builder.Text(span, new(), new(0, 1));
                         break;
 
                     case 1:
-                        builder.Text("1", new(0, -1), new(0, -1), textAppearance);
-                        builder.Line(new(-2, -1), new(2, -1), textAppearance);
-                        builder.Text("z^{-1}", new(0, -1), new(0, 1), textAppearance);
+                        span = builder.TextFormatter.Format("1", textStyle);
+                        builder.Text(span, new(0, -1), new(0, -1));
+                        builder.Line(new(-2, -1), new(2, -1), textStyle);
+                        span = builder.TextFormatter.Format("z^{-1}", textStyle);
+                        builder.Text(span, new(0, -1), new(0, 1));
                         break;
 
                     default:
@@ -55,11 +60,11 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                             var lexer = new SvgPathDataLexer(_pathData);
                             // b.WithTransform(new Transform(new(), Matrix2.Scale(Size * 0.3 / 11.0)));
                             SvgPathDataParser.Parse(lexer, b, null);
-                        }, Appearance);
+                        }, style);
                         builder.EndTransform();
                         break;
                 }
-                DrawLabels(builder);
+                DrawLabels(builder, style);
             }
         }
     }

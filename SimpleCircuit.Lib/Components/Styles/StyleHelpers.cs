@@ -5,12 +5,43 @@ namespace SimpleCircuit.Components.Styles
     public static class StyleHelpers
     {
         /// <summary>
+        /// Appends a style to an <see cref="IStyled"/>.
+        /// </summary>
+        /// <param name="styled">The styled item.</param>
+        /// <param name="modifier">The style modifier.</param>
+        public static void AppendStyle(this IStyled styled, IStyleModifier modifier)
+        {
+            if (styled.Style is not null)
+                styled.Style = new AggregateStyleModifier(styled.Style, modifier);
+            else
+                styled.Style = modifier;
+        }
+
+        /// <summary>
+        /// Applies style modifier based on variants to make a dashed or dotted line.
+        /// </summary>
+        /// <param name="drawable">The drawable.</param>
+        public static void ApplyDrawableLineStyle(this IDrawable drawable)
+        {
+            switch (drawable.Variants.Select("dashed", "dotted"))
+            {
+                case 0:
+                    drawable.AppendStyle(new LineStyleModifier(LineStyles.Dashed));
+                    break;
+
+                case 1:
+                    drawable.AppendStyle(new LineStyleModifier(LineStyles.Dotted));
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Gets a style that overrides another style to have the same fill as stroke color.
         /// </summary>
         /// <param name="style">The style.</param>
         /// <param name="lineThickness">An optional line thickness.</param>
         /// <returns>Returns the style.</returns>
-        public static IStyle AsFilledMarker(this IStyle style, double? lineThickness = null) => new FilledMarkerStyle(style, lineThickness);
+        public static IStyle AsFilledMarker(this IStyle style, double? lineThickness = null) => new FilledMarkerStyleModifier.Style(style, lineThickness);
 
         /// <summary>
         /// Gets a style that overrides another style to have no fill and no line style.
@@ -18,22 +49,30 @@ namespace SimpleCircuit.Components.Styles
         /// <param name="style">The style.</param>
         /// <param name="lineThickness">An optional line thickness.</param>
         /// <returns></returns>
-        public static IStyle AsStrokeMarker(this IStyle style, double? lineThickness = null) => new StrokeMarkerStyle(style, lineThickness);
+        public static IStyle AsStrokeMarker(this IStyle style, double? lineThickness = null) => new StrokeMarkerStyleModifier.Style(style, lineThickness);
 
         /// <summary>
         /// Gets a style that overrides another style to have no fill.
         /// </summary>
         /// <param name="style">The style.</param>
         /// <returns>Returns the style.</returns>
-        public static IStyle AsStroke(this IStyle style) => new NoFillStyle(style);
+        public static IStyle AsStroke(this IStyle style) => new NoFillStyleModifier.Style(style);
 
         /// <summary>
-        /// Gets a style that overrides another style to have a fixed stroke width.
+        /// Gets a style that overrides another style to have a fixed line thickness.
         /// </summary>
         /// <param name="style">The style.</param>
-        /// <param name="strokeWidth">The stroke width.</param>
+        /// <param name="thickness">The line thickness.</param>
         /// <returns>Returns the style.</returns>
-        public static IStyle AsStrokeWidth(this IStyle style, double strokeWidth) => new StrokeWidthStyle(style, strokeWidth);
+        public static IStyle AsLineThickness(this IStyle style, double thickness) => new StrokeWidthStyleModifier.Style(style, thickness);
+
+        /// <summary>
+        /// Gets a style that is modified by the given <see cref="IStyleModifier"/>.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="styleModifier">The style modifier.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
 
         /// <summary>
         /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.

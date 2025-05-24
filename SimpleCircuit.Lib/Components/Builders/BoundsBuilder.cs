@@ -13,18 +13,17 @@ namespace SimpleCircuit.Components.Builders
     public class BoundsBuilder : BaseGraphicsBuilder
     {
         private readonly Stack<Transform> _tf = new();
-        private readonly ITextFormatter _formatter;
 
         /// <summary>
         /// Creates a new <see cref="BoundsBuilder"/>.
         /// </summary>
         /// <param name="formatter">The text formatter.</param>
+        /// <param name="style">The style.</param>
         /// <param name="diagnostics">The diagnostiscs handler.</param>
-        public BoundsBuilder(ITextFormatter formatter, IDiagnosticHandler diagnostics = null)
-            : base(diagnostics)
+        public BoundsBuilder(ITextFormatter formatter, IStyle style, IDiagnosticHandler diagnostics)
+            : base(formatter, style, diagnostics)
         {
             _tf.Push(Transform.Identity);
-            _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
         }
 
         /// <inheritdoc />
@@ -105,54 +104,46 @@ namespace SimpleCircuit.Components.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, bool oriented = false)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation)
         {
             if (span is null)
                 return this;
 
             location = CurrentTransform.Apply(location);
-            expand = CurrentTransform.ApplyDirection(expand);
-
-            if (oriented)
+            var bounds = span.Bounds.Bounds;
+            switch (orientation.Type)
             {
-                var b = span.Bounds.Bounds;
-                Expand(expand * b.Right + expand.Perpendicular * b.Top);
-                Expand(expand * b.Left + expand.Perpendicular * b.Top);
-                Expand(expand * b.Right + expand.Perpendicular * b.Bottom);
-                Expand(expand * b.Left + expand.Perpendicular * b.Bottom);
-            }
-            else
-            {
-                // Compute the location based on the location and expansion
-                var bounds = span.Bounds.Bounds;
-                double y = location.Y, x = location.X;
-                if (expand.Y.IsZero())
-                    y = y - bounds.Height * 0.5 - bounds.Top;
-                else if (expand.Y < 0)
-                    y -= bounds.Bottom;
-                else
-                    y -= bounds.Top;
-                if (expand.X.IsZero())
-                    x = x - bounds.Width * 0.5 - bounds.Left;
-                else if (expand.X < 0)
-                    x -= bounds.Right;
-                else
-                    x -= bounds.Left;
+                case TextOrientationTypes.Normal:
+                    {
+                        Expand(location + bounds);
+                    }
+                    break;
 
-                // Return the offset bounds
-                Expand(bounds + new Vector2(x, y));
+                case TextOrientationTypes.VertialUp:
+                    {
+                    }
+                    break;
+
+                case TextOrientationTypes.VerticalDown:
+                    {
+                    }
+                    break;
+
+                case TextOrientationTypes.Transformed:
+                    {
+                        var expand = CurrentTransform.ApplyDirection(orientation.Orientation);
+                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Top);
+                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Top);
+                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
+                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
+                    }
+                    break;
+
+                default:
+                    throw new NotImplementedException();
             }
+            
             return this;
-        }
-
-        /// <inheritdoc />
-        public override IGraphicsBuilder Text(string value, Vector2 location, Vector2 expand, IStyle appearance, bool oriented = false)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return this;
-
-            var span = _formatter.Format(value, appearance);
-            return Text(span, location, expand, oriented);
         }
     }
 }

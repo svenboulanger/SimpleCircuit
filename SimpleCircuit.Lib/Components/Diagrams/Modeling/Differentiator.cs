@@ -27,24 +27,29 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
-                var textAppearance = new FontSizeStyle(Appearance, 0.8 * Style.DefaultFontSize * Scale);
+                var style = builder.Style.Modify(Style);
+                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize * Scale);
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
-                        builder.Text("s", new(), new(), textAppearance);
+                        var span = builder.TextFormatter.Format("s", textStyle);
+                        builder.Text(span, new(), new());
                         break;
 
                     case 1:
-                        builder.Text("z^{-1}", new(), new(), textAppearance);
+                        span = builder.TextFormatter.Format("z^{-1}", textStyle);
+                        builder.Text(span, new(), new());
                         break;
 
                     default:
-                        builder.Text("d", new(), new(0, -1), textAppearance);
-                        builder.Line(new(-2, 0), new(2, 0), textAppearance);
-                        builder.Text("dt", new(), new(0, 1), textAppearance);
+                        span = builder.TextFormatter.Format("d", textStyle);
+                        builder.Text(span, new(), new(0, -1));
+                        builder.Line(new(-2, 0), new(2, 0), textStyle);
+                        span = builder.TextFormatter.Format("dt", textStyle);
+                        builder.Text(span, new(), new(0, 1));
                         break;
                 }
-                DrawLabels(builder);
+                DrawLabels(builder, style);
             }
         }
     }

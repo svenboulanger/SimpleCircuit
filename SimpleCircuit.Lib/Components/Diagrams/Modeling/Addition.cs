@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
 using System;
@@ -27,6 +28,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var style = builder.Style.Modify(Style);
 
                 switch (Variants.Select("sigma"))
                 {
@@ -37,18 +39,18 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         {
                             var lexer = new SvgPathDataLexer(_pathData);
                             SvgPathDataParser.Parse(lexer, b, null);
-                        }, Appearance);
+                        }, style);
                         builder.EndTransform();
                         break;
 
                     default:
                         double s = Size * 0.3;
-                        builder.Line(new(-s, 0), new(s, 0), Appearance);
-                        builder.Line(new(0, -s), new(0, s), Appearance);
+                        builder.Line(new(-s, 0), new(s, 0), style);
+                        builder.Line(new(0, -s), new(0, s), style);
                         break;
                 }
 
-                DrawLabels(builder);
+                DrawLabels(builder, style);
             }
         }
     }

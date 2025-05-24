@@ -43,19 +43,21 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+
+                builder.ExtendPins(Pins, style);
                 builder.Polygon([
                     new(-5, -8),
                     new(5, -4),
                     new(5, 4),
                     new(-5, 8)
-                ], Appearance);
+                ], style);
 
-                var textAppearance = new FontSizeStyle(Appearance, 0.8 * Style.DefaultFontSize * Scale);
-                builder.Text("1", new Vector2(-4, -4), new Vector2(1, 0), textAppearance);
-                builder.Text("0", new Vector2(-4, 4), new Vector2(1, 0), textAppearance);
+                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize * Scale);
+                builder.Text("1", new Vector2(-4, -4), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
+                builder.Text("0", new Vector2(-4, 4), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

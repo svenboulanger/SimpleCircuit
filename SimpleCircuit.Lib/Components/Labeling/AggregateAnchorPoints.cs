@@ -18,22 +18,35 @@ namespace SimpleCircuit.Components.Labeling
         public override int Count => _a.Count + _b.Count;
 
         /// <inheritdoc />
-        public override bool TryCalculate(T subject, string name, out LabelAnchorPoint value)
+        public override LabelAnchorPoint GetAnchorPoint(T subject, int index)
+        {
+            index %= Count;
+            if (index < 0)
+                index += Count;
+
+            if (index < _a.Count)
+                return _a.GetAnchorPoint(subject, index);
+            else
+                return _b.GetAnchorPoint(subject, index - _a.Count);
+        }
+
+        /// <inheritdoc />
+        public override bool TryGetAnchorIndex(string name, out int index)
         {
             if (name.All(char.IsDigit))
             {
-                int index = int.Parse(name);
+                index = int.Parse(name);
                 index %= Count;
                 if (index < 0)
                     index += Count;
-                if (index < _a.Count)
-                    return _a.TryCalculate(subject, index.ToString(), out value);
-                else
-                    return _b.TryCalculate(subject, (index - _a.Count).ToString(), out value);
+                return true;
             }
-
-            // Just try in order
-            return _a.TryCalculate(subject, name, out value) || _b.TryCalculate(subject, name, out value);
+            else if (_a.TryGetAnchorIndex(name, out index))
+                return true;
+            else if (_b.TryGetAnchorIndex(name, out index))
+                return true;
+            index = -1;
+            return false;
         }
     }
 }

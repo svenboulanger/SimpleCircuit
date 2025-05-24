@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -36,8 +37,8 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("a", "The first pin.", this, new(-2, 0), new(-1, 0)), "a");
                 Pins.Add(new FixedOrientedPin("b", "The second pin.", this, new(2, 0), new(1, 0)), "b");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1)));
             }
 
             /// <inheritdoc />
@@ -61,29 +62,30 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style);
 
                 double h = 0.5 * Height;
                 double w = 0.5 * Gap;
                 switch (Variants.Select(_straight, _none))
                 {
                     case 0:
-                        builder.Line(new(-w, -h), new(-w, h), Appearance);
-                        builder.Line(new(w, -h), new(w, h), Appearance);
+                        builder.Line(new(-w, -h), new(-w, h), style);
+                        builder.Line(new(w, -h), new(w, h), style);
                         break;
 
                     case 1:
                         break;
 
                     default:
-                        builder.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h), Appearance);
-                        builder.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h), Appearance);
+                        builder.Line(new(-w - h * 0.25, -h), new(-w + h * 0.25, h), style);
+                        builder.Line(new(w - h * 0.25, -h), new(w + h * 0.25, h), style);
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -h - 1), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, h + 1), new(0, 1), Appearance);
-                _anchors.Draw(builder, this);
+                _anchors[0] = new LabelAnchorPoint(new(0, -h - 1), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, h + 1), new(0, 1));
+                _anchors.Draw(builder, this, style);
             }
         }
     }

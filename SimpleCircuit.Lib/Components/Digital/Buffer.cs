@@ -2,6 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -44,8 +45,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(6, 0), new(1, 0)), "out", "output");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1)));
             }
 
             /// <inheritdoc />
@@ -80,32 +81,35 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(Style);
                 switch (Variants.Select(Options.European, Options.American))
                 {
-                    case 0: DrawBufferIEC(builder); break;
+                    case 0: DrawBufferIEC(builder, style); break;
                     case 1:
-                    default: DrawBuffer(builder); break;
+                    default: DrawBuffer(builder, style); break;
                 }
             }
-            private void DrawBuffer(IGraphicsBuilder builder)
+            private void DrawBuffer(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "in", "out");
+                builder.ExtendPins(Pins, style, 2, "in", "out");
                 builder.Polygon([
                     new(-6, 6),
                     new(6, 0),
                     new(-6, -6)
-                ], Appearance);
-                _anchors.Draw(builder, this);
+                ], style);
+                _anchors.Draw(builder, this, style);
             }
 
-            private void DrawBufferIEC(IGraphicsBuilder builder)
+            private void DrawBufferIEC(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, Appearance, 2, "in", "out");
+                builder.ExtendPins(Pins, style, 2, "in", "out");
 
-                builder.Rectangle(-5, -5, 10, 10, Appearance, new());
-                builder.Text("1", new(), new(), Appearance);
+                builder.Rectangle(-5, -5, 10, 10, style, new());
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this);
+                var span = builder.TextFormatter.Format("1", style);
+                builder.Text(span, new(), new());
+
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

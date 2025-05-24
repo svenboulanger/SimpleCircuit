@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -30,11 +31,12 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             protected override void Draw(IGraphicsBuilder builder)
             {
                 base.Draw(builder);
+                var style = builder.Style.Modify(Style);
 
                 if (Variants.Contains(Square))
-                    BoxLabelAnchorPoints.Default.Draw(builder, this);
+                    BoxLabelAnchorPoints.Default.Draw(builder, this, style);
                 else
-                    EllipseLabelAnchorPoints.Default.Draw(builder, this);
+                    EllipseLabelAnchorPoints.Default.Draw(builder, this, style);
             }
         }
     }

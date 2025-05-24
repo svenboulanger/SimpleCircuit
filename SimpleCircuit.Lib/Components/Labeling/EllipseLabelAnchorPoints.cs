@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Labeling
                 var label = subject.Labels[i];
                 if (label?.Formatted is null)
                     continue;
-                string name = label.Location ?? i.ToString();
+                string name = label.Anchor ?? i.ToString();
                 var bounds = label.Formatted.Bounds.Bounds;
                 
                 switch (name)
@@ -63,9 +63,9 @@ namespace SimpleCircuit.Components.Labeling
                     case "ci": Expand(0, bounds); break;
 
                     default:
-                        if (label.Location.All(char.IsDigit))
+                        if (label.Anchor.All(char.IsDigit))
                         {
-                            int index = int.Parse(label.Location);
+                            int index = int.Parse(label.Anchor);
                             index %= Count;
                             if (index < 0)
                                 index += Count;
@@ -85,14 +85,14 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override bool TryCalculate(IEllipseDrawable subject, string name, out LabelAnchorPoint value)
+        public override bool TryGetAnchorIndex(string name, out int index)
         {
             switch (name)
             {
                 case "0":
                 case "c":
                 case "ci":
-                    value = new(subject.Center, new(), subject.Appearance);
+                    index = 0;
                     return true; // Center
 
                 case "1":
@@ -102,10 +102,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "nnwo":
                 case "wnw":
                 case "wnwo":
-                    Vector2 pt = new(-subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
-                    Vector2 n = new(pt.Y, pt.X);
-                    n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
+                    index = 1;
                     return true; // Top-left
 
                 case "2":
@@ -113,7 +110,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "no":
                 case "u":
                 case "up":
-                    value = new(subject.Center + new Vector2(0, -subject.RadiusY - subject.LabelMargin), new(0, -1), subject.Appearance);
+                    index = 2;
                     return true; // Top
 
                 case "3":
@@ -123,10 +120,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "eneo":
                 case "nne":
                 case "nneo":
-                    pt = new(subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
-                    n = new(-pt.Y, -pt.X);
-                    n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
+                    index = 3;
                     return true; // Top-right
 
                 case "4":
@@ -134,7 +128,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "eo":
                 case "r":
                 case "right":
-                    value = new(subject.Center + new Vector2(subject.RadiusX + subject.LabelMargin, 0), new(1, 0), subject.Appearance);
+                    index = 4;
                     return true; // Right
 
                 case "5":
@@ -144,10 +138,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "sseo":
                 case "ese":
                 case "eseo":
-                    pt = new(subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
-                    n = new(pt.Y, pt.X);
-                    n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
+                    index = 5;
                     return true; // Bottom-right
 
                 case "6":
@@ -155,7 +146,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "so":
                 case "d":
                 case "down":
-                    value = new(subject.Center + new Vector2(0, subject.RadiusY + subject.LabelMargin), new(0, 1), subject.Appearance);
+                    index = 6;
                     return true; // Bottom
 
                 case "7":
@@ -165,10 +156,7 @@ namespace SimpleCircuit.Components.Labeling
                 case "sswo":
                 case "wsw":
                 case "wswo":
-                    pt = new(-subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
-                    n = new(-pt.Y, -pt.X);
-                    n /= n.Length;
-                    value = new(subject.Center + pt + subject.LabelMargin * n, n, subject.Appearance);
+                    index = 7;
                     return true; // Bottom-left
 
                 case "8":
@@ -176,23 +164,83 @@ namespace SimpleCircuit.Components.Labeling
                 case "wo":
                 case "l":
                 case "left":
-                    value = new(subject.Center + new Vector2(-subject.RadiusX - subject.LabelMargin, 0), new(-1, 0), subject.Appearance);
+                    index = 8;
                     return true; // Left
 
                 default:
                     if (name.All(char.IsDigit))
                     {
-                        int index = int.Parse(name);
+                        index = int.Parse(name);
                         index %= Count;
                         if (index < 0)
                             index += Count;
-                        return TryCalculate(subject, index.ToString(), out value);
+                        return true;
                     }
                     break;
             }
-
-            value = default;
+            index = -1;
             return false;
+        }
+
+        public override LabelAnchorPoint GetAnchorPoint(IEllipseDrawable subject, int index)
+        {
+            index %= Count;
+            if (index < 0)
+                index += Count;
+
+            switch (index)
+            {
+                case 0:
+                    // Center
+                    return new(subject.Center, new());
+
+                case 1:
+                    // Top-left
+                    Vector2 pt = new(-subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
+                    Vector2 n = new(pt.Y, pt.X);
+                    n /= n.Length;
+                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+
+                case 2:
+                    // Top
+                    return new(subject.Center + new Vector2(0, -subject.RadiusY - subject.LabelMargin), new(0, -1));
+
+                case 3:
+                    // Top-right
+                    pt = new(subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
+                    n = new(-pt.Y, -pt.X);
+                    n /= n.Length;
+                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+
+                case 4:
+                    // Right
+                    return new(subject.Center + new Vector2(subject.RadiusX + subject.LabelMargin, 0), new(1, 0));
+
+                case 5:
+                    // Bottom-right
+                    pt = new(subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
+                    n = new(pt.Y, pt.X);
+                    n /= n.Length;
+                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+
+                case 6:
+                    // Bottom
+                    return new(subject.Center + new Vector2(0, subject.RadiusY + subject.LabelMargin), new(0, 1));
+
+                case 7:
+                    // Bottom-left
+                    pt = new(-subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
+                    n = new(-pt.Y, -pt.X);
+                    n /= n.Length;
+                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+
+                case 8:
+                    // Left
+                    return new(subject.Center + new Vector2(-subject.RadiusX - subject.LabelMargin, 0), new(-1, 0));
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }

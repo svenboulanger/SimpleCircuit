@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using System;
 using System.Collections;
@@ -80,11 +81,12 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
+                var style = builder.Style.Modify(_parent.Style);
                 foreach (var pin in _pinsByIndex.OfType<LoosePin>().Where(p => !p.Orientation.X.IsZero() || !p.Orientation.Y.IsZero()))
                 {
                     string name = TransformPinName(pin.Name);
                     if (name is not null)
-                        builder.Text(name, pin.Location - pin.Orientation * 2, -pin.Orientation, _parent.Appearance);
+                        builder.Text(name, pin.Location - pin.Orientation * 2, new(-pin.Orientation, TextOrientationTypes.Normal), style);
                 }
             }
 

@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -37,14 +38,15 @@ namespace SimpleCircuit.Components.Wires
                 Pins.Add(new FixedOrientedPin("input", "The input.", this, new(0, 0), new(-1, 0)), "i", "a", "in", "input");
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(0, 0), new(1, 0)), "o", "b", "out", "output");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(0, -1), Appearance),
-                    new LabelAnchorPoint(new(0, 4), new(0, 1), Appearance));
+                    new LabelAnchorPoint(new(0, -4), new(0, -1)),
+                    new LabelAnchorPoint(new(0, 4), new(0, 1)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, Crossings + 2);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style, Crossings + 2);
 
                 bool straight = Variants.Contains(_straight);
                 if (Crossings > 0)
@@ -59,10 +61,10 @@ namespace SimpleCircuit.Components.Wires
                             else
                                 b.MoveTo(new(x - 1.5, 3)).Line(new(3, -6));
                         }
-                    }, Appearance);
+                    }, style);
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

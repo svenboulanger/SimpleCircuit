@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Wires
 {
@@ -46,22 +47,23 @@ namespace SimpleCircuit.Components.Wires
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                builder.ExtendPins(Pins, Appearance, 4);
+                var style = builder.Style.Modify(Style);
+                builder.ExtendPins(Pins, style, 4);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
-                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
+                _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
                 switch (Variants.Select(_underground, _air, _tube, _inwall, _onwall))
                 {
-                    case 0: DrawUnderground(builder); break;
-                    case 1: DrawAir(builder); break;
-                    case 2: DrawTube(builder); break;
-                    case 3: DrawInWall(builder); break;
-                    case 4: DrawOnWall(builder); break;
+                    case 0: DrawUnderground(builder, style); break;
+                    case 1: DrawAir(builder, style); break;
+                    case 2: DrawTube(builder, style); break;
+                    case 3: DrawInWall(builder, style); break;
+                    case 4: DrawOnWall(builder, style); break;
                 }
 
-                _anchors.Draw(builder, this);
+                _anchors.Draw(builder, this, style);
             }
-            private void DrawUnderground(IGraphicsBuilder builder)
+            private void DrawUnderground(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Path(b => b
                     .MoveTo(new(-4, -5))
@@ -69,62 +71,62 @@ namespace SimpleCircuit.Components.Wires
                     .MoveTo(new(-2.5, -3.5))
                     .Line(new(5, 0))
                     .MoveTo(new(-1, -2))
-                    .Line(new(2, 0)), Appearance);
+                    .Line(new(2, 0)), style);
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
             }
-            private void DrawAir(IGraphicsBuilder builder)
+            private void DrawAir(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Circle(new(), 2, Appearance);
+                builder.Circle(new(), 2, style);
                 if (_anchors[0].Location.Y > -3)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
                 if (_anchors[1].Location.Y < 3)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
             }
-            private void DrawTube(IGraphicsBuilder builder)
+            private void DrawTube(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Circle(new(0, -3.5), 1.5, Appearance);
+                builder.Circle(new(0, -3.5), 1.5, style);
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
 
                 if (Multiple > 1)
                 {
-                    builder.Line(new(0, -3.5), new(2.1, -5.6), Appearance);
-                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), Appearance);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1), Appearance);
+                    builder.Line(new(0, -3.5), new(2.1, -5.6), style);
+                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                 }
             }
-            private void DrawInWall(IGraphicsBuilder builder)
+            private void DrawInWall(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Polyline([
                     new(-3, -2),
                     new(-3, -5),
                     new(3, -5),
                     new(3, -2)
-                ], Appearance);
-                builder.Line(new(0, -2), new(0, -5), Appearance);
+                ], style);
+                builder.Line(new(0, -2), new(0, -5), style);
                 if (_anchors[0].Location.Y > -6)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
                 if (_anchors[1].Location.Y < 1)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
             }
-            private void DrawOnWall(IGraphicsBuilder builder)
+            private void DrawOnWall(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Polyline([
                     new(-3, 5), 
                     new(-3, 2), 
                     new(3, 2), 
                     new(3, 5)
-                ], Appearance);
-                builder.Line(new(0, 5), new(0, 2), Appearance);
+                ], style);
+                builder.Line(new(0, 5), new(0, 2), style);
                 if (_anchors[0].Location.Y > -1)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1), Appearance);
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
             }
         }
     }

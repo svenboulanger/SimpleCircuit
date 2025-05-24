@@ -865,6 +865,20 @@ namespace SimpleCircuit.Parser
                     result = number;
                     break;
 
+                case TokenType.Word:
+                    switch (lexer.Content.ToString())
+                    {
+                        case "true":
+                        case "false":
+                            result = new LiteralNode(lexer.Token);
+                            return true;
+
+                        default:
+                            result = null;
+                            break;
+                    }
+                    break;
+
                 case TokenType.String:
                     result = new QuotedNode(lexer.Token);
                     lexer.Next();

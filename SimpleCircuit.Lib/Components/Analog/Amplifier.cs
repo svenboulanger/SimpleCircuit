@@ -62,9 +62,9 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name) : base(name)
             {
                 _anchors = new(
-                    new LabelAnchorPoint(new(2, 5), new(1, 1), Appearance),
-                    new LabelAnchorPoint(new(-2.5, 0), new(), Appearance),
-                    new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance)
+                    new LabelAnchorPoint(new(2, 5), new(1, 1)),
+                    new LabelAnchorPoint(new(-2.5, 0), new()),
+                    new LabelAnchorPoint(new(2, -5), new(1, -1))
                 );
             }
 
@@ -119,12 +119,7 @@ namespace SimpleCircuit.Components.Analog
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
 
                         // Allow dashed/dotted lines
-                        Appearance.LineStyle = Variants.Select(Dashed, Dotted) switch
-                        {
-                            0 => LineStyles.Dashed,
-                            1 => LineStyles.Dotted,
-                            _ => LineStyles.None
-                        };
+                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -133,8 +128,9 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1), Appearance);
-                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1), Appearance);
+                var style = Style?.Apply(builder.Style) ?? builder.Style;
+                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
+                _anchors[2] = new LabelAnchorPoint(new(2, -5), new(1, -1));
 
                 // The main triangle
                 builder.Polygon(
@@ -142,42 +138,42 @@ namespace SimpleCircuit.Components.Analog
                     new(-8, -8),
                     new(8, 0),
                     new(-8, 8)
-                ], Appearance);
+                ], style);
 
                 // Differential input?
-                var markerAppearance = Appearance.CreateStrokeStyle();
+                var markerStyle = StrokeMarkerStyleModifier.Default.Apply(style);
                 if (Variants.Contains(_differentialInput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 2, "inp", "inn");
+                    builder.ExtendPins(Pins, style, 2, "inp", "inn");
                     if (Variants.Contains(_swapInput))
-                        builder.Signs(new(-5.5, 4), new(-5.5, -4), Appearance);
+                        builder.Signs(new(-5.5, 4), new(-5.5, -4), style);
                     else
-                        builder.Signs(new(-5.5, -4), new(-5.5, 4), Appearance);
+                        builder.Signs(new(-5.5, -4), new(-5.5, 4), style);
                 }
                 else
-                    builder.ExtendPin(Pins["in"], Appearance);
+                    builder.ExtendPin(Pins["in"], style);
 
                 // Differential output?
                 if (Variants.Contains(_differentialOutput))
                 {
-                    builder.ExtendPins(Pins, Appearance, 5, "outp", "outn");
+                    builder.ExtendPins(Pins, style, 5, "outp", "outn");
                     if (Variants.Contains(_swapOutput))
-                        builder.Signs(new(6, -7), new(6, 7), Appearance);
+                        builder.Signs(new(6, -7), new(6, 7), style);
                     else
-                        builder.Signs(new(6, 7), new(6, -7), Appearance);
+                        builder.Signs(new(6, 7), new(6, -7), style);
 
                     // Give more breathing room to the labels
-                    _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1), Appearance);
-                    _anchors[2] = new LabelAnchorPoint(new(2, -8.5), new(1, -1), Appearance);
+                    _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1));
+                    _anchors[2] = new LabelAnchorPoint(new(2, -8.5), new(1, -1));
                 }
                 else
-                    builder.ExtendPin(Pins["out"], Appearance);
+                    builder.ExtendPin(Pins["out"], style);
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
                 {
-                    builder.Arrow(new(-7, 10), new(4, -8.5), Appearance);
-                    _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1), Appearance);
+                    builder.Arrow(new(-7, 10), new(4, -8.5), style);
+                    _anchors[2] = new LabelAnchorPoint(new(2, -10), new(1, 1));
                 }
 
                 // Comparator or schmitt trigger
@@ -187,7 +183,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Path(b => b.MoveTo(new(-5, 2))
                         .LineTo(new(-3, 2))
                         .LineTo(new(-3, -2))
-                        .LineTo(new(-1, -2)), Appearance.AsStroke());
+                        .LineTo(new(-1, -2)), style.AsStroke());
                         break;
 
                     case 1: // Schmitt trigger
@@ -201,11 +197,12 @@ namespace SimpleCircuit.Components.Analog
                                 .LineTo(new(-2, 2))
                                 .LineTo(new(-2, -2))
                                 .LineTo(new(0, -2));
-                        }, Appearance.AsStroke());
+                        }, style.AsStroke());
                         break;
                 }
 
-                _anchors.Draw(builder, Labels);
+                // Draw the labels
+                _anchors.Draw(builder, this, style);
             }
         }
     }
