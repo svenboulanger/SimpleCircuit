@@ -25,9 +25,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
             private double _wiper = 0.5, _length = 12, _width = 8;
             private bool _isSet = false;
 
@@ -210,7 +208,7 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         builder.Arrow(new(-5, w + 1), new(6, -w - 3), style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
