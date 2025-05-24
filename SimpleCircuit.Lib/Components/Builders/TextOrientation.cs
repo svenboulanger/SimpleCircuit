@@ -9,9 +9,14 @@ namespace SimpleCircuit.Components.Builders
     public readonly struct TextOrientation
     {
         /// <summary>
-        /// Gets or sets a normal text orientation.
+        /// Gets a normal text orientation.
         /// </summary>
-        public static TextOrientation Normal { get; } = new TextOrientation(new(1, 0), TextOrientationTypes.Normal);
+        public static TextOrientation Normal { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Normal);
+
+        /// <summary>
+        /// Gets a transformed text orientation.
+        /// </summary>
+        public static TextOrientation Transformed { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Transformed);
 
         /// <summary>
         /// Gets the orientation of the text.

@@ -122,7 +122,7 @@ namespace SimpleCircuit.Components.Analog
 
                             default:
                                 _anchors = new(3);
-                                _anchors[1] = new LabelAnchorPoint(new(-2.5, 0), Vector2.Zero, new(Vector2.UX, TextOrientationTypes.Transformed));
+                                _anchors[1] = new LabelAnchorPoint(new(-2.5, 0), Vector2.Zero, TextOrientation.Transformed);
                                 break;
                         }
 
