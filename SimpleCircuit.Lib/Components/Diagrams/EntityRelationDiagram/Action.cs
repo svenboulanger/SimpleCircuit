@@ -27,43 +27,31 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             public override string Type => "action";
 
-            /// <summary>
-            /// Gets or sets the width of the action block.
-            /// </summary>
             [Description("The width of the block.")]
             [Alias("w")]
             public double Width { get; set; } = 0;
 
-            /// <summary>
-            /// Gets or sets the minimum width.
-            /// </summary>
             [Description("The minimum width of the block. Only used when determining the width from contents.")]
             public double MinWidth { get; set; } = 0.0;
 
-            /// <summary>
-            /// Gets or sets the height of the action block.
-            /// </summary>
             [Description("The height of the block.")]
             [Alias("h")]
             public double Height { get; set; } = 0;
 
-            /// <summary>
-            /// Gets or sets the minimum height.
-            /// </summary>
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
-            /// <inheritdoc />
+            [Description("The margin of the label inside the ADC when sizing based on content.")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
+
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
-            /// <inheritdoc />
             [Description("The corner radius for the left and right corner.")]
             [Alias("rx")]
             public double CornerRadiusX { get; set; }
 
-            /// <inheritdoc />
             [Description("The corner radius for the top and bottom corner.")]
             [Alias("ry")]
             public double CornerRadiusY { get; set; }
@@ -74,7 +62,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
 
-
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
@@ -82,56 +69,35 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 if (result == PresenceResult.GiveUp)
                     return result;
 
-                Bounds GetBounds()
-                {
-                    // Figure out the bounds of the contents
-                    var bounds = new ExpandableBounds();
-                    foreach (var label in Labels)
-                        bounds.Expand(label.Formatted.Bounds.Bounds);
-                    return bounds.Bounds.Expand(LabelMargin);
-                }
-
                 // When determining the size, let's update the size based on the label bounds
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
-                        if (Width.IsZero())
+                        var style = context.Style.Modify(Style);
+
+                        if (Width.IsZero() || Height.IsZero())
                         {
-                            if (Height.IsZero())
+                            var bounds = LabelAnchorPoints<IBoxDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            bounds = bounds.Expand(Margin);
+
+                            if (Width.IsZero() && Height.IsZero())
                             {
-                                // The smallest circumference is where the same slope as the bounds is used
-                                var bounds = GetBounds();
-                                _width = bounds.Width * 2;
-                                _height = bounds.Height * 2;
+                                _width = Math.Max(MinWidth, bounds.Width * 2);
+                                _height = Math.Max(MinHeight, bounds.Height * 2);
+                            }
+                            else if (Width.IsZero())
+                            {
+                                _height = Height;
+                                _width = Math.Max(MinWidth, bounds.Width * Height / (Height - bounds.Height));
+                                if (_width < 0)
+                                    _width = bounds.Width * 2;
                             }
                             else
                             {
-                                var bounds = GetBounds();
-                                _height = Height;
-                                _width = bounds.Width * Height / (Height - bounds.Height);
-                                if (_width < 0)
-                                {
-                                    // Not possible to fit!
-                                    _width = bounds.Width * 2;
-                                }
-
-                                // Try to find a width that still contains the bounds
-                            }
-                        }
-                        else
-                        {
-                            if (Height.IsZero())
-                            {
-                                var bounds = GetBounds();
                                 _width = Width;
-                                _height = bounds.Height * Width / (Width - bounds.Width);
+                                _height = Math.Max(MinHeight, bounds.Height * Width / (Width - bounds.Width));
                                 if (_height < 0)
                                     _height = bounds.Height * 2;
-                            }
-                            else
-                            {
-                                _width = Width;
-                                _height = Height;
                             }
                         }
                         break;

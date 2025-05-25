@@ -15,7 +15,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
         /// <param name="context">The context.</param>
         public static Span Parse(SimpleTextLexer lexer, SimpleTextContext context)
         {
-            var lines = new MultilineSpan(context.Appearance.FontSize * context.Appearance.LineSpacing, context.Align);
+            var lines = new MultilineSpan(context.Style.FontSize * context.Style.LineSpacing, context.Style.Justification);
 
             // Parse lines
             while (lexer.Type != TokenType.EndOfContent)
@@ -45,8 +45,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
             if (lexer.Check(TokenType.Superscript | TokenType.Subscript))
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
-                var oldAppearance = context.Appearance;
-                context.Appearance = new FontSizeStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.8);
+                var oldAppearance = context.Style;
+                context.Style = new FontSizeStyleModifier.Style(context.Style, context.Style.FontSize * 0.8);
                 Span sub = null, super = null;
                 if (lexer.Branch(TokenType.Subscript))
                 {
@@ -88,8 +88,8 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             sub = ParseBlockSegment(lexer, context);
                     }
                 }
-                context.Appearance = oldAppearance;
-                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Appearance.FontSize, new(0, 0.075 * context.Appearance.FontSize));
+                context.Style = oldAppearance;
+                return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Style.FontSize, new(0, 0.075 * context.Style.FontSize));
             }
             return result;
         }
@@ -147,11 +147,11 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             lexer.Next();
                             if (lexer.Branch(TokenType.OpenBracket))
                             {
-                                var oldAppearance = context.Appearance;
-                                context.Appearance = new BoldTextStyleModifier.Style(oldAppearance);
+                                var oldAppearance = context.Style;
+                                context.Style = new BoldTextStyleModifier.Style(oldAppearance);
                                 var b = ParseBlockSegment(lexer, context);
                                 lexer.Branch(TokenType.CloseBracket);
-                                context.Appearance = oldAppearance;
+                                context.Style = oldAppearance;
                                 return b;
                             }
                             else
@@ -194,14 +194,14 @@ namespace SimpleCircuit.Parser.SimpleTexts
         }
         private static Span CreateOverline(Span @base, SimpleTextContext context)
         {
-            double margin = context.Appearance.FontSize * 0.1;
-            var style = new StrokeWidthStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.075);
+            double margin = context.Style.FontSize * 0.1;
+            var style = new StrokeWidthStyleModifier.Style(context.Style, context.Style.FontSize * 0.075);
             return new OverlineSpan(@base, margin, style);
         }
         private static Span CreateUnderline(Span @base, SimpleTextContext context)
         {
-            double margin = context.Appearance.FontSize * 0.1;
-            var style = new StrokeWidthStyleModifier.Style(context.Appearance, context.Appearance.FontSize * 0.075);
+            double margin = context.Style.FontSize * 0.1;
+            var style = new StrokeWidthStyleModifier.Style(context.Style, context.Style.FontSize * 0.075);
             return new UnderlineSpan(@base, margin, style);
         }
         private static Span CreateTextSpan(SimpleTextContext context)
@@ -209,10 +209,10 @@ namespace SimpleCircuit.Parser.SimpleTexts
             // Measure the contents
             string content = context.Builder.ToString();
             context.Builder.Clear();
-            var bounds = context.Measurer.Measure(content, context.Appearance.FontFamily, context.Appearance.Bold, context.Appearance.FontSize);
+            var bounds = context.Measurer.Measure(content, context.Style.FontFamily, context.Style.Bold, context.Style.FontSize);
 
             // Return the span
-            return new TextSpan(content, context.Appearance, bounds);
+            return new TextSpan(content, context.Style, bounds);
         }
     }
 }

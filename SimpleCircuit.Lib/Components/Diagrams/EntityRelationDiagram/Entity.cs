@@ -25,7 +25,9 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// <param name="name">The name of the entity.</param>
         private class Instance(string name) : LocatedDrawable(name), IRoundedBox
         {
-            private double _width, _height;
+            private double _width;
+            private double _top, _bottom;
+            private readonly List<double> _separators = [];
             private CustomLabelAnchorPoints _anchors = null;
 
             /// <inheritdoc />
@@ -68,6 +70,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Alias("radius")]
             public double CornerRadius { get; set; }
 
+            [Description("The header style.")]
+            public IStyleModifier HeaderStyle { get; set; } = new BoldTextStyleModifier().Color("white", "#666").JustifyCenter();
+
+            [Description("The style for even rows.")]
+            public IStyleModifier EvenStyle { get; set; }
+
+            [Description("The style for odd rows.")]
+            public IStyleModifier OddStyle { get; set; } = new ColorStyleModifier(null, "#ddd");
+
             /// <summary>
             /// Gets or sets the margin.
             /// </summary>
@@ -77,18 +88,26 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
+                var result = base.Prepare(context);
+                if (result == PresenceResult.GiveUp)
+                    return result;
+
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
                         Pins.Clear();
-                        _anchors = null;
+                        _anchors = new CustomLabelAnchorPoints(Labels.Count);
+                        _separators.Clear();
 
                         // Create the pins (we will deal with offsets later)
                         if (Labels.Count > 0)
                         {
+                            // Deal with header pins
                             Pins.Add(new FixedOrientedPin("left", "The left pin", this, default, new(-1, 0)), "l", "w", "left");
                             Pins.Add(new FixedOrientedPin("top", "The top pin", this, default, new(0, -1)), "t", "n", "top");
                             Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, default, new(0, 1)), "b", "s", "bottom");
+
+                            // Deal with entity attributes
                             for (int i = 1; i < Labels.Count; i++)
                             {
                                 Pins.Add(new FixedOrientedPin($"attr {i} left", $"The left pin for attribute {i}.", this, default, new(-1, 0)), $"l{i}", $"w{i}", $"left{i}");
@@ -98,62 +117,77 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         }
                         break;
 
-                    case PreparationMode.Offsets:
-
-                        // Place the header
-                        _anchors[0] = new LabelAnchorPoint(_anchors[0].Location + new Vector2(_width * 0.5, 0), new(1, 0), new(_anchors[0].Expand, TextOrientationTypes.Normal));
-
-                        ((FixedOrientedPin)Pins[1]).Offset = new(_width * 0.5, 0);
-                        ((FixedOrientedPin)Pins[2]).Offset = new(_width * 0.5, _height);
-                        ((FixedOrientedPin)Pins[^1]).Offset = new(_width, ((FixedOrientedPin)Pins[0]).Offset.Y);
-                        for (int i = 1; i < Labels.Count; i++)
-                            ((FixedOrientedPin)Pins[i * 2 + 2]).Offset = new(_width, ((FixedOrientedPin)Pins[i * 2 + 1]).Offset.Y);
-                        break;
-                }
-
-                var result = base.Prepare(context);
-                if (result == PresenceResult.GiveUp)
-                    return result;
-
-                switch (context.Mode)
-                {
                     case PreparationMode.Sizes:
-                        // Calculate the size of the total entity, update accordingly
                         var style = context.Style.Modify(Style);
-                        _anchors = new CustomLabelAnchorPoints(new LabelAnchorPoint[Labels.Count]);
-                        _height = Margin.Top;
-                        _width = 0.0;
-                        for (int i = 0; i < Labels.Count; i++)
+
+                        if (Labels.Count > 0)
                         {
-                            var bounds = Labels[i].Formatted.Bounds.Bounds;
-                            var labelStyle = style.Modify(Labels[i].Style);
+                            // Vertical coordinate computations
 
-                            if (i == 0)
+                            // Header (vertical)
+                            _anchors[0] = new LabelAnchorPoint(new(), new(0, 0));
+                            var bounds = Labels[0].Formatted.Bounds.Bounds.Expand(Margin);
+                            _width = Math.Max(bounds.Width, MinWidth);
+                            _top = -bounds.Height * 0.5;
+                            _bottom = bounds.Height * 0.5;
+
+                            // Attributes (vertical)
+                            double iY = style.LineSpacing * style.FontSize;
+                            for (int i = 1; i < Labels.Count; i++)
                             {
-                                // This is the header, we will center it according to the line height
-                                _anchors[0] = new LabelAnchorPoint(
-                                    new(0, _height + LineHeight * (1 - BaseLine) * style.FontSize + bounds.Top),
-                                    new(0, 1));
-                                ((FixedOrientedPin)Pins[0]).Offset = new(0, _height + LineHeight * style.FontSize * 0.5);
-                                _height += Margin.Bottom;
+                                // Store the separator
+                                _separators.Add(_bottom);
+
+                                // Get the bounds, and keep half a linespacing after and before the baseline of the text
+                                bounds = Labels[i].Formatted.Bounds.Bounds;
+                                _width = Math.Max(bounds.Width + Margin.Left + Margin.Right, _width);
+
+                                // We will make sure that the locations are in increments of the line spacing.
+                                double t = Math.Ceiling(bounds.Top / iY) * iY - iY;
+                                double b = Math.Floor(bounds.Bottom / iY) * iY + iY * 0.4;
+                                SetPinOffset(i * 2 + 1, new(0, _bottom + (t + b) * 0.5));
+                                SetPinOffset(i * 2 + 2, new(0, _bottom + (t + b) * 0.5));
+
+                                _bottom -= t;
+                                _anchors[i] = new LabelAnchorPoint(new(0, _bottom), Vector2.NaN, TextOrientation.Normal);
+                                _bottom += b;
                             }
-                            else
-                            {
-                                // These are attributes, we will simply follow the line height given
-                                _anchors[i] = new LabelAnchorPoint(
-                                    new(Margin.Left + bounds.Left, _height + LineHeight * (1 - BaseLine) * labelStyle.FontSize + bounds.Top),
-                                    new(1, 1));
 
-                                // We can already update the left-side pins (we will u
-                                ((FixedOrientedPin)Pins[i * 2 + 1]).Offset = new(0, _height + LineHeight * labelStyle.FontSize * 0.5);
-                            }    
-                            _height += LineHeight * labelStyle.FontSize;
-                            _width = Math.Max(_width, bounds.Width + Margin.Left + Margin.Right);
+                            // Place the header pins horizontally
+                            double w = _width * 0.5;
+                            SetPinOffset(0, new(-w, 0)); // Left pin
+                            SetPinOffset(1, new(0, _top)); // Top pin
+                            SetPinOffset(2, new(0, _bottom)); // Bottom pin
+                            SetPinOffset(Pins.Count - 1, new(w, 0)); // Right pin
+
+                            // Place the attributes and pins horizontally
+                            for (int i = 1; i < Labels.Count; i++)
+                            {
+                                SetPinOffset(i * 2 + 1, new(-w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
+                                SetPinOffset(i * 2 + 2, new(w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
+                                _anchors[i] = new LabelAnchorPoint(new(-w + Margin.Left, _anchors[i].Location.Y), Vector2.NaN, TextOrientation.Normal);
+                            }
                         }
                         break;
                 }
 
                 return result;
+            }
+
+            /// <inheritdoc />
+            protected override void FormatLabels(IPrepareContext context)
+            {
+                for (int i = 0; i < Labels.Count; i++)
+                {
+                    var style = context.Style.Modify(Style);
+                    if (i == 0)
+                        style = style.Modify(HeaderStyle);
+                    else if (i % 2 == 1)
+                        style = style.Modify(EvenStyle);
+                    else
+                        style = style.Modify(OddStyle);
+                    Labels[i]?.Format(context.TextFormatter, style);
+                }
             }
 
             /// <inheritdoc />
@@ -163,63 +197,59 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                 if (Labels.Count > 1)
                 {
-                    // The header
-                    var headerStyle = style.Modify(Labels[0].Style);
-                    double y = Margin.Top + Margin.Bottom + LineHeight * headerStyle.FontSize;
-                    builder.Path(b =>
+                    // Draw the header
+                    double s = _separators[0];
+                    if (CornerRadius.IsZero())
+                        builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Styles.Style.None, null));
+                    else
                     {
-                        b.MoveTo(new(_width - CornerRadius, 0));
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(_width, CornerRadius));
-                        b.VerticalTo(y);
-                        b.HorizontalTo(0);
-                        b.VerticalTo(CornerRadius);
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(CornerRadius, 0));
-                        b.Close();
-                    }, style);
+                        builder.Path(b =>
+                        {
+                            b.MoveTo(new(_width * 0.5 - CornerRadius, _top))
+                                .Arc(CornerRadius, CornerRadius, 0, false, true, new(CornerRadius, CornerRadius))
+                                .VerticalTo(s)
+                                .HorizontalTo(-_width * 0.5)
+                                .VerticalTo(_top + CornerRadius)
+                                .Arc(CornerRadius, CornerRadius, 0, false, true, new(CornerRadius, -CornerRadius))
+                                .Close();    
+                        }, style.Modify(HeaderStyle).Color(Styles.Style.None, null));
 
-                    // The attributes
-                    for (int i = 1; i < Labels.Count - 1; i++)
-                    {
-                        var labelStyle = style.Modify(Labels[i].Style);
-                        builder.Rectangle(0.0, y, _width, LineHeight * labelStyle.FontSize, style);
-                        y += LineHeight * labelStyle.FontSize;
+                        for (int i = 1; i < Labels.Count; i++)
+                        {
+                            var rowStyle = i % 2 == 1 ? style.Modify(EvenStyle) : style.Modify(OddStyle);
+                            if (i < Labels.Count - 1)
+                            {
+                                double ns = _separators[i];
+                                builder.Rectangle(-_width * 0.5, s, _width, ns - s, rowStyle.Color(Styles.Style.None, null));
+                                s = ns;
+                            }
+                            else if (CornerRadius.IsZero())
+                                builder.Rectangle(-_width * 0.5, s, _width, _bottom - s, rowStyle.Color(Styles.Style.None, null));
+                            else
+                            {
+                                builder.Path(b =>
+                                {
+                                    b.MoveTo(new(-_width * 0.5, s))
+                                        .Horizontal(_width)
+                                        .VerticalTo(_bottom - CornerRadius)
+                                        .Arc(CornerRadius, CornerRadius, 0, false, true, new(-CornerRadius, CornerRadius))
+                                        .Horizontal(-_width + 2 * CornerRadius)
+                                        .Arc(CornerRadius, CornerRadius, 0, false, true, new(-CornerRadius, -CornerRadius))
+                                        .Close();
+                                }, rowStyle.Color(Styles.Style.None, null));
+                            }
+                        }
                     }
-
-                    // Last attribute
-                    builder.Path(b =>
-                    {
-                        b.MoveTo(new(0, y));
-                        b.HorizontalTo(_width);
-                        b.LineTo(new(_width, _height - CornerRadius));
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(_width - CornerRadius, _height));
-                        b.HorizontalTo(CornerRadius);
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
-                        b.Close();
-                    }, style);
-
-                    // All attributes encapsulated
-                    y = Margin.Top + Margin.Bottom + LineHeight * headerStyle.FontSize;
-                    builder.Path(b =>
-                    {
-                        b.MoveTo(new(0, y));
-                        b.HorizontalTo(_width);
-                        b.VerticalTo(_height - CornerRadius);
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(_width - CornerRadius, _height));
-                        b.HorizontalTo(CornerRadius);
-                        if (!CornerRadius.Equals(0.0))
-                            b.ArcTo(CornerRadius, CornerRadius, 0.0, false, true, new(0, _height - CornerRadius));
-                        b.Close();
-                    }, style);
                 }
                 else
                 {
-                    builder.Rectangle(0, 0, _width, _height, style, CornerRadius, CornerRadius);
-                }    
+                    // There is only a header
+                    builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Modify(HeaderStyle).Color(Styles.Style.None, null), CornerRadius, CornerRadius);
+                }
+
+                // The outline
+                builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Color(null, Styles.Style.None), CornerRadius, CornerRadius);
+                
                 _anchors.Draw(builder, this, style);
             }
         }

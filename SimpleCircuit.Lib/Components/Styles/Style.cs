@@ -76,6 +76,9 @@
         public LineStyles LineStyle { get; set; } = LineStyles.None;
 
         /// <inheritdoc />
+        public double Justification { get; set; } = 1.0;
+
+        /// <inheritdoc />
         public override string ToString()
         {
             string[] items = [
@@ -87,7 +90,8 @@
                 $"fontfamily=\"{FontFamily}\"",
                 $"fontsize=\"{FontSize.ToSVG()}\"",
                 $"bold={(Bold ? "true" : "false")}",
-                $"linestyle=\"{LineStyle}\""
+                $"linestyle=\"{LineStyle}\"",
+                $"justification=\"{Justification.ToSVG()}\""
                 ];
             return string.Join(", ", items);
         }

@@ -23,7 +23,7 @@ namespace SimpleCircuit.Circuits.Spans
             var lexer = new SimpleTextLexer(content);
             var context = new SimpleTextContext(Measurer)
             {
-                Appearance = appearance
+                Style = appearance
             };
             return SimpleTextParser.Parse(lexer, context);
         }

@@ -33,68 +33,6 @@ namespace SimpleCircuit.Components
         {
         }
 
-        /// <summary>
-        /// Sets the offset of the specified pin.
-        /// </summary>
-        /// <param name="index">The pin index.</param>
-        /// <param name="offset">The offset.</param>
-        /// <exception cref="ArgumentException">Thrown if the pin is not a valid pin.</exception>
-        protected void SetPinOffset(int index, Vector2 offset)
-        {
-            if (index < Pins.Count && index >= 0)
-                SetPinOffset(Pins[index], offset);
-            else if (index < 0 && index >= -Pins.Count)
-                SetPinOffset(Pins[Pins.Count + index], offset);
-            else
-                throw new ArgumentOutOfRangeException(nameof(index));
-        }
-
-        /// <summary>
-        /// Sets the offset of the specified pin.
-        /// </summary>
-        /// <param name="pin">The pin.</param>
-        /// <param name="offset">The offset.</param>
-        /// <exception cref="ArgumentException">Thrown if the pin is not a valid pin.</exception>
-        protected void SetPinOffset(IPin pin, Vector2 offset)
-        {
-            if (pin is FixedOrientedPin fop)
-                fop.Offset = offset;
-            else if (pin is FixedPin fp)
-                fp.Offset = offset;
-            else
-                throw new ArgumentException("Wanted to set offset of an invalid pin");
-        }
-
-        /// <summary>
-        /// Sets the orientation of the specified pin.
-        /// </summary>
-        /// <param name="index">The pin index.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the pin is not a valid pin.</exception>
-        protected void SetPinOrientation(int index, Vector2 orientation)
-        {
-            if (index < Pins.Count && index >= 0)
-                SetPinOffset(Pins[index], orientation);
-            else if (index < 0 && index >= Pins.Count)
-                SetPinOffset(Pins[Pins.Count + index], orientation);
-            else
-                throw new ArgumentOutOfRangeException(nameof(index));
-        }
-
-        /// <summary>
-        /// Sets the orientation of the specified pin.
-        /// </summary>
-        /// <param name="pin">The pin.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <exception cref="ArgumentException">Thrown if the pin is not a valid pin.</exception>
-        protected void SetPinOrientation(IPin pin, Vector2 orientation)
-        {
-            if (pin is FixedOrientedPin fop)
-                fop.RelativeOrientation = orientation;
-            else
-                throw new ArgumentException("Wanted to set orientation of an invalid pin");
-        }
-
         /// <inheritdoc />
         protected override Transform CreateTransform() => new(Location, Transform * Matrix2.Scale(_scale, _scale));
 

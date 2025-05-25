@@ -49,6 +49,9 @@ namespace SimpleCircuit.Components.Styles
 
             /// <inheritdoc />
             public LineStyles LineStyle => _parent.LineStyle;
+
+            /// <inheritdoc />
+            public double Justification => _parent.Justification;
         }
 
         /// <inheritdoc />

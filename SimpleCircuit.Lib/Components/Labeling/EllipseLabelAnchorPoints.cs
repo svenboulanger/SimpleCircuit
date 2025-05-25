@@ -32,7 +32,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="subject">The subject.</param>
         /// <param name="spacing">The spacing.</param>
         /// <returns>Returns the size as a vector.</returns>
-        public Vector2 CalculateSize(IEllipseDrawable subject, Vector2 spacing)
+        public Vector2 CalculateSize(IEllipseDrawable subject, Vector2 spacing, Margins margins)
         {
             double width = 0.0;
             double height = 0.0;
@@ -76,9 +76,9 @@ namespace SimpleCircuit.Components.Labeling
             }
 
             if (width > 0)
-                width += subject.LabelMargin * 2;
+                width += margins.Left + margins.Right;
             if (height > 0)
-                height += subject.LabelMargin * 2;
+                height += margins.Top + margins.Bottom;
 
             // Calculate the ellipse size
             return new Vector2(width, height) * Math.Sqrt(2.0);

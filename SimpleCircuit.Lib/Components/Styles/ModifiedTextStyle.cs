@@ -21,7 +21,7 @@ namespace SimpleCircuit.Components.Styles
         /// <param name="fontSize">the font size.</param>
         /// <param name="bold">Bold text.</param>
         /// <param name="lineSpacing">The line spacing.</param>
-        public class ModifiedTextStyle(IStyle parent, string color, string fontFamily, double? fontSize, bool? bold, double? lineSpacing) : IStyle
+        public class Style(IStyle parent, string color, string fontFamily, double? fontSize, bool? bold, double? lineSpacing) : IStyle
         {
             private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -54,9 +54,12 @@ namespace SimpleCircuit.Components.Styles
 
             /// <inheritdoc />
             public LineStyles LineStyle => _parent.LineStyle;
+
+            /// <inheritdoc />
+            public double Justification => _parent.Justification;
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new ModifiedTextStyle(parent, color, fontFamily, fontSize, bold, lineSpacing);
+        public IStyle Apply(IStyle parent) => new Style(parent, color, fontFamily, fontSize, bold, lineSpacing);
     }
 }

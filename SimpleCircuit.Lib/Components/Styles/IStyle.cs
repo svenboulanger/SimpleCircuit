@@ -51,6 +51,11 @@
         public double LineSpacing { get; }
 
         /// <summary>
+        /// Gets the text justification.
+        /// </summary>
+        public double Justification { get; }
+
+        /// <summary>
         /// Gets or sets the line style.
         /// </summary>
         public LineStyles LineStyle { get; }

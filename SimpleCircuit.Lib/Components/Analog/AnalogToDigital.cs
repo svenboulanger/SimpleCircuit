@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components.Analog
             private const string _swapOutput = "swapout";
             private double _width = 0.0, _height = 0.0;
 
-            [Description("The margin of the label inside the ADC when sizing.")]
+            [Description("The margin of the label inside the ADC when sizing based on content.")]
             public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             [Description("The width of the ADC. If 0, the width is computed based on the label and minimum width. Default is 0.")]

@@ -75,6 +75,49 @@ namespace SimpleCircuit.Components.Styles
         public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
 
         /// <summary>
+        /// Gets a style that will override a style to have center justification.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle JustifyCenter(this IStyle style) => new JustificationStyleModifier.Style(style, 0.0);
+
+        /// <summary>
+        /// Gets a style modifier that will override a style to have center justification.
+        /// </summary>
+        /// <param name="modifier">The style modifier.</param>
+        /// <returns>Returns the style modifier.</returns>
+        public static IStyleModifier JustifyCenter(this IStyleModifier modifier)
+        {
+            if (modifier is null)
+                return new JustificationStyleModifier(0.0);
+            return new AggregateStyleModifier(modifier, new JustificationStyleModifier(0.0));
+        }
+
+        /// <summary>
+        /// Gets a style that will override a style to have foreground and/or background color.
+        /// </summary>
+        /// <param name="style">The parent style.</param>
+        /// <param name="color">The foreround color (or <c>null</c> if the parent color can be used).</param>
+        /// <param name="background">The background color (or <c>null</c> if the parent backround can be used)</param>
+        /// <returns>Returns the style</returns>
+        public static IStyle Color(this IStyle style, string color, string background)
+            => new ColorStyleModifier.Style(style, color, background);
+
+        /// <summary>
+        /// Gets a style modifier that will override a style to have foreground and/or background color.
+        /// </summary>
+        /// <param name="modifier">the modifier</param>
+        /// <param name="color">The foreground color (or <c>null</c> if the parent color can be used).</param>
+        /// <param name="background">The background color (or <c>null</c> if the parent background can be used).</param>
+        /// <returns>Returns the style modifier.</returns>
+        public static IStyleModifier Color(this IStyleModifier modifier, string color, string background)
+        {
+            if (modifier is null)
+                return new ColorStyleModifier(color, background);
+            return new AggregateStyleModifier(modifier, new ColorStyleModifier(color, background));
+        }
+
+        /// <summary>
         /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.
         /// Lines do not need to have any background color.
         /// </summary>
@@ -188,5 +231,4 @@ namespace SimpleCircuit.Components.Styles
             return sb.ToString();
         }
     }
-
 }

@@ -4,11 +4,14 @@ using System;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Drawing;
 using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
+    /// <summary>
+    /// An ERD attribute.
+    /// </summary>
     [Drawable("ATTR", "An entity-relationship diagram attribute.", "ERD", "ellipse")]
     public class Attribute : DrawableFactory
     {
@@ -26,29 +29,23 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             public override string Type => "attribute";
 
-            /// <summary>
-            /// Gets or sets the width of the attribute block.
-            /// </summary>
+            [Description("The margin of the label inside the ADC when sizing based on content.")]
+            public Margins Margin { get; set; }
+
+            [Description("The spacing between labels internally when sizing based on content.")]
+            public Vector2 Spacing { get; set; }
+
             [Description("The width of the block. If 0, the size is calculated from the contents. The default is 0.")]
             [Alias("w")]
             public double Width { get; set; }
 
-            /// <summary>
-            /// Gets or sets the minimum width.
-            /// </summary>
             [Description("The minimum width of the block. Only used when determining the width from contents.")]
             public double MinWidth { get; set; } = 0.0;
 
-            /// <summary>
-            /// Gets or sets the height of the attribute block.
-            /// </summary>
             [Description("The height of the block. If 0, the height is calculated from the contents. The default is 0.")]
             [Alias("h")]
             public double Height { get; set; }
 
-            /// <summary>
-            /// Gets or sets the minimum height.
-            /// </summary>
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
@@ -66,7 +63,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             double IEllipseDrawable.RadiusY => Height * 0.5;
 
-
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
@@ -80,11 +76,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     case PreparationMode.Sizes:
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var b = EllipseLabelAnchorPoints.Default.CalculateSize(this, default);
+                            var bounds = EllipseLabelAnchorPoints.Default.CalculateSize(this, Spacing, Margin);
                             if (Width.IsZero())
-                                _width = Math.Max(MinWidth, b.X);
+                                _width = Math.Max(MinWidth, bounds.X);
                             if (Height.IsZero())
-                                _height = Math.Max(MinHeight, b.Y);
+                                _height = Math.Max(MinHeight, bounds.Y);
                         }
                         else
                         {
