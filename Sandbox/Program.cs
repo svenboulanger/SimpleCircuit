@@ -19,7 +19,7 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            string script = DemoHelper.CreateDemo("FIO", evalContext.Factory, ["Check"]);
+            string script = DemoHelper.CreateDemo("SUB", evalContext.Factory, ["Check"]);
             // string script = @"X <r arrow> FD(""A"")";
             var lexer = SimpleCircuitLexer.FromString(script);
 

@@ -3,6 +3,9 @@ using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A subtraction.
+    /// </summary>
     [Drawable("SUB", "Subtraction.", "Modeling", "minus difference")]
     internal class Subtraction : DrawableFactory
     {

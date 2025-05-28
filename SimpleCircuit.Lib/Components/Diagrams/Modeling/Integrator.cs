@@ -2,10 +2,12 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
-using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// An integrator.
+    /// </summary>
     [Drawable("INT", "An integrator.", "Modeling", "sum")]
     public class Integrator : DrawableFactory
     {
@@ -37,19 +39,25 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
+                        // 1/s
                         var span = builder.TextFormatter.Format("1", textStyle);
-                        builder.Text(span, new(), new(0, -1));
+                        var bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), new());
                         builder.Line(new(-2, 0), new(2, 0), textStyle);
                         span = builder.TextFormatter.Format("s", textStyle);
-                        builder.Text(span, new(), new(0, 1));
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), new());
                         break;
 
                     case 1:
+                        // 1/z^-1
                         span = builder.TextFormatter.Format("1", textStyle);
-                        builder.Text(span, new(0, -1), new(0, -1));
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 2), new());
                         builder.Line(new(-2, -1), new(2, -1), textStyle);
                         span = builder.TextFormatter.Format("z^{-1}", textStyle);
-                        builder.Text(span, new(0, -1), new(0, 1));
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top), new());
                         break;
 
                     default:

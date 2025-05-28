@@ -3,6 +3,9 @@ using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// An oscillator.
+    /// </summary>
     [Drawable("OSC", "An oscillator.", "Modeling", "source generator")]
     public class Oscillator : DrawableFactory
     {

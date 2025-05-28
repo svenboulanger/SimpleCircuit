@@ -4,6 +4,9 @@ using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A mixer.
+    /// </summary>
     [Drawable("MIX", "A mixer", "Modeling", "x")]
     public class Mixer : DrawableFactory
     {

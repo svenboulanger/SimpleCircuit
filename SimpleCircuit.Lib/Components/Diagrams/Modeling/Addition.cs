@@ -6,6 +6,9 @@ using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A modeling diagram block that represents addition.
+    /// </summary>
     [Drawable("ADD", "Addition.", "Modeling", "plus sum")]
     public class Addition : DrawableFactory
     {
@@ -44,6 +47,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         break;
 
                     default:
+                        // Plus
                         double s = Size * 0.3;
                         builder.Line(new(-s, 0), new(s, 0), style);
                         builder.Line(new(0, -s), new(0, s), style);

@@ -3,6 +3,9 @@ using SimpleCircuit.Components.Builders;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A differentiator.
+    /// </summary>
     [Drawable("DIFF", "A differentiator.", "Modeling", "derivative")]
     public class Differentiator : DrawableFactory
     {
@@ -32,21 +35,28 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:
+                        // 's'
                         var span = builder.TextFormatter.Format("s", textStyle);
-                        builder.Text(span, new(), new());
+                        var bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top - bounds.Height * 0.5), new());
                         break;
 
                     case 1:
-                        span = builder.TextFormatter.Format("z^{-1}", textStyle);
-                        builder.Text(span, new(), new());
+                        // 'z'
+                        span = builder.TextFormatter.Format("z", textStyle);
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top - bounds.Height * 0.5), new());
                         break;
 
                     default:
+                        // d/dt
                         span = builder.TextFormatter.Format("d", textStyle);
-                        builder.Text(span, new(), new(0, -1));
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), new());
                         builder.Line(new(-2, 0), new(2, 0), textStyle);
                         span = builder.TextFormatter.Format("dt", textStyle);
-                        builder.Text(span, new(), new(0, 1));
+                        bounds = span.Bounds.Bounds;
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), new());
                         break;
                 }
                 DrawLabels(builder, style);

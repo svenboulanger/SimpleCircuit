@@ -3,6 +3,9 @@ using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A model filter.
+    /// </summary>
     [Drawable("FILT", "A filter", "Modeling", "lowpass highpass bandpass low high band")]
     public class Filter : DrawableFactory
     {
