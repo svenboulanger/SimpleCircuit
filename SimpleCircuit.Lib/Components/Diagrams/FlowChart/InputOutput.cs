@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
+    /// <summary>
+    /// A flowchart input/output.
+    /// </summary>
     [Drawable("FIO", "A Flowchart Input/Output.", "Flowchart", "parallelogram")]
     public class InputOutput : DrawableFactory
     {
@@ -24,8 +27,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// <param name="name">The name.</param>
         private class Instance(string name) : DiagramBlockInstance(name)
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
             private double _width, _height = 15.0;
 
             /// <summary>
@@ -62,14 +64,17 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
+            /// <inheritdoc />
             [Description("The radius of the sharp corners.")]
             [Alias("rs")]
             public double CornerRadiusSharp { get; set; }
 
+            /// <inheritdoc />
             [Description("The radius of the blunt corners.")]
             [Alias("rb")]
             public double CornerRadiusBlunt { get; set; }
 
+            /// <inheritdoc />
             [Description("Shorthand for setting the radius of both sharp and blunt corners.")]
             [Alias("r")]
             public double Radius

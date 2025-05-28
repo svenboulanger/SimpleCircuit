@@ -60,6 +60,9 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
 
             /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => default;
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
 
             /// <inheritdoc />

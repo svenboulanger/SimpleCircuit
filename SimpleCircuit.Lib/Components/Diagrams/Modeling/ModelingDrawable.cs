@@ -27,10 +27,22 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         [Alias("radius")]
         public double CornerRadius { get; set; }
 
+        /// <inheritdoc />
         Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(Size, Size);
+
+        /// <inheritdoc />
+        Vector2 IBoxDrawable.Center =>  new();
+
+        /// <inheritdoc />
         Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Size, Size);
+
+        /// <inheritdoc />
         Vector2 IEllipseDrawable.Center => new();
+
+        /// <inheritdoc />
         double IEllipseDrawable.RadiusX => 0.5 * Size;
+
+        /// <inheritdoc />
         double IEllipseDrawable.RadiusY => 0.5 * Size;
 
         /// <summary>

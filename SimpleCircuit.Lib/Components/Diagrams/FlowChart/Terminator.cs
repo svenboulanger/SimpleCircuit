@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
+    /// <summary>
+    /// A flowchart terminator.
+    /// </summary>
     [Drawable("FT", "A Flowchart Terminator.", "Flowchart", "pill")]
     public class Terminator : DrawableFactory
     {
@@ -19,7 +22,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// <inheritdoc />
         private class Instance : DiagramBlockInstance
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
             private double _width = 0, _height = 0;
 
             /// <inheritdoc />
@@ -62,7 +65,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             public Instance(string name)
                 : base(name)
             {
-                _anchors = new(new LabelAnchorPoint(new(), new()));
             }
 
             /// <inheritdoc />
@@ -76,17 +78,22 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
+                        var style = context.Style.Modify(Style);
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            // Figure out the bounds of the contents
-                            var bounds = new ExpandableBounds();
-                            foreach (var label in Labels)
-                                bounds.Expand(label.Formatted.Bounds.Bounds);
-                            var b = bounds.Bounds.Expand(LabelMargin);
+                            var b = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
+
+                            // Calculate the height
                             if (Height.IsZero())
                                 _height = Math.Max(MinHeight, b.Height);
+                            else
+                                _height = Height;
+
+                            // Calculate the width
                             if (Width.IsZero())
                                 _width = Math.Max(MinWidth, b.Width + _height);
+                            else
+                                _width = Width;
                         }
                         else
                         {

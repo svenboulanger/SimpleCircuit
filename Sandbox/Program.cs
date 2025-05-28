@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Evaluator;
+﻿using SimpleCircuit;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using System;
 using System.Diagnostics;
@@ -18,8 +19,8 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            // string script = DemoHelper.CreateDemo("ENT", evalContext.Factory, ["A", "B", "C"]);
-            string script = @"X <r arrow> ENT(""A\nTitle"", ""B"", ""C\nThis is a label"", r=2) <r arrow> X";
+            string script = DemoHelper.CreateDemo("FIO", evalContext.Factory, ["Check"]);
+            // string script = @"X <r arrow> FD(""A"")";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);

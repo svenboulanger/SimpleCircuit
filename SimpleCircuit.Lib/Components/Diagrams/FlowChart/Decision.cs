@@ -75,6 +75,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
 
             /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => new();
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
 
             /// <inheritdoc />
@@ -84,57 +87,44 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 if (result == PresenceResult.GiveUp)
                     return result;
 
-                Bounds GetBounds()
-                {
-                    // Figure out the bounds of the contents
-                    var bounds = new ExpandableBounds();
-                    foreach (var label in Labels)
-                        bounds.Expand(label.Formatted.Bounds.Bounds);
-                    return bounds.Bounds.Expand(LabelMargin);
-                }
-
                 // When determining the size, let's update the size based on the label bounds
+                var style = context.Style.Modify(Style);
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
-                        if (Width.IsZero())
+                        if (Width.IsZero() && Height.IsZero())
                         {
-                            if (Height.IsZero())
+                            // The smallest circumference is where the same slope as the bounds is used
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            _width = (bounds.Width + LabelMargin) * 2;
+                            _height = (bounds.Height + LabelMargin) * 2;
+                        }
+                        else if (Width.IsZero())
+                        {
+                            // Width is given, try to fit the height to contents
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            _height = Height;
+                            _width = bounds.Width * Height / (Height - bounds.Height);
+                            if (_width < 0)
                             {
-                                // The smallest circumference is where the same slope as the bounds is used
-                                var bounds = GetBounds();
+                                // Not possible to fit!
                                 _width = bounds.Width * 2;
+                            }
+                        }
+                        else if (Height.IsZero())
+                        {
+                            // Height is given, try to fit the width to contents
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            _width = Width;
+                            _height = bounds.Height * Width / (Width - bounds.Width);
+                            if (_height < 0)
                                 _height = bounds.Height * 2;
-                            }
-                            else
-                            {
-                                var bounds = GetBounds();
-                                _height = Height;
-                                _width = bounds.Width * Height / (Height - bounds.Height);
-                                if (_width < 0)
-                                {
-                                    // Not possible to fit!
-                                    _width = bounds.Width * 2;
-                                }
-                                
-                                // Try to find a width that still contains the bounds
-                            }
                         }
                         else
                         {
-                            if (Height.IsZero())
-                            {
-                                var bounds = GetBounds();
-                                _width = Width;
-                                _height = bounds.Height * Width / (Width - bounds.Width);
-                                if (_height < 0)
-                                    _height = bounds.Height * 2;
-                            }
-                            else
-                            {
-                                _width = Width;
-                                _height = Height;
-                            }
+                            // Full size given
+                            _width = Width;
+                            _height = Height;
                         }
                         break;
                 }
@@ -145,7 +135,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
+
+                // Draw the (rounded) diamond shape
                 builder.Diamond(0.0, 0.0, _width, _height, style, CornerRadiusX, CornerRadiusY);
+
+                // Draw labels
                 DiamondLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 

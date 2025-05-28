@@ -4,7 +4,9 @@ using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Xml.Schema;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -111,7 +113,11 @@ namespace SimpleCircuit.Components.Labeling
                     offset = invMatrix * new Vector2(x, y);
                 }
                 foreach (var label in pair.Value.Labels)
-                    builder.Text(label.Formatted, anchor.Location + offset + invMatrix * label.Offset, anchor.Orientation);
+                {
+                    var loc = anchor.Location + offset + invMatrix * label.Offset;
+                    builder.Text(label.Formatted, loc, anchor.Orientation);
+                    // builder.Rectangle(loc.X + bounds.Left, loc.Y + bounds.Top, bounds.Width, bounds.Height, new Style { Background = Style.None, Color = "red", LineThickness = 0.1 });
+                }
             }
         }
 

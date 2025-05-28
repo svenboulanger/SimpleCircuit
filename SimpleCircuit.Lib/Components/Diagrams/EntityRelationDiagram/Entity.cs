@@ -71,12 +71,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public double CornerRadius { get; set; }
 
             [Description("The header style.")]
+            [Alias("header")]
             public IStyleModifier HeaderStyle { get; set; } = new BoldTextStyleModifier().Color("white", "#666").JustifyCenter();
 
             [Description("The style for even rows.")]
+            [Alias("even")]
             public IStyleModifier EvenStyle { get; set; }
 
             [Description("The style for odd rows.")]
+            [Alias("odd")]
             public IStyleModifier OddStyle { get; set; } = new ColorStyleModifier(null, "#ddd");
 
             /// <summary>

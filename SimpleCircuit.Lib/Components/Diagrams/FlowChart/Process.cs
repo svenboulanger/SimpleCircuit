@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
+    /// <summary>
+    /// A flowchart process.
+    /// </summary>
     [Drawable("FP", "A Flowchart process.", "Flowchart", "box rectangle")]
     public class Process : DrawableFactory
     {
@@ -85,6 +88,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(_width, _height);
 
             /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => new();
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(_width, _height);
 
             /// <inheritdoc />
@@ -101,8 +107,22 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         if (Width.IsZero() || Height.IsZero())
                         {
                             var b = BoxLabelAnchorPoints.Default.CalculateSize(this, Spacing);
-                            _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin + CornerRadius * 0.707 * 2);
-                            _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin + CornerRadius * 0.707 * 2);
+
+                            // Compute the width
+                            if (Width.IsZero())
+                            {
+                                _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin + CornerRadius * 0.707 * 2);
+                                if (Variants.Contains(Predefined))
+                                    _width += 6;
+                            }
+                            else
+                                _width = Width;
+
+                            // Compute the height
+                            if (Height.IsZero())
+                                _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin + CornerRadius * 0.707 * 2);
+                            else
+                                _height = Height;
                         }
                         else
                         {
@@ -121,6 +141,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
 
                 builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, style, CornerRadius, CornerRadius);
 
+                // Predefined process variant
                 if (Variants.Contains(Predefined))
                 {
                     double a = _width * 0.5;
@@ -128,6 +149,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     builder.Line(new(-a + 3, -b), new(-a + 3, b), style);
                     builder.Line(new(a - 3, -b), new(a - 3, b), style);
                 }
+
+                // Draw labels
                 BoxLabelAnchorPoints.Default.Draw(builder, this, style);
             }
 

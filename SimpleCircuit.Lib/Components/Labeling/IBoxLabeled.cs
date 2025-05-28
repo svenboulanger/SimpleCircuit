@@ -11,6 +11,11 @@
         public Vector2 TopLeft { get; }
 
         /// <summary>
+        /// Gets the center coordinate of the box.
+        /// </summary>
+        public Vector2 Center { get; }
+
+        /// <summary>
         /// Gets the bottom-right coordinate of the box.
         /// </summary>
         public Vector2 BottomRight { get; }

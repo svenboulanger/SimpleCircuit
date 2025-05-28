@@ -24,7 +24,13 @@ namespace SimpleCircuit.Components.Digital
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
 
+            /// <inheritdoc />
             Vector2 IBoxDrawable.TopLeft => new(-5, -8);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => new();
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(5, 8);
 
             /// <summary>

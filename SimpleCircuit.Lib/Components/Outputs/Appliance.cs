@@ -41,14 +41,22 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             public override string Type => "appliance";
 
+            /// <inheritdoc />
             Vector2 IBoxDrawable.TopLeft => new(0, -8);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => new(8, 0);
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(16, 8);
 
+            /// <inheritdoc />
             [Description("The round-off corner radius.")]
             [Alias("r")]
             [Alias("radius")]
             public double CornerRadius { get; set; }
 
+            /// <inheritdoc />
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;

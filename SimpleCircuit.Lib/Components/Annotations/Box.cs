@@ -110,7 +110,13 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         public IStyleModifier Style { get; set; }
 
+        /// <inheritdoc />
         Vector2 IBoxDrawable.TopLeft => _topLeft;
+
+        /// <inheritdoc />
+        Vector2 IBoxDrawable.Center => (_topLeft + _bottomRight) / 2;
+
+        /// <inheritdoc />
         Vector2 IBoxDrawable.BottomRight => _bottomRight;
 
         /// <summary>

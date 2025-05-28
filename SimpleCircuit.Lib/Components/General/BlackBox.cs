@@ -91,7 +91,13 @@ namespace SimpleCircuit.Components
             [Description("The font size of the port labels.")]
             public double TextSize { get; set; } = 4.0;
 
+            /// <inheritdoc />
             Vector2 IBoxDrawable.TopLeft => new(Location.X, Location.Y);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => 0.5 * (Location + EndLocation);
+
+            /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(EndLocation.X, EndLocation.Y);
 
             [Description("The round-off corner radius.")]

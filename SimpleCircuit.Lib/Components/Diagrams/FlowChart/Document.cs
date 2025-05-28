@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.FlowChart
 {
+    /// <summary>
+    /// A flowchart document.
+    /// </summary>
     [Drawable("FDOC", "A Flowchart document.", "Flowchart")]
     public class Document : DrawableFactory
     {
@@ -64,7 +67,10 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
+            Vector2 IBoxDrawable.TopLeft => Variants.Contains(Multiple) ? new(-_width * 0.5 - 4, -_height * 0.5 - 4) : new(-_width * 0.5, -_height * 0.5);
+
+            /// <inheritdoc />
+            Vector2 IBoxDrawable.Center => new();
 
             /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
@@ -95,8 +101,14 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         if (Width.IsZero() || Height.IsZero())
                         {
                             var b = BoxLabelAnchorPoints.Default.CalculateSize(this, Spacing);
-                            _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin);
-                            _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin);
+                            if (Width.IsZero())
+                                _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin);
+                            else
+                                _width = Width;
+                            if (Height.IsZero())
+                                _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin);
+                            else
+                                _height = Height;
                         }
                         else
                         {
@@ -125,6 +137,23 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     .CurveTo(ab - h2, aa + h1, aa)
                     .Close();
             }
+            private void DrawPartial(IPathBuilder builder)
+            {
+                double a = _width * 0.5;
+                double b = _height * 0.5;
+                Vector2 h1 = new Vector2(0.1547, 0.0893) * _width;
+                Vector2 aa = new(-a, b + h1.Y * 0.75);
+                Vector2 ab = new(0, aa.Y);
+                Vector2 ac = new(a, aa.Y);
+                Vector2 h2 = new(h1.X, -h1.Y);
+                builder.MoveTo(new(-a, -b))
+                    .Horizontal(_width)
+                    .Vertical(2)
+                    .HorizontalTo(-a + 2)
+                    .Vertical(_height - 1)
+                    .Curve(new(-1, 0), new Vector2(-2, -0.5), new(-2, -0.5))
+                    .Close();
+            }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
@@ -137,7 +166,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     for (int i = 2; i >= 1; i--)
                     {
                         builder.BeginTransform(new(new(-i * 2, -i * 2), Matrix2.Identity));
-                        builder.Path(DrawPath, style);
+                        builder.Path(DrawPartial, style);
                         builder.EndTransform();
                     }
                 }
