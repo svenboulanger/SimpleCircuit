@@ -109,7 +109,11 @@ namespace SimpleCircuit.Components.Digital
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        bool keepLeft = Variants.Contains(Options.European);
+                        bool keepLeft = Variants.Select(Options.European, Options.American) switch
+                        {
+                            0 => true,
+                            1 or _ => false
+                        };
 
                         Pins.Clear();
                         char c = 'a';
@@ -156,17 +160,21 @@ namespace SimpleCircuit.Components.Digital
                 double h = Height * 0.5;
 
                 builder.Path(b => b.MoveTo(new(-w, h))
-                    .LineTo(new(-w * 0.8, h))
+                    .HorizontalTo(-w * 0.8)
                     .CurveTo(new(w * 0.2, h), new(w * 0.8, h * 0.3), new(w, 0))
-                    .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w + 1, -h))
-                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)), style);
+                    .CurveTo(new(w * 0.8, -h * 0.3), new(w * 0.2, -h), new(-w * 0.8, -h))
+                    .HorizontalTo(-w)
+                    .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h))
+                    .Close(), style);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
             private void DrawOrIEC(IGraphicsBuilder builder, IStyle style)
             {
                 builder.ExtendPins(Pins, style);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style, new());
-                builder.Text("&#8805;1", new(), new(), style);
+
+                var span = builder.TextFormatter.Format("&#8805;1", style);
+                builder.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

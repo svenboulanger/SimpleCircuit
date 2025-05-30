@@ -99,17 +99,18 @@ namespace SimpleCircuit.Components.Labeling
                     var expand = builder.CurrentTransform.ApplyDirection(anchor.Expand);
                     double x, y;
                     if (expand.X.IsZero())
-                        x = - bounds.Left - 0.5 * bounds.Width;
+                        x = -bounds.Left - 0.5 * bounds.Width;
                     else if (expand.X > 0)
-                        x = - bounds.Left;
+                        x = -bounds.Left;
                     else
-                        x = - bounds.Right;
+                        x = -bounds.Right;
                     if (expand.Y.IsZero())
-                        y = - bounds.Top - 0.5 * bounds.Height;
+                        y = -bounds.Top - 0.5 * bounds.Height;
                     else if (expand.Y > 0)
-                        y = - bounds.Top;
+                        y = -bounds.Top;
                     else
-                        y = - bounds.Bottom;
+                        y = -bounds.Bottom;
+                    // offset = invMatrix * new Vector2(x, y);
                     offset = invMatrix * new Vector2(x, y);
                 }
                 foreach (var label in pair.Value.Labels)

@@ -199,12 +199,15 @@ namespace SimpleCircuit.Components.Builders
                             g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
 
                         // Expand bounds
-                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Top);
-                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Top);
-                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
-                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
+                        Expand(location + expand * bounds.Right + expand.Perpendicular * bounds.Top);
+                        Expand(location + expand * bounds.Left + expand.Perpendicular * bounds.Top);
+                        Expand(location + expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
+                        Expand(location + expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
                     }
                     break;
+
+                default:
+                    throw new NotImplementedException();
             }
 
             // Create the text element

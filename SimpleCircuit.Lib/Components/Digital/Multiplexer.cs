@@ -60,8 +60,12 @@ namespace SimpleCircuit.Components.Digital
                 ], style);
 
                 var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize * Scale);
-                builder.Text("1", new Vector2(-4, -4), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
-                builder.Text("0", new Vector2(-4, 4), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
+
+                var span = builder.TextFormatter.Format("1", textStyle);
+                builder.Text(span, new Vector2(-4, -4) - span.Bounds.Bounds.MiddleLeft, TextOrientation.Transformed);
+
+                span = builder.TextFormatter.Format("0", textStyle);
+                builder.Text(span, new Vector2(-4, 4) - span.Bounds.Bounds.MiddleLeft, TextOrientation.Transformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

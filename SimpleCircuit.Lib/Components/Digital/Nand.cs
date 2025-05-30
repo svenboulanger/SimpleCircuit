@@ -163,7 +163,9 @@ namespace SimpleCircuit.Components.Digital
                 builder.ExtendPins(Pins, style);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
                 builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
-                builder.Text("&amp;", new(), new(), style);
+
+                var span = builder.TextFormatter.Format("&amp;", style);
+                builder.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

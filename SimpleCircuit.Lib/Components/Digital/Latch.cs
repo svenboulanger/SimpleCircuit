@@ -57,12 +57,25 @@ namespace SimpleCircuit.Components.Digital
 
                 // Labels
                 var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
-                builder.Text("S", new Vector2(-8, -6), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
-                builder.Text("R", new Vector2(-8, 6), new(new Vector2(1, 0), TextOrientationTypes.Transformed), textStyle);
-                builder.Text("Q", new Vector2(8, -6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed), textStyle);
+
+                var span = builder.TextFormatter.Format("S", textStyle);
+                var bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(-8, -6) - bounds.MiddleLeft, TextOrientation.Transformed);
+
+                span = builder.TextFormatter.Format("R", textStyle);
+                bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(-8, 6) - bounds.MiddleLeft, TextOrientation.Transformed);
+
+                span = builder.TextFormatter.Format("Q", textStyle);
+                bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(8, -6) - bounds.MiddleRight, TextOrientation.Transformed);
 
                 if (Pins["nq"].Connections > 0)
-                    builder.Text("\\overline{Q}", new Vector2(8, 6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed), textStyle);
+                {
+                    span = builder.TextFormatter.Format("\\overline{Q}", textStyle);
+                    bounds = span.Bounds.Bounds;
+                    builder.Text(span, new Vector2(8, 6) - bounds.MiddleRight, TextOrientation.Transformed);
+                }
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

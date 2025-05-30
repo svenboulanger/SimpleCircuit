@@ -138,7 +138,8 @@ namespace SimpleCircuit.Components.Digital
                         if (j < bits.Length)
                         {
                             var span = builder.TextFormatter.Format(bits[j], style);
-                            builder.Text(span, new(x, y), new());
+                            var bounds = span.Bounds.Bounds;
+                            builder.Text(span, new(x - bounds.Left - 0.5 * bounds.Width, y - bounds.Top - 0.5 * bounds.Height), TextOrientation.Transformed);
                         }
                         x += BlockSize;
                     }

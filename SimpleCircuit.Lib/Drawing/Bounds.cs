@@ -38,6 +38,56 @@ namespace SimpleCircuit.Drawing
         public double Height => Bottom - Top;
 
         /// <summary>
+        /// Gets the top-left coordinate.
+        /// </summary>
+        public Vector2 TopLeft => new(Left, Top);
+
+        /// <summary>
+        /// Gets the top-center coordinate.
+        /// </summary>
+        public Vector2 TopCenter => new(0.5 * (Left + Right), Top);
+
+        /// <summary>
+        /// Gets the top-right coordinate.
+        /// </summary>
+        public Vector2 TopRight => new(Right, Top);
+
+        /// <summary>
+        /// Gets the middle right coordinate.
+        /// </summary>
+        public Vector2 MiddleRight => new(Right, 0.5 * (Top + Bottom));
+
+        /// <summary>
+        /// Gets the bottom-right coordinate.
+        /// </summary>
+        public Vector2 BottomRight => new(Right, Bottom);
+
+        /// <summary>
+        /// Gets the bottom-center coordinate.
+        /// </summary>
+        public Vector2 BottomCenter => new(0.5 * (Left + Right), Bottom);
+
+        /// <summary>
+        /// Gets the bottom-left coordinate.
+        /// </summary>
+        public Vector2 BottomLeft => new(Left, Bottom);
+
+        /// <summary>
+        /// Gets the middle left coordinate.
+        /// </summary>
+        public Vector2 MiddleLeft => new(Left, 0.5 * (Top + Bottom));
+
+        /// <summary>
+        /// Gets the center of the bounds.
+        /// </summary>
+        public Vector2 Center => new(0.5 * (Left + Right), 0.5 * (Top + Bottom));
+
+        /// <summary>
+        /// Gets the size.
+        /// </summary>
+        public Vector2 Size => new(Right - Left, Bottom - Top);
+
+        /// <summary>
         /// Creates new bounds.
         /// </summary>
         /// <param name="left">The left argument.</param>

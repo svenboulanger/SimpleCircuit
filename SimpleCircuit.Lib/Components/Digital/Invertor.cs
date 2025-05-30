@@ -52,8 +52,8 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(9, 0), new(1, 0)), "out", "output");
                 _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(1, -1)),
-                    new LabelAnchorPoint(new(0, 4), new(1, 1)));
+                    new LabelAnchorPoint(new(0, -7), new(1, -1)),
+                    new LabelAnchorPoint(new(0, 7), new(1, 1)));
             }
 
             /// <inheritdoc />
@@ -66,19 +66,22 @@ namespace SimpleCircuit.Components.Digital
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        if (Variants.Contains(Options.European))
+                        switch (Variants.Select(Options.European, Options.American))
                         {
-                            SetPinOffset(0, new(-5, 0));
-                            SetPinOffset(1, new(0, -5));
-                            SetPinOffset(2, new(0, 5));
-                            SetPinOffset(3, new(8, 0));
-                        }
-                        else
-                        {
-                            SetPinOffset(0, new(-6, 0));
-                            SetPinOffset(1, new(0, -3));
-                            SetPinOffset(2, new(0, 3));
-                            SetPinOffset(3, new(9, 0));
+                            case 0:
+                                SetPinOffset(0, new(-5, 0));
+                                SetPinOffset(1, new(0, -5));
+                                SetPinOffset(2, new(0, 5));
+                                SetPinOffset(3, new(8, 0));
+                                break;
+
+                            case 1:
+                            default:
+                                SetPinOffset(0, new(-6, 0));
+                                SetPinOffset(1, new(0, -3));
+                                SetPinOffset(2, new(0, 3));
+                                SetPinOffset(3, new(9, 0));
+                                break;
                         }
                         break;
                 }
@@ -117,7 +120,8 @@ namespace SimpleCircuit.Components.Digital
                 builder.Circle(new(6.5, 0), 1.5, style);
 
                 var span = builder.TextFormatter.Format("1", style);
-                builder.Text(span, new Vector2(), new(default, TextOrientationTypes.Transformed));
+                var bounds = span.Bounds.Bounds;
+                builder.Text(span, -bounds.TopLeft - 0.5 * bounds.Size, TextOrientation.Transformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

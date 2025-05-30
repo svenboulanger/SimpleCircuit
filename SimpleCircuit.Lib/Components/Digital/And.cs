@@ -166,7 +166,8 @@ namespace SimpleCircuit.Components.Digital
                 drawing.ExtendPins(Pins, style);
                 drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
                 var span = drawing.TextFormatter.Format("&amp;", style);
-                drawing.Text(span, new(), new());
+                var bounds = span.Bounds.Bounds;
+                drawing.Text(span, -bounds.TopLeft - 0.5 * bounds.Size, TextOrientation.Transformed);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this, style);
             }
         }

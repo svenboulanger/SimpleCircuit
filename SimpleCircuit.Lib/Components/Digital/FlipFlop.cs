@@ -66,16 +66,22 @@ namespace SimpleCircuit.Components.Digital
 
                 var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
                 var span = builder.TextFormatter.Format("D", textStyle);
-                builder.Text(span, new Vector2(-8, -6), new(new Vector2(1, 0), TextOrientationTypes.Transformed));
+                var bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(-8, -6) - bounds.TopLeft - new Vector2(0, bounds.Height * 0.5), TextOrientation.Transformed);
+
                 span = builder.TextFormatter.Format("C", textStyle);
-                builder.Text(span, new Vector2(-6, 6), new(new Vector2(1, 0), TextOrientationTypes.Transformed));
+                bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(-6, 6) - bounds.TopLeft - new Vector2(0, bounds.Height * 0.5), TextOrientation.Transformed);
+
                 span = builder.TextFormatter.Format("Q", textStyle);
-                builder.Text(span, new Vector2(8, -6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed));
+                bounds = span.Bounds.Bounds;
+                builder.Text(span, new Vector2(8, -6) - bounds.BottomRight + new Vector2(0, bounds.Height * 0.5), TextOrientation.Transformed);
 
                 if (Pins["nq"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("\\overline{Q}", textStyle);
-                    builder.Text(span, new Vector2(8, 6), new(new Vector2(-1, 0), TextOrientationTypes.Transformed));
+                    bounds = span.Bounds.Bounds;
+                    builder.Text(span, new Vector2(8, 6) - bounds.BottomRight + new Vector2(0, bounds.Height * 0.5), TextOrientation.Transformed);
                 }
 
                 // Smaller text for asynchronous set and reset
@@ -83,12 +89,14 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["s"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("set", textStyle);
-                    builder.Text(span, new Vector2(0, -11.5), new(new Vector2(0, 1), TextOrientationTypes.Transformed));
+                    bounds = span.Bounds.Bounds;
+                    builder.Text(span, new Vector2(0, -11.5) - bounds.TopLeft, new(new Vector2(0, 1), TextOrientationTypes.Transformed));
                 }
                 if (Pins["r"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("rst", textStyle);
-                    builder.Text(span, new Vector2(0, 11.5), new(new Vector2(0, -1), TextOrientationTypes.Transformed));
+                    bounds = span.Bounds.Bounds;
+                    builder.Text(span, new Vector2(0, 11.5) - bounds.BottomRight - new Vector2(bounds.Width * 0.5, 0), TextOrientation.Transformed);
                 }
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
