@@ -19,14 +19,8 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            // string script = DemoHelper.CreateDemo("XOR", evalContext.Factory, ["Check"]);
-            string script = @"
-BB1[t1] <u r> R <r d> [t2]BB1
-BB1[l1] <l d> C <d r> [l2]BB1
-BB1[r1] <r d> L <d l> [r2]BB1
-BB1[b1] <d r> XTAL <r u> [b2]BB1
-BB1(r=3)
-";
+            string script = DemoHelper.CreateDemo("GND", evalContext.Factory, ["Check", "Second name"]);
+            // string script = @"";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);

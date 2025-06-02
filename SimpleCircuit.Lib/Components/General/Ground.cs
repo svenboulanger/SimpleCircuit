@@ -41,9 +41,7 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("p", "The one and only pin.", this, new(0, 0), new(0, -1)), "a", "p");
-                _anchors = new(
-                    new LabelAnchorPoint(new(-6, 0), new(-1, 0)),
-                    new LabelAnchorPoint(new(6, 0), new(1, 0)));
+                _anchors = new(2);
             }
 
             /// <inheritdoc />
@@ -64,30 +62,35 @@ namespace SimpleCircuit.Components
             }
             private void DrawGround(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, style, Variants.Contains(_protective) ? 9 : 3);
+                switch (Variants.Select(_noiseless, _protective))
+                {
+                    case 0:
+                        drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), style);
 
-                if (Variants.Contains(_noiseless))
-                {
-                    drawing.ExtendPins(Pins, style, 6);
-                    drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), style);
-                    if (_anchors[0].Location.X > -9)
-                        _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
-                    if (_anchors[0].Location.X < 9)
-                        _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
+                        if (_anchors[0].Location.X > -9)
+                            _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
+                        if (_anchors[0].Location.X < 9)
+                            _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
+
+                        drawing.ExtendPins(Pins, style, 6);
+                        break;
+
+                    case 1:
+                        drawing.Circle(new(0, -1), 6.5, style);
+
+                        if (_anchors[0].Location.X > -7.5) 
+                            _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
+                        if (_anchors[1].Location.X < 7.5)
+                            _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
+
+                        drawing.ExtendPins(Pins, style, 7.5);
+                        break;
+
+                    default:
+                        drawing.ExtendPins(Pins, style, 3);
+                        break;
                 }
-                if (Variants.Contains(_protective))
-                {
-                    drawing.ExtendPins(Pins, style, 7.5);
-                    drawing.Circle(new(0, -1), 6.5, style);
-                    if (_anchors[0].Location.X > -7.5) 
-                        _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
-                    if (_anchors[1].Location.X < 7.5)
-                        _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
-                }
-                else
-                {
-                    drawing.ExtendPins(Pins, style, 3);
-                }
+
                 drawing.Path(b => b
                     .MoveTo(new(-5, 0))
                     .LineTo(new(5, 0))
@@ -98,8 +101,6 @@ namespace SimpleCircuit.Components
             }
             private void DrawEarth(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, style, 3);
-
                 // Ground segments
                 drawing.Path(b => b
                     .MoveTo(new(-5, 0))
@@ -113,17 +114,18 @@ namespace SimpleCircuit.Components
 
                 if (_anchors[0].Location.X > -7)
                     _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
+
+                drawing.ExtendPins(Pins, style, 3);
             }
             private void DrawSignalGround(IGraphicsBuilder drawing, IStyle style)
             {
-                drawing.ExtendPins(Pins, style, 3);
-
-                // Ground
                 drawing.Polygon([
                     new(-5, 0),
                     new(5, 0),
                     new(0, 4)
                 ], style);
+
+                drawing.ExtendPins(Pins, style, 3);
             }
         }
     }
