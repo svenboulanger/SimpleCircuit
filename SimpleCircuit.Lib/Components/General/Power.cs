@@ -39,18 +39,21 @@ namespace SimpleCircuit.Components
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.ExtendPins(Pins, style);
-
                 if (Variants.Contains(_anchor))
+                {
                     builder.Polyline([
                         new(-4, 4),
                         new(),
                         new(4, 4)
                     ], style);
+                }
                 else
                 {
                     builder.Line(new Vector2(-5, 0), new Vector2(5, 0), style.AsLineThickness(1.0));
                 }
+
+                builder.ExtendPins(Pins, style);
+
                 _anchors.Draw(builder, this, style);
             }
         }
