@@ -111,7 +111,7 @@ namespace SimpleCircuit.Components.Builders
 
             // Get the location
             location = CurrentTransform.Apply(location);
-
+            
             // Get the bounds
             var bounds = orientation.TransformTextBounds(span.Bounds.Bounds, CurrentTransform);
 

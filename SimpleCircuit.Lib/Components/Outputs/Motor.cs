@@ -45,19 +45,12 @@ namespace SimpleCircuit.Components.Outputs
                 if (!Variants.Contains(Options.Arei))
                     builder.ExtendPins(Pins, style);
                 builder.Circle(new(), 5, style);
-                builder.Text("M", new(), new(), style);
+
+                var span = builder.TextFormatter.Format("M", style);
+                builder.Text(span, builder.CurrentTransform.Matrix.Inverse * -span.Bounds.Bounds.Center, TextOrientation.Normal);
 
                 if (Variants.Contains(_signs))
-                {
-                    builder.Path(b => b
-                            .MoveTo(new(-7, -4))
-                            .LineTo(new(-5, -4))
-                            .MoveTo(new(-6, -3))
-                            .LineTo(new(-6, -5)),
-                        style);
-                    builder.Line(new(5, -4), new(7, -4), style);
-                }
-
+                    builder.Signs(new(-6, -4), new(6, -4), style, upright: true);
                 _anchors.Draw(builder, this, style);
             }
         }

@@ -26,9 +26,7 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable, IStandardizedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
             private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
 
             /// <inheritdoc />
@@ -77,7 +75,6 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.Cross(new(), _sqrt2, style);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
@@ -96,6 +93,7 @@ namespace SimpleCircuit.Components.Outputs
                         DrawEmergency(builder, style);
                 }
 
+                builder.Cross(new(), _sqrt2, style);
                 _anchors.Draw(builder, this, style);
             }
 
@@ -134,7 +132,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawEmergency(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Circle(new(), 1.5, style);
+                builder.Circle(new(), 1.5, style.AsFilledMarker());
             }
         }
     }

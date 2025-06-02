@@ -106,9 +106,9 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (ventilator)
                 {
+                    DrawBox(builder, 11, 0, 22, 16, style);
                     DrawVentilator(builder, 17, 0, style, 3);
                     DrawHeater(builder, 7, 0, 10, 10, style);
-                    DrawBox(builder, 11, 0, 22, 16, style);
                 }
                 else
                 {
@@ -180,8 +180,8 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawDefault(IGraphicsBuilder builder, IStyle style)
             {
-                builder.ExtendPins(Pins, style);
                 DrawBox(builder, 8, 0, 16, 16, style);
+                builder.ExtendPins(Pins, style);
             }
 
             private void DrawBox(IGraphicsBuilder builder, double cx, double cy, double width, double height, IStyle style)
