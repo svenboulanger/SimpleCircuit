@@ -1,28 +1,26 @@
-﻿namespace SimpleCircuit.Components.Builders
+﻿using System;
+
+namespace SimpleCircuit.Components.Builders
 {
     /// <summary>
     /// Enumeration of text orientation types.
     /// </summary>
+    [Flags]
     public enum TextOrientationTypes
     {
         /// <summary>
-        /// Regular left-to-right text within a given quadrant.
+        /// Nothing special about the orientation type.
         /// </summary>
-        Normal,
+        None = 0,
 
         /// <summary>
-        /// A top-to-bottom text within a given quadrant.
+        /// Indicates that the text should be kept "upright", i.e. legible without standing on your head.
         /// </summary>
-        VerticalDown,
+        Upright = 0x01,
 
         /// <summary>
-        /// A bottom-to-top text within a given quadrant.
+        /// Indicates that the text is transformed.
         /// </summary>
-        VertialUp,
-
-        /// <summary>
-        /// Text that transforms with the orientation.
-        /// </summary>
-        Transformed
+        Transformed = 0x02
     }
 }

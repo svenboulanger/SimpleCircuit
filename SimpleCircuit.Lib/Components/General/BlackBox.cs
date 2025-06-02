@@ -60,21 +60,10 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public string Name { get; }
 
-            [Description("The minimum horizontal space between two pins.")]
-            [Alias("msx")]
-            public double MinSpaceX { get; set; } = 20.0;
-
-            [Description("The minimum vertical space between two pins.")]
-            [Alias("msy")]
-            public double MinSpaceY { get; set; } = 10.0;
-
-            [Description("The minimum horizontal space between a pin and the edge of the black box.")]
-            [Alias("mex")]
-            public double MinEdgeX { get; set; } = 10.0;
-
-            [Description("The minimum vertical space between a pin and the edge of the black box.")]
-            [Alias("mey")]
-            public double MinEdgeY { get; set; } = 10.0;
+            /// <summary>
+            /// Gets or sets the margin for each pin label.
+            /// </summary>
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             [Description("The minimum width.")]
             [Alias("minw")]
@@ -87,9 +76,6 @@ namespace SimpleCircuit.Components
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
-
-            [Description("The font size of the port labels.")]
-            public double TextSize { get; set; } = 4.0;
 
             /// <inheritdoc />
             Vector2 IBoxDrawable.TopLeft => new(Location.X, Location.Y);

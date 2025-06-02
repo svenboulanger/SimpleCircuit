@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Drawing
 {
     /// <summary>
     /// Bounds.
     /// </summary>
-    public readonly struct Bounds : IEquatable<Bounds>, IFormattable
+    public readonly struct Bounds : IEquatable<Bounds>, IFormattable, IEnumerable<Vector2>
     {
         /// <summary>
         /// Gets the left.
@@ -194,6 +196,18 @@ namespace SimpleCircuit.Drawing
                 Right.ToString(format, formatProvider) + "; " +
                 Bottom.ToString(format, formatProvider) + ")";
         }
+
+        /// <inheritdoc />
+        public IEnumerator<Vector2> GetEnumerator()
+        {
+            yield return new(Left, Top);
+            yield return new(Right, Top);
+            yield return new(Right, Bottom);
+            yield return new(Left, Bottom);
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Overloads addition for bounds.

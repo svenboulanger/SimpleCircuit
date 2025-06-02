@@ -167,48 +167,31 @@ namespace SimpleCircuit.Components.Builders
 
             location = CurrentTransform.Apply(location);
             var bounds = span.Bounds.Bounds;
-            switch (orientation.Type)
+
+            // First determine the orientation
+            var expand = orientation.Orientation;
+            if ((orientation.Type & TextOrientationTypes.Transformed) != 0)
+                expand = CurrentTransform.ApplyDirection(expand);
+            if ((orientation.Type & TextOrientationTypes.Upright) != 0)
             {
-                case TextOrientationTypes.Normal:
-                    {
-                        // Apply the transform to the group
-                        g.SetAttribute("transform", $"translate({location.ToSVG()})");
-
-                        // Expand bounds
-                        Expand(location + bounds);
-                    }
-                    break;
-
-                case TextOrientationTypes.Transformed:
-                    {
-                        // Modify the expansion and location such that the text is always upright
-                        var expand = CurrentTransform.ApplyDirection(orientation.Orientation);
-                        if (expand.X < 0)
-                        {
-                            // Orientation is towards the left, so this will cause the text to be upside-down
-                            // We will flip the orientation and make the text location start from the other end
-                            location += expand * (span.Bounds.Bounds.Right + span.Bounds.Bounds.Left) + expand.Perpendicular * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
-                            expand = -expand;
-                        }
-
-                        // Apply orientation and location to the containing group
-                        double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
-                        if (angle.IsZero())
-                            g.SetAttribute("transform", $"translate({location.ToSVG()})");
-                        else
-                            g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
-
-                        // Expand bounds
-                        Expand(location + expand * bounds.Right + expand.Perpendicular * bounds.Top);
-                        Expand(location + expand * bounds.Left + expand.Perpendicular * bounds.Top);
-                        Expand(location + expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
-                        Expand(location + expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
-                    }
-                    break;
-
-                default:
-                    throw new NotImplementedException();
+                if (expand.X < 0)
+                {
+                    // Orientation is towards the left, so this will cause the text to be upside-down
+                    // We will flip the orientation and make the text location start from the other end
+                    location += expand * (bounds.Right + bounds.Left) + expand.Perpendicular * (bounds.Top + bounds.Bottom);
+                    expand = -expand;
+                }
             }
+
+            // Apply orientation and location to the containing group
+            double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
+            if (angle.IsZero())
+                g.SetAttribute("transform", $"translate({location.ToSVG()})");
+            else
+                g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
+
+            // Expand the bounds
+            Expand(location + orientation.TransformTextBounds(bounds, CurrentTransform));
 
             // Create the text element
             var text = _document.CreateElement("text", Namespace);

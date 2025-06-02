@@ -34,6 +34,16 @@ namespace SimpleCircuit.Drawing
         public double Bottom { get; } = bottom;
 
         /// <summary>
+        /// Gets the total vertical margin.
+        /// </summary>
+        public double Vertical => Top + Bottom;
+
+        /// <summary>
+        /// Gets the total horizontal margin.
+        /// </summary>
+        public double Horizontal => Left + Right;
+
+        /// <summary>
         /// Converts the margins to a string.
         /// </summary>
         /// <returns>The string.</returns>

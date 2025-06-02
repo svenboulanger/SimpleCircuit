@@ -109,40 +109,14 @@ namespace SimpleCircuit.Components.Builders
             if (span is null)
                 return this;
 
+            // Get the location
             location = CurrentTransform.Apply(location);
-            var bounds = span.Bounds.Bounds;
-            switch (orientation.Type)
-            {
-                case TextOrientationTypes.Normal:
-                    {
-                        Expand(location + bounds);
-                    }
-                    break;
 
-                case TextOrientationTypes.VertialUp:
-                    {
-                    }
-                    break;
+            // Get the bounds
+            var bounds = orientation.TransformTextBounds(span.Bounds.Bounds, CurrentTransform);
 
-                case TextOrientationTypes.VerticalDown:
-                    {
-                    }
-                    break;
-
-                case TextOrientationTypes.Transformed:
-                    {
-                        var expand = CurrentTransform.ApplyDirection(orientation.Orientation);
-                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Top);
-                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Top);
-                        Expand(expand * bounds.Right + expand.Perpendicular * bounds.Bottom);
-                        Expand(expand * bounds.Left + expand.Perpendicular * bounds.Bottom);
-                    }
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
-            
+            // Expand
+            Expand(location + bounds);
             return this;
         }
     }

@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Drawing;
-using System;
 
 namespace SimpleCircuit.Components.Builders
 {
@@ -11,12 +10,17 @@ namespace SimpleCircuit.Components.Builders
         /// <summary>
         /// Gets a normal text orientation.
         /// </summary>
-        public static TextOrientation Normal { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Normal);
+        public static TextOrientation Normal { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Upright);
+
+        /// <summary>
+        /// Gets a vertical text orientation.
+        /// </summary>
+        public static TextOrientation Vertical { get; } = new TextOrientation(Vector2.UY, TextOrientationTypes.Upright);
 
         /// <summary>
         /// Gets a transformed text orientation.
         /// </summary>
-        public static TextOrientation Transformed { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Transformed);
+        public static TextOrientation Transformed { get; } = new TextOrientation(Vector2.UX, TextOrientationTypes.Transformed | TextOrientationTypes.Upright);
 
         /// <summary>
         /// Gets the orientation of the text.
@@ -47,7 +51,7 @@ namespace SimpleCircuit.Components.Builders
         public TextOrientation(double x, double y)
         {
             Orientation = new Vector2(x, y);
-            Type = TextOrientationTypes.Normal;
+            Type = TextOrientationTypes.Upright;
         }
 
         /// <summary>
@@ -58,22 +62,18 @@ namespace SimpleCircuit.Components.Builders
         /// <returns>Returns the bounds of the transformed text.</returns>
         public Bounds TransformTextBounds(Bounds bounds, Transform transform)
         {
-            switch (Type)
+            var b = new ExpandableBounds();
+            if ((Type & TextOrientationTypes.Transformed) != 0)
             {
-                case TextOrientationTypes.Normal:
-                    return bounds;
-
-                case TextOrientationTypes.Transformed:
-                    var b = new ExpandableBounds();
-                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Left, bounds.Bottom)));
-                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Left, bounds.Top)));
-                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Right, bounds.Top)));
-                    b.Expand(transform.ApplyDirection(new Vector2(bounds.Right, bounds.Bottom)));
-                    return b.Bounds;
-
-                default:
-                    throw new NotImplementedException();
+                foreach (var p in bounds)
+                    b.Expand(transform.ApplyDirection(p.X * Orientation + p.Y * Orientation.Perpendicular));
             }
+            else
+            {
+                foreach (var p in bounds)
+                    b.Expand(p.X * Orientation + p.Y * Orientation.Perpendicular);
+            }
+            return b.Bounds;
         }
     }
 }
