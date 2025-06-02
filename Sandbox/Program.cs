@@ -20,11 +20,12 @@ namespace Sandbox
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
             // string script = DemoHelper.CreateDemo("SEG", evalContext.Factory, ["VDD"]);
-            string script = @"X <nw> MOTOR";
+            // string script = @"ATTR_1(""a"", ""b"", ""c"", ""d"", ""e"", ""f"", ""g"", ""h"", ""i"")";
+            string script = "";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);
-            Console.WriteLine(statements.ToString());
+            Console.WriteLine(statements?.ToString() ?? "empty");
 
             StatementEvaluator.Evaluate(statements, evalContext);
 

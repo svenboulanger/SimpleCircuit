@@ -27,6 +27,9 @@ namespace SimpleCircuit.Evaluator
         /// <param name="context">The context.</param>
         public static void Evaluate(SyntaxNode statement, EvaluationContext context)
         {
+            if (statement is null)
+                return; // There's nothing to evaluate
+
             switch (statement)
             {
                 case ScopedStatementsNode statements: EvaluateScoped(statements, context); break;

@@ -64,7 +64,7 @@ namespace SimpleCircuitOnline.Shared
         /// <returns>Returns the parsing context.</returns>
         public EvaluationContext BuildContext(IDiagnosticHandler diagnostics)
         {
-            var context = new EvaluationContext(DefaultLibraryLoaded, _textFormatter)
+            var context = new EvaluationContext(DefaultLibraryLoaded, null, _textFormatter)
             {
                 Diagnostics = diagnostics
             };

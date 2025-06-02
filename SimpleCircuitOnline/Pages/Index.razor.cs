@@ -513,7 +513,7 @@ namespace SimpleCircuitOnline.Pages
                 var lexer = SimpleCircuitLexer.FromString(code);
                 context.Options.RenderBounds = includeBounds;
                 var parsingContext = new ParsingContext() { Diagnostics = context.Diagnostics };
-                if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node.Statements.Length > 0)
+                if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node is not null && node.Statements.Length > 0)
                 {
                     StatementEvaluator.Evaluate(node, context);
                     var ckt = context.Circuit;
@@ -528,14 +528,7 @@ namespace SimpleCircuitOnline.Pages
 
                     // We now need the last things to have executed
                     if (ckt.Count > 0 && _logger.Errors == 0)
-                    {
-                        doc = ckt.Render(_logger, []); // context.ExtraCss);
-
-                        // Update the style for our document
-                        var styleNode = doc.DocumentElement.ChildNodes[0];
-                        string style = styleNode.InnerText;
-                        await _js.InvokeVoidAsync("updateStyle", ModifyCSS(style));
-                    }
+                        doc = ckt.Render(_logger, []);
                 }
             }
             catch (Exception ex)
