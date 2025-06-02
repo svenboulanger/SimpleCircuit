@@ -48,15 +48,26 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.ExtendPin(Pins["a"], style);
+
                 builder.Path(b => b
                     .MoveTo(new(4, -4))
                     .ArcTo(4, 4, 0, true, false, new(4, 4)), style);
 
                 if (Variants.Contains(_earth))
+                {
                     DrawProtectiveConnection(builder, style);
-                if (Variants.Contains(_sealed))
-                    DrawSealed(builder, style);
+
+                    if (Variants.Contains(_sealed))
+                    {
+                        var span = builder.TextFormatter.Format("h", style);
+                        builder.Text(span, new Vector2(0.5, 4 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, TextOrientation.Normal);
+                    }
+                }
+                else if (Variants.Contains(_sealed))
+                {
+                    var span = builder.TextFormatter.Format("h", style);
+                    builder.Text(span, new Vector2(0.5, 2.5 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, TextOrientation.Normal);
+                }
                 if (Variants.Contains(_child))
                     DrawChildProtection(builder, style);
 
@@ -66,6 +77,7 @@ namespace SimpleCircuit.Components.Outputs
                     builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1), style);
                 }
 
+                builder.ExtendPin(Pins["a"], style);
                 _anchors.Draw(builder, this, style);
             }
             private void DrawProtectiveConnection(IGraphicsBuilder builder, IStyle style)
@@ -83,7 +95,6 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawSealed(IGraphicsBuilder builder, IStyle style)
             {
-                builder.Text("h", new(0.5, 3), new(-1, 1), style);
             }
         }
     }

@@ -116,8 +116,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-5, -5, 10, 10, style, new());
 
                 var span = builder.TextFormatter.Format("1", style);
-                var bounds = span.Bounds.Bounds;
-                builder.Text(span, -bounds.TopLeft - 0.5 * bounds.Size, TextOrientation.Transformed);
+                builder.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

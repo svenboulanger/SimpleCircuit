@@ -93,7 +93,7 @@ namespace SimpleCircuit.Components.Sources
                 }
 
                 // Add a little plus and minus next to the terminals!
-                builder.Signs(new(offset + 2, 3), new(-offset - 2, 3), style, vertical: true);
+                builder.Signs(new(offset + 3, 3), new(-offset - 3, 3), style, upright: true);
 
                 // Depending on the orientation, let's anchor the text differently
                 _anchors.Draw(builder, this, style);

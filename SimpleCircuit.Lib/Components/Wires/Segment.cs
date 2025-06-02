@@ -48,7 +48,6 @@ namespace SimpleCircuit.Components.Wires
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.ExtendPins(Pins, style, 4);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -1), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
@@ -61,6 +60,7 @@ namespace SimpleCircuit.Components.Wires
                     case 4: DrawOnWall(builder, style); break;
                 }
 
+                builder.ExtendPins(Pins, style, 4);
                 _anchors.Draw(builder, this, style);
             }
             private void DrawUnderground(IGraphicsBuilder builder, IStyle style)

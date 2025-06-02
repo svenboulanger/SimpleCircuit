@@ -95,7 +95,7 @@ namespace SimpleCircuit.Components.Sources
                 ], style);
 
                 // Plus and minus
-                builder.Signs(new(3, 0), new(-3, 0), style, new());
+                builder.Signs(new(3, 0), new(-3, 0), style, vertical: true);
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
