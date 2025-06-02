@@ -38,13 +38,14 @@ namespace SimpleCircuit.Components.Inputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.ExtendPin(Pins["p"], style, 4);
-                builder.ExtendPin(Pins["n"], style);
-                builder.Circle(new(), 1.5, style);
                 builder.Circle(new(), 4, style);
-                builder.Circle(new(4, 0), 1, style);
+                builder.Circle(new(), 1.5, style);
+                builder.Circle(new(4, 0), 1, style.AsFilledMarker());
 
                 _anchors.Draw(builder, this, style);
+
+                builder.ExtendPin(Pins["p"], style, 4);
+                builder.ExtendPin(Pins["n"], style);
             }
         }
     }

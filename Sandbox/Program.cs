@@ -19,7 +19,7 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            string script = DemoHelper.CreateDemo("ANT", evalContext.Factory, ["VDD"]);
+            string script = DemoHelper.CreateDemo("MIC", evalContext.Factory, ["VDD"]);
             // string script = @"";
             var lexer = SimpleCircuitLexer.FromString(script);
 

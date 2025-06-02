@@ -41,11 +41,12 @@ namespace SimpleCircuit.Components.Inputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.Modify(Style);
-                builder.ExtendPins(Pins, style);
                 builder.Circle(new(), 4, style);
-
                 builder.Line(new(4, -4), new(4, 4), style.AsLineThickness(1.0));
+
                 _anchors.Draw(builder, this, style);
+
+                builder.ExtendPins(Pins, style);
             }
         }
     }
