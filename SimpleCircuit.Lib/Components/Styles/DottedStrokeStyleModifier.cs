@@ -3,30 +3,26 @@
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// A style modifier that affects color.
+    /// A style modifier that makes everything dashed.
     /// </summary>
-    /// <param name="color">The color.</param>
-    /// <param name="backgroundColor">The background color.</param>
-    public class ColorStyleModifier(string color, string backgroundColor) : IStyleModifier
+    public class DottedStrokeStyleModifier : IStyleModifier
     {
         /// <summary>
-        /// The style for a <see cref="ColorStyleModifier"/>.
+        /// The style that modifies the stroke to be dotted.
         /// </summary>
         /// <param name="parent">The parent style.</param>
-        /// <param name="color">The color.</param>
-        /// <param name="backgroundColor">The background color.</param>
-        public class Style(IStyle parent, string color, string backgroundColor) : IStyle
+        public class Style(IStyle parent) : IStyle
         {
             private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
             /// <inheritdoc />
-            public string Color => color ?? _parent.Color;
+            public string Color => _parent.Color;
 
             /// <inheritdoc />
             public double Opacity => _parent.Opacity;
 
             /// <inheritdoc />
-            public string Background => backgroundColor ?? _parent.Background;
+            public string Background => _parent.Background;
 
             /// <inheritdoc />
             public double BackgroundOpacity => _parent.BackgroundOpacity;
@@ -47,13 +43,13 @@ namespace SimpleCircuit.Components.Styles
             public double LineSpacing => _parent.LineSpacing;
 
             /// <inheritdoc />
-            public string StrokeDashArray => _parent.StrokeDashArray;
+            public double Justification => _parent.Justification;
 
             /// <inheritdoc />
-            public double Justification => _parent.Justification;
+            public string StrokeDashArray => $"{LineThickness.ToSVG()} {(LineThickness * 3).ToSVG()}";
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new Style(parent, color, backgroundColor);
+        public IStyle Apply(IStyle parent) => new Style(parent);
     }
 }

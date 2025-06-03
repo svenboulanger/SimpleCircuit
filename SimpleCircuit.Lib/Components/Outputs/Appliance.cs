@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 if (Variants.Contains(_heater))
                     DrawHeater(builder, Variants.Contains(_ventilator), Variants.Contains(_accu), style);
                 else

@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     return result;
 
                 // When determining the size, let's update the size based on the label bounds
-                var style = context.Style.Modify(Style);
+                var style = context.Style.ModifyDashedDotted(this);
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
@@ -134,7 +134,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Draw the (rounded) diamond shape
                 builder.Diamond(0.0, 0.0, _width, _height, style, CornerRadiusX, CornerRadiusY);

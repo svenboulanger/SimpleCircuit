@@ -123,7 +123,7 @@ namespace SimpleCircuit.Components.Digital
                 if (_bits == null)
                     return;
 
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 double hw = 0.5 * BlockSize;
                 double y = 0.0;

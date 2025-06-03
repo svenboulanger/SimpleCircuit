@@ -115,9 +115,6 @@ namespace SimpleCircuit.Components.Analog
                         double w = Width * 0.5;
                         _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -126,7 +123,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.ExtendPins(Pins, style, 2, "a", "b");
 

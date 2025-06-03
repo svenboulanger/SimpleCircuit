@@ -78,7 +78,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
-                        var style = context.Style.Modify(Style);
+                        var style = context.Style.ModifyDashedDotted(this);
                         if (Width.IsZero() || Height.IsZero())
                         {
                             var b = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 double a = _width * 0.5;
                 double b = _height * 0.5;
 

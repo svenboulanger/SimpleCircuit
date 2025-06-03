@@ -35,7 +35,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.ExtendPins(Pins, style, 4);
 
                 switch (Variants.Select("input", "in", "output", "out", "inout", "other", "pad", "square", "none"))

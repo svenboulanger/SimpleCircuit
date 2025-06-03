@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// A style modifier that affects the line style.
     /// </summary>
-    /// <param name="lineStyle">The line style.</param>
-    public class LineStyleModifier(LineStyles lineStyle) : IStyleModifier
+    /// <param name="strokeDashArray">The line style.</param>
+    public class LineStyleModifier(string strokeDashArray) : IStyleModifier
     {
         /// <summary>
         /// The style for a <see cref="LineStyleModifier"/>.
         /// </summary>
         /// <param name="parent">The parent style.</param>
-        /// <param name="lineStyle">The line style.</param>
-        public class Style(IStyle parent, LineStyles lineStyle) : IStyle
+        /// <param name="strokeDashArray">The line style.</param>
+        public class Style(IStyle parent, string strokeDashArray) : IStyle
         {
             private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -47,13 +45,13 @@ namespace SimpleCircuit.Components.Styles
             public double LineSpacing => _parent.LineSpacing;
 
             /// <inheritdoc />
-            public LineStyles LineStyle => lineStyle;
+            public string StrokeDashArray => strokeDashArray;
 
             /// <inheritdoc />
             public double Justification => _parent.Justification;
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new Style(parent, lineStyle);
+        public IStyle Apply(IStyle parent) => new Style(parent, strokeDashArray);
     }
 }

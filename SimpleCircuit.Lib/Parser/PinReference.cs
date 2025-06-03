@@ -10,7 +10,8 @@ namespace SimpleCircuit.Parser
     /// </summary>
     /// <param name="drawable">The component.</param>
     /// <param name="name">The pin name.</param>
-    public class PinReference(IDrawable drawable, string name, TextLocation Source)
+    /// <param name="source">The source.</param>
+    public class PinReference(IDrawable drawable, string name, TextLocation source)
     {
         private IPin _pin = null;
 
@@ -27,7 +28,7 @@ namespace SimpleCircuit.Parser
         /// <summary>
         /// Gets the source of the reference.
         /// </summary>
-        public TextLocation Source { get; }
+        public TextLocation Source => source;
 
         /// <summary>
         /// Gets the pin.

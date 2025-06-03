@@ -73,7 +73,7 @@
         public double LineSpacing { get; set; } = DefaultLineSpacing;
 
         /// <inheritdoc />
-        public LineStyles LineStyle { get; set; } = LineStyles.None;
+        public string StrokeDashArray { get; set; } = null;
 
         /// <inheritdoc />
         public double Justification { get; set; } = 1.0;
@@ -90,7 +90,7 @@
                 $"fontfamily=\"{FontFamily}\"",
                 $"fontsize=\"{FontSize.ToSVG()}\"",
                 $"bold={(Bold ? "true" : "false")}",
-                $"linestyle=\"{LineStyle}\"",
+                $"linestyle=\"{StrokeDashArray}\"",
                 $"justification=\"{Justification.ToSVG()}\""
                 ];
             return string.Join(", ", items);

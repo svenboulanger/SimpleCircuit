@@ -58,6 +58,6 @@
         /// <summary>
         /// Gets or sets the line style.
         /// </summary>
-        public LineStyles LineStyle { get; }
+        public string StrokeDashArray { get; }
     }
 }

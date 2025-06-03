@@ -49,17 +49,9 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override PresenceResult Prepare(IPrepareContext context)
-            {
-                if (context.Mode == PreparationMode.Reset)
-                    this.ApplyDrawableLineStyle();
-                return base.Prepare(context);
-            }
-
-            /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Package background
                 if (Variants.Contains(_packaged))
@@ -99,17 +91,9 @@ namespace SimpleCircuit.Components.Analog
             }
 
             /// <inheritdoc />
-            public override PresenceResult Prepare(IPrepareContext context)
-            {
-                if (context.Mode == PreparationMode.Reset)
-                    this.ApplyDrawableLineStyle();
-                return base.Prepare(context);
-            }
-
-            /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Draw background package
                 if (Variants.Contains(_packaged))

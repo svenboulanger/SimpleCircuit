@@ -30,7 +30,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public override string Type => "attribute";
 
             [Description("The margin of the label inside the ADC when sizing based on content.")]
-            public Margins Margin { get; set; }
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             [Description("The spacing between labels internally when sizing based on content.")]
             public Vector2 Spacing { get; set; }
@@ -58,10 +58,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             Vector2 IEllipseDrawable.Center => new();
 
             /// <inheritdoc />
-            double IEllipseDrawable.RadiusX => Width * 0.5;
+            double IEllipseDrawable.RadiusX => _width * 0.5;
 
             /// <inheritdoc />
-            double IEllipseDrawable.RadiusY => Height * 0.5;
+            double IEllipseDrawable.RadiusY => _height * 0.5;
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -95,7 +95,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.Ellipse(new(), _width * 0.5, _height * 0.5, style);
                 EllipseLabelAnchorPoints.Default.Draw(builder, this, style);
             }

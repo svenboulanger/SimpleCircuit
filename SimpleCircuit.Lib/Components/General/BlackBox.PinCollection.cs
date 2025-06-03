@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(_parent.Style);
+                var style = builder.Style.ModifyDashedDotted(_parent);
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
                     if (_pinsByIndex[i] is not LoosePin pin || _spansByIndex[i] is null)
@@ -338,7 +338,7 @@ namespace SimpleCircuit.Components
                         break;
 
                     case PreparationMode.Sizes:
-                        var style = context.Style.Modify(_parent.Style);
+                        var style = context.Style.ModifyDashedDotted(_parent);
                         foreach (var pin in _pinsByIndex)
                         {
                             string text = TransformPinName(pin.Name);

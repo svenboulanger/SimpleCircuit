@@ -59,7 +59,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         /// <inheritdoc />
         protected override void Draw(IGraphicsBuilder builder)
         {
-            var style = builder.Style.Modify(Style);
+            var style = builder.Style.ModifyDashedDotted(this);
             if (Variants.Contains(Square))
                 builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, style, CornerRadius, CornerRadius);
             else

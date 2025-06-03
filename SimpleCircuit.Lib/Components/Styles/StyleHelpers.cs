@@ -18,24 +18,6 @@ namespace SimpleCircuit.Components.Styles
         }
 
         /// <summary>
-        /// Applies style modifier based on variants to make a dashed or dotted line.
-        /// </summary>
-        /// <param name="drawable">The drawable.</param>
-        public static void ApplyDrawableLineStyle(this IDrawable drawable)
-        {
-            switch (drawable.Variants.Select("dashed", "dotted"))
-            {
-                case 0:
-                    drawable.AppendStyle(new LineStyleModifier(LineStyles.Dashed));
-                    break;
-
-                case 1:
-                    drawable.AppendStyle(new LineStyleModifier(LineStyles.Dotted));
-                    break;
-            }
-        }
-
-        /// <summary>
         /// Gets a style that overrides another style to have the same fill as stroke color.
         /// </summary>
         /// <param name="style">The style.</param>
@@ -72,7 +54,24 @@ namespace SimpleCircuit.Components.Styles
         /// <param name="style">The style.</param>
         /// <param name="styleModifier">The style modifier.</param>
         /// <returns>Returns the style.</returns>
-        public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
+        // public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
+
+        /// <summary>
+        /// Gets a style that is modified by the given <see cref="IDrawable"/> style.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="drawable">The drawable.</param>
+        /// <returns>Returns the style.</returns>
+        public static IStyle ModifyDashedDotted(this IStyle style, IDrawable drawable)
+        {
+            var result = drawable.Style?.Apply(style) ?? style;
+            switch (drawable.Variants.Select("dashed", "dotted"))
+            {
+                case 0: result = new DashedStrokeStyleModifier.Style(result); break;
+                case 1: result = new DottedStrokeStyleModifier.Style(result); break;
+            }
+            return result;
+        }
 
         /// <summary>
         /// Gets a style that will override a style to have center justification.
@@ -121,111 +120,95 @@ namespace SimpleCircuit.Components.Styles
         /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.
         /// Lines do not need to have any background color.
         /// </summary>
-        /// <param name="appearance">The appearance.</param>
+        /// <param name="style">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeStyle(this IStyle appearance)
+        public static string CreateStrokeStyle(this IStyle style)
         {
-            var style = new StringBuilder();
+            var result = new StringBuilder();
 
             // Deal with the foreground
-            if (appearance.Opacity.IsZero())
-                style.Append("stroke: none; ");
-            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
-                style.Append($"stroke: {appearance.Color}; ");
+            if (style.Opacity.IsZero())
+                result.Append("stroke: none; ");
+            else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
+                result.Append($"stroke: {style.Color}; ");
             else
             {
-                style.Append($"stroke: {appearance.Color}; ");
-                style.Append($"stroke-opacity: {appearance.Opacity.ToSVG()};");
+                result.Append($"stroke: {style.Color}; ");
+                result.Append($"stroke-opacity: {style.Opacity.ToSVG()};");
             }
 
             // Allow other path options
-            switch (appearance.LineStyle)
-            {
-                case LineStyles.Dashed:
-                    style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
-                    break;
-
-                case LineStyles.Dotted:
-                    style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
-                    break;
-            }
+            if (style.StrokeDashArray is not null && !string.IsNullOrWhiteSpace(style.StrokeDashArray))
+                result.Append($"stroke-dasharray: {style.StrokeDashArray}; ");
 
             // Path options
-            style.Append($"stroke-width: {appearance.LineThickness.ToSVG()}pt; ");
-            style.Append("stroke-linecap: round; ");
-            style.Append("stroke-linejoin: round; ");
-            style.Append("fill: none;");
+            result.Append($"stroke-width: {style.LineThickness.ToSVG()}pt; ");
+            result.Append("stroke-linecap: round; ");
+            result.Append("stroke-linejoin: round; ");
+            result.Append("fill: none;");
 
-            return style.ToString();
+            return result.ToString();
         }
 
         /// <summary>
         /// Creates a style attribute value for strokes with fill that represents the <see cref="IStyle"/>.
         /// </summary>
-        /// <param name="appearance">The style.</param>
+        /// <param name="style">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeFillStyle(this IStyle appearance)
+        public static string CreateStrokeFillStyle(this IStyle style)
         {
-            var style = new StringBuilder();
+            var result = new StringBuilder();
 
             // Deal with the foreground
-            if (appearance.Opacity.IsZero())
-                style.Append("stroke: none; ");
-            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
-                style.Append($"stroke: {appearance.Color}; ");
+            if (style.Opacity.IsZero())
+                result.Append("stroke: none; ");
+            else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
+                result.Append($"stroke: {style.Color}; ");
             else
             {
-                style.Append($"stroke: {appearance.Color}; ");
-                style.Append($"stroke-opacity: {appearance.Opacity.ToSVG()};");
+                result.Append($"stroke: {style.Color}; ");
+                result.Append($"stroke-opacity: {style.Opacity.ToSVG()};");
             }
 
             // Path options
-            style.Append($"stroke-width: {appearance.LineThickness.ToSVG()}pt; ");
-            style.Append("stroke-linecap: round; ");
-            style.Append("stroke-linejoin: round; ");
+            result.Append($"stroke-width: {style.LineThickness.ToSVG()}pt; ");
+            result.Append("stroke-linecap: round; ");
+            result.Append("stroke-linejoin: round; ");
 
-            // Allow other path options
-            switch (appearance.LineStyle)
-            {
-                case LineStyles.Dashed:
-                    style.Append($"stroke-dasharray: {(appearance.LineThickness * 4).ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
-                    break;
-
-                case LineStyles.Dotted:
-                    style.Append($"stroke-dasharray: {appearance.LineThickness.ToSVG()} {(appearance.LineThickness * 3).ToSVG()}; ");
-                    break;
-            }
+            // Stroke dasharray
+            if (style.StrokeDashArray is not null && !string.IsNullOrWhiteSpace(style.StrokeDashArray))
+                result.Append($"stroke-dasharray: {style.StrokeDashArray}; ");
 
             // Deal with the background
-            if (appearance.BackgroundOpacity.IsZero())
-                style.Append("fill: none;");
-            else if ((appearance.BackgroundOpacity - Style.Opaque).IsZero() || appearance.BackgroundOpacity > Style.Opaque)
-                style.Append($"fill: {appearance.Background};");
+            if (style.BackgroundOpacity.IsZero())
+                result.Append("fill: none;");
+            else if ((style.BackgroundOpacity - Style.Opaque).IsZero() || style.BackgroundOpacity > Style.Opaque)
+                result.Append($"fill: {style.Background};");
             else
             {
-                style.Append($"fill: {appearance.Background};");
-                style.Append($"fill-opacity: {appearance.BackgroundOpacity.ToSVG()};");
+                result.Append($"fill: {style.Background};");
+                result.Append($"fill-opacity: {style.BackgroundOpacity.ToSVG()};");
             }
-            return style.ToString();
+            return result.ToString();
         }
 
         /// <summary>
         /// Creats a style attribute for text that represents the <see cref="IStyle"/>.
         /// </summary>
-        /// <param name="appearance">The style.</param>
+        /// <param name="style">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateTextStyle(this IStyle appearance)
+        public static string CreateTextStyle(this IStyle style)
         {
             var sb = new StringBuilder();
-            sb.Append($"font-family: {appearance.FontFamily}; ");
-            sb.Append($"font-size: {appearance.FontSize.ToSVG()}pt; ");
-            if (appearance.Opacity.IsZero())
+            sb.Append($"font-family: {style.FontFamily}; ");
+            sb.Append($"font-size: {style.FontSize.ToSVG()}pt; ");
+            if (style.Opacity.IsZero())
                 sb.Append($"fill: none; ");
-            else if ((appearance.Opacity - Style.Opaque).IsZero() || appearance.Opacity > Style.Opaque)
-                sb.Append($"fill: {appearance.Color}; ");
+            else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
+                sb.Append($"fill: {style.Color}; ");
             else
-                sb.Append($"fill: {appearance.Color}; fill-opacity: {appearance.Opacity}; ");
-            if (appearance.Bold)
+                sb.Append($"fill: {style.Color}; fill-opacity: {style.Opacity}; ");
+            if (style.Bold)
                 sb.Append("font-weight: bold; ");
             sb.Append("stroke: none;");
             return sb.ToString();

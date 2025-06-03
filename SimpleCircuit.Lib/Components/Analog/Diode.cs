@@ -97,9 +97,6 @@ namespace SimpleCircuit.Components.Analog
                             case 1: break;
                             case 2: break;
                         }
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -108,7 +105,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.ExtendPins(Pins, style);
                 switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))

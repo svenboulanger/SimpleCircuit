@@ -39,7 +39,7 @@ namespace SimpleCircuit.Components.Labeling
             switch (index)
             {
                 case 0: // Center
-                    return new(0.5 * (subject.TopLeft + subject.BottomRight), new());
+                    return new(subject.Center, new());
 
                 case 1: // Top-left above box
                     return new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1));

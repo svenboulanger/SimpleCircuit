@@ -90,9 +90,6 @@ namespace SimpleCircuit.Components.Analog
                         }
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, default, new(1, 0)), "o", "out", "outp", "po");
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
 
                     case PreparationMode.Sizes:
@@ -166,7 +163,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // ADC base shape
                 double w = 0.5 * _width;

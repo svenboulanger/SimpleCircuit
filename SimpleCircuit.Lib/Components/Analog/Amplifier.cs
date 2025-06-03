@@ -39,7 +39,11 @@ namespace SimpleCircuit.Components.Analog
         /// <summary>
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
-        private class Instance : ScaledOrientedDrawable
+        /// <remarks>
+        /// Creates a new <see cref="Instance"/>.
+        /// </remarks>
+        /// <param name="name">The name.</param>
+        private class Instance(string name) : ScaledOrientedDrawable(name)
         {
             private readonly static Vector2
                 _supplyPos = new(-2, -5),
@@ -54,14 +58,6 @@ namespace SimpleCircuit.Components.Analog
 
             /// <inheritdoc />
             public override string Type => "amplifier";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name) : base(name)
-            {
-            }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -125,9 +121,6 @@ namespace SimpleCircuit.Components.Analog
                                 _anchors[1] = new LabelAnchorPoint(new(-2.5, 0), Vector2.Zero, TextOrientation.Transformed);
                                 break;
                         }
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -136,7 +129,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
                 _anchors[^1] = new LabelAnchorPoint(new(2, -5), new(1, -1));
 

@@ -19,9 +19,9 @@ namespace Sandbox
             };
             var evalContext = new EvaluationContext() { Diagnostics = logger };
 
-            // string script = DemoHelper.CreateDemo("SEG", evalContext.Factory, ["VDD"]);
-            // string script = @"ATTR_1(""a"", ""b"", ""c"", ""d"", ""e"", ""f"", ""g"", ""h"", ""i"")";
-            string script = "";
+            string script = DemoHelper.CreateDemo("WP", evalContext.Factory, ["VDD"]);
+            // string script = @"WP(multiple=2)";
+            // string script = "";
             var lexer = SimpleCircuitLexer.FromString(script);
 
             SimpleCircuitParser.Parse(lexer, context, out var statements);

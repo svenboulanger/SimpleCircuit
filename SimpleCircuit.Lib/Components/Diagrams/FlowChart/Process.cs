@@ -137,7 +137,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.Rectangle(-_width * 0.5, -_height * 0.5, _width, _height, style, CornerRadius, CornerRadius);
 

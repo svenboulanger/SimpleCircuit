@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.ExtendPins(Pins, style, 2, "d", "c", "q");
 
                 // Body

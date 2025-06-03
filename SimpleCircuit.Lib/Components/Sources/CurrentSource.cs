@@ -70,7 +70,7 @@ namespace SimpleCircuit.Components.Sources
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.ExtendPins(Pins, style);
                 switch (Variants.Select(Options.American, Options.European))
                 {

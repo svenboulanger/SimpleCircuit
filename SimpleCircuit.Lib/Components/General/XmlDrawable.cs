@@ -177,7 +177,7 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 foreach (var pin in _extend)
                     builder.ExtendPin(Pins[pin], style);

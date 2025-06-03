@@ -94,16 +94,10 @@ namespace SimpleCircuit.Components.Analog
 
                 switch (context.Mode)
                 {
-                    case PreparationMode.Reset:
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
-                        break;
-
                     case PreparationMode.Sizes:
 
                         // Calculate sizes
-                        var style = context.Style.Modify(Style);
+                        var style = context.Style.ModifyDashedDotted(this);
                         var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 2, _anchors, style);
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
                         _rx = _width * 0.25;
@@ -128,7 +122,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Transmission line
                 builder.Path(DrawShape, style);

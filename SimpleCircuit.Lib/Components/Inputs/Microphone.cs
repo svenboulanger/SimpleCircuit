@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.Circle(new(), 4, style);
                 builder.Line(new(4, -4), new(4, 4), style.AsLineThickness(1.0));
 

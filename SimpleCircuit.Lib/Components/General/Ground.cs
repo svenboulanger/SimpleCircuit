@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
                 _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))

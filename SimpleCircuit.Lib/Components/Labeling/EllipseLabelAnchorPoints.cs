@@ -53,32 +53,20 @@ namespace SimpleCircuit.Components.Labeling
                 var label = subject.Labels[i];
                 if (label?.Formatted is null)
                     continue;
-                string name = label.Anchor ?? i.ToString();
+                if (!TryGetAnchorIndex(label.Anchor ?? i.ToString(), out int anchorIndex))
+                    continue;
                 var bounds = label.Formatted.Bounds.Bounds;
-                
-                switch (name)
-                {
-                    case "0":
-                    case "c":
-                    case "ci": Expand(0, bounds); break;
 
-                    default:
-                        if (label.Anchor.All(char.IsDigit))
-                        {
-                            int index = int.Parse(label.Anchor);
-                            index %= Count;
-                            if (index < 0)
-                                index += Count;
-                            Expand(index, bounds);
-                        }
-                        break;
-                }
+                // Expand
+                if (anchorIndex == 0)
+                    Expand(anchorIndex, bounds);
             }
 
+            // Calculate the total width and height
             if (width > 0)
-                width += margins.Left + margins.Right;
+                width += margins.Horizontal;
             if (height > 0)
-                height += margins.Top + margins.Bottom;
+                height += margins.Vertical;
 
             // Calculate the ellipse size
             return new Vector2(width, height) * Math.Sqrt(2.0);

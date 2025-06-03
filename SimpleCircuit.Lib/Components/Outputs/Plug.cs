@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Styles;
@@ -47,15 +48,22 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
-                builder.Path(b => b
-                    .MoveTo(new(4, -4))
-                    .ArcTo(4, 4, 0, true, false, new(4, 4)), style);
+                switch (Variants.Select(_child))
+                {
+                    case 0:
+                        builder.Path(b => b.MoveTo(new(4, -6)).LineTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)).LineTo(new(4, 6)), style);
+                        break;
+
+                    default:
+                        builder.Path(b => b.MoveTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)), style);
+                        break;
+                }
 
                 if (Variants.Contains(_earth))
                 {
-                    DrawProtectiveConnection(builder, style);
+                    builder.Line(new(0, 4), new(0, -4), style);
 
                     if (Variants.Contains(_sealed))
                     {
@@ -68,33 +76,17 @@ namespace SimpleCircuit.Components.Outputs
                     var span = builder.TextFormatter.Format("h", style);
                     builder.Text(span, new Vector2(0.5, 2.5 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, TextOrientation.Normal);
                 }
-                if (Variants.Contains(_child))
-                    DrawChildProtection(builder, style);
 
                 if (Multiple > 1)
                 {
                     builder.Line(new(2.6, -1.4), new(-0.2, -4.2), style);
-                    builder.Text(Multiple.ToString(), new(-0.6, -4.6), new(-1, -1), style);
+
+                    var span = builder.TextFormatter.Format(Multiple.ToString(), style);
+                    builder.Text(span, new Vector2(-0.2, -4.2) + new Vector2(-0.707, -0.707) * style.FontSize - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, TextOrientation.Normal);
                 }
 
                 builder.ExtendPin(Pins["a"], style);
                 _anchors.Draw(builder, this, style);
-            }
-            private void DrawProtectiveConnection(IGraphicsBuilder builder, IStyle style)
-            {
-                builder.Line(new(0, 4), new(0, -4), style);
-            }
-            private void DrawChildProtection(IGraphicsBuilder builder, IStyle style)
-            {
-                builder.Path(b => b
-                    .MoveTo(new(4, -6))
-                    .LineTo(new(4, -4))
-                    .MoveTo(new(4, 4))
-                    .LineTo(new(4, 6)),
-                    style);
-            }
-            private void DrawSealed(IGraphicsBuilder builder, IStyle style)
-            {
             }
         }
     }

@@ -41,7 +41,7 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 if (!Variants.Contains(Options.Arei))
                     builder.ExtendPins(Pins, style);
                 builder.Circle(new(), 5, style);

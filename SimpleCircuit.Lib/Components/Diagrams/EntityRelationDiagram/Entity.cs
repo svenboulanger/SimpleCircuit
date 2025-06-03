@@ -121,7 +121,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                         break;
 
                     case PreparationMode.Sizes:
-                        var style = context.Style.Modify(Style);
+                        var style = context.Style.ModifyDashedDotted(this);
 
                         if (Labels.Count > 0)
                         {
@@ -180,30 +180,31 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             /// <inheritdoc />
             protected override void FormatLabels(IPrepareContext context)
             {
+                var style = context.Style.ModifyDashedDotted(this);
                 for (int i = 0; i < Labels.Count; i++)
                 {
-                    var style = context.Style.Modify(Style);
+                    IStyle cstyle;
                     if (i == 0)
-                        style = style.Modify(HeaderStyle);
+                        cstyle = style.Modify(HeaderStyle);
                     else if (i % 2 == 1)
-                        style = style.Modify(EvenStyle);
+                        cstyle = style.Modify(EvenStyle);
                     else
-                        style = style.Modify(OddStyle);
-                    Labels[i]?.Format(context.TextFormatter, style);
+                        cstyle = style.Modify(OddStyle);
+                    Labels[i]?.Format(context.TextFormatter, cstyle);
                 }
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 if (Labels.Count > 1)
                 {
                     // Draw the header
                     double s = _separators[0];
                     if (CornerRadius.IsZero())
-                        builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Styles.Style.None, null));
+                        builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Styles.Style.None, null)); // Header background
                     else
                     {
                         builder.Path(b =>
@@ -214,8 +215,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 .HorizontalTo(-_width * 0.5)
                                 .VerticalTo(_top + CornerRadius)
                                 .Arc(CornerRadius, CornerRadius, 0, false, true, new(CornerRadius, -CornerRadius))
-                                .Close();    
-                        }, style.Modify(HeaderStyle).Color(Styles.Style.None, null));
+                                .Close();
+                        }, style.Modify(HeaderStyle).Color(Styles.Style.None, null)); // Header background
 
                         for (int i = 1; i < Labels.Count; i++)
                         {

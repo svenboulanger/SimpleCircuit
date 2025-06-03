@@ -71,9 +71,6 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(0, new(-4, 0));
                             SetPinOffset(3, new(4, 0));
                         }
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -89,7 +86,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.ExtendPins(Pins, style, 4, "s", "d");
                 builder.ExtendPin(Pins["g"], style);
@@ -119,7 +116,7 @@ namespace SimpleCircuit.Components.Analog
             }
             private void DrawPackaged(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Packaged
                 builder.Circle(new(0, 3), 8.0, style);
@@ -194,25 +191,22 @@ namespace SimpleCircuit.Components.Analog
                             SetPinOffset(1, new(0, 9));
                             SetPinOffset(3, new(-4, 0));
                         }
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
             }
 
             /// <inheritdoc />
-            protected override void Draw(IGraphicsBuilder drawing)
+            protected override void Draw(IGraphicsBuilder builder)
             {
                 if (Variants.Contains(_packaged))
-                    DrawPackaged(drawing);
+                    DrawPackaged(builder);
                 else
-                    DrawRegular(drawing);
+                    DrawRegular(builder);
             }
             private void DrawRegular(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.ExtendPins(Pins, style, 4, "s", "d");
                 builder.ExtendPin(Pins["g"], style);
@@ -241,32 +235,32 @@ namespace SimpleCircuit.Components.Analog
                 }
                 _anchors.Draw(builder, this, style);
             }
-            private void DrawPackaged(IGraphicsBuilder drawing)
+            private void DrawPackaged(IGraphicsBuilder builder)
             {
-                var style = drawing.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // Packaged
-                drawing.Circle(new(0, 3), 8.0, style);
+                builder.Circle(new(0, 3), 8.0, style);
 
-                drawing.ExtendPins(Pins, style, 4, "s", "d");
-                drawing.ExtendPin(Pins["g"], style);
+                builder.ExtendPins(Pins, style, 4, "s", "d");
+                builder.ExtendPin(Pins["g"], style);
 
                 // Gate
-                drawing.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
+                builder.Path(b => b.MoveTo(new(-6, 6)).LineTo(new(6, 6))
                     .MoveTo(new(-7, 4)).LineTo(new(-4, 4))
                     .MoveTo(new(-2, 4)).LineTo(new(2, 4))
                     .MoveTo(new(4, 4)).LineTo(new(7, 4)), style);
 
                 // Drain, source and gate
-                drawing.Line(new(-5, 0), new(-5, 4), style);
-                drawing.Line(new(5, 0), new(5, 4), style);
-                drawing.Arrow(new(0, 4), new(0, 0), style);
-                drawing.Line(new(0, 0), new(-5, 0), style);
+                builder.Line(new(-5, 0), new(-5, 4), style);
+                builder.Line(new(5, 0), new(5, 4), style);
+                builder.Arrow(new(0, 4), new(0, 0), style);
+                builder.Line(new(0, 0), new(-5, 0), style);
 
                 // Label
                 _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
                 _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
-                _anchors.Draw(drawing, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

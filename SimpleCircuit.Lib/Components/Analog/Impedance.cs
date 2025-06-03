@@ -69,14 +69,9 @@ namespace SimpleCircuit.Components.Analog
 
                 switch (context.Mode)
                 {
-                    case PreparationMode.Reset:
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
-                        break;
-
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
-                        var style = context.Style.Modify(Style);
+                        var style = context.Style.ModifyDashedDotted(this);
                         var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 1, _anchors, style);
 
                         // Determine the height
@@ -109,7 +104,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
                 builder.ExtendPins(Pins, style);
 
                 // The rectangle

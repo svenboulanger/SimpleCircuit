@@ -109,9 +109,6 @@ namespace SimpleCircuit.Components.Analog
                         _anchors[2] = new LabelAnchorPoint(new(2, -8), new(1, -1));
                         if (Variants.Contains(_programmable))
                             _anchors[2] = new LabelAnchorPoint(new(2, -13), new(1, -1));
-
-                        // Allow dashed/dotted lines
-                        this.ApplyDrawableLineStyle();
                         break;
                 }
                 return result;
@@ -120,7 +117,7 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 // The triangle
                 builder.Polygon([

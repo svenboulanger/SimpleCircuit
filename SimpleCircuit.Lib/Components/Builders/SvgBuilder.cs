@@ -262,7 +262,7 @@ namespace SimpleCircuit.Components.Builders
                         var path = _document.CreateElement("path", Namespace);
                         groupElement.AppendChild(path);
                         path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
-                        path.SetAttribute("style", $"stroke: {underlineSpan.Appearance.Color}; stroke-width: {underlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
+                        path.SetAttribute("style", $"stroke: {underlineSpan.Style.Color}; stroke-width: {underlineSpan.Style.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
                         path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;

@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components.Styles
             public double Justification => justification;
 
             /// <inheritdoc />
-            public LineStyles LineStyle => _parent.LineStyle;
+            public string StrokeDashArray => _parent.StrokeDashArray;
         }
 
         /// <inheritdoc />
