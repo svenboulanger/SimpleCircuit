@@ -18,6 +18,19 @@ namespace SimpleCircuit.Components.Styles
         }
 
         /// <summary>
+        /// Appends a style to a <see cref="IStyleModifier"/>.
+        /// </summary>
+        /// <param name="modifier">The style modifier.</param>
+        /// <param name="next">The next style modifier.</param>
+        /// <returns>The combined style modifier.</returns>
+        public static IStyleModifier Append(this IStyleModifier modifier, IStyleModifier next)
+        {
+            if (modifier is not null)
+                return new AggregateStyleModifier(modifier, next);
+            return next;
+        }
+
+        /// <summary>
         /// Gets a style that overrides another style to have the same fill as stroke color.
         /// </summary>
         /// <param name="style">The style.</param>
@@ -54,7 +67,7 @@ namespace SimpleCircuit.Components.Styles
         /// <param name="style">The style.</param>
         /// <param name="styleModifier">The style modifier.</param>
         /// <returns>Returns the style.</returns>
-        // public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
+        public static IStyle Modify(this IStyle style, IStyleModifier styleModifier) => styleModifier?.Apply(style) ?? style;
 
         /// <summary>
         /// Gets a style that is modified by the given <see cref="IDrawable"/> style.

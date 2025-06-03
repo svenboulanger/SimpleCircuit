@@ -10,6 +10,7 @@ using SimpleCircuit.Parser.Variants;
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using SimpleCircuit.Parser.Styles;
 
 namespace SimpleCircuit.Components.Builders
 {
@@ -210,7 +211,7 @@ namespace SimpleCircuit.Components.Builders
                 return;
 
             // Draw the line
-            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
             var style = modifier?.Apply(Style) ?? Style;
             Line(new(x1, y1), new(x2, y2), style);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), style);
@@ -253,7 +254,7 @@ namespace SimpleCircuit.Components.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
             var style = modifier?.Apply(Style) ?? Style;
 
             // Draw the polyline
@@ -299,7 +300,7 @@ namespace SimpleCircuit.Components.Builders
             if (string.IsNullOrWhiteSpace(pathData))
                 return;
 
-            var modifier = ParseStyleModifier(node, Diagnostics, ref startMarkers, ref endMarkers);
+            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
             var style = modifier?.Apply(Style) ?? Style;
 
             if (!string.IsNullOrWhiteSpace(pathData))
@@ -374,13 +375,87 @@ namespace SimpleCircuit.Components.Builders
 
         private IStyleModifier ParseStyleModifier(XmlNode node)
         {
-            // Parse the style
+            // Parse the style string
+            IStyleModifier result = null;
+            var style = node.Attributes["style"]?.Value;
+            if (!string.IsNullOrWhiteSpace(style))
+            {
+                var lexer = new StylesLexer(style);
+                while (lexer.Type != Parser.Styles.TokenType.EndOfContent)
+                {
+                    // First we expect a key
+                    if (!lexer.Branch(Parser.Styles.TokenType.Key, out var keyToken))
+                    {
+                        Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Warning, "WARNING", "Expected a style key"));
+                        lexer.Skip(~Parser.Styles.TokenType.Semicolon);
+                        lexer.Next();
+                        continue;
+                    }
+
+                    // Then we expect a colon
+                    if (!lexer.Branch(Parser.Styles.TokenType.Colon))
+                    {
+                        Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Warning, "WARNING", "Expected a colon"));
+                        lexer.Skip(~Parser.Styles.TokenType.Semicolon);
+                        lexer.Next();
+                        continue;
+                    }
+
+                    // The value can be anything
+                    var start = lexer.Track();
+                    int nestedLevel = 0;
+                    while (lexer.Check(~Parser.Styles.TokenType.Semicolon) && nestedLevel == 0)
+                    {
+                        switch (lexer.Type)
+                        {
+                            case Parser.Styles.TokenType.Parenthesis:
+                                if (lexer.Token.Content.Span[0] == '(')
+                                    nestedLevel++;
+                                else
+                                    nestedLevel--;
+                                lexer.Next();
+                                break;
+
+                            default:
+                                lexer.Next();
+                                break;
+                        }
+                    }
+
+                    // Get the full value
+                    var value = lexer.GetTracked(start);
+
+                    switch (keyToken.Content.ToString().ToLower())
+                    {
+                        case "stroke": result = result.Append(new ColorStyleModifier(value.Content.ToString(), null)); break;
+                        case "fill": result = result.Append(new ColorStyleModifier(null, value.Content.ToString())); break;
+                        case "stroke-dasharray": result = result.Append(new StrokeDashArrayStyleModifier(value.Content.ToString())); break;
+                        case "stroke-width":
+                            if (double.TryParse(value.Content.ToString(), out double strokeWidth))
+                                result = result.Append(new StrokeWidthStyleModifier(strokeWidth));
+                            else
+                                Diagnostics?.Post(new SourceDiagnosticMessage(value.Location, SeverityLevel.Warning, "WARNING", "Expected a number for stroke-width"));
+                            break;
+                        case "font-family": result = result.Append(new FontFamilyStyleModifier(value.Content.ToString())); break;
+                        case "font-size":
+                            if (double.TryParse(value.Content.ToString(), out double fontSize))
+                                result = result.Append(new FontSizeStyleModifier(fontSize));
+                            else
+                                Diagnostics?.Post(new SourceDiagnosticMessage(value.Location, SeverityLevel.Warning, "WARNING", "Expected a number for font-size"));
+                            break;
+                    }
+
+                    // Get rid of any semicolons
+                    while (lexer.Check(Parser.Styles.TokenType.Semicolon))
+                        lexer.Next();
+                }
+            }
 
             // Stroke attributes
-            return null;
+            return result;
         }
 
-        private IStyleModifier ParseStyleModifier(XmlNode node, IDiagnosticHandler diagnostics, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        private IStyleModifier ParseStyleModifier(XmlNode node, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
             var style = ParseStyleModifier(node);
 
@@ -391,7 +466,7 @@ namespace SimpleCircuit.Components.Builders
                 startMarkers ??= [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                    AddMarker(startMarkers, markerToken.Content.ToString(), diagnostics);
+                    AddMarker(startMarkers, markerToken.Content.ToString());
             }
 
             // Read end markers
@@ -401,13 +476,13 @@ namespace SimpleCircuit.Components.Builders
                 endMarkers ??= [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
-                    AddMarker(endMarkers, markerToken.Content.ToString(), diagnostics);
+                    AddMarker(endMarkers, markerToken.Content.ToString());
             }
 
             return style;
         }
 
-        private void AddMarker(HashSet<Marker> markers, string value, IDiagnosticHandler diagnostics)
+        private void AddMarker(HashSet<Marker> markers, string value)
         {
             switch (value)
             {
@@ -423,7 +498,7 @@ namespace SimpleCircuit.Components.Builders
                 case "minus": markers.Add(new Minus()); break;
                 case "slash": markers.Add(new Slash()); break;
                 default:
-                    diagnostics?.Post(ErrorCodes.InvalidMarker, value);
+                    Diagnostics?.Post(ErrorCodes.InvalidMarker, value);
                     break;
             }
         }

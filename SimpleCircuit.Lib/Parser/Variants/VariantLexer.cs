@@ -11,7 +11,6 @@ namespace SimpleCircuit.Parser.Variants
     /// <param name="text">The text.</param>
     public class VariantLexer(string text) : Lexer<TokenType>(text, text)
     {
-
         /// <inheritdoc />
         public override bool Check(TokenType flags) => (Type & flags) != 0;
 

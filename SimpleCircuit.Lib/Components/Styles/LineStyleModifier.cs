@@ -6,10 +6,10 @@ namespace SimpleCircuit.Components.Styles
     /// A style modifier that affects the line style.
     /// </summary>
     /// <param name="strokeDashArray">The line style.</param>
-    public class LineStyleModifier(string strokeDashArray) : IStyleModifier
+    public class StrokeDashArrayStyleModifier(string strokeDashArray) : IStyleModifier
     {
         /// <summary>
-        /// The style for a <see cref="LineStyleModifier"/>.
+        /// The style for a <see cref="StrokeDashArrayStyleModifier"/>.
         /// </summary>
         /// <param name="parent">The parent style.</param>
         /// <param name="strokeDashArray">The line style.</param>
