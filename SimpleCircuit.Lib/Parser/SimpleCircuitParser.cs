@@ -30,7 +30,7 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseScopedStatements(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result)
+        private static bool ParseScopedStatements(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result, HashSet<string> excludeReferences = null)
         {
             result = null;
             var statements = new List<SyntaxNode>();
@@ -63,6 +63,13 @@ namespace SimpleCircuit.Parser
                 // Use the collected scoped statements
                 foreach (var parameterDefinition in parameterDefinitions)
                     context.ReferencedVariables.Remove(parameterDefinition.Name);
+
+                // Also exclude any parameters passed down the optional argument
+                if (excludeReferences is not null)
+                {
+                    foreach (string name in excludeReferences)
+                        context.ReferencedVariables.Remove(name);
+                }
                 result = new ScopedStatementsNode(statements, parameterDefinitions, context.ReferencedVariables.OrderBy(n => n));
             }
             return true;
@@ -1133,7 +1140,7 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse statements
-            if (!ParseScopedStatements(lexer, context, out var statements))
+            if (!ParseScopedStatements(lexer, context, out var statements, [variableToken.Content.ToString()]))
                 return false;
 
             // Expect the end of the loop
