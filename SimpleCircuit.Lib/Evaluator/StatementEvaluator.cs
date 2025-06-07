@@ -19,6 +19,7 @@ namespace SimpleCircuit.Evaluator
     {
         private const double _isqrt2 = 0.70710678118;
         private const string _wireKey = "wire";
+        public const double MinimumWireLength = 10.0;
 
         /// <summary>
         /// Evaluates a list of statements.
@@ -548,7 +549,7 @@ namespace SimpleCircuit.Evaluator
                             var segment = new WireSegmentInfo(direction.Location)
                             {
                                 IsMinimum = true,
-                                Length = context.Options.MinimumWireLength
+                                Length = MinimumWireLength
                             };
 
                             // Handle markers
@@ -587,10 +588,10 @@ namespace SimpleCircuit.Evaluator
                             if (direction.Distance is not null)
                             {
                                 if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
-                                    segment.Length = EvaluateAsNumber(unary.Argument, context, context.Options.MinimumWireLength);
+                                    segment.Length = EvaluateAsNumber(unary.Argument, context, MinimumWireLength);
                                 else
                                 {
-                                    segment.Length = EvaluateAsNumber(direction.Distance, context, context.Options.MinimumWireLength);
+                                    segment.Length = EvaluateAsNumber(direction.Distance, context, MinimumWireLength);
                                     segment.IsMinimum = false;
                                 }
                             }
@@ -620,7 +621,7 @@ namespace SimpleCircuit.Evaluator
                             var segment = new WireSegmentInfo(literal.Location)
                             {
                                 IsMinimum = true,
-                                Length = context.Options.MinimumWireLength
+                                Length = MinimumWireLength
                             };
                             segments.Add(segment);
                         }
@@ -678,7 +679,7 @@ namespace SimpleCircuit.Evaluator
                         var segment = new WireSegmentInfo(direction.Location)
                         {
                             IsMinimum = true,
-                            Length = context.Options.MinimumWireLength
+                            Length = MinimumWireLength
                         };
 
                         if (direction.Angle is not null)
@@ -705,10 +706,10 @@ namespace SimpleCircuit.Evaluator
                         if (direction.Distance is not null)
                         {
                             if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
-                                segment.Length = EvaluateAsNumber(unary.Argument, context, context.Options.MinimumWireLength);
+                                segment.Length = EvaluateAsNumber(unary.Argument, context, MinimumWireLength);
                             else
                             {
-                                segment.Length = EvaluateAsNumber(direction.Distance, context, context.Options.MinimumWireLength);
+                                segment.Length = EvaluateAsNumber(direction.Distance, context, MinimumWireLength);
                                 segment.IsMinimum = false;
                             }
                         }

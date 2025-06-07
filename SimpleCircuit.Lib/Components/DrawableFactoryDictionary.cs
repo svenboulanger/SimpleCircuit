@@ -54,7 +54,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
-        /// Registers a factory for the specified key.
+        /// Registers a factory.
         /// </summary>
         /// <param name="factory">The factory.</param>
         public void Register(IDrawableFactory factory)
@@ -79,7 +79,7 @@ namespace SimpleCircuit.Components
         }
 
         /// <summary>
-        /// Load XML.
+        /// Load XML containing descriptions of drawables.
         /// </summary>
         /// <param name="xml">The XML.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>

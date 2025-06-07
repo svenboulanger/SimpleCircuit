@@ -17,7 +17,7 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, IStandardizedDrawable, IBoxDrawable
+        private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors;
 
@@ -25,8 +25,6 @@ namespace SimpleCircuit.Components.Digital
             public override string Type => "invertor";
 
             /// <inheritdoc />
-            public Standards Supported { get; } = Standards.American | Standards.European;
-
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;

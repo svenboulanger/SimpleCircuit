@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Digital
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), IStandardizedDrawable, IBoxDrawable
+        private class Instance(string name) : ScaledOrientedDrawable(name), IBoxDrawable
         {
             private int _inputs = 2;
             private double _spacing = 5;
@@ -28,6 +28,9 @@ namespace SimpleCircuit.Components.Digital
             /// <inheritdoc />
             public override string Type => "nand";
 
+            /// <summary>
+            /// Gets or sets the number of inputs.
+            /// </summary>
             [Description("The number of inputs (1 to 10)")]
             public int Inputs
             {
@@ -42,6 +45,9 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
+            /// <summary>
+            /// Gets or sets the spacing between inputs.
+            /// </summary>
             [Description("The space between inputs")]
             public double Spacing
             {
@@ -84,6 +90,7 @@ namespace SimpleCircuit.Components.Digital
                 }
             }
 
+            /// <inheritdoc />
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
@@ -96,9 +103,6 @@ namespace SimpleCircuit.Components.Digital
 
             /// <inheritdoc />
             Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
-
-            /// <inheritdoc />
-            public Standards Supported { get; } = Standards.American | Standards.European;
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)

@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components;
-using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
@@ -34,38 +33,6 @@ namespace SimpleCircuit
         /// The identifier for European style components.
         /// </summary>
         public const string European = "euro";
-
-        /// <summary>
-        /// Gets the current style.
-        /// </summary>
-        public Standards Standard { get; private set; }
-
-        [Description("If true, use native symbols.")]
-        public bool Native { get => Standard == Standards.Native; set => Standard = Standards.Native; }
-
-        [Description("If true, use ANSI style symbols.")]
-        public bool AmericanStyle { get => Standard == Standards.American; set => Standard = Standards.American; }
-
-        [Description("If true, use IEC style symbols.")]
-        public bool EuropeanStyle { get => Standard == Standards.European; set => Standard = Standards.European; }
-
-        [Description("If true, some components will use symbols for electrical installations in Belgium (Algemeen Reglement op Elektrische Installaties).")]
-        public bool AREI { get => Standard == Standards.AREI; set => Standard = Standards.AREI; }
-
-        [Description("The minimum wire length used for wires when no minimum or fixed length is specified.")]
-        public double MinimumWireLength { get; set; } = 10.0;
-
-        [Description("The default scale for any amplifier created. The default is 1.")]
-        public double Scale { get; set; } = 1.0;
-
-        [Description("If true, removes any empty groups in the SVG output. The default is true.")] 
-        public bool RemoveEmptyGroups { get; set; } = true;
-
-        [Description("The radius of corners for subsequent components that support it. The default is 0.")]
-        public double CornerRadius { get; set; } = 0.0;
-
-        [Description("The default label margin to the edge of subsequent components. The default is 1.")]
-        public double LabelMargin { get; set; } = 1.0;
 
         [Description("The spacing in X-direction between two unconnected circuit diagrams. The default is 10.")]
         public double SpacingX { get; set; } = 20.0;
@@ -145,31 +112,6 @@ namespace SimpleCircuit
         /// <param name="diagnostics">The diagnostics.</param>
         public void Apply(string key, IDrawable drawable, IDiagnosticHandler diagnostics)
         {
-            // Default scale
-            if (drawable is IScaledDrawable scaled)
-                scaled.Scale = Scale;
-
-            // Default standard
-            if (drawable is IStandardizedDrawable standardized)
-            {
-                if (Standard == Standards.AREI && (standardized.Supported & Standards.AREI) == Standards.AREI)
-                    standardized.Variants.Add(Arei);
-                if (Standard == Standards.European && (standardized.Supported & Standards.European) == Standards.European)
-                    standardized.Variants.Add(European);
-                if (Standard == Standards.American && (standardized.Supported & Standards.American) == Standards.American)
-                    standardized.Variants.Add(American);
-            }
-
-            // Rounded box
-            if (drawable is IRoundedBox rb)
-                rb.CornerRadius = CornerRadius;
-
-            // Labels
-            if (drawable is IBoxDrawable bl)
-                bl.LabelMargin = LabelMargin;
-            if (drawable is IEllipseDrawable el)
-                el.LabelMargin = LabelMargin;
-
             // Handle default variants
             if (_includes.TryGetValue(key, out var set))
             {
