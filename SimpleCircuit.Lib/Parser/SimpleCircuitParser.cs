@@ -35,6 +35,7 @@ namespace SimpleCircuit.Parser
             result = null;
             var statements = new List<SyntaxNode>();
             var parameterDefinitions = new List<ParameterDefinitionNode>();
+            var defaultVariantsAndProperties = new List<ControlPropertyNode>();
 
             while (true)
             {
@@ -53,6 +54,8 @@ namespace SimpleCircuit.Parser
                 // Don't add a statement if it is a parameter definition (this is added separately to the context)
                 if (statement is ParameterDefinitionNode parameterDefinition)
                     parameterDefinitions.Add(parameterDefinition);
+                else if (statement is ControlPropertyNode defaultOptions)
+                    defaultVariantsAndProperties.Add(defaultOptions);
                 else
                     statements.Add(statement);
             }
@@ -70,7 +73,7 @@ namespace SimpleCircuit.Parser
                     foreach (string name in excludeReferences)
                         context.ReferencedVariables.Remove(name);
                 }
-                result = new ScopedStatementsNode(statements, parameterDefinitions, context.ReferencedVariables.OrderBy(n => n));
+                result = new ScopedStatementsNode(statements, parameterDefinitions, defaultVariantsAndProperties, context.ReferencedVariables.OrderBy(n => n));
             }
             return true;
         }
@@ -586,7 +589,7 @@ namespace SimpleCircuit.Parser
             }
 
             // The name itself
-            if (!ParseVirtualName(lexer, context, out result))
+            if (!ParseFilterName(lexer, context, out result))
                 return false;
             if (result is null)
                 return true;
@@ -765,13 +768,13 @@ namespace SimpleCircuit.Parser
         }
 
         /// <summary>
-        /// Parses a name in a virtual chain.
+        /// Parses name that can contain wildcard characters for filtering.
         /// </summary>
         /// <param name="lexer">The lexer.</param>
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
-        public static bool ParseVirtualName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        public static bool ParseFilterName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
             while (true)
@@ -1008,16 +1011,13 @@ namespace SimpleCircuit.Parser
         private static bool ParseControlPropertyStatement(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
-            if (!lexer.Branch(TokenType.Word, out var keyToken))
-            {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected component key"));
+            if (!ParseFilterName(lexer, context, out var name))
                 return false;
-            }
 
             // Start reading properties
             if (!ParsePropertyList(lexer, context, out var properties))
                 return false;
-            result = new ControlPropertyNode(keyToken, properties);
+            result = new ControlPropertyNode(name, properties);
             return true;
         }
         private static bool ParseParameterDefinition(Token param, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)

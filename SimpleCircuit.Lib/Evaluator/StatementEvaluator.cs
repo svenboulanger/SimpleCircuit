@@ -18,8 +18,7 @@ namespace SimpleCircuit.Evaluator
     public static class StatementEvaluator
     {
         private const double _isqrt2 = 0.70710678118;
-        private const string _wireKey = "wire";
-        public const double MinimumWireLength = 10.0;
+        public const double MinimumWireLength = -1.0;
 
         /// <summary>
         /// Evaluates a list of statements.
@@ -56,7 +55,7 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(ScopedStatementsNode statements, EvaluationContext context)
         {
-            ApplyLocalParameterDefinitions(statements.ParameterDefinitions, context);
+            ApplyLocalParameterDefinitions(statements.ParameterDefinitions, statements.DefaultVariantsAndProperties, context);
 
             // Evaluate the statements
             foreach (var statement in statements.Statements)
@@ -211,16 +210,76 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(ControlPropertyNode controlProperty, EvaluationContext context)
         {
-            string key = controlProperty.Key.Content.ToString();
+            string filter = EvaluateFilter(controlProperty.Filter, context);
 
-            // Check whether the key is actually a key
-            if (!StringComparer.Ordinal.Equals(key, _wireKey) && !context.Factory.IsKey(key))
+            int labelIndex = 0;
+            HashSet<string> includes = [], excludes = [];
+            List<(Token, object)> defaultProperties = [];
+
+            foreach (var property in controlProperty.Properties)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(controlProperty.Key, SeverityLevel.Error, "ERR", $"Expected component key of '{_wireKey}'"));
-                return;
+                switch (property)
+                {
+                    case UnaryNode unary:
+                        if (unary.Type == UnaryOperatorTypes.Positive)
+                        {
+                            // Add a variant
+                            string name = EvaluateName(unary.Argument, context);
+                            includes.Add(name);
+                        }
+                        else if (unary.Type == UnaryOperatorTypes.Negative)
+                        {
+                            // Remove a variant
+                            string name = EvaluateName(unary.Argument, context);
+                            excludes.Add(name);
+                        }
+                        else
+                            throw new NotImplementedException();
+                        break;
+
+                    case QuotedNode quoted:
+                        {
+                            // Add a label
+                            defaultProperties.Add((new Token(quoted.Location, $"label{labelIndex}".AsMemory()), quoted.Value.ToString()));
+                            labelIndex++;
+                        }
+                        break;
+
+                    case IdentifierNode id:
+                        {
+                            // Add a variant
+                            includes.Add(id.Name);
+                        }
+                        break;
+
+                    case BinaryNode binary:
+                        switch (binary.Type)
+                        {
+                            case BinaryOperatorTypes.Concatenate:
+                                break;
+
+                            case BinaryOperatorTypes.Assignment:
+                                // Set property
+                                if (binary.Left is not IdentifierNode id)
+                                {
+                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Location, SeverityLevel.Error, "ERR", "Expected a literal"));
+                                    return;
+                                }
+                                string propertyName = id.Name;
+                                object value = EvaluateExpression(binary.Right, context);
+
+                                defaultProperties.Add((id.Token, value));
+                                break;
+                        }
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
+                }
             }
 
-            StorePropertiesAndVariants(key, context.Options, controlProperty.Properties, context);
+            // Add the defaults to the current scope
+            context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
         private static void Evaluate(SectionDefinitionNode sectionDefinition, EvaluationContext context)
         {
@@ -384,7 +443,7 @@ namespace SimpleCircuit.Evaluator
             context.Factory.Register(new Subcircuit(subckt.Name.Content.ToString(), subckt, context.Factory, context.Options, context.Diagnostics));
         }
 
-        private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, EvaluationContext context)
+        private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> defaultVariantsAndProperties, EvaluationContext context)
         {
             // Make sure we can find the parameter definitions back
             foreach (var parameterDefinition in parameterDefinitions)
@@ -403,6 +462,10 @@ namespace SimpleCircuit.Evaluator
                 // Release the used parameter name
                 context.UsedExpressionParameters.Remove(parameterDefinition.Name);
             }
+
+            // Then evaluate all default variants and properties
+            foreach (var defaultOptions in defaultVariantsAndProperties)
+                Evaluate(defaultOptions, context);
         }
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)
         {
@@ -468,77 +531,6 @@ namespace SimpleCircuit.Evaluator
                         throw new NotImplementedException();
                 }
             }
-        }
-        private static void StorePropertiesAndVariants(string filter, Options options, IEnumerable<SyntaxNode> properties, EvaluationContext context)
-        {
-            int labelIndex = 0;
-            HashSet<string> includes = [], excludes = [];
-            List<(Token, object)> defaultProperties = [];
-
-            foreach (var property in properties)
-            {
-                switch (property)
-                {
-                    case UnaryNode unary:
-                        if (unary.Type == UnaryOperatorTypes.Positive)
-                        {
-                            // Add a variant
-                            string name = EvaluateName(unary.Argument, context);
-                            includes.Add(name);
-                        }
-                        else if (unary.Type == UnaryOperatorTypes.Negative)
-                        {
-                            // Remove a variant
-                            string name = EvaluateName(unary.Argument, context);
-                            excludes.Add(name);
-                        }
-                        else
-                            throw new NotImplementedException();
-                        break;
-
-                    case QuotedNode quoted:
-                        {
-                            // Add a label
-                            defaultProperties.Add((new Token(quoted.Location, $"label{labelIndex}".AsMemory()), quoted.Value.ToString()));
-                            labelIndex++;
-                        }
-                        break;
-
-                    case IdentifierNode id:
-                        {
-                            // Add a variant
-                            includes.Add(id.Name);
-                        }
-                        break;
-
-                    case BinaryNode binary:
-                        switch (binary.Type)
-                        {
-                            case BinaryOperatorTypes.Concatenate:
-                                break;
-
-                            case BinaryOperatorTypes.Assignment:
-                                // Set property
-                                if (binary.Left is not IdentifierNode id)
-                                {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Location, SeverityLevel.Error, "ERR", "Expected a literal"));
-                                    return;
-                                }
-                                string propertyName = id.Name;
-                                object value = EvaluateExpression(binary.Right, context);
-
-                                defaultProperties.Add((id.Token, value));
-                                break;
-                        }
-                        break;
-
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
-
-            // Add the defaults to the current scope
-            context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
         private static void ProcessWire(PinReference startPin, WireNode wire, PinReference endPin, EvaluationContext context)
         {
@@ -787,7 +779,7 @@ namespace SimpleCircuit.Evaluator
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            string name = EvaluateVirtualName(component, context);
+            string name = EvaluateFilter(component, context);
             if (name is null)
                 return null;
 
@@ -799,7 +791,7 @@ namespace SimpleCircuit.Evaluator
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, SyntaxNode pin, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            string name = EvaluateVirtualName(component, context);
+            string name = EvaluateFilter(component, context);
             if (name is null)
                 return null;
 
@@ -816,7 +808,7 @@ namespace SimpleCircuit.Evaluator
         private static (ILocatedPresence, ILocatedPresence) ProcessVirtualComponent(SyntaxNode component, SyntaxNode left, SyntaxNode right, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            string name = EvaluateVirtualName(component, context);
+            string name = EvaluateFilter(component, context);
             if (name is null)
                 return (null, null);
 
@@ -858,7 +850,7 @@ namespace SimpleCircuit.Evaluator
                     return null;
             }
         }
-        private static string EvaluateVirtualName(SyntaxNode node, EvaluationContext context)
+        private static string EvaluateFilter(SyntaxNode node, EvaluationContext context)
         {
             // Evaluate and validate the name
             string name = EvaluateName(node, context);

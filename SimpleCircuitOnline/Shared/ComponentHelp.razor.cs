@@ -127,7 +127,7 @@ namespace SimpleCircuitOnline.Shared
 
                 if (factory != null && metadata != null)
                 {
-                    _drawable = factory.Create(metadata.Key, metadata.Key, new Options(), null);
+                    _drawable = factory.Create(metadata.Key, metadata.Key, new Options(), null, null);
                     if (string.IsNullOrWhiteSpace(_drawable.Labels[0]?.Value))
                         _drawable.Labels[0].Value = "label";
                     foreach (var variant in _drawable.Variants)

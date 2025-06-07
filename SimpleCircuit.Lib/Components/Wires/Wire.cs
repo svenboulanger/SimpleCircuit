@@ -60,9 +60,19 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
 
-        [Description("The radius.")]
+        /// <summary>
+        /// Gets or sets the radius of corners.
+        /// </summary>
+        [Description("The radius of wire corners. The default is 0.")]
         [Alias("r")]
-        public double RoundRadius { get; set; } = 0.0;
+        public double Radius { get; set; } = 0.0;
+
+        /// <summary>
+        /// Gets or sets the minimum length of wire segments.
+        /// </summary>
+        [Description("The minimum length of a wire segment. The default is 10.")]
+        [Alias("ml")]
+        public double MinimumLength { get; set; } = 10.0;
 
         /// <summary>
         /// Gets the global coordinates of the points of the wire.
@@ -355,6 +365,7 @@ namespace SimpleCircuit.Components.Wires
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
                 var orientation = GetOrientation(i);
+                double length = segment.Length < 0 ? MinimumLength : segment.Length;
 
                 // Ignore unconstrained wires
                 if (double.IsNaN(orientation.X) || double.IsNaN(orientation.Y))
@@ -362,11 +373,11 @@ namespace SimpleCircuit.Components.Wires
 
                 // Wire is of minimum length
                 if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * segment.Length);
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
                 else if (orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * segment.Length);
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
                 else if (!orientation.X.IsZero() && !orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, segment.Length);
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, length);
                 fromX = toX;
                 fromY = toY;
             }
@@ -423,7 +434,7 @@ namespace SimpleCircuit.Components.Wires
                         else
                         {
                             _points.Add(tf.Apply(_localPoints[i].Location));
-                            if (RoundRadius.IsZero() || i >= _localPoints.Count - 1)
+                            if (Radius.IsZero() || i >= _localPoints.Count - 1)
                                 builder.LineTo(current);
                             else
                             {
@@ -441,7 +452,7 @@ namespace SimpleCircuit.Components.Wires
                                     else
                                     {
                                         // Rounded corner
-                                        double x = RoundRadius / Math.Tan(Math.Acos(dot) * 0.5);
+                                        double x = Radius / Math.Tan(Math.Acos(dot) * 0.5);
                                         if (x > lu * 0.5 || x > lv * 0.5)
                                         {
                                             // No place, just do straight line again
@@ -451,7 +462,7 @@ namespace SimpleCircuit.Components.Wires
                                         {
                                             // Segments
                                             builder.LineTo(current + nu * x);
-                                            builder.ArcTo(RoundRadius, RoundRadius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
+                                            builder.ArcTo(Radius, Radius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
                                         }
                                     }
                                 }

@@ -42,6 +42,13 @@ namespace SimpleCircuit.Components.Wires
         /// </summary>
         public string EndY => GetYName(_segments.Count - 1);
 
+        /// <summary>
+        /// Gets or sets the minimum length of wire segments.
+        /// </summary>
+        [Description("The minimum length of a wire segment. The default is 10.")]
+        [Alias("ml")]
+        public double MinimumLength { get; set; } = 10.0;
+
         /// <inheritdoc />
         public PresenceResult Prepare(IPrepareContext context)
         {
@@ -82,21 +89,22 @@ namespace SimpleCircuit.Components.Wires
                 var toY = context.GetOffset(y);
                 var segment = _segments[i];
                 var orientation = segment.Orientation;
+                double length = segment.Length < 0 ? MinimumLength : segment.Length;
 
-                if (doY && segment.Orientation.X.IsZero() && fromY.Representative != toY.Representative)
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, segment.Orientation.Y * segment.Length);
-                if (doX && segment.Orientation.Y.IsZero() && fromX.Representative != toX.Representative)
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, segment.Orientation.X * segment.Length);
+                if (doY && orientation.X.IsZero() && fromY.Representative != toY.Representative)
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
+                if (doX && orientation.Y.IsZero() && fromX.Representative != toX.Representative)
+                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
 
-                if (!segment.Orientation.X.IsZero() && !segment.Orientation.Y.IsZero())
+                if (!orientation.X.IsZero() && !orientation.Y.IsZero())
                 {
                     // The wire definition is an odd angle, the axis becomes important
                     if (doX && doY)
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.{y}", fromX, fromY, toX, toY, segment.Orientation, segment.Length);
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.{y}", fromX, fromY, toX, toY, orientation, length);
                     else if (doX)
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, segment.Orientation.X * segment.Length);
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
                     else
-                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, segment.Orientation.Y * segment.Length);
+                        MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
                 }
                 fromX = toX;
                 fromY = toY;

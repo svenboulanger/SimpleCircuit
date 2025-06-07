@@ -12,7 +12,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets an empty scoped statements node.
         /// </summary>
-        public static ScopedStatementsNode Empty { get; } = new([], [], []);
+        public static ScopedStatementsNode Empty { get; } = new([], [], [], []);
 
         /// <summary>
         /// Gets the statements.
@@ -23,6 +23,11 @@ namespace SimpleCircuit.Parser.Nodes
         /// Gets the parameter definitions.
         /// </summary>
         public ParameterDefinitionNode[] ParameterDefinitions { get; }
+
+        /// <summary>
+        /// Gets the default variants and properties.
+        /// </summary>
+        public ControlPropertyNode[] DefaultVariantsAndProperties { get; }
 
         /// <summary>
         /// Gets a sorted array of strings that contain all the references.
@@ -38,11 +43,12 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="statements">The statements.</param>
         /// <param name="parameterDefinitions">The parameter definitions.</param>
         /// <param name="references">The references.</param>
-        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<string> references)
+        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> controlPropertyNodes, IEnumerable<string> references)
             : base(statements.FirstOrDefault()?.Location ?? default)
         {
             Statements = statements?.ToArray() ?? [];
             ParameterDefinitions = parameterDefinitions?.ToArray() ?? [];
+            DefaultVariantsAndProperties = controlPropertyNodes?.ToArray() ?? [];
             References = references?.ToArray() ?? [];
         }
 

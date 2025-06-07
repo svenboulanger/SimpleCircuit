@@ -93,7 +93,6 @@ namespace SimpleCircuit.Evaluator
         public void AddDefault(string filter, IEnumerable<string> includes, IEnumerable<string> excludes, IEnumerable<(Token Name, object Value)> properties)
         {
             // Modify the filter
-            filter = $"(?<=^|/){filter.Replace("*", ".*")}";
             var r = new DefaultOptions(filter);
 
             if (includes is not null)
