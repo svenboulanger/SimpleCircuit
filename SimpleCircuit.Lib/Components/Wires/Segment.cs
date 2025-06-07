@@ -96,7 +96,10 @@ namespace SimpleCircuit.Components.Wires
                 if (Multiple > 1)
                 {
                     builder.Line(new(0, -3.5), new(2.1, -5.6), style);
-                    builder.Text(Multiple.ToString(), new(2.5, -5.1), new(1, -1), style);
+
+                    var span = builder.TextFormatter.Format(Multiple.ToString(), style);
+                    builder.Text(span, new Vector2(2.5, -5.1) + new Vector2(0.707, -0.707) * (style.FontSize + 1) * 0.5 - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, TextOrientation.Normal);
+
                     _anchors[0] = new LabelAnchorPoint(new(0, -11), new(0, -1));
                 }
             }
