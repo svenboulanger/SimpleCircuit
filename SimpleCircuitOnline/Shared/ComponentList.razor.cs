@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using SimpleCircuit.Components;
 using SimpleCircuit.Evaluator;
-using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 
@@ -17,7 +16,7 @@ namespace SimpleCircuitOnline.Shared
         private bool IsFiltered((DrawableMetadata Metadata, IDrawableFactory Factory) item)
         {
             int count = 0;
-            foreach (var term in _searchTerms)
+            foreach (string term in _searchTerms)
             {
                 if (StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term) ||
                     item.Metadata.Keywords.Contains(term) ||

@@ -1,11 +1,16 @@
 ﻿@if (Demo.Demos != null)
 {
-    @foreach (var demo in Demo.Demos)
+    @foreach (var pair in _demos)
     {
-        <a @onclick="x => Update(demo.Code)" class="bd-callout" role="button">
-            <h5>@demo.Title</h5>
-            <p>@demo.Description</p>
-        </a>
+        <Expandable Title="@pair.Key">
+            @foreach (var demo in pair.Value)
+            {
+                <a @onclick="x => Update(demo.Code)" class="bd-callout" role="button">
+                    <h5>@demo.Title</h5>
+                <p>@demo.Description</p>
+            </a>
+            }
+        </Expandable>
     }
 }
 
