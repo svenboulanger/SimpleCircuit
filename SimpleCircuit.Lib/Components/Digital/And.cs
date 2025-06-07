@@ -7,26 +7,27 @@ using SimpleCircuit.Components.Pins;
 namespace SimpleCircuit.Components.Digital
 {
     /// <summary>
-    /// And gate.
+    /// AND or NAND gate.
     /// </summary>
     [Drawable("AND", "An AND gate.", "Digital")]
+    [Drawable("NAND", "A NAND gate.", "Digital")]
     public class And : DrawableFactory
     {
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
-            => new Instance(name);
+            => new Instance(name, key.Equals("NAND"));
 
         /// <summary>
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), IBoxDrawable
+        private class Instance(string name, bool invertOutput) : ScaledOrientedDrawable(name), IBoxDrawable
         {
             private int _inputs = 2;
             private double _spacing = 5;
 
             /// <inheritdoc />
-            public override string Type => "and";
+            public override string Type => invertOutput ? "nand" : "and";
 
             /// <summary>
             /// Gets or sets the number of inputs.
@@ -124,7 +125,7 @@ namespace SimpleCircuit.Components.Digital
                             y += Spacing;
                             c++;
                         }
-                        Pins.Add(new FixedOrientedPin("output", "Output", this, new(r, 0), new(1, 0)), "output", "out", "o");
+                        Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(r + 3, 0) : new(r, 0), new(1, 0)), "output", "out", "o");
                         break;
                 }
                 return result;
@@ -159,17 +160,22 @@ namespace SimpleCircuit.Components.Digital
                     .LineTo(new(-w, -h))
                     .Close(), style);
 
+                if (invertOutput)
+                    builder.Circle(new(w + 1.5, 0), 1.5, style);
+
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
-            private void DrawAndIEC(IGraphicsBuilder drawing, IStyle style)
+            private void DrawAndIEC(IGraphicsBuilder builder, IStyle style)
             {
-                drawing.ExtendPins(Pins, style);
-                drawing.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
+                builder.ExtendPins(Pins, style);
+                builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
+                if (invertOutput)
+                    builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
                 
-                var span = drawing.TextFormatter.Format("&amp;", style);
-                drawing.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
+                var span = builder.TextFormatter.Format("&amp;", style);
+                builder.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(drawing, this, style);
+                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
         }
     }

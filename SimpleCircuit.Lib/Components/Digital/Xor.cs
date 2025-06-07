@@ -10,17 +10,19 @@ namespace SimpleCircuit.Components.Digital
     /// Xor gate.
     /// </summary>
     [Drawable("XOR", "An XOR gate.", "Digital")]
+    [Drawable("XNOR", "An XNOR gate.", "Digital")]
     public class Xor : DrawableFactory
     {
         /// <inheritdoc />
         protected override IDrawable Factory(string key, string name)
-            => new Instance(name);
+            => new Instance(name, key.Equals("XNOR"));
 
         /// <summary>
         /// Creates a new <see cref="Instance"/>.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : ScaledOrientedDrawable(name), IBoxDrawable
+        /// <param name="invertOutput">If <c>true</c>, the output is inverted.</param>
+        private class Instance(string name, bool invertOutput) : ScaledOrientedDrawable(name), IBoxDrawable
         {
             private int _inputs = 2;
             private double _spacing = 5;
@@ -140,7 +142,7 @@ namespace SimpleCircuit.Components.Digital
                             y += Spacing;
                             c++;
                         }
-                        Pins.Add(new FixedOrientedPin("output", "Output", this, new(w, 0), new(1, 0)), "output", "out", "o");
+                        Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(w + 3, 0) : new(w, 0), new(1, 0)), "output", "out", "o");
                         break;
                 }
                 return result;
@@ -172,6 +174,8 @@ namespace SimpleCircuit.Components.Digital
                     .CurveTo(new(-w * 0.6, -h / 3), new(-w * 0.6, h / 3), new(-w, h)), style);
                 builder.Path(b => b.MoveTo(new(-w * 1.3, h))
                     .CurveTo(new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)), style.AsStroke());
+                if (invertOutput)
+                    builder.Circle(new(w + 1.5, 0), 1.5, style);
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }
 
@@ -179,6 +183,8 @@ namespace SimpleCircuit.Components.Digital
             {
                 builder.ExtendPins(Pins, style);
                 builder.Rectangle(-Width * 0.5, -Height * 0.5, Width, Height, style);
+                if (invertOutput)
+                    builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
 
                 var span = builder.TextFormatter.Format("=1", style);
                 builder.Text(span, -span.Bounds.Bounds.Center, TextOrientation.Transformed);
