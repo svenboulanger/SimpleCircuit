@@ -4,6 +4,7 @@ using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
 using System.Xml;
@@ -28,7 +29,7 @@ namespace SimpleCircuit.Components.General
         }
 
         /// <inheritdoc />
-        public IEnumerable<string> Keys => new string[] { _metadata.Key };
+        public IEnumerable<string> Keys => [_metadata.Key];
 
         /// <summary>
         /// Creates a new XML drawable.
@@ -44,7 +45,7 @@ namespace SimpleCircuit.Components.General
             string keywords = definition.Attributes["keywords"]?.Value ?? string.Empty;
 
             _metadata = new(key, description, category);
-            foreach (string keyword in keywords.Split(new[] { ' ', ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries))
+            foreach (string keyword in keywords.Split([' ', ',', ';'], System.StringSplitOptions.RemoveEmptyEntries))
                 _metadata.Keywords.Add(keyword);
 
             // Extract the pin definition
@@ -67,7 +68,7 @@ namespace SimpleCircuit.Components.General
         }
 
         /// <inheritdoc />
-        public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
+        public IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics)
             => new Instance(key, name, _pins, _drawing);
 
         /// <summary>

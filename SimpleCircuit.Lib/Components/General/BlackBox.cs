@@ -9,6 +9,7 @@ using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
+using SimpleCircuit.Evaluator;
 
 namespace SimpleCircuit.Components
 {
@@ -23,9 +24,9 @@ namespace SimpleCircuit.Components
             => new Instance(name);
 
         /// <inheritdoc />
-        public override IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
+        public override IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics)
         {
-            var instance = (Instance)base.Create(key, name, options, diagnostics);
+            var instance = (Instance)base.Create(key, name, options, scope, diagnostics);
             return instance;
         }
 

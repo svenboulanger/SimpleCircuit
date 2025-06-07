@@ -53,8 +53,11 @@ namespace SimpleCircuit.Components
         }
 
         /// <inheritdoc />
-        public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
-            => new Instance(key, name, this);
+        public IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics)
+        {
+            var result = new Instance(key, name, this);
+            return result;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subcircuit"/> class.

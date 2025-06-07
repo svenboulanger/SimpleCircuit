@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,10 +50,10 @@ namespace SimpleCircuit.Components
         protected abstract IDrawable Factory(string key, string name);
 
         /// <inheritdoc />
-        public virtual IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics)
+        public virtual IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics)
         {
             var result = Factory(key, name);
-            options?.Apply(key, result, diagnostics);
+            scope?.ApplyDefaults(name, result, diagnostics);
             return result;
         }
     }

@@ -122,7 +122,7 @@ namespace SimpleCircuit.Evaluator
 
                     case QueuedAnonymousPoint qap:
                         {
-                            var point = context.Factory.Create(PointFactory.Key, context.Options, context.Diagnostics) as ILocatedDrawable;
+                            var point = context.Factory.Create(PointFactory.Key, context.Options, context.CurrentScope, context.Diagnostics) as ILocatedDrawable;
                             context.Circuit.Add(point);
                             context.QueuedPoints.Enqueue(point);
                             if (lastWire is not null)
@@ -469,9 +469,12 @@ namespace SimpleCircuit.Evaluator
                 }
             }
         }
-        private static void StorePropertiesAndVariants(string key, Options options, IEnumerable<SyntaxNode> properties, EvaluationContext context)
+        private static void StorePropertiesAndVariants(string filter, Options options, IEnumerable<SyntaxNode> properties, EvaluationContext context)
         {
             int labelIndex = 0;
+            HashSet<string> includes = [], excludes = [];
+            List<(Token, object)> defaultProperties = [];
+
             foreach (var property in properties)
             {
                 switch (property)
@@ -481,13 +484,13 @@ namespace SimpleCircuit.Evaluator
                         {
                             // Add a variant
                             string name = EvaluateName(unary.Argument, context);
-                            options.AddInclude(key, name);
+                            includes.Add(name);
                         }
                         else if (unary.Type == UnaryOperatorTypes.Negative)
                         {
                             // Remove a variant
                             string name = EvaluateName(unary.Argument, context);
-                            options.AddExclude(key, name);
+                            excludes.Add(name);
                         }
                         else
                             throw new NotImplementedException();
@@ -496,7 +499,7 @@ namespace SimpleCircuit.Evaluator
                     case QuotedNode quoted:
                         {
                             // Add a label
-                            options.AddDefaultProperty(key, new Token(quoted.Location, $"label{labelIndex}".AsMemory()), quoted.Value.ToString());
+                            defaultProperties.Add((new Token(quoted.Location, $"label{labelIndex}".AsMemory()), quoted.Value.ToString()));
                             labelIndex++;
                         }
                         break;
@@ -504,7 +507,7 @@ namespace SimpleCircuit.Evaluator
                     case IdentifierNode id:
                         {
                             // Add a variant
-                            options.AddInclude(key, id.Name);
+                            includes.Add(id.Name);
                         }
                         break;
 
@@ -523,7 +526,8 @@ namespace SimpleCircuit.Evaluator
                                 }
                                 string propertyName = id.Name;
                                 object value = EvaluateExpression(binary.Right, context);
-                                options.AddDefaultProperty(key, id.Token, value);
+
+                                defaultProperties.Add((id.Token, value));
                                 break;
                         }
                         break;
@@ -532,6 +536,9 @@ namespace SimpleCircuit.Evaluator
                         throw new NotImplementedException();
                 }
             }
+
+            // Add the defaults to the current scope
+            context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
         private static void ProcessWire(PinReference startPin, WireNode wire, PinReference endPin, EvaluationContext context)
         {
@@ -658,9 +665,7 @@ namespace SimpleCircuit.Evaluator
 
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
-
-                // Apply default properties and variants for wires
-                context.Options.Apply(_wireKey, result, context.Diagnostics);
+                context.CurrentScope.ApplyDefaults("wire", result, context.Diagnostics);
 
                 // Apply properties and variants
                 ApplyPropertiesAndVariants(result, propertiesAndVariants, context);
@@ -759,7 +764,7 @@ namespace SimpleCircuit.Evaluator
             // Get the item
             if (!context.Circuit.TryGetValue(name, out var presence))
             {
-                presence = context.Factory.Create(name, context.Options, context.Diagnostics);
+                presence = context.Factory.Create(name, context.Options, context.CurrentScope, context.Diagnostics);
                 if (presence is null)
                 {
                     context.Diagnostics?.Post(new SourceDiagnosticMessage(component.Location, SeverityLevel.Error, "ERR", $"Could not create a component for '{name}'"));

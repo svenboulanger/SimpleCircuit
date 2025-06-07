@@ -1,24 +1,10 @@
-﻿using SimpleCircuit.Components;
-using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Parser;
-using System;
-using System.Collections.Generic;
-
-namespace SimpleCircuit
+﻿namespace SimpleCircuit
 {
     /// <summary>
     /// Describes options for parsing SimpleCircuit.
     /// </summary>
     public class Options
     {
-        private readonly struct DefaultProperty(Token property, object value)
-        {
-            public Token Property { get; } = property;
-            public object Value { get; } = value;
-        }
-        private readonly Dictionary<string, HashSet<string>> _includes = [], _excludes = [];
-        private readonly Dictionary<string, List<DefaultProperty>> _properties = [];
-
         /// <summary>
         /// The identifier for AREI style components.
         /// </summary>
@@ -42,95 +28,6 @@ namespace SimpleCircuit
 
         [Description("If true, the graphical bounds are rendered on top of each component. The default is false.")]
         public bool RenderBounds { get; set; }
-
-        /// <summary>
-        /// Adds a default property value for any drawable of the given key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="propertyToken">The property.</param>
-        /// <param name="value">The value.</param>
-        public void AddDefaultProperty(string key, Token propertyToken, object value)
-        {
-            if (!_properties.TryGetValue(key, out var list))
-            {
-                list = [];
-                _properties.Add(key, list);
-            }
-            list.Add(new DefaultProperty(propertyToken, value));
-        }
-
-        /// <summary>
-        /// Adds a variant that needs to be included for the given key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="variant">The variant.</param>
-        public void AddInclude(string key, string variant)
-        {
-            // If it was excluded previously, remove it from there
-            if (_excludes.TryGetValue(key, out var set))
-                set.Remove(variant);
-            if (!_includes.TryGetValue(key, out set))
-            {
-                set = new(StringComparer.OrdinalIgnoreCase);
-                _includes.Add(key, set);
-            }
-            set.Add(variant);
-        }
-
-        /// <summary>
-        /// Adds a variant that needs to be removed for the given key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="variant">The variant.</param>
-        public void AddExclude(string key, string variant)
-        {
-            if (_includes.TryGetValue(key, out var set))
-                set.Remove(variant);
-            if (!_excludes.TryGetValue(key, out set))
-            {
-                set = new(StringComparer.OrdinalIgnoreCase);
-                _excludes.Add(key, set);
-            }
-            set.Add(variant);
-        }
-
-        /// <summary>
-        /// Clears the variants from the options.
-        /// </summary>
-        public void ClearPropertiesAndVariants()
-        {
-            _includes.Clear();
-            _excludes.Clear();
-            _properties.Clear();
-        }
-
-        /// <summary>
-        /// Applies the variants for the given drawable and key.
-        /// </summary>
-        /// <param name="key">The drawable factory key.</param>
-        /// <param name="drawable">The drawable.</param>
-        /// <param name="diagnostics">The diagnostics.</param>
-        public void Apply(string key, IDrawable drawable, IDiagnosticHandler diagnostics)
-        {
-            // Handle default variants
-            if (_includes.TryGetValue(key, out var set))
-            {
-                foreach (string variant in set)
-                    drawable.Variants.Add(variant);
-            }
-            if (_excludes.TryGetValue(key, out set))
-            {
-                foreach (string variant in set)
-                    drawable.Variants.Remove(variant);
-            }
-
-            // Handle default properties
-            if (_properties.TryGetValue(key, out var list))
-            {
-                foreach (var defaultProperty in list)
-                    drawable.SetProperty(defaultProperty.Property, defaultProperty.Value, diagnostics);
-            }
-        }
 
         /// <summary>
         /// Applies the options to the given graphical circuit.

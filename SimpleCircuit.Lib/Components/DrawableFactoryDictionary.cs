@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.General;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -243,12 +244,12 @@ namespace SimpleCircuit.Components
         /// <param name="options">The options.</param>
         /// <param name="diagnostics">The diagnostic handler.</param>
         /// <returns>The created drawable, or <c>null</c> if the drawable could not be created.</returns>
-        public IDrawable Create(string fullname, Options options, IDiagnosticHandler diagnostics)
+        public IDrawable Create(string fullname, Options options, Scope scope, IDiagnosticHandler diagnostics)
         {
-            bool isAnonymous = Extract(fullname, out var key, out var factory);
+            bool isAnonymous = Extract(fullname, out string key, out var factory);
             if (isAnonymous)
-                return factory?.Create(key, $"{fullname}{AnonymousSeparator}{++_anonymousIndex}", options, diagnostics);
-            return factory?.Create(key, fullname, options, diagnostics);
+                return factory?.Create(key, $"{fullname}{AnonymousSeparator}{++_anonymousIndex}", options, scope, diagnostics);
+            return factory?.Create(key, fullname, options, scope, diagnostics);
         }
     }
 }

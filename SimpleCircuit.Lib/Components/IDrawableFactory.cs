@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Evaluator;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components
@@ -28,6 +29,6 @@ namespace SimpleCircuit.Components
         /// <param name="options">The options currently in use.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The drawable, or <c>null</c> if it couldn't be created.</returns>
-        public IDrawable Create(string key, string name, Options options, IDiagnosticHandler diagnostics);
+        public IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics);
     }
 }
