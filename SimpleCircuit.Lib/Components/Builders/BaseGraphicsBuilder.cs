@@ -27,14 +27,6 @@ namespace SimpleCircuit.Components.Builders
         public IDiagnosticHandler Diagnostics { get; }
 
         /// <inheritdoc />
-        public ISet<string> RequiredCSS { get; } = new HashSet<string>();
-
-        /// <summary>
-        /// Adds extra CSS after the required CSS (ordered).
-        /// </summary>
-        public IList<string> ExtraCSS { get; } = [];
-
-        /// <inheritdoc />
         public Transform CurrentTransform => _tf.Peek();
 
         /// <inheritdoc />

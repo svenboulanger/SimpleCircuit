@@ -429,7 +429,7 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-        public XmlDocument Render(IDiagnosticHandler diagnostics, IEnumerable<string> extraCss = null)
+        public XmlDocument Render(IDiagnosticHandler diagnostics)
         {
             if (!Solved)
             {
@@ -439,11 +439,6 @@ namespace SimpleCircuit
 
             // Create our drawing
             var drawing = new SvgBuilder(TextFormatter, Style, diagnostics);
-            if (extraCss != null)
-            {
-                foreach (var ec in extraCss)
-                    drawing.ExtraCSS.Add(ec);
-            }
 
             // Draw
             Render(drawing);

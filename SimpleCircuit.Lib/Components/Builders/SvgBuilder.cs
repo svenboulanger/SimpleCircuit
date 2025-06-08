@@ -331,17 +331,6 @@ namespace SimpleCircuit.Components.Builders
         {
             var svg = _document.DocumentElement;
 
-            // Add stylesheet info if necessary
-            var styleElt = _document.CreateElement("style", Namespace);
-            List<string> style =
-            [
-                Properties.Resources.DefaultStyle,
-                .. RequiredCSS,
-                .. ExtraCSS
-            ];
-            styleElt.InnerText = string.Join(Environment.NewLine, style);
-            svg.PrependChild(styleElt);
-
             // Try to get the bounds of this
             var bounds = Bounds.Expand(Margin);
 

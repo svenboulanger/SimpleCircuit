@@ -91,23 +91,6 @@ namespace SimpleCircuitOnline.Pages
         }
 
         /// <summary>
-        /// Gets or sets whether the component bounds should be rendered.
-        /// </summary>
-        protected bool RenderBounds
-        {
-            get => _settings.RenderBounds;
-            set
-            {
-                if (_settings.RenderBounds != value)
-                {
-                    _settings.RenderBounds = value;
-                    Update();
-                    Task.Run(SaveSettings);
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets whether changes in the editor should cause an automatic update of the output.
         /// </summary>
         protected bool AutoUpdate
@@ -488,11 +471,11 @@ namespace SimpleCircuitOnline.Pages
         private async Task UpdateNow(EvaluationContext context)
         {
             _loading = 2;
-            _svg = await ComputeXml(context, false, _settings.RenderBounds);
+            _svg = await ComputeXml(context, false);
             _loading = 0;
             StateHasChanged();
         }
-        private async Task<XmlDocument> ComputeXml(EvaluationContext context, bool includeScript, bool includeBounds = false)
+        private async Task<XmlDocument> ComputeXml(EvaluationContext context, bool includeScript)
         {
             XmlDocument doc = null;
             try
@@ -511,7 +494,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Parse the script
                 var lexer = SimpleCircuitLexer.FromString(code);
-                context.Options.RenderBounds = includeBounds;
+                lexer.Diagnostics = context.Diagnostics;
                 var parsingContext = new ParsingContext() { Diagnostics = context.Diagnostics };
                 if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node is not null && node.Statements.Length > 0)
                 {
@@ -528,13 +511,12 @@ namespace SimpleCircuitOnline.Pages
 
                     // We now need the last things to have executed
                     if (ckt.Count > 0 && _logger.Errors == 0)
-                        doc = ckt.Render(_logger, []);
+                        doc = ckt.Render(_logger);
                 }
             }
             catch (Exception ex)
             {
-                _logger.Post(new DiagnosticMessage(SeverityLevel.Error,
-                    "Exception", ex.Message));
+                _logger.Post(new DiagnosticMessage(SeverityLevel.Error, "Exception", ex.Message));
             }
 
             // Add our errors and warnings
@@ -563,32 +545,6 @@ namespace SimpleCircuitOnline.Pages
                 return ((char)value).ToString();
             });
             return script;
-        }
-        private static string ModifyCSS(string style)
-        {
-            int level = 0;
-            StringBuilder sb = new(style.Length);
-            bool start = true;
-            for (int i = 0; i < style.Length; i++)
-            {
-                char c = style[i];
-                switch (c)
-                {
-                    case '{': level++; break;
-                    case '}': level--; start = true; break;
-                    case ',': start = true; break;
-                    default:
-                        if (level == 0 && start && !(char.IsWhiteSpace(c) || c == '\r' || c == '\n'))
-                        {
-                            // This is a first character of a selector, so let's splice in our own selector here!
-                            sb.Append(".simplecircuit ");
-                            start = false;
-                        }
-                        break;
-                }
-                sb.Append(c);
-            }
-            return sb.ToString();
         }
         private async Task SaveSettings()
         {

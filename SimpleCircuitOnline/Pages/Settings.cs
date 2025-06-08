@@ -21,10 +21,5 @@
         /// Gets or sets whether the preview should be updated automatically when the script changes.
         /// </summary>
         public bool AutoUpdate { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets whether the bounds of elements should be included in the preview.
-        /// </summary>
-        public bool RenderBounds { get; set; } = true;
     }
 }

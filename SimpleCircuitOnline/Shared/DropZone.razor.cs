@@ -62,12 +62,6 @@ namespace SimpleCircuitOnline.Shared
         public EventCallback<bool> ShrinkYChanged { get; set; }
 
         [Parameter]
-        public bool Bounds { get; set; }
-
-        [Parameter]
-        public EventCallback<bool> BoundsChanged { get; set; }
-
-        [Parameter]
         public bool AutoUpdate { get; set; }
 
         [Parameter]
@@ -100,11 +94,7 @@ namespace SimpleCircuitOnline.Shared
             ShrinkY = value;
             await ShrinkYChanged.InvokeAsync(value);
         }
-        private async Task ToggleBounds(bool value)
-        {
-            Bounds = value;
-            await BoundsChanged.InvokeAsync(value);
-        }
+
         private async Task ToggleAutoUpdate(bool value)
         {
             AutoUpdate = value;

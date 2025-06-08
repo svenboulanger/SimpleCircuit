@@ -34,11 +34,6 @@ namespace SimpleCircuit.Parser
         public HashSet<string> Included { get; } = [];
 
         /// <summary>
-        /// Gets extra CSS.
-        /// </summary>
-        public IList<string> ExtraCss { get; } = [];
-
-        /// <summary>
         /// Gets the referenced variables in the current scope.
         /// </summary>
         public HashSet<string> ReferencedVariables { get; } = [];

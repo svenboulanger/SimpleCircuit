@@ -106,12 +106,11 @@ namespace SimpleCircuit.Components.Wires
                 builder.Line(new(-6, 0), new(-4, 0), style);
                 builder.Line(new(-4, 0), new(4, -4), style);
 
-                builder.RequiredCSS.Add(".marker { fill: black; }");
                 builder.Polygon(
                 [
                     new(4, -4), new(3.25, -5.5),
                     new(1.25, -4.5), new(2, -3)
-                ], style);
+                ], style.AsFilledMarker());
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));

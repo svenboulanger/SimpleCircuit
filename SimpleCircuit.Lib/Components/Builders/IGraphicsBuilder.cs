@@ -19,11 +19,6 @@ namespace SimpleCircuit.Components.Builders
         public IDiagnosticHandler Diagnostics { get; }
 
         /// <summary>
-        /// Gets a set with extra CSS that should be included along with the graphics.
-        /// </summary>
-        public ISet<string> RequiredCSS { get; }
-
-        /// <summary>
         /// Gets the current transform being applied.
         /// </summary>
         public Transform CurrentTransform { get; }
