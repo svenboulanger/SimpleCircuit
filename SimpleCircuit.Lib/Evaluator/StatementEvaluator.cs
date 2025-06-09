@@ -36,6 +36,7 @@ namespace SimpleCircuit.Evaluator
                 case ComponentChain chain: Evaluate(chain, context); break;
                 case VirtualChainNode virtualChain: Evaluate(virtualChain, context); break;
                 case ControlPropertyNode controlProperty: Evaluate(controlProperty, context); break;
+                case ScopeDefinitionNode scopeDefinition: Evaluate(scopeDefinition, context); break;
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
                 case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
@@ -280,6 +281,31 @@ namespace SimpleCircuit.Evaluator
 
             // Add the defaults to the current scope
             context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
+        }
+        private static void Evaluate(ScopeDefinitionNode scopeDefinition, EvaluationContext context)
+        {
+            context.StartScope();
+            foreach (var property in scopeDefinition.Properties)
+            {
+                // Try to parse a property and update the local scope
+                if (property is not BinaryNode assignment ||
+                    assignment.Type != BinaryOperatorTypes.Assignment ||
+                    assignment.Left is not IdentifierNode propertyName)
+                {
+                    context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                    return;
+                }
+
+                // Update the value
+                object value = EvaluateExpression(assignment.Right, context);
+                if (value is null)
+                    return;
+                context.CurrentScope[propertyName.Name] = value;
+            }
+
+            // Execute the statements under a new section
+            Evaluate(scopeDefinition.Statements, context);
+            context.EndScope();
         }
         private static void Evaluate(SectionDefinitionNode sectionDefinition, EvaluationContext context)
         {

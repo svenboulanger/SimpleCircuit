@@ -1,9 +1,11 @@
-﻿using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Components.Diagrams.Modeling;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SimpleCircuit.Parser
 {
@@ -937,6 +939,18 @@ namespace SimpleCircuit.Parser
                             return false;
                         break;
 
+                    case "scope":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'scope'
+                        if (!ParseScopeDefinition(word, lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected scope definition"));
+                            return false;
+                        }
+                        break;
+
                     case "section":
                         lexer.Next(); // '.'
                         lexer.Next(); // 'section'
@@ -1041,6 +1055,45 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
+        private static bool ParseScopeDefinition(Token scope, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Properties
+            if (!ParsePropertyList(lexer, context, out var propertyList))
+                return false;
+
+            // Start the statements
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                return false;
+            }
+
+            // Parse the statements
+            if (!ParseScopedStatements(lexer, context, out var statements))
+                return false;
+
+            // Expect a .ends
+            if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")
+            {
+                if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
+                {
+                    switch (lexer.NextContent.ToString())
+                    {
+                        case "ends":
+                        case "endscope":
+                            lexer.Next(); // '.'
+                            lexer.Next(); // 'ends'
+
+                            result = new ScopeDefinitionNode(scope, propertyList, statements);
+                            return true;
+                    }
+                }
+            }
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endscope'"));
+            return false;
+        }
         private static bool ParseSectionDefinition(Token section, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
             result = null;
@@ -1063,7 +1116,7 @@ namespace SimpleCircuit.Parser
                 return true;
             }
 
-            // Start the expressions
+            // Start the statements
             if (!lexer.Branch(TokenType.Newline))
             {
                 context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
