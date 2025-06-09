@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
+using SimpleCircuit.Drawing.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;

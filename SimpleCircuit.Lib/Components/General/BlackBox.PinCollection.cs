@@ -1,9 +1,9 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Collections;
 using System.Collections.Generic;

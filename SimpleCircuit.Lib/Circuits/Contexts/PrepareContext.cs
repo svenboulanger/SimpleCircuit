@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;

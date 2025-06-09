@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Styles;
+﻿using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {

@@ -1,8 +1,9 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders.Markers;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Builders.Markers;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;

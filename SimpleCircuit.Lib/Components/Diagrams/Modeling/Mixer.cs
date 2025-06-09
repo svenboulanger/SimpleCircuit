@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
+﻿using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling

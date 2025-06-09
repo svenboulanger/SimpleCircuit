@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing.Styles;
 using System.Collections;
 using System.Collections.Generic;
 

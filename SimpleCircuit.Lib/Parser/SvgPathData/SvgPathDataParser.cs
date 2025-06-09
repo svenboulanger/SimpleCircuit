@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Builders;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser.SvgPathData

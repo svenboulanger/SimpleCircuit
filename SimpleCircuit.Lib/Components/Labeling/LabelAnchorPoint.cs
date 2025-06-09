@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Drawing.Builders;
 
 namespace SimpleCircuit.Components.Labeling
 {

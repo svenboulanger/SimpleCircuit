@@ -1,7 +1,7 @@
-﻿using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -64,7 +64,7 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-9, 8)
                 ], style);
 
-                var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
+                var textStyle = new FontSizeStyleModifier.Style(style, Drawing.Styles.Style.DefaultFontSize);
                 var span = builder.TextFormatter.Format("D", textStyle);
                 var bounds = span.Bounds.Bounds;
                 builder.Text(span, new Vector2(-8, -6) - bounds.MiddleLeft, TextOrientation.Transformed);
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Digital
                 }
 
                 // Smaller text for asynchronous set and reset
-                textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize);
+                textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Drawing.Styles.Style.DefaultFontSize);
                 if (Pins["s"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("set", textStyle);

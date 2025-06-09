@@ -1,9 +1,9 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Analog
 {
@@ -142,7 +142,7 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l, 3.5), new(1, 0));
-                            marker.Draw(builder, style.AsLineThickness(Styles.Style.DefaultLineThickness));
+                            marker.Draw(builder, style.AsLineThickness(Drawing.Styles.Style.DefaultLineThickness));
                             _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
                         }
                         else
@@ -200,7 +200,7 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_dot))
                         {
                             var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
-                            marker.Draw(builder, style.AsLineThickness(Styles.Style.DefaultLineThickness));
+                            marker.Draw(builder, style.AsLineThickness(Drawing.Styles.Style.DefaultLineThickness));
                             _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
                         }
                         else

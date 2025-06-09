@@ -1,13 +1,13 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SimpleCircuit.Drawing.Styles;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Builders.Markers;
 
 namespace SimpleCircuit.Components.Wires
 {

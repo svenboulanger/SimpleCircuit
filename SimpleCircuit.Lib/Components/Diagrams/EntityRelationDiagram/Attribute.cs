@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System;
 using SimpleCircuit.Components.Labeling;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Styles;
+using SimpleCircuit.Drawing.Builders;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {

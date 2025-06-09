@@ -1,8 +1,8 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Builders.Markers;
+﻿using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System;
 
 namespace SimpleCircuit.Components

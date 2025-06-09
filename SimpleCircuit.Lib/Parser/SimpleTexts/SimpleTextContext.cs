@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Components.Styles;
+﻿using SimpleCircuit.Drawing.Styles;
 using System.Text;
 
 namespace SimpleCircuit.Parser.SimpleTexts

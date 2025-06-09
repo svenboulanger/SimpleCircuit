@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser.SvgPathData;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling

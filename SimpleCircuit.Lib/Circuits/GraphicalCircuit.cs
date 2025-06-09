@@ -9,6 +9,8 @@ using SimpleCircuit.Components;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;

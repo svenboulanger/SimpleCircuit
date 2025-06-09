@@ -1,5 +1,5 @@
-﻿using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Builders;
+﻿using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -31,7 +31,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             {
                 base.Draw(builder);
                 var style = builder.Style.ModifyDashedDotted(this);
-                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Styles.Style.DefaultFontSize * Scale);
+                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Drawing.Styles.Style.DefaultFontSize * Scale);
                 switch (Variants.Select("sdomain", "zdomain"))
                 {
                     case 0:

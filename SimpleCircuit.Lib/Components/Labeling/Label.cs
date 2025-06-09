@@ -1,5 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Labeling
 {

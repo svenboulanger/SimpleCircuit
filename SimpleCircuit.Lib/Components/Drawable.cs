@@ -1,6 +1,4 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
@@ -12,6 +10,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using SimpleCircuit.Drawing.Styles;
+using SimpleCircuit.Drawing.Builders;
 
 namespace SimpleCircuit.Components
 {

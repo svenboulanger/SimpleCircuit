@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Labeling

@@ -1,7 +1,7 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
-using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Digital
 {
@@ -56,7 +56,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-9, -12, 18, 24, style, new());
 
                 // Labels
-                var textStyle = new FontSizeStyleModifier.Style(style, Styles.Style.DefaultFontSize);
+                var textStyle = new FontSizeStyleModifier.Style(style, Drawing.Styles.Style.DefaultFontSize);
 
                 var span = builder.TextFormatter.Format("S", textStyle);
                 builder.Text(span, new Vector2(-8, -6) - span.Bounds.Bounds.MiddleLeft, TextOrientation.Transformed);
