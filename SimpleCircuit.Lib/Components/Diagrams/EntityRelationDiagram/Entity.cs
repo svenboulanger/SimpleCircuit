@@ -72,15 +72,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
             [Description("The header style.")]
             [Alias("header")]
-            public IStyleModifier HeaderStyle { get; set; } = new BoldTextStyleModifier().Color("white", "#666").JustifyCenter();
+            public IStyleModifier HeaderStyle { get; set; } = new BoldTextStyleModifier().Color("--light", "#666").JustifyCenter();
 
             [Description("The style for even rows.")]
             [Alias("even")]
-            public IStyleModifier EvenStyle { get; set; }
+            public IStyleModifier EvenStyle { get; set; } = new ColorStyleModifier("--foreground", "white");
 
             [Description("The style for odd rows.")]
             [Alias("odd")]
-            public IStyleModifier OddStyle { get; set; } = new ColorStyleModifier(null, "#ddd");
+            public IStyleModifier OddStyle { get; set; } = new ColorStyleModifier("--foreground", "#ddd");
 
             /// <summary>
             /// Gets or sets the margin.

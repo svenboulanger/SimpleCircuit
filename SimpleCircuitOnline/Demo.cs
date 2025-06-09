@@ -123,7 +123,7 @@
                 "11. Annotation boxes (advanced)",
                 "Tutorial on using annotation boxes.",
                 "Tutorial",
-                "* For more tutorials, go to Help > Demo's.\r\n\r\n* Annotations are boxes that will automatically be fitted\r\n* to their contents.\r\n* To start an annotation box, use two pipe '|' characters\r\n* and start with the name of the annotation box.\r\n|annotation1|\r\nT(\"in\") <r> [s]NMOS1[d] <r> T(\"out\")\r\nNMOS1[g] <u> T(\"c\")\r\n* The end of an annotation box is two pipe characters\r\n* without a name.\r\n||\r\n\r\n* It is possible to start and end annotation boxes inside\r\n* a component chain\r\nC1 |a| <r> R2 ||\r\n\r\n* You can also give extra parameters to annotation boxes.\r\n* Check the Wiki for a list of available options.\r\n|b \"B\" poly radius=2 margin=2 |\r\nR3 <ne r se> R4\r\n* As long as the contents between pipe '|' characters is\r\n* not starting with the name of an annotation, it is\r\n* treated as the end of the last opened annotation box.\r\n|-------------------------------|\r\n"),
+                "* For more tutorials, go to Help > Demo's.\r\n\r\n* Boxes are added to the drawing after all circuits\r\n* have been layouted. They can be used to annotate a schematic.\r\n.box\r\n    T(\"in\") <r> [s]NMOS1[d] <r> T(\"out\")\r\n    NMOS1[g] <u> T(\"c\")\r\n.endb\r\n\r\n* A box can be drawn even after a component has already been created.\r\nC1 <r> R2\r\n.box\r\n    R2\r\n.endb\r\n\r\n* You can also give extra parameters to boxes.\r\n* Check the Wiki for a list of available options.\r\n.box \"B\" anchor1=\"c\" poly r=2\r\n    R3 <ne r se> R4\r\n.endb\r\n"),
 
             // Non-inverting amplifier
             new Demo(
