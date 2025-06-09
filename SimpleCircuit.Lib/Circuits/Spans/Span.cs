@@ -1,6 +1,4 @@
-﻿using SimpleCircuit.Drawing;
-
-namespace SimpleCircuit.Circuits.Spans
+﻿namespace SimpleCircuit.Circuits.Spans
 {
     /// <summary>
     /// Describes an abstract text span.

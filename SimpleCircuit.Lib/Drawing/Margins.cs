@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SimpleCircuit.Drawing
+﻿namespace SimpleCircuit.Drawing
 {
     /// <summary>
     /// A structure for defining margins.

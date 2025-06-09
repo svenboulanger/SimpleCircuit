@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Drawing;
 using System;
-using System.Text;
 
 namespace SimpleCircuit.Components.Builders
 {

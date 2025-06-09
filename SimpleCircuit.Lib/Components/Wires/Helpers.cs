@@ -4,8 +4,6 @@ using SimpleCircuit.Parser.Nodes;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using SimpleCircuit.Components.General;
 
 namespace SimpleCircuit.Components.Wires
 {

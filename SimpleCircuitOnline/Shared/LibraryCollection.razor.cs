@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Evaluator;
-using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.IO;

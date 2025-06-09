@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Analog;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using System;

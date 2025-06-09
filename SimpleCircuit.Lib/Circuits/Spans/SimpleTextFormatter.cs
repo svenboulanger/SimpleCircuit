@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
+﻿using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Parser.SimpleTexts;
 
 namespace SimpleCircuit.Circuits.Spans

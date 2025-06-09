@@ -2,7 +2,6 @@
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.SvgPathData;
-using System;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {

@@ -2,11 +2,7 @@
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Drawing;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Xml.Schema;
 
 namespace SimpleCircuit.Components.Labeling
 {

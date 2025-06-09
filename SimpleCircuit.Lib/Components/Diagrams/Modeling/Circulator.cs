@@ -1,6 +1,5 @@
 ﻿using System;
 using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling

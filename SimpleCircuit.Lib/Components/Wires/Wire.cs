@@ -8,7 +8,6 @@ using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SimpleCircuit.Components.Wires
 {

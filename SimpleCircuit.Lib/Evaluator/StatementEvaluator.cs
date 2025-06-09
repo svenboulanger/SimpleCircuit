@@ -9,7 +9,6 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuit.Evaluator
 {

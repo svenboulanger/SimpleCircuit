@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Components.Styles;
-using System.Text;
 
 namespace SimpleCircuit.Circuits.Spans
 {

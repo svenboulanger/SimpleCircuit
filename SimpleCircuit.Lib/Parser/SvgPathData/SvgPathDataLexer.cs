@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Parser.SvgPathData
+﻿namespace SimpleCircuit.Parser.SvgPathData
 {
     /// <summary>
     /// Creates a new <see cref="SvgPathDataLexer"/>

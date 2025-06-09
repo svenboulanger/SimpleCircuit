@@ -1,5 +1,4 @@
-﻿using SimpleCircuit;
-using SimpleCircuit.Evaluator;
+﻿using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using System;
 using System.Diagnostics;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Parser.Nodes
+﻿namespace SimpleCircuit.Parser.Nodes
 {
     /// <summary>
     /// An identifier.

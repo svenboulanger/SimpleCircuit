@@ -3,7 +3,6 @@ using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Styles;
-using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Components.Outputs

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Parser.Markers
+﻿namespace SimpleCircuit.Parser.Markers
 {
     /// <summary>
     /// A lexer for markers.

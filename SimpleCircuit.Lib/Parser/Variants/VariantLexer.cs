@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimpleCircuit.Parser.Variants
+﻿namespace SimpleCircuit.Parser.Variants
 {
     /// <summary>
     /// A lexer for parsing variant combinations.

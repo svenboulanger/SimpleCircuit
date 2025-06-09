@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Styles;
+﻿using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;

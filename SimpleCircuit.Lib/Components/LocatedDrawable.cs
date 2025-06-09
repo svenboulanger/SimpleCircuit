@@ -1,7 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
-using System;
 
 namespace SimpleCircuit.Components
 {
