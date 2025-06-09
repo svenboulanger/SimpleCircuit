@@ -9,6 +9,9 @@
     border: 1px solid #dee2e6;
     overflow: auto;
 }
+div.output.dark {
+    background-color: #333333;
+}
 div.svg {
     width: 100%;
     height: 100%;

@@ -100,10 +100,55 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        Task.Run(() => UpdateNow(_libraries.BuildContext(_logger)));
+                        Task.Run(() => UpdateNow(_libraries.BuildContext(_logger, _settings.ViewDarkMode)));
                     }
                     else
                         _timer.Stop();
+                    Task.Run(SaveSettings);
+                }
+            }
+        }
+
+        protected bool ViewDarkMode
+        {
+            get => _settings.ViewDarkMode;
+            set
+            {
+                if (_settings.ViewDarkMode != value)
+                {
+                    _settings.ViewDarkMode = value;
+                    Task.Run(SaveSettings);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether a light mode image should be exported.
+        /// </summary>
+        protected bool ExportLightMode
+        {
+            get => _settings.ExportLightMode;
+            set
+            {
+                if (_settings.ExportLightMode != value)
+                {
+                    _settings.ExportLightMode = value;
+                    Task.Run(SaveSettings);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether a dark mode image should be exported.
+        /// </summary>
+        protected bool ExportDarkMode
+        {
+            get => _settings.ExportDarkMode;
+            set
+            {
+                if (_settings.ExportDarkMode != value)
+                {
+                    _settings.ExportDarkMode = value;
                     Task.Run(SaveSettings);
                 }
             }
@@ -120,7 +165,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Update documentation
                 await _libraries.LoadLibraries();
-                var context = _libraries.BuildContext(_logger);
+                var context = _libraries.BuildContext(_logger, _settings.ViewDarkMode);
                 await UpdateKeywords(context);
                 _componentList.Update(context);
 
@@ -269,70 +314,112 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        var context = _libraries.BuildContext(_logger);
-                        var doc = await ComputeXml(context, includeScript: true);
-                        
-                        string result;
-                        using (var sw = new Utf8StringWriter())
-                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        async void ExportSvg(bool mode, string exportFilename)
                         {
-                            doc.WriteTo(xml);
-                            xml.Flush();
-                            sw.Flush();
-                            result = sw.ToString();
+                            var context = _libraries.BuildContext(_logger, mode);
+                            var doc = await ComputeXml(context, includeScript: true);
+
+                            string result;
+                            using (var sw = new Utf8StringWriter())
+                            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                            {
+                                doc.WriteTo(xml);
+                                xml.Flush();
+                                sw.Flush();
+                                result = sw.ToString();
+                            }
+                            byte[] file = Encoding.UTF8.GetBytes(result);
+                            await _js.InvokeVoidAsync("BlazorDownloadFile", exportFilename, "image/svg+xml;", file);
                         }
-                        byte[] file = Encoding.UTF8.GetBytes(result);
-                        await _js.InvokeVoidAsync("BlazorDownloadFile", $"{filename}.svg", "image/svg+xml;", file);
+                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+                        {
+                            ExportSvg(false, $"{filename}_light.svg");
+                            ExportSvg(true, $"{filename}_dark.svg");
+                        }
+                        else if (_settings.ExportLightMode)
+                            ExportSvg(false, filename);
+                        else if (_settings.ExportDarkMode)
+                            ExportSvg(true, filename);
+                        else
+                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        var context = _libraries.BuildContext(_logger);
-                        var doc = await ComputeXml(context, includeScript: true);
-
-                        // Compute the width and height to compute the scale of the image
-                        if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
-                            w = 10.0;
-                        if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
-                            h = 10.0;
-
-                        string result;
-                        using (var sw = new StringWriter())
-                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        async void ExportPng(bool mode, string exportFilename)
                         {
-                            doc.WriteTo(xml);
-                            xml.Flush();
-                            sw.Flush();
-                            result = sw.ToString();
+                            var context = _libraries.BuildContext(_logger, mode);
+                            var doc = await ComputeXml(context, includeScript: true);
+
+                            // Compute the width and height to compute the scale of the image
+                            if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
+                                w = 10.0;
+                            if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
+                                h = 10.0;
+
+                            string result;
+                            using (var sw = new StringWriter())
+                            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                            {
+                                doc.WriteTo(xml);
+                                xml.Flush();
+                                sw.Flush();
+                                result = sw.ToString();
+                            }
+                            string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                            await _js.InvokeVoidAsync("BlazorExportImage", exportFilename, "image/png", url, (int)w, (int)h);
                         }
-                        string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.png", "image/png", url, (int)w, (int)h);
+                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+                        {
+                            ExportPng(false, $"{filename}_light.png");
+                            ExportPng(true, $"{filename}_dark.png");
+                        }
+                        else if (_settings.ExportLightMode)
+                            ExportPng(false, filename);
+                        else if (_settings.ExportDarkMode)
+                            ExportPng(true, filename);
+                        else
+                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        var context = _libraries.BuildContext(_logger);
-                        var doc = await ComputeXml(context, includeScript: true);
-
-                        // Compute the width and height to compute the scale of the image
-                        if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
-                            w = 10.0;
-                        if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
-                            h = 10.0;
-
-                        string result;
-                        using (var sw = new StringWriter())
-                        using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        async void ExportJpg(bool mode, string exportFilename)
                         {
-                            doc.WriteTo(xml);
-                            xml.Flush();
-                            sw.Flush();
-                            result = sw.ToString();
+                            var context = _libraries.BuildContext(_logger, mode);
+                            var doc = await ComputeXml(context, includeScript: true);
+
+                            // Compute the width and height to compute the scale of the image
+                            if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
+                                w = 10.0;
+                            if (!double.TryParse(doc.DocumentElement.GetAttribute("height"), out double h))
+                                h = 10.0;
+
+                            string result;
+                            using (var sw = new StringWriter())
+                            using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                            {
+                                doc.WriteTo(xml);
+                                xml.Flush();
+                                sw.Flush();
+                                result = sw.ToString();
+                            }
+                            string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
+                            await _js.InvokeVoidAsync("BlazorExportImage", exportFilename, "image/jpeg", url, (int)w, (int)h, mode ? "black" : "white");
                         }
-                        string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
-                        await _js.InvokeVoidAsync("BlazorExportImage", $"{filename}.jpg", "image/jpeg", url, (int)w, (int)h, "white");
+                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+                        {
+                            ExportJpg(false, $"{filename}_light.jpg");
+                            ExportJpg(true, $"{filename}_dark.jpg");
+                        }
+                        else if (_settings.ExportLightMode)
+                            ExportJpg(false, filename);
+                        else if (_settings.ExportDarkMode)
+                            ExportJpg(true, filename);
+                        else
+                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
@@ -411,7 +498,7 @@ namespace SimpleCircuitOnline.Pages
             if (!string.IsNullOrWhiteSpace(script))
             {
                 await _scriptEditor.SetValue(script);
-                await UpdateNow(_libraries.BuildContext(_logger));
+                await UpdateNow(_libraries.BuildContext(_logger, false));
             }
             lock (_lock)
                 _updates = 0;
@@ -452,7 +539,7 @@ namespace SimpleCircuitOnline.Pages
                     // Updating happens asynchronously
                     _logger.Clear();
                     _viewMode = false;
-                    _currentSolver = Task.Run(() => UpdateNow(_libraries.BuildContext(_logger)));
+                    _currentSolver = Task.Run(() => UpdateNow(_libraries.BuildContext(_logger, false)));
                 }
                 else if (_updates > 1)
                 {
@@ -570,7 +657,7 @@ namespace SimpleCircuitOnline.Pages
         }
         private async Task LibrariesUpdated()
         {
-            var context = _libraries.BuildContext(_logger);
+            var context = _libraries.BuildContext(_logger, false);
 
             // Update documentation
             _componentList.Update(context);

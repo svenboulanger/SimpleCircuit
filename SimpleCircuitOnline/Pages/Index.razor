@@ -47,7 +47,9 @@
             @bind-ShrinkX=@ShrinkX
             @bind-ShrinkY=@ShrinkY
             @bind-AutoUpdate=@AutoUpdate
-                  RefreshRequested=@(() => UpdateNow(_libraries.BuildContext(_logger)))>
+            @bind-ExportDark=@ExportDarkMode
+            @bind-ExportLight=@ExportLightMode
+                  RefreshRequested=@(() => UpdateNow(_libraries.BuildContext(_logger, false)))>
             <span class="version">@_simpleCircuitVersion</span>
             <SvgOutput Svg=@_svg Loading=@_loading ShrinkX=@ShrinkX ShrinkY=@ShrinkY />
         </DropZone>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Evaluator;
 using System;
 using System.Collections.Generic;
@@ -59,10 +60,11 @@ namespace SimpleCircuitOnline.Shared
         /// Builds a context with the current library collection.
         /// </summary>
         /// <param name="diagnostics">The diagnostics.</param>
+        /// <param name="darkMode">If <c>true</c>, the context is built for dark mode.</param>
         /// <returns>Returns the parsing context.</returns>
-        public EvaluationContext BuildContext(IDiagnosticHandler diagnostics)
+        public EvaluationContext BuildContext(IDiagnosticHandler diagnostics, bool darkMode)
         {
-            var context = new EvaluationContext(DefaultLibraryLoaded, null, _textFormatter)
+            var context = new EvaluationContext(DefaultLibraryLoaded, darkMode ? Style.Dark : Style.Light, _textFormatter)
             {
                 Diagnostics = diagnostics
             };
