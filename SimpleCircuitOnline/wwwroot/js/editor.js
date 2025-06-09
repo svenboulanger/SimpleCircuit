@@ -273,7 +273,6 @@ function registerLanguage(keywords) {
     });
 }
 
-const svg_style = document.getElementById('svg-style');
 const canvas_measure = document.getElementById('canvas');
 const context = canvas_measure.getContext('2d');
 const div_decode = document.getElementById('div_decode');
@@ -296,10 +295,6 @@ function measureText(text, fontfamily, isbold, size) {
     };
 }
 
-function updateStyle(style) {
-    svg_style.innerHTML = style;
-}
-
 function stopEventPropagation(e) {
     console.log(e);
     e.stopPropagation();
@@ -317,5 +312,4 @@ function apply_splitter() {
             element: document.querySelector('.gutter-col'),
         }],
     })
-    console.log("Done")
 }
