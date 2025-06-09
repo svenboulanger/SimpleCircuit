@@ -2,10 +2,8 @@
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
-using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Xml;
 
@@ -70,7 +68,7 @@ namespace SimpleCircuit.Components.Builders
             line.SetAttribute("y1", start.Y.ToSVG());
             line.SetAttribute("x2", end.X.ToSVG());
             line.SetAttribute("y2", end.Y.ToSVG());
-            line.SetAttribute("style", options.CreateStrokeStyle());
+            line.SetAttribute("style", options.CreateStrokeStyle(Diagnostics));
             _current.AppendChild(line);
 
             Expand(start, end);
@@ -88,7 +86,7 @@ namespace SimpleCircuit.Components.Builders
             circle.SetAttribute("cx", center.X.ToSVG());
             circle.SetAttribute("cy", center.Y.ToSVG());
             circle.SetAttribute("r", radius.ToSVG());
-            circle.SetAttribute("style", options.CreateStrokeFillStyle());
+            circle.SetAttribute("style", options.CreateStrokeFillStyle(Diagnostics));
             _current.AppendChild(circle);
 
             Expand(
@@ -112,7 +110,7 @@ namespace SimpleCircuit.Components.Builders
 
             // Creates the poly
             var poly = _document.CreateElement("polyline", Namespace);
-            poly.SetAttribute("style", options.CreateStrokeStyle());
+            poly.SetAttribute("style", options.CreateStrokeStyle(Diagnostics));
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
             return this;
@@ -135,7 +133,7 @@ namespace SimpleCircuit.Components.Builders
             var poly = _document.CreateElement("polygon", Namespace);
             _current.AppendChild(poly);
             poly.SetAttribute("points", sb.ToString());
-            poly.SetAttribute("style", options.CreateStrokeFillStyle());
+            poly.SetAttribute("style", options.CreateStrokeFillStyle(Diagnostics));
             return this;
         }
 
@@ -212,7 +210,7 @@ namespace SimpleCircuit.Components.Builders
                     {
                         // Make a span at the specified location
                         var element = _document.CreateElement("tspan", Namespace);
-                        element.SetAttribute("style", textSpan.Appearance.CreateTextStyle());
+                        element.SetAttribute("style", textSpan.Appearance.CreateTextStyle(Diagnostics));
                         element.SetAttribute("x", textSpan.Offset.X.ToSVG());
                         element.SetAttribute("y", textSpan.Offset.Y.ToSVG());
                         element.InnerXml = textSpan.Content;
@@ -286,7 +284,7 @@ namespace SimpleCircuit.Components.Builders
             var path = _document.CreateElement("path", Namespace);
             _current.AppendChild(path);
             path.SetAttribute("d", builder.ToString());
-            path.SetAttribute("style", options.CreateStrokeFillStyle());
+            path.SetAttribute("style", options.CreateStrokeFillStyle(Diagnostics));
             return this;
         }
 

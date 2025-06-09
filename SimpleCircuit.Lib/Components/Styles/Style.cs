@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Styles
+﻿using System.Collections.Generic;
+
+namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
     /// Describes a style.
@@ -6,9 +8,25 @@
     public class Style : IStyle
     {
         /// <summary>
+        /// Gets a dictionary of variables.
+        /// </summary>
+        public Dictionary<string, string> Variables { get; } = new() {
+            { "foreground", "#212529" }, // From Bootstrap 5
+            { "background", "none" },
+            { "primary", "#007bff" }, // From Bootstrap 5
+            { "secondary", "#6c757d" }, // From Bootstrap 5
+            { "success", "#28a745" }, // From Bootstrap 5
+            { "warning", "#ffc107" }, // From Bootstrap 5
+            { "danger", "#dc3545" }, // From Bootstrap 5
+            { "light", "#f8f9fa" }, // From Bootstrap 5
+            { "dark", "#343a40" }, // From Bootstrap 5
+        };
+
+        /// <summary>
         /// The default color.
         /// </summary>
         public const string DefaultColor = "black";
+
 
         /// <summary>
         /// An identifier representing no color.
@@ -40,19 +58,14 @@
         /// </summary>
         public const double DefaultLineSpacing = 1.5;
 
-        /// <summary>
-        /// The default line style.
-        /// </summary>
-        public const LineStyles DefaultLineStyle = LineStyles.None;
-
         /// <inheritdoc />
-        public string Color { get; set; } = DefaultColor;
+        public string Color { get; set; } = $"--foreground";
 
         /// <inheritdoc />
         public double Opacity { get; set; } = Opaque;
 
         /// <inheritdoc />
-        public string Background { get; set; } = None;
+        public string Background { get; set; } = $"--background";
 
         /// <inheritdoc />
         public double BackgroundOpacity { get; set; } = Opaque;
@@ -95,5 +108,8 @@
                 ];
             return string.Join(", ", items);
         }
+
+        /// <inheritdoc />
+        public bool TryGetVariable(string key, out string value) => Variables.TryGetValue(key, out value);
     }
 }

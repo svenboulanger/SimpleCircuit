@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Annotations
         public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Style { get; set; } = new ColorStyleModifier($"--primary", null);
 
         /// <inheritdoc />
         Vector2 IBoxDrawable.TopLeft => _topLeft;
@@ -141,10 +141,7 @@ namespace SimpleCircuit.Components.Annotations
             // All components should have been rendered by now
             if (_drawables.Count > 0)
             {
-                // builder.RequiredCSS.Add(".annotation { stroke: #6600cc; }");
-                // builder.RequiredCSS.Add(".annotation text { fill: #6600cc; }");
-
-                var style = Style?.Apply(builder.Style) ?? builder.Style;
+                var style = builder.Style.Modify(Style);
 
                 // Expand the bounds by the margins
                 builder.BeginGroup(Name, ["annotation"], !Variants.Contains(Over));

@@ -57,6 +57,9 @@ namespace SimpleCircuit.Components.Styles
 
             /// <inheritdoc />
             public double Justification => _parent.Justification;
+
+            /// <inheritdoc />
+            public bool TryGetVariable(string key, out string value) => _parent.TryGetVariable(key, out value);
         }
 
         /// <inheritdoc />

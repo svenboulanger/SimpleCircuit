@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Styles
 {
     /// <summary>
-    /// A style modifier that changes the text justification.
+    /// A style modifier that changes or overrides variables for styles.
     /// </summary>
-    /// <param name="justification">The new justification.</param>
-    public class JustificationStyleModifier(double justification) : IStyleModifier
+    public class VariableStyleModifier : IStyleModifier
     {
         /// <summary>
-        /// The <see cref="IStyle"/>.
+        /// Gets the variables that will override parent variables.
         /// </summary>
-        /// <param name="parent">The parent style.</param>
-        /// <param name="justification">The justification.</param>
-        public class Style(IStyle parent, double justification) : IStyle
+        public Dictionary<string, string> Variables { get; } = [];
+
+        /// <summary>
+        /// A style that modifies the variables.
+        /// </summary>
+        public class Style(IStyle parent, IReadOnlyDictionary<string, string> variables) : IStyle
         {
             private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            private readonly IReadOnlyDictionary<string, string> _variables = variables ?? throw new ArgumentNullException(nameof(variables));
 
             /// <inheritdoc />
             public string Color => _parent.Color;
@@ -45,16 +49,24 @@ namespace SimpleCircuit.Components.Styles
             public double LineSpacing => _parent.LineSpacing;
 
             /// <inheritdoc />
-            public double Justification => justification;
+            public double Justification => _parent.Justification;
 
             /// <inheritdoc />
             public string StrokeDashArray => _parent.StrokeDashArray;
 
             /// <inheritdoc />
-            public bool TryGetVariable(string key, out string value) => _parent.TryGetVariable(key, out value);
+            public bool TryGetVariable(string key, out string value)
+            {
+                // First try to find locally
+                if (_variables.TryGetValue(key, out value))
+                    return true;
+
+                // If it doesn't exist, refer to parent style
+                return _parent.TryGetVariable(key, out value);
+            }
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new Style(parent, justification);
+        public IStyle Apply(IStyle parent) => new Style(parent, Variables);
     }
 }

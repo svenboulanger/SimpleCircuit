@@ -47,6 +47,9 @@ namespace SimpleCircuit.Components.Styles
 
             /// <inheritdoc />
             public string StrokeDashArray => $"{LineThickness.ToSVG()} {(LineThickness * 3).ToSVG()}";
+
+            /// <inheritdoc />
+            public bool TryGetVariable(string key, out string value) => _parent.TryGetVariable(key, out value);
         }
 
         /// <inheritdoc />

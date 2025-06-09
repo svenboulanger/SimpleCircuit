@@ -59,5 +59,13 @@
         /// Gets or sets the line style.
         /// </summary>
         public string StrokeDashArray { get; }
+
+        /// <summary>
+        /// Tries to get a variable from the style.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Returns <c>true</c> if the variable was found; otherwise, <c>false</c>.</returns>
+        public bool TryGetVariable(string key, out string value);
     }
 }

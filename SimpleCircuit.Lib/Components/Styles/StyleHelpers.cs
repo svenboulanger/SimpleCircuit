@@ -1,7 +1,11 @@
-﻿using System.Text;
+﻿using SimpleCircuit.Diagnostics;
+using System.Text;
 
 namespace SimpleCircuit.Components.Styles
 {
+    /// <summary>
+    /// Helper methods for styles.
+    /// </summary>
     public static class StyleHelpers
     {
         /// <summary>
@@ -130,12 +134,48 @@ namespace SimpleCircuit.Components.Styles
         }
 
         /// <summary>
+        /// Resolves a color from a style, also using the variables.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <returns>The color.</returns>
+        private static string GetColor(IStyle style, string color, IDiagnosticHandler diagnostics)
+        {
+            if (color[0] == '-' && color[1] == '-')
+            {
+                // This is likely a variable, try to find the key
+                if (style.TryGetVariable(color.Substring(2), out string result))
+                    return result;
+                else
+                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", $"Could not find color variable '{color}'."));
+            }
+            return color;
+        }
+
+        /// <summary>
+        /// Resolves the foreground color from a style.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <returns>Returns the color.</returns>
+        private static string GetForeground(this IStyle style, IDiagnosticHandler diagnostics) => GetColor(style, style.Color, diagnostics);
+
+        /// <summary>
+        /// Resolves the background color from a style.
+        /// </summary>
+        /// <param name="style">The style.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <returns>Returns the background color.</returns>
+        private static string GetBackground(this IStyle style, IDiagnosticHandler diagnostics) => GetColor(style, style.Background, diagnostics);
+
+        /// <summary>
         /// Creates a style attribute value for strokes and no fill that represents the <see cref="IStyle"/>.
         /// Lines do not need to have any background color.
         /// </summary>
         /// <param name="style">The style.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeStyle(this IStyle style)
+        public static string CreateStrokeStyle(this IStyle style, IDiagnosticHandler diagnostics)
         {
             var result = new StringBuilder();
 
@@ -143,12 +183,9 @@ namespace SimpleCircuit.Components.Styles
             if (style.Opacity.IsZero())
                 result.Append("stroke: none; ");
             else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
-                result.Append($"stroke: {style.Color}; ");
+                result.Append($"stroke: {style.GetForeground(diagnostics)}; ");
             else
-            {
-                result.Append($"stroke: {style.Color}; ");
-                result.Append($"stroke-opacity: {style.Opacity.ToSVG()};");
-            }
+                result.Append($"stroke: {style.GetForeground(diagnostics)}; stroke-opacity: {style.Opacity.ToSVG()}; ");
 
             // Allow other path options
             if (style.StrokeDashArray is not null && !string.IsNullOrWhiteSpace(style.StrokeDashArray))
@@ -168,7 +205,7 @@ namespace SimpleCircuit.Components.Styles
         /// </summary>
         /// <param name="style">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateStrokeFillStyle(this IStyle style)
+        public static string CreateStrokeFillStyle(this IStyle style, IDiagnosticHandler diagnostics)
         {
             var result = new StringBuilder();
 
@@ -176,12 +213,9 @@ namespace SimpleCircuit.Components.Styles
             if (style.Opacity.IsZero())
                 result.Append("stroke: none; ");
             else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
-                result.Append($"stroke: {style.Color}; ");
+                result.Append($"stroke: {style.GetForeground(diagnostics)}; ");
             else
-            {
-                result.Append($"stroke: {style.Color}; ");
-                result.Append($"stroke-opacity: {style.Opacity.ToSVG()};");
-            }
+                result.Append($"stroke: {style.GetForeground(diagnostics)}; stroke-opacity: {style.Opacity.ToSVG()}; ");
 
             // Path options
             result.Append($"stroke-width: {style.LineThickness.ToSVG()}pt; ");
@@ -196,12 +230,9 @@ namespace SimpleCircuit.Components.Styles
             if (style.BackgroundOpacity.IsZero())
                 result.Append("fill: none;");
             else if ((style.BackgroundOpacity - Style.Opaque).IsZero() || style.BackgroundOpacity > Style.Opaque)
-                result.Append($"fill: {style.Background};");
+                result.Append($"fill: {style.GetBackground(diagnostics)};");
             else
-            {
-                result.Append($"fill: {style.Background};");
-                result.Append($"fill-opacity: {style.BackgroundOpacity.ToSVG()};");
-            }
+                result.Append($"fill: {style.GetBackground(diagnostics)}; fill-opacity: {style.BackgroundOpacity.ToSVG()};");
             return result.ToString();
         }
 
@@ -210,7 +241,7 @@ namespace SimpleCircuit.Components.Styles
         /// </summary>
         /// <param name="style">The style.</param>
         /// <returns>Returns the style attribute value.</returns>
-        public static string CreateTextStyle(this IStyle style)
+        public static string CreateTextStyle(this IStyle style, IDiagnosticHandler diagnostics)
         {
             var sb = new StringBuilder();
             sb.Append($"font-family: {style.FontFamily}; ");
@@ -218,9 +249,9 @@ namespace SimpleCircuit.Components.Styles
             if (style.Opacity.IsZero())
                 sb.Append($"fill: none; ");
             else if ((style.Opacity - Style.Opaque).IsZero() || style.Opacity > Style.Opaque)
-                sb.Append($"fill: {style.Color}; ");
+                sb.Append($"fill: {style.GetForeground(diagnostics)}; ");
             else
-                sb.Append($"fill: {style.Color}; fill-opacity: {style.Opacity}; ");
+                sb.Append($"fill: {style.GetForeground(diagnostics)}; fill-opacity: {style.Opacity}; ");
             if (style.Bold)
                 sb.Append("font-weight: bold; ");
             sb.Append("stroke: none;");
