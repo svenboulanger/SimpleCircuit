@@ -16,17 +16,25 @@ namespace SimpleCircuit.Components.Annotations
     /// <summary>
     /// An annotation box.
     /// </summary>
-    public class Box : IAnnotation, IBoxDrawable, IRoundedBox
+    /// <param name="name">The name of the box.</param>
+    public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
     {
         private readonly HashSet<IDrawable> _drawables = [];
         private Vector2 _topLeft, _bottomRight;
         private static readonly OffsetAnchorPoints<IBoxDrawable> _anchors = new(BoxLabelAnchorPoints.Default, 1);
 
-        public static readonly string Poly = "poly";
-        private static readonly string _over = "over";
+        /// <summary>
+        /// Class identifier for an annotation box that shapes like a polygon.
+        /// </summary>
+        public const string Poly = "poly";
+
+        /// <summary>
+        /// Class identifier that indicates the annotation should be drawn on top.
+        /// </summary>
+        public const string Over = "over";
 
         /// <inheritdoc />
-        public string Name { get; }
+        public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
 
         /// <inheritdoc />
         public List<TextLocation> Sources { get; } = [];
@@ -47,62 +55,54 @@ namespace SimpleCircuit.Components.Annotations
         public Bounds Bounds { get; private set; }
 
         /// <inheritdoc />
-        public (string X, string Y) CoordinateGroup { get; private set; } = ("0", "0");
+        public Labels Labels { get; } = new();
 
-        /// <inheritdoc />
-        public Labels Labels { get; }
-
-        [Description("The margin for the annotation box on the left side.")]
-        [Alias("ml")]
-        public double LeftMargin { get; set; } = 5.0;
-
-        [Description("The margin for the annotation box on the right side.")]
-        [Alias("mr")]
-        public double RightMargin { get; set; } = 5.0;
-
-        [Description("The margin for the annotation box on the top side.")]
-        [Alias("mt")]
-        public double TopMargin { get; set; } = 5.0;
-
-        [Description("The margin for the annotation box on the bottom side.")]
-        [Alias("mb")]
-        public double BottomMargin { get; set; } = 5.0;
-
-        [Description("The margin for the annotation box. Shorthand for setting all margins.")]
+        /// <summary>
+        /// Gets or sets the margin for components inside the box.
+        /// </summary>
+        [Description("The margins for components inside the box.")]
         [Alias("m")]
-        public double Margin
-        {
-            get => 0.25 * (LeftMargin + RightMargin + TopMargin + BottomMargin);
-            set
-            {
-                LeftMargin = value;
-                TopMargin = value;
-                RightMargin = value;
-                BottomMargin = value;
-            }
-        }
+        public Margins Margin { get; set; } = new(3, 3, 3, 3);
 
-        [Description("The margin for the annotation box along wires.")]
+        /// <summary>
+        /// Gets or sets the margin for wires inside the box.
+        /// </summary>
+        [Description("The margin for the box along wires.")]
         [Alias("wm")]
-        public double WireMargin { get; set; } = 5.0;
+        public double WireMargin { get; set; } = 3.0;
 
-        [Description("The margin for the annotation box for the start of wires.")]
+        /// <summary>
+        /// Gets or sets the margin for the start of wires inside the box.
+        /// </summary>
+        [Description("The margin for the box for the start of wires.")]
         [Alias("wsm")]
-        public double WireStartMargin { get; set; } = 5.0;
+        public double WireStartMargin { get; set; } = 3.0;
 
+        /// <summary>
+        /// Gets or sets the margin for the end of wires inside the box.
+        /// </summary>
         [Description("The margin for the annotation box for the end of wires.")]
         [Alias("wem")]
-        public double WireEndMargin { get; set; } = 5.0;
+        public double WireEndMargin { get; set; } = 3.0;
 
+        /// <summary>
+        /// Gets or sets corner radius of the box outline.
+        /// </summary>
         [Description("The round-off corner radius.")]
         [Alias("r")]
         [Alias("radius")]
         public double CornerRadius { get; set; }
 
-        [Description("The tolerance to group points together as a side of the annotation box.")]
+        /// <summary>
+        /// Gets or sets the tolerance for points along one side to place labels.
+        /// </summary>
+        [Description("The tolerance to group points together as a single side of the box for placing label anchors.")]
         [Alias("tol")]
         public double Tolerance { get; set; } = 4.0;
 
+        /// <summary>
+        /// Gets or sets the margin for labels to the box outline.
+        /// </summary>
         [Description("The margin for labels to the edge.")]
         [Alias("lm")]
         public double LabelMargin { get; set; } = 1.0;
@@ -119,16 +119,6 @@ namespace SimpleCircuit.Components.Annotations
         /// <inheritdoc />
         Vector2 IBoxDrawable.BottomRight => _bottomRight;
 
-        /// <summary>
-        /// Creates a new <see cref="Box"/>.
-        /// </summary>
-        /// <param name="name">The name of the box.</param>
-        public Box(string name)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Labels = new();
-        }
-
         /// <inheritdoc />
         public void Add(IDrawable drawable)
         {
@@ -140,10 +130,7 @@ namespace SimpleCircuit.Components.Annotations
             => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context)
-        {
-            return PresenceResult.Success;
-        }
+        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
 
         /// <inheritdoc />
         public void Register(IRegisterContext context) { }
@@ -160,7 +147,7 @@ namespace SimpleCircuit.Components.Annotations
                 var style = Style?.Apply(builder.Style) ?? builder.Style;
 
                 // Expand the bounds by the margins
-                builder.BeginGroup(Name, ["annotation"], !Variants.Contains(_over));
+                builder.BeginGroup(Name, ["annotation"], !Variants.Contains(Over));
                 var matrix = builder.CurrentTransform.Matrix.Inverse;
                 builder.BeginTransform(new Transform(-matrix * builder.CurrentTransform.Offset, matrix));
                 switch (Variants.Select(Poly))
@@ -195,8 +182,8 @@ namespace SimpleCircuit.Components.Annotations
                 }
                 else
                 {
-                    bounds.Expand(drawable.Bounds.Left - LeftMargin, drawable.Bounds.Top - TopMargin);
-                    bounds.Expand(drawable.Bounds.Right + RightMargin, drawable.Bounds.Bottom + BottomMargin);
+                    bounds.Expand(drawable.Bounds.Left - Margin.Left, drawable.Bounds.Top - Margin.Top);
+                    bounds.Expand(drawable.Bounds.Right + Margin.Right, drawable.Bounds.Bottom + Margin.Bottom);
                 }
             }
 
@@ -248,7 +235,7 @@ namespace SimpleCircuit.Components.Annotations
                                 continue;
                             normal = current - last;
                             normal /= normal.Length;
-                            Vector2 perpendicular = normal.Perpendicular;
+                            var perpendicular = normal.Perpendicular;
                             if (isFirst)
                             {
                                 isFirst = false;
@@ -303,10 +290,10 @@ namespace SimpleCircuit.Components.Annotations
                 else
                 {
                     var localBounds = drawable.Bounds;
-                    AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Top - TopMargin));
-                    AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Top - TopMargin));
-                    AddPoint(new Vector2(localBounds.Right + RightMargin, localBounds.Bottom + BottomMargin));
-                    AddPoint(new Vector2(localBounds.Left - LeftMargin, localBounds.Bottom + BottomMargin));
+                    AddPoint(new Vector2(localBounds.Left - Margin.Left, localBounds.Top - Margin.Top));
+                    AddPoint(new Vector2(localBounds.Right + Margin.Right, localBounds.Top - Margin.Top));
+                    AddPoint(new Vector2(localBounds.Right + Margin.Right, localBounds.Bottom + Margin.Bottom));
+                    AddPoint(new Vector2(localBounds.Left - Margin.Left, localBounds.Bottom + Margin.Bottom));
                 }
             }
 
@@ -397,9 +384,9 @@ namespace SimpleCircuit.Components.Annotations
                     var node = top.First;
                     var current = node.Value;
 
-                    Vector2 nu = last - current;
+                    var nu = last - current;
                     double lu = nu.Length;
-                    Vector2 nv = node.Next.Value - current;
+                    var nv = node.Next.Value - current;
                     double lv = nv.Length;
                     if (lu > 0 && lv > 0)
                     {

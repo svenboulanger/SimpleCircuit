@@ -1,11 +1,9 @@
-﻿using SimpleCircuit.Components.Diagrams.Modeling;
-using SimpleCircuit.Diagnostics;
+﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using static System.Collections.Specialized.BitVector32;
 
 namespace SimpleCircuit.Parser
 {
@@ -922,6 +920,13 @@ namespace SimpleCircuit.Parser
                 var word = lexer.NextToken;
                 switch (lexer.NextContent.ToString())
                 {
+                    case "box":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'box'
+                        if (!ParseBox(word, lexer, context, out result))
+                            return false;
+                        break;
+
                     case "variant":
                     case "variants":
                     case "property":
@@ -1054,6 +1059,45 @@ namespace SimpleCircuit.Parser
                 result = new ParameterDefinitionNode(param, identifier, value);
             }
             return true;
+        }
+        private static bool ParseBox(Token box, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Properties and variants
+            if (!ParsePropertyList(lexer, context, out var propertyList))
+                return false;
+
+            // Start the statements
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                return false;
+            }
+
+            // Parse the statements
+            if (!ParseScopedStatements(lexer, context, out var statements))
+                return false;
+
+            // Expect a .ends
+            if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")
+            {
+                if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
+                {
+                    switch (lexer.NextContent.ToString())
+                    {
+                        case "endb":
+                        case "endbox":
+                            lexer.Next(); // '.'
+                            lexer.Next(); // 'ends'
+
+                            result = new BoxNode(box, propertyList, statements);
+                            return true;
+                    }
+                }
+            }
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endscope'"));
+            return false;
         }
         private static bool ParseScopeDefinition(Token scope, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {

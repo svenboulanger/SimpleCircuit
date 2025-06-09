@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
@@ -36,6 +37,7 @@ namespace SimpleCircuit.Evaluator
                 case ComponentChain chain: Evaluate(chain, context); break;
                 case VirtualChainNode virtualChain: Evaluate(virtualChain, context); break;
                 case ControlPropertyNode controlProperty: Evaluate(controlProperty, context); break;
+                case BoxNode annotation: Evaluate(annotation, context); break;
                 case ScopeDefinitionNode scopeDefinition: Evaluate(scopeDefinition, context); break;
                 case SectionDefinitionNode sectionDefinition: Evaluate(sectionDefinition, context); break;
                 case ForLoopNode forLoop: Evaluate(forLoop, context); break;
@@ -123,6 +125,7 @@ namespace SimpleCircuit.Evaluator
                     case QueuedAnonymousPoint qap:
                         {
                             var point = context.Factory.Create(PointFactory.Key, context.Options, context.CurrentScope, context.Diagnostics) as ILocatedDrawable;
+                            context.NotifyDrawable(point);
                             context.Circuit.Add(point);
                             context.QueuedPoints.Enqueue(point);
                             if (lastWire is not null)
@@ -282,10 +285,30 @@ namespace SimpleCircuit.Evaluator
             // Add the defaults to the current scope
             context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
+        private static void Evaluate(BoxNode annotation, EvaluationContext context)
+        {
+            context.StartScope();
+            var box = new Box(context.GetAnnotationName());
+            context.Circuit.Add(box);
+
+            // Apply properties and variants
+            ApplyPropertiesAndVariants(box, annotation.Properties, context);
+
+            // Evaluate the scoped statements
+            context.StartTrackingDrawables();
+            Evaluate(annotation.Statements, context);
+            var set = context.StopTrackingDrawables();
+
+            // Add the drawables to the annotation
+            foreach (var drawable in set)
+                box.Add(drawable);
+
+            context.EndScope();
+        }
         private static void Evaluate(ScopeDefinitionNode scopeDefinition, EvaluationContext context)
         {
             context.StartScope();
-            foreach (var property in scopeDefinition.Properties)
+            foreach (var property in scopeDefinition.Parameters)
             {
                 // Try to parse a property and update the local scope
                 if (property is not BinaryNode assignment ||
@@ -683,6 +706,7 @@ namespace SimpleCircuit.Evaluator
 
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
+                context.NotifyDrawable(result);
                 context.CurrentScope.ApplyDefaults("wire", result, context.Diagnostics);
 
                 // Apply properties and variants
@@ -798,8 +822,12 @@ namespace SimpleCircuit.Evaluator
             presence.Sources.Add(component.Location);
 
             // Apply properties and variants
-            if (presence is IDrawable drawable && properties is not null)
-                ApplyPropertiesAndVariants(drawable, properties, context);
+            if (presence is IDrawable drawable)
+            {
+                context.NotifyDrawable(drawable);
+                if (properties is not null)
+                    ApplyPropertiesAndVariants(drawable, properties, context);
+            }
             return presence;
         }
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)

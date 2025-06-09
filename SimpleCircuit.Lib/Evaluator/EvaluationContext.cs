@@ -1,12 +1,10 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
 using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
-using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +19,11 @@ namespace SimpleCircuit.Evaluator
         private readonly Stack<string> _sections = new();
         private readonly Stack<Dictionary<string, int>> _anonymousCounterStack = [];
         private Dictionary<string, int> _anonymousCounters = [];
+        private Stack<HashSet<IDrawable>> _trackedDrawables = [];
+
+        protected const string WireKey = ":wire:";
+        protected const string VirtualKey = ":virtual:";
+        protected const string AnnotationKey = ":annotation:";
 
         /// <summary>
         /// Gets the options.
@@ -163,21 +166,41 @@ namespace SimpleCircuit.Evaluator
         }
 
         /// <summary>
+        /// Gets an annotation name.
+        /// </summary>
+        /// <returns>The annotation name.</returns>
+        public string GetAnnotationName()
+        {
+            string name;
+            if (_anonymousCounters.TryGetValue(AnnotationKey, out int counter))
+            {
+                name = $"annotation-{counter}";
+                _anonymousCounters[AnnotationKey] = counter + 1;
+            }
+            else
+            {
+                name = "annotation-1";
+                _anonymousCounters[AnnotationKey] = 2;
+            }
+            return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
+        }
+
+        /// <summary>
         /// Gets a wire name.
         /// </summary>
         /// <returns>The wire name.</returns>
         public string GetWireName()
         {
             string name;
-            if (_anonymousCounters.TryGetValue(":wire:", out int counter))
+            if (_anonymousCounters.TryGetValue(WireKey, out int counter))
             {
                 name = $"wire-{counter}";
-                _anonymousCounters[":wire:"] = counter + 1;
+                _anonymousCounters[WireKey] = counter + 1;
             }
             else
             {
                 name = "wire-1";
-                _anonymousCounters[":wire:"] = 2;
+                _anonymousCounters[WireKey] = 2;
             }
             return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
         }
@@ -189,15 +212,15 @@ namespace SimpleCircuit.Evaluator
         public string GetVirtualName()
         {
             string name;
-            if (_anonymousCounters.TryGetValue(":virtual:", out int counter))
+            if (_anonymousCounters.TryGetValue(VirtualKey, out int counter))
             {
                 name = $"virtual-{counter}";
-                _anonymousCounters[":virtual:"] = counter + 1;
+                _anonymousCounters[VirtualKey] = counter + 1;
             }
             else
             {
                 name = "virtual-1";
-                _anonymousCounters[":virtual:"] = 2;
+                _anonymousCounters[VirtualKey] = 2;
             }
             return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
         }
@@ -220,6 +243,11 @@ namespace SimpleCircuit.Evaluator
         public void StartScope() => CurrentScope = new Scope(CurrentScope);
 
         /// <summary>
+        /// Starts tracking drawables.
+        /// </summary>
+        public void StartTrackingDrawables() => _trackedDrawables.Push([]);
+
+        /// <summary>
         /// Pops/ends the last started section.
         /// </summary>
         /// <returns>The section name that was closed.</returns>
@@ -234,5 +262,27 @@ namespace SimpleCircuit.Evaluator
         /// Ends a previously started scope.
         /// </summary>
         public void EndScope() => CurrentScope = CurrentScope.ParentScope;
+
+        /// <summary>
+        /// Stop tracking drawables.
+        /// </summary>
+        /// <returns>The found drawables.</returns>
+        public IEnumerable<IDrawable> StopTrackingDrawables()
+        {
+            var set = _trackedDrawables.Pop();
+            if (_trackedDrawables.Count > 0)
+                _trackedDrawables.Peek().UnionWith(set);
+            return set;
+        }
+
+        /// <summary>
+        /// Notify the context of a newly created drawable.
+        /// </summary>
+        /// <param name="drawable">The drawable.</param>
+        public void NotifyDrawable(IDrawable drawable)
+        {
+            if (_trackedDrawables.Count > 0 && drawable is not null)
+                _trackedDrawables.Peek().Add(drawable);
+        }
     }
 }

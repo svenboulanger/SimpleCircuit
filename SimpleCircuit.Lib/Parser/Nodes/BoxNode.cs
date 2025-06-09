@@ -7,17 +7,17 @@ namespace SimpleCircuit.Parser.Nodes
     /// <summary>
     /// A scope definition.
     /// </summary>
-    public record ScopeDefinitionNode : SyntaxNode
+    public record BoxNode : SyntaxNode
     {
         /// <summary>
-        /// Gets the SCOPE token.
+        /// Gets the annotation token.
         /// </summary>
-        public Token Scope { get; }
+        public Token Annotation { get; }
 
         /// <summary>
         /// Gets the properties.
         /// </summary>
-        public SyntaxNode[] Parameters { get; }
+        public SyntaxNode[] Properties { get; }
 
         /// <summary>
         /// Gets the statements.
@@ -30,11 +30,11 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="scope">The scope keyword.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="statements">The statements.</param>
-        public ScopeDefinitionNode(Token scope, IEnumerable<SyntaxNode> properties, ScopedStatementsNode statements)
+        public BoxNode(Token scope, IEnumerable<SyntaxNode> properties, ScopedStatementsNode statements)
             : base(scope.Location)
         {
-            Scope = scope;
-            Parameters = properties?.ToArray() ?? [];
+            Annotation = scope;
+            Properties = properties?.ToArray() ?? [];
             Statements = statements ?? ScopedStatementsNode.Empty;
         }
 
@@ -43,18 +43,18 @@ namespace SimpleCircuit.Parser.Nodes
         {
             StringBuilder sb = new();
             sb.Append('.');
-            sb.Append(Scope.Content);
-            if (Parameters.Length > 0)
+            sb.Append(Annotation.Content);
+            if (Properties.Length > 0)
             {
-                for (int i = 0; i < Parameters.Length; i++)
+                for (int i = 0; i < Properties.Length; i++)
                 {
                     sb.Append(' ');
-                    sb.Append(Parameters[i]);
+                    sb.Append(Properties[i]);
                 }
             }
             sb.AppendLine();
             sb.AppendLine(Statements.ToString());
-            sb.Append(".endscope");
+            sb.Append(".endb");
             return sb.ToString();
         }
     }
