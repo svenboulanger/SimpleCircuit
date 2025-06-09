@@ -6,8 +6,6 @@ using System.Xml;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
@@ -69,7 +67,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets the style.
         /// </summary>
-        public IStyle Style { get; } = style ?? new Style();
+        public IStyle Style { get; } = style ?? Drawing.Styles.Style.Light;
 
         /// <summary>
         /// Adds the specified component.

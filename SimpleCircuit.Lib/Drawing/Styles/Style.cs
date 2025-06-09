@@ -8,19 +8,47 @@ namespace SimpleCircuit.Drawing.Styles
     public class Style : IStyle
     {
         /// <summary>
+        /// Gets a light mode style.
+        /// </summary>
+        public static Style Light { get; } = new()
+        {
+            Variables =
+            {
+                { "foreground", "#212529" }, // From Bootstrap 5
+                { "background", "none" },
+                { "primary", "#007bff" }, // From Bootstrap 5
+                { "secondary", "#6c757d" }, // From Bootstrap 5
+                { "success", "#28a745" }, // From Bootstrap 5
+                { "warning", "#ffc107" }, // From Bootstrap 5
+                { "danger", "#dc3545" }, // From Bootstrap 5
+                { "light", "#f8f9fa" }, // From Bootstrap 5
+                { "dark", "#343a40" }, // From Bootstrap 5
+            }
+        };
+
+        /// <summary>
+        /// Gets a dark mode style.
+        /// </summary>
+        public static Style Dark { get; } = new()
+        {
+            Variables =
+            {
+                { "foreground", "#dee2e6" }, // From Bootstrap 5
+                { "background", "none" },
+                { "primary", "#007bff" }, // From Bootstrap 5
+                { "secondary", "#6c757d" }, // From Bootstrap 5
+                { "success", "#28a745" }, // From Bootstrap 5
+                { "warning", "#ffc107" }, // From Bootstrap 5
+                { "danger", "#dc3545" }, // From Bootstrap 5
+                { "light", "#f8f9fa" }, // From Bootstrap 5
+                { "dark", "#343a40" }, // From Bootstrap 5
+            }
+        };
+
+        /// <summary>
         /// Gets a dictionary of variables.
         /// </summary>
-        public Dictionary<string, string> Variables { get; } = new() {
-            { "foreground", "#212529" }, // From Bootstrap 5
-            { "background", "none" },
-            { "primary", "#007bff" }, // From Bootstrap 5
-            { "secondary", "#6c757d" }, // From Bootstrap 5
-            { "success", "#28a745" }, // From Bootstrap 5
-            { "warning", "#ffc107" }, // From Bootstrap 5
-            { "danger", "#dc3545" }, // From Bootstrap 5
-            { "light", "#f8f9fa" }, // From Bootstrap 5
-            { "dark", "#343a40" }, // From Bootstrap 5
-        };
+        public Dictionary<string, string> Variables { get; } = [];
 
         /// <summary>
         /// The default color.

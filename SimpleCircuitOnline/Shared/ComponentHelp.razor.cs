@@ -2,8 +2,8 @@
 using SimpleCircuit;
 using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders;
-using SimpleCircuit.Components.Styles;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -146,9 +146,11 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgBuilder(_textFormatter, new Style(), null);
-            var context = new PrepareContext(_textFormatter, drawing.Style, null);
-            context.Mode = PreparationMode.Reset;
+            var drawing = new SvgBuilder(_textFormatter, Style.Light, null);
+            var context = new PrepareContext(_textFormatter, drawing.Style, null)
+            {
+                Mode = PreparationMode.Reset
+            };
             _drawable.Prepare(context);
             context.Mode = PreparationMode.Sizes;
             _drawable.Prepare(context);

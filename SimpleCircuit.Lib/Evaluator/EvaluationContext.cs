@@ -1,6 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components;
-using SimpleCircuit.Components.Builders.Markers;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Drawing.Styles;

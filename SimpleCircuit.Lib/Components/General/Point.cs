@@ -1,7 +1,7 @@
-﻿using SimpleCircuit.Components.Builders.Markers;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Drawing.Styles;
 using System;
 
