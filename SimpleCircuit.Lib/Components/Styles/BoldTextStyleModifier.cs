@@ -5,7 +5,7 @@ namespace SimpleCircuit.Components.Styles
     /// <summary>
     /// A style modifier that will make text bold.
     /// </summary>
-    public class BoldTextStyleModifier : IStyleModifier
+    public class BoldTextStyleModifier(bool isBold = true) : IStyleModifier
     {
         /// <summary>
         /// A default <see cref="BoldTextStyleModifier"/>.
@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Styles
         /// The style for a <see cref="BoldTextStyleModifier"/>.
         /// </summary>
         /// <param name="parent">The parent style.</param>
-        public class Style(IStyle parent) : IStyle
+        public class Style(IStyle parent, bool isBold = true) : IStyle
         {
             private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -42,7 +42,7 @@ namespace SimpleCircuit.Components.Styles
             public double FontSize => _parent.FontSize;
 
             /// <inheritdoc />
-            public bool Bold => true;
+            public bool Bold => isBold;
 
             /// <inheritdoc />
             public double LineSpacing => _parent.LineSpacing;
@@ -55,6 +55,6 @@ namespace SimpleCircuit.Components.Styles
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new Style(parent);
+        public IStyle Apply(IStyle parent) => new Style(parent, isBold);
     }
 }

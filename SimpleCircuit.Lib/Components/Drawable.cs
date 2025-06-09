@@ -83,6 +83,12 @@ namespace SimpleCircuit.Components
         public virtual bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
             => SetProperty(this, propertyToken, value, diagnostics);
 
+        /// <summary>
+        /// Creates a dictionary of setter methods for a given type using reflection.
+        /// </summary>
+        /// <param name="key">The type.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <returns>Returns the dictionary.</returns>
         private static Dictionary<string, Func<IDrawable, Token, object, bool>> CreateCache(Type key, IDiagnosticHandler diagnostics)
         {
             // Extract the property names for the type
@@ -95,7 +101,7 @@ namespace SimpleCircuit.Components
                 if (!property.CanWrite)
                     continue;
                 string description = null;
-                foreach (var attribute in property.GetCustomAttributes(true))
+                foreach (object attribute in property.GetCustomAttributes(true))
                 {
                     if (attribute is DescriptionAttribute descAttr)
                         description = descAttr.Description;
@@ -160,6 +166,7 @@ namespace SimpleCircuit.Components
                 int index;
                 if (value is Vector2 vector)
                 {
+                    // 'offset#' can change the local offset of an individual label.
                     if (TryMatchIndexedProperty(property, "offset", out index))
                     {
                         drawable.Labels[index].Offset = vector;
@@ -188,6 +195,7 @@ namespace SimpleCircuit.Components
 
                         case "thickness":
                         case "t":
+                        case "stroke-width":
                             drawable.AppendStyle(new StrokeWidthStyleModifier(number));
                             return true;
 
@@ -196,20 +204,38 @@ namespace SimpleCircuit.Components
                             return true;
 
                         default:
-                            if ((number - Math.Round(number)).IsZero())
+                            // 'anchor#' will designate the anchor for the label at the given index.
+                            if ((number - Math.Round(number)).IsZero() &&
+                                TryMatchIndexedProperty(property, "anchor", out index))
                             {
-                                // Integer-only
-                                if (TryMatchIndexedProperty(property, "anchor", out index))
-                                {
-                                    drawable.Labels[index].Anchor = ((int)Math.Round(number)).ToString();
-                                    return true;
-                                }
+                                drawable.Labels[index].Anchor = ((int)Math.Round(number)).ToString();
+                                return true;
                             }
-                            if (TryMatchIndexedProperty(property, "size", out index))
+
+                            // 'size#' will change the font size for the label at the given index.
+                            if (TryMatchIndexedProperty(property, "size", out index) ||
+                                TryMatchIndexedProperty(property, "fontsize", out index))
                             {
                                 drawable.Labels[index].AppendStyle(new FontSizeStyleModifier(number));
                                 return true;
                             }
+
+                            // 'opacity#' will change the opacity of the label at the given index.
+                            if (TryMatchIndexedProperty(property, "opacity", out index))
+                            {
+                                drawable.Labels[index].AppendStyle(new OpacityStyleModifier(number, number));
+                                return true;
+                            }
+
+                            // 'justify#' will change the label justification at the given index.
+                            if (TryMatchIndexedProperty(property, "justify", out index) ||
+                                TryMatchIndexedProperty(property, "justification", out index))
+                            {
+                                drawable.Labels[index].AppendStyle(new JustificationStyleModifier(number));
+                                return true;
+                            }
+
+                            // 'ls#' or 'linespacing#' will designate the line spacing for the label at the given index.
                             if (TryMatchIndexedProperty(property, "linespacing", out index) ||
                                 TryMatchIndexedProperty(property, "ls", out index))
                             {
@@ -235,15 +261,19 @@ namespace SimpleCircuit.Components
                             return true;
 
                         case "fontfamily":
+                        case "font":
                             drawable.AppendStyle(new FontFamilyStyleModifier(label));
                             return true;
 
                         default:
+                            // 'label#' will change the label at the given index.
                             if (TryMatchIndexedProperty(property, "label", out index))
                             {
                                 drawable.Labels[index].Value = label;
                                 return true;
                             }
+
+                            // 'anchor#' will change the anchor for the label at the given index.
                             if (TryMatchIndexedProperty(property, "anchor", out index))
                             {
                                 drawable.Labels[index].Anchor = label;
@@ -263,6 +293,14 @@ namespace SimpleCircuit.Components
                             return true;
 
                         default:
+                            // 'bold#' will change whether the text is bold for the label at the given index.
+                            if (TryMatchIndexedProperty(property, "bold", out index))
+                            {
+                                drawable.Labels[index].AppendStyle(new BoldTextStyleModifier(b));
+                                return true;
+                            }
+
+                            // Treat as a variant
                             if (b)
                                 drawable.Variants.Add(property);
                             else
