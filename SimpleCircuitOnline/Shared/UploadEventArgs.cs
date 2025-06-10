@@ -25,7 +25,6 @@ namespace SimpleCircuitOnline.Shared
     public class UploadSvgEventArgs : UploadEventArgs
     {
         public string Script { get; set; }
-        public string Style { get; set; }
         public string Version { get; set; }
     }
 }

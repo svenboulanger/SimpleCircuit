@@ -185,11 +185,6 @@ namespace SimpleCircuitOnline.Shared
                         swScript.WriteLine(node.InnerText);
                 }
 
-                // Search for the style
-                StringWriter swStyle = new();
-                foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
-                    swStyle.WriteLine(node.InnerText);
-
                 // Search for the version
                 var nodes = doc.DocumentElement.GetElementsByTagName("sc:version");
                 if (nodes.Count > 0)
@@ -197,18 +192,11 @@ namespace SimpleCircuitOnline.Shared
 
                 // Call the event
                 args.Script = swScript.ToString();
-                args.Style = swStyle.ToString();
                 if (args.Script.Length == 0)
                 {
                     args.Messages.Add(
                         new DiagnosticMessage(SeverityLevel.Error, null,
                         "No SimpleCircuit script metadata found in uploaded SVG file."));
-                }
-                else if (args.Style.Length == 0)
-                {
-                    args.Messages.Add(
-                        new DiagnosticMessage(SeverityLevel.Error, null,
-                        "No styling information found in uploaded SVG file."));
                 }
 
                 result = args;
@@ -224,6 +212,10 @@ namespace SimpleCircuitOnline.Shared
 
             // Search for the file name
             result.Filename = Path.GetFileNameWithoutExtension(e.File.Name);
+            if (result.Filename.EndsWith("_dark"))
+                result.Filename = result.Filename.Substring(0, result.Filename.Length - 5);
+            else if (result.Filename.EndsWith("_light"))
+                result.Filename = result.Filename.Substring(0, result.Filename.Length - 6);
             InternalFilename = result.Filename;
             await Upload.InvokeAsync(result);
         }
