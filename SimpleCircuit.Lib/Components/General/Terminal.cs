@@ -17,7 +17,7 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "terminal";

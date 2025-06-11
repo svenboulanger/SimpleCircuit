@@ -1,6 +1,5 @@
-﻿using SimpleCircuit.Circuits.Spans;
+﻿using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
-using System.Text;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {

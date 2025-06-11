@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Labeling

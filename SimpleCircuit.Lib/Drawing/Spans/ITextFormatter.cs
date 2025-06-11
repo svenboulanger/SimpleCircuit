@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// Describes a text formatter.

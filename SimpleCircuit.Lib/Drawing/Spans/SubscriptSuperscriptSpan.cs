@@ -1,7 +1,8 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing;
 using System;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// A superscript span.

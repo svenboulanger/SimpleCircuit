@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Circuits.Spans;
+﻿using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System.Collections;
 using System.Collections.Generic;

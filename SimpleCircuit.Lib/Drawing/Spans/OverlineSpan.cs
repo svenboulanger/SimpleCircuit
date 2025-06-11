@@ -1,18 +1,19 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// A span of content that is underlined
     /// </summary>
     /// <remarks>
-    /// Creates a new <see cref="UnderlineSpan"/>.
+    /// Creates a new <see cref="OverlineSpan"/>.
     /// </remarks>
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
-    /// <param name="style">The style.</param>
-    public class UnderlineSpan(Span @base, double margin, IStyle style) : Span
+    /// <param name="style">The style of the overline.</param>
+    public class OverlineSpan(Span @base, double margin, IStyle style) : Span
     {
         /// <summary>
         /// Gets the content.
@@ -20,9 +21,9 @@ namespace SimpleCircuit.Circuits.Spans
         public Span Base { get; } = @base;
 
         /// <summary>
-        /// Gets the appearance.
+        /// Gets the style.
         /// </summary>
-        public IStyle Style => style;
+        public IStyle Style { get; } = style;
 
         /// <summary>
         /// Gets the margin.
@@ -42,11 +43,11 @@ namespace SimpleCircuit.Circuits.Spans
         /// <inheritdoc />
         protected override SpanBounds ComputeBounds()
         {
-            return new(new Bounds(
+            return new SpanBounds(new Bounds(
                 Base.Bounds.Bounds.Left,
-                Base.Bounds.Bounds.Top,
+                Base.Bounds.Bounds.Top - Margin - Style.LineThickness,
                 Base.Bounds.Bounds.Right,
-                Base.Bounds.Bounds.Bottom + Margin + style.LineThickness), Base.Bounds.Advance);
+                Base.Bounds.Bounds.Bottom), Base.Bounds.Advance);
         }
 
         /// <inheritdoc />
@@ -55,7 +56,7 @@ namespace SimpleCircuit.Circuits.Spans
             Base.SetOffset(offset);
             Offset = offset;
 
-            double y = offset.Y + Base.Bounds.Bounds.Bottom + Margin + style.LineThickness * 0.5;
+            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Style.LineThickness * 0.5;
             double x1 = offset.X + Base.Bounds.Bounds.Left;
             double x2 = offset.X + Base.Bounds.Bounds.Right;
             Start = new(x1, y);

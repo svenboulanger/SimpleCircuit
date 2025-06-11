@@ -7,6 +7,7 @@ using Blazored.LocalStorage;
 using Microsoft.JSInterop;
 using SimpleCircuit.Parser.SimpleTexts;
 using SimpleCircuit.Circuits.Spans;
+using SimpleCircuit.Drawing.Spans;
 
 namespace SimpleCircuitOnline
 {

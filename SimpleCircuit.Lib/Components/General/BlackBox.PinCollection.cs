@@ -1,8 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
-using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Collections;

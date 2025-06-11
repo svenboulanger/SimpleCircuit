@@ -1,9 +1,10 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// A span for multiple lines.

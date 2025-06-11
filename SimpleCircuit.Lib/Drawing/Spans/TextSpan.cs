@@ -1,6 +1,7 @@
-﻿using SimpleCircuit.Drawing.Styles;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// A span representing a simple text element.

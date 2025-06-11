@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Markers;
 using SimpleCircuit.Parser.SvgPathData;
@@ -11,6 +10,7 @@ using SimpleCircuit.Parser.Styles;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Components;
 using SimpleCircuit.Drawing.Builders.Markers;
+using SimpleCircuit.Drawing.Spans;
 
 namespace SimpleCircuit.Drawing.Builders
 {

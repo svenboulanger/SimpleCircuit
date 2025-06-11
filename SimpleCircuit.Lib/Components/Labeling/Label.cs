@@ -1,4 +1,4 @@
-﻿using SimpleCircuit.Circuits.Spans;
+﻿using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Labeling

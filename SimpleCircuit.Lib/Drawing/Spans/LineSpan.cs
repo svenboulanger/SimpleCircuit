@@ -1,8 +1,9 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Circuits.Spans
+namespace SimpleCircuit.Drawing.Spans
 {
     /// <summary>
     /// A span that simply adds multiple 
@@ -34,11 +35,11 @@ namespace SimpleCircuit.Circuits.Spans
         protected override SpanBounds ComputeBounds()
         {
             var bounds = new ExpandableBounds();
-            double x = 0.0, advance = 0.0;
+            double advance = 0.0;
             foreach (var span in _spans)
             {
-                bounds.Expand(new Vector2(x, 0) + span.Bounds.Bounds);
-                advance = x + span.Bounds.Advance;
+                bounds.Expand(new Vector2(advance, 0) + span.Bounds.Bounds);
+                advance += span.Bounds.Advance;
             }
             return new(bounds.Bounds, advance);
         }

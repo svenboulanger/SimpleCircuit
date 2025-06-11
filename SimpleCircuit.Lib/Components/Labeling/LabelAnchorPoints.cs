@@ -1,6 +1,6 @@
-﻿using SimpleCircuit.Circuits.Spans;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System.Collections.Generic;
 
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Labeling
                 {
                     var loc = anchor.Location + offset + invMatrix * label.Offset;
                     builder.Text(label.Formatted, loc, anchor.Orientation);
-                    // builder.Rectangle(loc.X + bounds.Left, loc.Y + bounds.Top, bounds.Width, bounds.Height, new Style { Background = Style.None, Color = "red", LineThickness = 0.1 });
+                    builder.Rectangle(loc.X + bounds.Left, loc.Y + bounds.Top, bounds.Width, bounds.Height, new Style { Background = Style.None, Color = "red", LineThickness = 0.1 });
                 }
             }
         }
