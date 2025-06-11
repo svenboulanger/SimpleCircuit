@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Spans;
 using SimpleCircuit.Drawing.Styles;
+using System.Text;
 
 namespace SimpleCircuit.Parser.SimpleTexts
 {
@@ -45,7 +46,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
             if (lexer.Check(TokenType.Superscript | TokenType.Subscript))
             {
                 // Create our sub/superscript element and make the font size smaller for whatever is next
-                var oldAppearance = context.Style;
+                var oldStyle = context.Style;
                 context.Style = new FontSizeStyleModifier.Style(context.Style, context.Style.FontSize * 0.8);
                 Span sub = null, super = null;
                 if (lexer.Branch(TokenType.Subscript))
@@ -88,7 +89,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             sub = ParseBlockSegment(lexer, context);
                     }
                 }
-                context.Style = oldAppearance;
+                context.Style = oldStyle;
                 return new SubscriptSuperscriptSpan(result, sub, super, 0.5 * context.Style.FontSize, new(0, 0.075 * context.Style.FontSize));
             }
             return result;
@@ -143,15 +144,47 @@ namespace SimpleCircuit.Parser.SimpleTexts
                                 return CreateTextSpan(context);
                             }
 
+                        case "\\textcolor":
+                            var track = lexer.Track();
+                            lexer.Next();
+                            if (lexer.Branch(TokenType.OpenBracket))
+                            {
+                                // Read the color first
+                                var oldStyle = context.Style;
+                                context.Style = ParseColorStyle(lexer, context);
+
+                                if (lexer.Branch(TokenType.OpenBracket))
+                                {
+                                    var b = ParseBlockSegment(lexer, context);
+                                    lexer.Branch(TokenType.CloseBracket);
+                                    context.Style = oldStyle;
+                                    return b;
+                                }
+                                else
+                                {
+                                    context.Style = oldStyle;
+                                    context.Builder.Append(lexer.GetTracked(track).Content);
+                                    ContinueText(lexer, context);
+                                    return CreateTextSpan(context);
+                                }
+                            }
+                            else
+                            {
+                                context.Builder.Append(content);
+                                lexer.Next();
+                                ContinueText(lexer, context);
+                                return CreateTextSpan(context);
+                            }
+
                         case "\\textb":
                             lexer.Next();
                             if (lexer.Branch(TokenType.OpenBracket))
                             {
-                                var oldAppearance = context.Style;
-                                context.Style = new BoldTextStyleModifier.Style(oldAppearance);
+                                var oldStyle = context.Style;
+                                context.Style = new BoldTextStyleModifier.Style(oldStyle);
                                 var b = ParseBlockSegment(lexer, context);
                                 lexer.Branch(TokenType.CloseBracket);
-                                context.Style = oldAppearance;
+                                context.Style = oldStyle;
                                 return b;
                             }
                             else
@@ -160,7 +193,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                                 ContinueText(lexer, context);
                                 return CreateTextSpan(context);
                             }
-                        
+
                         default:
                             context.Builder.Append(content);
                             lexer.Next();
@@ -213,6 +246,17 @@ namespace SimpleCircuit.Parser.SimpleTexts
 
             // Return the span
             return new TextSpan(content, context.Style, bounds);
+        }
+
+        private static IStyle ParseColorStyle(SimpleTextLexer lexer, SimpleTextContext context)
+        {
+            var tracker = lexer.Track();
+            while (lexer.Check(~TokenType.CloseBracket))
+                lexer.Next();
+            string color = lexer.GetTracked(tracker, false).Content.ToString().Trim();
+            lexer.Branch(TokenType.CloseBracket);
+
+            return new ColorStyleModifier.Style(context.Style, color, null);
         }
     }
 }

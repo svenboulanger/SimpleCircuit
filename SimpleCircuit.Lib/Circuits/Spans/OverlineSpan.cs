@@ -11,8 +11,8 @@ namespace SimpleCircuit.Circuits.Spans
     /// </remarks>
     /// <param name="base">The base.</param>
     /// <param name="margin">The margin.</param>
-    /// <param name="thickness">The thickness.</param>
-    public class OverlineSpan(Span @base, double margin, IStyle appearance) : Span
+    /// <param name="style">The style of the overline.</param>
+    public class OverlineSpan(Span @base, double margin, IStyle style) : Span
     {
         /// <summary>
         /// Gets the content.
@@ -20,9 +20,9 @@ namespace SimpleCircuit.Circuits.Spans
         public Span Base { get; } = @base;
 
         /// <summary>
-        /// Gets the appearance.
+        /// Gets the style.
         /// </summary>
-        public IStyle Appearance { get; } = appearance;
+        public IStyle Style { get; } = style;
 
         /// <summary>
         /// Gets the margin.
@@ -44,7 +44,7 @@ namespace SimpleCircuit.Circuits.Spans
         {
             return new SpanBounds(new Bounds(
                 Base.Bounds.Bounds.Left,
-                Base.Bounds.Bounds.Top - Margin - Appearance.LineThickness,
+                Base.Bounds.Bounds.Top - Margin - Style.LineThickness,
                 Base.Bounds.Bounds.Right,
                 Base.Bounds.Bounds.Bottom), Base.Bounds.Advance);
         }
@@ -55,7 +55,7 @@ namespace SimpleCircuit.Circuits.Spans
             Base.SetOffset(offset);
             Offset = offset;
 
-            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Appearance.LineThickness * 0.5;
+            double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Style.LineThickness * 0.5;
             double x1 = offset.X + Base.Bounds.Bounds.Left;
             double x2 = offset.X + Base.Bounds.Bounds.Right;
             Start = new(x1, y);

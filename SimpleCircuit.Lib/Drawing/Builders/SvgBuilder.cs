@@ -248,7 +248,8 @@ namespace SimpleCircuit.Drawing.Builders
                         var path = _document.CreateElement("path", Namespace);
                         groupElement.AppendChild(path);
                         path.SetAttribute("d", $"M{overlineSpan.Start.ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
-                        path.SetAttribute("style", $"stroke: {overlineSpan.Appearance.Color}; stroke-width: {overlineSpan.Appearance.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
+                        path.SetAttribute("style", overlineSpan.Style.CreateStrokeStyle(Diagnostics));
+                        // path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;
 
@@ -260,8 +261,8 @@ namespace SimpleCircuit.Drawing.Builders
                         var path = _document.CreateElement("path", Namespace);
                         groupElement.AppendChild(path);
                         path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
-                        path.SetAttribute("style", $"stroke: {underlineSpan.Style.Color}; stroke-width: {underlineSpan.Style.LineThickness.ToSVG()}pt; stroke-linecap: butt; fill: none;");
-                        path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
+                        path.SetAttribute("style", underlineSpan.Style.CreateStrokeStyle(Diagnostics));
+                        // path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;
 
