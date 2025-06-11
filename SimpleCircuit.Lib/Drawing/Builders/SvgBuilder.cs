@@ -36,7 +36,7 @@ namespace SimpleCircuit.Drawing.Builders
         /// <summary>
         /// Gets or sets the margin used along the border to make sure everything is included.
         /// </summary>
-        public double Margin { get; set; } = 1.0;
+        public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
         /// <summary>
         /// Removes empty groups.
@@ -249,7 +249,6 @@ namespace SimpleCircuit.Drawing.Builders
                         groupElement.AppendChild(path);
                         path.SetAttribute("d", $"M{overlineSpan.Start.ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
                         path.SetAttribute("style", overlineSpan.Style.CreateStrokeStyle(Diagnostics));
-                        // path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;
 
@@ -262,7 +261,6 @@ namespace SimpleCircuit.Drawing.Builders
                         groupElement.AppendChild(path);
                         path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
                         path.SetAttribute("style", underlineSpan.Style.CreateStrokeStyle(Diagnostics));
-                        // path.SetAttribute("transform", groupElement.Attributes["transform"]?.Value ?? string.Empty);
                     }
                     break;
 
