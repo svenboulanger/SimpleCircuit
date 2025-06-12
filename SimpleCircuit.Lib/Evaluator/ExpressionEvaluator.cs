@@ -1,7 +1,9 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser.Nodes;
 using SpiceSharp;
 using System;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -10,6 +12,230 @@ namespace SimpleCircuit.Evaluator
     /// </summary>
     public static class ExpressionEvaluator
     {
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _addition = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a + (double)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a + (double)b },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a + (int)b },
+            { Tuple.Create(typeof(double), typeof(string)), (a, b) => GetString((double)a) + (string)b },
+            { Tuple.Create(typeof(string), typeof(double)), (a, b) => (string)a + GetString((double)b) },
+            { Tuple.Create(typeof(int), typeof(string)), (a, b) => a.ToString() + (string)b },
+            { Tuple.Create(typeof(string), typeof(int)), (a, b) => a + (string)b },
+            { Tuple.Create(typeof(string), typeof(string)), (a, b) => (string)a + (string)b },
+            { Tuple.Create(typeof(Vector2), typeof(Vector2)), (a, b) => (Vector2)a + (Vector2)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _subtraction = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a - (double)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a - (double)b },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a - (int)b },
+            { Tuple.Create(typeof(Vector2), typeof(Vector2)), (a, b) => (Vector2)a - (Vector2)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _multiplication = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a * (double)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a * (double)b },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a * (int)b },
+            { Tuple.Create(typeof(Vector2), typeof(double)), (a, b) => (Vector2)a * (double)b },
+            { Tuple.Create(typeof(double), typeof(Vector2)), (a, b) => (double)a * (Vector2)b },
+            { Tuple.Create(typeof(Vector2), typeof(int)), (a, b) => (Vector2)a * (int)b },
+            { Tuple.Create(typeof(int), typeof(Vector2)), (a, b) => (int)a * (Vector2)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _division = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a / (double)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a / (double)b },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a / (int)b },
+            { Tuple.Create(typeof(Vector2), typeof(double)), (a, b) => (Vector2)a / (double)b },
+            { Tuple.Create(typeof(Vector2), typeof(int)), (a, b) => (Vector2)a / (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _modulo = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a % (double)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a % (double)b },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a % (int)b }
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _logicalAnd = new()
+        {
+            { Tuple.Create(typeof(bool), typeof(bool)), (a, b) => (bool)a && (bool)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _logicalOr = new()
+        {
+            { Tuple.Create(typeof(bool), typeof(bool)), (a, b) => (bool)a || (bool)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _and = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)(l & r);
+            } },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                return (double)(l & (int)b);
+            } },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) =>
+            {
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)((int)a & r);
+            } },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a & (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _or = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)(l | r);
+            } },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                return (double)(l | (int)b);
+            } },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) =>
+            {
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)((int)a | r);
+            } },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a | (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _xor = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)(l ^ r);
+            } },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                return (double)(l ^ (int)b);
+            } },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) =>
+            {
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)((int)a ^ r);
+            } },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a ^ (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _equals = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => ((double)a).Equals((double)b) },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => ((double)b).Equals((double)(int)a) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => ((double)a).Equals((double)(int)b) },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => ((int)a).Equals((int)b) },
+            { Tuple.Create(typeof(bool), typeof(bool)), (a, b) => (bool)a == (bool)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _notEquals = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => !((double)a).Equals((double)b) },            
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => !((double)b).Equals((double)(int)a) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => !((double)a).Equals((double)(int)b) },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => !((int)a).Equals((int)b) },
+            { Tuple.Create(typeof(bool), typeof(bool)), (a, b) => (bool)a != (bool)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _smallerThan = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => ((double)a) < ((double)b) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a < (int)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a < (double)b },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a < (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _greaterThan = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => ((double)a) > ((double)b) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a > (int)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a > (double)b },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a > (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _smallerThanOrEqual = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => ((double)a) <= ((double)b) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a <= (int)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a <= (double)b },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a <= (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _greaterThanOrEqual = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) => ((double)a) >= ((double)b) },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a >= (int)b },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a >= (double)b },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a >= (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _shiftLeft = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)(l << r);
+            } },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                return (double)(l << (int)b);
+            } },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) =>
+            {
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)((int)a << r);
+            } },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a << (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _shiftRight = new()
+        {
+            { Tuple.Create(typeof(double), typeof(double)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)(l >> r);
+            } },
+            { Tuple.Create(typeof(double), typeof(int)), (a, b) =>
+            {
+                int l = (int)Math.Round((double)a, MidpointRounding.AwayFromZero);
+                return (double)(l >> (int)b);
+            } },
+            { Tuple.Create(typeof(int), typeof(double)), (a, b) =>
+            {
+                int r = (int)Math.Round((double)b, MidpointRounding.AwayFromZero);
+                return (double)((int)a >> r);
+            } },
+            { Tuple.Create(typeof(int), typeof(int)), (a, b) => (int)a >> (int)b },
+        };
+        private static readonly Dictionary<Tuple<Type, Type>, Func<object, object, object>> _concatenate = new()
+        {
+            { Tuple.Create(typeof(string), typeof(string)), (a, b) => (string)a + (string)b }
+        };
+
+        private static readonly Dictionary<Tuple<Type>, Func<object, object>> _minus = new()
+        {
+            { Tuple.Create(typeof(double)), a => -(double)a },
+            { Tuple.Create(typeof(int)), a => -(int)a },
+            { Tuple.Create(typeof(Vector2)), a => -(Vector2)a },
+        };
+        private static readonly Dictionary<Tuple<Type>, Func<object, object>> _plus = new()
+        {
+            { Tuple.Create(typeof(double)), a => +(double)a },
+            { Tuple.Create(typeof(int)), a => +(int)a },
+            { Tuple.Create(typeof(Vector2)), a => (Vector2)a },
+        };
+        private static readonly Dictionary<Tuple<Type>, Func<object, object>> _invert = new()
+        {
+            { Tuple.Create(typeof(bool)), a => !(bool)a },
+        };
+
+        /// <summary>
+        /// Evaluates a syntax node as an expression.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>Returns the evaluated value.</returns>
+        /// <exception cref="NotImplementedException">Thrown if the node could not be parsed as an expression.</exception>
         public static object Evaluate(SyntaxNode node, EvaluationContext context)
         {
             return node switch
@@ -22,6 +248,7 @@ namespace SimpleCircuit.Evaluator
                 TernaryNode ternary => Evaluate(ternary, context),
                 UnaryNode unary => Evaluate(unary, context),
                 BracketNode bracket => Evaluate(bracket, context),
+                VectorNode vector => Evaluate(vector, context),
                 _ => throw new NotImplementedException(),
             };
         }
@@ -34,6 +261,7 @@ namespace SimpleCircuit.Evaluator
             context.Diagnostics?.Post(new SourceDiagnosticMessage(bracket.Left.Location, SeverityLevel.Error, "ERR", "Unrecognized brackets"));
             return null;
         }
+
         private static object Evaluate(BinaryNode binary, EvaluationContext context)
         {
             object left = Evaluate(binary.Left, context);
@@ -41,196 +269,53 @@ namespace SimpleCircuit.Evaluator
             if (left is null || right is null)
                 return null;
 
-            switch (binary.Type)
+            var (name, dict) = binary.Type switch
             {
-                case BinaryOperatorTypes.Addition:
-                    {
-                        if (left is double dLeft)
-                        {
-                            if (right is double dRight)
-                                return dLeft + dRight;
-                            return dLeft.GetString() + right.ToString();
-                        }
-                        else
-                        {
-                            if (right is double dRight)
-                                return left.ToString() + dRight.GetString();
-                            return left.ToString() + right.ToString();
-                        }
-                    }
+                BinaryOperatorTypes.Addition => ("add", _addition),
+                BinaryOperatorTypes.Subtraction => ("subtract", _subtraction),
+                BinaryOperatorTypes.Multiplication => ("multiply", _multiplication),
+                BinaryOperatorTypes.Division => ("divide", _division),
+                BinaryOperatorTypes.Modulo => ("modulo", _modulo),
+                BinaryOperatorTypes.LogicalAnd => ("and", _logicalAnd),
+                BinaryOperatorTypes.LogicalOr => ("or", _logicalOr),
+                BinaryOperatorTypes.And => ("bitwise and", _and),
+                BinaryOperatorTypes.Or => ("bitwise or", _or),
+                BinaryOperatorTypes.Xor => ("bitwise xor", _xor),
+                BinaryOperatorTypes.Equals => ("compare", _equals),
+                BinaryOperatorTypes.NotEquals => ("compare", _notEquals),
+                BinaryOperatorTypes.SmallerThan => ("compare", _smallerThan),
+                BinaryOperatorTypes.GreaterThan => ("compare", _greaterThan),
+                BinaryOperatorTypes.SmallerThanOrEqual => ("compare", _smallerThanOrEqual),
+                BinaryOperatorTypes.GreaterThanOrEqual => ("compare", _greaterThanOrEqual),
+                BinaryOperatorTypes.ShiftLeft => ("bitshift", _shiftLeft),
+                BinaryOperatorTypes.ShiftRight => ("bitshift", _shiftRight),
+                BinaryOperatorTypes.Concatenate => ("concatenate", _concatenate),
+                _ => throw new NotImplementedException()
+            };
 
-                case BinaryOperatorTypes.Subtraction:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft - dRight;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot subtract non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Multiplication:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft * dRight;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot multiply non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Division:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft / dRight;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot divide non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Modulo:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft % dRight;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot modulo non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.LogicalAnd:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return !left.Equals(0.0) && !right.Equals(0.0);
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot logical-AND non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.LogicalOr:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return !left.Equals(0.0) || !right.Equals(0.0);
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot logical-OR non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.And:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                        {
-                            int l = (int)Math.Round(dLeft, MidpointRounding.AwayFromZero);
-                            int r = (int)Math.Round(dRight, MidpointRounding.AwayFromZero);
-                            return (double)(l & r);
-                        }
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot AND non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Or:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                        {
-                            int l = (int)Math.Round(dLeft, MidpointRounding.AwayFromZero);
-                            int r = (int)Math.Round(dRight, MidpointRounding.AwayFromZero);
-                            return (double)(l | r);
-                        }
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot OR non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Xor:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                        {
-                            int l = (int)Math.Round(dLeft, MidpointRounding.AwayFromZero);
-                            int r = (int)Math.Round(dRight, MidpointRounding.AwayFromZero);
-                            return (double)(l ^ r);
-                        }
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot XOR non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Equals:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft.Equals(dRight);
-                        else
-                            return left.ToString() == right.ToString();
-                    }
-
-                case BinaryOperatorTypes.NotEquals:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return !dLeft.Equals(dRight);
-                        else
-                            return left.ToString() != right.ToString();
-                    }
-
-                case BinaryOperatorTypes.SmallerThan:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft < dRight;
-                        else
-                            return left.ToString().CompareTo(right.ToString()) < 0;
-                    }
-
-                case BinaryOperatorTypes.GreaterThan:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft > dRight;
-                        else
-                            return left.ToString().CompareTo(right.ToString()) > 0;
-                    }
-
-                case BinaryOperatorTypes.SmallerThanOrEqual:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft <= dRight;
-                        else
-                            return left.ToString().CompareTo(right.ToString()) <= 0;
-                    }
-
-                case BinaryOperatorTypes.GreaterThanOrEqual:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                            return dLeft >= dRight;
-                        else
-                            return left.ToString().CompareTo(right.ToString()) >= 0;
-                    }
-
-                case BinaryOperatorTypes.ShiftLeft:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                        {
-                            int l = (int)Math.Round(dLeft, MidpointRounding.AwayFromZero);
-                            int r = (int)Math.Round(dRight, MidpointRounding.AwayFromZero);
-                            return (double)(l << r);
-                        }
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot shift-left non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.ShiftRight:
-                    {
-                        if (left is double dLeft && right is double dRight)
-                        {
-                            int l = (int)Math.Round(dLeft, MidpointRounding.AwayFromZero);
-                            int r = (int)Math.Round(dRight, MidpointRounding.AwayFromZero);
-                            return (double)(l >> r);
-                        }
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", "Cannot shift-right non-numbers"));
-                        return null;
-                    }
-
-                case BinaryOperatorTypes.Concatenate:
-                    return left.ToString() + right.ToString();
-
-                default:
-                    throw new NotImplementedException();
-            }
+            if (dict.TryGetValue(Tuple.Create(left.GetType(), right.GetType()), out var func))
+                return func(left, right);
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", $"Cannot {name} types '{left.GetType().Name}' and '{right.GetType().Name}'"));
+            return false;
         }
         private static object Evaluate(CallNode call, EvaluationContext context)
         {
-            object[] args = new object[call.Arguments.Length];
-            for (int i = 0; i < args.Length; i++)
+            // Build the argument list
+            object[] args;
+            if (call.Arguments is VectorNode argumentList)
             {
-                args[i] = Evaluate(call.Arguments[i], context);
-                if (args[i] == null)
-                    return null;
+                args = new object[argumentList.Arguments.Length];
+                for (int i = 0; i < args.Length; i++)
+                {
+                    args[i] = Evaluate(argumentList.Arguments[i], context);
+                    if (args[i] == null)
+                        return null;
+                }
             }
+            else
+                args = [];
+
+            // Call
             if (call.Subject is IdentifierNode name)
             {
                 switch (name.Name)
@@ -244,14 +329,14 @@ namespace SimpleCircuit.Evaluator
                             }
                             if (args[0] is not double d)
                             {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Arguments[0].Location, SeverityLevel.Error, "ERR", "Expected number as first argument"));
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Expected number as first argument"));
                                 return null;
                             }
                             if (args.Length == 2)
                             {
                                 if (args[1] is not double n)
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Arguments[1].Location, SeverityLevel.Error, "ERR", "Expected number as second argument"));
+                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Expected number as second argument"));
                                     return null;
                                 }
                                 return Math.Round(d, (int)Math.Round(n, MidpointRounding.AwayFromZero));
@@ -321,37 +406,76 @@ namespace SimpleCircuit.Evaluator
         private static object Evaluate(UnaryNode unary, EvaluationContext context)
         {
             object arg = Evaluate(unary.Argument, context);
-            switch (unary.Type)
+            if (arg is null)
+                return null;
+
+            var (name, dict) = unary.Type switch
             {
-                case UnaryOperatorTypes.Positive:
-                    {
-                        if (arg is double d)
-                            return d;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Location, SeverityLevel.Error, "ERR", "Cannot take positive of non-numbers"));
-                        return null;
-                    }
+                UnaryOperatorTypes.Positive => ("plus", _plus),
+                UnaryOperatorTypes.Negative => ("negate", _minus),
+                UnaryOperatorTypes.Invert => ("invert", _invert),
+                _ => throw new NotImplementedException()
+            };
 
-                case UnaryOperatorTypes.Negative:
-                    {
-                        if (arg is double d)
-                            return -d;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Location, SeverityLevel.Error, "ERR", "Cannot take negative of non-numbers"));
-                        return null;
-                    }
-
-                case UnaryOperatorTypes.Invert:
-                    {
-                        if (arg is double d)
-                            return d.Equals(0.0) ? 1.0 : 0.0;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Location, SeverityLevel.Error, "ERR", "Cannot invert non-numbers"));
-                        return null;
-                    }
-
-                default:
-                    throw new NotImplementedException();
+            if (dict.TryGetValue(Tuple.Create(arg.GetType()), out var func))
+                return func(arg);
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot {name} type '{arg.GetType().Name}'"));
+            return false;
+        }
+        private static object Evaluate(VectorNode vector, EvaluationContext context)
+        {
+            if (vector.Arguments.Length == 0)
+                throw new NotImplementedException();
+            if (vector.Arguments.Length == 1)
+                return Evaluate(vector.Arguments[0], context);
+            if (vector.Arguments.Length == 2)
+            {
+                // Go for a vector
+                if (TryGetDouble(vector.Arguments[0], context, out double x) &&
+                    TryGetDouble(vector.Arguments[1], context, out double y))
+                    return new Vector2(x, y);
+                return null;
             }
+            if (vector.Arguments.Length == 4)
+            {
+                if (TryGetDouble(vector.Arguments[0], context, out double left) &&
+                    TryGetDouble(vector.Arguments[1], context, out double top) &&
+                    TryGetDouble(vector.Arguments[2], context, out double right) &&
+                    TryGetDouble(vector.Arguments[3], context, out double bottom))
+                    return new Margins(left, top, right, bottom);
+                return null;
+            }
+
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(vector.Location, SeverityLevel.Error, "ERR", $"Could not interpret {vector.Arguments.Length} arguments"));
+            return null;
         }
         private static string GetString(this double value)
             => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        private static bool TryGetDouble(SyntaxNode node, EvaluationContext context, out double result)
+        {
+            var arg = Evaluate(node, context);
+
+            if (arg is null)
+            {
+                result = double.NaN;
+                return false;
+            }
+
+            if (arg is double d)
+            {
+                result = d;
+                return true;
+            }
+
+            if (arg is int i)
+            {
+                result = i;
+                return true;
+            }
+
+            result = double.NaN;
+            context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", "Expected a number"));
+            return false;
+        }
     }
 }

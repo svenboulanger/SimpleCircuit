@@ -2,31 +2,6 @@
 
 namespace SimpleCircuit.Parser.Nodes
 {
-    public enum BinaryOperatorTypes
-    {
-        None,
-        Addition,
-        Subtraction,
-        Multiplication,
-        Division,
-        Modulo,
-        ShiftLeft,
-        ShiftRight,
-        GreaterThan,
-        SmallerThan,
-        GreaterThanOrEqual,
-        SmallerThanOrEqual,
-        Equals,
-        NotEquals,
-        And,
-        Or,
-        Xor,
-        LogicalAnd,
-        LogicalOr,
-        Concatenate,
-        Assignment,
-    }
-
     /// <summary>
     /// A binary operation.
     /// </summary>

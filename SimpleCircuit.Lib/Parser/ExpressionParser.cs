@@ -18,7 +18,27 @@ namespace SimpleCircuit.Parser
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if no errors were encountered; otherwise, <c>false</c>.</returns>
         public static bool ParseExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
-            => ParseConditionalExpression(lexer, context, out result);
+        {
+            if (!ParseConditionalExpression(lexer, context, out result))
+                return false;
+
+            // If there are more arguments, 
+            if (lexer.Check(TokenType.Punctuator, ","))
+            {
+                // Read second argument
+                var args = new List<SyntaxNode> { result };
+
+                // Read any extra arguments
+                while (lexer.Branch(TokenType.Punctuator, ","))
+                {
+                    if (!ParseConditionalExpression(lexer, context, out result))
+                        return false;
+                    args.Add(result);
+                }
+                result = new VectorNode(args);
+            }
+            return true;
+        }
 
         private static bool ParseConditionalExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
@@ -252,8 +272,7 @@ namespace SimpleCircuit.Parser
                         lexer.Next();
                         lexer.Next(); // '('
 
-                        List<SyntaxNode> arguments = [];
-                        while (!lexer.Branch(TokenType.Punctuator, ")", out var bracketClose))
+                        if (!lexer.Branch(TokenType.Punctuator, ")", out var bracketClose))
                         {
                             if (!ParseExpression(lexer, context, out var argument))
                                 return false;
@@ -262,8 +281,16 @@ namespace SimpleCircuit.Parser
                                 context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected an argument"));
                                 return false;
                             }
+
+                            if (!lexer.Branch(TokenType.Punctuator, ")"))
+                            {
+                                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected closing bracket"));
+                                return false;
+                            }
+                            result = new CallNode(new IdentifierNode(id), argument);
                         }
-                        result = new CallNode(new IdentifierNode(id), arguments);
+                        else
+                            result = new CallNode(new IdentifierNode(id), null);
                     }
                     else
                     {

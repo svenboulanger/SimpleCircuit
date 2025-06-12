@@ -930,6 +930,8 @@ namespace SimpleCircuit.Evaluator
                 return defaultValue;
             if (result is double dResult)
                 return dResult;
+            else if (result is int iResult)
+                return iResult;
             else
             {
                 context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", "Cannot evaluate as a number"));
