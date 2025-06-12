@@ -10,6 +10,7 @@ using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser.SimpleTexts;
+using SpiceSharp;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
 
@@ -154,9 +155,10 @@ namespace SimpleCircuit
 
             // Space loose blocks next to each other to avoid overlaps
             var registerContext = new RegisterContext(diagnostics, prepareContext);
+            List<IDiagnosticMessage> warnings = [];
             void Log(object sender, SpiceSharp.WarningEventArgs e)
             {
-                diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
+                warnings.Add(new DiagnosticMessage(SeverityLevel.Warning, "OP001", e.Message));
             }
 
             // Register any solvable presences in the circuit
@@ -180,7 +182,7 @@ namespace SimpleCircuit
             }
 
             // Solve the circuit
-            SpiceSharp.SpiceSharpWarning.WarningGenerated += Log;
+            SpiceSharpWarning.WarningGenerated += Log;
             try
             {
                 // Solve
@@ -196,9 +198,19 @@ namespace SimpleCircuit
                 if (!Update(prepareContext, updateContext, presences))
                     return false;
             }
+            catch (SpiceSharpException ex)
+            {
+                // First log all the warning messages
+                if (diagnostics is not null)
+                {
+                    foreach (var msg in warnings)
+                        diagnostics.Post(msg);
+                }
+                throw ex;
+            }
             finally
             {
-                SpiceSharp.SpiceSharpWarning.WarningGenerated -= Log;
+                SpiceSharpWarning.WarningGenerated -= Log;
             }
 
             return true;

@@ -46,8 +46,8 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             _lastState = true;
             
             // Calculate conductances
-            _g = _gOn;
-            _gOff = 1.0 / _parameters.Weight;
+            _g = _gOn + _iteration.Gmin;
+            _gOff = 1.0 / _parameters.Weight + _iteration.Gmin;
 
             // Calculate currents
             _iOn = (_parameters.Offset + _parameters.Minimum) * _gOn;
@@ -61,7 +61,7 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             if (_iteration.Mode == IterationModes.Fix || _iteration.Mode == IterationModes.Junction)
             {
                 _state = true;
-                _g = _gOn;
+                _g = _gOn + _iteration.Gmin;
                 _i = _iOn;
             }
             else
@@ -69,9 +69,9 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
                 // Get the controlled value
                 _lastState = _state;
                 double ctrl = _variables.Positive.Value - (_variables.Negative.Value + _parameters.Offset);
-                if (ctrl < _parameters.Minimum - _threshold)
+                if (ctrl < _parameters.Minimum - _threshold - _iteration.Gmin * 1e6)
                     _state = true;
-                else if (ctrl > _parameters.Minimum + _threshold)
+                else if (ctrl > _parameters.Minimum + _threshold + _iteration.Gmin * 1e6)
                     _state = false;
 
                 if (_state != _lastState)
@@ -79,12 +79,12 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
                     _iteration.IsConvergent = false;
                     if (_state)
                     {
-                        _g = _gOn;
+                        _g = _gOn + _iteration.Gmin;
                         _i = _iOn;
                     }
                     else
                     {
-                        _g = _gOff;
+                        _g = _gOff + _iteration.Gmin;
                         _i = _iOff;
                     }
                 }

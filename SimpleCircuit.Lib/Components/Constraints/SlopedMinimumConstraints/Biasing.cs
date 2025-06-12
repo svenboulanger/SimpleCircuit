@@ -96,9 +96,9 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
             _state = true;
             _lastState = true;
             _n = _parameters.Normal;
-            _gnx2 = _gOn * _n.X * _n.X;
-            _gnxny = _gOn * _n.X * _n.Y;
-            _gny2 = _gOn * _n.Y * _n.Y;
+            _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+            _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+            _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
             _i = _iOn = -_gOn * _n * (_parameters.Minimum + _n.Dot(_parameters.Offset));
             _xo = _parameters.Normal.Dot(_parameters.Offset.Perpendicular);
         }
@@ -110,9 +110,9 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
             if (_iteration.Mode == IterationModes.Fix || _iteration.Mode == IterationModes.Junction)
             {
                 _state = true;
-                _gnx2 = _gOn * _n.X * _n.X;
-                _gnxny = _gOn * _n.X * _n.Y;
-                _gny2 = _gOn * _n.Y * _n.Y;
+                _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+                _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+                _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
             }
             else
             {
@@ -120,9 +120,9 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                 _lastState = _state;
                 Vector2 ctrl = new(_x2.Value - (_x1.Value + _parameters.Offset.X), _y2.Value - (_y1.Value + _parameters.Offset.Y));
                 double dot = ctrl.Dot(_n);
-                if (dot < _parameters.Minimum - _thresholdHysteresis)
+                if (dot < _parameters.Minimum - _thresholdHysteresis - _iteration.Gmin * 1e6)
                     _state = true;
-                else if (dot > _parameters.Minimum + _thresholdHysteresis)
+                else if (dot > _parameters.Minimum + _thresholdHysteresis + _iteration.Gmin * 1e6)
                     _state = false;
             
                 // Change the parameters if necessary
@@ -131,16 +131,16 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                     _iteration.IsConvergent = false;
                     if (_state)
                     {
-                        _gnx2 = _gOn * _n.X * _n.X;
-                        _gnxny = _gOn * _n.X * _n.Y;
-                        _gny2 = _gOn * _n.Y * _n.Y;
+                        _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+                        _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+                        _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
                         _i = _iOn;
                     }
                     else
                     {
-                        _gnx2 = _n.X * _n.X / _parameters.Weight;
-                        _gnxny = _n.X * _n.Y / _parameters.Weight;
-                        _gny2 = _n.Y * _n.Y / _parameters.Weight;
+                        _gnx2 = _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
+                        _gnxny = _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
+                        _gny2 = _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
                         _i = new();
                     }
                 }
