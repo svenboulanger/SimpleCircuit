@@ -116,7 +116,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Register(IRegisterContext context)
             {
-                // Figure out the edge margins
+                // Figure out the edge margins using the labels
                 double marginLeft = CornerRadius, marginTop = CornerRadius, marginRight = CornerRadius, marginBottom = CornerRadius;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
@@ -246,8 +246,8 @@ namespace SimpleCircuit.Components
                     var lastOffset = context.GetOffset(_parent.Y);
                     var nextOffset = context.GetOffset(Bottom);
                     double minimum = Math.Max(marginTop + marginBottom, _parent.MinHeight);
-                    minLeftHeight = minRightHeight = marginTop + marginBottom;
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.lr.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                    minLeftHeight = minRightHeight = minimum;
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.tb.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
                 if (lastTopPin >= 0)
                 {
@@ -270,11 +270,11 @@ namespace SimpleCircuit.Components
                 if (lastTopPin < 0 && lastBottomPin < 0)
                 {
                     // There are no vertical pins to determine spacing, so let's place a minimum constraint
-                    var lastOffset = context.GetOffset(_parent.Y);
-                    var nextOffset = context.GetOffset(Bottom);
-                    double minimum = Math.Max(marginTop + marginBottom, _parent.MinHeight);
-                    minTopWidth = minBottomWidth = marginLeft + marginRight;
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.tb.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                    var lastOffset = context.GetOffset(_parent.X);
+                    var nextOffset = context.GetOffset(Right);
+                    double minimum = Math.Max(marginLeft + marginRight, _parent.MinWidth);
+                    minTopWidth = minBottomWidth = minimum;
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.lr.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
 
                 // Add minimum width/height
@@ -339,13 +339,17 @@ namespace SimpleCircuit.Components
 
                     case PreparationMode.Sizes:
                         var style = context.Style.ModifyDashedDotted(_parent);
+                        Span emptySpan = null;
                         foreach (var pin in _pinsByIndex)
                         {
                             string text = TransformPinName(pin.Name);
                             if (!string.IsNullOrWhiteSpace(text))
                                 _spansByIndex.Add(context.TextFormatter.Format(text, style));
                             else
-                                _spansByIndex.Add(null);
+                            {
+                                emptySpan ??= context.TextFormatter.Format(string.Empty, style);
+                                _spansByIndex.Add(emptySpan);
+                            }
                         }
                         break;
 

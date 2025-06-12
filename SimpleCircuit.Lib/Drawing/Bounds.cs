@@ -10,6 +10,11 @@ namespace SimpleCircuit.Drawing
     public readonly struct Bounds : IEquatable<Bounds>, IFormattable, IEnumerable<Vector2>
     {
         /// <summary>
+        /// Gets bounds that represent zero.
+        /// </summary>
+        public static Bounds Zero { get; } = new(0, 0, 0, 0);
+
+        /// <summary>
         /// Gets the left.
         /// </summary>
         public double Left { get; }

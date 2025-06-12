@@ -37,16 +37,21 @@ namespace SimpleCircuit.Drawing.Spans
         protected override SpanBounds ComputeBounds()
         {
             var bounds = new ExpandableBounds();
-            double y = 0.0, advance = 0.0;
-            foreach (var span in _spans)
+            if (_spans.Count > 0)
             {
-                bounds.Expand(
-                    new Vector2(0, y + span.Bounds.Bounds.Top),
-                    new Vector2(span.Bounds.Bounds.Width, y + span.Bounds.Bounds.Bottom));
-                advance = Math.Max(advance, span.Bounds.Advance);
-                y += LineIncrement;
+                double y = 0.0, advance = 0.0;
+                foreach (var span in _spans)
+                {
+                    bounds.Expand(
+                        new Vector2(0, y + span.Bounds.Bounds.Top),
+                        new Vector2(span.Bounds.Bounds.Width, y + span.Bounds.Bounds.Bottom));
+                    advance = Math.Max(advance, span.Bounds.Advance);
+                    y += LineIncrement;
+                }
+                return new(bounds.Bounds, advance);
             }
-            return new(bounds.Bounds, advance);
+            else
+                return new(Drawing.Bounds.Zero, 0.0);
         }
 
         /// <inheritdoc />

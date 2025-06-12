@@ -28,7 +28,6 @@ namespace SimpleCircuit.Components.Labeling
             bounds.Expand(new Vector2());
 
             // Go through each label and figure out the width
-            var anchor = GetAnchorPoint(drawable, index);
             for (int i = 0; i < drawable.Labels.Count; i++)
             {
                 // Get the location
