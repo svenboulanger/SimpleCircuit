@@ -35,7 +35,6 @@ namespace Sandbox
             // Draw the component
             if (evalContext.Circuit.Count > 0 && logger.ErrorCount == 0)
             {
-                evalContext.Circuit.RenderBounds = false;
                 var doc = evalContext.Circuit.Render(logger);
                 if (doc == null)
                     return;

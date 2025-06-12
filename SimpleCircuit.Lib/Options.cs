@@ -26,9 +26,6 @@
         [Description("The spacing in Y-direction between two unconnected circuit diagrams. The default is 10.")]
         public double SpacingY { get; set; } = 20.0;
 
-        [Description("If true, the graphical bounds are rendered on top of each component. The default is false.")]
-        public bool RenderBounds { get; set; }
-
         /// <summary>
         /// Applies the options to the given graphical circuit.
         /// </summary>
@@ -36,7 +33,6 @@
         public void Apply(GraphicalCircuit circuit)
         {
             circuit.Spacing = new(SpacingX, SpacingY);
-            circuit.RenderBounds = RenderBounds;
         }
     }
 }

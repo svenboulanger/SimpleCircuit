@@ -56,11 +56,6 @@ namespace SimpleCircuit
         public Vector2 Spacing { get; set; } = new(10.0, 10.0);
 
         /// <summary>
-        /// Gets or sets a flag that determines whether bounds are rendered.
-        /// </summary>
-        public bool RenderBounds { get; set; }
-
-        /// <summary>
         /// Gets the text formatter.
         /// </summary>
         public ITextFormatter TextFormatter => formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
