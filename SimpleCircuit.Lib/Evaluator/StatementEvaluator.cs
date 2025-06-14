@@ -866,14 +866,35 @@ namespace SimpleCircuit.Evaluator
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            string name = EvaluateFilter(component, context);
-            if (name is null)
-                return null;
+            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.History)
+            {
+                // This should be treated as an anonymous component in the past
+                string name = EvaluateName(bn.Left, context);
+                if (name is null)
+                    return null;
+                int goBack = EvaluateAsInteger(bn.Right, context, 1);
 
-            // Return the result
-            var result = new AlignedComponents(context.GetVirtualName(), name, flags);
-            context.Circuit.Add(result);
-            return result;
+                // History
+                if (!context.TryGetHistoricAnonymousComponent(bn.Left.Location, name, goBack, out var presence))
+                    return null;
+                if (presence is not ILocatedPresence lp)
+                {
+                    context.Diagnostics?.Post(bn.Left.Location, ErrorCodes.ComponentCannotChangeLocation);
+                    return null;
+                }
+                return lp;
+            }
+            else
+            {
+                string name = EvaluateFilter(component, context);
+                if (name is null)
+                    return null;
+
+                // Return the result
+                var result = new AlignedComponents(context.GetVirtualName(), name, flags);
+                context.Circuit.Add(result);
+                return result;
+            }
         }
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, SyntaxNode pin, VirtualChainConstraints flags, EvaluationContext context)
         {
