@@ -36,6 +36,8 @@
         CouldNotFindComponentInSubcircuitForPort,
         [Diagnostic(SeverityLevel.Warning, null, "Could not find any component matching '{0}'")]
         CouldNotFindComponentMatching,
+        [Diagnostic(SeverityLevel.Error, null, "Could not find a historic anonymous component for '{0}' going back {1} components")]
+        CouldNotFindHistoricAnonymousComponent,
         [Diagnostic(SeverityLevel.Error, null, "Could not find any pins matching '{0}' on component '{1}'")]
         CouldNotFindMatchingPinOnComponent,
         [Diagnostic(SeverityLevel.Error, null, "Cannot find the pin '{0}' on component {1}")]
@@ -76,6 +78,8 @@
 
         [Diagnostic(SeverityLevel.Error, null, "Expected attribute {0} on {1}")]
         ExpectedAttributeOn,
+        [Diagnostic(SeverityLevel.Error, null, "Expected an anonymous component key, but got '{0}'")]
+        ExpectedAnonymousKey,
         [Diagnostic(SeverityLevel.Error, null, "Expected between {0} and {1} arguments for method '{2}'")]
         ExpectedBetweenArgumentsFor,
         [Diagnostic(SeverityLevel.Warning, null, "Expected coordinate for attribute {0} on {1}, but was '{2}'")]

@@ -718,7 +718,7 @@ namespace SimpleCircuit.Parser
                     // A separator for sections
                     result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(opSlash));
                 }
-                else if (lexer.Branch(TokenType.Word, out var word))
+                else if (lexer.Branch(TokenType.Word | TokenType.Number, out var word))
                 {
                     // A word
                     var expression = new LiteralNode(word);
@@ -749,6 +749,21 @@ namespace SimpleCircuit.Parser
 
                     expression = new BracketNode(bracketLeft, expression, bracketRight);
                     result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                }
+                else if (result is not null && lexer.Branch(TokenType.Punctuator, "~", out var tilde))
+                {
+                    // Parse the value or expression
+                    if (!ParseValueOrExpression(lexer, context, out var expression))
+                        return false;
+                    if (expression is null)
+                    {
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedValueOrExpression);
+                        return false;
+                    }
+
+                    // There cannot be anything after this for the name
+                    result = new BinaryNode(BinaryOperatorTypes.History, result, tilde, expression);
+                    return true;
                 }
                 else
                     return true;

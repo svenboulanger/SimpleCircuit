@@ -111,6 +111,7 @@ namespace SimpleCircuit.Parser
                     case '}':
                     case ',':
                     case ':':
+                    case '~':
                         NextType = TokenType.Punctuator;
                         ContinueToken();
                         break;

@@ -416,9 +416,9 @@ namespace SimpleCircuit.Evaluator
         {
             // Evaluate the values for the for-loop
             string variableName = forLoop.Variable.Content.ToString();
-            double start = EvaluateAsNumber(forLoop.Start, context, 0.0);
-            double end = EvaluateAsNumber(forLoop.End, context, 1.0);
-            double increment = EvaluateAsNumber(forLoop.Increment, context, 1.0);
+            double start = EvaluateAsDouble(forLoop.Start, context, 0.0);
+            double end = EvaluateAsDouble(forLoop.End, context, 1.0);
+            double increment = EvaluateAsDouble(forLoop.Increment, context, 1.0);
 
             // Make sure we don't end up in an infinite loop
             if (increment.IsZero())
@@ -623,7 +623,7 @@ namespace SimpleCircuit.Evaluator
 
                             if (direction.Angle is not null)
                             {
-                                double angle = EvaluateAsNumber(direction.Angle, context, 0.0);
+                                double angle = EvaluateAsDouble(direction.Angle, context, 0.0);
                                 segment.Orientation = Vector2.Normal(-angle / 180.0 * Math.PI);
                             }
                             else
@@ -647,10 +647,10 @@ namespace SimpleCircuit.Evaluator
                             if (direction.Distance is not null)
                             {
                                 if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
-                                    segment.Length = EvaluateAsNumber(unary.Argument, context, MinimumWireLength);
+                                    segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
                                 else
                                 {
-                                    segment.Length = EvaluateAsNumber(direction.Distance, context, MinimumWireLength);
+                                    segment.Length = EvaluateAsDouble(direction.Distance, context, MinimumWireLength);
                                     segment.IsMinimum = false;
                                 }
                             }
@@ -742,7 +742,7 @@ namespace SimpleCircuit.Evaluator
 
                         if (direction.Angle is not null)
                         {
-                            double angle = EvaluateAsNumber(direction.Angle, context, 0.0);
+                            double angle = EvaluateAsDouble(direction.Angle, context, 0.0);
                             segment.Orientation = Vector2.Normal(angle / 180.0 * Math.PI);
                         }
                         else
@@ -764,10 +764,10 @@ namespace SimpleCircuit.Evaluator
                         if (direction.Distance is not null)
                         {
                             if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
-                                segment.Length = EvaluateAsNumber(unary.Argument, context, MinimumWireLength);
+                                segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
                             else
                             {
-                                segment.Length = EvaluateAsNumber(direction.Distance, context, MinimumWireLength);
+                                segment.Length = EvaluateAsDouble(direction.Distance, context, MinimumWireLength);
                                 segment.IsMinimum = false;
                             }
                         }
@@ -788,45 +788,67 @@ namespace SimpleCircuit.Evaluator
         }
         private static ICircuitPresence ProcessComponent(SyntaxNode component, EvaluationContext context)
         {
-            // Evaluate the full name
+            // Split into the component and its properties
             SyntaxNode[] properties = null;
             if (component is PropertyListNode pln)
             {
                 properties = pln.Properties;
                 component = pln.Subject;
             }
-            string name = EvaluateName(component, context);
-            if (name is null)
-                return null;
-            if (context.QueuedPoints.Count > 0 && name.Equals(PointFactory.Key))
+
+            // Evaluate the full name of the component
+            ICircuitPresence presence;
+            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.History)
             {
-                var pt = context.QueuedPoints.Dequeue();
-                return pt;
+                // This should be treated as an anonymous component in the past
+                string name = EvaluateName(bn.Left, context);
+                if (name is null)
+                    return null;
+                int goBack = EvaluateAsInteger(bn.Right, context, 1);
+
+                // History
+                if (!context.TryGetHistoricAnonymousComponent(bn.Left.Location, name, goBack, out presence))
+                    return null;
             }
-
-            // Validate the name of the component
-            if (!IsValidName(name))
+            else
             {
-                context.Diagnostics?.Post(component.Location, ErrorCodes.InvalidName, name);
-                return null;
-            }
+                // Regular naming
+                string name = EvaluateName(component, context);
+                if (name is null)
+                    return null;
 
-            // Expand the name
-            name = context.GetFullname(name);
-
-            // Get the item
-            if (!context.Circuit.TryGetValue(name, out var presence))
-            {
-                presence = context.Factory.Create(name, context.Options, context.CurrentScope, context.Diagnostics);
-                if (presence is null)
+                // If the name is an anonymous point, then let's 
+                if (context.QueuedPoints.Count > 0 && name.Equals(PointFactory.Key))
                 {
-                    context.Diagnostics?.Post(component.Location, ErrorCodes.CouldNotCreateComponentForName, name);
+                    var pt = context.QueuedPoints.Dequeue();
+                    return pt;
+                }
+
+                // Validate the name of the component
+                if (!IsValidName(name))
+                {
+                    context.Diagnostics?.Post(component.Location, ErrorCodes.InvalidName, name);
                     return null;
                 }
-                context.Circuit.Add(presence);
 
-                if (presence is Subcircuit.Instance inst)
-                    inst.ApplyDefaultProperties(context);
+                // Expand the name
+                name = context.GetFullname(name);
+
+                // Get the item
+                if (!context.Circuit.TryGetValue(name, out presence))
+                {
+                    presence = context.Factory.Create(name, context.Options, context.CurrentScope, context.Diagnostics);
+                    if (presence is null)
+                    {
+                        context.Diagnostics?.Post(component.Location, ErrorCodes.CouldNotCreateComponentForName, name);
+                        return null;
+                    }
+                    context.Circuit.Add(presence);
+
+                    if (presence is Subcircuit.Instance inst)
+                        inst.ApplyDefaultProperties(context);
+                }
+
             }
 
             // Register the source
@@ -902,10 +924,22 @@ namespace SimpleCircuit.Evaluator
                 case LiteralNode literalNode:
                     return literalNode.Value.ToString();
 
+                case NumberNode number:
+                    return number.ToString();
+
                 case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.Concatenate:
                     string left = EvaluateName(binaryNode.Left, context);
                     string right = EvaluateName(binaryNode.Right, context);
+                    if (left is null || right is null)
+                        return null;
                     return left + right;
+
+                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.History:
+                    left = EvaluateName(binaryNode.Left, context);
+                    right = EvaluateName(binaryNode.Right, context);
+                    if (left is null || right is null)
+                        return null;
+                    return left + "~" + right;
 
                 case BracketNode bracketNode when bracketNode.Left.Content.ToString() == "{" && bracketNode.Right.Content.ToString() == "}":
                     return ExpressionEvaluator.Evaluate(bracketNode.Value, context)?.ToString();
@@ -935,7 +969,24 @@ namespace SimpleCircuit.Evaluator
                 name = $"^{name}$";
             return name;
         }
-        private static double EvaluateAsNumber(SyntaxNode node, EvaluationContext context, double defaultValue)
+        private static int EvaluateAsInteger(SyntaxNode node, EvaluationContext context, int defaultValue)
+        {
+            object result = EvaluateExpression(node, context);
+            if (result is null)
+                return defaultValue;
+            if (result is int i)
+                return i;
+            if (result is double d)
+            {
+                if ((d - Math.Round(d)).IsZero())
+                    return (int)Math.Round(d);
+                else
+                    context.Diagnostics?.Post(ErrorCodes.ExpectedInteger);
+                return defaultValue;
+            }
+            return defaultValue;
+        }
+        private static double EvaluateAsDouble(SyntaxNode node, EvaluationContext context, double defaultValue)
         {
             object result = EvaluateExpression(node, context);
             if (result is null)

@@ -26,5 +26,6 @@
         LogicalOr,
         Concatenate,
         Assignment,
+        History
     }
 }
