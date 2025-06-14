@@ -146,14 +146,14 @@ namespace SimpleCircuit.Evaluator
         }
 
         /// <summary>
-        /// Gets an anonymous component backtracking a number of steps.
+        /// Tries to get an anonymous component backtracking a number of steps.
         /// </summary>
         /// <param name="location">The location.</param>
         /// <param name="name">The name.</param>
-        /// <param name="history">The number of steps to backtrack.</param>
+        /// <param name="backtrack">The number of steps to backtrack.</param>
         /// <param name="presence">The found result.</param>
         /// <returns>Returns <c>true</c> if the component could be found; otherwise, <c>false</c>.</returns>
-        public bool TryGetHistoricAnonymousComponent(TextLocation location, string name, int history, out ICircuitPresence presence)
+        public bool TryGetBacktrackedAnonymousComponent(TextLocation location, string name, int backtrack, out ICircuitPresence presence)
         {
             // Check that the name is a key
             if (!Factory.IsAnonymous(name, out string key))
@@ -164,15 +164,15 @@ namespace SimpleCircuit.Evaluator
             }
 
             // Get the counter for the given anonymous key
-            if (history <= 0 || !_anonymousCounters.TryGetValue(key, out int counter) || history >= counter)
+            if (backtrack <= 0 || !_anonymousCounters.TryGetValue(key, out int counter) || backtrack >= counter)
             {
-                Diagnostics?.Post(location, ErrorCodes.CouldNotFindHistoricAnonymousComponent, name, history);
+                Diagnostics?.Post(location, ErrorCodes.CouldNotFindBacktrackedAnonymousComponent, name, backtrack);
                 presence = null;
                 return false;
             }
 
             // Expand the name
-            name = $"{name}{DrawableFactoryDictionary.AnonymousSeparator}{counter - history}";
+            name = $"{name}{DrawableFactoryDictionary.AnonymousSeparator}{counter - backtrack}";
             name = string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
             if (!Circuit.TryGetValue(name, out presence))
                 throw new ArgumentException();

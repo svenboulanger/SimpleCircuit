@@ -36,8 +36,8 @@
         CouldNotFindComponentInSubcircuitForPort,
         [Diagnostic(SeverityLevel.Warning, null, "Could not find any component matching '{0}'")]
         CouldNotFindComponentMatching,
-        [Diagnostic(SeverityLevel.Error, null, "Could not find a historic anonymous component for '{0}' going back {1} components")]
-        CouldNotFindHistoricAnonymousComponent,
+        [Diagnostic(SeverityLevel.Error, null, "Could not find an anonymous component to backtrack to for '{0}' going back {1} components")]
+        CouldNotFindBacktrackedAnonymousComponent,
         [Diagnostic(SeverityLevel.Error, null, "Could not find any pins matching '{0}' on component '{1}'")]
         CouldNotFindMatchingPinOnComponent,
         [Diagnostic(SeverityLevel.Error, null, "Cannot find the pin '{0}' on component {1}")]

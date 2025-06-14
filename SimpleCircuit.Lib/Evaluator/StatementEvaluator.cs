@@ -798,7 +798,7 @@ namespace SimpleCircuit.Evaluator
 
             // Evaluate the full name of the component
             ICircuitPresence presence;
-            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.History)
+            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.Backtrack)
             {
                 // This should be treated as an anonymous component in the past
                 string name = EvaluateName(bn.Left, context);
@@ -806,8 +806,8 @@ namespace SimpleCircuit.Evaluator
                     return null;
                 int goBack = EvaluateAsInteger(bn.Right, context, 1);
 
-                // History
-                if (!context.TryGetHistoricAnonymousComponent(bn.Left.Location, name, goBack, out presence))
+                // Backtrack the anonymous component
+                if (!context.TryGetBacktrackedAnonymousComponent(bn.Left.Location, name, goBack, out presence))
                     return null;
             }
             else
@@ -866,7 +866,7 @@ namespace SimpleCircuit.Evaluator
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.History)
+            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.Backtrack)
             {
                 // This should be treated as an anonymous component in the past
                 string name = EvaluateName(bn.Left, context);
@@ -874,8 +874,8 @@ namespace SimpleCircuit.Evaluator
                     return null;
                 int goBack = EvaluateAsInteger(bn.Right, context, 1);
 
-                // History
-                if (!context.TryGetHistoricAnonymousComponent(bn.Left.Location, name, goBack, out var presence))
+                // Get the backtracked anonymous component
+                if (!context.TryGetBacktrackedAnonymousComponent(bn.Left.Location, name, goBack, out var presence))
                     return null;
                 if (presence is not ILocatedPresence lp)
                 {
@@ -955,7 +955,7 @@ namespace SimpleCircuit.Evaluator
                         return null;
                     return left + right;
 
-                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.History:
+                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.Backtrack:
                     left = EvaluateName(binaryNode.Left, context);
                     right = EvaluateName(binaryNode.Right, context);
                     if (left is null || right is null)

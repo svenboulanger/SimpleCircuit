@@ -762,7 +762,7 @@ namespace SimpleCircuit.Parser
                     }
 
                     // There cannot be anything after this for the name
-                    result = new BinaryNode(BinaryOperatorTypes.History, result, tilde, expression);
+                    result = new BinaryNode(BinaryOperatorTypes.Backtrack, result, tilde, expression);
                     return true;
                 }
                 else
@@ -838,7 +838,7 @@ namespace SimpleCircuit.Parser
                     }
 
                     // There cannot be anything after this for the name
-                    result = new BinaryNode(BinaryOperatorTypes.History, result, tilde, expression);
+                    result = new BinaryNode(BinaryOperatorTypes.Backtrack, result, tilde, expression);
                     return true;
                 }
                 else
