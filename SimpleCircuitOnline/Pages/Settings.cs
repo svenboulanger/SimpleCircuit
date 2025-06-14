@@ -1,5 +1,8 @@
 ﻿namespace SimpleCircuitOnline.Pages
 {
+    /// <summary>
+    /// Settings.
+    /// </summary>
     public class Settings
     {
         /// <summary>

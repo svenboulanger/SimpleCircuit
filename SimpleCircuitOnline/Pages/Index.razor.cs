@@ -200,11 +200,11 @@ namespace SimpleCircuitOnline.Pages
                         {
                             _logger.Messages.Add(new DiagnosticMessage(SeverityLevel.Error,
                                 null, $"Loading script failed: {ex.Message}"));
-                            script = Demo.Demos[0].Code;
+                            script = DemoCategory.MainDemo.Code;
                         }
                     }
                     else
-                        script = Demo.Demos[0].Code;
+                        script = DemoCategory.MainDemo.Code;
                     _viewMode = true;
                     await SetCurrentScript(script);
 
@@ -475,7 +475,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Allow loading an initial script if none was stored
                 if (string.IsNullOrWhiteSpace(script))
-                    script = Demo.Demos[0].Code;
+                    script = DemoCategory.MainDemo.Code;
 
                 await SetCurrentScript(script);
             }

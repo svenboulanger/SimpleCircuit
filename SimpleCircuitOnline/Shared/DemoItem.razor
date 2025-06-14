@@ -1,0 +1,14 @@
+﻿<a @onclick="x => Update(Item.Code)" class="bd-callout" role="button">
+    <h5>@Item.Title</h5>
+    <p>@Item.Description</p>
+</a>
+
+@code {
+    [Parameter]
+    public EventCallback<string> DemoSelected { get; set; }
+
+    [Parameter]
+    public Demo Item { get; set; }
+
+    private async Task Update(string code) => await DemoSelected.InvokeAsync(code);
+}

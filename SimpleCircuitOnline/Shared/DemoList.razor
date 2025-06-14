@@ -1,16 +1,8 @@
-﻿@if (Demo.Demos != null)
+﻿@if (DemoCategory.Demos != null)
 {
-    @foreach (var pair in _demos)
+    @foreach (var category in DemoCategory.Demos)
     {
-        <Expandable Title="@pair.Key">
-            @foreach (var demo in pair.Value)
-            {
-                <a @onclick="x => Update(demo.Code)" class="bd-callout" role="button">
-                    <h5>@demo.Title</h5>
-                    <p>@demo.Description</p>
-                </a>
-            }
-        </Expandable>
+        <DemoCategoryItem Item="category" DemoSelected="Update" />
     }
 }
 

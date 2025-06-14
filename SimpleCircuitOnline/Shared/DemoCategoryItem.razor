@@ -1,0 +1,26 @@
+﻿<Expandable Title="@Item.Title">
+    @if (Item?.Categories is not null && Item.Categories.Length > 0)
+    {
+        @foreach (var category in Item.Categories)
+        {
+            <DemoCategoryItem Item="category" DemoSelected="Update" @key="category" />
+        }
+    }
+    @if (Item?.Items is not null && Item.Items.Length > 0)
+    {
+        @foreach (var item in Item.Items)
+        {
+            <DemoItem Item="item" DemoSelected="Update" @key="item" />
+        }
+    }
+</Expandable>
+
+@code {
+    [Parameter]
+    public EventCallback<string> DemoSelected { get; set; }
+
+    [Parameter]
+    public DemoCategory Item { get; set; }
+
+    private async Task Update(string code) => await DemoSelected.InvokeAsync(code);
+}
