@@ -62,14 +62,14 @@ namespace SimpleCircuit.Components.General
                     {
                         if (presence is not ILocatedPresence located)
                         {
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"Component {presence.Name} cannot change location"));
+                            context.Diagnostics?.Post(Sources, ErrorCodes.ComponentCannotChangeLocation, presence.Name);
                             continue;
                         }
                         _presences.Add(located);
                     }
                     if (_presences.Count == 0)
                     {
-                        context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"Could not find any presences for {Name}"));
+                        context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotFindComponentMatching, _filter);
                         return PresenceResult.Success;
                     }
                     break;
@@ -88,7 +88,7 @@ namespace SimpleCircuit.Components.General
                             {
                                 if (!context.Offsets.Group(last.X, presence.X, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, last.X, presence.X);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -96,7 +96,7 @@ namespace SimpleCircuit.Components.General
                             {
                                 if (!context.Offsets.Group(last.Y, presence.Y, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, last.Y, presence.Y);
                                     return PresenceResult.GiveUp;
                                 }
                             }

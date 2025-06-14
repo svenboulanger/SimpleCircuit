@@ -118,7 +118,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (binary.Left is not IdentifierNode id)
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Left.Location, SeverityLevel.Error, "ERR", "Expected property name"));
+                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedPropertyName);
                                     return false;
                                 }
                                 object value = StatementEvaluator.EvaluateExpression(binary.Right, evalContext);
@@ -140,7 +140,7 @@ namespace SimpleCircuit.Components
                         if (!globalScope.TryGetValue(name, out value))
                         {
                             // Perhaps point to the references in the error message instead here
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", $"Could not find a parameter with the name '{name}'"));
+                            context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotFindVariable, name);
                             return false;
                         }
                     }
@@ -161,11 +161,6 @@ namespace SimpleCircuit.Components
                     case PreparationMode.Reset:
 
                         // First get the graphical circuit for the current state
-                        if (_parentFactory._definitionNode.Statements.References.Any(item => item is null))
-                        {
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", "Missing property"));
-                            return PresenceResult.GiveUp;
-                        }
                         var state = new SubcircuitState(_properties);
                         if (!_parentFactory._versions.TryGetValue(state, out var version))
                         {
@@ -216,7 +211,7 @@ namespace SimpleCircuit.Components
                             string name = StatementEvaluator.EvaluateName(pnp.Name, context);
                             if (!circuit.TryGetValue(name, out var presence) || presence is not IDrawable drawable)
                             {
-                                diagnostics?.Post(new SourceDiagnosticMessage(pnp.Name.Location, SeverityLevel.Error, "ERR", $"Could not find component '{name}' in subcircuit '{_parentFactory._key}'"));
+                                diagnostics?.Post(pnp.Name.Location, ErrorCodes.CouldNotFindComponentInSubcircuitForPort, name, _parentFactory._key);
                                 return PresenceResult.GiveUp;
                             }
 
@@ -231,7 +226,7 @@ namespace SimpleCircuit.Components
                                     pinFactories.Add(CreatePinFactory(name, pinName, pin, usedPins, context.Diagnostics));
                                 else
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(pnp.PinLeft.Location, SeverityLevel.Error, "ERR", $"Could not find pin '{pinName}' on '{name}'"));
+                                    context.Diagnostics?.Post(pnp.PinLeft.Location, ErrorCodes.CouldNotFindPinOnComponentInSubcircuitForPort, pinName, name, _parentFactory._key);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -244,7 +239,7 @@ namespace SimpleCircuit.Components
                                     pinFactories.Add(CreatePinFactory(name, pinName, pin, usedPins, context.Diagnostics));
                                 else
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(pnp.PinRight.Location, SeverityLevel.Error, "ERR", $"Could not find pin '{pinName}' on '{name}'"));
+                                    context.Diagnostics?.Post(pnp.PinRight.Location, ErrorCodes.CouldNotFindPinOnComponentInSubcircuitForPort, pinName, name, _parentFactory._key);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -257,14 +252,14 @@ namespace SimpleCircuit.Components
                             string name = literal.Value.ToString();
                             if (!circuit.TryGetValue(name, out var presence) || presence is not IDrawable drawable)
                             {
-                                diagnostics?.Post(new SourceDiagnosticMessage(literal.Location, SeverityLevel.Error, "ERR", $"Could not find component '{name}' in subcircuit '{_parentFactory._key}'"));
+                                diagnostics?.Post(literal.Location, ErrorCodes.CouldNotFindComponentInSubcircuitForPort, name, _parentFactory._key);
                                 return PresenceResult.GiveUp;
                             }
 
                             // Determine the name of the pin
                             if (drawable.Pins.Count == 0)
                             {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(literal.Location, SeverityLevel.Error, "ERR", $"The component '{name}' does not have pins"));
+                                context.Diagnostics?.Post(literal.Location, ErrorCodes.ComponentDoesNotHaveAnyPins, name);
                                 return PresenceResult.GiveUp;
                             }
                             var pin = drawable.Pins[^1];
@@ -287,7 +282,7 @@ namespace SimpleCircuit.Components
                 if (usedPins.Add(namePin))
                     names.Add(namePin);
                 else
-                    diagnostics?.Post(new SourcesDiagnosticMessage(pin.Sources, SeverityLevel.Warning, "WARNING", $"The pin '{pinName}' on '{drawableName}' is used multiple times and will not be accessible as a port anymore."));
+                    diagnostics?.Post(pin.Sources, ErrorCodes.MultipleSubcircuitInstancePinPort, pinName, drawableName);
 
                 // Also try just the drawable name
                 if (usedPins.Add(drawableName))

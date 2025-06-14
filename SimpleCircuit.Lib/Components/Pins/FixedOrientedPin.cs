@@ -97,12 +97,12 @@ namespace SimpleCircuit.Components.Pins
                     var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
                     if (!context.Offsets.Group(_origin.X, X, offset.X))
                     {
-                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.X, Name);
+                        context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.X, Name);
                         return PresenceResult.GiveUp;
                     }
                     if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
                     {
-                        context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, offset.Y, Name);
+                        context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.Y, Name);
                         return PresenceResult.GiveUp;
                     }
                     break;

@@ -4,6 +4,7 @@ using SimpleCircuit.Parser.Nodes;
 using SpiceSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -17,8 +18,8 @@ namespace SimpleCircuit.Evaluator
             { Tuple.Create(typeof(double), typeof(double)), (a, b) => (double)a + (double)b },
             { Tuple.Create(typeof(int), typeof(double)), (a, b) => (int)a + (double)b },
             { Tuple.Create(typeof(double), typeof(int)), (a, b) => (double)a + (int)b },
-            { Tuple.Create(typeof(double), typeof(string)), (a, b) => GetString((double)a) + (string)b },
-            { Tuple.Create(typeof(string), typeof(double)), (a, b) => (string)a + GetString((double)b) },
+            { Tuple.Create(typeof(double), typeof(string)), (a, b) => ((double)a).ToString(CultureInfo.InvariantCulture) + (string)b },
+            { Tuple.Create(typeof(string), typeof(double)), (a, b) => (string)a + ((double)b).ToString(CultureInfo.InvariantCulture) },
             { Tuple.Create(typeof(int), typeof(string)), (a, b) => a.ToString() + (string)b },
             { Tuple.Create(typeof(string), typeof(int)), (a, b) => a + (string)b },
             { Tuple.Create(typeof(string), typeof(string)), (a, b) => (string)a + (string)b },
@@ -258,7 +259,7 @@ namespace SimpleCircuit.Evaluator
             if (bracket.Left.Content.Length == 1 && bracket.Right.Content.Length == 1 &&
                 bracket.Left.Content.Span[0] == '(' && bracket.Right.Content.Span[0] == ')')
                 return Evaluate(bracket.Value, context);
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(bracket.Left.Location, SeverityLevel.Error, "ERR", "Unrecognized brackets"));
+            context.Diagnostics?.Post([bracket.Left.Location, bracket.Right.Location], ErrorCodes.CouldNotRecognizeBracket, bracket.Left.Content.ToString(), bracket.Right.Content.ToString());
             return null;
         }
 
@@ -295,25 +296,19 @@ namespace SimpleCircuit.Evaluator
 
             if (dict.TryGetValue(Tuple.Create(left.GetType(), right.GetType()), out var func))
                 return func(left, right);
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Operator, SeverityLevel.Error, "ERR", $"Cannot {name} types '{left.GetType().Name}' and '{right.GetType().Name}'"));
+            context.Diagnostics?.Post(binary.Operator.Location, ErrorCodes.CouldNotOperateForArgumentTypes, left.GetType().Name, right.GetType().Name);
             return false;
         }
         private static object Evaluate(CallNode call, EvaluationContext context)
         {
             // Build the argument list
-            object[] args;
-            if (call.Arguments is VectorNode argumentList)
-            {
-                args = new object[argumentList.Arguments.Length];
-                for (int i = 0; i < args.Length; i++)
-                {
-                    args[i] = Evaluate(argumentList.Arguments[i], context);
-                    if (args[i] == null)
-                        return null;
-                }
-            }
-            else
+            SyntaxNode[] args;
+            if (call.Arguments is null)
                 args = [];
+            else if (call.Arguments is VectorNode vn)
+                args = vn.Arguments;
+            else
+                args = [call.Arguments];
 
             // Call
             if (call.Subject is IdentifierNode name)
@@ -322,30 +317,27 @@ namespace SimpleCircuit.Evaluator
                 {
                     case "round":
                         {
-                            if (args.Length < 1 || args.Length > 2)
+                            if (args.Length == 1)
                             {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Expected 1 or 2 arguments"));
-                                return null;
-                            }
-                            if (args[0] is not double d)
-                            {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Expected number as first argument"));
-                                return null;
+                                if (TryGetDouble(args[0], context, out double d))
+                                    return Math.Round(d);
+                                else
+                                    return null;
                             }
                             if (args.Length == 2)
                             {
-                                if (args[1] is not double n)
-                                {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Expected number as second argument"));
+                                if (TryGetDouble(args[0], context, out double d) &&
+                                    TryGetInteger(args[1], context, out int i))
+                                    return Math.Round(d, i);
+                                else
                                     return null;
-                                }
-                                return Math.Round(d, (int)Math.Round(n, MidpointRounding.AwayFromZero));
                             }
-                            return Math.Round(d, MidpointRounding.AwayFromZero);
+                            context.Diagnostics?.Post(call.Location, ErrorCodes.ExpectedBetweenArgumentsFor, 1, 2, "round");
+                            return null;
                         }
 
                     default:
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(call.Location, SeverityLevel.Error, "ERR", "Unrecognized function '{0}'".FormatString(name.Name)));
+                        context.Diagnostics?.Post(call.Location, ErrorCodes.UnrecognizedFunction, name.Name);
                         return null;
                 }
             }
@@ -356,7 +348,7 @@ namespace SimpleCircuit.Evaluator
             // If we are actually in the middle of evaluating the identifier, raise an error
             if (context.UsedExpressionParameters.Contains(identifier.Name))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Token.Location, SeverityLevel.Error, "ERR", $"Circular variable reference for '{identifier.Name}'"));
+                context.Diagnostics?.Post(identifier.Token, ErrorCodes.CircularVariableReference, identifier.Name);
                 return null;
             }
 
@@ -384,7 +376,7 @@ namespace SimpleCircuit.Evaluator
 
             // It was not in the current scope, not in one of the parameter to be evaluated, and it wasn't in a parent scope
             // Give up now
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(identifier.Location, SeverityLevel.Error, "ERR", $"Could not find variable '{identifier.Name}'"));
+            context.Diagnostics?.Post(identifier.Location, ErrorCodes.CouldNotFindVariable, identifier.Name);
             return null;
         }
         private static object Evaluate(NumberNode number, EvaluationContext context)
@@ -419,7 +411,7 @@ namespace SimpleCircuit.Evaluator
 
             if (dict.TryGetValue(Tuple.Create(arg.GetType()), out var func))
                 return func(arg);
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(unary.Operator, SeverityLevel.Error, "ERR", $"Cannot {name} type '{arg.GetType().Name}'"));
+            context.Diagnostics?.Post(unary.Operator, ErrorCodes.CouldNotOperateForArgumentType, name, arg.GetType().Name);
             return false;
         }
         private static object Evaluate(VectorNode vector, EvaluationContext context)
@@ -446,11 +438,41 @@ namespace SimpleCircuit.Evaluator
                 return null;
             }
 
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(vector.Location, SeverityLevel.Error, "ERR", $"Could not interpret {vector.Arguments.Length} arguments"));
+            context.Diagnostics?.Post(vector.Location, ErrorCodes.ExpectedVector, vector.Arguments.Length);
             return null;
         }
-        private static string GetString(this double value)
-            => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        private static bool TryGetString(SyntaxNode node, EvaluationContext context, out string result)
+        {
+            var arg = Evaluate(node, context);
+
+            if (arg is null)
+            {
+                result = null;
+                return false;
+            }
+
+            if (arg is string str)
+            {
+                result = str;
+                return true;
+            }
+
+            if (arg is double d)
+            {
+                result = d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return true;
+            }
+
+            if (arg is int i)
+            {
+                result = i.ToString();
+                return true;
+            }
+
+            result = null;
+            context.Diagnostics?.Post(node.Location, ErrorCodes.ExpectedString);
+            return false;
+        }
         private static bool TryGetDouble(SyntaxNode node, EvaluationContext context, out double result)
         {
             var arg = Evaluate(node, context);
@@ -474,7 +496,37 @@ namespace SimpleCircuit.Evaluator
             }
 
             result = double.NaN;
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", "Expected a number"));
+            context.Diagnostics?.Post(node.Location, ErrorCodes.ExpectedDouble);
+            return false;
+        }
+        private static bool TryGetInteger(SyntaxNode node, EvaluationContext context, out int result)
+        {
+            var arg = Evaluate(node, context);
+
+            if (arg is null)
+            {
+                result = -1;
+                return false;
+            }
+
+            if (arg is int i)
+            {
+                result = i;
+                return true;
+            }
+
+            if (arg is double d)
+            {
+                double rounded = Math.Round(d, MidpointRounding.AwayFromZero);
+                if ((d - rounded).IsZero())
+                {
+                    result = (int)rounded;
+                    return true;
+                }
+            }
+
+            context.Diagnostics?.Post(node.Location, ErrorCodes.ExpectedInteger);
+            result = -1;
             return false;
         }
     }

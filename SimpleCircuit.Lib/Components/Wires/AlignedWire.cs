@@ -54,12 +54,12 @@ namespace SimpleCircuit.Components.Wires
                         {
                             if (doX && !context.Offsets.Group(last.X, presence.X, 0.0))
                             {
-                                context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
+                                context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, last.X, presence.X);
                                 return PresenceResult.GiveUp;
                             }
                             if (doY && !context.Offsets.Group(last.Y, presence.Y, 0.0))
                             {
-                                context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
+                                context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, last.Y, presence.Y);
                                 return PresenceResult.GiveUp;
                             }
                         }

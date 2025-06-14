@@ -54,14 +54,14 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (ifTrue is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                     return false;
                 }
 
                 // ':'
                 if (!lexer.Branch(TokenType.Punctuator, ":"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ':'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ":");
                     return false;
                 }
 
@@ -70,7 +70,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (ifFalse is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                     return false;
                 }
                 result = new TernaryNode(result, ifTrue, ifFalse);
@@ -205,7 +205,7 @@ namespace SimpleCircuit.Parser
                         return false;
                     if (arg is null)
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                         return false;
                     }
                     result = new UnaryNode(token, arg, type);
@@ -243,7 +243,7 @@ namespace SimpleCircuit.Parser
                                 return false;
                             if (arg is null)
                             {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                                 return false;
                             }
                             args.Add(arg);
@@ -276,15 +276,10 @@ namespace SimpleCircuit.Parser
                         {
                             if (!ParseExpression(lexer, context, out var argument))
                                 return false;
-                            if (argument is null)
-                            {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected an argument"));
-                                return false;
-                            }
-
+                            
                             if (!lexer.Branch(TokenType.Punctuator, ")"))
                             {
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected closing bracket"));
+                                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ")");
                                 return false;
                             }
                             result = new CallNode(new IdentifierNode(id), argument);
@@ -321,7 +316,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                             result = null;
                             return false;
                         }
@@ -329,7 +324,7 @@ namespace SimpleCircuit.Parser
                         // ')'
                         if (!lexer.Branch(TokenType.Punctuator, ")", out var bracketRight))
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ')'"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ")");
                             return false;
                         }
 
@@ -367,7 +362,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (right is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                             return false;
                         }
                         result = new BinaryNode(type, result, token, right);

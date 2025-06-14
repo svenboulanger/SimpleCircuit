@@ -12,9 +12,20 @@
                 {
                     <p>@(message.Message). Edit the script to start tracking, or click <a href="javascript:void(0);" @onclick=@(async () => await ViewModeClicked.InvokeAsync(true))>here</a> to restore your last saved work.</p>
                 }
-                else if (message is SourceDiagnosticMessage tdm)
+                else if (message is SourceDiagnosticMessage sdm)
                 {
-                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(tdm.Location))>line @(tdm.Location.Line), column @(tdm.Location.Column)</a>.</p>
+                    <p>@(message.Message) at <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(sdm.Location))>line @(sdm.Location.Line), column @(sdm.Location.Column)</a>.</p>
+                }
+                else if (message is SourcesDiagnosticMessage ssdm)
+                {
+                    <p>
+                        @(message.Message) at
+                        @for (int i = 0; i < ssdm.Locations.Length; i++)
+                        {
+                            var loc = ssdm.Locations[i];
+                            <a href="javascript:void(0);" @onclick=@(async () => await MessageClicked.InvokeAsync(loc))>line @(loc.Line), column @(loc.Column)</a>
+                        }
+                    </p>
                 }
                 else
                 {

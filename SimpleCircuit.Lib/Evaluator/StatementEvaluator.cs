@@ -265,7 +265,7 @@ namespace SimpleCircuit.Evaluator
                                 // Set property
                                 if (binary.Left is not IdentifierNode id)
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Location, SeverityLevel.Error, "ERR", "Expected a literal"));
+                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedLiteral);
                                     return;
                                 }
                                 string propertyName = id.Name;
@@ -311,10 +311,14 @@ namespace SimpleCircuit.Evaluator
             {
                 // Try to parse a property and update the local scope
                 if (property is not BinaryNode assignment ||
-                    assignment.Type != BinaryOperatorTypes.Assignment ||
-                    assignment.Left is not IdentifierNode propertyName)
+                    assignment.Type != BinaryOperatorTypes.Assignment)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                    context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
+                    return;
+                }
+                if (assignment.Left is not IdentifierNode propertyName)
+                {
+                    context.Diagnostics?.Post(assignment.Left.Location, ErrorCodes.ExpectedPropertyName);
                     return;
                 }
 
@@ -343,7 +347,7 @@ namespace SimpleCircuit.Evaluator
                     // Try to find the template
                     if (!context.SectionDefinitions.TryGetValue(sectionName.Name, out template))
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(sectionName.Token, SeverityLevel.Error, "ERR", $"Cannot find any section with the name '{sectionName.Name}'"));
+                        context.Diagnostics?.Post(sectionName.Location, ErrorCodes.CouldNotFindSectionWithName, sectionName.Name);
                         return;
                     }
                 }
@@ -355,10 +359,14 @@ namespace SimpleCircuit.Evaluator
             {
                 // Try to parse a property and update the local scope
                 if (property is not BinaryNode assignment ||
-                    assignment.Type != BinaryOperatorTypes.Assignment ||
-                    assignment.Left is not IdentifierNode propertyName)
+                    assignment.Type != BinaryOperatorTypes.Assignment)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                    context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
+                    return;
+                }
+                if (assignment.Left is not IdentifierNode propertyName)
+                {
+                    context.Diagnostics?.Post(assignment.Left.Location, ErrorCodes.ExpectedPropertyName);
                     return;
                 }
 
@@ -377,10 +385,14 @@ namespace SimpleCircuit.Evaluator
                 {
                     var property = sectionDefinition.Properties[i];
                     if (property is not BinaryNode assignment ||
-                        assignment.Type != BinaryOperatorTypes.Assignment ||
-                        assignment.Left is not IdentifierNode propertyName)
+                        assignment.Type != BinaryOperatorTypes.Assignment)
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(property.Location, SeverityLevel.Error, "ERR", "Expected a property assignment"));
+                        context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
+                        return;
+                    }
+                    if (assignment.Left is not IdentifierNode propertyName)
+                    {
+                        context.Diagnostics?.Post(assignment.Left.Location, ErrorCodes.ExpectedPropertyName);
                         return;
                     }
 
@@ -411,7 +423,7 @@ namespace SimpleCircuit.Evaluator
             // Make sure we don't end up in an infinite loop
             if (increment.IsZero())
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(forLoop.Increment.Location, SeverityLevel.Error, "ERR", $"For-loop increment is too small ({increment})"));
+                context.Diagnostics?.Post(forLoop.Increment.Location, ErrorCodes.ForLoopIncrementTooSmall, increment);
                 return;
             }
             
@@ -564,7 +576,7 @@ namespace SimpleCircuit.Evaluator
                                 // Set property
                                 if (binary.Left is not IdentifierNode id)
                                 {
-                                    context.Diagnostics?.Post(new SourceDiagnosticMessage(binary.Location, SeverityLevel.Error, "ERR", "Expected a literal"));
+                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedLiteral);
                                     return;
                                 }
                                 string propertyName = id.Name;
@@ -795,7 +807,7 @@ namespace SimpleCircuit.Evaluator
             // Validate the name of the component
             if (!IsValidName(name))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(component.Location, SeverityLevel.Error, "ERR", $"Invalid name '{name}'"));
+                context.Diagnostics?.Post(component.Location, ErrorCodes.InvalidName, name);
                 return null;
             }
 
@@ -808,7 +820,7 @@ namespace SimpleCircuit.Evaluator
                 presence = context.Factory.Create(name, context.Options, context.CurrentScope, context.Diagnostics);
                 if (presence is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(component.Location, SeverityLevel.Error, "ERR", $"Could not create a component for '{name}'"));
+                    context.Diagnostics?.Post(component.Location, ErrorCodes.CouldNotCreateComponentForName, name);
                     return null;
                 }
                 context.Circuit.Add(presence);
@@ -899,7 +911,7 @@ namespace SimpleCircuit.Evaluator
                     return ExpressionEvaluator.Evaluate(bracketNode.Value, context)?.ToString();
 
                 default:
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", "Unable to resolve name"));
+                    context.Diagnostics?.Post(node.Location, ErrorCodes.CouldNotResolveName, node.ToString());
                     return null;
             }
         }
@@ -911,7 +923,7 @@ namespace SimpleCircuit.Evaluator
                 return null;
             if (!IsValidName(name, true))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", $"The virtual component filter {name} is invalid"));
+                context.Diagnostics?.Post(node.Location, ErrorCodes.InvalidName, name);
                 return null;
             }
 
@@ -928,13 +940,13 @@ namespace SimpleCircuit.Evaluator
             object result = EvaluateExpression(node, context);
             if (result is null)
                 return defaultValue;
-            if (result is double dResult)
-                return dResult;
-            else if (result is int iResult)
-                return iResult;
+            if (result is double d)
+                return d;
+            else if (result is int i)
+                return i;
             else
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(node.Location, SeverityLevel.Error, "ERR", "Cannot evaluate as a number"));
+                context.Diagnostics?.Post(node.Location, ErrorCodes.ExpectedDouble);
                 return defaultValue;
             }
         }

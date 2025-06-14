@@ -25,7 +25,7 @@ namespace SimpleCircuit.Parser
                 return false;
             if (lexer.Type != TokenType.EndOfContent)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Unrecognized statement"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeStatement);
                 return false;
             }
             return true;
@@ -135,7 +135,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (wire is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected wire"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedWireDefinition);
                             lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
                             return false;
                         }
@@ -154,7 +154,7 @@ namespace SimpleCircuit.Parser
                     // '>'
                     if (!lexer.Branch(TokenType.Punctuator, ">"))
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '>'"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ">");
                         lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
                         return false;
                     }
@@ -227,7 +227,7 @@ namespace SimpleCircuit.Parser
                     if (value is null)
                     {
                         result = null;
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected value"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPropertyValue);
                         return false;
                     }
                     result = new BinaryNode(BinaryOperatorTypes.Assignment, result, assignment, value);
@@ -306,7 +306,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (angle is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected angle"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedWireSegmentAngle);
                             return false;
                         }
 
@@ -398,7 +398,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (wire is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected wire"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedWireDefinition);
                             lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
                             return false;
                         }
@@ -406,7 +406,7 @@ namespace SimpleCircuit.Parser
                         // '>'
                         if (!lexer.Branch(TokenType.Punctuator, ">"))
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '>'"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ">");
                             lexer.SkipToTokenOrLine(TokenType.Punctuator, ">");
                             return false;
                         }
@@ -421,7 +421,7 @@ namespace SimpleCircuit.Parser
                 // ')'
                 if (!lexer.Branch(TokenType.Punctuator, ")", out var bracketRight))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected ')'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ")");
                     result = null;
                     return false;
                 }
@@ -483,7 +483,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (pinLeft is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPinName);
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -491,7 +491,7 @@ namespace SimpleCircuit.Parser
                 // ']'
                 if (!lexer.Branch(TokenType.Punctuator, "]"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "]");
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -515,7 +515,7 @@ namespace SimpleCircuit.Parser
                     result = new PropertyListNode(result, properties);
                 if (!lexer.Branch(TokenType.Punctuator, ")"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected property or ')'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ")");
                     return false;
                 }
             }
@@ -529,13 +529,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (pinRight is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
-                    return false;
-                }
-
-                if (pinRight is null)
-                {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPinName);
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -543,7 +537,7 @@ namespace SimpleCircuit.Parser
                 // ']'
                 if (!lexer.Branch(TokenType.Punctuator, "]"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "]");
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -574,7 +568,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (pinLeft is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPinName);
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -582,7 +576,7 @@ namespace SimpleCircuit.Parser
                 // ']'
                 if (!lexer.Branch(TokenType.Punctuator, "]"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "]");
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -603,13 +597,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (pinRight is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
-                    return false;
-                }
-
-                if (pinRight is null)
-                {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected pin name"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedPinName);
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -617,7 +605,7 @@ namespace SimpleCircuit.Parser
                 // ']'
                 if (!lexer.Branch(TokenType.Punctuator, "]"))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected ']'"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "]");
                     lexer.SkipToTokenOrLine(TokenType.Punctuator, "]");
                     return false;
                 }
@@ -681,7 +669,7 @@ namespace SimpleCircuit.Parser
                 // '+' word
                 if (!lexer.Branch(TokenType.Word, out word))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                     return false;
                 }
                 result = new UnaryNode(op, new LiteralNode(word), UnaryOperatorTypes.Positive);
@@ -692,7 +680,7 @@ namespace SimpleCircuit.Parser
                 // '-' word
                 if (!lexer.Branch(TokenType.Word, out word))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected variant"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                     return false;
                 }
                 result = new UnaryNode(op, new LiteralNode(word), UnaryOperatorTypes.Negative);
@@ -747,7 +735,7 @@ namespace SimpleCircuit.Parser
                     }
                     if (expression is null)
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
                         result = null;
                         return false;
                     }
@@ -755,7 +743,7 @@ namespace SimpleCircuit.Parser
                     // '}'
                     if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
                         return false;
                     }
 
@@ -806,7 +794,7 @@ namespace SimpleCircuit.Parser
                     }
                     if (expression is null)
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected expression"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
                         result = null;
                         return false;
                     }
@@ -814,7 +802,7 @@ namespace SimpleCircuit.Parser
                     // '}'
                     if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
                     {
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
                         return false;
                     }
 
@@ -848,7 +836,7 @@ namespace SimpleCircuit.Parser
                         // '}'
                         if (!lexer.Branch(TokenType.Punctuator, "}", out var bracketRight))
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token, SeverityLevel.Error, "ERR", "Expected '}'"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
                             return false;
                         }
 
@@ -951,7 +939,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected scope definition"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedScopeDefinition);
                             return false;
                         }
                         break;
@@ -963,7 +951,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected section definition"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSectionDefinition);
                             return false;
                         }
                         break;
@@ -975,7 +963,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected for loop"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedForLoopDefinition);
                             return false;
                         }
                         break;
@@ -987,7 +975,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected symbol definition"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSymbolDefinition);
                             return false;
                         }
                         break;
@@ -999,7 +987,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected if-else statement"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedIfElseStatement);
                             return false;
                         }
                         break;
@@ -1007,7 +995,7 @@ namespace SimpleCircuit.Parser
                     case "subckt":
                         if (!context.AllowSubcircuitDefinitions)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Nested subcircuit definitions are not allowed"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.NestedSubcircuitDefinition);
                             return false;
                         }
                         lexer.Next(); // '.'
@@ -1016,7 +1004,7 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (result is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected subcircuit definition"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSubcircuitDefinition);
                             return false;
                         }
                         break;
@@ -1046,14 +1034,14 @@ namespace SimpleCircuit.Parser
             {
                 if (!lexer.Branch(TokenType.Punctuator, "="))
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a '='"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "=");
                     return false;
                 }
                 if (!ParseValueOrExpression(lexer, context, out var value))
                     return false;
                 if (value is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a value"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedParameterValue);
                     return false;
                 }
                 result = new ParameterDefinitionNode(param, identifier, value);
@@ -1071,7 +1059,7 @@ namespace SimpleCircuit.Parser
             // Start the statements
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1096,7 +1084,7 @@ namespace SimpleCircuit.Parser
                     }
                 }
             }
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endscope'"));
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "endb");
             return false;
         }
         private static bool ParseScopeDefinition(Token scope, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -1110,7 +1098,7 @@ namespace SimpleCircuit.Parser
             // Start the statements
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1135,7 +1123,7 @@ namespace SimpleCircuit.Parser
                     }
                 }
             }
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endscope'"));
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "ends");
             return false;
         }
         private static bool ParseSectionDefinition(Token section, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -1145,7 +1133,7 @@ namespace SimpleCircuit.Parser
             // Section name
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a section name"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSectionName);
                 return false;
             }
 
@@ -1163,7 +1151,7 @@ namespace SimpleCircuit.Parser
             // Start the statements
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected new line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1188,7 +1176,7 @@ namespace SimpleCircuit.Parser
                     }
                 }
             }
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected '.ends' or '.endsection'"));
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "ends");
             return false;
         }
         private static bool ParseForLoop(Token @for, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -1198,7 +1186,7 @@ namespace SimpleCircuit.Parser
             // Parse the variable name
             if (!lexer.Branch(TokenType.Word, out var variableToken))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a variable name"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariableName);
                 return false;
             }
 
@@ -1207,7 +1195,7 @@ namespace SimpleCircuit.Parser
                 return false;
             if (start is null)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected start value"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedStartValue);
                 return false;
             }
 
@@ -1216,7 +1204,7 @@ namespace SimpleCircuit.Parser
                 return false;
             if (start is null)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end value"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedEndValue);
                 return false;
             }
 
@@ -1225,14 +1213,14 @@ namespace SimpleCircuit.Parser
                 return false;
             if (increment is null)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected increment"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedIncrementValue);
                 return false;
             }
 
             // New line
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a new line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1255,7 +1243,7 @@ namespace SimpleCircuit.Parser
                         return true;
                 }
             }
-            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected for-loop end ('.end', '.endf', '.endfor')"));
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "endf");
             return false;
         }
         private static bool ParseSymbolDefinition(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -1265,12 +1253,12 @@ namespace SimpleCircuit.Parser
             // Read the key name
             if (!lexer.Branch(TokenType.Word, out var keyToken))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected symbol key"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSymbolKey);
                 return false;
             }
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a newline"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1306,7 +1294,7 @@ namespace SimpleCircuit.Parser
                                     xml.Location.Source,
                                     xml.Location.Line + ex.LineNumber - 1,
                                     xml.Location.Line == 1 ? xml.Location.Column + ex.LinePosition : ex.LinePosition);
-                                context.Diagnostics?.Post(new SourceDiagnosticMessage(loc, SeverityLevel.Error, "XML", ex.Message));
+                                context.Diagnostics?.Post(loc, ErrorCodes.XmlError, ex.Message);
                                 return false;
                             }
                             result = new SymbolDefinitionNode(keyToken, doc.DocumentElement);
@@ -1317,7 +1305,7 @@ namespace SimpleCircuit.Parser
             }
             if (lexer.Type == TokenType.EndOfContent)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Unexpected end of document, expected symbol end"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "ends");
                 return false;
             }
             return true;
@@ -1333,12 +1321,12 @@ namespace SimpleCircuit.Parser
                 return false;
             if (condition is null)
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedValueOrExpression);
                 return false;
             }
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 
@@ -1370,12 +1358,12 @@ namespace SimpleCircuit.Parser
                             return false;
                         if (condition is null)
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected condition"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedValueOrExpression);
                             return false;
                         }
                         if (!lexer.Branch(TokenType.Newline))
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                             return false;
                         }
 
@@ -1390,7 +1378,7 @@ namespace SimpleCircuit.Parser
                         lexer.Next(); // 'else'
                         if (!lexer.Branch(TokenType.Newline))
                         {
-                            context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected end of line"));
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                             return false;
                         }
 
@@ -1400,7 +1388,7 @@ namespace SimpleCircuit.Parser
                         break;
 
                     default:
-                        context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", $"Could not recognize control statement '.{lexer.NextContent}'"));
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
                         return false;
                 }
             }
@@ -1411,7 +1399,7 @@ namespace SimpleCircuit.Parser
             result = null;
             if (!lexer.Branch(TokenType.Word, out var nameToken))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected subcircuit name"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSymbolKey);
                 return false;
             }
 
@@ -1428,7 +1416,7 @@ namespace SimpleCircuit.Parser
                     return false;
                 if (pin is null)
                 {
-                    context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a pin"));
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedSubcircuitPort);
                     return false;
                 }
                 pins.Add(pin);
@@ -1442,7 +1430,7 @@ namespace SimpleCircuit.Parser
 
             if (!lexer.Branch(TokenType.Newline))
             {
-                context.Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Error, "ERR", "Expected a new line"));
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
                 return false;
             }
 

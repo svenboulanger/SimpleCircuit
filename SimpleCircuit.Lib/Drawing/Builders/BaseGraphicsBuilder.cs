@@ -11,6 +11,7 @@ using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Components;
 using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Drawing.Spans;
+using SimpleCircuit.Parser.Nodes;
 
 namespace SimpleCircuit.Drawing.Builders
 {
@@ -378,7 +379,6 @@ namespace SimpleCircuit.Drawing.Builders
                     // First we expect a key
                     if (!lexer.Branch(Parser.Styles.TokenType.Key, out var keyToken))
                     {
-                        Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Warning, "WARNING", "Expected a style key"));
                         lexer.Skip(~Parser.Styles.TokenType.Semicolon);
                         lexer.Next();
                         continue;
@@ -387,7 +387,6 @@ namespace SimpleCircuit.Drawing.Builders
                     // Then we expect a colon
                     if (!lexer.Branch(Parser.Styles.TokenType.Colon))
                     {
-                        Diagnostics?.Post(new SourceDiagnosticMessage(lexer.Token.Location, SeverityLevel.Warning, "WARNING", "Expected a colon"));
                         lexer.Skip(~Parser.Styles.TokenType.Semicolon);
                         lexer.Next();
                         continue;
@@ -425,15 +424,11 @@ namespace SimpleCircuit.Drawing.Builders
                         case "stroke-width":
                             if (double.TryParse(value.Content.ToString(), out double strokeWidth))
                                 result = result.Append(new StrokeWidthStyleModifier(strokeWidth));
-                            else
-                                Diagnostics?.Post(new SourceDiagnosticMessage(value.Location, SeverityLevel.Warning, "WARNING", "Expected a number for stroke-width"));
                             break;
                         case "font-family": result = result.Append(new FontFamilyStyleModifier(value.Content.ToString())); break;
                         case "font-size":
                             if (double.TryParse(value.Content.ToString(), out double fontSize))
                                 result = result.Append(new FontSizeStyleModifier(fontSize));
-                            else
-                                Diagnostics?.Post(new SourceDiagnosticMessage(value.Location, SeverityLevel.Warning, "WARNING", "Expected a number for font-size"));
                             break;
                     }
 

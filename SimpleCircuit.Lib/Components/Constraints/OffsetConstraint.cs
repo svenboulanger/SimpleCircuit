@@ -71,7 +71,7 @@ namespace SimpleCircuit.Components
             {
                 if (!context.Offsets.Group(Lowest, Highest, Offset))
                 {
-                    context.Diagnostics?.Post(ErrorCodes.CannotResolveFixedOffsetFor, Offset, Name);
+                    context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, Offset, Name);
                     return PresenceResult.GiveUp;
                 }
             }

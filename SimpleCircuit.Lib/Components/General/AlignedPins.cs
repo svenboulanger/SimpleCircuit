@@ -94,23 +94,23 @@ namespace SimpleCircuit.Components.General
                                 {
                                     if (context.Desparateness == DesperatenessLevel.GiveUp)
                                     {
-                                        context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"No matching pins found for {component.Name}"));
+                                        context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotFindMatchingPinOnComponent, _pinFilter, drawable.Name);
                                         return PresenceResult.Success;
                                     }
                                     return PresenceResult.Incomplete;
                                 }
                             }
                             else
-                                context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Warning, "WARNING", $"Component {component.Name} does not have any pins"));
+                                context.Diagnostics?.Post(Sources, ErrorCodes.ComponentDoesNotHaveAnyPins, component.Name);
                         }
                         if (!foundComponent)
                         {
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", $"Could not find any components for '{_componentFilter}'"));
+                            context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotFindComponentMatching, _componentFilter);
                             return PresenceResult.GiveUp;
                         }
                         if (_pins.Count == 0)
                         {
-                            context.Diagnostics?.Post(new SourcesDiagnosticMessage(Sources, SeverityLevel.Error, "ERR", $"Could not find any pins"));
+                            context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotFindAnyPinsMatching, _pinFilter, _componentFilter);
                             return PresenceResult.GiveUp;
                         }
                     }
@@ -130,7 +130,7 @@ namespace SimpleCircuit.Components.General
                             {
                                 if (!context.Offsets.Group(last.X, presence.X, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, last.X, presence.X);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, last.X, presence.X);
                                     return PresenceResult.GiveUp;
                                 }
                             }
@@ -138,7 +138,7 @@ namespace SimpleCircuit.Components.General
                             {
                                 if (!context.Offsets.Group(last.Y, presence.Y, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, last.Y, presence.Y);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, last.Y, presence.Y);
                                     return PresenceResult.GiveUp;
                                 }
                             }

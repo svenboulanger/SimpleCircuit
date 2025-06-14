@@ -302,7 +302,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, _parent.Y, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, _parent.Y, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
                                 context.Offsets.Add(pin.X);
@@ -311,7 +311,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongY, Bottom, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, Bottom, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
                                 context.Offsets.Add(pin.X);
@@ -320,7 +320,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.X, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.X, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
                                 context.Offsets.Add(pin.Y);
@@ -329,7 +329,7 @@ namespace SimpleCircuit.Components
                             {
                                 if (!context.Offsets.Group(Right, pin.X, 0.0))
                                 {
-                                    context.Diagnostics?.Post(ErrorCodes.CannotAlignAlongX, _parent.Name, pin.Name);
+                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.Name, pin.Name);
                                     return PresenceResult.GiveUp;
                                 }
                                 context.Offsets.Add(pin.Y);
