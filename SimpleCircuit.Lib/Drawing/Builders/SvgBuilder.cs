@@ -1,5 +1,4 @@
 ﻿using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System;
@@ -215,6 +214,21 @@ namespace SimpleCircuit.Drawing.Builders
                         element.SetAttribute("y", textSpan.Offset.Y.ToSVG());
                         element.InnerXml = textSpan.Content;
                         textElement.AppendChild(element);
+
+                        /*
+                        // Add bounds
+                        var path = _document.CreateElement("path", Namespace);
+                        groupElement.AppendChild(path);
+                        var sb = new StringBuilder();
+                        sb.Append("M");
+                        sb.Append((textSpan.Offset + textSpan.Bounds.Bounds.TopLeft).ToSVG()); sb.Append(' ');
+                        sb.Append((textSpan.Offset + textSpan.Bounds.Bounds.TopRight).ToSVG()); sb.Append(' ');
+                        sb.Append((textSpan.Offset + textSpan.Bounds.Bounds.BottomRight).ToSVG()); sb.Append(' ');
+                        sb.Append((textSpan.Offset + textSpan.Bounds.Bounds.BottomLeft).ToSVG());
+                        sb.Append('Z');
+                        path.SetAttribute("d", sb.ToString());
+                        path.SetAttribute("style", "stroke-width: 0.1pt; stroke: red; fill: none;");
+                        */
                     }
                     break;
 
@@ -247,7 +261,7 @@ namespace SimpleCircuit.Drawing.Builders
                         // Make the line manually as it bypasses the transform step
                         var path = _document.CreateElement("path", Namespace);
                         groupElement.AppendChild(path);
-                        path.SetAttribute("d", $"M{overlineSpan.Start.ToSVG()} h{(overlineSpan.End.X - overlineSpan.Start.X).ToSVG()}");
+                        path.SetAttribute("d", $"M{overlineSpan.Start.ToSVG()} {overlineSpan.End.ToSVG()}");
                         path.SetAttribute("style", overlineSpan.Style.CreateStrokeStyle(Diagnostics));
                     }
                     break;
@@ -259,7 +273,7 @@ namespace SimpleCircuit.Drawing.Builders
                         // Make the line manually as it bypasses the transform step
                         var path = _document.CreateElement("path", Namespace);
                         groupElement.AppendChild(path);
-                        path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} h{(underlineSpan.End.X - underlineSpan.Start.X).ToSVG()}");
+                        path.SetAttribute("d", $"M{underlineSpan.Start.ToSVG()} {underlineSpan.End.ToSVG()}");
                         path.SetAttribute("style", underlineSpan.Style.CreateStrokeStyle(Diagnostics));
                     }
                     break;

@@ -20,6 +20,9 @@ namespace SimpleCircuitOnline
         /// <inheritdoc />
         public SpanBounds Measure(string text, string fontFamily, bool isBold, double size)
         {
+            // Replace spaces by a non-breaking space to make sure the text measuring treates leading/trailing spaces correctly
+            text = text.Replace(" ", "&nbsp;");
+
             // Make a piece of XML that allows measuring this element
             JsonElement obj2 = ((IJSInProcessRuntime)_js).Invoke<JsonElement>("measureText", text, fontFamily, isBold, size);
             double advance = obj2.GetProperty("a").GetDouble();

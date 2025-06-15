@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Styles;
+using System;
 
 namespace SimpleCircuit.Drawing.Spans
 {
@@ -46,7 +47,7 @@ namespace SimpleCircuit.Drawing.Spans
             return new SpanBounds(new Bounds(
                 Base.Bounds.Bounds.Left,
                 Base.Bounds.Bounds.Top - Margin - Style.LineThickness,
-                Base.Bounds.Bounds.Right,
+                Math.Max(Base.Bounds.Bounds.Right, Base.Bounds.Advance),
                 Base.Bounds.Bounds.Bottom), Base.Bounds.Advance);
         }
 
@@ -57,8 +58,8 @@ namespace SimpleCircuit.Drawing.Spans
             Offset = offset;
 
             double y = offset.Y + Base.Bounds.Bounds.Top - Margin - Style.LineThickness * 0.5;
-            double x1 = offset.X + Base.Bounds.Bounds.Left;
-            double x2 = offset.X + Base.Bounds.Bounds.Right;
+            double x1 = offset.X; // + Base.Bounds.Bounds.Left;
+            double x2 = offset.X + Base.Bounds.Advance; // + Base.Bounds.Bounds.Right;
             Start = new(x1, y);
             End = new(x2, y);
         }

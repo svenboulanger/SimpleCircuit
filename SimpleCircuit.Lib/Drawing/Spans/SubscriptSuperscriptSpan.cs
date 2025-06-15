@@ -56,7 +56,7 @@ namespace SimpleCircuit.Drawing.Spans
             if (Sub is not null)
             {
                 var subLocation = new Vector2(
-                    Base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left,
+                    Base.Bounds.Advance + Margin.X - Sub.Bounds.Bounds.Left,
                     -Halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
                 bounds.Expand(subLocation + Sub.Bounds.Bounds);
                 advance = Math.Max(subLocation.X + Sub.Bounds.Advance, advance);
@@ -64,7 +64,7 @@ namespace SimpleCircuit.Drawing.Spans
             if (Super is not null)
             {
                 var superLocation = new Vector2(
-                    Base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left,
+                    Base.Bounds.Advance + Margin.X - Super.Bounds.Bounds.Left,
                     -Halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
                 bounds.Expand(superLocation + Super.Bounds.Bounds);
                 advance = Math.Max(superLocation.X + Super.Bounds.Advance, advance);
@@ -80,14 +80,14 @@ namespace SimpleCircuit.Drawing.Spans
             if (Sub is not null)
             {
                 var subLocation = new Vector2(
-                    offset.X + Base.Bounds.Bounds.Right + Margin.X - Sub.Bounds.Bounds.Left,
+                    offset.X + Base.Bounds.Advance + Margin.X - Sub.Bounds.Bounds.Left,
                     offset.Y - Halfway + Margin.Y * 0.5 - Sub.Bounds.Bounds.Top);
                 Sub.SetOffset(subLocation);
             }
             if (Super is not null)
             {
                 var superLocation = new Vector2(
-                    offset.X + Base.Bounds.Bounds.Right + Margin.X - Super.Bounds.Bounds.Left,
+                    offset.X + Base.Bounds.Advance + Margin.X - Super.Bounds.Bounds.Left,
                     offset.Y - Halfway - Margin.Y * 0.5 - Super.Bounds.Bounds.Bottom);
                 Super.SetOffset(superLocation);
             }

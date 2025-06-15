@@ -76,7 +76,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                         lexer.Branch(TokenType.CloseBracket);
                     }
                     else
-                        super = ParseLine(lexer, context);
+                        super = ParseSegment(lexer, context);
                     if (lexer.Branch(TokenType.Subscript))
                     {
                         if (lexer.Branch(TokenType.OpenBracket))
@@ -85,7 +85,7 @@ namespace SimpleCircuit.Parser.SimpleTexts
                             lexer.Branch(TokenType.CloseBracket);
                         }
                         else
-                            sub = ParseBlockSegment(lexer, context);
+                            sub = ParseSegment(lexer, context);
                     }
                 }
                 context.Style = oldStyle;
