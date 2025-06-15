@@ -32,7 +32,7 @@ namespace SimpleCircuit.Drawing.Styles
             public double BackgroundOpacity => _parent.Opacity;
 
             /// <inheritdoc />
-            public double LineThickness => 0.1 * FontSize;
+            public double LineThickness => _parent.LineThickness;
 
             /// <inheritdoc />
             public string FontFamily => _parent.FontFamily;

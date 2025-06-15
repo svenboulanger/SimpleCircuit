@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -17,7 +18,12 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the section name.
         /// </summary>
-        public Token Name { get; }
+        public SyntaxNode Name { get; }
+
+        /// <summary>
+        /// Gets the section template.
+        /// </summary>
+        public SyntaxNode Template { get; }
 
         /// <summary>
         /// Gets the properties.
@@ -32,14 +38,17 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Creates a new <see cref="SectionDefinitionNode"/>.
         /// </summary>
+        /// <param name="section">The section token.</param>
         /// <param name="name">The name.</param>
+        /// <param name="template">An optional template token.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="statements">The statements.</param>
-        public SectionDefinitionNode(Token section, Token name, IEnumerable<SyntaxNode> properties, ScopedStatementsNode statements)
+        public SectionDefinitionNode(Token section, SyntaxNode name, SyntaxNode template, IEnumerable<SyntaxNode> properties, ScopedStatementsNode statements)
             : base(section.Location)
         {
             Section = section;
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Template = template;
             Properties = properties?.ToArray() ?? [];
             Statements = statements ?? ScopedStatementsNode.Empty;
         }
@@ -49,18 +58,37 @@ namespace SimpleCircuit.Parser.Nodes
         {
             StringBuilder sb = new();
             sb.Append(".section ");
-            sb.Append(Name.Content);
-            if (Properties.Length > 0)
+            sb.Append(Name);
+            if (Template is not null)
             {
-                for (int i = 0; i < Properties.Length; i++)
+                sb.Append(' ');
+                sb.Append(Template);
+                if (Properties.Length > 0)
                 {
-                    sb.Append(' ');
-                    sb.Append(Properties[i]);
+                    sb.Append('(');
+                    for (int i = 0; i < Properties.Length; i++)
+                    {
+                        if (i > 0)
+                            sb.Append(' ');
+                        sb.Append(Properties[i]);
+                    }
+                    sb.Append(')');
                 }
             }
-            sb.AppendLine();
-            sb.AppendLine(Statements.ToString());
-            sb.Append(".endsection");
+            else
+            {
+                if (Properties.Length > 0)
+                {
+                    for (int i = 0; i < Properties.Length; i++)
+                    {
+                        sb.Append(' ');
+                        sb.Append(Properties[i]);
+                    }
+                }
+                sb.AppendLine();
+                sb.AppendLine(Statements.ToString());
+                sb.Append(".endsection");
+            }
             return sb.ToString();
         }
     }

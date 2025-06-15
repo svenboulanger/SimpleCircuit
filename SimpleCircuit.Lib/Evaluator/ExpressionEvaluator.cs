@@ -244,7 +244,7 @@ namespace SimpleCircuit.Evaluator
                 BinaryNode binary => Evaluate(binary, context),
                 CallNode call => Evaluate(call, context),
                 IdentifierNode id => Evaluate(id, context),
-                NumberNode number => Evaluate(number, context),
+                ConstantNode number => Evaluate(number, context),
                 QuotedNode quoted => Evaluate(quoted, context),
                 TernaryNode ternary => Evaluate(ternary, context),
                 UnaryNode unary => Evaluate(unary, context),
@@ -379,7 +379,7 @@ namespace SimpleCircuit.Evaluator
             context.Diagnostics?.Post(identifier.Location, ErrorCodes.CouldNotFindVariable, identifier.Name);
             return null;
         }
-        private static object Evaluate(NumberNode number, EvaluationContext context)
+        private static object Evaluate(ConstantNode number, EvaluationContext context)
             => number.Value;
         private static object Evaluate(QuotedNode quoted, EvaluationContext context)
             => quoted.Value.ToString();

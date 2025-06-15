@@ -264,6 +264,20 @@ namespace SimpleCircuit.Parser
             switch (lexer.Type)
             {
                 case TokenType.Word:
+                    // Special keywords
+                    switch (lexer.Content.ToString())
+                    {
+                        case "true":
+                            result = new ConstantNode(true, lexer.NextToken);
+                            lexer.Next();
+                            return true;
+
+                        case "false":
+                            result = new ConstantNode(false, lexer.NextToken);
+                            lexer.Next();
+                            return true;
+                    }
+
                     // Variable or function
                     if (lexer.NextType == TokenType.Punctuator && lexer.NextContent.Length == 1 && lexer.NextContent.Span[0] == '(')
                     {
@@ -382,7 +396,7 @@ namespace SimpleCircuit.Parser
         /// <param name="context">The parsing context.</param>
         /// <param name="result">The result.</param>
         /// <returns>Returns <c>true</c> if no errors were encountered; otherwise, <c>false</c>.</returns>
-        public static bool ParseNumber(SimpleCircuitLexer lexer, ParsingContext context, out NumberNode result)
+        public static bool ParseNumber(SimpleCircuitLexer lexer, ParsingContext context, out ConstantNode result)
         {
             // Should be a number token
             if (lexer.Type != TokenType.Number)
@@ -447,7 +461,7 @@ namespace SimpleCircuit.Parser
                 }
             }
 
-            result = new NumberNode(scalar, location);
+            result = new ConstantNode(scalar, lexer.Token);
             lexer.Next();
             return true;
         }

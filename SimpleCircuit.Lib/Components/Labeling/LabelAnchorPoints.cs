@@ -73,7 +73,6 @@ namespace SimpleCircuit.Components.Labeling
                 }
                 bounds.Bounds.Expand(anchor.Orientation.TransformTextBounds(label.Formatted.Bounds.Bounds, builder.CurrentTransform));
                 bounds.Labels.Add(label);
-
             }
 
             // Draw the labels

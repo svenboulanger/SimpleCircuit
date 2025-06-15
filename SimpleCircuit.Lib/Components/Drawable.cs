@@ -265,6 +265,14 @@ namespace SimpleCircuit.Components
                             return true;
 
                         default:
+                            // 'fontfamily#' will change the font family
+                            if (TryMatchIndexedProperty(property, "font", out index) ||
+                                TryMatchIndexedProperty(property, "fontfamily", out index))
+                            {
+                                drawable.Labels[index].AppendStyle(new FontFamilyStyleModifier(label));
+                                return true;
+                            }
+
                             // 'label#' will change the label at the given index.
                             if (TryMatchIndexedProperty(property, "label", out index))
                             {

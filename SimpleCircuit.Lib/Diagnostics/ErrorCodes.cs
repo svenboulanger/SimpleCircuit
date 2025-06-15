@@ -177,6 +177,8 @@
         UndefinedWireSegment,
         [Diagnostic(SeverityLevel.Error, null, "Unrecognized function '{0}'")]
         UnrecognizedFunction,
+        [Diagnostic(SeverityLevel.Error, null, "Unrecognized escape sequence")]
+        UnrecognizedEscapeSequence,
 
         [Diagnostic(SeverityLevel.Error, null, "Quote mismatch")]
         QuoteMismatch,

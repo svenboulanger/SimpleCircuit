@@ -21,9 +21,9 @@ namespace SimpleCircuit.Evaluator
         private Dictionary<string, int> _anonymousCounters = [];
         private Stack<HashSet<IDrawable>> _trackedDrawables = [];
 
-        protected const string WireKey = ":wire:";
-        protected const string VirtualKey = ":virtual:";
-        protected const string AnnotationKey = ":annotation:";
+        public const string WireKey = ":wire:";
+        public const string VirtualKey = ":virtual:";
+        public const string AnnotationKey = ":annotation:";
 
         /// <summary>
         /// Gets the options.

@@ -3,7 +3,7 @@
     /// <summary>
     /// A number.
     /// </summary>
-    public record NumberNode : SyntaxNode
+    public record ConstantNode : SyntaxNode
     {
         /// <summary>
         /// Gets the token that represents the number.
@@ -16,13 +16,14 @@
         public object Value { get; }
 
         /// <summary>
-        /// Creates a <see cref="NumberNode"/>.
+        /// Creates a <see cref="ConstantNode"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="location">The location.</param>
-        public NumberNode(object value, TextLocation location)
-            : base(location)
+        public ConstantNode(object value, Token content)
+            : base(content.Location)
         {
+            Content = content;
             Value = value;
         }
 

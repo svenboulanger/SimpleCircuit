@@ -53,6 +53,15 @@ namespace SimpleCircuit.Components
                         pin = new LoosePin(name, name, _parent);
                         _pinsByName.Add(name, pin);
                         _pinsByIndex.Add(pin);
+
+                        // Try to add an alias if possible
+                        int separator = name.IndexOf('_');
+                        if (separator > 0)
+                        {
+                            string alias = name.Substring(0, separator);
+                            if (!_pinsByName.ContainsKey(alias))
+                                _pinsByName.Add(alias, pin);
+                        }
                     }
                     return pin;
                 }
@@ -88,7 +97,6 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
-                var style = builder.Style.ModifyDashedDotted(_parent);
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
                     if (_pinsByIndex[i] is not LoosePin pin || _spansByIndex[i] is null)
@@ -108,9 +116,16 @@ namespace SimpleCircuit.Components
             {
                 if (string.IsNullOrWhiteSpace(name))
                     return null;
-                if (name[0] == '_')
+
+                // Find the separator
+                if (name[^1] == '_')
                     return null;
-                return name;
+                if (name[0] == '_' && name.Length > 1)
+                    return name[1..];
+                int separator = name.IndexOf('_');
+                if (separator < 0)
+                    return name;
+                return name[separator..];
             }
 
             /// <inheritdoc />

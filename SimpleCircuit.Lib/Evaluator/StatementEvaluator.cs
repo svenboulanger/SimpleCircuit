@@ -214,6 +214,8 @@ namespace SimpleCircuit.Evaluator
         private static void Evaluate(ControlPropertyNode controlProperty, EvaluationContext context)
         {
             string filter = EvaluateFilter(controlProperty.Filter, context);
+            if (filter is null)
+                return;
 
             int labelIndex = 0;
             HashSet<string> includes = [], excludes = [];
@@ -336,20 +338,18 @@ namespace SimpleCircuit.Evaluator
         private static void Evaluate(SectionDefinitionNode sectionDefinition, EvaluationContext context)
         {
             // First determine the name of the section
-            string name = sectionDefinition.Name.Content.ToString();
+            string name = EvaluateName(sectionDefinition.Name, context);
+            if (name is null)
+                return;
 
-            // If there is an identifier in the properties, let's try to find a template
             var template = sectionDefinition;
-            if (sectionDefinition.Properties.Length > 0)
+            if (sectionDefinition.Template is not null)
             {
-                if (sectionDefinition.Properties[0] is IdentifierNode sectionName)
+                string templateName = EvaluateName(sectionDefinition.Template, context);
+                if (!context.SectionDefinitions.TryGetValue(templateName, out template))
                 {
-                    // Try to find the template
-                    if (!context.SectionDefinitions.TryGetValue(sectionName.Name, out template))
-                    {
-                        context.Diagnostics?.Post(sectionName.Location, ErrorCodes.CouldNotFindSectionWithName, sectionName.Name);
-                        return;
-                    }
+                    context.Diagnostics?.Post(sectionDefinition.Template.Location, ErrorCodes.CouldNotFindSectionWithName, templateName);
+                    return;
                 }
             }
 
@@ -381,11 +381,9 @@ namespace SimpleCircuit.Evaluator
             if (!ReferenceEquals(sectionDefinition, template))
             {
                 // Ignore the first property since that is supposed to be the name of the template
-                for (int i = 1; i < sectionDefinition.Properties.Length; i++)
+                foreach (var property in sectionDefinition.Properties)
                 {
-                    var property = sectionDefinition.Properties[i];
-                    if (property is not BinaryNode assignment ||
-                        assignment.Type != BinaryOperatorTypes.Assignment)
+                    if (property is not BinaryNode assignment || assignment.Type != BinaryOperatorTypes.Assignment)
                     {
                         context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                         return;
@@ -686,8 +684,8 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
-                    case UnaryNode unary:
-                    case BinaryNode binary:
+                    case UnaryNode:
+                    case BinaryNode:
                         propertiesAndVariants.Add(item);
                         break;
 
@@ -945,7 +943,7 @@ namespace SimpleCircuit.Evaluator
                 case LiteralNode literalNode:
                     return literalNode.Value.ToString();
 
-                case NumberNode number:
+                case ConstantNode number:
                     return number.ToString();
 
                 case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.Concatenate:
@@ -983,11 +981,14 @@ namespace SimpleCircuit.Evaluator
             }
 
             // Resolve the name as a filter
-            name = context.GetFullname(name, resolveAnonymous: false).Replace("*", ".*");
-            if (context.Factory.IsAnonymous(name))
-                name = $"^{name}{DrawableFactoryDictionary.AnonymousSeparator}.*$";
-            else
-                name = $"^{name}$";
+            if (name != "wire")
+            {
+                name = context.GetFullname(name, resolveAnonymous: false).Replace("*", ".*");
+                if (context.Factory.IsAnonymous(name))
+                    name = $"^{name}{DrawableFactoryDictionary.AnonymousSeparator}.*$";
+                else
+                    name = $"^{name}$";
+            }
             return name;
         }
         private static int EvaluateAsInteger(SyntaxNode node, EvaluationContext context, int defaultValue)
