@@ -9,9 +9,8 @@ using System.Xml;
 using SimpleCircuit.Parser.Styles;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Components;
-using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Drawing.Spans;
-using SimpleCircuit.Parser.Nodes;
+using SimpleCircuit.Components.Markers;
 
 namespace SimpleCircuit.Drawing.Builders
 {

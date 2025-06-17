@@ -1,6 +1,6 @@
 ﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser;
@@ -8,6 +8,7 @@ using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -93,8 +94,28 @@ namespace SimpleCircuit.Evaluator
             if (loadAssembly)
             {
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
-                Markers.Add("arrow", () => new Arrow());
-                Markers.Add("rarrow", () => new ReverseArrow());
+
+                foreach (var t in typeof(ParsingContext).Assembly.GetTypes())
+                {
+                    if (t.IsAbstract || t.IsInterface || t.IsGenericType)
+                        continue;
+                    var nt = t;
+                    while (nt is not null)
+                    {
+                        nt = nt.BaseType;
+                        if (nt == typeof(Marker))
+                        {
+                            // Version where location and orientation is given
+                            var ctor = t.GetConstructor([typeof(Vector2), typeof(Vector2)]);
+                            if (ctor is not null)
+                            {
+                                Marker factory() => (Marker)Activator.CreateInstance(t, [new Vector2(), new Vector2()]);
+                                foreach (var attribute in t.GetCustomAttributes<DrawableAttribute>())
+                                    Markers.Add(attribute.Key, factory);
+                            }
+                        }
+                    }
+                }
             }
             Circuit = new GraphicalCircuit(style, formatter);
             Options = options ?? new Options();

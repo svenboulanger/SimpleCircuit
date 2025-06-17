@@ -2,9 +2,9 @@
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
+using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
-using SimpleCircuit.Drawing.Builders.Markers;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
@@ -525,7 +525,7 @@ namespace SimpleCircuit.Evaluator
             foreach (var defaultOptions in defaultVariantsAndProperties)
                 Evaluate(defaultOptions, context);
         }
-        private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)
+        private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context, HashSet<Marker> markers = null)
         {
             int labelIndex = 0;
             foreach (var property in properties)
@@ -656,20 +656,8 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
-                    case IdentifierNode identifier:
-                        {
-                            string name = identifier.Name;
-
-                            // Identify markers
-                            if (context.Markers.TryGetValue(name, out var markerFactory))
-                            {
-                                markers.Add(markerFactory());
-                                continue;
-                            }
-
-                            // Identify styles
-                            propertiesAndVariants.Add(identifier);
-                        }
+                    case BinaryNode bn when bn.Type == BinaryOperatorTypes.Assignment:
+                        propertiesAndVariants.Add(item);
                         break;
 
                     case LiteralNode literal when literal.Value.Length == 1 && literal.Value.Span[0] == '-':
@@ -684,13 +672,53 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
-                    case UnaryNode:
-                    case BinaryNode:
+                    case UnaryNode unary:
+                        if (unary.Type == UnaryOperatorTypes.Positive)
+                        {
+                            // Variant - force evaluation immediate
+                            string name = EvaluateName(unary.Argument, context);
+                            if (name is null)
+                                continue;
+                            if (context.Markers.TryGetValue(name, out var func))
+                                markers.Add(func());
+                            else
+                                propertiesAndVariants.Add(new IdentifierNode(new(unary.Location, name.AsMemory())));
+                        }
+                        else if (unary.Type == UnaryOperatorTypes.Negative)
+                            propertiesAndVariants.Add(unary); // Can't "remove" markers - so we already know it's a variant
+                        else
+                            throw new NotImplementedException();
+                        break;
+
+                    case IdentifierNode id:
+                        {
+                            if (context.Markers.TryGetValue(id.Name, out var func))
+                                markers.Add(func());
+                            else
+                                propertiesAndVariants.Add(id);
+                        }
+                        break;
+
+                    case QuotedNode: // Label
                         propertiesAndVariants.Add(item);
                         break;
 
+                    case BinaryNode bn when bn.Type == BinaryOperatorTypes.Concatenate:
+                        {
+                            // This should evaluate to a name of a variant
+                            string name = EvaluateName(bn, context);
+                            if (name is null)
+                                continue;
+                            if (context.Markers.TryGetValue(name, out var func))
+                                markers.Add(func());
+                            else
+                                propertiesAndVariants.Add(new IdentifierNode(new(bn.Location, name.AsMemory())));
+                        }
+                        break;
+
                     default:
-                        throw new NotImplementedException();
+                        context.Diagnostics?.Post(item.Location, ErrorCodes.ExpectedVariantName);
+                        break;
                 }
             }
             if (markers.Count > 0)

@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Drawing.Builders.Markers
+namespace SimpleCircuit.Components.Markers
 {
     /// <summary>
     /// An abstract class representing a marker.

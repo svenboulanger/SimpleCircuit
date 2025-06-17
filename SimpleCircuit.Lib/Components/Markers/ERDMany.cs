@@ -2,7 +2,7 @@
 using SimpleCircuit.Drawing.Styles;
 using System.Linq;
 
-namespace SimpleCircuit.Drawing.Builders.Markers
+namespace SimpleCircuit.Components.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "many".
@@ -12,6 +12,7 @@ namespace SimpleCircuit.Drawing.Builders.Markers
     /// </remarks>
     /// <param name="location">The location.</param>
     /// <param name="orientation">The orientation.</param>
+    [Drawable("erd-many", "An Entity-Relationship Diagram many-symbol.", "ERD")]
     public class ERDMany(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];

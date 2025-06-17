@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Drawing.Builders;
-using SimpleCircuit.Drawing.Builders.Markers;
+using SimpleCircuit.Components.Markers;
 
 namespace SimpleCircuit.Components.Wires
 {

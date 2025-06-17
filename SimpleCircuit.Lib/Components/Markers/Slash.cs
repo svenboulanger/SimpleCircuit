@@ -1,22 +1,20 @@
 ﻿using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Drawing.Builders.Markers
+namespace SimpleCircuit.Components.Markers
 {
     /// <summary>
-    /// A dot marker.
+    /// A slash marker.
     /// </summary>
     /// <remarks>
-    /// Creates a new dot marker.
+    /// Creates a new slash marker.
     /// </remarks>
     /// <param name="location">The location.</param>
     /// <param name="orientation">The orientation.</param>
-    public class Dot(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+    public class Slash(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
-        {
-            builder.Circle(new(), 2.0 * appearance.LineThickness, appearance.AsFilledMarker());
-        }
+            => builder.Line(new(-1, 2), new(1, -2), appearance);
     }
 }

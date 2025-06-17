@@ -1,7 +1,7 @@
 ﻿using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Drawing.Builders.Markers
+namespace SimpleCircuit.Components.Markers
 {
     /// <summary>
     /// An entity-relationship diagram marker for "only one".
@@ -11,6 +11,7 @@ namespace SimpleCircuit.Drawing.Builders.Markers
     /// </remarks>
     /// <param name="location">The location.</param>
     /// <param name="orientation">The orientation.</param>
+    [Drawable("erd-only-one", "An Entity-Relationship Diagram only one-symbol.", "ERD")]
     public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />

@@ -1,21 +1,23 @@
 ﻿using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 
-namespace SimpleCircuit.Drawing.Builders.Markers
+namespace SimpleCircuit.Components.Markers
 {
     /// <summary>
-    /// An entity-relationship diagram marker for "one".
+    /// An entity-relation diagram marker for "zero or one".
     /// </summary>
     /// <remarks>
-    /// Creates a new entity-relationship diagram marker for "one".
+    /// Creates an entity-relationship diagram marker for "zero or one".
     /// </remarks>
     /// <param name="location">The location.</param>
     /// <param name="orientation">The orientation.</param>
-    public class ERDOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+    [Drawable("erd-zero-one", "An Entity-Relationship Diagram zero or one-symbol.", "ERD")]
+    public class ERDZeroOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
         protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
         {
+            builder.Circle(new(-11 * appearance.LineThickness, 0), 3 * appearance.LineThickness, appearance);
             builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, appearance);
         }
     }
