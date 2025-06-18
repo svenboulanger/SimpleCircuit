@@ -7,6 +7,7 @@ using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
+using SpiceSharp;
 using System;
 using System.Collections.Generic;
 
@@ -123,7 +124,8 @@ namespace SimpleCircuit.Evaluator
 
                     case QueuedAnonymousPoint qap:
                         {
-                            var point = context.Factory.Create(PointFactory.Key, context.Options, context.CurrentScope, context.Diagnostics) as ILocatedDrawable;
+                            var pointName = context.GetAnonymousPointName();
+                            var point = context.Factory.Create(pointName, context.Options, context.CurrentScope, context.Diagnostics) as ILocatedDrawable;
                             context.NotifyDrawable(point);
                             context.Circuit.Add(point);
                             context.QueuedPoints.Enqueue(point);
@@ -254,6 +256,13 @@ namespace SimpleCircuit.Evaluator
                         {
                             // Add a variant
                             includes.Add(id.Name);
+                        }
+                        break;
+
+                    case LiteralNode literal:
+                        {
+                            // Add a variant
+                            includes.Add(literal.Value.ToString());
                         }
                         break;
 
@@ -564,6 +573,13 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
+                    case LiteralNode literal:
+                        {
+                            // Add a variant
+                            presence.Variants.Add(literal.Value.ToString());
+                        }
+                        break;
+
                     case BinaryNode binary:
                         switch (binary.Type)
                         {
@@ -572,14 +588,11 @@ namespace SimpleCircuit.Evaluator
 
                             case BinaryOperatorTypes.Assignment:
                                 // Set property
-                                if (binary.Left is not IdentifierNode id)
-                                {
-                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedLiteral);
+                                string propertyName = EvaluateName(binary.Left, context);
+                                if (propertyName is null)
                                     return;
-                                }
-                                string propertyName = id.Name;
                                 object value = EvaluateExpression(binary.Right, context);
-                                if (!presence.SetProperty(id.Token, value, context.Diagnostics))
+                                if (!presence.SetProperty(new(binary.Left.Location, propertyName.AsMemory()), value, context.Diagnostics))
                                     return;
                                 break;
                         }
@@ -660,7 +673,8 @@ namespace SimpleCircuit.Evaluator
                         propertiesAndVariants.Add(item);
                         break;
 
-                    case LiteralNode literal when literal.Value.Length == 1 && literal.Value.Span[0] == '-':
+                    case LiteralNode literal:
+                        if (literal.Value.Length == 1 && literal.Value.Span[0] == '-')
                         {
                             // Create the segment and apply defaults
                             var segment = new WireSegmentInfo(literal.Location)
@@ -669,6 +683,14 @@ namespace SimpleCircuit.Evaluator
                                 Length = MinimumWireLength
                             };
                             segments.Add(segment);
+                        }
+                        else
+                        {
+                            string name = literal.Value.ToString();
+                            if (context.Markers.TryGetValue(name, out var func))
+                                markers.Add(func());
+                            else
+                                propertiesAndVariants.Add(literal);
                         }
                         break;
 
