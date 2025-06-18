@@ -364,7 +364,76 @@ namespace SimpleCircuit.Drawing.Builders
                 "upright-transformed" => TextOrientationType.UprightTransformed,
                 _ => TextOrientationType.Transformed
             };
-            Text(span, new Vector2(x, y), new Vector2(nx, ny), type);
+
+            // Also modify the position depending on an additional flag
+            var location = new Vector2(x, y);
+            var anchorOrientation = Vector2.Zero;
+            mode = node.Attributes?["anchor"]?.Value;
+            if (mode is not null)
+            {
+                switch (mode?.ToLower())
+                {
+                    case "left": anchorOrientation = new(1, 0); break;
+                    case "top": anchorOrientation = new(0, 1); break;
+                    case "right": anchorOrientation = new(-1, 0); break;
+                    case "bottom": anchorOrientation = new(0, -1); break;
+                    case "bottom-left":
+                    case "bottomleft": anchorOrientation = new(1, -1); break;
+                    case "bottom-right":
+                    case "bottomright": anchorOrientation = new(-1, -1); break;
+                    case "top-left":
+                    case "topleft": anchorOrientation = new(1, 1); break;
+                    case "top-right":
+                    case "topright": anchorOrientation = new(-1, 1); break;
+                };
+            }
+
+            // Also introduce an anchor mode, that allows us to transform the expandOffset
+            mode = node.Attributes?["transform-anchor"]?.Value;
+            if (mode is null)
+            {
+                if ((type & TextOrientationType.Transformed) == 0)
+                    anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
+            }
+            else
+            {
+                switch (mode?.ToLower())
+                {
+                    case "true":
+                        anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
+                        break;
+
+                    case "false":
+                        break;
+
+                    default:
+                        if ((type & TextOrientationType.Transformed) == 0)
+                            anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
+                        break;
+                }
+            }
+
+            // Now let's calculate the real offset
+            double offsetX = 0, offsetY = 0;
+            if (anchorOrientation.X.IsZero())
+                offsetX -= 0.5 * (span.Bounds.Bounds.Left + span.Bounds.Bounds.Right);
+            else if (anchorOrientation.X > 0)
+                offsetX -= span.Bounds.Bounds.Left;
+            else
+                offsetX -= span.Bounds.Bounds.Right;
+            if (anchorOrientation.Y.IsZero())
+                offsetY -= 0.5 * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
+            else if (anchorOrientation.Y > 0)
+                offsetY -= span.Bounds.Bounds.Top;
+            else
+                offsetY -= span.Bounds.Bounds.Bottom;
+
+            if ((type & TextOrientationType.Transformed) == 0)
+                location += CurrentTransform.Matrix.Inverse * new Vector2(offsetX, offsetY);
+            else
+                location += new Vector2(offsetX, offsetY);
+
+            Text(span, location, new Vector2(nx, ny), type);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
@@ -382,21 +451,28 @@ namespace SimpleCircuit.Drawing.Builders
         private IStyleModifier ParseStyleModifier(XmlNode node, bool asText = false)
         {
             IStyleModifier result = null;
-
-            // Color from attributes
             if (node.Attributes is not null)
             {
+                // Color from attributes
+                // Foreground color
                 string color = node.Attributes["color"]?.Value;
+                color ??= node.Attributes["fg"]?.Value;
+                color ??= node.Attributes["foreground"]?.Value;
+
+                // Background color
                 string bgColor = node.Attributes["background"]?.Value;
+                bgColor = node.Attributes["bg"]?.Value;
+
+                // Some dependency on whether we want to parse as text
                 if (asText)
-                {
                     color ??= node.Attributes["fill"]?.Value;
-                }
                 else
                 {
                     color ??= node.Attributes["stroke"]?.Value;
                     bgColor ??= node.Attributes["fill"]?.Value;
                 }
+
+                // Store
                 if (color is not null || bgColor is not null)
                     result = result.Append(new ColorStyleModifier(color, bgColor));
 
@@ -443,9 +519,26 @@ namespace SimpleCircuit.Drawing.Builders
                         result = result.Append(new OpacityStyleModifier(scale, scale));
                 }
 
+                opacity = node.Attributes["foreground-opacity"]?.Value;
+                opacity ??= node.Attributes["fgo"]?.Value;
+                if (opacity is not null)
+                {
+                    if (double.TryParse(opacity, out double scale))
+                        result = result.Append(new OpacityStyleModifier(scale, null));
+                }
+
+                opacity = node.Attributes["background-opacity"]?.Value;
+                opacity ??= node.Attributes["bgo"]?.Value;
+                if (opacity is not null)
+                {
+                    if (double.TryParse(opacity, out double scale))
+                        result = result.Append(new OpacityStyleModifier(null, scale));
+                }
+
                 // Justification from attributes
                 string justification = node.Attributes["justification"]?.Value;
                 justification ??= node.Attributes["justify"]?.Value;
+                justification ??= node.Attributes["text-align"]?.Value;
                 if (justification is not null)
                 {
                     switch (justification.ToLower())
@@ -522,6 +615,8 @@ namespace SimpleCircuit.Drawing.Builders
                     switch (keyToken.Content.ToString().ToLower())
                     {
                         case "color":
+                        case "foreground":
+                        case "fg":
                             result = result.Append(new ColorStyleModifier(value.Content.ToString(), null));
                             break;
 
@@ -538,6 +633,7 @@ namespace SimpleCircuit.Drawing.Builders
                             break;
 
                         case "background":
+                        case "bg":
                             result = result.Append(new ColorStyleModifier(null, value.Content.ToString()));
                             break;
 
@@ -565,8 +661,21 @@ namespace SimpleCircuit.Drawing.Builders
                                 result = result.Append(new OpacityStyleModifier(scale, scale));
                             break;
 
+                        case "foreground-opacity":
+                        case "fgo":
+                            if (double.TryParse(value.Content.ToString(), out scale))
+                                result = result.Append(new OpacityStyleModifier(scale, null));
+                            break;
+
+                        case "background-opacity":
+                        case "bgo":
+                            if (double.TryParse(value.Content.ToString(), out scale))
+                                result = result.Append(new OpacityStyleModifier(null, scale));
+                            break;
+
                         case "justification":
                         case "justify":
+                        case "text-align":
                             if (double.TryParse(value.Content.ToString(), out double justify))
                                 result = result.Append(new JustificationStyleModifier(justify));
                             break;
