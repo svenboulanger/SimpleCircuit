@@ -417,7 +417,9 @@ namespace SimpleCircuit.Drawing.Builders
 
                     switch (keyToken.Content.ToString().ToLower())
                     {
+                        case "color":
                         case "stroke": result = result.Append(new ColorStyleModifier(value.Content.ToString(), null)); break;
+                        case "background":
                         case "fill": result = result.Append(new ColorStyleModifier(null, value.Content.ToString())); break;
                         case "stroke-dasharray": result = result.Append(new StrokeDashArrayStyleModifier(value.Content.ToString())); break;
                         case "stroke-width":
@@ -428,6 +430,15 @@ namespace SimpleCircuit.Drawing.Builders
                         case "font-size":
                             if (double.TryParse(value.Content.ToString(), out double fontSize))
                                 result = result.Append(new FontSizeStyleModifier(fontSize));
+                            break;
+                        case "opacity":
+                            if (double.TryParse(value.Content.ToString(), out double opacity))
+                                result = result.Append(new OpacityStyleModifier(opacity, opacity));
+                            break;
+                        case "justification":
+                        case "justify":
+                            if (double.TryParse(value.Content.ToString(), out double justify))
+                                result = result.Append(new JustificationStyleModifier(justify));
                             break;
                     }
 
