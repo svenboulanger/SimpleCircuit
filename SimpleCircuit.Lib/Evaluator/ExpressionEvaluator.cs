@@ -272,31 +272,31 @@ namespace SimpleCircuit.Evaluator
 
             var (name, dict) = binary.Type switch
             {
-                BinaryOperatorTypes.Addition => ("add", _addition),
-                BinaryOperatorTypes.Subtraction => ("subtract", _subtraction),
-                BinaryOperatorTypes.Multiplication => ("multiply", _multiplication),
-                BinaryOperatorTypes.Division => ("divide", _division),
-                BinaryOperatorTypes.Modulo => ("modulo", _modulo),
-                BinaryOperatorTypes.LogicalAnd => ("and", _logicalAnd),
-                BinaryOperatorTypes.LogicalOr => ("or", _logicalOr),
-                BinaryOperatorTypes.And => ("bitwise and", _and),
-                BinaryOperatorTypes.Or => ("bitwise or", _or),
-                BinaryOperatorTypes.Xor => ("bitwise xor", _xor),
-                BinaryOperatorTypes.Equals => ("compare", _equals),
-                BinaryOperatorTypes.NotEquals => ("compare", _notEquals),
-                BinaryOperatorTypes.SmallerThan => ("compare", _smallerThan),
-                BinaryOperatorTypes.GreaterThan => ("compare", _greaterThan),
-                BinaryOperatorTypes.SmallerThanOrEqual => ("compare", _smallerThanOrEqual),
-                BinaryOperatorTypes.GreaterThanOrEqual => ("compare", _greaterThanOrEqual),
-                BinaryOperatorTypes.ShiftLeft => ("bitshift", _shiftLeft),
-                BinaryOperatorTypes.ShiftRight => ("bitshift", _shiftRight),
-                BinaryOperatorTypes.Concatenate => ("concatenate", _concatenate),
+                BinaryOperatortype.Addition => ("add", _addition),
+                BinaryOperatortype.Subtraction => ("subtract", _subtraction),
+                BinaryOperatortype.Multiplication => ("multiply", _multiplication),
+                BinaryOperatortype.Division => ("divide", _division),
+                BinaryOperatortype.Modulo => ("modulo", _modulo),
+                BinaryOperatortype.LogicalAnd => ("and", _logicalAnd),
+                BinaryOperatortype.LogicalOr => ("or", _logicalOr),
+                BinaryOperatortype.And => ("bitwise and", _and),
+                BinaryOperatortype.Or => ("bitwise or", _or),
+                BinaryOperatortype.Xor => ("bitwise xor", _xor),
+                BinaryOperatortype.Equals => ("compare", _equals),
+                BinaryOperatortype.NotEquals => ("compare", _notEquals),
+                BinaryOperatortype.SmallerThan => ("compare", _smallerThan),
+                BinaryOperatortype.GreaterThan => ("compare", _greaterThan),
+                BinaryOperatortype.SmallerThanOrEqual => ("compare", _smallerThanOrEqual),
+                BinaryOperatortype.GreaterThanOrEqual => ("compare", _greaterThanOrEqual),
+                BinaryOperatortype.ShiftLeft => ("bitshift", _shiftLeft),
+                BinaryOperatortype.ShiftRight => ("bitshift", _shiftRight),
+                BinaryOperatortype.Concatenate => ("concatenate", _concatenate),
                 _ => throw new NotImplementedException()
             };
 
             if (dict.TryGetValue(Tuple.Create(left.GetType(), right.GetType()), out var func))
                 return func(left, right);
-            context.Diagnostics?.Post(binary.Operator.Location, ErrorCodes.CouldNotOperateForArgumentTypes, left.GetType().Name, right.GetType().Name);
+            context.Diagnostics?.Post(binary.Operator.Location, ErrorCodes.CouldNotOperateForArgumenttype, left.GetType().Name, right.GetType().Name);
             return false;
         }
         private static object Evaluate(CallNode call, EvaluationContext context)
@@ -403,9 +403,9 @@ namespace SimpleCircuit.Evaluator
 
             var (name, dict) = unary.Type switch
             {
-                UnaryOperatorTypes.Positive => ("plus", _plus),
-                UnaryOperatorTypes.Negative => ("negate", _minus),
-                UnaryOperatorTypes.Invert => ("invert", _invert),
+                UnaryOperatortype.Positive => ("plus", _plus),
+                UnaryOperatortype.Negative => ("negate", _minus),
+                UnaryOperatortype.Invert => ("invert", _invert),
                 _ => throw new NotImplementedException()
             };
 

@@ -38,25 +38,25 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         // 's'
                         var span = builder.TextFormatter.Format("s", textStyle);
                         var bounds = span.Bounds.Bounds;
-                        builder.Text(span, -bounds.Center, new(1, 0), TextOrientationTypes.Transformed);
+                        builder.Text(span, -bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
                         break;
 
                     case 1:
                         // 'z'
                         span = builder.TextFormatter.Format("z", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, -bounds.Center, new(1, 0), TextOrientationTypes.Transformed);
+                        builder.Text(span, -bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
                         break;
 
                     default:
                         // d/dt
                         span = builder.TextFormatter.Format("d", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), new(1, 0), TextOrientationTypes.Transformed);
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), Vector2.UX, TextOrientationType.UprightTransformed);
                         builder.Line(new(-2, 0), new(2, 0), textStyle);
                         span = builder.TextFormatter.Format("dt", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), new(1, 0), TextOrientationTypes.Transformed);
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), Vector2.UX, TextOrientationType.UprightTransformed);
                         break;
                 }
                 DrawLabels(builder, style);

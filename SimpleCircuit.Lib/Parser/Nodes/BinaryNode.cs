@@ -10,7 +10,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// The operation type.
         /// </summary>
-        public BinaryOperatorTypes Type { get; }
+        public BinaryOperatortype Type { get; }
 
         /// <summary>
         /// The left argument.
@@ -34,7 +34,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="left">The left argument.</param>
         /// <param name="right">The right argument.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="left"/> or <paramref name="right"/> is <c>null</c>.</exception>
-        public BinaryNode(BinaryOperatorTypes type, SyntaxNode left, Token @operator, SyntaxNode right)
+        public BinaryNode(BinaryOperatortype type, SyntaxNode left, Token @operator, SyntaxNode right)
             : base(left.Location)
         {
             Type = type;

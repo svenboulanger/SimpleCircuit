@@ -10,7 +10,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the type.
         /// </summary>
-        public UnaryOperatorTypes Type { get; }
+        public UnaryOperatortype Type { get; }
 
         /// <summary>
         /// Gets the operator.
@@ -29,7 +29,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="arg">The argument.</param>
         /// <param name="type">The operator type.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="arg"/> is <c>null</c>.</exception>
-        public UnaryNode(Token @operator, SyntaxNode arg, UnaryOperatorTypes type)
+        public UnaryNode(Token @operator, SyntaxNode arg, UnaryOperatortype type)
             : base(@operator.Location)
         {
             Operator = @operator;
@@ -41,7 +41,7 @@ namespace SimpleCircuit.Parser.Nodes
         public override string ToString()
             => Type switch
             {
-                UnaryOperatorTypes.PostfixDecrement or UnaryOperatorTypes.PostfixIncrement => $"{Argument}{Operator.Content}",
+                UnaryOperatortype.PostfixDecrement or UnaryOperatortype.PostfixIncrement => $"{Argument}{Operator.Content}",
                 _ => $"{Operator.Content}{Argument}"
             };
     }

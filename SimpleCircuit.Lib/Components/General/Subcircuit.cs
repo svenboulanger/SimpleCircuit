@@ -114,7 +114,7 @@ namespace SimpleCircuit.Components
                     switch (node)
                     {
                         case BinaryNode binary:
-                            if (binary.Type == BinaryOperatorTypes.Assignment)
+                            if (binary.Type == BinaryOperatortype.Assignment)
                             {
                                 if (binary.Left is not IdentifierNode id)
                                 {

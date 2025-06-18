@@ -154,7 +154,7 @@ namespace SimpleCircuit.Drawing.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationType type)
         {
             if (span is null)
                 return this;
@@ -167,9 +167,9 @@ namespace SimpleCircuit.Drawing.Builders
             var bounds = span.Bounds.Bounds;
 
             // First determine the orientation
-            if ((types & TextOrientationTypes.Transformed) != 0)
+            if ((type & TextOrientationType.Transformed) != 0)
                 expand = CurrentTransform.ApplyDirection(expand);
-            if ((types & TextOrientationTypes.Upright) != 0)
+            if ((type & TextOrientationType.Upright) != 0)
             {
                 if (expand.X < 0)
                 {

@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Analog
                         // Calculate the anchor positions
                         _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1));
                         _anchors[1] = new(new(0, _width * 0.5 + 1), new(0, 1));
-                        _anchors[2] = new(new(0, 0), new(0, 0), new(new(1, 0), TextOrientationTypes.Transformed));
+                        _anchors[2] = new(new(0, 0), new(0, 0), Vector2.UX, TextOrientationType.Transformed);
                         break;
                 }
 

@@ -1,7 +1,7 @@
 ﻿namespace SimpleCircuit.Parser.Markers
 {
     /// <summary>
-    /// Token types for parsing markers.
+    /// Token type for parsing markers.
     /// </summary>
     public enum TokenType
     {

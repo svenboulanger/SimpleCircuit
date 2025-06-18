@@ -71,7 +71,11 @@ namespace SimpleCircuit.Components.Labeling
                     bounds.Bounds.Expand(new Vector2());
                     anchorBounds.Add(anchorIndex, bounds);
                 }
-                bounds.Bounds.Expand(anchor.Orientation.TransformTextBounds(label.Formatted.Bounds.Bounds, builder.CurrentTransform));
+                var orientation = anchor.Orientation;
+                if ((anchor.Type & TextOrientationType.Transformed) != 0)
+                    orientation = builder.CurrentTransform.ApplyDirection(orientation);
+                foreach (var p in label.Formatted.Bounds.Bounds)
+                    bounds.Bounds.Expand(p.X * orientation + p.Y * orientation.Perpendicular);
                 bounds.Labels.Add(label);
             }
 
@@ -104,14 +108,12 @@ namespace SimpleCircuit.Components.Labeling
                         y = -bounds.Top;
                     else
                         y = -bounds.Bottom;
-                    // offset = invMatrix * new Vector2(x, y);
                     offset = invMatrix * new Vector2(x, y);
                 }
                 foreach (var label in pair.Value.Labels)
                 {
                     var loc = anchor.Location + offset + invMatrix * label.Offset;
-                    builder.Text(label.Formatted, loc, anchor.Expand, anchor.);
-                    // builder.Rectangle(loc.X + bounds.Left, loc.Y + bounds.Top, bounds.Width, bounds.Height, new Style { Background = Style.None, Color = "red", LineThickness = 0.1 });
+                    builder.Text(label.Formatted, loc, anchor.Orientation, anchor.Type);
                 }
             }
         }

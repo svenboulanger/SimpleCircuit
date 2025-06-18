@@ -51,7 +51,7 @@
         [Diagnostic(SeverityLevel.Error, null, "Could not find a variable with the name'{0}'")]
         CouldNotFindVariable,
         [Diagnostic(SeverityLevel.Error, null, "Could not {0} for arguments of type '{1}' and '{2}'")]
-        CouldNotOperateForArgumentTypes,
+        CouldNotOperateForArgumenttype,
         [Diagnostic(SeverityLevel.Error, null, "Could not {0} for argument of type '{1}'")]
         CouldNotOperateForArgumentType,
         [Diagnostic(SeverityLevel.Error, null, "Could not recognize bracket '{0}' and '{1}'")]

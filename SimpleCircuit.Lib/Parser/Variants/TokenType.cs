@@ -1,7 +1,7 @@
 ﻿namespace SimpleCircuit.Parser.Variants
 {
     /// <summary>
-    /// The token types for variants.
+    /// The token type for variants.
     /// </summary>
     public enum TokenType
     {
@@ -41,7 +41,7 @@
         CloseBracket = 0x20,
 
         /// <summary>
-        /// All token types.
+        /// All token type.
         /// </summary>
         All = -1
     }

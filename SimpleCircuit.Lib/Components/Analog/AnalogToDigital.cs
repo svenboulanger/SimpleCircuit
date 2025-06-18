@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), Vector2.NaN, Vector2.UX, TextOrientationTypes.Transformed);
+                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
                         _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1));
                         _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1));
                         break;

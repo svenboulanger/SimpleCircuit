@@ -228,7 +228,7 @@ namespace SimpleCircuit.Parser
                         result = null;
                         return false;
                     }
-                    result = new BinaryNode(BinaryOperatorTypes.Assignment, word, assignmentToken, value);
+                    result = new BinaryNode(BinaryOperatortype.Assignment, word, assignmentToken, value);
                 }
                 else
                 {
@@ -329,7 +329,7 @@ namespace SimpleCircuit.Parser
                 lexer.Next();
                 if (!ParseValueOrExpression(lexer, context, out var distance))
                     return false;
-                result = new UnaryNode(plus, distance, UnaryOperatorTypes.Positive);
+                result = new UnaryNode(plus, distance, UnaryOperatortype.Positive);
             }
             else
             {
@@ -649,12 +649,12 @@ namespace SimpleCircuit.Parser
                 switch (lexer.Type)
                 {
                     case TokenType.Word:
-                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(lexer.Token));
+                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                         lexer.Next();
                         break;
 
                     case TokenType.Number:
-                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(lexer.Token));
+                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                         lexer.Next();
                         break;
 
@@ -681,12 +681,12 @@ namespace SimpleCircuit.Parser
                                         context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
                                         return false;
                                     }
-                                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                                    result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
                                 }
                                 break;
 
                             case "-":
-                                result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(lexer.Token));
+                                result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                                 lexer.Next();
                                 break;
 
@@ -716,7 +716,7 @@ namespace SimpleCircuit.Parser
                 {
                     if (!ParseValueOrExpression(lexer, context, out var value))
                         return false;
-                    result = new BinaryNode(BinaryOperatorTypes.Assignment, word, assignment, value);
+                    result = new BinaryNode(BinaryOperatortype.Assignment, word, assignment, value);
                 }
                 else
                     // word
@@ -733,7 +733,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                     return false;
                 }
-                result = new UnaryNode(op, word, UnaryOperatorTypes.Positive);
+                result = new UnaryNode(op, word, UnaryOperatortype.Positive);
                 return true;
             }
             
@@ -747,7 +747,7 @@ namespace SimpleCircuit.Parser
                     context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                     return false;
                 }
-                result = new UnaryNode(op, word, UnaryOperatorTypes.Negative);
+                result = new UnaryNode(op, word, UnaryOperatortype.Negative);
                 return true;
             }
             
@@ -781,7 +781,7 @@ namespace SimpleCircuit.Parser
                         {
                             // A number (if allowed)
                             var expression = new LiteralNode(lexer.Token);
-                            result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                            result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
                             lexer.Next(); // number
                         }
                         else
@@ -789,14 +789,14 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case TokenType.Word:
-                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(lexer.Token));
+                        result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                         lexer.Next(); // word
                         break;
 
                     case TokenType.Punctuator:
                         if (result is not null && lexer.Content.Span[0] == DrawableFactoryDictionary.Separator)
                         {
-                            result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(lexer.Token));
+                            result = new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                             lexer.Next();
                         }
                         else
@@ -818,7 +818,7 @@ namespace SimpleCircuit.Parser
                                     }
 
                                     // There cannot be anything after this for the name
-                                    result = new BinaryNode(BinaryOperatorTypes.Backtrack, result, tilde, expression);
+                                    result = new BinaryNode(BinaryOperatortype.Backtrack, result, tilde, expression);
                                     return true;
 
                                 case "{":
@@ -846,7 +846,7 @@ namespace SimpleCircuit.Parser
                                     }
 
                                     expression = new BracketNode(bracketLeft, expression, bracketRight);
-                                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                                    result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
                                     break;
 
                                 default:
@@ -884,13 +884,13 @@ namespace SimpleCircuit.Parser
                 if (result is not null && lexer.Branch(TokenType.Punctuator, "/", out var opSlash))
                 {
                     // A separator for sections
-                    result = new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(opSlash));
+                    result = new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(opSlash));
                 }
                 else if (lexer.Branch(TokenType.Word, out var word))
                 {
                     // A word
                     var expression = new LiteralNode(word);
-                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
                 }
                 else if (lexer.Branch(TokenType.Punctuator, "{", out var bracketLeft))
                 {
@@ -916,10 +916,10 @@ namespace SimpleCircuit.Parser
                     }
 
                     expression = new BracketNode(bracketLeft, expression, bracketRight);
-                    result = result is null ? expression : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, expression);
+                    result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
                 }
                 else if (lexer.Branch(TokenType.Punctuator, "*", out var asterisk))
-                    result = result is null ? new LiteralNode(asterisk) : new BinaryNode(BinaryOperatorTypes.Concatenate, result, default, new LiteralNode(asterisk));
+                    result = result is null ? new LiteralNode(asterisk) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(asterisk));
                 else if (result is not null && lexer.Branch(TokenType.Punctuator, "~", out var tilde))
                 {
                     // Parse the value or expression
@@ -932,7 +932,7 @@ namespace SimpleCircuit.Parser
                     }
 
                     // There cannot be anything after this for the name
-                    result = new BinaryNode(BinaryOperatorTypes.Backtrack, result, tilde, expression);
+                    result = new BinaryNode(BinaryOperatortype.Backtrack, result, tilde, expression);
                     return true;
                 }
                 else
@@ -971,13 +971,13 @@ namespace SimpleCircuit.Parser
                         // parse a number
                         if (!ParseValueOrExpression(lexer, context, out var argument))
                             return false;
-                        result = new UnaryNode(minus, argument, UnaryOperatorTypes.Negative);
+                        result = new UnaryNode(minus, argument, UnaryOperatortype.Negative);
                     }
                     else if (lexer.Branch(TokenType.Punctuator, "+", out var plus))
                     {
                         if (!ParseValueOrExpression(lexer, context, out var argument))
                             return false;
-                        result = new UnaryNode(plus, argument, UnaryOperatorTypes.Positive);
+                        result = new UnaryNode(plus, argument, UnaryOperatortype.Positive);
                     }
                     break;
 

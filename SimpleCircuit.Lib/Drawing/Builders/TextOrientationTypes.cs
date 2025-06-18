@@ -3,10 +3,10 @@
 namespace SimpleCircuit.Drawing.Builders
 {
     /// <summary>
-    /// Enumeration of text orientation types.
+    /// Enumeration of text orientation type.
     /// </summary>
     [Flags]
-    public enum TextOrientationTypes
+    public enum TextOrientationType
     {
         /// <summary>
         /// Nothing special about the orientation type.
@@ -21,6 +21,11 @@ namespace SimpleCircuit.Drawing.Builders
         /// <summary>
         /// Indicates that the text is transformed.
         /// </summary>
-        Transformed = 0x02
+        Transformed = 0x02,
+
+        /// <summary>
+        /// Indicates that the text should be both transformed and upright.
+        /// </summary>
+        UprightTransformed = Upright | Transformed
     }
 }

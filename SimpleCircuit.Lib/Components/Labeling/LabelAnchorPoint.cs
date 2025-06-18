@@ -18,14 +18,19 @@ namespace SimpleCircuit.Components.Labeling
         public Vector2 Location { get; }
 
         /// <summary>
-        /// Gets the label orientation.
+        /// Gets the orientation.
         /// </summary>
-        public TextOrientation Orientation { get; }
+        public Vector2 Orientation { get; }
 
         /// <summary>
         /// Gets the label expansion (if <see cref="Orientation"/> is normal or vertical text).
         /// </summary>
         public Vector2 Expand { get; }
+
+        /// <summary>
+        /// Gets the text orientation type.
+        /// </summary>
+        public TextOrientationType Type { get; }
 
         /// <summary>
         /// Creates a new <see cref="LabelAnchorPoint"/>.
@@ -34,7 +39,8 @@ namespace SimpleCircuit.Components.Labeling
         {
             Location = default;
             Expand = default;
-            Orientation = TextOrientation.Normal;
+            Orientation = Vector2.UX;
+            Type = TextOrientationType.Upright;
         }
 
         /// <summary>
@@ -46,7 +52,8 @@ namespace SimpleCircuit.Components.Labeling
         {
             Location = location;
             Expand = expand;
-            Orientation = TextOrientation.Normal;
+            Orientation = Vector2.UX;
+            Type = TextOrientationType.Upright;
         }
 
         /// <summary>
@@ -54,11 +61,12 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="location">The location.</param>
         /// <param name="orientation">The label orientation.</param>
-        public LabelAnchorPoint(Vector2 location, Vector2 expand, TextOrientation orientation)
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, Vector2 orientation, TextOrientationType type)
         {
             Location = location;
             Expand = expand;
             Orientation = orientation;
+            Type = type;
         }
     }
 }

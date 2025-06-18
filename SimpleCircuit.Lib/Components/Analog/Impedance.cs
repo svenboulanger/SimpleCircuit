@@ -85,7 +85,7 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
-                        _anchors[1] = new(default, default, Vector2.UX, TextOrientationTypes.Transformed);
+                        _anchors[1] = new(default, default, Vector2.UX, TextOrientationType.Transformed);
                         if (Variants.Contains(_programmable))
                         {
                             _anchors[0] = new(new(0, -_width * 0.5 - 5), new(0, -1));

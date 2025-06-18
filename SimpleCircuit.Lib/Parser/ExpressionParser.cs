@@ -82,8 +82,8 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "||" => BinaryOperatorTypes.LogicalOr,
-                    _ => BinaryOperatorTypes.None
+                    "||" => BinaryOperatortype.LogicalOr,
+                    _ => BinaryOperatortype.None
                 }, ParseLogicalAndExpression);
         }
         private static bool ParseLogicalAndExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -91,8 +91,8 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "&&" => BinaryOperatorTypes.LogicalAnd,
-                    _ => BinaryOperatorTypes.None
+                    "&&" => BinaryOperatortype.LogicalAnd,
+                    _ => BinaryOperatortype.None
                 }, ParseOrExpression);
         }
         private static bool ParseOrExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -100,8 +100,8 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "|" => BinaryOperatorTypes.Or,
-                    _ => BinaryOperatorTypes.None
+                    "|" => BinaryOperatortype.Or,
+                    _ => BinaryOperatortype.None
                 }, ParseXorExpression);
         }
         private static bool ParseXorExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -109,8 +109,8 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "^" => BinaryOperatorTypes.Xor,
-                    _ => BinaryOperatorTypes.None
+                    "^" => BinaryOperatortype.Xor,
+                    _ => BinaryOperatortype.None
                 }, ParseAndExpression);
         }
         private static bool ParseAndExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -118,8 +118,8 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "&" => BinaryOperatorTypes.And,
-                    _ => BinaryOperatorTypes.None
+                    "&" => BinaryOperatortype.And,
+                    _ => BinaryOperatortype.None
                 }, ParseEqualityExpression);
         }
         private static bool ParseEqualityExpression(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -127,9 +127,9 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "==" => BinaryOperatorTypes.Equals,
-                    "!=" => BinaryOperatorTypes.NotEquals,
-                    _ => BinaryOperatorTypes.None
+                    "==" => BinaryOperatortype.Equals,
+                    "!=" => BinaryOperatortype.NotEquals,
+                    _ => BinaryOperatortype.None
                 },
                 ParseRelationalExpression);
         }
@@ -138,11 +138,11 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "<" => BinaryOperatorTypes.SmallerThan,
-                    ">" => BinaryOperatorTypes.GreaterThan,
-                    "<=" => BinaryOperatorTypes.SmallerThanOrEqual,
-                    ">=" => BinaryOperatorTypes.GreaterThanOrEqual,
-                    _ => BinaryOperatorTypes.None
+                    "<" => BinaryOperatortype.SmallerThan,
+                    ">" => BinaryOperatortype.GreaterThan,
+                    "<=" => BinaryOperatortype.SmallerThanOrEqual,
+                    ">=" => BinaryOperatortype.GreaterThanOrEqual,
+                    _ => BinaryOperatortype.None
                 },
                 ParseShiftExpression);
         }
@@ -151,9 +151,9 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "<<" => BinaryOperatorTypes.ShiftLeft,
-                    ">>" => BinaryOperatorTypes.ShiftRight,
-                    _ => BinaryOperatorTypes.None
+                    "<<" => BinaryOperatortype.ShiftLeft,
+                    ">>" => BinaryOperatortype.ShiftRight,
+                    _ => BinaryOperatortype.None
                 },
                 ParseAdditiveExpression);
         }
@@ -162,9 +162,9 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "+" => BinaryOperatorTypes.Addition,
-                    "-" => BinaryOperatorTypes.Subtraction,
-                    _ => BinaryOperatorTypes.None
+                    "+" => BinaryOperatortype.Addition,
+                    "-" => BinaryOperatortype.Subtraction,
+                    _ => BinaryOperatortype.None
                 },
                 ParseMultipliciativeExpression);
         }
@@ -173,10 +173,10 @@ namespace SimpleCircuit.Parser
             return ParseBinaryOperator(lexer, context, out result,
                 op => op switch
                 {
-                    "*" => BinaryOperatorTypes.Multiplication,
-                    "/" => BinaryOperatorTypes.Division,
-                    "%" => BinaryOperatorTypes.Modulo,
-                    _ => BinaryOperatorTypes.None
+                    "*" => BinaryOperatortype.Multiplication,
+                    "/" => BinaryOperatortype.Division,
+                    "%" => BinaryOperatortype.Modulo,
+                    _ => BinaryOperatortype.None
                 },
                 ParseUnaryExpression);
         }
@@ -190,15 +190,15 @@ namespace SimpleCircuit.Parser
                 string op = token.Content.ToString();
                 var type = op switch
                 {
-                    "+" => UnaryOperatorTypes.Positive,
-                    "-" => UnaryOperatorTypes.Negative,
-                    "!" => UnaryOperatorTypes.Invert,
-                    "++" => UnaryOperatorTypes.PrefixIncrement,
-                    "--" => UnaryOperatorTypes.PrefixDecrement,
-                    _ => UnaryOperatorTypes.None
+                    "+" => UnaryOperatortype.Positive,
+                    "-" => UnaryOperatortype.Negative,
+                    "!" => UnaryOperatortype.Invert,
+                    "++" => UnaryOperatortype.PrefixIncrement,
+                    "--" => UnaryOperatortype.PrefixDecrement,
+                    _ => UnaryOperatortype.None
                 };
 
-                if (type != UnaryOperatorTypes.None)
+                if (type != UnaryOperatortype.None)
                 {
                     lexer.Next(); // operator
                     if (!ParsePostfixExpression(lexer, context, out var arg))
@@ -251,9 +251,9 @@ namespace SimpleCircuit.Parser
                     }
                 }
                 else if (lexer.Branch(TokenType.Punctuator, "++", out var op))
-                    result = new UnaryNode(op, result, UnaryOperatorTypes.PostfixIncrement);
+                    result = new UnaryNode(op, result, UnaryOperatortype.PostfixIncrement);
                 else if (lexer.Branch(TokenType.Punctuator, "--", out op))
-                    result = new UnaryNode(op, result, UnaryOperatorTypes.PostfixDecrement);
+                    result = new UnaryNode(op, result, UnaryOperatortype.PostfixDecrement);
                 else
                     return true;
             }
@@ -352,7 +352,7 @@ namespace SimpleCircuit.Parser
         private delegate bool ParseMethod(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result);
 
         private static bool ParseBinaryOperator(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result,
-            Func<string, BinaryOperatorTypes> getOperatorType,
+            Func<string, BinaryOperatortype> getOperatorType,
             ParseMethod subMethod)
         {
             // Sub method
@@ -369,7 +369,7 @@ namespace SimpleCircuit.Parser
                     string op = token.Content.ToString();
                     var type = getOperatorType(op);
 
-                    if (type != BinaryOperatorTypes.None)
+                    if (type != BinaryOperatortype.None)
                     {
                         lexer.Next(); // operator
                         if (!subMethod(lexer, context, out var right))

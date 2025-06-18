@@ -228,13 +228,13 @@ namespace SimpleCircuit.Evaluator
                 switch (property)
                 {
                     case UnaryNode unary:
-                        if (unary.Type == UnaryOperatorTypes.Positive)
+                        if (unary.Type == UnaryOperatortype.Positive)
                         {
                             // Add a variant
                             string name = EvaluateName(unary.Argument, context);
                             includes.Add(name);
                         }
-                        else if (unary.Type == UnaryOperatorTypes.Negative)
+                        else if (unary.Type == UnaryOperatortype.Negative)
                         {
                             // Remove a variant
                             string name = EvaluateName(unary.Argument, context);
@@ -269,10 +269,10 @@ namespace SimpleCircuit.Evaluator
                     case BinaryNode binary:
                         switch (binary.Type)
                         {
-                            case BinaryOperatorTypes.Concatenate:
+                            case BinaryOperatortype.Concatenate:
                                 break;
 
-                            case BinaryOperatorTypes.Assignment:
+                            case BinaryOperatortype.Assignment:
                                 // Set property
                                 if (binary.Left is not IdentifierNode id)
                                 {
@@ -322,7 +322,7 @@ namespace SimpleCircuit.Evaluator
             {
                 // Try to parse a property and update the local scope
                 if (property is not BinaryNode assignment ||
-                    assignment.Type != BinaryOperatorTypes.Assignment)
+                    assignment.Type != BinaryOperatortype.Assignment)
                 {
                     context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                     return;
@@ -368,7 +368,7 @@ namespace SimpleCircuit.Evaluator
             {
                 // Try to parse a property and update the local scope
                 if (property is not BinaryNode assignment ||
-                    assignment.Type != BinaryOperatorTypes.Assignment)
+                    assignment.Type != BinaryOperatortype.Assignment)
                 {
                     context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                     return;
@@ -392,7 +392,7 @@ namespace SimpleCircuit.Evaluator
                 // Ignore the first property since that is supposed to be the name of the template
                 foreach (var property in sectionDefinition.Properties)
                 {
-                    if (property is not BinaryNode assignment || assignment.Type != BinaryOperatorTypes.Assignment)
+                    if (property is not BinaryNode assignment || assignment.Type != BinaryOperatortype.Assignment)
                     {
                         context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                         return;
@@ -542,13 +542,13 @@ namespace SimpleCircuit.Evaluator
                 switch (property)
                 {
                     case UnaryNode unary:
-                        if (unary.Type == UnaryOperatorTypes.Positive)
+                        if (unary.Type == UnaryOperatortype.Positive)
                         {
                             // Add a variant
                             string name = EvaluateName(unary.Argument, context);
                             presence.Variants.Add(name);
                         }
-                        else if (unary.Type == UnaryOperatorTypes.Negative)
+                        else if (unary.Type == UnaryOperatortype.Negative)
                         {
                             // Remove a variant
                             string name = EvaluateName(unary.Argument, context);
@@ -583,10 +583,10 @@ namespace SimpleCircuit.Evaluator
                     case BinaryNode binary:
                         switch (binary.Type)
                         {
-                            case BinaryOperatorTypes.Concatenate:
+                            case BinaryOperatortype.Concatenate:
                                 break;
 
-                            case BinaryOperatorTypes.Assignment:
+                            case BinaryOperatortype.Assignment:
                                 // Set property
                                 string propertyName = EvaluateName(binary.Left, context);
                                 if (propertyName is null)
@@ -657,7 +657,7 @@ namespace SimpleCircuit.Evaluator
                             }
                             if (direction.Distance is not null)
                             {
-                                if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
+                                if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatortype.Positive)
                                     segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
                                 else
                                 {
@@ -669,7 +669,7 @@ namespace SimpleCircuit.Evaluator
                         }
                         break;
 
-                    case BinaryNode bn when bn.Type == BinaryOperatorTypes.Assignment:
+                    case BinaryNode bn when bn.Type == BinaryOperatortype.Assignment:
                         propertiesAndVariants.Add(item);
                         break;
 
@@ -695,7 +695,7 @@ namespace SimpleCircuit.Evaluator
                         break;
 
                     case UnaryNode unary:
-                        if (unary.Type == UnaryOperatorTypes.Positive)
+                        if (unary.Type == UnaryOperatortype.Positive)
                         {
                             // Variant - force evaluation immediate
                             string name = EvaluateName(unary.Argument, context);
@@ -706,7 +706,7 @@ namespace SimpleCircuit.Evaluator
                             else
                                 propertiesAndVariants.Add(new IdentifierNode(new(unary.Location, name.AsMemory())));
                         }
-                        else if (unary.Type == UnaryOperatorTypes.Negative)
+                        else if (unary.Type == UnaryOperatortype.Negative)
                             propertiesAndVariants.Add(unary); // Can't "remove" markers - so we already know it's a variant
                         else
                             throw new NotImplementedException();
@@ -725,7 +725,7 @@ namespace SimpleCircuit.Evaluator
                         propertiesAndVariants.Add(item);
                         break;
 
-                    case BinaryNode bn when bn.Type == BinaryOperatorTypes.Concatenate:
+                    case BinaryNode bn when bn.Type == BinaryOperatortype.Concatenate:
                         {
                             // This should evaluate to a name of a variant
                             string name = EvaluateName(bn, context);
@@ -811,7 +811,7 @@ namespace SimpleCircuit.Evaluator
                         }
                         if (direction.Distance is not null)
                         {
-                            if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatorTypes.Positive)
+                            if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatortype.Positive)
                                 segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
                             else
                             {
@@ -846,7 +846,7 @@ namespace SimpleCircuit.Evaluator
 
             // Evaluate the full name of the component
             ICircuitPresence presence;
-            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.Backtrack)
+            if (component is BinaryNode bn && bn.Type == BinaryOperatortype.Backtrack)
             {
                 // This should be treated as an anonymous component in the past
                 string name = EvaluateName(bn.Left, context);
@@ -914,7 +914,7 @@ namespace SimpleCircuit.Evaluator
         private static ILocatedPresence ProcessVirtualComponent(SyntaxNode component, VirtualChainConstraints flags, EvaluationContext context)
         {
             // Evaluate and validate the name
-            if (component is BinaryNode bn && bn.Type == BinaryOperatorTypes.Backtrack)
+            if (component is BinaryNode bn && bn.Type == BinaryOperatortype.Backtrack)
             {
                 // This should be treated as an anonymous component in the past
                 string name = EvaluateName(bn.Left, context);
@@ -996,14 +996,14 @@ namespace SimpleCircuit.Evaluator
                 case ConstantNode number:
                     return number.ToString();
 
-                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.Concatenate:
+                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatortype.Concatenate:
                     string left = EvaluateName(binaryNode.Left, context);
                     string right = EvaluateName(binaryNode.Right, context);
                     if (left is null || right is null)
                         return null;
                     return left + right;
 
-                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatorTypes.Backtrack:
+                case BinaryNode binaryNode when binaryNode.Type == BinaryOperatortype.Backtrack:
                     left = EvaluateName(binaryNode.Left, context);
                     right = EvaluateName(binaryNode.Right, context);
                     if (left is null || right is null)

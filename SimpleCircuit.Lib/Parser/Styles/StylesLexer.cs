@@ -42,7 +42,7 @@ namespace SimpleCircuit.Parser.Styles
         Any = 0x20,
 
         /// <summary>
-        /// All token types.
+        /// All token type.
         /// </summary>
         All = -1
     }

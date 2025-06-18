@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 SetPinOffset(i * 2 + 2, new(0, _bottom + (t + b) * 0.5));
 
                                 _bottom -= t;
-                                _anchors[i] = new LabelAnchorPoint(new(0, _bottom), Vector2.NaN, TextOrientation.Normal);
+                                _anchors[i] = new LabelAnchorPoint(new(0, _bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Upright);
                                 _bottom += b;
                             }
 
@@ -168,7 +168,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                             {
                                 SetPinOffset(i * 2 + 1, new(-w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
                                 SetPinOffset(i * 2 + 2, new(w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
-                                _anchors[i] = new LabelAnchorPoint(new(-w + Margin.Left, _anchors[i].Location.Y), Vector2.NaN, TextOrientation.Normal);
+                                _anchors[i] = new LabelAnchorPoint(new(-w + Margin.Left, _anchors[i].Location.Y), Vector2.NaN, Vector2.UX, TextOrientationType.Upright);
                             }
                         }
                         break;

@@ -357,23 +357,14 @@ namespace SimpleCircuit.Drawing.Builders
             // Now let's transform the text location and orientation if necessary
             string mode = node.Attributes?["mode"]?.Value;
             mode ??= "transformed";
-            TextOrientationTypes textOrientationTypes = TextOrientationTypes.None;
-            switch (mode.ToLower())
+            TextOrientationType type = mode.ToLower() switch
             {
-                case "transformed":
-                    textOrientationTypes |= TextOrientationTypes.Transformed;
-                    break;
-
-                case "upright":
-                    textOrientationTypes |= TextOrientationTypes.Upright;
-                    break;
-
-                default:
-                    // Consider adding diagnostic message
-                    break;
-            }
-
-            Text(span, new Vector2(x, y), new Vector2(nx, ny), textOrientationTypes);
+                "transformed" => TextOrientationType.Transformed,
+                "upright" => TextOrientationType.Upright,
+                "upright-transformed" => TextOrientationType.UprightTransformed,
+                _ => TextOrientationType.Transformed
+            };
+            Text(span, new Vector2(x, y), new Vector2(nx, ny), type);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
@@ -690,6 +681,6 @@ namespace SimpleCircuit.Drawing.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types);
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationType type);
     }
 }

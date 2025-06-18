@@ -51,7 +51,7 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
                 _anchors = new(
                     new LabelAnchorPoint(new(2, 8), new(1, 1)),
-                    new LabelAnchorPoint(new(), new(), Vector2.UX, TextOrientationTypes.Transformed),
+                    new LabelAnchorPoint(new(), new(), Vector2.UX, TextOrientationType.Transformed),
                     new LabelAnchorPoint(new(2, -8), new(1, -1)));
             }
 

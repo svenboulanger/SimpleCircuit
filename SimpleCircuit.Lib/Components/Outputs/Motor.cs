@@ -47,7 +47,7 @@ namespace SimpleCircuit.Components.Outputs
                 builder.Circle(new(), 5, style);
 
                 var span = builder.TextFormatter.Format("M", style);
-                builder.Text(span, builder.CurrentTransform.Matrix.Inverse * -span.Bounds.Bounds.Center, TextOrientation.Normal);
+                builder.Text(span, builder.CurrentTransform.Matrix.Inverse * -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Upright);
 
                 if (Variants.Contains(_signs))
                     builder.Signs(new(-6, -4), new(6, -4), style, upright: true);

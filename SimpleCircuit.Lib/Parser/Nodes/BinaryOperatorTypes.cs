@@ -1,9 +1,9 @@
 ﻿namespace SimpleCircuit.Parser.Nodes
 {
     /// <summary>
-    /// Possible binary operator types.
+    /// Possible binary operator type.
     /// </summary>
-    public enum BinaryOperatorTypes
+    public enum BinaryOperatortype
     {
         None,
         Addition,

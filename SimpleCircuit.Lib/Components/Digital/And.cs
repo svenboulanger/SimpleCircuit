@@ -173,7 +173,7 @@ namespace SimpleCircuit.Components.Digital
                     builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
                 
                 var span = builder.TextFormatter.Format("&amp;", style);
-                builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationTypes.Transformed);
+                builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
             }

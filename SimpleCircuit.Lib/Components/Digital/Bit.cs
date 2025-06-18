@@ -139,7 +139,7 @@ namespace SimpleCircuit.Components.Digital
                         {
                             var span = builder.TextFormatter.Format(bits[j], style);
                             var bounds = span.Bounds.Bounds;
-                            builder.Text(span, new(x - bounds.Left - 0.5 * bounds.Width, y - bounds.Top - 0.5 * bounds.Height), Vector2.UX, TextOrientationTypes.Transformed);
+                            builder.Text(span, new(x - bounds.Left - 0.5 * bounds.Width, y - bounds.Top - 0.5 * bounds.Height), Vector2.UX, TextOrientationType.Transformed);
                         }
                         x += BlockSize;
                     }
