@@ -59,18 +59,18 @@ namespace SimpleCircuit.Components.Digital
                 var textStyle = new FontSizeStyleModifier.Style(style, Drawing.Styles.Style.DefaultFontSize);
 
                 var span = builder.TextFormatter.Format("S", textStyle);
-                builder.Text(span, new Vector2(-8, -6) - span.Bounds.Bounds.MiddleLeft, TextOrientation.Transformed);
+                builder.Text(span, new Vector2(-8, -6) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationTypes.Transformed);
 
                 span = builder.TextFormatter.Format("R", textStyle);
-                builder.Text(span, new Vector2(-8, 6) - span.Bounds.Bounds.MiddleLeft, TextOrientation.Transformed);
+                builder.Text(span, new Vector2(-8, 6) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationTypes.Transformed);
 
                 span = builder.TextFormatter.Format("Q", textStyle);
-                builder.Text(span, new Vector2(8, -6) - span.Bounds.Bounds.MiddleRight, TextOrientation.Transformed);
+                builder.Text(span, new Vector2(8, -6) - span.Bounds.Bounds.MiddleRight, Vector2.UX, TextOrientationTypes.Transformed);
 
                 if (Pins["nq"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("\\overline{Q}", textStyle);
-                    builder.Text(span, new Vector2(8, 6) - span.Bounds.Bounds.MiddleRight, TextOrientation.Transformed);
+                    builder.Text(span, new Vector2(8, 6) - span.Bounds.Bounds.MiddleRight, Vector2.UX, TextOrientationTypes.Transformed);
                 }
 
                 new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);

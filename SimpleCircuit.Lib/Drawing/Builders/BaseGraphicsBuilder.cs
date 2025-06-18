@@ -339,18 +339,41 @@ namespace SimpleCircuit.Drawing.Builders
             bool success = true;
             success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
             success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 1.0, out double nx);
             success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
             if (!success)
                 return;
 
-            string value = node.Attributes?["value"]?.Value;
-            var modifier = ParseStyleModifier(node);
+            // Get the style
+            var modifier = ParseStyleModifier(node, asText: true);
             var style = modifier?.Apply(Style) ?? Style;
 
+            // Get the text value
+            string value = node.Attributes?["value"]?.Value;
             if (value != null && context != null)
                 value = context.TransformText(value);
-            Text(value, new Vector2(x, y), new(nx, ny), style);
+            var span = TextFormatter.Format(value, style);
+
+            // Now let's transform the text location and orientation if necessary
+            string mode = node.Attributes?["mode"]?.Value;
+            mode ??= "transformed";
+            TextOrientationTypes textOrientationTypes = TextOrientationTypes.None;
+            switch (mode.ToLower())
+            {
+                case "transformed":
+                    textOrientationTypes |= TextOrientationTypes.Transformed;
+                    break;
+
+                case "upright":
+                    textOrientationTypes |= TextOrientationTypes.Upright;
+                    break;
+
+                default:
+                    // Consider adding diagnostic message
+                    break;
+            }
+
+            Text(span, new Vector2(x, y), new Vector2(nx, ny), textOrientationTypes);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
@@ -365,10 +388,101 @@ namespace SimpleCircuit.Drawing.Builders
             context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny)));
         }
 
-        private IStyleModifier ParseStyleModifier(XmlNode node)
+        private IStyleModifier ParseStyleModifier(XmlNode node, bool asText = false)
         {
-            // Parse the style string
             IStyleModifier result = null;
+
+            // Color from attributes
+            if (node.Attributes is not null)
+            {
+                string color = node.Attributes["color"]?.Value;
+                string bgColor = node.Attributes["background"]?.Value;
+                if (asText)
+                {
+                    color ??= node.Attributes["fill"]?.Value;
+                }
+                else
+                {
+                    color ??= node.Attributes["stroke"]?.Value;
+                    bgColor ??= node.Attributes["fill"]?.Value;
+                }
+                if (color is not null || bgColor is not null)
+                    result = result.Append(new ColorStyleModifier(color, bgColor));
+
+                // StrokeDashArray from attributes
+                string strokeDashArray = node.Attributes["stroke-dasharray"]?.Value;
+                if (strokeDashArray is not null)
+                    result = result.Append(new StrokeDashArrayStyleModifier(strokeDashArray));
+
+                // Stroke width from attributes
+                string strokeWidth = node.Attributes["stroke-width"]?.Value;
+                strokeWidth ??= node.Attributes["thickness"]?.Value;
+                if (strokeWidth is not null)
+                {
+                    if (double.TryParse(strokeWidth, out double thickness))
+                    {
+                        if (strokeWidth.EndsWith("px"))
+                            thickness *= 4.0 / 3.0;
+                        result = result.Append(new StrokeWidthStyleModifier(thickness));
+                    }
+                }
+
+                // Font-family from attributes
+                string fontFamily = node.Attributes["font-family"]?.Value;
+                if (fontFamily is not null)
+                    result = result.Append(new FontFamilyStyleModifier(fontFamily));
+
+                // Font-size from attributes
+                string fontSize = node.Attributes["font-size"]?.Value;
+                if (fontSize is not null)
+                {
+                    if (double.TryParse(fontSize, out double size))
+                    {
+                        if (fontSize.EndsWith("px"))
+                            size *= 4.0 / 3.0;
+                        result = result.Append(new FontSizeStyleModifier(size / 3.0 * 4.0));
+                    }
+                }
+
+                // Opacity from attributes
+                string opacity = node.Attributes["opacity"]?.Value;
+                if (opacity is not null)
+                {
+                    if (double.TryParse(opacity, out double scale))
+                        result = result.Append(new OpacityStyleModifier(scale, scale));
+                }
+
+                // Justification from attributes
+                string justification = node.Attributes["justification"]?.Value;
+                justification ??= node.Attributes["justify"]?.Value;
+                if (justification is not null)
+                {
+                    switch (justification.ToLower())
+                    {
+                        case "left":
+                        case "text-left":
+                            result = result.Append(new JustificationStyleModifier(1.0));
+                            break;
+
+                        case "center":
+                        case "text-center":
+                            result = result.Append(new JustificationStyleModifier(0.0));
+                            break;
+
+                        case "right":
+                        case "text-right":
+                            result = result.Append(new JustificationStyleModifier(-1.0));
+                            break;
+
+                        default:
+                            if (double.TryParse(justification, out double scale))
+                                result = result.Append(new JustificationStyleModifier(scale));
+                            break;
+                    }
+                }
+            }
+
+            // Parse the style string    
             var style = node.Attributes["style"]?.Value;
             if (!string.IsNullOrWhiteSpace(style))
             {
@@ -414,27 +528,52 @@ namespace SimpleCircuit.Drawing.Builders
 
                     // Get the full value
                     var value = lexer.GetTracked(start);
-
                     switch (keyToken.Content.ToString().ToLower())
                     {
                         case "color":
-                        case "stroke": result = result.Append(new ColorStyleModifier(value.Content.ToString(), null)); break;
+                            result = result.Append(new ColorStyleModifier(value.Content.ToString(), null));
+                            break;
+
+                        case "stroke":
+                            if (!asText)
+                                result = result.Append(new ColorStyleModifier(value.Content.ToString(), null));
+                            break;
+
+                        case "fill":
+                            if (asText)
+                                result = result.Append(new ColorStyleModifier(value.Content.ToString(), null));
+                            else
+                                result = result.Append(new ColorStyleModifier(null, value.Content.ToString()));
+                            break;
+
                         case "background":
-                        case "fill": result = result.Append(new ColorStyleModifier(null, value.Content.ToString())); break;
-                        case "stroke-dasharray": result = result.Append(new StrokeDashArrayStyleModifier(value.Content.ToString())); break;
+                            result = result.Append(new ColorStyleModifier(null, value.Content.ToString()));
+                            break;
+
+                        case "stroke-dasharray":
+                            result = result.Append(new StrokeDashArrayStyleModifier(value.Content.ToString()));
+                            break;
+
                         case "stroke-width":
-                            if (double.TryParse(value.Content.ToString(), out double strokeWidth))
-                                result = result.Append(new StrokeWidthStyleModifier(strokeWidth));
+                        case "thickness":
+                            if (double.TryParse(value.Content.ToString(), out double thickness))
+                                result = result.Append(new StrokeWidthStyleModifier(thickness));
                             break;
-                        case "font-family": result = result.Append(new FontFamilyStyleModifier(value.Content.ToString())); break;
+
+                        case "font-family":
+                            result = result.Append(new FontFamilyStyleModifier(value.Content.ToString()));
+                            break;
+
                         case "font-size":
-                            if (double.TryParse(value.Content.ToString(), out double fontSize))
-                                result = result.Append(new FontSizeStyleModifier(fontSize));
+                            if (double.TryParse(value.Content.ToString(), out double size))
+                                result = result.Append(new FontSizeStyleModifier(size));
                             break;
+
                         case "opacity":
-                            if (double.TryParse(value.Content.ToString(), out double opacity))
-                                result = result.Append(new OpacityStyleModifier(opacity, opacity));
+                            if (double.TryParse(value.Content.ToString(), out double scale))
+                                result = result.Append(new OpacityStyleModifier(scale, scale));
                             break;
+
                         case "justification":
                         case "justify":
                             if (double.TryParse(value.Content.ToString(), out double justify))
@@ -551,16 +690,6 @@ namespace SimpleCircuit.Drawing.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation);
-
-        /// <inheritdoc />
-        public virtual IGraphicsBuilder Text(string value, Vector2 location, TextOrientation orientation, IStyle appearance)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return this;
-
-            var span = TextFormatter.Format(value, appearance);
-            return Text(span, location, orientation);
-        }
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types);
     }
 }

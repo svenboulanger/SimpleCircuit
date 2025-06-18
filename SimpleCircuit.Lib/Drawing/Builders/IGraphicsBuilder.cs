@@ -150,13 +150,11 @@ namespace SimpleCircuit.Drawing.Builders
         /// <summary>
         /// Draws text.
         /// </summary>
-        /// <remarks>
-        /// Use <see cref="TextFormatter"/> if you need to convert a string to a <see cref="Span"/>.
-        /// </remarks>
         /// <param name="span">The span to be drawn.</param>
         /// <param name="location">The location where the span should be.</param>
-        /// <param name="orientation">The text orientation.</param>
+        /// <param name="expand">The expansion direction.</param>
+        /// <param name="types">The text orientation types.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation);
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types);
     }
 }

@@ -524,22 +524,5 @@ namespace SimpleCircuit.Components
                 p = center + Vector2.Normal(a0 + fraction * (a1 - a0)) * radius;
             }
         }
-
-        /// <summary>
-        /// Formats and draws the text.
-        /// </summary>
-        /// <param name="builder">The builder.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="location">The location.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <param name="style">The style.</param>
-        public static void Text(this IGraphicsBuilder builder, string value, Vector2 location, TextOrientation orientation, IStyle style)
-        {
-            var span = builder.TextFormatter.Format(value, style);
-            if (span is not null)
-            {
-                builder.Text(span, location, orientation);
-            }
-        }
     }
 }

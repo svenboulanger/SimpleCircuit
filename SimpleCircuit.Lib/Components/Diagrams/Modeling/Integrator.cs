@@ -42,22 +42,22 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         // 1/s
                         var span = builder.TextFormatter.Format("1", textStyle);
                         var bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), new());
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 1), Vector2.UX, TextOrientationTypes.Transformed);
                         builder.Line(new(-2, 0), new(2, 0), textStyle);
                         span = builder.TextFormatter.Format("s", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), new());
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top + 1), Vector2.UX, TextOrientationTypes.Transformed);
                         break;
 
                     case 1:
                         // 1/z^-1
                         span = builder.TextFormatter.Format("1", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 2), new());
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Bottom - 2), Vector2.UX, TextOrientationTypes.Transformed);
                         builder.Line(new(-2, -1), new(2, -1), textStyle);
                         span = builder.TextFormatter.Format("z^{-1}", textStyle);
                         bounds = span.Bounds.Bounds;
-                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top), new());
+                        builder.Text(span, new(-bounds.Left - bounds.Width * 0.5, -bounds.Top), Vector2.UX, TextOrientationTypes.Transformed);
                         break;
 
                     default:

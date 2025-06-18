@@ -104,19 +104,19 @@ namespace SimpleCircuit.Drawing.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types)
         {
             if (span is null)
                 return this;
 
             // Get the location
             location = CurrentTransform.Apply(location);
-            
-            // Get the bounds
-            var bounds = orientation.TransformTextBounds(span.Bounds.Bounds, CurrentTransform);
 
-            // Expand
-            Expand(location + bounds);
+            // Get the bounds
+            if ((types & TextOrientationTypes.Transformed) != 0)
+                expand = CurrentTransform.ApplyDirection(expand);
+            foreach (var p in span.Bounds.Bounds)
+                Expand(location + p.X * expand + p.Y * expand.Perpendicular);
             return this;
         }
     }

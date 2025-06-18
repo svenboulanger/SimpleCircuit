@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -153,7 +154,7 @@ namespace SimpleCircuit.Drawing.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, TextOrientation orientation)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationTypes types)
         {
             if (span is null)
                 return this;
@@ -166,10 +167,9 @@ namespace SimpleCircuit.Drawing.Builders
             var bounds = span.Bounds.Bounds;
 
             // First determine the orientation
-            var expand = orientation.Orientation;
-            if ((orientation.Type & TextOrientationTypes.Transformed) != 0)
+            if ((types & TextOrientationTypes.Transformed) != 0)
                 expand = CurrentTransform.ApplyDirection(expand);
-            if ((orientation.Type & TextOrientationTypes.Upright) != 0)
+            if ((types & TextOrientationTypes.Upright) != 0)
             {
                 if (expand.X < 0)
                 {
@@ -180,15 +180,16 @@ namespace SimpleCircuit.Drawing.Builders
                 }
             }
 
+            // Expand bounds
+            foreach (var p in span.Bounds.Bounds)
+                Expand(location + p.X * expand + p.Y * expand.Perpendicular);
+
             // Apply orientation and location to the containing group
             double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
             if (angle.IsZero())
                 g.SetAttribute("transform", $"translate({location.ToSVG()})");
             else
                 g.SetAttribute("transform", $"translate({location.ToSVG()}) rotate({angle.ToSVG()})");
-
-            // Expand the bounds
-            Expand(location + orientation.TransformTextBounds(bounds, CurrentTransform));
 
             // Create the text element
             var text = _document.CreateElement("text", Namespace);
