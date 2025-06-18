@@ -117,6 +117,70 @@ namespace SimpleCircuit.Components.Labeling
                 case "c":
                 case "ci": index = 0; return true;
 
+                case "1":
+                case "nw":
+                case "nwo":
+                case "nnw":
+                case "nnwo": index = 1; return true;
+
+                case "2":
+                case "n":
+                case "no":
+                case "u":
+                case "up": index = 2; return true;
+
+                case "3":
+                case "ne":
+                case "neo":
+                case "nne":
+                case "nneo": index = 3; return true;
+
+                case "4":
+                case "ene":
+                case "eneo": index = 4; return true;
+
+                case "5":
+                case "e":
+                case "eo":
+                case "r":
+                case "right": index = 5; return true;
+
+                case "6":
+                case "ese":
+                case "eseo": index = 6; return true;
+
+                case "7":
+                case "se":
+                case "seo":
+                case "sse":
+                case "sseo": index = 7; return true;
+
+                case "8":
+                case "s":
+                case "so":
+                case "d":
+                case "down": index = 8; return true;
+
+                case "9":
+                case "sw":
+                case "swo":
+                case "ssw":
+                case "sswo": index = 9; return true;
+
+                case "10":
+                case "wsw":
+                case "wswo": index = 10; return true;
+
+                case "11":
+                case "w":
+                case "wo":
+                case "l":
+                case "left": index = 11; return true;
+
+                case "12":
+                case "wnw":
+                case "wnwo": index = 12; return true;
+
                 case "13":
                 case "nwi": index = 13; return true;
 
