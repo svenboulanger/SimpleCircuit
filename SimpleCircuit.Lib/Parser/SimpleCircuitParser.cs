@@ -1201,7 +1201,7 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
                 {
-                    switch (lexer.NextContent.ToString())
+                    switch (lexer.NextContent.ToString().ToLower())
                     {
                         case "endb":
                         case "endbox":
@@ -1210,6 +1210,10 @@ namespace SimpleCircuit.Parser
 
                             result = new BoxNode(box, propertyList, statements);
                             return true;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
+                            return false;
                     }
                 }
             }
@@ -1240,7 +1244,7 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
                 {
-                    switch (lexer.NextContent.ToString())
+                    switch (lexer.NextContent.ToString().ToLower())
                     {
                         case "ends":
                         case "endscope":
@@ -1249,6 +1253,10 @@ namespace SimpleCircuit.Parser
 
                             result = new ScopeDefinitionNode(scope, propertyList, statements);
                             return true;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
+                            return false;
                     }
                 }
             }
@@ -1323,7 +1331,7 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
                 {
-                    switch (lexer.NextContent.ToString())
+                    switch (lexer.NextContent.ToString().ToLower())
                     {
                         case "ends":
                         case "endsection":
@@ -1332,6 +1340,10 @@ namespace SimpleCircuit.Parser
 
                             result = new SectionDefinitionNode(section, name, null, propertyList, statements);
                             return true;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
+                            return false;
                     }
                 }
             }
@@ -1391,7 +1403,7 @@ namespace SimpleCircuit.Parser
             if (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word && !lexer.NextHasTrivia &&
                 lexer.Content.ToString() == ".")
             {
-                switch (lexer.NextContent.ToString())
+                switch (lexer.NextContent.ToString().ToLower())
                 {
                     case "end":
                     case "endf":
@@ -1400,6 +1412,10 @@ namespace SimpleCircuit.Parser
                         lexer.Next(); // 'end'
                         result = new ForLoopNode(@for, variableToken, start, end, increment, statements);
                         return true;
+
+                    default:
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextToken.ToString());
+                        return false;
                 }
             }
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "endf");
@@ -1498,7 +1514,7 @@ namespace SimpleCircuit.Parser
             while (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Word &&
                 lexer.Content.ToString() == ".")
             {
-                switch (lexer.NextContent.ToString())
+                switch (lexer.NextContent.ToString().ToLower())
                 {
                     case "end":
                     case "endif":
@@ -1544,14 +1560,34 @@ namespace SimpleCircuit.Parser
                         // Statements
                         if (!ParseScopedStatements(lexer, context, out elseStatements))
                             return false;
-                        break;
+
+                        // Expect a '.end'
+                        if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")
+                        {
+                            switch (lexer.NextContent.ToString().ToLower())
+                            {
+                                case "end":
+                                case "endif":
+                                    lexer.Next(); // '.'
+                                    lexer.Next(); // 'endif'
+                                    result = new IfElseNode(conditions, elseStatements);
+                                    return true;
+
+                                default:
+                                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
+                                    return false;
+                            }
+                        }
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ".endif");
+                        return false;
 
                     default:
                         context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
                         return false;
                 }
             }
-            return true;
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ".endif");
+            return false;
         }
         private static bool ParseSubcircuitDefinition(Token subckt, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
         {
@@ -1605,7 +1641,7 @@ namespace SimpleCircuit.Parser
             {
                 if (lexer.NextType == TokenType.Word && !lexer.NextHasTrivia)
                 {
-                    switch (lexer.NextContent.ToString())
+                    switch (lexer.NextContent.ToString().ToLower())
                     {
                         case "ends":
                         case "endsubckt":
@@ -1614,9 +1650,14 @@ namespace SimpleCircuit.Parser
 
                             result = new SubcircuitDefinitionNode(subckt, nameToken, pins, properties, statements);
                             return true;
+
+                        default:
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.CouldNotRecognizeControlStatement, lexer.NextContent.ToString());
+                            return false;
                     }
                 }
             }
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ".ends");
             return false;
         }
     }

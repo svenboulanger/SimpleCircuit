@@ -116,13 +116,13 @@ namespace SimpleCircuit.Components
                         case BinaryNode binary:
                             if (binary.Type == BinaryOperatortype.Assignment)
                             {
-                                if (binary.Left is not IdentifierNode id)
-                                {
-                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedPropertyName);
+                                string name = StatementEvaluator.EvaluateName(binary.Left, evalContext);
+                                if (name is null)
                                     return false;
-                                }
                                 object value = StatementEvaluator.EvaluateExpression(binary.Right, evalContext);
-                                direct[id.Name] = value;
+                                if (value is null)
+                                    return false;
+                                direct[name] = value;
                             }
                             break;
 

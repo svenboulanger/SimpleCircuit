@@ -274,15 +274,14 @@ namespace SimpleCircuit.Evaluator
 
                             case BinaryOperatortype.Assignment:
                                 // Set property
-                                if (binary.Left is not IdentifierNode id)
-                                {
-                                    context.Diagnostics?.Post(binary.Left.Location, ErrorCodes.ExpectedLiteral);
+                                string propertyName = EvaluateName(binary.Left, context);
+                                if (propertyName is null)
                                     return;
-                                }
-                                string propertyName = id.Name;
                                 object value = EvaluateExpression(binary.Right, context);
+                                if (value is null)
+                                    return;
 
-                                defaultProperties.Add((id.Token, value));
+                                defaultProperties.Add((new(binary.Location, propertyName.AsMemory()), value));
                                 break;
                         }
                         break;
@@ -373,17 +372,15 @@ namespace SimpleCircuit.Evaluator
                     context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                     return;
                 }
-                if (assignment.Left is not IdentifierNode propertyName)
-                {
-                    context.Diagnostics?.Post(assignment.Left.Location, ErrorCodes.ExpectedPropertyName);
-                    return;
-                }
 
                 // Update the value
+                string propertyName = EvaluateName(assignment.Left, context);
+                if (propertyName is null)
+                    return;
                 object value = EvaluateExpression(assignment.Right, context);
                 if (value is null)
                     return;
-                context.CurrentScope[propertyName.Name] = value;
+                context.CurrentScope[propertyName] = value;
             }
 
             // If the template is not the same as the current section, override the default properties from before
@@ -397,17 +394,15 @@ namespace SimpleCircuit.Evaluator
                         context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
                         return;
                     }
-                    if (assignment.Left is not IdentifierNode propertyName)
-                    {
-                        context.Diagnostics?.Post(assignment.Left.Location, ErrorCodes.ExpectedPropertyName);
-                        return;
-                    }
 
                     // Update the value
+                    string propertyName = EvaluateName(assignment.Left, context);
+                    if (propertyName is null)
+                        return;
                     object value = EvaluateExpression(assignment.Right, context);
                     if (value is null)
                         return;
-                    context.CurrentScope[propertyName.Name] = value;
+                    context.CurrentScope[propertyName] = value;
                 }
             }
 
