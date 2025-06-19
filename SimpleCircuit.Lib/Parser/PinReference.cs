@@ -58,7 +58,7 @@ namespace SimpleCircuit.Parser
                             _pin = Drawable.Pins[drawable.Pins.Count + defaultIndex];
                     }
                     if (_pin == null)
-                        diagnostics?.Post(default(TextLocation), ErrorCodes.DoesNotHavePins, drawable.Name);
+                        diagnostics?.Post(Source, ErrorCodes.DoesNotHavePins, drawable.Name);
                 }
                 else
                 {

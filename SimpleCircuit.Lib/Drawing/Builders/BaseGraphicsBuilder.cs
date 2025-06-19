@@ -355,47 +355,14 @@ namespace SimpleCircuit.Drawing.Builders
             var span = TextFormatter.Format(value, style);
 
             // Now let's transform the text location and orientation if necessary
-            string mode = node.Attributes?["mode"]?.Value;
-            mode ??= "transformed";
-            TextOrientationType type = mode.ToLower() switch
-            {
-                "transformed" => TextOrientationType.Transformed,
-                "upright" => TextOrientationType.Upright,
-                "upright-transformed" => TextOrientationType.UprightTransformed,
-                _ => TextOrientationType.Transformed
-            };
+            var type = GetTextOrientationType(node);
 
             // Also modify the position depending on an additional flag
             var location = new Vector2(x, y);
-            var anchorOrientation = Vector2.NaN;
-            mode = node.Attributes?["anchor"]?.Value;
-            if (mode is not null)
-            {
-                switch (mode?.ToLower())
-                {
-                    case "center": anchorOrientation = new(0, 0); break;
-                    case "center-baseline": anchorOrientation = new(0, double.NaN); break; // Horizontally centered anchor
-                    case "baseline-center": anchorOrientation = new(double.NaN, 0); break; // Vertically centered anchor
-                    case "left": anchorOrientation = new(1, 0); break;
-                    case "top": anchorOrientation = new(0, 1); break;
-                    case "right": anchorOrientation = new(-1, 0); break;
-                    case "bottom": anchorOrientation = new(0, -1); break;
-                    case "bottom-left":
-                    case "bottomleft": anchorOrientation = new(1, -1); break;
-                    case "bottom-right":
-                    case "bottomright": anchorOrientation = new(-1, -1); break;
-                    case "top-left":
-                    case "topleft": anchorOrientation = new(1, 1); break;
-                    case "top-right":
-                    case "topright": anchorOrientation = new(-1, 1); break;
-                    case "baseline":
-                    case "baseline-baseline":
-                    case "origin": anchorOrientation = Vector2.NaN; break;
-                };
-            }
+            var anchorOrientation = GetExpansion(node);
 
             // Also introduce an anchor mode, that allows us to transform the expandOffset
-            mode = node.Attributes?["transform-anchor"]?.Value;
+            string mode = node.Attributes?["transform-anchor"]?.Value;
             if (mode is null)
             {
                 if ((type & TextOrientationType.Transformed) == 0)
@@ -454,11 +421,56 @@ namespace SimpleCircuit.Drawing.Builders
             bool success = true;
             success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
             success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 0.0, out double nx);
+            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 1.0, out double nx);
             success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
+
             if (!success)
                 return;
-            context.Anchors.Add(new LabelAnchorPoint(new(x, y), new(nx, ny)));
+            context.Anchors.Add(new LabelAnchorPoint(new(x, y), GetExpansion(node), new(nx, ny), GetTextOrientationType(node)));
+        }
+        private static TextOrientationType GetTextOrientationType(XmlNode node)
+        {
+            // Now let's transform the text location and orientation if necessary
+            string mode = node.Attributes?["mode"]?.Value;
+            mode ??= "upright-transformed";
+            return mode.ToLower() switch
+            {
+                "transformed" => TextOrientationType.Transformed,
+                "upright" => TextOrientationType.Upright,
+                "upright-transformed" => TextOrientationType.UprightTransformed,
+                _ => TextOrientationType.Transformed
+            };
+        }
+        private static Vector2 GetExpansion(XmlNode node)
+        {
+            // Also modify the position depending on an additional flag
+            var anchorOrientation = Vector2.NaN;
+            string mode = node.Attributes?["anchor"]?.Value;
+            if (mode is not null)
+            {
+                switch (mode?.ToLower())
+                {
+                    case "center": anchorOrientation = new(0, 0); break;
+                    case "center-baseline": anchorOrientation = new(0, double.NaN); break; // Horizontally centered anchor
+                    case "baseline-center": anchorOrientation = new(double.NaN, 0); break; // Vertically centered anchor
+                    case "left": anchorOrientation = new(1, 0); break;
+                    case "top": anchorOrientation = new(0, 1); break;
+                    case "right": anchorOrientation = new(-1, 0); break;
+                    case "bottom": anchorOrientation = new(0, -1); break;
+                    case "bottom-left":
+                    case "bottomleft": anchorOrientation = new(1, -1); break;
+                    case "bottom-right":
+                    case "bottomright": anchorOrientation = new(-1, -1); break;
+                    case "top-left":
+                    case "topleft": anchorOrientation = new(1, 1); break;
+                    case "top-right":
+                    case "topright": anchorOrientation = new(-1, 1); break;
+                    case "baseline":
+                    case "baseline-baseline":
+                    case "origin": anchorOrientation = Vector2.NaN; break;
+                }
+            }
+            return anchorOrientation;
         }
 
         private IStyleModifier ParseStyleModifier(XmlNode node, bool asText = false)
