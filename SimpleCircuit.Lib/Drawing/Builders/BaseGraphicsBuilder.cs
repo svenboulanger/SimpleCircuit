@@ -367,12 +367,15 @@ namespace SimpleCircuit.Drawing.Builders
 
             // Also modify the position depending on an additional flag
             var location = new Vector2(x, y);
-            var anchorOrientation = Vector2.Zero;
+            var anchorOrientation = Vector2.NaN;
             mode = node.Attributes?["anchor"]?.Value;
             if (mode is not null)
             {
                 switch (mode?.ToLower())
                 {
+                    case "center": anchorOrientation = new(0, 0); break;
+                    case "center-baseline": anchorOrientation = new(0, double.NaN); break; // Horizontally centered anchor
+                    case "baseline-center": anchorOrientation = new(double.NaN, 0); break; // Vertically centered anchor
                     case "left": anchorOrientation = new(1, 0); break;
                     case "top": anchorOrientation = new(0, 1); break;
                     case "right": anchorOrientation = new(-1, 0); break;
@@ -385,6 +388,9 @@ namespace SimpleCircuit.Drawing.Builders
                     case "topleft": anchorOrientation = new(1, 1); break;
                     case "top-right":
                     case "topright": anchorOrientation = new(-1, 1); break;
+                    case "baseline":
+                    case "baseline-baseline":
+                    case "origin": anchorOrientation = Vector2.NaN; break;
                 };
             }
 
@@ -414,24 +420,31 @@ namespace SimpleCircuit.Drawing.Builders
             }
 
             // Now let's calculate the real offset
-            double offsetX = 0, offsetY = 0;
-            if (anchorOrientation.X.IsZero())
-                offsetX -= 0.5 * (span.Bounds.Bounds.Left + span.Bounds.Bounds.Right);
-            else if (anchorOrientation.X > 0)
-                offsetX -= span.Bounds.Bounds.Left;
-            else
-                offsetX -= span.Bounds.Bounds.Right;
-            if (anchorOrientation.Y.IsZero())
-                offsetY -= 0.5 * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
-            else if (anchorOrientation.Y > 0)
-                offsetY -= span.Bounds.Bounds.Top;
-            else
-                offsetY -= span.Bounds.Bounds.Bottom;
-
-            if ((type & TextOrientationType.Transformed) == 0)
-                location += CurrentTransform.Matrix.Inverse * new Vector2(offsetX, offsetY);
-            else
-                location += new Vector2(offsetX, offsetY);
+            {
+                double offsetX = 0, offsetY = 0;
+                if (!anchorOrientation.X.IsNaN())
+                {
+                    if (anchorOrientation.X.IsZero())
+                        offsetX -= 0.5 * (span.Bounds.Bounds.Left + span.Bounds.Bounds.Right);
+                    else if (anchorOrientation.X > 0)
+                        offsetX -= span.Bounds.Bounds.Left;
+                    else
+                        offsetX -= span.Bounds.Bounds.Right;
+                }
+                if (!anchorOrientation.Y.IsNaN())
+                {
+                    if (anchorOrientation.Y.IsZero())
+                        offsetY -= 0.5 * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
+                    else if (anchorOrientation.Y > 0)
+                        offsetY -= span.Bounds.Bounds.Top;
+                    else
+                        offsetY -= span.Bounds.Bounds.Bottom;
+                }
+                if ((type & TextOrientationType.Transformed) == 0)
+                    location += CurrentTransform.Matrix.Inverse * new Vector2(offsetX, offsetY);
+                else
+                    location += new Vector2(offsetX, offsetY);
+            }
 
             Text(span, location, new Vector2(nx, ny), type);
         }
@@ -643,7 +656,7 @@ namespace SimpleCircuit.Drawing.Builders
 
                         case "stroke-width":
                         case "thickness":
-                            if (double.TryParse(value.Content.ToString(), out double thickness))
+                            if (TryParseStyleSize(value.Content.ToString(), out double thickness))
                                 result = result.Append(new StrokeWidthStyleModifier(thickness));
                             break;
 
@@ -652,7 +665,7 @@ namespace SimpleCircuit.Drawing.Builders
                             break;
 
                         case "font-size":
-                            if (double.TryParse(value.Content.ToString(), out double size))
+                            if (TryParseStyleSize(value.Content.ToString(), out double size))
                                 result = result.Append(new FontSizeStyleModifier(size));
                             break;
 
@@ -676,7 +689,7 @@ namespace SimpleCircuit.Drawing.Builders
                         case "justification":
                         case "justify":
                         case "text-align":
-                            if (double.TryParse(value.Content.ToString(), out double justify))
+                            if (TryParseStyleSize(value.Content.ToString(), out double justify))
                                 result = result.Append(new JustificationStyleModifier(justify));
                             break;
                     }
@@ -716,6 +729,27 @@ namespace SimpleCircuit.Drawing.Builders
             }
 
             return style;
+        }
+        private bool TryParseStyleSize(string value, out double result)
+        {
+            // In pixels
+            if (value.EndsWith("px"))
+            {
+                value = value[0..^2].Trim();
+                if (double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out result))
+                {
+                    result *= 3.0 / 4.0;
+                    return true;
+                }
+                return false;
+            }
+            if (value.EndsWith("pt"))
+            {
+                value = value[0..^2].Trim();
+                return double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out result);
+            }
+            value = value.Trim();
+            return double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out result);
         }
 
         private void AddMarker(HashSet<Marker> markers, string value)
