@@ -11,6 +11,7 @@ using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Components;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Components.Markers;
+using System.Linq;
 
 namespace SimpleCircuit.Drawing.Builders
 {
@@ -337,10 +338,8 @@ namespace SimpleCircuit.Drawing.Builders
                 return;
 
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 1.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
+            success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, Vector2.Zero, out var location);
+            success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, Vector2.UX, out var orientation);
             if (!success)
                 return;
 
@@ -358,75 +357,59 @@ namespace SimpleCircuit.Drawing.Builders
             var type = GetTextOrientationType(node);
 
             // Also modify the position depending on an additional flag
-            var location = new Vector2(x, y);
-            var anchorOrientation = GetExpansion(node);
+            if (!GetOrientationAndExpand(node, span, out var expand, out var offset))
+                return;
 
-            // Also introduce an anchor mode, that allows us to transform the expandOffset
-            string mode = node.Attributes?["transform-anchor"]?.Value;
-            if (mode is null)
+            // This should be similar to the LabelAnchorPoints implementation
+            if (!expand.IsNaN())
             {
-                if ((type & TextOrientationType.Transformed) == 0)
-                    anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
-            }
-            else
-            {
-                switch (mode?.ToLower())
+                // Calculate the bounds of the text
+                Bounds bounds;
+                if ((type & TextOrientationType.Transformed) != 0)
                 {
-                    case "true":
-                        anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
-                        break;
-
-                    case "false":
-                        break;
-
-                    default:
-                        if ((type & TextOrientationType.Transformed) == 0)
-                            anchorOrientation = CurrentTransform.ApplyDirection(anchorOrientation);
-                        break;
+                    var eb = new ExpandableBounds();
+                    var or = CurrentTransform.ApplyDirection(orientation);
+                    foreach (var p in span.Bounds.Bounds)
+                        eb.Expand(p.X * or + p.Y * or.Perpendicular);
+                    bounds = eb.Bounds;
                 }
-            }
-
-            // Now let's calculate the real offset
-            {
-                double offsetX = 0, offsetY = 0;
-                if (!anchorOrientation.X.IsNaN())
-                {
-                    if (anchorOrientation.X.IsZero())
-                        offsetX -= 0.5 * (span.Bounds.Bounds.Left + span.Bounds.Bounds.Right);
-                    else if (anchorOrientation.X > 0)
-                        offsetX -= span.Bounds.Bounds.Left;
-                    else
-                        offsetX -= span.Bounds.Bounds.Right;
-                }
-                if (!anchorOrientation.Y.IsNaN())
-                {
-                    if (anchorOrientation.Y.IsZero())
-                        offsetY -= 0.5 * (span.Bounds.Bounds.Top + span.Bounds.Bounds.Bottom);
-                    else if (anchorOrientation.Y > 0)
-                        offsetY -= span.Bounds.Bounds.Top;
-                    else
-                        offsetY -= span.Bounds.Bounds.Bottom;
-                }
-                if ((type & TextOrientationType.Transformed) == 0)
-                    location += CurrentTransform.Matrix.Inverse * new Vector2(offsetX, offsetY);
                 else
-                    location += new Vector2(offsetX, offsetY);
+                    bounds = span.Bounds.Bounds;
+
+                // Stick to a quadrant
+                expand = CurrentTransform.ApplyDirection(expand);
+                double x, y;
+                if (expand.X.IsZero())
+                    x = -bounds.Center.X;
+                else if (expand.X > 0)
+                    x = -bounds.Left;
+                else
+                    x = -bounds.Right;
+                if (expand.Y.IsZero())
+                    y = -bounds.Center.Y;
+                else if (expand.Y > 0)
+                    y = -span.Bounds.Bounds.Top;
+                else
+                    y = -bounds.Bottom;
+                offset = CurrentTransform.Matrix.Inverse * new Vector2(x, y);
+                location += offset;
             }
 
-            Text(span, location, new Vector2(nx, ny), type);
+            Text(span, location, orientation, type);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
         {
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("nx", Diagnostics, 1.0, out double nx);
-            success &= node.Attributes.ParseOptionalScalar("ny", Diagnostics, 0.0, out double ny);
-
+            success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, default, out var location);
+            success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, default, out var orientation);
+            success &= node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.NaN, out var expand);
             if (!success)
                 return;
-            context.Anchors.Add(new LabelAnchorPoint(new(x, y), GetExpansion(node), new(nx, ny), GetTextOrientationType(node)));
+
+            var type = GetTextOrientationType(node);
+
+            context.Anchors.Add(new LabelAnchorPoint(location, expand, orientation, type));
         }
         private static TextOrientationType GetTextOrientationType(XmlNode node)
         {
@@ -441,36 +424,119 @@ namespace SimpleCircuit.Drawing.Builders
                 _ => TextOrientationType.Transformed
             };
         }
-        private static Vector2 GetExpansion(XmlNode node)
+        private bool GetOrientationAndExpand(XmlNode node, Span span, out Vector2 expand, out Vector2 offset)
         {
-            // Also modify the position depending on an additional flag
-            var anchorOrientation = Vector2.NaN;
+            // If the anchor is defined, then we assume that the expand is NaN
+            offset = Vector2.Zero;
             string mode = node.Attributes?["anchor"]?.Value;
+            mode ??= node.Attributes?["text-align"]?.Value;
             if (mode is not null)
             {
+                expand = Vector2.NaN;
                 switch (mode?.ToLower())
                 {
-                    case "center": anchorOrientation = new(0, 0); break;
-                    case "center-baseline": anchorOrientation = new(0, double.NaN); break; // Horizontally centered anchor
-                    case "baseline-center": anchorOrientation = new(double.NaN, 0); break; // Vertically centered anchor
-                    case "left": anchorOrientation = new(1, 0); break;
-                    case "top": anchorOrientation = new(0, 1); break;
-                    case "right": anchorOrientation = new(-1, 0); break;
-                    case "bottom": anchorOrientation = new(0, -1); break;
-                    case "bottom-left":
-                    case "bottomleft": anchorOrientation = new(1, -1); break;
-                    case "bottom-right":
-                    case "bottomright": anchorOrientation = new(-1, -1); break;
+                    case "center": offset = -span.Bounds.Bounds.Center; break;
+
+                    case "left":
+                    case "left-middle":
+                    case "leftmiddle":
+                    case "middle-left":
+                    case "middleleft": offset = -span.Bounds.Bounds.MiddleLeft; break;
+
+                    case "left-top":
+                    case "lefttop":
                     case "top-left":
-                    case "topleft": anchorOrientation = new(1, 1); break;
+                    case "topleft": offset = -span.Bounds.Bounds.TopLeft; break;
+
+                    case "top":
+                    case "center-top":
+                    case "centertop":
+                    case "top-center":
+                    case "topcenter": offset = -span.Bounds.Bounds.TopCenter; break;
+
                     case "top-right":
-                    case "topright": anchorOrientation = new(-1, 1); break;
-                    case "baseline":
-                    case "baseline-baseline":
-                    case "origin": anchorOrientation = Vector2.NaN; break;
+                    case "topright":
+                    case "right-top":
+                    case "righttop": offset = -span.Bounds.Bounds.TopRight; break;
+
+                    case "right":
+                    case "right-middle":
+                    case "rightmiddle":
+                    case "middle-right":
+                    case "middleright": offset = -span.Bounds.Bounds.MiddleRight; break;
+
+                    case "bottom-right":
+                    case "bottomright":
+                    case "right-bottom":
+                    case "rightbottom": offset = -span.Bounds.Bounds.BottomRight; break;
+
+                    case "bottom":
+                    case "center-bottom":
+                    case "centerbottom":
+                    case "bottom-center":
+                    case "bottomcenter": offset = -span.Bounds.Bounds.BottomCenter; break;
+
+                    case "bottom-left":
+                    case "bottomleft":
+                    case "left-bottom":
+                    case "leftbottom": offset = -span.Bounds.Bounds.BottomLeft; break;
+
+                    case "origin":
+                    case "begin": // This is for SVG text-align compatibility
+                    case "begin-baseline":
+                    case "beginbaseline":
+                    case "baseline-begin":
+                    case "baselinebegin": offset = Vector2.Zero; break;
+
+                    case "middle": // This is just for SVG text-align compatibility
+                    case "center-baseline":
+                    case "centerbaseline":
+                    case "baseline-center":
+                    case "baselinecenter": offset = -new Vector2(span.Bounds.Bounds.Center.X, 0); break; // Horizontally centered anchor
+
+                    case "end": // This is for SVG text-align compatibility
+                    case "end-baseline":
+                    case "endbaseline":
+                    case "baseline-end":
+                    case "baselineend": offset = -new Vector2(span.Bounds.Advance, 0); break;
+
+                    case "begin-middle":
+                    case "beginmiddle":
+                    case "middle-begin":
+                    case "middlebegin": offset = -new Vector2(0, span.Bounds.Bounds.Center.Y); break; // Vertically centered anchor
+
+                    case "end-middle":
+                    case "endmiddle":
+                    case "middle-end":
+                    case "middleend": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Center.Y); break;
+
+                    case "begin-top":
+                    case "begintop":
+                    case "top-begin":
+                    case "topbegin": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Top); break;
+
+                    case "end-top":
+                    case "endtop":
+                    case "topend":
+                    case "top-end": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Top); break;
+
+                    case "begin-bottom":
+                    case "beginbottom":
+                    case "bottom-begin":
+                    case "bottombegin": offset = -new Vector2(0, span.Bounds.Bounds.Bottom); break;
+
+                    case "end-bottom":
+                    case "endbottom":
+                    case "bottom-end":
+                    case "bottomend": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Bottom); break;
                 }
+                return true;
             }
-            return anchorOrientation;
+
+            // If no anchor is given, then we allow expansion
+            offset = Vector2.Zero;
+            bool success = node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.UX, out expand);
+            return success;
         }
 
         private IStyleModifier ParseStyleModifier(XmlNode node, bool asText = false)
@@ -836,6 +902,6 @@ namespace SimpleCircuit.Drawing.Builders
         public abstract IGraphicsBuilder Path(Action<IPathBuilder> pathBuild, IStyle options);
 
         /// <inheritdoc />
-        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationType type);
+        public abstract IGraphicsBuilder Text(Span span, Vector2 location, Vector2 orientation, TextOrientationType type);
     }
 }

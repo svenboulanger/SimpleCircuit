@@ -152,9 +152,9 @@ namespace SimpleCircuit.Drawing.Builders
         /// </summary>
         /// <param name="span">The span to be drawn.</param>
         /// <param name="location">The location where the span should be.</param>
-        /// <param name="expand">The expansion direction.</param>
+        /// <param name="orientation">The text orientation.</param>
         /// <param name="type">The text orientation type.</param>
         /// <returns>Returns the graphics builder for chaining.</returns>
-        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationType type);
+        public IGraphicsBuilder Text(Span span, Vector2 location, Vector2 orientation, TextOrientationType type);
     }
 }

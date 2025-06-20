@@ -22,6 +22,26 @@ namespace SimpleCircuit.Drawing
         }
 
         /// <summary>
+        /// Gets the left coordinate.
+        /// </summary>
+        public double Left => _l;
+
+        /// <summary>
+        /// Gets the right coordinate.
+        /// </summary>
+        public double Right => _r;
+
+        /// <summary>
+        /// Gets the top coordinate.
+        /// </summary>
+        public double Top => _t;
+
+        /// <summary>
+        /// Gets the bottom coordinate.
+        /// </summary>
+        public double Bottom => _b;
+
+        /// <summary>
         /// Resets the expandable bounds.
         /// </summary>
         public void Reset()

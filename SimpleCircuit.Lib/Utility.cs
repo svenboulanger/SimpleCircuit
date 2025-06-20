@@ -79,14 +79,14 @@ namespace SimpleCircuit
         /// <returns>Returns <c>true</c> if the read was successful; otherwise, <c>false</c>.</returns>
         public static bool ParseOptionalScalar(this XmlAttributeCollection attributes, string name, IDiagnosticHandler diagnostics, double defValue, out double result, ErrorCodes errorCode = ErrorCodes.InvalidXmlCoordinate)
         {
-            if (attributes == null)
+            if (attributes is null)
             {
                 result = defValue;
                 return true;
             }
 
             var attribute = attributes[name];
-            if (attribute == null)
+            if (attribute is null)
             {
                 result = defValue;
                 return true;
@@ -99,6 +99,32 @@ namespace SimpleCircuit
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Parses an optional vector value.
+        /// </summary>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="xName">The x-coordinate attribute name.</param>
+        /// <param name="yName">The y-coordinate attribute name.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="defValue">The default vector.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="errorCode">An optional error code for invalid coordinates.</param>
+        /// <returns>Returns <c>true</c> if the read was successful; otherwise, <c>false</c>.</returns>
+        public static bool ParseOptionalVector(this XmlAttributeCollection attributes, string xName, string yName, IDiagnosticHandler diagnostics, Vector2 defValue, out Vector2 result, ErrorCodes errorCode = ErrorCodes.InvalidXmlCoordinate)
+        {
+            if (attributes is null)
+            {
+                result = defValue;
+                return true;
+            }
+
+            // X-coordinate
+            bool success = ParseOptionalScalar(attributes, xName, diagnostics, defValue.X, out double x);
+            success &= ParseOptionalScalar(attributes, yName, diagnostics, defValue.Y, out double y);
+            result = new(x, y);
+            return success;
         }
 
         /// <summary>

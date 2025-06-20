@@ -33,6 +33,11 @@ namespace SimpleCircuit.Components.Labeling
         public TextOrientationType Type { get; }
 
         /// <summary>
+        /// Gets the text anchor.
+        /// </summary>
+        public TextAnchor Anchor { get; }
+
+        /// <summary>
         /// Creates a new <see cref="LabelAnchorPoint"/>.
         /// </summary>
         public LabelAnchorPoint()
@@ -60,13 +65,17 @@ namespace SimpleCircuit.Components.Labeling
         /// Creates a new <see cref="LabelAnchorPoint"/>.
         /// </summary>
         /// <param name="location">The location.</param>
+        /// <param name="expand">The expansion direction.</param>
         /// <param name="orientation">The label orientation.</param>
-        public LabelAnchorPoint(Vector2 location, Vector2 expand, Vector2 orientation, TextOrientationType type)
+        /// <param name="type">The drawing label type.</param>
+        /// <param name="anchor">The anchor in case the text is not expand-based.</param>
+        public LabelAnchorPoint(Vector2 location, Vector2 expand, Vector2 orientation, TextOrientationType type, TextAnchor anchor = TextAnchor.Origin)
         {
             Location = location;
             Expand = expand;
             Orientation = orientation;
             Type = type;
+            Anchor = anchor;
         }
     }
 }
