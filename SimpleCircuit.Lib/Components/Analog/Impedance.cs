@@ -72,7 +72,7 @@ namespace SimpleCircuit.Components.Analog
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
                         var style = context.Style.ModifyDashedDotted(this);
-                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 1, _anchors, style);
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 1, _anchors, style);
 
                         // Determine the height
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;

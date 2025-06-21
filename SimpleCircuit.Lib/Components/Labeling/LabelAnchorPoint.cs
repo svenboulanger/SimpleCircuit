@@ -5,13 +5,8 @@ namespace SimpleCircuit.Components.Labeling
     /// <summary>
     /// Describes the placement of a label.
     /// </summary>
-    public struct LabelAnchorPoint
+    public readonly struct LabelAnchorPoint
     {
-        /// <summary>
-        /// Class name for labels.
-        /// </summary>
-        public const string LabelClass = "lbl";
-
         /// <summary>
         /// Gets or sets the location of the label.
         /// </summary>

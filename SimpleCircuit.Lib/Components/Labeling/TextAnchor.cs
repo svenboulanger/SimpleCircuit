@@ -84,5 +84,15 @@
         /// The text end but at the bottom.
         /// </summary>
         BottomEnd,
+
+        /// <summary>
+        /// The text anchor point origin but the middle.
+        /// </summary>
+        MiddleBegin,
+
+        /// <summary>
+        /// The text anchor point origin but the middle.
+        /// </summary>
+        MiddleEnd,
     }
 }

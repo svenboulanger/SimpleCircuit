@@ -156,6 +156,8 @@
         InvalidName,
         [Diagnostic(SeverityLevel.Error, null, "The symbol key '{0}' is invalid. Only words are allowed.")]
         InvalidSymbolKey,
+        [Diagnostic(SeverityLevel.Error, null, "Invalid text orientation type '{0}'")]
+        InvalidTextOrientationType,
         [Diagnostic(SeverityLevel.Error, null, "Invalid coordinate '{0}' for XML tag {1}.")]
         InvalidXmlCoordinate,
 

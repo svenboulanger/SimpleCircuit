@@ -80,7 +80,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var bounds = LabelAnchorPoints<IBoxDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            var bounds = LabelAnchorPoints<IBoxDrawable>.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
                             bounds = bounds.Expand(Margin);
 
                             if (Width.IsZero() && Height.IsZero())

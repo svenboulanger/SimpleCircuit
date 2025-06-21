@@ -80,7 +80,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         var style = context.Style.ModifyDashedDotted(this);
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var b = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 0, _anchors, style);
+                            var b = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
 
                             // Calculate the height
                             if (Height.IsZero())

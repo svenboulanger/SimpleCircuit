@@ -98,7 +98,7 @@ namespace SimpleCircuit.Components.Analog
 
                         // Calculate sizes
                         var style = context.Style.ModifyDashedDotted(this);
-                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, Labels, 2, _anchors, style);
+                        var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 2, _anchors, style);
                         _width = Width.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinWidth) : Width;
                         _rx = _width * 0.25;
                         _length = Length.IsZero() ? Math.Max(labelBounds.Width + Margin.Left + Margin.Right + 2 * _rx, MinLength) : Length;

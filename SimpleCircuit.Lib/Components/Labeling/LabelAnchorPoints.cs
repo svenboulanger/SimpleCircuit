@@ -1,5 +1,4 @@
-﻿using SimpleCircuit.Components.Analog;
-using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
@@ -39,7 +38,7 @@ namespace SimpleCircuit.Components.Labeling
 
                 // Get the bounds and expand
                 if (label.Formatted is null)
-                    label.Format(formatter, label.Style?.Apply(parentStyle) ?? parentStyle);
+                    label.Format(formatter, parentStyle);
                 bounds.Expand(label.Formatted.Bounds.Bounds);
             }
             return bounds.Bounds;
@@ -163,6 +162,8 @@ namespace SimpleCircuit.Components.Labeling
                 TextAnchor.TopEnd => -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Top),
                 TextAnchor.BottomBegin => -new Vector2(0, span.Bounds.Bounds.Bottom),
                 TextAnchor.BottomEnd => -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Bottom),
+                TextAnchor.MiddleBegin => -new Vector2(0, span.Bounds.Bounds.Center.Y),
+                TextAnchor.MiddleEnd => -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Center.Y),
                 _ => throw new NotImplementedException()
             };
 
@@ -170,19 +171,19 @@ namespace SimpleCircuit.Components.Labeling
         /// Calculates the bounds of a given anchor index for a given <see cref="ILabelAnchorPoints{T}"/>.
         /// </summary>
         /// <param name="formatter">The formatter.</param>
-        /// <param name="labels">The labels.</param>
+        /// <param name="drawable">The drawable.</param>
         /// <param name="anchorIndex">The anchor index for which the bounds need to be computed.</param>
         /// <param name="anchors">The anchors.</param>
         /// <param name="parentStyle">The parent style.</param>
         /// <returns>Returns the bounds for all labels on the given anchor index.</returns>
-        public static Bounds CalculateBounds(ITextFormatter formatter, Labels labels, int anchorIndex, ILabelAnchorPoints<T> anchors, IStyle parentStyle)
+        public static Bounds CalculateBounds(ITextFormatter formatter, T drawable, int anchorIndex, ILabelAnchorPoints<T> anchors, IStyle parentStyle)
         {
             var bounds = new ExpandableBounds();
             bounds.Expand(new Vector2());
-            for (int i = 0; i < labels.Count; i++)
+            for (int i = 0; i < drawable.Labels.Count; i++)
             {
                 // Get the label index
-                var label = labels[i];
+                var label = drawable.Labels[i];
                 if (!anchors.TryGetAnchorIndex(label.Anchor ?? i.ToString(), out int index) || index != anchorIndex)
                     continue;
 

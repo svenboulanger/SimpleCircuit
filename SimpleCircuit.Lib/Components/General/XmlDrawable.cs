@@ -18,6 +18,7 @@ namespace SimpleCircuit.Components.General
     {
         private readonly DrawableMetadata _metadata;
         private readonly XmlNode _drawing, _pins;
+        private readonly IStyleModifier _styleModifier;
 
         /// <inheritdoc />
         public IEnumerable<DrawableMetadata> Metadata
@@ -30,6 +31,7 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IEnumerable<string> Keys => [_metadata.Key];
+
 
         /// <summary>
         /// Creates a new XML drawable.
@@ -57,6 +59,9 @@ namespace SimpleCircuit.Components.General
             _drawing = definition.SelectSingleNode("drawing");
             if (_drawing == null)
                 diagnostics.Post(ErrorCodes.MissingSymbolDrawing, key);
+
+            // Parse the style now that we have a diagnostics handler for it
+            _styleModifier = BaseGraphicsBuilder.ParseStyleModifier(_drawing, diagnostics);
         }
 
         /// <inheritdoc />
@@ -69,24 +74,34 @@ namespace SimpleCircuit.Components.General
 
         /// <inheritdoc />
         public IDrawable Create(string key, string name, Options options, Scope scope, IDiagnosticHandler diagnostics)
-            => new Instance(key, name, _pins, _drawing);
+            => new Instance(key, name, _pins, _drawing, _styleModifier);
 
         /// <summary>
         /// Creates a new <see cref="Instance"/>
         /// </summary>
-        /// <param name="type">The instance type.</param>
-        /// <param name="name">The instance name.</param>
-        /// <param name="drawing">The XML data describing the node.</param>
-        /// <param name="scale">The scale of the instance.</param>
-        /// <param name="pins">The pins of the instance.</param>
-        private class Instance(string type, string name, XmlNode pins, XmlNode drawing) : ScaledOrientedDrawable(name)
+        private class Instance : ScaledOrientedDrawable
         {
-            private readonly XmlNode _drawing = drawing, _pins = pins;
+            private readonly XmlNode _drawing, _pins;
             private readonly List<int> _extend = [];
-            private readonly List<LabelAnchorPoint> _anchors = [];
+
+            /// <summary>
+            /// Creates a new <see cref="Instance"/>.
+            /// </summary>
+            /// <param name="type">The instance type.</param>
+            /// <param name="name">The instance name.</param>
+            /// <param name="drawing">The XML data describing the node.</param>
+            /// <param name="pins">The pins of the instance.</param>
+            /// <param name="styleModifier">The style modifier.</param>
+            public Instance(string type, string name, XmlNode pins, XmlNode drawing, IStyleModifier styleModifier) : base(name)
+            {
+                _drawing = drawing;
+                _pins = pins;
+                Type = type;
+                Style = styleModifier;
+            }
 
             /// <inheritdoc />
-            public override string Type { get; } = type;
+            public override string Type { get; }
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -178,10 +193,6 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.ModifyDashedDotted(this);
-
-                foreach (var pin in _extend)
-                    builder.ExtendPin(Pins[pin], style);
                 if (_drawing != null)
                 {
                     var context = new XmlDrawingContext(Labels, Variants) { Style = Style };

@@ -154,7 +154,7 @@ namespace SimpleCircuit.Drawing.Builders
         }
 
         /// <inheritdoc />
-        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 expand, TextOrientationType type)
+        public override IGraphicsBuilder Text(Span span, Vector2 location, Vector2 orientation, TextOrientationType type)
         {
             if (span is null)
                 return this;
@@ -168,24 +168,24 @@ namespace SimpleCircuit.Drawing.Builders
 
             // First determine the orientation
             if ((type & TextOrientationType.Transformed) != 0)
-                expand = CurrentTransform.ApplyDirection(expand);
+                orientation = CurrentTransform.ApplyDirection(orientation);
             if ((type & TextOrientationType.Upright) != 0)
             {
-                if (expand.X < 0)
+                if (orientation.X < 0)
                 {
                     // Orientation is towards the left, so this will cause the text to be upside-down
                     // We will flip the orientation and make the text location start from the other end
-                    location += expand * (bounds.Right + bounds.Left) + expand.Perpendicular * (bounds.Top + bounds.Bottom);
-                    expand = -expand;
+                    location += orientation * (bounds.Right + bounds.Left) + orientation.Perpendicular * (bounds.Top + bounds.Bottom);
+                    orientation = -orientation;
                 }
             }
 
             // Expand bounds
             foreach (var p in span.Bounds.Bounds)
-                Expand(location + p.X * expand + p.Y * expand.Perpendicular);
+                Expand(location + p.X * orientation + p.Y * orientation.Perpendicular);
 
             // Apply orientation and location to the containing group
-            double angle = Math.Atan2(expand.Y, expand.X) / Math.PI * 180.0;
+            double angle = Math.Atan2(orientation.Y, orientation.X) / Math.PI * 180.0;
             if (angle.IsZero())
                 g.SetAttribute("transform", $"translate({location.ToSVG()})");
             else

@@ -94,14 +94,14 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         if (Width.IsZero() && Height.IsZero())
                         {
                             // The smallest circumference is where the same slope as the bounds is used
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
                             _width = (bounds.Width + LabelMargin) * 2;
                             _height = (bounds.Height + LabelMargin) * 2;
                         }
                         else if (Width.IsZero())
                         {
                             // Width is given, try to fit the height to contents
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
                             _height = Height;
                             _width = bounds.Width * Height / (Height - bounds.Height);
                             if (_width < 0)
@@ -113,7 +113,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         else if (Height.IsZero())
                         {
                             // Height is given, try to fit the width to contents
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, Labels, 0, DiamondLabelAnchorPoints.Default, style);
+                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
                             _width = Width;
                             _height = bounds.Height * Width / (Width - bounds.Width);
                             if (_height < 0)

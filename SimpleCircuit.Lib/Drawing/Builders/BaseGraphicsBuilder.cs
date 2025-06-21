@@ -1,17 +1,18 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Components;
+using SimpleCircuit.Components.General;
+using SimpleCircuit.Components.Labeling;
+using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Spans;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser.Markers;
+using SimpleCircuit.Parser.Styles;
 using SimpleCircuit.Parser.SvgPathData;
 using SimpleCircuit.Parser.Variants;
 using System;
 using System.Collections.Generic;
-using System.Xml;
-using SimpleCircuit.Parser.Styles;
-using SimpleCircuit.Drawing.Styles;
-using SimpleCircuit.Components;
-using SimpleCircuit.Drawing.Spans;
-using SimpleCircuit.Components.Markers;
 using System.Linq;
+using System.Xml;
 
 namespace SimpleCircuit.Drawing.Builders
 {
@@ -159,12 +160,12 @@ namespace SimpleCircuit.Drawing.Builders
                 switch (node.Name)
                 {
                     case "#comment": break;
-                    case "line": DrawXmlLine(node); break;
-                    case "circle": DrawXmlCircle(node); break;
-                    case "path": DrawXmlPath(node); break;
-                    case "polygon": DrawXmlPolygon(node); break;
-                    case "polyline": DrawXmlPolyline(node); break;
-                    case "rect": DrawXmlRectangle(node); break;
+                    case "line": DrawXmlLine(node, context); break;
+                    case "circle": DrawXmlCircle(node, context); break;
+                    case "path": DrawXmlPath(node, context); break;
+                    case "polygon": DrawXmlPolygon(node, context); break;
+                    case "polyline": DrawXmlPolyline(node, context); break;
+                    case "rect": DrawXmlRectangle(node, context); break;
                     case "text": DrawXmlText(node, context); break;
                     case "variant":
                     case "v":
@@ -175,7 +176,7 @@ namespace SimpleCircuit.Drawing.Builders
                     case "group":
                     case "g":
                         // Parse options
-                        var style = ParseStyleModifier(node);
+                        var style = ParseStyleModifier(node, Diagnostics);
                         var oldStyle = Style;
                         Style = style?.Apply(Style) ?? Style;
                         BeginGroup();
@@ -190,7 +191,7 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlLine(XmlNode node)
+        private void DrawXmlLine(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -205,13 +206,14 @@ namespace SimpleCircuit.Drawing.Builders
 
             // Draw the line
             var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = modifier?.Apply(Style) ?? Style;
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
             Line(new(x1, y1), new(x2, y2), style);
             DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), style);
             DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), style);
         }
 
-        private void DrawXmlPolygon(XmlNode node)
+        private void DrawXmlPolygon(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -224,14 +226,15 @@ namespace SimpleCircuit.Drawing.Builders
             if (points == null || points.Count <= 1)
                 return;
 
-            var modifier = ParseStyleModifier(node);
-            var style = modifier?.Apply(Style) ?? Style;
+            var modifier = ParseStyleModifier(node, Diagnostics);
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             // Draw the polygon
             Polygon(points, style);
         }
 
-        private void DrawXmlPolyline(XmlNode node)
+        private void DrawXmlPolyline(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -248,7 +251,8 @@ namespace SimpleCircuit.Drawing.Builders
                 return;
 
             var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = modifier?.Apply(Style) ?? Style;
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             // Draw the polyline
             Polyline(points, style);
@@ -264,7 +268,7 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlCircle(XmlNode node)
+        private void DrawXmlCircle(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -276,14 +280,15 @@ namespace SimpleCircuit.Drawing.Builders
             if (!success)
                 return;
 
-            var modifier = ParseStyleModifier(node);
-            var style = modifier?.Apply(Style) ?? Style;
+            var modifier = ParseStyleModifier(node, Diagnostics);
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             // Draw the circle
             Circle(new(cx, cy), r, style);
         }
 
-        private void DrawXmlPath(XmlNode node)
+        private void DrawXmlPath(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -294,7 +299,8 @@ namespace SimpleCircuit.Drawing.Builders
                 return;
 
             var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = modifier?.Apply(Style) ?? Style;
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             if (!string.IsNullOrWhiteSpace(pathData))
             {
@@ -310,7 +316,7 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlRectangle(XmlNode node)
+        private void DrawXmlRectangle(XmlNode node, IXmlDrawingContext context)
         {
             if (node.Attributes == null)
                 return;
@@ -325,8 +331,9 @@ namespace SimpleCircuit.Drawing.Builders
             if (!success)
                 return;
 
-            var modifier = ParseStyleModifier(node);
-            var style = modifier?.Apply(Style) ?? Style;
+            var modifier = ParseStyleModifier(node, Diagnostics);
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             // Draw the rectangle
             this.Rectangle(x, y, width, height, style, rx, ry);
@@ -340,206 +347,187 @@ namespace SimpleCircuit.Drawing.Builders
             bool success = true;
             success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, Vector2.Zero, out var location);
             success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, Vector2.UX, out var orientation);
+            success &= node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.NaN, out var expand);
             if (!success)
                 return;
 
             // Get the style
-            var modifier = ParseStyleModifier(node, asText: true);
-            var style = modifier?.Apply(Style) ?? Style;
+            var modifier = ParseStyleModifier(node, Diagnostics, asText: true);
+            var style = context.Style?.Apply(Style) ?? Style;
+            style = modifier?.Apply(style) ?? style;
 
             // Get the text value
             string value = node.Attributes?["value"]?.Value;
-            if (value != null && context != null)
-                value = context.TransformText(value);
-            var span = TextFormatter.Format(value, style);
+            if (value is null)
+                return;
+            Label label = new() { Value = value };
+            label.Format(TextFormatter, style);
 
             // Now let's transform the text location and orientation if necessary
-            var type = GetTextOrientationType(node);
-
-            // Also modify the position depending on an additional flag
-            if (!GetOrientationAndExpand(node, span, out var expand, out var offset))
+            if (!TryGetTextOrientationType(node, out var type))
                 return;
 
-            // This should be similar to the LabelAnchorPoints implementation
-            if (!expand.IsNaN())
-            {
-                // Calculate the bounds of the text
-                Bounds bounds;
-                if ((type & TextOrientationType.Transformed) != 0)
-                {
-                    var eb = new ExpandableBounds();
-                    var or = CurrentTransform.ApplyDirection(orientation);
-                    foreach (var p in span.Bounds.Bounds)
-                        eb.Expand(p.X * or + p.Y * or.Perpendicular);
-                    bounds = eb.Bounds;
-                }
-                else
-                    bounds = span.Bounds.Bounds;
+            // Also modify the position depending on an additional flag
+            if (!TryGetAnchor(node, out var textAnchor))
+                return;
 
-                // Stick to a quadrant
-                expand = CurrentTransform.ApplyDirection(expand);
-                double x, y;
-                if (expand.X.IsZero())
-                    x = -bounds.Center.X;
-                else if (expand.X > 0)
-                    x = -bounds.Left;
-                else
-                    x = -bounds.Right;
-                if (expand.Y.IsZero())
-                    y = -bounds.Center.Y;
-                else if (expand.Y > 0)
-                    y = -span.Bounds.Bounds.Top;
-                else
-                    y = -bounds.Bottom;
-                offset = CurrentTransform.Matrix.Inverse * new Vector2(x, y);
-                location += offset;
-            }
-
-            Text(span, location, orientation, type);
+            var anchorPoint = new LabelAnchorPoint(location, expand, orientation, type, textAnchor);
+            LabelAnchorPoints<IDrawable>.DrawLabel(this, anchorPoint, [label]);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
         {
             bool success = true;
             success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, default, out var location);
-            success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, default, out var orientation);
+            success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, Vector2.UX, out var orientation);
             success &= node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.NaN, out var expand);
             if (!success)
                 return;
 
-            var type = GetTextOrientationType(node);
+            // Get the text orientation type
+            if (!TryGetTextOrientationType(node, out var type))
+                return;
 
-            context.Anchors.Add(new LabelAnchorPoint(location, expand, orientation, type));
+            // Get the text anchor
+            if (!TryGetAnchor(node, out var textAnchor))
+                return;
+
+            context.Anchors.Add(new LabelAnchorPoint(location, expand, orientation, type, textAnchor));
         }
-        private static TextOrientationType GetTextOrientationType(XmlNode node)
+        private bool TryGetTextOrientationType(XmlNode node, out TextOrientationType type)
         {
             // Now let's transform the text location and orientation if necessary
             string mode = node.Attributes?["mode"]?.Value;
-            mode ??= "upright-transformed";
-            return mode.ToLower() switch
-            {
-                "transformed" => TextOrientationType.Transformed,
-                "upright" => TextOrientationType.Upright,
-                "upright-transformed" => TextOrientationType.UprightTransformed,
-                _ => TextOrientationType.Transformed
-            };
-        }
-        private bool GetOrientationAndExpand(XmlNode node, Span span, out Vector2 expand, out Vector2 offset)
-        {
-            // If the anchor is defined, then we assume that the expand is NaN
-            offset = Vector2.Zero;
-            string mode = node.Attributes?["anchor"]?.Value;
-            mode ??= node.Attributes?["text-align"]?.Value;
             if (mode is not null)
             {
-                expand = Vector2.NaN;
-                switch (mode?.ToLower())
+                switch (mode.ToLower())
                 {
-                    case "center": offset = -span.Bounds.Bounds.Center; break;
+                    case "transformed": type = TextOrientationType.Transformed; return true;
+                    case "upright": type = TextOrientationType.Upright; return true;
+                    case "upright-transformed": type = TextOrientationType.UprightTransformed; return true;
+                    default:
+                        Diagnostics?.Post(ErrorCodes.InvalidTextOrientationType, mode);
+                        type = TextOrientationType.UprightTransformed;
+                        return false;
+                }
+                ;
+            }
+            type = TextOrientationType.UprightTransformed;
+            return true;
+        }
+        private bool TryGetAnchor(XmlNode node, out TextAnchor anchor)
+        {
+            string a = node.Attributes?["anchor"]?.Value;
+            if (a is not null)
+            {
+                switch (a.ToLower())
+                {
+                    case "center": anchor = TextAnchor.Center; return true;
 
                     case "left":
                     case "left-middle":
                     case "leftmiddle":
                     case "middle-left":
-                    case "middleleft": offset = -span.Bounds.Bounds.MiddleLeft; break;
+                    case "middleleft": anchor = TextAnchor.MiddleLeft; return true;
 
                     case "left-top":
                     case "lefttop":
                     case "top-left":
-                    case "topleft": offset = -span.Bounds.Bounds.TopLeft; break;
+                    case "topleft": anchor = TextAnchor.TopLeft; return true;
 
                     case "top":
                     case "center-top":
                     case "centertop":
                     case "top-center":
-                    case "topcenter": offset = -span.Bounds.Bounds.TopCenter; break;
+                    case "topcenter": anchor = TextAnchor.TopCenter; return true;
 
                     case "top-right":
                     case "topright":
                     case "right-top":
-                    case "righttop": offset = -span.Bounds.Bounds.TopRight; break;
+                    case "righttop": anchor = TextAnchor.TopRight; return true;
 
                     case "right":
                     case "right-middle":
                     case "rightmiddle":
                     case "middle-right":
-                    case "middleright": offset = -span.Bounds.Bounds.MiddleRight; break;
+                    case "middleright": anchor = TextAnchor.MiddleRight; return true;
 
                     case "bottom-right":
                     case "bottomright":
                     case "right-bottom":
-                    case "rightbottom": offset = -span.Bounds.Bounds.BottomRight; break;
+                    case "rightbottom": anchor = TextAnchor.BottomRight; return true;
 
                     case "bottom":
                     case "center-bottom":
                     case "centerbottom":
                     case "bottom-center":
-                    case "bottomcenter": offset = -span.Bounds.Bounds.BottomCenter; break;
+                    case "bottomcenter": anchor = TextAnchor.BottomCenter; return true;
 
                     case "bottom-left":
                     case "bottomleft":
                     case "left-bottom":
-                    case "leftbottom": offset = -span.Bounds.Bounds.BottomLeft; break;
+                    case "leftbottom": anchor = TextAnchor.BottomLeft; return true;
 
                     case "origin":
                     case "begin": // This is for SVG text-align compatibility
                     case "begin-baseline":
                     case "beginbaseline":
                     case "baseline-begin":
-                    case "baselinebegin": offset = Vector2.Zero; break;
+                    case "baselinebegin": anchor = TextAnchor.Origin; return true;
 
                     case "middle": // This is just for SVG text-align compatibility
                     case "center-baseline":
                     case "centerbaseline":
                     case "baseline-center":
-                    case "baselinecenter": offset = -new Vector2(span.Bounds.Bounds.Center.X, 0); break; // Horizontally centered anchor
+                    case "baselinecenter": anchor = TextAnchor.BaselineCenter; return true;
 
                     case "end": // This is for SVG text-align compatibility
                     case "end-baseline":
                     case "endbaseline":
                     case "baseline-end":
-                    case "baselineend": offset = -new Vector2(span.Bounds.Advance, 0); break;
+                    case "baselineend": anchor = TextAnchor.BaselineEnd; return true;
 
                     case "begin-middle":
                     case "beginmiddle":
                     case "middle-begin":
-                    case "middlebegin": offset = -new Vector2(0, span.Bounds.Bounds.Center.Y); break; // Vertically centered anchor
+                    case "middlebegin": anchor = TextAnchor.MiddleBegin; return true;
 
                     case "end-middle":
                     case "endmiddle":
                     case "middle-end":
-                    case "middleend": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Center.Y); break;
+                    case "middleend": anchor = TextAnchor.MiddleEnd; return true;
 
                     case "begin-top":
                     case "begintop":
                     case "top-begin":
-                    case "topbegin": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Top); break;
+                    case "topbegin": anchor = TextAnchor.TopBegin; return true;
 
                     case "end-top":
                     case "endtop":
                     case "topend":
-                    case "top-end": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Top); break;
+                    case "top-end": anchor = TextAnchor.TopEnd; return true;
 
                     case "begin-bottom":
                     case "beginbottom":
                     case "bottom-begin":
-                    case "bottombegin": offset = -new Vector2(0, span.Bounds.Bounds.Bottom); break;
+                    case "bottombegin": anchor = TextAnchor.BottomBegin; return true;
 
                     case "end-bottom":
                     case "endbottom":
                     case "bottom-end":
-                    case "bottomend": offset = -new Vector2(span.Bounds.Advance, span.Bounds.Bounds.Bottom); break;
+                    case "bottomend": anchor = TextAnchor.BottomEnd; return true;
+
+                    default:
+                        Diagnostics?.Post(ErrorCodes.CouldNotRecognizeBracket, a);
+                        anchor = TextAnchor.Origin;
+                        return false;
                 }
-                return true;
             }
-
-            // If no anchor is given, then we allow expansion
-            offset = Vector2.Zero;
-            bool success = node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.UX, out expand);
-            return success;
+            anchor = TextAnchor.Origin;
+            return true;
         }
-
-        private IStyleModifier ParseStyleModifier(XmlNode node, bool asText = false)
+        
+        public static IStyleModifier ParseStyleModifier(XmlNode node, IDiagnosticHandler diagnostics, bool asText = false)
         {
             IStyleModifier result = null;
             if (node.Attributes is not null)
@@ -784,7 +772,7 @@ namespace SimpleCircuit.Drawing.Builders
 
         private IStyleModifier ParseStyleModifier(XmlNode node, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
         {
-            var style = ParseStyleModifier(node);
+            var style = ParseStyleModifier(node, Diagnostics);
 
             // Read start markers
             string markers = node.Attributes?["marker-start"]?.Value;
@@ -808,7 +796,7 @@ namespace SimpleCircuit.Drawing.Builders
 
             return style;
         }
-        private bool TryParseStyleSize(string value, out double result)
+        private static bool TryParseStyleSize(string value, out double result)
         {
             // In pixels
             if (value.EndsWith("px"))
