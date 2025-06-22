@@ -101,6 +101,8 @@ namespace SimpleCircuit.Components.Labeling
                 if ((anchorPoint.Type & TextOrientationType.Transformed) != 0)
                 {
                     var orientation = builder.CurrentTransform.ApplyDirection(anchorPoint.Orientation);
+                    if (!orientation.IsZero())
+                        orientation /= orientation.Length;
                     foreach (var p in bounds.Bounds)
                         bounds.Expand(p.X * orientation + p.Y * orientation.Perpendicular);
                 }

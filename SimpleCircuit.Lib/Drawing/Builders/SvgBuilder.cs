@@ -168,7 +168,11 @@ namespace SimpleCircuit.Drawing.Builders
 
             // First determine the orientation
             if ((type & TextOrientationType.Transformed) != 0)
+            {
                 orientation = CurrentTransform.ApplyDirection(orientation);
+                if (!orientation.IsZero())
+                    orientation /= orientation.Length;
+            }
             if ((type & TextOrientationType.Upright) != 0)
             {
                 if (orientation.X < 0)

@@ -1028,7 +1028,7 @@ namespace SimpleCircuit.Evaluator
             // Resolve the name as a filter
             if (name != "wire")
             {
-                name = context.GetFullname(name, resolveAnonymous: false).Replace("*", ".*");
+                name = context.GetFullname(name, resolveAnonymous: false).Replace("*", $"[^{DrawableFactoryDictionary.AnonymousSeparator}]*");
                 if (context.Factory.IsAnonymous(name))
                     name = $"^{name}{DrawableFactoryDictionary.AnonymousSeparator}.*$";
                 else

@@ -114,7 +114,11 @@ namespace SimpleCircuit.Drawing.Builders
 
             // Get the bounds
             if ((type & TextOrientationType.Transformed) != 0)
+            {
                 orientation = CurrentTransform.ApplyDirection(orientation);
+                if (!orientation.IsZero())
+                    orientation /= orientation.Length;
+            }
             foreach (var p in span.Bounds.Bounds)
                 Expand(location + p.X * orientation + p.Y * orientation.Perpendicular);
             return this;

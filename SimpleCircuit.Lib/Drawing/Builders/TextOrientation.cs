@@ -53,27 +53,5 @@ namespace SimpleCircuit.Drawing.Builders
             Orientation = new Vector2(x, y);
             Type = TextOrientationType.Upright;
         }
-
-        /// <summary>
-        /// Transforms text bounds according to the text orientation and a given transform..
-        /// </summary>
-        /// <param name="bounds">The bounds.</param>
-        /// <param name="transform">The transform.</param>
-        /// <returns>Returns the bounds of the transformed text.</returns>
-        public Bounds TransformTextBounds(Bounds bounds, Transform transform)
-        {
-            var b = new ExpandableBounds();
-            if ((Type & TextOrientationType.Transformed) != 0)
-            {
-                foreach (var p in bounds)
-                    b.Expand(transform.ApplyDirection(p.X * Orientation + p.Y * Orientation.Perpendicular));
-            }
-            else
-            {
-                foreach (var p in bounds)
-                    b.Expand(p.X * Orientation + p.Y * Orientation.Perpendicular);
-            }
-            return b.Bounds;
-        }
     }
 }
