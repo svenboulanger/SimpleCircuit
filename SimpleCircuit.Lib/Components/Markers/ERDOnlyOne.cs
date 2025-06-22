@@ -15,10 +15,10 @@ namespace SimpleCircuit.Components.Markers
     public class ERDOnlyOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)
         {
-            builder.Line(new Vector2(-4, -3) * appearance.LineThickness, new Vector2(-4, 3) * appearance.LineThickness, appearance);
-            builder.Line(new Vector2(-8, -3) * appearance.LineThickness, new Vector2(-8, 3) * appearance.LineThickness, appearance);
+            builder.Line(new Vector2(-4, -3) * style.LineThickness, new Vector2(-4, 3) * style.LineThickness, style);
+            builder.Line(new Vector2(-8, -3) * style.LineThickness, new Vector2(-8, 3) * style.LineThickness, style);
         }
     }
 }

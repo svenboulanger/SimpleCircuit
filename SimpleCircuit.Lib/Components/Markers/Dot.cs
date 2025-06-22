@@ -15,9 +15,9 @@ namespace SimpleCircuit.Components.Markers
     public class Dot(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)
         {
-            builder.Circle(new(), 2.0 * appearance.LineThickness, appearance.AsFilledMarker());
+            builder.Circle(new(), 2.0 * style.LineThickness, style.AsFilledMarker());
         }
     }
 }

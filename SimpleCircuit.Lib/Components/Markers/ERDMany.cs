@@ -18,10 +18,10 @@ namespace SimpleCircuit.Components.Markers
         private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)
         {
-            builder.Polyline(_points.Select(p => p * 2.0 * appearance.LineThickness), appearance);
-            builder.Line(new Vector2(-4, 0) * appearance.LineThickness, new(), appearance);
+            builder.Polyline(_points.Select(p => p * 2.0 * style.LineThickness), style);
+            builder.Line(new Vector2(-4, 0) * style.LineThickness, new(), style);
         }
     }
 }

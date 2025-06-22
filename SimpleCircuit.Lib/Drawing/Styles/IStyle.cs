@@ -67,5 +67,14 @@
         /// <param name="value">The value.</param>
         /// <returns>Returns <c>true</c> if the variable was found; otherwise, <c>false</c>.</returns>
         public bool TryGetVariable(string key, out string value);
+
+        /// <summary>
+        /// Registers a variable to the style if it doesn't exist yet.
+        /// This is used to simply guarantee that it is defined.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Returns <c>true</c> if the variable was added; otherwise, <c>false</c>.</returns>
+        public bool RegisterVariable(string key, string value);
     }
 }

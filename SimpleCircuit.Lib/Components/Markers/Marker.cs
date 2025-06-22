@@ -27,14 +27,15 @@ namespace SimpleCircuit.Components.Markers
         /// Draws the marker to the given drawing.
         /// </summary>
         /// <param name="builder">The graphics builder.</param>
-        public void Draw(IGraphicsBuilder builder, IStyle appearance)
+        /// <param name="style">The marker style.</param>
+        public void Draw(IGraphicsBuilder builder, IStyle style)
         {
             var orientation = Orientation;
             if (orientation.IsZero())
                 orientation = new(1, 0);
 
             builder.BeginTransform(new(Location, new(orientation.X, -orientation.Y, orientation.Y, orientation.X)));
-            DrawMarker(builder, appearance);
+            DrawMarker(builder, style);
             builder.EndTransform();
         }
 
@@ -43,6 +44,7 @@ namespace SimpleCircuit.Components.Markers
         /// The location is at (0, 0).
         /// </summary>
         /// <param name="builder">The drawing.</param>
-        protected abstract void DrawMarker(IGraphicsBuilder builder, IStyle appearance);
+        /// <param name="style">The marker style.</param>
+        protected abstract void DrawMarker(IGraphicsBuilder builder, IStyle style);
     }
 }

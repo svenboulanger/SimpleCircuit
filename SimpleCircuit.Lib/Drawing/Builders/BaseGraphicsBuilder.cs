@@ -152,7 +152,7 @@ namespace SimpleCircuit.Drawing.Builders
         private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context)
         {
             // Calculate the style for the following actions
-            var style = context.Style.Apply(Style) ?? Style;
+            var style = context.Style?.Apply(Style) ?? Style;
 
             foreach (XmlNode node in parent.ChildNodes)
             {
@@ -351,6 +351,11 @@ namespace SimpleCircuit.Drawing.Builders
             if (!success)
                 return;
 
+            // Normalize the vectors
+            if (!expand.IsNaN())
+                expand /= expand.Length;
+            orientation /= orientation.Length;
+
             // Get the style
             var modifier = ParseStyleModifier(node, Diagnostics, asText: true);
             style = modifier?.Apply(style) ?? style;
@@ -382,6 +387,9 @@ namespace SimpleCircuit.Drawing.Builders
             success &= node.Attributes.ParseOptionalVector("ex", "ey", Diagnostics, Vector2.NaN, out var expand);
             if (!success)
                 return;
+            if (!expand.IsNaN())
+                expand /= expand.Length;
+            orientation /= orientation.Length;
 
             // Get the text orientation type
             if (!TryGetTextOrientationType(node, out var type))

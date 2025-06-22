@@ -52,6 +52,9 @@ namespace SimpleCircuit.Drawing.Styles
 
             /// <inheritdoc />
             public bool TryGetVariable(string key, out string value) => _parent.TryGetVariable(key, out value);
+
+            /// <inheritdoc />
+            public bool RegisterVariable(string key, string value) => _parent.RegisterVariable(key, value);
         }
 
         /// <inheritdoc />

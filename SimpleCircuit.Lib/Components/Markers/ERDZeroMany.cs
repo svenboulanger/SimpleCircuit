@@ -15,13 +15,16 @@ namespace SimpleCircuit.Components.Markers
     [Drawable("erd-zero-many", "An Entity-Relationship Diagram zero or many-symbol.", "ERD")]
     public class ERDZeroMany(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
     {
-        private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
+        private readonly static Vector2[] _points = [new(0, -3), new(-6, 0), new(0, 3)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
-        {   
-            builder.Polyline(_points.Select(p => p * appearance.LineThickness), appearance);
-            builder.Circle(new Vector2(-9, 0) * appearance.LineThickness, 1.5, appearance);
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)
+        {
+            // Just ot make sure
+            style.RegisterVariable("bg-opaque", "white");
+
+            builder.Polyline(_points.Select(p => p * style.LineThickness), style);
+            builder.Circle(new Vector2(-9, 0) * style.LineThickness, 1.5, style.Color(null, "--bg-opaque"));
         }
     }
 }

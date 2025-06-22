@@ -130,7 +130,15 @@ namespace SimpleCircuit.Components.Annotations
             => Drawable.SetProperty(this, propertyToken, value, diagnostics);
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context) => PresenceResult.Success;
+        public PresenceResult Prepare(IPrepareContext context)
+        {
+            if (context.Mode == PreparationMode.Sizes)
+            {
+                var style = Style?.Apply(context.Style) ?? context.Style;
+                Labels.Format(context.TextFormatter, style);
+            }
+            return PresenceResult.Success;
+        }
 
         /// <inheritdoc />
         public void Register(IRegisterContext context) { }

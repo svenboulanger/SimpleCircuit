@@ -18,9 +18,9 @@ namespace SimpleCircuit.Components.Markers
         private readonly static Vector2[] _points = [new(0, -1), new(-2.5, 0), new(0, 1)];
 
         /// <inheritdoc />
-        protected override void DrawMarker(IGraphicsBuilder builder, IStyle appearance)
+        protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)
         {
-            builder.Polygon(_points.Select(pt => pt * 2.0 * appearance.LineThickness), appearance.AsFilledMarker());
+            builder.Polygon(_points.Select(pt => pt * 2.0 * style.LineThickness), style.AsFilledMarker());
         }
     }
 }

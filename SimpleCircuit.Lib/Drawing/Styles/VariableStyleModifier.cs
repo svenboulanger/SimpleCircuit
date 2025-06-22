@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Drawing.Styles
 {
@@ -63,6 +64,17 @@ namespace SimpleCircuit.Drawing.Styles
 
                 // If it doesn't exist, refer to parent style
                 return _parent.TryGetVariable(key, out value);
+            }
+
+            /// <inheritdoc />
+            public bool RegisterVariable(string key, string value)
+            {
+                // If we have the variable, stop there
+                if (_variables.ContainsKey(key))
+                    return false;
+
+                // Doesn't exist, so let's add it to the parent
+                return _parent.RegisterVariable(key, value);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleCircuit.Components.Variants;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Drawing.Styles
 {
@@ -10,7 +11,7 @@ namespace SimpleCircuit.Drawing.Styles
         /// <summary>
         /// Gets a light mode style.
         /// </summary>
-        public static Style Light { get; } = new()
+        public static Style Light => new()
         {
             Variables =
             {
@@ -23,13 +24,14 @@ namespace SimpleCircuit.Drawing.Styles
                 { "danger", "#dc3545" }, // From Bootstrap 5
                 { "light", "#f8f9fa" }, // From Bootstrap 5
                 { "dark", "#343a40" }, // From Bootstrap 5
+                { "bg-opaque", "white" },
             }
         };
 
         /// <summary>
         /// Gets a dark mode style.
         /// </summary>
-        public static Style Dark { get; } = new()
+        public static Style Dark => new()
         {
             Variables =
             {
@@ -42,6 +44,7 @@ namespace SimpleCircuit.Drawing.Styles
                 { "danger", "#dc3545" }, // From Bootstrap 5
                 { "light", "#f8f9fa" }, // From Bootstrap 5
                 { "dark", "#343a40" }, // From Bootstrap 5
+                { "bg-opaque", "#343a40" },
             }
         };
 
@@ -54,7 +57,6 @@ namespace SimpleCircuit.Drawing.Styles
         /// The default color.
         /// </summary>
         public const string DefaultColor = "black";
-
 
         /// <summary>
         /// An identifier representing no color.
@@ -139,5 +141,14 @@ namespace SimpleCircuit.Drawing.Styles
 
         /// <inheritdoc />
         public bool TryGetVariable(string key, out string value) => Variables.TryGetValue(key, out value);
+
+        /// <inheritdoc />
+        public bool RegisterVariable(string key, string value)
+        {
+            if (Variables.ContainsKey(key))
+                return false;
+            Variables.Add(key, value);
+            return true;
+        }
     }
 }
