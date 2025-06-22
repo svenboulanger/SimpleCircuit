@@ -9,7 +9,6 @@ using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace SimpleCircuit.Components.General
 {
@@ -59,47 +58,21 @@ namespace SimpleCircuit.Components.General
         public IStyleModifier Style { get; set; }
 
         /// <inheritdoc />
-        public string TransformText(string input)
-        {
-            // Simple substitution of \# with the corresponding label.
-            return Regex.Replace(input, @"(?!<\\)\\(\d+)", match =>
-            {
-                int index = int.Parse(match.Groups[1].Value);
-                return Labels[index]?.Value ?? "";
-            });
-        }
-
-        /// <inheritdoc />
         public bool Contains(string variant) => _variants?.Contains(variant) ?? false;
 
         /// <inheritdoc />
-        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics)
-        {
-            throw new NotImplementedException();
-        }
+        public bool SetProperty(Token propertyToken, object value, IDiagnosticHandler diagnostics) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public void Render(IGraphicsBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
+        public void Render(IGraphicsBuilder builder) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public void Register(IRegisterContext context)
-        {
-            throw new NotImplementedException();
-        }
+        public void Register(IRegisterContext context) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public void Update(IUpdateContext context)
-        {
-            throw new NotImplementedException();
-        }
+        public void Update(IUpdateContext context) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public PresenceResult Prepare(IPrepareContext context)
-        {
-            throw new NotImplementedException();
-        }
+        public PresenceResult Prepare(IPrepareContext context) => throw new NotImplementedException();
     }
 }

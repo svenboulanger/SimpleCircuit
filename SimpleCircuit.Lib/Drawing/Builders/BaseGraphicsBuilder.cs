@@ -151,8 +151,12 @@ namespace SimpleCircuit.Drawing.Builders
 
         private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context)
         {
+            // Calculate the style for the following actions
+            var style = context.Style.Apply(Style) ?? Style;
+
             foreach (XmlNode node in parent.ChildNodes)
             {
+                // If there is an attribute called "variant", evaluate whether this action should be processed
                 if (!EvaluateVariants(node.Attributes?["variant"]?.Value, context))
                     continue;
 
@@ -160,13 +164,13 @@ namespace SimpleCircuit.Drawing.Builders
                 switch (node.Name)
                 {
                     case "#comment": break;
-                    case "line": DrawXmlLine(node, context); break;
-                    case "circle": DrawXmlCircle(node, context); break;
-                    case "path": DrawXmlPath(node, context); break;
-                    case "polygon": DrawXmlPolygon(node, context); break;
-                    case "polyline": DrawXmlPolyline(node, context); break;
-                    case "rect": DrawXmlRectangle(node, context); break;
-                    case "text": DrawXmlText(node, context); break;
+                    case "line": DrawXmlLine(node, style); break;
+                    case "circle": DrawXmlCircle(node, style); break;
+                    case "path": DrawXmlPath(node, style); break;
+                    case "polygon": DrawXmlPolygon(node, style); break;
+                    case "polyline": DrawXmlPolyline(node, style); break;
+                    case "rect": DrawXmlRectangle(node, style); break;
+                    case "text": DrawXmlText(node, style); break;
                     case "variant":
                     case "v":
                         // Just recursive thingy
@@ -175,14 +179,18 @@ namespace SimpleCircuit.Drawing.Builders
                     case "label": DrawXmlLabelAnchor(node, context); break;
                     case "group":
                     case "g":
-                        // Parse options
-                        var style = ParseStyleModifier(node, Diagnostics);
-                        var oldStyle = Style;
-                        Style = style?.Apply(Style) ?? Style;
+                        // Parse style options
+                        var modifier = ParseStyleModifier(node, Diagnostics);
+                        var oldModifier = context.Style;
+                        context.Style = context.Style.Append(modifier);
+
+                        // Recursively descend
                         BeginGroup();
                         DrawXmlActions(node, context);
                         EndGroup();
-                        Style = oldStyle;
+
+                        // Rettore
+                        context.Style = oldModifier;
                         break;
                     default:
                         Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
@@ -191,33 +199,34 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlLine(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlLine(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
+
+            // Parse main properties
             bool success = true;
-            HashSet<Marker> startMarkers = null, endMarkers = null;
-            success &= node.Attributes.ParseOptionalScalar("x1", Diagnostics, 0.0, out double x1);
-            success &= node.Attributes.ParseOptionalScalar("y1", Diagnostics, 0.0, out double y1);
-            success &= node.Attributes.ParseOptionalScalar("x2", Diagnostics, 0.0, out double x2);
-            success &= node.Attributes.ParseOptionalScalar("y2", Diagnostics, 0.0, out double y2);
+            success &= node.Attributes.ParseOptionalVector("x1", "y1", Diagnostics, Vector2.Zero, out var start);
+            success &= node.Attributes.ParseOptionalVector("x2", "y2", Diagnostics, Vector2.Zero, out var end);
             if (!success)
                 return;
 
-            // Draw the line
-            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = context.Style?.Apply(Style) ?? Style;
+            // Parse the style
+            var modifier = ParseStyleModifier(node, Diagnostics, out var startMarkers, out var endMarkers);
             style = modifier?.Apply(style) ?? style;
-            Line(new(x1, y1), new(x2, y2), style);
-            DrawMarkers(startMarkers, new(x1, y1), new(x2 - x1, y2 - y1), style);
-            DrawMarkers(endMarkers, new(x2, y2), new(x2 - x1, y2 - y1), style);
+
+            // Draw
+            Line(start, end, style);
+            DrawMarkers(startMarkers, start, start - end, style);
+            DrawMarkers(endMarkers, end, end - start, style);
         }
 
-        private void DrawXmlPolygon(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlPolygon(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
 
+            // Parse points
             string attr = node.Attributes?["points"]?.Value;
             if (attr == null)
                 return;
@@ -226,20 +235,20 @@ namespace SimpleCircuit.Drawing.Builders
             if (points == null || points.Count <= 1)
                 return;
 
+            // Parse the style
             var modifier = ParseStyleModifier(node, Diagnostics);
-            var style = context.Style?.Apply(Style) ?? Style;
             style = modifier?.Apply(style) ?? style;
 
             // Draw the polygon
             Polygon(points, style);
         }
 
-        private void DrawXmlPolyline(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlPolyline(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
 
-            HashSet<Marker> startMarkers = null, endMarkers = null;
+            // Parse the points
             string attr = node.Attributes?["points"]?.Value;
             if (attr == null)
                 return;
@@ -247,11 +256,9 @@ namespace SimpleCircuit.Drawing.Builders
             var points = SvgPathDataParser.ParsePoints(lexer, Diagnostics);
             if (points == null || points.Count <= 1)
                 return;
-            if (points == null || points.Count <= 1)
-                return;
 
-            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = context.Style?.Apply(Style) ?? Style;
+            // Parse the style
+            var modifier = ParseStyleModifier(node, Diagnostics, out var startMarkers, out var endMarkers);
             style = modifier?.Apply(style) ?? style;
 
             // Draw the polyline
@@ -268,40 +275,35 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlCircle(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlCircle(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
 
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("cx", Diagnostics, 0.0, out double cx);
-            success &= node.Attributes.ParseOptionalScalar("cy", Diagnostics, 0.0, out double cy);
+            success &= node.Attributes.ParseOptionalVector("cx", "cy", Diagnostics, Vector2.Zero, out var center);
             success &= node.Attributes.ParseOptionalScalar("r", Diagnostics, 0.0, out double r);
             if (!success)
                 return;
 
             var modifier = ParseStyleModifier(node, Diagnostics);
-            var style = context.Style?.Apply(Style) ?? Style;
             style = modifier?.Apply(style) ?? style;
 
             // Draw the circle
-            Circle(new(cx, cy), r, style);
+            Circle(center, r, style);
         }
 
-        private void DrawXmlPath(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlPath(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
 
-            HashSet<Marker> startMarkers = null, endMarkers = null;
-            string pathData = node.Attributes?["d"]?.Value;
-            if (string.IsNullOrWhiteSpace(pathData))
-                return;
-
-            var modifier = ParseStyleModifier(node, ref startMarkers, ref endMarkers);
-            var style = context.Style?.Apply(Style) ?? Style;
+            // Parse the style
+            var modifier = ParseStyleModifier(node, Diagnostics, out var startMarkers, out var endMarkers);
             style = modifier?.Apply(style) ?? style;
 
+            // Get the path data
+            string pathData = node.Attributes?["d"]?.Value;
             if (!string.IsNullOrWhiteSpace(pathData))
             {
                 SvgPathDataParser.MarkerLocation start = default, end = default;
@@ -316,30 +318,28 @@ namespace SimpleCircuit.Drawing.Builders
             }
         }
 
-        private void DrawXmlRectangle(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlRectangle(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
 
+            // Parse main properties
             bool success = true;
-            success &= node.Attributes.ParseOptionalScalar("x", Diagnostics, 0.0, out double x);
-            success &= node.Attributes.ParseOptionalScalar("y", Diagnostics, 0.0, out double y);
-            success &= node.Attributes.ParseOptionalScalar("width", Diagnostics, 0.0, out double width);
-            success &= node.Attributes.ParseOptionalScalar("height", Diagnostics, 0.0, out double height);
-            success &= node.Attributes.ParseOptionalScalar("rx", Diagnostics, double.NaN, out double rx);
-            success &= node.Attributes.ParseOptionalScalar("ry", Diagnostics, double.NaN, out double ry);
+            success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, Vector2.Zero, out var location);
+            success &= node.Attributes.ParseOptionalVector("width", "height", Diagnostics, Vector2.Zero, out var size);
+            success &= node.Attributes.ParseOptionalVector("rx", "ry", Diagnostics, Vector2.NaN, out var radius);
             if (!success)
                 return;
 
+            // Parse the style
             var modifier = ParseStyleModifier(node, Diagnostics);
-            var style = context.Style?.Apply(Style) ?? Style;
             style = modifier?.Apply(style) ?? style;
 
             // Draw the rectangle
-            this.Rectangle(x, y, width, height, style, rx, ry);
+            this.Rectangle(location.X, location.Y, size.X, size.Y, style, radius.X, radius.Y);
         }
 
-        private void DrawXmlText(XmlNode node, IXmlDrawingContext context)
+        private void DrawXmlText(XmlNode node, IStyle style)
         {
             if (node.Attributes == null)
                 return;
@@ -353,7 +353,6 @@ namespace SimpleCircuit.Drawing.Builders
 
             // Get the style
             var modifier = ParseStyleModifier(node, Diagnostics, asText: true);
-            var style = context.Style?.Apply(Style) ?? Style;
             style = modifier?.Apply(style) ?? style;
 
             // Get the text value
@@ -363,20 +362,20 @@ namespace SimpleCircuit.Drawing.Builders
             Label label = new() { Value = value };
             label.Format(TextFormatter, style);
 
-            // Now let's transform the text location and orientation if necessary
+            // Get how the text should be placed
             if (!TryGetTextOrientationType(node, out var type))
                 return;
-
-            // Also modify the position depending on an additional flag
             if (!TryGetAnchor(node, out var textAnchor))
                 return;
 
+            // Draw the text
             var anchorPoint = new LabelAnchorPoint(location, expand, orientation, type, textAnchor);
             LabelAnchorPoints<IDrawable>.DrawLabel(this, anchorPoint, [label]);
         }
 
         private void DrawXmlLabelAnchor(XmlNode node, IXmlDrawingContext context)
         {
+            // Get the main properties
             bool success = true;
             success &= node.Attributes.ParseOptionalVector("x", "y", Diagnostics, default, out var location);
             success &= node.Attributes.ParseOptionalVector("nx", "ny", Diagnostics, Vector2.UX, out var orientation);
@@ -527,6 +526,13 @@ namespace SimpleCircuit.Drawing.Builders
             return true;
         }
         
+        /// <summary>
+        /// Parses a style attribute, or attributes that relate to the style of an XML node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="asText">If <c>true</c>, the fill is treated as the foreground color to allow SVG syntax.</param>
+        /// <returns>Returns the style modifier.</returns>
         public static IStyleModifier ParseStyleModifier(XmlNode node, IDiagnosticHandler diagnostics, bool asText = false)
         {
             IStyleModifier result = null;
@@ -770,29 +776,42 @@ namespace SimpleCircuit.Drawing.Builders
             return result;
         }
 
-        private IStyleModifier ParseStyleModifier(XmlNode node, ref HashSet<Marker> startMarkers, ref HashSet<Marker> endMarkers)
+        /// <summary>
+        /// Parses a style attribute, or attributes that relate to the style of an XML node. It also parses
+        /// start- and end-markers.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <param name="startMarkers">The set of markers that should be at the start.</param>
+        /// <param name="endMarkers">The set of markers that should be at the end.</param>
+        /// <returns>Returns the style modifier.</returns>
+        public IStyleModifier ParseStyleModifier(XmlNode node, IDiagnosticHandler diagnostics, out HashSet<Marker> startMarkers, out HashSet<Marker> endMarkers)
         {
-            var style = ParseStyleModifier(node, Diagnostics);
+            var style = ParseStyleModifier(node, diagnostics);
 
             // Read start markers
             string markers = node.Attributes?["marker-start"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
-                startMarkers ??= [];
+                startMarkers = [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
                     AddMarker(startMarkers, markerToken.Content.ToString());
             }
+            else
+                startMarkers = null;
 
             // Read end markers
             markers = node.Attributes?["marker-end"]?.Value;
             if (!string.IsNullOrWhiteSpace(markers))
             {
-                endMarkers ??= [];
+                endMarkers = [];
                 var lexer = new MarkerLexer(markers);
                 while (lexer.Branch(Parser.Markers.TokenType.Marker, out var markerToken))
                     AddMarker(endMarkers, markerToken.Content.ToString());
             }
+            else
+                endMarkers = null;
 
             return style;
         }
