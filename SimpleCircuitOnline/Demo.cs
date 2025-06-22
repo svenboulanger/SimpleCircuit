@@ -144,8 +144,8 @@
                         "A latch, showing off some odd-angle wires.",
                         "* Horizontal chains\r\nT(in) <r> Xia <r> NAND1 <r x r> T(out)\r\nT(in) <r> Xib <r> [b]NAND2 <r x r> T(out)\r\n\r\n* Cross-coupled wires\r\nNAND2[a] <l u a 20 u> X\r\nNAND1[b] <l d a -20 d> X\r\n"),
                     new Demo(
-                        "CTIA / CSA",
-                        "A Charge Transimpedance Amplifier or also known as Charge Sense Amplifier.",
+                        "CTIA / CFA / CSA",
+                        "A Charge Transimpedance Amplifier or also known as Capacitive Feedback Amplifier or Charge Sense Amplifier.",
                         "* Input section\r\n.section Input\r\n    X1 <l d> I(\"I_in\") <d> GND1\r\n    X1 <d> C(\"C_in\") <d> GND2\r\n    (GND1 <r +25> GND2)\r\n.endsection\r\n\r\n* Link to the next section\r\nInput/X1 <r> CTIA/Xin\r\n\r\n* Charge Transimpedance Amplifier\r\n.section CTIA\r\n    Xin <r> A1(\"-A\", anchor1=1) <r> Xout\r\n    Xin <u r> C1(\"C_fb\") <r d> Xout\r\n    (y A1 <u +20> C1)\r\n.endsection\r\n\r\n* Link CTIA to output circuit\r\nCTIA/Xout <r> Output/Xout\r\n\r\n* Output circuit\r\n.section Output\r\n    Xout <d> C1(\"C_L\") <d> GND1\r\n    Xout <r> Xout2 <d> R1(\"R_L\") <d> GND2\r\n    Xout2 <r> T(\"V_out\")\r\n    (GND1 <r +20> GND2)\r\n.endsection\r\n\r\n* We can still enforce alignment between elements\r\n* This would not be possible with subcircuits\r\n(y Input/GND1 <r> Output/GND1)\r\n"),
                     new Demo(
                         "Buck converter",
