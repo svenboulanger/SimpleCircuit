@@ -215,9 +215,23 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(ControlPropertyNode controlProperty, EvaluationContext context)
         {
-            string filter = EvaluateFilter(controlProperty.Filter, context);
-            if (filter is null)
-                return;
+            // Unroll OR binary nodes
+            List<string> filterNames = [];
+            var node = controlProperty.Filter;
+            while (node is BinaryNode bn && bn.Type == BinaryOperatortype.Or)
+            {
+                string filter = EvaluateFilter(bn.Left, context);
+                if (filter is null)
+                    return;
+                filterNames.Add(filter);
+                node = bn.Right;
+            }
+            {
+                string filter = EvaluateFilter(node, context);
+                if (filter is null)
+                    return;
+                filterNames.Add(filter);
+            }
 
             int labelIndex = 0;
             HashSet<string> includes = [], excludes = [];
@@ -292,7 +306,8 @@ namespace SimpleCircuit.Evaluator
             }
 
             // Add the defaults to the current scope
-            context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
+            foreach (string filter in filterNames)
+                context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
         private static void Evaluate(BoxNode annotation, EvaluationContext context)
         {

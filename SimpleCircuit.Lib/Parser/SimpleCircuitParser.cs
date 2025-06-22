@@ -1154,6 +1154,18 @@ namespace SimpleCircuit.Parser
             result = null;
             if (!ParseFilterName(lexer, context, out var name))
                 return false;
+            while (lexer.Branch(TokenType.Punctuator, "|", out var orToken))
+            {
+                if (!ParseFilterName(lexer, context, out var filterItem))
+                    return false;
+                if (filterItem is null)
+                {
+                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.InvalidName);
+                    result = null;
+                    return false;
+                }
+                name = new BinaryNode(BinaryOperatortype.Or, name, orToken, filterItem);
+            }
 
             // Start reading properties
             if (!ParsePropertyList(lexer, context, out var properties))
