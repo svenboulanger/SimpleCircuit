@@ -70,7 +70,7 @@ namespace SimpleCircuit.Components.Digital
                             if (Separator == null)
                                 _bits.Add(["0"]);
                             else if (Separator.Length == 0)
-                                _bits.Add(label.Select(c => c.ToString()).ToArray());
+                                _bits.Add([.. label.Select(c => c.ToString())]);
                             else
                                 _bits.Add(Regex.Split(label, Separator));
                             _maxWidth = Math.Max(_maxWidth, _bits[^1].Length);

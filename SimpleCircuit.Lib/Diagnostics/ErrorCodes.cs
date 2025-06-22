@@ -26,6 +26,8 @@
         CouldNotAlignAlongX,
         [Diagnostic(SeverityLevel.Error, null, "Could not align '{0}' and '{1}' along the Y-axis")]
         CouldNotAlignAlongY,
+        [Diagnostic(SeverityLevel.Error, null, "Could not backtrack to anonymous components inside sections")]
+        CouldNotBacktrackToSections,
         [Diagnostic(SeverityLevel.Error, null, "Could not constrain orientation of {0}")]
         CouldNotConstrainOrientation,
         [Diagnostic(SeverityLevel.Error, null, "Could not create a component for the name '{0}'")]

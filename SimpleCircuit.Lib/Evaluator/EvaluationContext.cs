@@ -176,6 +176,14 @@ namespace SimpleCircuit.Evaluator
         /// <returns>Returns <c>true</c> if the component could be found; otherwise, <c>false</c>.</returns>
         public bool TryGetBacktrackedAnonymousComponent(TextLocation location, string name, int backtrack, out ICircuitPresence presence)
         {
+            // Check whether this is referring to other sections
+            if (name.Contains(DrawableFactoryDictionary.Separator))
+            {
+                Diagnostics?.Post(location, ErrorCodes.CouldNotBacktrackToSections, name, backtrack);
+                presence = null;
+                return false;
+            }
+
             // Check that the name is a key
             if (!Factory.IsAnonymous(name, out string key))
             {

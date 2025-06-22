@@ -641,9 +641,7 @@ namespace SimpleCircuit.Parser
             bool continueThis = true, isFirst = true;
             while (continueThis)
             {
-                if (isFirst)
-                    isFirst = false;
-                else if (lexer.HasTrivia)
+                if (!isFirst && lexer.HasTrivia)
                     break;
 
                 switch (lexer.Type)
@@ -686,8 +684,14 @@ namespace SimpleCircuit.Parser
                                 break;
 
                             case "-":
-                                result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
-                                lexer.Next();
+                                if (!isFirst)
+                                {
+                                    // '-' should not start a name
+                                    result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
+                                    lexer.Next();
+                                }
+                                else
+                                    continueThis = false;
                                 break;
 
                             default:
@@ -700,6 +704,7 @@ namespace SimpleCircuit.Parser
                         continueThis = false;
                         break;
                 }
+                isFirst = false;
             }
             return true;
         }

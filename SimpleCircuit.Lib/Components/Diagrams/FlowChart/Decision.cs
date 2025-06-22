@@ -97,6 +97,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
                             _width = (bounds.Width + LabelMargin) * 2;
                             _height = (bounds.Height + LabelMargin) * 2;
+                            _width = Math.Max(_width, MinWidth);
+                            _height = Math.Max(_height, MinHeight);
                         }
                         else if (Width.IsZero())
                         {
@@ -109,6 +111,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                                 // Not possible to fit!
                                 _width = bounds.Width * 2;
                             }
+                            _width = Math.Max(MinWidth, _width);
                         }
                         else if (Height.IsZero())
                         {
@@ -118,6 +121,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             _height = bounds.Height * Width / (Width - bounds.Width);
                             if (_height < 0)
                                 _height = bounds.Height * 2;
+                            _height = Math.Max(MinHeight, _height);
                         }
                         else
                         {
