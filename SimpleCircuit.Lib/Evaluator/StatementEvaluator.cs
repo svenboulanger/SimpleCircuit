@@ -213,30 +213,36 @@ namespace SimpleCircuit.Evaluator
                 }
             }
         }
-        private static void Evaluate(ControlPropertyNode controlProperty, EvaluationContext context)
+        private static List<string> EvaluateFilterList(SyntaxNode filter, EvaluationContext context)
         {
-            // Unroll OR binary nodes
-            List<string> filterNames = [];
-            var node = controlProperty.Filter;
-            while (node is BinaryNode bn && bn.Type == BinaryOperatortype.Or)
+            List<string> result = [];
+            while (filter is BinaryNode bn && bn.Type == BinaryOperatortype.Or)
             {
-                string filter = EvaluateFilter(bn.Left, context);
-                if (filter is null)
-                    return;
-                filterNames.Add(filter);
-                node = bn.Right;
-            }
-            {
-                string filter = EvaluateFilter(node, context);
-                if (filter is null)
-                    return;
-                filterNames.Add(filter);
+                string name = EvaluateFilter(bn.Left, context);
+                if (name is null)
+                    return null;
+                result.Add(name);
+                filter = bn.Right;
             }
 
+            // Add
+            {
+                string name = EvaluateFilter(filter, context);
+                if (name is null)
+                    return null;
+                result.Add(name);
+            }
+            return result;
+        }
+        private static void Evaluate(ControlPropertyNode controlProperty, EvaluationContext context)
+        {
+            // Get the filter names
+            var filterNames = EvaluateFilterList(controlProperty.Filter, context);
+
+            // Get the properties and variants
             int labelIndex = 0;
             HashSet<string> includes = [], excludes = [];
             List<(Token, object)> defaultProperties = [];
-
             foreach (var property in controlProperty.Properties)
             {
                 switch (property)
@@ -305,17 +311,19 @@ namespace SimpleCircuit.Evaluator
                 }
             }
 
-            // Add the defaults to the current scope
+            // Register these defaults
             foreach (string filter in filterNames)
                 context.CurrentScope.AddDefault(filter, includes, excludes, defaultProperties);
         }
         private static void Evaluate(BoxNode annotation, EvaluationContext context)
         {
             context.StartScope();
-            var box = new Box(context.GetAnnotationName());
+            string name = context.GetAnnotationBoxName();
+            var box = new Box(name);
             context.Circuit.Add(box);
 
             // Apply properties and variants
+            context.CurrentScope.ApplyDefaults(name, box, context.Diagnostics);
             ApplyPropertiesAndVariants(box, annotation.Properties, context);
 
             // Evaluate the scoped statements
@@ -776,7 +784,7 @@ namespace SimpleCircuit.Evaluator
                 // Create the wire
                 var result = new Wire(wireName, startPin, segments, endPin);
                 context.NotifyDrawable(result);
-                context.CurrentScope.ApplyDefaults("wire", result, context.Diagnostics);
+                context.CurrentScope.ApplyDefaults(wireName, result, context.Diagnostics);
 
                 // Apply properties and variants
                 ApplyPropertiesAndVariants(result, propertiesAndVariants, context);
@@ -1041,23 +1049,38 @@ namespace SimpleCircuit.Evaluator
             }
 
             // Resolve the name as a filter
-            if (name != "wire")
+            switch (name.ToLower())
             {
-                if (name.Equals("*"))
-                {
-                    // This should match everything
-                    name = $"^{context.GetFullname(".*", resolveAnonymous: false)}$";
-                }
-                else if (context.Factory.IsAnonymous(name))
-                {
-                    name = context.GetFullname(name, resolveAnonymous: false);
-                    name = $"^{name}{DrawableFactoryDictionary.AnonymousSeparator}.*$";
-                }
-                else
-                {
-                    name = context.GetFullname(name, resolveAnonymous: false);
-                    name = $"^{name.Replace("*", $"[^{DrawableFactoryDictionary.AnonymousSeparator}]*")}$";
-                }
+                case EvaluationContext.BoxName:
+                    // The name should target all the
+                    name = $"^{context.GetFullname(EvaluationContext.BoxName + DrawableFactoryDictionary.AnonymousSeparator, resolveAnonymous: false)}.*$";
+                    break;
+
+                case EvaluationContext.WireName:
+                    // The name should target all the wires in the current section
+                    name = $"^{context.GetFullname(EvaluationContext.WireName + DrawableFactoryDictionary.AnonymousSeparator, resolveAnonymous: false)}.*$";
+                    break;
+
+                case "*":
+                    // The name should target all anonymous and named components in the current section
+                    name = $"^{context.GetFullname($"(?!{EvaluationContext.WireName}|{EvaluationContext.BoxName}).*", resolveAnonymous: false)}$";
+                    break;
+
+                default:
+                    if (context.Factory.IsAnonymous(name))
+                    {
+                        // The name should target all anonymous components of the same key in the current section
+                        name = context.GetFullname(name, resolveAnonymous: false);
+                        name = $"^{name}{DrawableFactoryDictionary.AnonymousSeparator}.*$";
+                    }
+                    else
+                    {
+                        // The name should target all named components that match the wildcard-containing name in the current section
+                        name = context.GetFullname(name, resolveAnonymous: false);
+                        name = $"^{name.Replace("*", $"[^{DrawableFactoryDictionary.AnonymousSeparator}]*")}$";
+                    }
+                    break;
+
             }
             return name;
         }

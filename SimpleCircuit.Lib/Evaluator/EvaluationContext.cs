@@ -26,6 +26,9 @@ namespace SimpleCircuit.Evaluator
         public const string VirtualKey = ":virtual:";
         public const string AnnotationKey = ":annotation:";
 
+        public const string BoxName = "box";
+        public const string WireName = "wire";
+
         /// <summary>
         /// Gets the options.
         /// </summary>
@@ -232,17 +235,17 @@ namespace SimpleCircuit.Evaluator
         /// Gets an annotation name.
         /// </summary>
         /// <returns>The annotation name.</returns>
-        public string GetAnnotationName()
+        public string GetAnnotationBoxName()
         {
             string name;
             if (_anonymousCounters.TryGetValue(AnnotationKey, out int counter))
             {
-                name = $"annotation-{counter}";
+                name = $"{BoxName}{DrawableFactoryDictionary.AnonymousSeparator}{counter}";
                 _anonymousCounters[AnnotationKey] = counter + 1;
             }
             else
             {
-                name = "annotation-1";
+                name = $"{BoxName}{DrawableFactoryDictionary.AnonymousSeparator}1";
                 _anonymousCounters[AnnotationKey] = 2;
             }
             return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
@@ -257,12 +260,12 @@ namespace SimpleCircuit.Evaluator
             string name;
             if (_anonymousCounters.TryGetValue(WireKey, out int counter))
             {
-                name = $"wire-{counter}";
+                name = $"{WireName}{DrawableFactoryDictionary.AnonymousSeparator}{counter}";
                 _anonymousCounters[WireKey] = counter + 1;
             }
             else
             {
-                name = "wire-1";
+                name = $"{WireName}{DrawableFactoryDictionary.AnonymousSeparator}1";
                 _anonymousCounters[WireKey] = 2;
             }
             return string.Join(DrawableFactoryDictionary.Separator.ToString(), _sections.Reverse().Union([name]));
