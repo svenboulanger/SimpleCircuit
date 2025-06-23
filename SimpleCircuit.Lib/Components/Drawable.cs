@@ -265,6 +265,15 @@ namespace SimpleCircuit.Components
                             return true;
 
                         default:
+                            // 'color#', 'foreground#' or 'fg#' will change the color
+                            if (TryMatchIndexedProperty(property, "color", out index) ||
+                                TryMatchIndexedProperty(property, "foreground", out index) ||
+                                TryMatchIndexedProperty(property, "fg", out index))
+                            {
+                                drawable.Labels[index].AppendStyle(new ColorStyleModifier(null, label));
+                                return true;
+                            }
+
                             // 'fontfamily#' will change the font family
                             if (TryMatchIndexedProperty(property, "font", out index) ||
                                 TryMatchIndexedProperty(property, "fontfamily", out index))
