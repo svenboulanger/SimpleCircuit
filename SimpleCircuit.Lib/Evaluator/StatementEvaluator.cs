@@ -7,7 +7,6 @@ using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
-using SpiceSharp;
 using System;
 using System.Collections.Generic;
 

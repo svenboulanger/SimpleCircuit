@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	  <LangVersion>latest</LangVersion>
 	  <RootNamespace>SimpleCircuit</RootNamespace>
-	  <VersionPrefix>1.8.4.0</VersionPrefix>
+	  <VersionPrefix>2.0.0.0</VersionPrefix>
 	  <Title>SimpleCircuit Core</Title>
 	  <Authors>SvenB</Authors>
 	  <PackageProjectUrl>https://github.com/svenboulanger/SimpleCircuit</PackageProjectUrl>
@@ -65,13 +65,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="3.116.0" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
     <PackageReference Include="SpiceSharp" Version="3.2.3" />
     <PackageReference Include="SpiceSharpGenerator" Version="1.0.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Memory" Version="4.6.0" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
   </ItemGroup>
 
   <ItemGroup>
