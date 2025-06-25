@@ -9,8 +9,10 @@ namespace SimpleCircuitOnline.Shared
 {
     public partial class SvgOutput
     {
-        private string _svg;
         private bool _invalid;
+        private string _showSvg = null;
+        private int _index = 0;
+        private readonly List<(string Theme, string Svg)> _svgs = [];
 
         [Parameter]
         public bool UseDOM { get; set; } = true;
@@ -27,24 +29,40 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public bool ShrinkY { get; set; } = true;
 
+        public void ChangeSvg(int index)
+        {
+            if (_svgs is null || _svgs.Count == 0)
+                _showSvg = null;
+
+            index %= _svgs.Count;
+            if (_index != index)
+            {
+                _showSvg = _svgs[index].Svg;
+                _index = index;
+                StateHasChanged();
+            }
+        }
+
         public void UpdateSvg(object sender, EventArgs args)
         {
+            _svgs.Clear();
             if (Svg is not null)
             {
-                if (Svg.Count > 0 && Svg[0].Document is not null)
+                foreach (var (theme, doc, bg) in Svg)
                 {
                     using var sw = new StringWriter();
                     using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
-                        Svg[0].Document.WriteTo(xml);
+                        doc.WriteTo(xml);
                     var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
                     string classes = $"{(ShrinkX ? "max-width" : "")}{(ShrinkY ? " max-height" : "")}{(_invalid ? " greyed" : "")}";
-                    _svg = $"<img class=\"{classes}\" style=\"background-color:{Svg[0].Background ?? "white"};\" src=\"data:image/svg+xml;base64,{data}\" />";
+                    _svgs.Add((theme, $"<img class=\"{classes}\" style=\"background-color:{bg ?? "white"};\" src=\"data:image/svg+xml;base64,{data}\" />"));
                 }
-                else
-                    _svg = string.Empty;
+                if (_svgs.Count > 0)
+                {
+                    _index %= _svgs.Count;
+                    _showSvg = _svgs[_index].Svg;
+                }
             }
-            else if (_svg != string.Empty)
-                _svg = string.Empty;
             StateHasChanged();
         }
 

@@ -40,6 +40,21 @@ h2 {
 .dot3 {
     animation-delay: .2s;
 }
+div.themes {
+    text-align: left;
+}
+a.theme {
+    display: inline-block;
+    background-color: #343a40;
+    color: #f8f9fa;
+    padding: .35em .65em;
+    border-radius: .25rem;
+    margin: 0.2rem;
+    font-size: 0.75rem;
+}
+    a.theme.selected {
+        background-color: #007bff;
+    }
 
 @keyframes dots {
     0%, 57.14% {

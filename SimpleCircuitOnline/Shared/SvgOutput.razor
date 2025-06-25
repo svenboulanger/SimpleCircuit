@@ -1,16 +1,27 @@
 ﻿@inject IJSRuntime _js
 
 <div class="output">
-    @if (_svg != null)
-    {
-        <div class="svg @(_invalid ? "greyed" : "")">
-            @((MarkupString)_svg)
-        </div>
-    }
-    else
-    {
-        <h2 class="text-muted">Preview</h2>
-    }
+    <div class="svg @(_invalid ? "greyed" : "")">
+        @if (_svgs is not null && _svgs.Count > 1)
+        {
+            <div class="themes">
+                @for (int i = 0; i < _svgs.Count; i++)
+                {
+                    int sel = i;
+                    <a class="theme@(i == _index ? " selected" : "")" href="javascript:void(0);" @onclick="() => ChangeSvg(sel)">@_svgs[i].Theme</a> 
+                }
+            </div>
+        }
+
+        @if (_showSvg is not null)
+        {
+            @((MarkupString)_showSvg)
+        }
+        else
+        {
+            <h2 class="text-muted">Preview</h2>
+        }
+    </div>
 
     @if (Loading > 0)
     {

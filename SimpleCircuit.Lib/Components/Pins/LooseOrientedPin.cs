@@ -36,6 +36,10 @@ namespace SimpleCircuit.Components.Pins
         /// <inheritdoc />
         public override PresenceResult Prepare(IPrepareContext context)
         {
+            var result = base.Prepare(context);
+            if (result == PresenceResult.GiveUp)
+                return result;
+
             var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
             switch (context.Mode)
             {
@@ -52,7 +56,7 @@ namespace SimpleCircuit.Components.Pins
                     }
                     break;
             }
-            return PresenceResult.Success;
+            return result;
         }
 
         /// <inheritdoc />

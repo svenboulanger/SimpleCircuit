@@ -173,6 +173,8 @@ namespace SimpleCircuit
                 // Apply spacing
                 if (!Update(prepareContext, updateContext, presences))
                     return false;
+
+                Solved = true;
                 return true;
             }
 
@@ -208,6 +210,7 @@ namespace SimpleCircuit
                 SpiceSharpWarning.WarningGenerated -= Log;
             }
 
+            Solved = true;
             return true;
         }
 

@@ -55,6 +55,7 @@ namespace SimpleCircuit.Components.Pins
             {
                 case PreparationMode.Reset:
                     Location = new();
+                    Connections = 0;
                     break;
             }
             return PresenceResult.Success;
