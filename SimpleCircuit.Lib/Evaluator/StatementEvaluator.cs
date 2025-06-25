@@ -9,6 +9,7 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SimpleCircuit.Evaluator
 {
@@ -43,6 +44,7 @@ namespace SimpleCircuit.Evaluator
                 case SymbolDefinitionNode symbolDefinition: Evaluate(symbolDefinition, context); break;
                 case IfElseNode ifElse: Evaluate(ifElse, context); break;
                 case SubcircuitDefinitionNode subckt: Evaluate(subckt, context); break;
+                case IncludeNode include: Evaluate(include, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -525,6 +527,43 @@ namespace SimpleCircuit.Evaluator
         {
             // Create a new factory
             context.Factory.Register(new Subcircuit(subckt.Name.Content.ToString(), subckt, context.Factory, context.Options, context.Diagnostics));
+        }
+        private static void Evaluate(IncludeNode include, EvaluationContext context)
+        {
+            // Evaluate the file to include
+            object obj = EvaluateExpression(include.Filename, context);
+            if (obj is not string filename)
+            {
+                context.Diagnostics?.Post(include.Filename.Location, ErrorCodes.ExpectedFilename);
+                return;
+            }
+
+            // Let's try to combine it with the base path
+            if (context.BasePath is not null)
+                filename = Path.Combine(context.BasePath, filename);
+            if (!Path.IsPathRooted(filename))
+                filename = Path.GetFullPath(filename);
+
+            // Now let's see if we already parsed it
+            if (!context.ParsedFiles.TryGetValue(filename, out var statements))
+            {
+                if (!File.Exists(filename))
+                {
+                    context.Diagnostics?.Post(include.Filename.Location, ErrorCodes.FileDoesNotExist, filename);
+                    return;
+                }
+                var lexer = SimpleCircuitLexer.FromFile(filename);
+                var parsingContext = new ParsingContext() { Diagnostics = context.Diagnostics };
+                SimpleCircuitParser.Parse(lexer, parsingContext, out var s);
+                statements = s; // This might be null if there is an error or if it's empty
+
+                // Store for later
+                context.ParsedFiles.Add(filename, statements);
+            }
+
+            // Evaluate the statements
+            if (statements is not null)
+                Evaluate(statements, context);
         }
 
         private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> defaultVariantsAndProperties, EvaluationContext context)

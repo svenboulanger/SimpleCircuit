@@ -63,7 +63,7 @@ namespace SimpleCircuit
         /// <summary>
         /// Gets the style.
         /// </summary>
-        public IStyle Style { get; } = style ?? Drawing.Styles.Style.Light;
+        public IStyle Style { get; } = style ?? new Style();
 
         /// <summary>
         /// Adds the specified component.

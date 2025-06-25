@@ -86,6 +86,16 @@ namespace SimpleCircuit.Evaluator
         public Queue<ILocatedDrawable> QueuedPoints { get; } = [];
 
         /// <summary>
+        /// Gets or sets the base path of the evaluation context.
+        /// </summary>
+        public string BasePath { get; set; }
+
+        /// <summary>
+        /// Gets the already parsed files.
+        /// </summary>
+        public Dictionary<string, SyntaxNode> ParsedFiles { get; } = [];
+
+        /// <summary>
         /// Create a new parsing context with the default stuff in it.
         /// </summary>
         /// <param name="loadAssembly">If <c>true</c>, the assembly should be searched for components using reflection.</param>
@@ -98,6 +108,7 @@ namespace SimpleCircuit.Evaluator
             {
                 Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
 
+                // Search for markers in the assembly
                 foreach (var t in typeof(ParsingContext).Assembly.GetTypes())
                 {
                     if (t.IsAbstract || t.IsInterface || t.IsGenericType)
@@ -131,7 +142,6 @@ namespace SimpleCircuit.Evaluator
         /// <param name="factories">The factories.</param>
         /// <param name="circuit">The circuit.</param>
         /// <param name="options">The options.</param>
-        /// <param name="diagnostics">The diagnostics handler.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="factories"/>, <paramref name="circuit"/> or <paramref name="options"/> is <c>null</c>.</exception>
         public EvaluationContext(DrawableFactoryDictionary factories, GraphicalCircuit circuit, Options options, Scope scope = null)
         {

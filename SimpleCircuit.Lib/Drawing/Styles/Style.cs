@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Components.Variants;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Drawing.Styles
 {
@@ -9,43 +10,37 @@ namespace SimpleCircuit.Drawing.Styles
     public class Style : IStyle
     {
         /// <summary>
-        /// Gets a light mode style.
+        /// Gets the default "light" theme colors.
         /// </summary>
-        public static Style Light => new()
+        public static Dictionary<string, string> LightTheme { get; } = new()
         {
-            Variables =
-            {
-                { "foreground", "#212529" }, // From Bootstrap 5
-                { "background", "none" },
-                { "primary", "#007bff" }, // From Bootstrap 5
-                { "secondary", "#6c757d" }, // From Bootstrap 5
-                { "success", "#28a745" }, // From Bootstrap 5
-                { "warning", "#ffc107" }, // From Bootstrap 5
-                { "danger", "#dc3545" }, // From Bootstrap 5
-                { "light", "#f8f9fa" }, // From Bootstrap 5
-                { "dark", "#343a40" }, // From Bootstrap 5
-                { "bg-opaque", "white" },
-            }
+            { "foreground", "#212529" }, // From Bootstrap 5
+            { "background", "none" },
+            { "primary", "#007bff" }, // From Bootstrap 5
+            { "secondary", "#6c757d" }, // From Bootstrap 5
+            { "success", "#28a745" }, // From Bootstrap 5
+            { "warning", "#ffc107" }, // From Bootstrap 5
+            { "danger", "#dc3545" }, // From Bootstrap 5
+            { "light", "#f8f9fa" }, // From Bootstrap 5
+            { "dark", "#343a40" }, // From Bootstrap 5
+            { "bg-opaque", "white" },
         };
 
         /// <summary>
-        /// Gets a dark mode style.
+        /// Gets the default "dark" theme colors.
         /// </summary>
-        public static Style Dark => new()
+        public static Dictionary<string, string> DarkTheme { get; } = new()
         {
-            Variables =
-            {
-                { "foreground", "#dee2e6" }, // From Bootstrap 5
-                { "background", "none" },
-                { "primary", "#007bff" }, // From Bootstrap 5
-                { "secondary", "#6c757d" }, // From Bootstrap 5
-                { "success", "#28a745" }, // From Bootstrap 5
-                { "warning", "#ffc107" }, // From Bootstrap 5
-                { "danger", "#dc3545" }, // From Bootstrap 5
-                { "light", "#f8f9fa" }, // From Bootstrap 5
-                { "dark", "#343a40" }, // From Bootstrap 5
-                { "bg-opaque", "#343a40" },
-            }
+            { "foreground", "#dee2e6" }, // From Bootstrap 5
+            { "background", "none" },
+            { "primary", "#007bff" }, // From Bootstrap 5
+            { "secondary", "#6c757d" }, // From Bootstrap 5
+            { "success", "#28a745" }, // From Bootstrap 5
+            { "warning", "#ffc107" }, // From Bootstrap 5
+            { "danger", "#dc3545" }, // From Bootstrap 5
+            { "light", "#f8f9fa" }, // From Bootstrap 5
+            { "dark", "#343a40" }, // From Bootstrap 5
+            { "bg-opaque", "#343a40" },
         };
 
         /// <summary>
@@ -121,6 +116,40 @@ namespace SimpleCircuit.Drawing.Styles
         /// <inheritdoc />
         public double Justification { get; set; } = 1.0;
 
+        /// <summary>
+        /// Creates a new <see cref="Style"/>.
+        /// </summary>
+        /// <param name="theme">The theme colors.</param>
+        public Style(IEnumerable<KeyValuePair<string, string>> theme = null)
+        {
+            if (theme is not null)
+                ApplyTheme(theme);
+            else
+                ApplyTheme(LightTheme);
+        }
+
+        /// <inheritdoc />
+        public bool TryGetVariable(string key, out string value) => Variables.TryGetValue(key, out value);
+
+        /// <inheritdoc />
+        public bool RegisterVariable(string key, string value)
+        {
+            if (Variables.ContainsKey(key))
+                return false;
+            Variables.Add(key, value);
+            return true;
+        }
+
+        /// <summary>
+        /// Apply colors for a theme.
+        /// </summary>
+        /// <param name="pairs">The key-value pairs that represent theme colors.</param>
+        public void ApplyTheme(IEnumerable<KeyValuePair<string, string>> pairs)
+        {
+            foreach (var pair in pairs)
+                Variables[pair.Key] = pair.Value;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -137,18 +166,6 @@ namespace SimpleCircuit.Drawing.Styles
                 $"justification=\"{Justification.ToSVG()}\""
                 ];
             return string.Join(", ", items);
-        }
-
-        /// <inheritdoc />
-        public bool TryGetVariable(string key, out string value) => Variables.TryGetValue(key, out value);
-
-        /// <inheritdoc />
-        public bool RegisterVariable(string key, string value)
-        {
-            if (Variables.ContainsKey(key))
-                return false;
-            Variables.Add(key, value);
-            return true;
         }
     }
 }

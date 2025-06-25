@@ -94,6 +94,8 @@
         ExpectedEndValue,
         [Diagnostic(SeverityLevel.Error, null, "Expected an expression")]
         ExpectedExpression,
+        [Diagnostic(SeverityLevel.Error, null, "Expected a filename")]
+        ExpectedFilename,
         [Diagnostic(SeverityLevel.Error, null, "Expected a for-loop definition")]
         ExpectedForLoopDefinition,
         [Diagnostic(SeverityLevel.Error, null, "Expected '{0}'")]
@@ -149,6 +151,8 @@
         [Diagnostic(SeverityLevel.Error, null, "Expected a wire segment angle value")]
         ExpectedWireSegmentAngle,
 
+        [Diagnostic(SeverityLevel.Error, null, "The file '{0}' does not exist")]
+        FileDoesNotExist,
         [Diagnostic(SeverityLevel.Error, null, "For-loop increment is too small ({0})")]
         ForLoopIncrementTooSmall,
 

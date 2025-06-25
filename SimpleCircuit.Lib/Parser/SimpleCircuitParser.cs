@@ -3,6 +3,7 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -143,7 +144,7 @@ namespace SimpleCircuit.Parser
 
                         // Allow queued anonymous points here
                         if (lexer.Branch(TokenType.Punctuator, ".", out var dot) ||
-                            context.CompatibilityMode && lexer.Branch(TokenType.Word, "x", out dot))
+                            lexer.Branch(TokenType.Word, "x", out dot))
                         {
                             items.Add(wire);
                             items.Add(new QueuedAnonymousPoint(dot));
@@ -1047,6 +1048,20 @@ namespace SimpleCircuit.Parser
                         lexer.Next(); // 'box'
                         if (!ParseBox(word, lexer, context, out result))
                             return false;
+                        break;
+
+                    case "inc":
+                    case "include":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'inc'
+                        if (!ParseValueOrExpression(lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedFilename);
+                            return false;
+                        }
+                        result = new IncludeNode(word, result);
                         break;
 
                     case "variant":
