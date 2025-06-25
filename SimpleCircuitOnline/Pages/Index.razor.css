@@ -86,6 +86,7 @@
 .version {
     display: block;
     position: absolute;
+    text-align: right;
     top: 5px;
     right: 10px;
     color: #aaa;
