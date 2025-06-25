@@ -20,7 +20,7 @@ namespace SimpleCircuit.Evaluator
         private readonly Stack<string> _sections = new();
         private readonly Stack<Dictionary<string, int>> _anonymousCounterStack = [];
         private Dictionary<string, int> _anonymousCounters = [];
-        private Stack<HashSet<IDrawable>> _trackedDrawables = [];
+        private readonly Stack<HashSet<IDrawable>> _trackedDrawables = [];
 
         public const string WireKey = ":wire:";
         public const string VirtualKey = ":virtual:";
@@ -76,6 +76,11 @@ namespace SimpleCircuit.Evaluator
         public Dictionary<string, SectionDefinitionNode> SectionDefinitions { get; } = [];
 
         /// <summary>
+        /// Gets the already parsed files.
+        /// </summary>
+        public Dictionary<string, SyntaxNode> IncludeDefinitions { get; } = [];
+
+        /// <summary>
         /// Gets or sets whether the evaluator should try to be compatible with SimpleCircuit 2.x.
         /// </summary>
         public bool CompatibilityMode { get; set; } = true;
@@ -91,9 +96,9 @@ namespace SimpleCircuit.Evaluator
         public string BasePath { get; set; }
 
         /// <summary>
-        /// Gets the already parsed files.
+        /// Gets all the requested themes.
         /// </summary>
-        public Dictionary<string, SyntaxNode> ParsedFiles { get; } = [];
+        public Dictionary<string, Dictionary<string, string>> Themes { get; } = [];
 
         /// <summary>
         /// Create a new parsing context with the default stuff in it.

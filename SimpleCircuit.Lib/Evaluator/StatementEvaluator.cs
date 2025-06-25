@@ -5,6 +5,7 @@ using SimpleCircuit.Components.General;
 using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
@@ -45,6 +46,7 @@ namespace SimpleCircuit.Evaluator
                 case IfElseNode ifElse: Evaluate(ifElse, context); break;
                 case SubcircuitDefinitionNode subckt: Evaluate(subckt, context); break;
                 case IncludeNode include: Evaluate(include, context); break;
+                case ThemeNode theme: Evaluate(theme, context); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -545,7 +547,7 @@ namespace SimpleCircuit.Evaluator
                 filename = Path.GetFullPath(filename);
 
             // Now let's see if we already parsed it
-            if (!context.ParsedFiles.TryGetValue(filename, out var statements))
+            if (!context.IncludeDefinitions.TryGetValue(filename, out var statements))
             {
                 if (!File.Exists(filename))
                 {
@@ -558,12 +560,63 @@ namespace SimpleCircuit.Evaluator
                 statements = s; // This might be null if there is an error or if it's empty
 
                 // Store for later
-                context.ParsedFiles.Add(filename, statements);
+                context.IncludeDefinitions.Add(filename, statements);
             }
 
             // Evaluate the statements
             if (statements is not null)
                 Evaluate(statements, context);
+        }
+        private static void Evaluate(ThemeNode theme, EvaluationContext context)
+        {
+            // Get the theme name
+            string name = EvaluateName(theme.Name, context);
+            if (name is null)
+                return;
+
+            // Get the colors for the theme
+            if (!context.Themes.TryGetValue(name, out var colors))
+            {
+                colors = [];
+                if (Style.DefaultThemes.TryGetValue(name, out var existing))
+                {
+                    foreach (var pair in existing)
+                        colors[pair.Key] = pair.Value;
+                }
+                context.Themes.Add(name, colors);
+            }
+
+            // Go over all the properties to overwrite the theme colors if necessary
+            foreach (var property in theme.Properties)
+            {
+                switch (property)
+                {
+                    case BinaryNode bn when bn.Type == BinaryOperatortype.Assignment:
+
+                        // Get the property name
+                        string colorKey = EvaluateName(bn.Left, context);
+                        if (colorKey is null)
+                            return;
+
+                        // Get the color value
+                        object objValue = EvaluateExpression(bn.Right, context);
+                        if (objValue is null)
+                            return;
+                        if (objValue is not string colorValue)
+                        {
+                            context.Diagnostics?.Post(bn.Right.Location, ErrorCodes.ExpectedString);
+                            return;
+                        }
+
+                        // Store the color
+                        colors[colorKey] = colorValue;
+                        break;
+
+                    default:
+                        context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
+                        return;
+                }
+            }
         }
 
         private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> defaultVariantsAndProperties, EvaluationContext context)

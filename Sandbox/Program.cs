@@ -23,6 +23,9 @@ namespace Sandbox
 
             // string script = DemoHelper.CreateDemo("WP", evalContext.Factory, ["VDD"]);
             string script = @"
+.theme dark
+.theme light foreground=""blue""
+
 GND <u> V(""Hello"") <u r> R <r d> C <d> GND
 (y GND)
 ";
@@ -39,13 +42,19 @@ GND <u> V(""Hello"") <u r> R <r d> C <d> GND
             // Draw the component
             if (evalContext.Circuit.Count > 0 && logger.ErrorCount == 0)
             {
-                Export("tmp.html", evalContext.Circuit, logger);
-
-                // Now do a dark theme with the same circuit
-                if (evalContext.Circuit.Style is Style style)
+                if (evalContext.Themes.Count == 0)
+                    evalContext.Themes.Add("light", Style.DefaultThemes["light"]);
+                var style = (Style)evalContext.Circuit.Style;
+                foreach (var pair in evalContext.Themes)
                 {
-                    style.ApplyTheme(Style.DarkTheme);
-                    Export("tmp_dark.html", evalContext.Circuit, logger, "black");
+                    // Apply the style colors
+                    style.Variables.Clear();
+                    foreach (var color in pair.Value)
+                        style.Variables[color.Key] = color.Value;
+                    string filename = evalContext.Themes.Count > 1 ? $"tmp_{pair.Key}.html" : "tmp.html";
+                    if (!style.Variables.TryGetValue("bg-opaque", out string bgColor))
+                        bgColor = null;
+                    Export(filename, evalContext.Circuit, logger, bgColor);
                 }
             }
         }

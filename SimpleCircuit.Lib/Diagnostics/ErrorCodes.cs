@@ -138,6 +138,10 @@
         ExpectedSymbolDefinition,
         [Diagnostic(SeverityLevel.Error, null, "Expected a symbol key")]
         ExpectedSymbolKey,
+        [Diagnostic(SeverityLevel.Error, null, "Expected a theme definition")]
+        ExpectedThemeDefinition,
+        [Diagnostic(SeverityLevel.Error, null, "Expected a theme name")]
+        ExpectedThemeName,
         [Diagnostic(SeverityLevel.Error, null, "Expected a value or an expression")]
         ExpectedValueOrExpression,
         [Diagnostic(SeverityLevel.Error, null, "Expected a variable name")]

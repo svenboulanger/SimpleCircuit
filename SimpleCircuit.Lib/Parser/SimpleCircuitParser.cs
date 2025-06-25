@@ -1158,6 +1158,18 @@ namespace SimpleCircuit.Parser
                         }
                         break;
 
+                    case "theme":
+                        lexer.Next(); // '.'
+                        lexer.Next(); // 'theme'
+                        if (!ParseTheme(word, lexer, context, out result))
+                            return false;
+                        if (result is null)
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedThemeDefinition);
+                            return false;
+                        }
+                        break;
+
                     default:
                         break;
                 }
@@ -1691,6 +1703,34 @@ namespace SimpleCircuit.Parser
             }
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, ".ends");
             return false;
+        }
+        private static bool ParseTheme(Token theme, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+        {
+            result = null;
+
+            // Parse the name
+            if (!ParseName(lexer, context, out var name))
+                return false;
+            if (name is null)
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedThemeName);
+                return false;
+            }
+
+            // Parse properties
+            if (!ParsePropertyList(lexer, context, out var properties))
+                return false;
+
+            // We now expect the end of the line
+            if (!lexer.Branch(TokenType.Newline))
+            {
+                context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
+                return false;
+            }
+
+            // OK
+            result = new ThemeNode(theme, name, properties);
+            return true;
         }
     }
 }
