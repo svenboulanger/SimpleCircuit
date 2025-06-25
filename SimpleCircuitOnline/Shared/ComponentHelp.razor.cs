@@ -19,7 +19,7 @@ namespace SimpleCircuitOnline.Shared
         private const double MaxPreviewWidth = 90;
         private List<(PropertyInfo, string[], string)> _properties;
         private IDrawable _drawable = null;
-        private readonly HashSet<string> _initialVariants = new();
+        private readonly HashSet<string> _initialVariants = [];
 
         [Parameter]
         public string Class { get; set; }
@@ -146,7 +146,7 @@ namespace SimpleCircuitOnline.Shared
                 return;
             }
 
-            var drawing = new SvgBuilder(_textFormatter, Style.Light, null);
+            var drawing = new SvgBuilder(_textFormatter, new Style(), null);
             var context = new PrepareContext(_textFormatter, drawing.Style, null)
             {
                 Mode = PreparationMode.Reset

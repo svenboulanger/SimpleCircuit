@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
+using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Evaluator;
+using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -57,14 +59,14 @@ namespace SimpleCircuitOnline.Shared
         public EventCallback LibrariesChanged { get; set; }
 
         /// <summary>
-        /// Builds a context with the current library collection.
+        /// Builds an evaluation context.
         /// </summary>
-        /// <param name="diagnostics">The diagnostics.</param>
-        /// <param name="darkMode">If <c>true</c>, the context is built for dark mode.</param>
-        /// <returns>Returns the parsing context.</returns>
-        public EvaluationContext BuildContext(IDiagnosticHandler diagnostics, bool darkMode)
+        /// <param name="diagnostics">The diagnostics handler.</param>
+        /// <returns>Returns the evaluation context.</returns>
+        public EvaluationContext BuildContext(IDiagnosticHandler diagnostics)
         {
-            var context = new EvaluationContext(DefaultLibraryLoaded, darkMode ? Style.Dark : Style.Light, _textFormatter)
+            // Get the context
+            var evalContext = new EvaluationContext(DefaultLibraryLoaded, new Style(), _textFormatter)
             {
                 Diagnostics = diagnostics
             };
@@ -73,9 +75,35 @@ namespace SimpleCircuitOnline.Shared
             foreach (var library in Libraries.OrderBy(lib => lib.Key))
             {
                 if (library.Value.IsLoaded)
-                    context.Factory.Load(library.Value.Library, diagnostics);
+                    evalContext.Factory.Load(library.Value.Library, diagnostics);
             }
-            return context;
+            return evalContext;
+        }
+
+        /// <summary>
+        /// Builds a circuit from a script.
+        /// </summary>
+        /// <param name="script">The script.</param>
+        /// <param name="source">The source.</param>
+        /// <param name="options">The options.</param>
+        /// <param name="evalContext">The evaluation context, if you already have one.</param>
+        /// <returns>Returns the circuit and themes.</returns>
+        public (GraphicalCircuit Circuit, Dictionary<string, Dictionary<string, string>> Themes) BuildCircuit(string script, string source, Options options, EvaluationContext evalContext)
+        {
+            // Parse the script
+            var parsingContext = new ParsingContext()
+            {
+                Diagnostics = evalContext.Diagnostics
+            };
+            var lexer = SimpleCircuitLexer.FromString(script, source);
+            if (!SimpleCircuitParser.Parse(lexer, parsingContext, out var statements))
+                return (null, null);
+
+            // Evaluate the script
+            StatementEvaluator.Evaluate(statements, evalContext);
+
+            // Return the results
+            return (evalContext.Circuit, evalContext.Themes);
         }
 
         /// <summary>

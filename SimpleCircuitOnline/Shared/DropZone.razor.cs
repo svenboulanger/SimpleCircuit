@@ -70,18 +70,6 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public EventCallback RefreshRequested { get; set; }
 
-        [Parameter]
-        public bool ExportLight { get; set; }
-
-        [Parameter]
-        public EventCallback<bool> ExportLightChanged { get; set; }
-
-        [Parameter]
-        public bool ExportDark { get; set; }
-
-        [Parameter]
-        public EventCallback<bool> ExportDarkChanged { get; set; }
-
         protected string ContainerClasses
         {
             get
@@ -111,18 +99,6 @@ namespace SimpleCircuitOnline.Shared
         {
             AutoUpdate = value;
             await AutoUpdateChanged.InvokeAsync(value);
-        }
-
-        private async Task ToggleExportLight(bool value)
-        {
-            ExportLight = value;
-            await ExportLightChanged.InvokeAsync(value);
-        }
-
-        private async Task ToggleExportDark(bool value)
-        {
-            ExportDark = value;
-            await ExportDarkChanged.InvokeAsync(value);
         }
 
         private async Task RequestRefresh() => await RefreshRequested.InvokeAsync();

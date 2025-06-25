@@ -10,6 +10,11 @@ namespace SimpleCircuit.Drawing.Styles
     public class Style : IStyle
     {
         /// <summary>
+        /// Gets the key in themes that is used for an opaque background.
+        /// </summary>
+        public const string OpaqueBackground = "bg-opaque";
+
+        /// <summary>
         /// Gets the default "light" theme colors.
         /// </summary>
         public static Dictionary<string, Dictionary<string, string>> DefaultThemes { get; } = new()
@@ -25,7 +30,7 @@ namespace SimpleCircuit.Drawing.Styles
                     { "danger", "#dc3545" }, // From Bootstrap 5
                     { "light", "#f8f9fa" }, // From Bootstrap 5
                     { "dark", "#343a40" }, // From Bootstrap 5
-                    { "bg-opaque", "white" },
+                    { OpaqueBackground, "white" },
                 }
             },
             { "dark", new()
@@ -39,7 +44,7 @@ namespace SimpleCircuit.Drawing.Styles
                     { "danger", "#dc3545" }, // From Bootstrap 5
                     { "light", "#f8f9fa" }, // From Bootstrap 5
                     { "dark", "#343a40" }, // From Bootstrap 5
-                    { "bg-opaque", "#343a40" },
+                    { OpaqueBackground, "#343a40" },
                 }
             }
         };

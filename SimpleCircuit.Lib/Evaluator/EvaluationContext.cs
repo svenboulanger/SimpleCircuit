@@ -81,11 +81,6 @@ namespace SimpleCircuit.Evaluator
         public Dictionary<string, SyntaxNode> IncludeDefinitions { get; } = [];
 
         /// <summary>
-        /// Gets or sets whether the evaluator should try to be compatible with SimpleCircuit 2.x.
-        /// </summary>
-        public bool CompatibilityMode { get; set; } = true;
-
-        /// <summary>
         /// Gets the queue of anonymous points.
         /// </summary>
         public Queue<ILocatedDrawable> QueuedPoints { get; } = [];
@@ -154,6 +149,24 @@ namespace SimpleCircuit.Evaluator
             Circuit = circuit ?? throw new ArgumentNullException(nameof(circuit));
             Options = options ?? throw new ArgumentNullException(nameof(options));
             CurrentScope = scope ?? new();
+        }
+
+        /// <summary>
+        /// Resets the evaluation context for re-use.
+        /// </summary>
+        public void Reset()
+        {
+            _sections.Clear();
+            _anonymousCounters.Clear();
+            _anonymousCounterStack.Clear();
+            _trackedDrawables.Clear();
+            CurrentScope = new();
+            LocalParameterValues.Clear();
+            UsedExpressionParameters.Clear();
+            Circuit.Clear();
+            SectionDefinitions.Clear();
+            IncludeDefinitions.Clear();
+            QueuedPoints.Clear();
         }
 
         /// <summary>

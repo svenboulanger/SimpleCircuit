@@ -45,7 +45,7 @@ namespace SimpleCircuitOnline.Shared
         /// <summary>
         /// Updates the list with the given parsing context.
         /// </summary>
-        /// <param name="context">Gets the evaluation context.</param>
+        /// <param name="context">The evaluation context to resolve the components.</param>
         public void Update(EvaluationContext context)
         {
             _categories.Clear();

@@ -16,7 +16,7 @@ namespace SimpleCircuitOnline.Shared
         public bool UseDOM { get; set; } = true;
 
         [Parameter]
-        public XmlDocument Svg { get; set; }
+        public List<(string Theme, XmlDocument Document, string Background)> Svg { get; set; }
 
         [Parameter]
         public int Loading { get; set; }
@@ -27,13 +27,34 @@ namespace SimpleCircuitOnline.Shared
         [Parameter]
         public bool ShrinkY { get; set; } = true;
 
+        public void UpdateSvg(object sender, EventArgs args)
+        {
+            if (Svg is not null)
+            {
+                if (Svg.Count > 0 && Svg[0].Document is not null)
+                {
+                    using var sw = new StringWriter();
+                    using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
+                        Svg[0].Document.WriteTo(xml);
+                    var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
+                    string classes = $"{(ShrinkX ? "max-width" : "")}{(ShrinkY ? " max-height" : "")}{(_invalid ? " greyed" : "")}";
+                    _svg = $"<img class=\"{classes}\" style=\"background-color:{Svg[0].Background ?? "white"};\" src=\"data:image/svg+xml;base64,{data}\" />";
+                }
+                else
+                    _svg = string.Empty;
+            }
+            else if (_svg != string.Empty)
+                _svg = string.Empty;
+            StateHasChanged();
+        }
+
         /// <inheritdoc />
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             // Update the SVG
             _invalid = false;
             bool update = false, render = false;
-            if (parameters.TryGetValue<XmlDocument>(nameof(Svg), out var cSvg) && !ReferenceEquals(Svg, cSvg))
+            if (parameters.TryGetValue<List<(string, XmlDocument, string)>>(nameof(Svg), out var cSvg) && !ReferenceEquals(Svg, cSvg))
             {
                 Svg = cSvg;
                 update = true;
@@ -60,37 +81,7 @@ namespace SimpleCircuitOnline.Shared
             }
 
             if (update)
-            {
-                if (Svg == null)
-                    _invalid = true;
-                else if (UseDOM)
-                {
-                    // Remove any styling from the document, as it is defined elsewhere in the document
-                    var doc = (XmlDocument)Svg.Clone();
-                    using StringWriter style = new();
-                    var tags = new List<XmlNode>();
-                    foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("style"))
-                        tags.Add(node);
-                    foreach (var tag in tags)
-                        tag.ParentNode.RemoveChild(tag);
-                    doc.DocumentElement.SetAttribute("class", $"simplecircuit{(ShrinkX ? " max-width" : "")}{(ShrinkY ? " max-height" : "")}{(_invalid ? " greyed" : "")}");
-
-                    // Write out the stripped document XML
-                    using var sw = new StringWriter();
-                    using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }))
-                        doc.WriteTo(xml);
-                    _svg = sw.ToString();
-                }
-                else
-                {
-                    using var sw = new StringWriter();
-                    using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
-                        Svg.WriteTo(xml);
-                    var data = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sw.ToString()));
-                    _svg = $"<img src=\"data:image/svg+xml;base64,{data}\" />";
-                }
-                StateHasChanged();
-            }
+                UpdateSvg(this, EventArgs.Empty);
             else if (render)
                 StateHasChanged();
             else

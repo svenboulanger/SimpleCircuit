@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using SimpleCircuit;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using SimpleCircuitOnline.Shared;
@@ -24,11 +25,12 @@ namespace SimpleCircuitOnline.Pages
         private Task _currentSolver = null;
         private readonly Logger _logger = new();
         private string _simpleCircuitVersion;
-        private XmlDocument _svg;
+        private List<(string Theme, XmlDocument Document, string Background)> _svg = null;
         private readonly Timer _timer = new(750) { Enabled = false, AutoReset = true };
         private readonly System.Threading.Lock _lock = new();
         private int _updates = 0;
         private int _loading;
+
         private StandaloneCodeEditor _scriptEditor;
         private LibraryCollection _libraries;
         private TabMenu _tabs;
@@ -100,55 +102,10 @@ namespace SimpleCircuitOnline.Pages
                         _timer.Start();
                         lock (_lock)
                             _updates = 0;
-                        Task.Run(() => UpdateNow(_libraries.BuildContext(_logger, _settings.ViewDarkMode)));
+                        Task.Run(UpdateNow);
                     }
                     else
                         _timer.Stop();
-                    Task.Run(SaveSettings);
-                }
-            }
-        }
-
-        protected bool ViewDarkMode
-        {
-            get => _settings.ViewDarkMode;
-            set
-            {
-                if (_settings.ViewDarkMode != value)
-                {
-                    _settings.ViewDarkMode = value;
-                    Task.Run(SaveSettings);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether a light mode image should be exported.
-        /// </summary>
-        protected bool ExportLightMode
-        {
-            get => _settings.ExportLightMode;
-            set
-            {
-                if (_settings.ExportLightMode != value)
-                {
-                    _settings.ExportLightMode = value;
-                    Task.Run(SaveSettings);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether a dark mode image should be exported.
-        /// </summary>
-        protected bool ExportDarkMode
-        {
-            get => _settings.ExportDarkMode;
-            set
-            {
-                if (_settings.ExportDarkMode != value)
-                {
-                    _settings.ExportDarkMode = value;
                     Task.Run(SaveSettings);
                 }
             }
@@ -165,7 +122,7 @@ namespace SimpleCircuitOnline.Pages
 
                 // Update documentation
                 await _libraries.LoadLibraries();
-                var context = _libraries.BuildContext(_logger, _settings.ViewDarkMode);
+                var context = _libraries.BuildContext(_logger);
                 await UpdateKeywords(context);
                 _componentList.Update(context);
 
@@ -314,11 +271,8 @@ namespace SimpleCircuitOnline.Pages
             {
                 case DownloadEventArgs.Types.Svg:
                     {
-                        async void ExportSvg(bool mode, string exportFilename)
+                        async void ExportSvg(string exportFilename, XmlDocument doc)
                         {
-                            var context = _libraries.BuildContext(_logger, mode);
-                            var doc = await ComputeXml(context, includeScript: true);
-
                             string result;
                             using (var sw = new Utf8StringWriter())
                             using (var xml = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = false }))
@@ -331,27 +285,23 @@ namespace SimpleCircuitOnline.Pages
                             byte[] file = Encoding.UTF8.GetBytes(result);
                             await _js.InvokeVoidAsync("BlazorDownloadFile", exportFilename, "image/svg+xml;", file);
                         }
-                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+
+                        // Build the circuit
+                        var docs = await ComputeXml(includeScript: true);
+
+                        // Export
+                        foreach (var (theme, doc, _) in docs)
                         {
-                            ExportSvg(false, $"{filename}_light.svg");
-                            ExportSvg(true, $"{filename}_dark.svg");
+                            string exportFilename = docs.Count > 1 ? $"{filename}_{theme}.svg" : $"{filename}.svg";
+                            ExportSvg(exportFilename, doc);
                         }
-                        else if (_settings.ExportLightMode)
-                            ExportSvg(false, filename);
-                        else if (_settings.ExportDarkMode)
-                            ExportSvg(true, filename);
-                        else
-                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
                 case DownloadEventArgs.Types.Png:
                     {
-                        async void ExportPng(bool mode, string exportFilename)
+                        async void ExportPng(string exportFilename, XmlDocument doc)
                         {
-                            var context = _libraries.BuildContext(_logger, mode);
-                            var doc = await ComputeXml(context, includeScript: true);
-
                             // Compute the width and height to compute the scale of the image
                             if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
                                 w = 10.0;
@@ -370,27 +320,23 @@ namespace SimpleCircuitOnline.Pages
                             string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
                             await _js.InvokeVoidAsync("BlazorExportImage", exportFilename, "image/png", url, (int)w, (int)h);
                         }
-                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+
+                        // Build the circuit
+                        var docs = await ComputeXml(includeScript: true);
+
+                        // Export
+                        foreach (var (theme, doc, _) in docs)
                         {
-                            ExportPng(false, $"{filename}_light.png");
-                            ExportPng(true, $"{filename}_dark.png");
+                            string exportFilename = docs.Count > 1 ? $"{filename}_{theme}.png" : $"{filename}.png";
+                            ExportPng(exportFilename, doc);
                         }
-                        else if (_settings.ExportLightMode)
-                            ExportPng(false, filename);
-                        else if (_settings.ExportDarkMode)
-                            ExportPng(true, filename);
-                        else
-                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
                 case DownloadEventArgs.Types.Jpeg:
                     {
-                        async void ExportJpg(bool mode, string exportFilename)
+                        async void ExportJpg(string exportFilename, XmlDocument doc, string backgroundColor)
                         {
-                            var context = _libraries.BuildContext(_logger, mode);
-                            var doc = await ComputeXml(context, includeScript: true);
-
                             // Compute the width and height to compute the scale of the image
                             if (!double.TryParse(doc.DocumentElement.GetAttribute("width"), out double w))
                                 w = 10.0;
@@ -407,19 +353,18 @@ namespace SimpleCircuitOnline.Pages
                                 result = sw.ToString();
                             }
                             string url = $"data:image/svg+xml;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(result))}";
-                            await _js.InvokeVoidAsync("BlazorExportImage", exportFilename, "image/jpeg", url, (int)w, (int)h, mode ? "black" : "white");
+                            await _js.InvokeVoidAsync("BlazorExportImage", exportFilename, "image/jpeg", url, (int)w, (int)h, backgroundColor);
                         }
-                        if (_settings.ExportDarkMode && _settings.ExportLightMode)
+
+                        // Build the circuit
+                        var docs = await ComputeXml(includeScript: true);
+
+                        // Export
+                        foreach (var (theme, doc, background) in docs)
                         {
-                            ExportJpg(false, $"{filename}_light.jpg");
-                            ExportJpg(true, $"{filename}_dark.jpg");
+                            string exportFilename = docs.Count > 1 ? $"{filename}_{theme}.jpg" : $"{filename}.jpg";
+                            ExportJpg(exportFilename, doc, background);
                         }
-                        else if (_settings.ExportLightMode)
-                            ExportJpg(false, filename);
-                        else if (_settings.ExportDarkMode)
-                            ExportJpg(true, filename);
-                        else
-                            _logger.Post(new DiagnosticMessage(SeverityLevel.Warning, "WARNING", "No light or dark mode is selected for export"));
                     }
                     break;
 
@@ -498,7 +443,7 @@ namespace SimpleCircuitOnline.Pages
             if (!string.IsNullOrWhiteSpace(script))
             {
                 await _scriptEditor.SetValue(script);
-                await UpdateNow(_libraries.BuildContext(_logger, false));
+                await UpdateNow();
             }
             lock (_lock)
                 _updates = 0;
@@ -539,7 +484,7 @@ namespace SimpleCircuitOnline.Pages
                     // Updating happens asynchronously
                     _logger.Clear();
                     _viewMode = false;
-                    _currentSolver = Task.Run(() => UpdateNow(_libraries.BuildContext(_logger, false)));
+                    _currentSolver = Task.Run(UpdateNow);
                 }
                 else if (_updates > 1)
                 {
@@ -549,16 +494,16 @@ namespace SimpleCircuitOnline.Pages
                 }
             }
         }
-        private async Task UpdateNow(EvaluationContext context)
+        private async Task UpdateNow()
         {
             _loading = 2;
-            _svg = await ComputeXml(context, false);
+            _svg = await ComputeXml(false);
             _loading = 0;
             StateHasChanged();
         }
-        private async Task<XmlDocument> ComputeXml(EvaluationContext context, bool includeScript)
+        private async Task<List<(string Theme, XmlDocument Document, string Background)>> ComputeXml(bool includeScript)
         {
-            XmlDocument doc = null;
+            List<(string Theme, XmlDocument Document, string Background)> result = [];
             try
             {
                 string code = await _scriptEditor.GetValue();
@@ -574,14 +519,10 @@ namespace SimpleCircuitOnline.Pages
                 }
 
                 // Parse the script
-                var lexer = SimpleCircuitLexer.FromString(code);
-                lexer.Diagnostics = context.Diagnostics;
-                var parsingContext = new ParsingContext() { Diagnostics = context.Diagnostics };
-                if (SimpleCircuitParser.Parse(lexer, parsingContext, out var node) && node is not null && node.Statements.Length > 0)
+                var context = _libraries.BuildContext(_logger);
+                var (ckt, themes) = _libraries.BuildCircuit(code, "editor", new(), context);
+                if (ckt is not null)
                 {
-                    StatementEvaluator.Evaluate(node, context);
-                    var ckt = context.Circuit;
-
                     // Include XML data
                     if (includeScript)
                     {
@@ -592,7 +533,23 @@ namespace SimpleCircuitOnline.Pages
 
                     // We now need the last things to have executed
                     if (ckt.Count > 0 && _logger.Errors == 0)
-                        doc = ckt.Render(_logger);
+                    {
+                        if (themes.Count == 0)
+                            themes.Add("light", Style.DefaultThemes["light"]);
+                        foreach (var theme in themes)
+                        {
+                            if (ckt.Style is Style style)
+                            {
+                                style.Variables.Clear();
+                                foreach (var pair in theme.Value)
+                                    style.Variables[pair.Key] = pair.Value;
+                            }
+                            ckt.Metadata["theme"] = theme.Key;
+                            if (!theme.Value.TryGetValue(Style.OpaqueBackground, out var bgColor))
+                                bgColor = "white";
+                            result.Add((theme.Key, ckt.Render(_logger), bgColor));
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -602,7 +559,7 @@ namespace SimpleCircuitOnline.Pages
 
             // Add our errors and warnings
             if (_logger.Errors == 0)
-                return doc;
+                return result;
             else
                 return null;
         }
@@ -657,14 +614,12 @@ namespace SimpleCircuitOnline.Pages
         }
         private async Task LibrariesUpdated()
         {
-            var context = _libraries.BuildContext(_logger, false);
-
             // Update documentation
-            _componentList.Update(context);
+            _componentList.Update(_libraries.BuildContext(null));
 
             // Reuse the context for updating
             _logger.Clear();
-            await UpdateNow(context);
+            await UpdateNow();
         }
 
         [GeneratedRegex("[\u0100-\uffff]")]
