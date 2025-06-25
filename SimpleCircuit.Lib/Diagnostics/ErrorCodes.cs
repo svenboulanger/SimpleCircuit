@@ -34,6 +34,8 @@
         CouldNotCreateComponentForName,
         [Diagnostic(SeverityLevel.Error, null, "Could not find any pins matching '{0}' on components matching '{1}'")]
         CouldNotFindAnyPinsMatching,
+        [Diagnostic(SeverityLevel.Error, null, "Could not find the base theme '{0}'")]
+        CouldNotFindBaseTheme,
         [Diagnostic(SeverityLevel.Error, null, "Could not find the component '{0}' in subcircuit '{1}' for creating a port")]
         CouldNotFindComponentInSubcircuitForPort,
         [Diagnostic(SeverityLevel.Warning, null, "Could not find any component matching '{0}'")]
@@ -177,6 +179,8 @@
         MissingSymbolKey,
         [Diagnostic(SeverityLevel.Warning, null, "Symbol '{0}' is missing a 'pins' tag")]
         MissingSymbolPins,
+        [Diagnostic(SeverityLevel.Warning, null, "Multiple base themes specified")]
+        MultipleBaseThemes,
         [Diagnostic(SeverityLevel.Warning, null, "The pin '{0}' on component '{1}' is used multiple times as a subcircuit port, causing duplicate port to be removed")]
         MultipleSubcircuitInstancePinPort,
 

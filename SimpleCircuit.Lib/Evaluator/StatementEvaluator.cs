@@ -573,24 +573,51 @@ namespace SimpleCircuit.Evaluator
             string name = EvaluateName(theme.Name, context);
             if (name is null)
                 return;
-
-            // Get the colors for the theme
-            if (!context.Themes.TryGetValue(name, out var colors))
-            {
-                colors = [];
-                if (Style.DefaultThemes.TryGetValue(name, out var existing))
-                {
-                    foreach (var pair in existing)
-                        colors[pair.Key] = pair.Value;
-                }
-                context.Themes.Add(name, colors);
-            }
+            Token baseTheme = default;
+            bool showedBaseThemeWarning = false;
+            List<KeyValuePair<string, string>> colors = [];
 
             // Go over all the properties to overwrite the theme colors if necessary
             foreach (var property in theme.Properties)
             {
                 switch (property)
                 {
+                    case QuotedNode quoted:
+                        {
+                            // Add a label
+                            if (baseTheme.Content.Length > 0 && !showedBaseThemeWarning)
+                            {
+                                context.Diagnostics?.Post(quoted.Location, ErrorCodes.MultipleBaseThemes);
+                                showedBaseThemeWarning = true;
+                            }
+                            baseTheme = new(quoted.Location, quoted.Value);
+                        }
+                        break;
+
+                    case IdentifierNode id:
+                        {
+                            // Add a label
+                            if (baseTheme.Content.Length > 0 && !showedBaseThemeWarning)
+                            {
+                                context.Diagnostics?.Post(id.Location, ErrorCodes.MultipleBaseThemes);
+                                showedBaseThemeWarning = true;
+                            }
+                            baseTheme = id.Token;
+                        }
+                        break;
+
+                    case LiteralNode literal:
+                        {
+                            // Add a label
+                            if (baseTheme.Content.Length > 0 && !showedBaseThemeWarning)
+                            {
+                                context.Diagnostics?.Post(literal.Location, ErrorCodes.MultipleBaseThemes);
+                                showedBaseThemeWarning = true;
+                            }
+                            baseTheme = new(literal.Location, literal.Value);
+                        }
+                        break;
+
                     case BinaryNode bn when bn.Type == BinaryOperatortype.Assignment:
 
                         // Get the property name
@@ -609,7 +636,7 @@ namespace SimpleCircuit.Evaluator
                         }
 
                         // Store the color
-                        colors[colorKey] = colorValue;
+                        colors.Add(new(colorKey, colorValue));
                         break;
 
                     default:
@@ -617,6 +644,41 @@ namespace SimpleCircuit.Evaluator
                         return;
                 }
             }
+
+            // Now let's build the theme
+            if (!context.Themes.TryGetValue(name, out var colorDict))
+            {
+                colorDict = [];
+                context.Themes.Add(name, colorDict);
+            }
+
+            // Work with the base theme first
+            if (baseTheme.Content.Length == 0)
+            {
+                // Maybe extension of the name itself?
+                if (Style.DefaultThemes.TryGetValue(name, out var existing))
+                {
+                    foreach (var pair in existing)
+                        colorDict.Add(pair.Key, pair.Value);
+                }
+            }
+            else
+            {
+                if (Style.DefaultThemes.TryGetValue(baseTheme.Content.ToString(), out var existing))
+                {
+                    foreach (var pair in existing)
+                        colorDict.Add(pair.Key, pair.Value);
+                }
+                else
+                {
+                    context.Diagnostics?.Post(baseTheme.Location, ErrorCodes.CouldNotFindBaseTheme, baseTheme.Content.ToString());
+                    return;
+                }
+            }
+
+            // Then apply overrides
+            foreach (var pair in colors)
+                colorDict[pair.Key] = pair.Value;
         }
 
         private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> defaultVariantsAndProperties, EvaluationContext context)
