@@ -184,10 +184,14 @@
         [Diagnostic(SeverityLevel.Warning, null, "The pin '{0}' on component '{1}' is used multiple times as a subcircuit port, causing duplicate port to be removed")]
         MultipleSubcircuitInstancePinPort,
 
+        [Diagnostic(SeverityLevel.Error, null, "A theme definnition should be at root level")]
+        NotRootLevelTheme,
+        [Diagnostic(SeverityLevel.Error, null, "A subcircuit definition should be at root level")]
+        NotRootLevelSubckt,
+        [Diagnostic(SeverityLevel.Error, null, "A symbol definition should be at root level")]
+        NotRootLevelSymbol,
         [Diagnostic(SeverityLevel.Info, null, "No unknowns to solve for")]
         NoUnknownsToSolve,
-        [Diagnostic(SeverityLevel.Error, null, "Nested subcircuit definitions are not allowed")]
-        NestedSubcircuitDefinition,
 
         [Diagnostic(SeverityLevel.Error, null, "Undefined wire segments are only allowed for the first and last segment in the wire")]
         UndefinedWireSegment,

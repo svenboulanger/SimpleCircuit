@@ -27,7 +27,7 @@ namespace SimpleCircuit.Parser.Nodes
         /// <summary>
         /// Gets the default variants and properties.
         /// </summary>
-        public ControlPropertyNode[] DefaultVariantsAndProperties { get; }
+        public SyntaxNode[] ControlStatements { get; }
 
         /// <summary>
         /// Gets a sorted array of strings that contain all the references.
@@ -43,12 +43,12 @@ namespace SimpleCircuit.Parser.Nodes
         /// <param name="statements">The statements.</param>
         /// <param name="parameterDefinitions">The parameter definitions.</param>
         /// <param name="references">The references.</param>
-        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> controlPropertyNodes, IEnumerable<string> references)
+        public ScopedStatementsNode(IEnumerable<SyntaxNode> statements, IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<SyntaxNode> controlStatements, IEnumerable<string> references)
             : base(statements.FirstOrDefault()?.Location ?? default)
         {
             Statements = statements?.ToArray() ?? [];
             ParameterDefinitions = parameterDefinitions?.ToArray() ?? [];
-            DefaultVariantsAndProperties = controlPropertyNodes?.ToArray() ?? [];
+            ControlStatements = controlStatements?.ToArray() ?? [];
             References = references?.ToArray() ?? [];
         }
 
@@ -67,6 +67,12 @@ namespace SimpleCircuit.Parser.Nodes
                 if (sb.Length > 0)
                     sb.AppendLine();
                 sb.Append(parameterDefinition.ToString());
+            }
+            foreach (var statement in ControlStatements)
+            {
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append(statement.ToString());
             }
             return sb.ToString();
         }

@@ -1,7 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
-using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Text;

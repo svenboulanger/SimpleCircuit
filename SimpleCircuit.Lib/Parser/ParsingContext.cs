@@ -9,8 +9,7 @@ namespace SimpleCircuit.Parser
     public class ParsingContext
     {
         /// <summary>
-        /// Gets or sets a flag that allows definitions of subcircuit definitions. This flag is used
-        /// to avoid nested subcircuit definitions.
+        /// A flag that determines whether subcircuit definitions are allowed.
         /// </summary>
         public bool AllowSubcircuitDefinitions { get; set; } = true;
 

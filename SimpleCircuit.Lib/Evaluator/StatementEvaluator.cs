@@ -61,7 +61,7 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(ScopedStatementsNode statements, EvaluationContext context)
         {
-            ApplyLocalParameterDefinitions(statements.ParameterDefinitions, statements.DefaultVariantsAndProperties, context);
+            ApplyLocalParameterDefinitions(statements.ParameterDefinitions, statements.ControlStatements, context);
 
             // Evaluate the statements
             foreach (var statement in statements.Statements)
@@ -527,6 +527,9 @@ namespace SimpleCircuit.Evaluator
         }
         private static void Evaluate(SubcircuitDefinitionNode subckt, EvaluationContext context)
         {
+            // Subcircuits should not be defined anywhere else than the root
+
+
             // Create a new factory
             context.Factory.Register(new Subcircuit(subckt.Name.Content.ToString(), subckt, context.Factory, context.Options, context.Diagnostics));
         }
@@ -681,7 +684,7 @@ namespace SimpleCircuit.Evaluator
                 colorDict[pair.Key] = pair.Value;
         }
 
-        private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<ControlPropertyNode> defaultVariantsAndProperties, EvaluationContext context)
+        private static void ApplyLocalParameterDefinitions(IEnumerable<ParameterDefinitionNode> parameterDefinitions, IEnumerable<SyntaxNode> controlStatements, EvaluationContext context)
         {
             // Make sure we can find the parameter definitions back
             foreach (var parameterDefinition in parameterDefinitions)
@@ -702,8 +705,8 @@ namespace SimpleCircuit.Evaluator
             }
 
             // Then evaluate all default variants and properties
-            foreach (var defaultOptions in defaultVariantsAndProperties)
-                Evaluate(defaultOptions, context);
+            foreach (var statement in controlStatements)
+                Evaluate(statement, context);
         }
         private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context, HashSet<Marker> markers = null)
         {

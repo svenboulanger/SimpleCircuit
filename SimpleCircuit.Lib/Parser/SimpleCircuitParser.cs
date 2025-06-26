@@ -37,7 +37,7 @@ namespace SimpleCircuit.Parser
             result = null;
             var statements = new List<SyntaxNode>();
             var parameterDefinitions = new List<ParameterDefinitionNode>();
-            var defaultVariantsAndProperties = new List<ControlPropertyNode>();
+            var controlStatements = new List<SyntaxNode>();
 
             while (true)
             {
@@ -54,12 +54,23 @@ namespace SimpleCircuit.Parser
                     break;
 
                 // Don't add a statement if it is a parameter definition (this is added separately to the context)
-                if (statement is ParameterDefinitionNode parameterDefinition)
-                    parameterDefinitions.Add(parameterDefinition);
-                else if (statement is ControlPropertyNode defaultOptions)
-                    defaultVariantsAndProperties.Add(defaultOptions);
-                else
-                    statements.Add(statement);
+                switch (statement)
+                {
+                    case ParameterDefinitionNode pdn:
+                        parameterDefinitions.Add(pdn);
+                        break;
+
+                    case SubcircuitDefinitionNode:
+                    case SymbolDefinitionNode:
+                    case ControlPropertyNode:
+                    case ThemeNode:
+                        controlStatements.Add(statement);
+                        break;
+
+                    default:
+                        statements.Add(statement);
+                        break;
+                }
             }
 
             // We finished parsing statements. If there are any, let's create our result node
@@ -75,7 +86,7 @@ namespace SimpleCircuit.Parser
                     foreach (string name in excludeReferences)
                         context.ReferencedVariables.Remove(name);
                 }
-                result = new ScopedStatementsNode(statements, parameterDefinitions, defaultVariantsAndProperties, context.ReferencedVariables.OrderBy(n => n));
+                result = new ScopedStatementsNode(statements, parameterDefinitions, controlStatements, context.ReferencedVariables.OrderBy(n => n));
             }
             return true;
         }
@@ -1144,7 +1155,7 @@ namespace SimpleCircuit.Parser
                     case "subckt":
                         if (!context.AllowSubcircuitDefinitions)
                         {
-                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.NestedSubcircuitDefinition);
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.NotRootLevelSubckt);
                             return false;
                         }
                         lexer.Next(); // '.'
