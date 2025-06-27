@@ -23,7 +23,7 @@ namespace SimpleCircuit.Parser
         /// <returns>Returns <c>true</c> if there were no error while parsing; otherwise, <c>false</c>.</returns>
         public static bool Parse(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result)
         {
-            if (!ParseScopedStatements(lexer, context, out result))
+            if (!ParseScopedStatements(lexer, context, out result, isRoot: true))
                 return false;
             if (lexer.Type != TokenType.EndOfContent)
             {
@@ -32,61 +32,70 @@ namespace SimpleCircuit.Parser
             }
             return true;
         }
-        private static bool ParseScopedStatements(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result, HashSet<string> excludeReferences = null)
+        private static bool ParseScopedStatements(SimpleCircuitLexer lexer, ParsingContext context, out ScopedStatementsNode result, HashSet<string> excludeReferences = null, bool isRoot = false)
         {
             result = null;
             var statements = new List<SyntaxNode>();
             var parameterDefinitions = new List<ParameterDefinitionNode>();
             var controlStatements = new List<SyntaxNode>();
 
-            while (true)
+            bool lastAllowFactoryExtension = context.AllowFactoryExtension;
+            try
             {
-                // Skip any empty lines
-                while (lexer.Type == TokenType.Newline || lexer.Type == TokenType.Comment)
-                    lexer.Next();
-                if (lexer.Type == TokenType.EndOfContent)
-                    break;
-
-                // Parse a statement
-                if (!ParseStatement(lexer, context, out var statement))
-                    return false;
-                if (statement is null)
-                    break;
-
-                // Don't add a statement if it is a parameter definition (this is added separately to the context)
-                switch (statement)
+                context.AllowFactoryExtension = isRoot;
+                while (true)
                 {
-                    case ParameterDefinitionNode pdn:
-                        parameterDefinitions.Add(pdn);
+                    // Skip any empty lines
+                    while (lexer.Type == TokenType.Newline || lexer.Type == TokenType.Comment)
+                        lexer.Next();
+                    if (lexer.Type == TokenType.EndOfContent)
                         break;
 
-                    case SubcircuitDefinitionNode:
-                    case SymbolDefinitionNode:
-                    case ControlPropertyNode:
-                    case ThemeNode:
-                        controlStatements.Add(statement);
+                    // Parse a statement
+                    if (!ParseStatement(lexer, context, out var statement))
+                        return false;
+                    if (statement is null)
                         break;
 
-                    default:
-                        statements.Add(statement);
-                        break;
+                    // Don't add a statement if it is a parameter definition (this is added separately to the context)
+                    switch (statement)
+                    {
+                        case ParameterDefinitionNode pdn:
+                            parameterDefinitions.Add(pdn);
+                            break;
+
+                        case SubcircuitDefinitionNode:
+                        case SymbolDefinitionNode:
+                        case ControlPropertyNode:
+                        case ThemeNode:
+                            controlStatements.Add(statement);
+                            break;
+
+                        default:
+                            statements.Add(statement);
+                            break;
+                    }
+                }
+
+                // We finished parsing statements. If there are any, let's create our result node
+                if (statements.Count > 0 || parameterDefinitions.Count > 0)
+                {
+                    // Use the collected scoped statements
+                    foreach (var parameterDefinition in parameterDefinitions)
+                        context.ReferencedVariables.Remove(parameterDefinition.Name);
+
+                    // Also exclude any parameters passed down the optional argument
+                    if (excludeReferences is not null)
+                    {
+                        foreach (string name in excludeReferences)
+                            context.ReferencedVariables.Remove(name);
+                    }
+                    result = new ScopedStatementsNode(statements, parameterDefinitions, controlStatements, context.ReferencedVariables.OrderBy(n => n));
                 }
             }
-
-            // We finished parsing statements. If there are any, let's create our result node
-            if (statements.Count > 0 || parameterDefinitions.Count > 0)
+            finally
             {
-                // Use the collected scoped statements
-                foreach (var parameterDefinition in parameterDefinitions)
-                    context.ReferencedVariables.Remove(parameterDefinition.Name);
-
-                // Also exclude any parameters passed down the optional argument
-                if (excludeReferences is not null)
-                {
-                    foreach (string name in excludeReferences)
-                        context.ReferencedVariables.Remove(name);
-                }
-                result = new ScopedStatementsNode(statements, parameterDefinitions, controlStatements, context.ReferencedVariables.OrderBy(n => n));
+                context.AllowFactoryExtension = lastAllowFactoryExtension;
             }
             return true;
         }
@@ -1129,6 +1138,11 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case "symbol":
+                        if (!context.AllowFactoryExtension)
+                        {
+                            context.Diagnostics?.Post(lexer.Token, ErrorCodes.NotRootLevelSymbol);
+                            return false;
+                        }
                         lexer.Next(); // '.'
                         lexer.Next(); // 'symbol'
                         if (!ParseSymbolDefinition(lexer, context, out result))
@@ -1153,7 +1167,7 @@ namespace SimpleCircuit.Parser
                         break;
 
                     case "subckt":
-                        if (!context.AllowSubcircuitDefinitions)
+                        if (!context.AllowFactoryExtension)
                         {
                             context.Diagnostics?.Post(lexer.Token, ErrorCodes.NotRootLevelSubckt);
                             return false;
@@ -1685,11 +1699,8 @@ namespace SimpleCircuit.Parser
             }
 
             // Parse the statements
-            bool lastAllowSubckt = context.AllowSubcircuitDefinitions;
-            context.AllowSubcircuitDefinitions = false;
             if (!ParseScopedStatements(lexer, context, out var statements))
                 return false;
-            context.AllowSubcircuitDefinitions = lastAllowSubckt;
 
             // Expect a .ends
             if (lexer.Type == TokenType.Punctuator && lexer.Content.ToString() == ".")

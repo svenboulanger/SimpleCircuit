@@ -9,9 +9,10 @@ namespace SimpleCircuit.Parser
     public class ParsingContext
     {
         /// <summary>
-        /// A flag that determines whether subcircuit definitions are allowed.
+        /// A flag that determines whether subcircuit or symbol definitions are allowed.
+        /// They change the factory dictionary, so typically you don't want them nested.
         /// </summary>
-        public bool AllowSubcircuitDefinitions { get; set; } = true;
+        public bool AllowFactoryExtension { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the diagnostics handler.
