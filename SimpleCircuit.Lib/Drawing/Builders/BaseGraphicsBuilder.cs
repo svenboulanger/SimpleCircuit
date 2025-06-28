@@ -152,7 +152,7 @@ namespace SimpleCircuit.Drawing.Builders
         private void DrawXmlActions(XmlNode parent, IXmlDrawingContext context)
         {
             // Calculate the style for the following actions
-            var style = context.Style?.Apply(Style) ?? Style;
+            var style = context.Modifier?.Apply(Style) ?? Style;
 
             foreach (XmlNode node in parent.ChildNodes)
             {
@@ -181,8 +181,8 @@ namespace SimpleCircuit.Drawing.Builders
                     case "g":
                         // Parse style options
                         var modifier = ParseStyleModifier(node, Diagnostics);
-                        var oldModifier = context.Style;
-                        context.Style = context.Style.Append(modifier);
+                        var oldModifier = context.Modifier;
+                        context.Modifier = context.Modifier.Append(modifier);
 
                         // Recursively descend
                         BeginGroup();
@@ -190,7 +190,7 @@ namespace SimpleCircuit.Drawing.Builders
                         EndGroup();
 
                         // Rettore
-                        context.Style = oldModifier;
+                        context.Modifier = oldModifier;
                         break;
                     default:
                         Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);

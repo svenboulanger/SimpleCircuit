@@ -43,7 +43,7 @@ namespace SimpleCircuit.Components.General
             {
                 _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
-                _anchors.Draw(builder, this, builder.Style.Modify(Style));
+                _anchors.Draw(builder, this, builder.Style.Modify(Modifier));
             }
         }
     }

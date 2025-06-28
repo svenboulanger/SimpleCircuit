@@ -65,7 +65,7 @@ namespace SimpleCircuit.Components
         public Bounds Bounds { get; private set; }
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Modifier { get; set; }
 
         /// <summary>
         /// Creates a new component.
@@ -414,7 +414,7 @@ namespace SimpleCircuit.Components
         /// </summary>
         /// <param name="context">The prepare context.</param>
         protected virtual void FormatLabels(IPrepareContext context)
-            => Labels.Format(context.TextFormatter, context.Style.Modify(Style));
+            => Labels.Format(context.TextFormatter, context.Style.Modify(Modifier));
 
         /// <summary>
         /// Creates a transform.

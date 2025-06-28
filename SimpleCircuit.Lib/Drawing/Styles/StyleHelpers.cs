@@ -16,10 +16,10 @@ namespace SimpleCircuit.Drawing.Styles
         /// <param name="modifier">The style modifier.</param>
         public static void AppendStyle(this IStyled styled, IStyleModifier modifier)
         {
-            if (styled.Style is not null)
-                styled.Style = new AggregateStyleModifier(styled.Style, modifier);
+            if (styled.Modifier is not null)
+                styled.Modifier = new AggregateStyleModifier(styled.Modifier, modifier);
             else
-                styled.Style = modifier;
+                styled.Modifier = modifier;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace SimpleCircuit.Drawing.Styles
         /// <returns>Returns the style.</returns>
         public static IStyle ModifyDashedDotted(this IStyle style, IDrawable drawable)
         {
-            var result = drawable.Style?.Apply(style) ?? style;
+            var result = drawable.Modifier?.Apply(style) ?? style;
             switch (drawable.Variants.Select("dashed", "dotted"))
             {
                 case 0: result = new DashedStrokeStyleModifier.Style(result); break;

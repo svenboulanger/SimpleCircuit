@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets the style.
         /// </summary>
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Modifier { get; set; }
     }
 }

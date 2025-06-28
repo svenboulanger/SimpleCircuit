@@ -108,7 +108,7 @@ namespace SimpleCircuit.Components.Annotations
         public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; } = new ColorStyleModifier($"--primary", null);
+        public IStyleModifier Modifier { get; set; } = new ColorStyleModifier($"--primary", null);
 
         /// <inheritdoc />
         Vector2 IBoxDrawable.TopLeft => _topLeft;
@@ -134,7 +134,7 @@ namespace SimpleCircuit.Components.Annotations
         {
             if (context.Mode == PreparationMode.Sizes)
             {
-                var style = Style?.Apply(context.Style) ?? context.Style;
+                var style = Modifier?.Apply(context.Style) ?? context.Style;
                 Labels.Format(context.TextFormatter, style);
             }
             return PresenceResult.Success;
@@ -149,7 +149,7 @@ namespace SimpleCircuit.Components.Annotations
             // All components should have been rendered by now
             if (_drawables.Count > 0)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.Modify(Modifier);
 
                 // Expand the bounds by the margins
                 builder.BeginGroup(Name, ["annotation"], !Variants.Contains(Over));

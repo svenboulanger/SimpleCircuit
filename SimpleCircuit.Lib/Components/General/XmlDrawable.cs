@@ -97,7 +97,7 @@ namespace SimpleCircuit.Components.General
                 _drawing = drawing;
                 _pins = pins;
                 Type = type;
-                Style = styleModifier;
+                Modifier = styleModifier;
             }
 
             /// <inheritdoc />
@@ -195,7 +195,7 @@ namespace SimpleCircuit.Components.General
             {
                 if (_drawing != null)
                 {
-                    var context = new XmlDrawingContext(Labels, Variants) { Style = Style };
+                    var context = new XmlDrawingContext(Labels, Variants) { Modifier = Modifier };
                     builder.DrawXml(_drawing, context);
                 }
             }

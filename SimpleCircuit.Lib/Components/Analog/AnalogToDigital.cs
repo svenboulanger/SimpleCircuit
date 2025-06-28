@@ -94,7 +94,7 @@ namespace SimpleCircuit.Components.Analog
 
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
-                        var style = Style?.Apply(context.Style) ?? context.Style;
+                        var style = Modifier?.Apply(context.Style) ?? context.Style;
                         var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
 
                         // Determine the height

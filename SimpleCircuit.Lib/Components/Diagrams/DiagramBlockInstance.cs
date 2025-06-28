@@ -75,7 +75,7 @@ namespace SimpleCircuit.Components.Diagrams
         public Labels Labels { get; }
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Modifier { get; set; }
 
         /// <summary>
         /// Creates a new instance for a block diagram.
@@ -114,7 +114,7 @@ namespace SimpleCircuit.Components.Diagrams
                     break;
 
                 case PreparationMode.Sizes:
-                    Labels.Format(context.TextFormatter, Style?.Apply(context.Style) ?? context.Style);
+                    Labels.Format(context.TextFormatter, Modifier?.Apply(context.Style) ?? context.Style);
                     break;
 
                 case PreparationMode.DrawableGroups:

@@ -52,7 +52,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                var style = builder.Style.Modify(Style);
+                var style = builder.Style.Modify(Modifier);
 
                 if (Variants.Contains("dot"))
                 {

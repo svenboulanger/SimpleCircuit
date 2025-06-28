@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Labeling
         public Span Formatted { get; private set; }
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Modifier { get; set; }
 
         /// <summary>
         /// Gets or sets the anchor to which the label will attach.
@@ -36,6 +36,6 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="formatter">A text formatter.</param>
         /// <param name="parentStyle">The parent style.</param>
-        public void Format(ITextFormatter formatter, IStyle parentStyle) => Formatted = formatter.Format(Value, Style?.Apply(parentStyle) ?? parentStyle);
+        public void Format(ITextFormatter formatter, IStyle parentStyle) => Formatted = formatter.Format(Value, Modifier?.Apply(parentStyle) ?? parentStyle);
     }
 }

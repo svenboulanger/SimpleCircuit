@@ -55,7 +55,7 @@ namespace SimpleCircuit.Components.General
         public int Order => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public IStyleModifier Style { get; set; }
+        public IStyleModifier Modifier { get; set; }
 
         /// <inheritdoc />
         public bool Contains(string variant) => _variants?.Contains(variant) ?? false;

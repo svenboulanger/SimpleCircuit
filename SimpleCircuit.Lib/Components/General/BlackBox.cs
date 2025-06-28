@@ -102,7 +102,7 @@ namespace SimpleCircuit.Components
             public Bounds Bounds { get; private set; }
 
             /// <inheritdoc />
-            public IStyleModifier Style { get; set; }
+            public IStyleModifier Modifier { get; set; }
 
             /// <summary>
             /// Creates a new black box.
@@ -149,7 +149,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
-                var style = Style?.Apply(builder.Style) ?? builder.Style;
+                var style = Modifier?.Apply(builder.Style) ?? builder.Style;
 
                 builder.BeginGroup(Name, ["blackbox"]);
                 var size = EndLocation - Location;

@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             : base(name)
         {
             Size = size;
-            Style = new ColorStyleModifier(null, "white");
+            Modifier = new ColorStyleModifier(null, "white");
         }
 
         /// <inheritdoc />
