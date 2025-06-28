@@ -195,7 +195,7 @@ namespace SimpleCircuit.Components.Analog
                 {
                     builder.ExtendPins(Pins, style, 4, "outp", "outn");
                     x = w - 0.25 * h;
-                    double y = 0.25 * h + 3;
+                    double y = 0.5 * h + 2;
                     if (Variants.Contains(_swapOutput))
                         builder.Signs(new(x, y), new(x, -y), style);
                     else

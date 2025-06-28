@@ -70,6 +70,8 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case PreparationMode.Reset:
                         Pins.Clear();
+                        Vector2 la0 = new(-8, 8), la1 = new(8, 0);
+                        Vector2 lb0 = new(8, 0), lb1 = new(-8, -8);
 
                         // Add input pins
                         if (Variants.Contains(_differentialInput))
@@ -99,26 +101,48 @@ namespace SimpleCircuit.Components.Analog
                             {
                                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputPos, new(1, 0)), "outn", "no");
                                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputNeg, new(1, 0)), "o", "out", "outp", "po");
+                                la1 = new(6, 8);
+                                lb0 = new(7, -7);
                             }
                             else
                             {
                                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputNeg, new(1, 0)), "outn", "no");
                                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputPos, new(1, 0)), "o", "out", "outp", "po");
+                                la1 = new(7, 7);
+                                lb0 = new(6, -8);
                             }
                         }
                         else
                             Pins.Add(new FixedOrientedPin("output", "The output.", this, _outputCommon, new(1, 0)), "o", "out", "outp", "po");
 
+                        if (Variants.Contains(_programmable))
+                        {
+                            la0 = new(-7, 10);
+                            lb0 = new(4, -8.5);
+                        }
+
+                        // Calculate the locations of the 2 outer anchor points
+                        var expA = (la1 - la0).Perpendicular;
+                        expA /= expA.Length;
+                        var locA = Vector2.AtX(2.0, la0, la1) + expA;
+                        var expB = (lb1 - lb0).Perpendicular;
+                        expB /= expB.Length;
+                        var locB = Vector2.AtX(2.0, lb0, lb1) + expB;
                         switch (Variants.Select(_schmitt, _comparator))
                         {
                             case 0:
                             case 1:
-                                _anchors = new(2);
+                                // There's already some diagram in the center, don't allocate the label anchor inside the amplifier
+                                _anchors = new(
+                                    new(locA, expA),
+                                    new(locB, expB));
                                 break;
 
                             default:
-                                _anchors = new(3);
-                                _anchors[1] = new LabelAnchorPoint(new(-2.5, 0), Vector2.Zero, Vector2.UX, TextOrientationType.Transformed);
+                                _anchors = new(
+                                    new(locA, expA),
+                                    new(new(-2.5, 0), Vector2.Zero, Vector2.UX, TextOrientationType.UprightTransformed),
+                                    new(locB, expB));
                                 break;
                         }
                         break;
@@ -130,8 +154,6 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
-                _anchors[0] = new LabelAnchorPoint(new(2, 5), new(1, 1));
-                _anchors[^1] = new LabelAnchorPoint(new(2, -5), new(1, -1));
 
                 // The main triangle
                 builder.Polygon(
@@ -162,20 +184,13 @@ namespace SimpleCircuit.Components.Analog
                         builder.Signs(new(6, -7), new(6, 7), style);
                     else
                         builder.Signs(new(6, 7), new(6, -7), style);
-
-                    // Give more breathing room to the labels
-                    _anchors[0] = new LabelAnchorPoint(new(2, 8.5), new(1, 1));
-                    _anchors[^1] = new LabelAnchorPoint(new(2, -8.5), new(1, -1));
                 }
                 else
                     builder.ExtendPin(Pins["out"], style);
 
                 // Programmable arrow
                 if (Variants.Contains(_programmable))
-                {
                     builder.Arrow(new(-7, 10), new(4, -8.5), style);
-                    _anchors[^1] = new LabelAnchorPoint(new(2, -10), new(1, -1));
-                }
 
                 // Comparator or schmitt trigger
                 switch (Variants.Select(_comparator, _schmitt))
@@ -184,7 +199,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Path(b => b.MoveTo(new(-5, 2))
                         .LineTo(new(-3, 2))
                         .LineTo(new(-3, -2))
-                        .LineTo(new(-1, -2)), style.AsStroke());
+                        .LineTo(new(-1, -2)), style.AsStrokeMarker(Drawing.Styles.Style.DefaultLineThickness));
                         break;
 
                     case 1: // Schmitt trigger
@@ -198,7 +213,7 @@ namespace SimpleCircuit.Components.Analog
                                 .LineTo(new(-2, 2))
                                 .LineTo(new(-2, -2))
                                 .LineTo(new(0, -2));
-                        }, style.AsStroke());
+                        }, style.AsStrokeMarker(Drawing.Styles.Style.DefaultLineThickness));
                         break;
                 }
 

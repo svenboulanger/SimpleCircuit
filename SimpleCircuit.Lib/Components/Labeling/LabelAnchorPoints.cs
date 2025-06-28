@@ -82,6 +82,8 @@ namespace SimpleCircuit.Components.Labeling
         /// <param name="labels">The labels.</param>
         public static void DrawLabel(IGraphicsBuilder builder, LabelAnchorPoint anchorPoint, List<Label> labels)
         {
+            if (labels is null)
+                return;
             var invMatrix = builder.CurrentTransform.Matrix.Inverse;
 
             // If the anchor point has an expansion, first determine the global bounds
@@ -93,6 +95,8 @@ namespace SimpleCircuit.Components.Labeling
                 var bounds = new ExpandableBounds();
                 foreach (var label in labels)
                 {
+                    if (label?.Formatted is null)
+                        continue;
                     var offset = GetOffsetFromAnchor(anchorPoint.Anchor, label.Formatted);
                     bounds.Expand(offset + label.Formatted.Bounds.Bounds);
                 }
@@ -129,6 +133,8 @@ namespace SimpleCircuit.Components.Labeling
             {
                 foreach (var label in labels)
                 {
+                    if (label?.Formatted is null)
+                        continue;
                     var offset = GetOffsetFromAnchor(anchorPoint.Anchor, label.Formatted);
                     offset = offset.X * anchorPoint.Orientation + offset.Y * anchorPoint.Orientation.Perpendicular;
                     builder.Text(label.Formatted, anchorPoint.Location + offset + invMatrix * (globalOffset + label.Offset), anchorPoint.Orientation, anchorPoint.Type);
@@ -138,6 +144,8 @@ namespace SimpleCircuit.Components.Labeling
             {
                 foreach (var label in labels)
                 {
+                    if (label?.Formatted is null)
+                        continue;
                     var offset = GetOffsetFromAnchor(anchorPoint.Anchor, label.Formatted);
                     offset = offset.X * anchorPoint.Orientation + offset.Y * anchorPoint.Orientation.Perpendicular;
                     builder.Text(label.Formatted, anchorPoint.Location + invMatrix * (offset + globalOffset + label.Offset), anchorPoint.Orientation, anchorPoint.Type);

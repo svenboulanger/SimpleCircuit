@@ -747,6 +747,7 @@ namespace SimpleCircuit.Parser
                 else
                     // word
                     result = word;
+                return true;
             }
             
             if (lexer.Branch(TokenType.Punctuator, "+", out var op))

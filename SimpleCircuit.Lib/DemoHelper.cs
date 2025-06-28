@@ -47,10 +47,10 @@ namespace SimpleCircuit
         /// </summary>
         /// <param name="drawable"></param>
         /// <returns></returns>
-        public static string CreateDemo(string key, DrawableFactoryDictionary factory, string[] labels = null)
+        public static string CreateDemo(string key, IDrawableFactory factory, string[] labels = null)
         {
             var options = new Options();
-            var representative = factory.Create(key, options, null, null);
+            var representative = factory.Create(key, key, options, null, null);
 
             // Remove all variants first (some elements add variants at creation)
             foreach (string v in representative.Variants.ToList())

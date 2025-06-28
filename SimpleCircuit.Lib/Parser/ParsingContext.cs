@@ -23,5 +23,14 @@ namespace SimpleCircuit.Parser
         /// Gets the referenced variables in the current scope.
         /// </summary>
         public HashSet<string> ReferencedVariables { get; } = [];
+
+        /// <summary>
+        /// Resets the parsing context.
+        /// </summary>
+        public void Reset()
+        {
+            AllowFactoryExtension = true;
+            ReferencedVariables.Clear();
+        }
     }
 }

@@ -3,10 +3,17 @@ using System;
 
 namespace Sandbox
 {
+    /// <summary>
+    /// A logger that passes diagnostic messages to the console.
+    /// </summary>
     public class Logger : IDiagnosticHandler
     {
+        /// <summary>
+        /// Gets the number of errors.
+        /// </summary>
         public int ErrorCount { get; private set; }
 
+        /// <inheritdoc />
         public void Post(IDiagnosticMessage message)
         {
             if (message == null)
@@ -22,6 +29,14 @@ namespace Sandbox
 
             if (message.Severity == SeverityLevel.Error)
                 ErrorCount++;
+        }
+
+        /// <summary>
+        /// Reset the error count.
+        /// </summary>
+        public void Reset()
+        {
+            ErrorCount = 0;
         }
     }
 }

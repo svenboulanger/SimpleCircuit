@@ -55,7 +55,7 @@ namespace SimpleCircuit.Drawing.Styles
             public double LineSpacing => _parent.LineSpacing;
 
             /// <inheritdoc />
-            public string StrokeDashArray => _parent.StrokeDashArray;
+            public string StrokeDashArray => null;
 
             /// <inheritdoc />
             public double Justification => _parent.Justification;

@@ -193,6 +193,24 @@ namespace SimpleCircuit
         }
 
         /// <summary>
+        /// Calculate a point on a line between two vectors at a given X-coordinate.
+        /// </summary>
+        /// <param name="x">The x-coordinate.</param>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <returns>Returns the point on the line at the given x-coordinate.</returns>
+        public static Vector2 AtX(double x, Vector2 a, Vector2 b)
+        {
+            var delta = b - a;
+            if (delta.X.IsZero())
+                return NaN;
+
+            // Calculate the y-coordinate for the given X-coordinate
+            double y = a.Y + delta.Y / delta.X * (x - a.X);
+            return new(x, y);
+        }
+
+        /// <summary>
         /// Implements the operator -.
         /// </summary>
         /// <param name="a">The first argument.</param>

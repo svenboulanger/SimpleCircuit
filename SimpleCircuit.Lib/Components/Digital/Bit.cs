@@ -67,6 +67,8 @@ namespace SimpleCircuit.Components.Digital
                         for (int i = 0; i < Labels.Count; i++)
                         {
                             string label = Labels[i].Value;
+                            if (label is null)
+                                continue;
                             if (Separator == null)
                                 _bits.Add(["0"]);
                             else if (Separator.Length == 0)
