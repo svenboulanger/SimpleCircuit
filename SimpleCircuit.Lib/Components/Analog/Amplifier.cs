@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A factory for amplifiers.
     /// </summary>
-    [Drawable("A", "A generic amplifier.", "Analog", "schmitt trigger comparator programmable")]
-    [Drawable("OA", "An operational amplifier.", "Analog", "schmitt trigger comparator programmable")]
+    [Drawable("A", "A generic amplifier.", "Analog", "schmitt trigger comparator programmable", labelCount: 3)]
+    [Drawable("OA", "An operational amplifier.", "Analog", "schmitt trigger comparator programmable", labelCount: 3)]
     public class Amplifier : DrawableFactory
     {
         private const string _differentialInput = "diffin";
@@ -101,15 +101,15 @@ namespace SimpleCircuit.Components.Analog
                             {
                                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputPos, new(1, 0)), "outn", "no");
                                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputNeg, new(1, 0)), "o", "out", "outp", "po");
-                                la1 = new(6, 8);
-                                lb0 = new(7, -7);
+                                la1 = new(7, 7);
+                                lb0 = new(6, -8);
                             }
                             else
                             {
                                 Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, _outputNeg, new(1, 0)), "outn", "no");
                                 Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, _outputPos, new(1, 0)), "o", "out", "outp", "po");
-                                la1 = new(7, 7);
-                                lb0 = new(6, -8);
+                                la1 = new(6, 8);
+                                lb0 = new(7, -7);
                             }
                         }
                         else
@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Analog
                             default:
                                 _anchors = new(
                                     new(locA, expA),
-                                    new(new(-2.5, 0), Vector2.Zero, Vector2.UX, TextOrientationType.UprightTransformed),
+                                    new(new(-2.5, 0), Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.Center),
                                     new(locB, expB));
                                 break;
                         }

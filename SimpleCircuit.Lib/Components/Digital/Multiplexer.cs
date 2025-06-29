@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
@@ -17,6 +18,8 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
+            private CustomLabelAnchorPoints _anchors;
+
             /// <inheritdoc />
             public override string Type => "mux";
 
@@ -46,6 +49,20 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
             }
 
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = new(
+                            new LabelAnchorPoint(new(0, 8 + m), new(0, 1)));
+                        break;
+                }
+                return base.Prepare(context);
+            }
+
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
@@ -59,7 +76,7 @@ namespace SimpleCircuit.Components.Digital
                     new(-5, 8)
                 ], style);
 
-                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Drawing.Styles.Style.DefaultFontSize * Scale);
+                var textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Style.DefaultFontSize * Scale);
 
                 var span = builder.TextFormatter.Format("1", textStyle);
                 builder.Text(span, new Vector2(-4, -4) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationType.Transformed);
@@ -67,7 +84,7 @@ namespace SimpleCircuit.Components.Digital
                 span = builder.TextFormatter.Format("0", textStyle);
                 builder.Text(span, new Vector2(-4, 4) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationType.Transformed);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

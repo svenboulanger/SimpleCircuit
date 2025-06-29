@@ -43,10 +43,12 @@ namespace SimpleCircuit
         }
 
         /// <summary>
-        /// Make a
+        /// Creates a demo circuit for a given key and drawable factory.
         /// </summary>
-        /// <param name="drawable"></param>
-        /// <returns></returns>
+        /// <param name="key">The key.</param>
+        /// <param name="factory">The factory.</param>
+        /// <param name="labels">The labels, or <c>null</c> if the method should try to create labels from metadata.</param>
+        /// <returns>The script of the demo page.</returns>
         public static string CreateDemo(string key, IDrawableFactory factory, string[] labels = null)
         {
             var options = new Options();
@@ -59,8 +61,12 @@ namespace SimpleCircuit
             // Specify labels
             if (labels is null)
             {
-                if (string.IsNullOrWhiteSpace(representative.Labels[0]?.Value))
-                    labels = ["\"label\""];
+                // Try to add labels based on the metadata
+                var info = factory.GetType().GetCustomAttributes(false).FirstOrDefault(attr => attr is DrawableAttribute da && da.Key == key) as DrawableAttribute;
+                if (info is not null)
+                    labels = [.. Enumerable.Range(0, info.LabelCount).Select(n => $"\"label {n + 1}\"")];
+                else
+                    labels = ["\"label 1\""];
             }
             else
             {
@@ -102,8 +108,10 @@ namespace SimpleCircuit
                 }
 
                 // Also do a different orientation
-                sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
-                sb.AppendLine($"X <ne 5 color=\"red\"> {key}_{styles.Count + 1}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <sw 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <nw 5 color=\"red\"> {key}_{styles.Count + 1}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count + 2}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <ne 5 color=\"red\"> {key}_{styles.Count + 3}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
                 sb.AppendLine($"(y {key}_*_{row})");
             }
             for (int col = 0; col < styles.Count + 2; col++)

@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// Xor gate.
     /// </summary>
-    [Drawable("XOR", "An XOR gate.", "Digital")]
-    [Drawable("XNOR", "An XNOR gate.", "Digital")]
+    [Drawable("XOR", "An XOR gate.", "Digital", labelCount: 3)]
+    [Drawable("XNOR", "An XNOR gate.", "Digital", labelCount: 3)]
     public class Xor : DrawableFactory
     {
         /// <inheritdoc />
@@ -26,6 +26,7 @@ namespace SimpleCircuit.Components.Digital
         {
             private int _inputs = 2;
             private double _spacing = 5;
+            private CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "xor";
@@ -143,6 +144,20 @@ namespace SimpleCircuit.Components.Digital
                             c++;
                         }
                         Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(w + 3, 0) : new(w, 0), new(1, 0)), "output", "out", "o");
+
+                        // Labels
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = Variants.Select(Options.European, Options.American) switch
+                        {
+                            0 => new(
+                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                            _ => new(
+                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
+                                new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.Center),
+                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                        };
                         break;
                 }
                 return result;
@@ -176,7 +191,8 @@ namespace SimpleCircuit.Components.Digital
                     .CurveTo(new(-w * 0.9, h / 3), new(-w * 0.9, -h / 3), new(-w * 1.3, -h)), style.AsStroke());
                 if (invertOutput)
                     builder.Circle(new(w + 1.5, 0), 1.5, style);
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+
+                _anchors.Draw(builder, this, style);
             }
 
             private void DrawXorIEC(IGraphicsBuilder builder, IStyle style)
@@ -189,7 +205,7 @@ namespace SimpleCircuit.Components.Digital
                 var span = builder.TextFormatter.Format("=1", style);
                 builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Transformed);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

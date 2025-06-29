@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
@@ -8,7 +9,7 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// A latch.
     /// </summary>
-    [Drawable("LATCH", "A general latch.", "Digital", "level trigger")]
+    [Drawable("LATCH", "A general latch.", "Digital", "level trigger", labelCount: 2)]
     public class Latch : DrawableFactory
     {
         /// <inheritdoc />
@@ -17,6 +18,8 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
+            private CustomLabelAnchorPoints _anchors;
+
             /// <inheritdoc />
             public override string Type => "latch";
 
@@ -46,6 +49,21 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
             }
 
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = new(
+                            new LabelAnchorPoint(new(0, -12 - m), new(0, -1)),
+                            new LabelAnchorPoint(new(0, 12 + m), new(0, 1)));
+                        break;
+                }
+                return base.Prepare(context);
+            }
+
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
@@ -56,7 +74,7 @@ namespace SimpleCircuit.Components.Digital
                 builder.Rectangle(-9, -12, 18, 24, style, new());
 
                 // Labels
-                var textStyle = new FontSizeStyleModifier.Style(style, Drawing.Styles.Style.DefaultFontSize);
+                var textStyle = new FontSizeStyleModifier.Style(style, Style.DefaultFontSize);
 
                 var span = builder.TextFormatter.Format("S", textStyle);
                 builder.Text(span, new Vector2(-8, -6) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationType.Transformed);
@@ -73,7 +91,7 @@ namespace SimpleCircuit.Components.Digital
                     builder.Text(span, new Vector2(8, 6) - span.Bounds.Bounds.MiddleRight, Vector2.UX, TextOrientationType.Transformed);
                 }
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

@@ -9,9 +9,9 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// An invertor.
     /// </summary>
-    [Drawable("BUF", "A buffer.", "Digital")]
-    [Drawable("INV", "An invertor.", "Digital")]
-    [Drawable("NOT", "An invertor.", "Digital")]
+    [Drawable("BUF", "A buffer.", "Digital", labelCount: 3)]
+    [Drawable("INV", "An invertor.", "Digital", labelCount: 3)]
+    [Drawable("NOT", "An invertor.", "Digital", labelCount: 3)]
     public class Buffer : DrawableFactory
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private CustomLabelAnchorPoints _anchors;
             private readonly bool _invertOutput;
 
             /// <inheritdoc />
@@ -74,7 +74,7 @@ namespace SimpleCircuit.Components.Digital
                                 SetPinOffset(0, new(-5, 0));
                                 SetPinOffset(1, new(0, -5));
                                 SetPinOffset(2, new(0, 5));
-                                SetPinOffset(3, new(5, 0));
+                                SetPinOffset(3, new(_invertOutput ? 8 : 5, 0));
                                 break;
 
                             case 1:
@@ -85,6 +85,18 @@ namespace SimpleCircuit.Components.Digital
                                 SetPinOffset(3, new(_invertOutput ? 9 : 6, 0));
                                 break;
                         }
+
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = Variants.Select(Options.European, Options.American) switch
+                        {
+                            0 => new(
+                                new LabelAnchorPoint(new(0, -5 - m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, 5 + m), new(0, 1))),
+                            _ => new(
+                                new LabelAnchorPoint(new(0, -6 - m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, 6 + m), new(0, 1))),
+                        };
                         break;
                 }
                 return result;
@@ -125,7 +137,7 @@ namespace SimpleCircuit.Components.Digital
                 var span = builder.TextFormatter.Format("1", style);
                 builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

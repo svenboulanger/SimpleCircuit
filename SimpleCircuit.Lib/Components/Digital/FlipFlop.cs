@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
@@ -8,7 +9,7 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// A flip-flop.
     /// </summary>
-    [Drawable("FF", "A general flip-flop.", "Digital", "edge trigger")]
+    [Drawable("FF", "A general flip-flop.", "Digital", "edge trigger", labelCount: 2)]
     public class FlipFlop : DrawableFactory
     {
         /// <inheritdoc />
@@ -17,6 +18,8 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
+            private CustomLabelAnchorPoints _anchors;
+
             /// <inheritdoc />
             public override string Type => "flipflop";
 
@@ -48,6 +51,21 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
             }
 
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = new(
+                            new LabelAnchorPoint(new(0, -12 - m), new(0, -1)),
+                            new LabelAnchorPoint(new(0, 12 + m), new(0, 1)));
+                        break;
+                }
+                return base.Prepare(context);
+            }
+
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
@@ -64,7 +82,7 @@ namespace SimpleCircuit.Components.Digital
                     new Vector2(-9, 8)
                 ], style);
 
-                var textStyle = new FontSizeStyleModifier.Style(style, Drawing.Styles.Style.DefaultFontSize);
+                var textStyle = new FontSizeStyleModifier.Style(style, Style.DefaultFontSize);
                 var span = builder.TextFormatter.Format("D", textStyle);
                 var bounds = span.Bounds.Bounds;
                 builder.Text(span, new Vector2(-8, -6) - bounds.MiddleLeft, Vector2.UX, TextOrientationType.UprightTransformed);
@@ -85,7 +103,7 @@ namespace SimpleCircuit.Components.Digital
                 }
 
                 // Smaller text for asynchronous set and reset
-                textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Drawing.Styles.Style.DefaultFontSize);
+                textStyle = new FontSizeStyleModifier.Style(style, 0.8 * Style.DefaultFontSize);
                 if (Pins["s"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("set", textStyle);
@@ -99,7 +117,7 @@ namespace SimpleCircuit.Components.Digital
                     builder.Text(span, new Vector2(0, 11.5) - bounds.BottomCenter - new Vector2(bounds.Width * 0.5, 0), Vector2.UY, TextOrientationType.UprightTransformed);
                 }
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

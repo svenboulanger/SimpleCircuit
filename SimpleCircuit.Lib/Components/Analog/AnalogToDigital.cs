@@ -11,7 +11,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An analog-to-digital converter.
     /// </summary>
-    [Drawable("ADC", "An analog-to-digital converter.", "Digital")]
+    [Drawable("ADC", "An analog-to-digital converter.", "Digital", labelCount: 3)]
     public class AnalogToDigital : DrawableFactory
     {
         /// <inheritdoc />
@@ -46,6 +46,10 @@ namespace SimpleCircuit.Components.Analog
             [Description("The minimum height. The defalut is 12.")]
             [Alias("mh")]
             public double MinHeight { get; set; } = 12;
+
+            [Description("The label margin. The default is 1.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
             public override string Type => "adc";
@@ -94,7 +98,7 @@ namespace SimpleCircuit.Components.Analog
 
                     case PreparationMode.Sizes:
                         // Calculate the label bounds
-                        var style = Modifier?.Apply(context.Style) ?? context.Style;
+                        var style = context.Style.ModifyDashedDotted(this);
                         var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
 
                         // Determine the height
@@ -152,9 +156,11 @@ namespace SimpleCircuit.Components.Analog
                         x = -_width * 0.5 + Margin.Left;
                         if (Variants.Contains(_differentialInput))
                             x += 4;
-                        _anchors[0] = new LabelAnchorPoint(new(x - labelBounds.Left, labelBounds.Height * 0.5 - labelBounds.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
-                        _anchors[1] = new LabelAnchorPoint(new(-_width * 0.5, -_height * 0.5 - Margin.Top), new(1, -1));
-                        _anchors[2] = new LabelAnchorPoint(new(-_width * 0.5, _height * 0.5 + Margin.Bottom), new(1, 1));
+
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(new(x, 0), Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.MiddleBegin);
+                        _anchors[1] = new LabelAnchorPoint(new(0, -_height * 0.5 - m), new(0, -1));
+                        _anchors[2] = new LabelAnchorPoint(new(0, _height * 0.5 + m), new(0, 1));
                         break;
                 }
                 return result;

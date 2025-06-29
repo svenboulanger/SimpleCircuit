@@ -41,15 +41,15 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
                         {
                             var lexer = new SvgPathDataLexer(_pathData);
                             SvgPathDataParser.Parse(lexer, b, null);
-                        }, style);
+                        }, style.AsStrokeMarker(Style.DefaultLineThickness));
                         builder.EndTransform();
                         break;
 
                     default:
                         // Plus
                         double s = Size * 0.3;
-                        builder.Line(new(-s, 0), new(s, 0), style);
-                        builder.Line(new(0, -s), new(0, s), style);
+                        builder.Line(new(-s, 0), new(s, 0), style.AsStrokeMarker(Style.DefaultLineThickness));
+                        builder.Line(new(0, -s), new(0, s), style.AsStrokeMarker(Style.DefaultLineThickness));
                         break;
                 }
 

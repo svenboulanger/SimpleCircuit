@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components.Digital
     /// <summary>
     /// AND or NAND gate.
     /// </summary>
-    [Drawable("AND", "An AND gate.", "Digital")]
-    [Drawable("NAND", "A NAND gate.", "Digital")]
+    [Drawable("AND", "An AND gate.", "Digital", labelCount: 3)]
+    [Drawable("NAND", "A NAND gate.", "Digital", labelCount: 3)]
     public class And : DrawableFactory
     {
         /// <inheritdoc />
@@ -25,6 +25,7 @@ namespace SimpleCircuit.Components.Digital
         {
             private int _inputs = 2;
             private double _spacing = 5;
+            private CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => invertOutput ? "nand" : "and";
@@ -126,6 +127,20 @@ namespace SimpleCircuit.Components.Digital
                             c++;
                         }
                         Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(r + 3, 0) : new(r, 0), new(1, 0)), "output", "out", "o");
+
+                        // Labels
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = Variants.Select(Options.European, Options.American) switch
+                        {
+                            0 => new(
+                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                            _ => new(
+                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
+                                new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.Center),
+                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                        };
                         break;
                 }
                 return result;
@@ -163,7 +178,7 @@ namespace SimpleCircuit.Components.Digital
                 if (invertOutput)
                     builder.Circle(new(w + 1.5, 0), 1.5, style);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
             private void DrawAndIEC(IGraphicsBuilder builder, IStyle style)
             {
@@ -175,7 +190,7 @@ namespace SimpleCircuit.Components.Digital
                 var span = builder.TextFormatter.Format("&amp;", style);
                 builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
 
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
         }
     }

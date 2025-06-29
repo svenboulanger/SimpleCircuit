@@ -13,27 +13,30 @@ namespace SimpleCircuit.Components
     /// <param name="description">The description.</param>
     /// <param name="category">The category.</param>
     /// <param name="keywords">The keywords.</param>
+    /// <param name="labelCount">The most number of labels that can be placed at different anchor points. Used for generating demo's.</param>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-    public class DrawableAttribute(string key, string description, string category, string keywords = null) : Attribute
+    public class DrawableAttribute(string key, string description, string category, string keywords = null, int labelCount = 1) : Attribute
     {
         /// <summary>
         /// Gets the key of the drawable.
         /// </summary>
-        public string Key { get; } = key;
+        public string Key => key;
 
         /// <summary>
         /// Gets the description of the attribute.
         /// </summary>
-        public string Description { get; } = description;
+        public string Description => description;
 
         /// <summary>
         /// Gets the category of the attribute.
         /// </summary>
-        public string Category { get; } = category;
+        public string Category => category;
 
         /// <summary>
         /// Gets the keywords of the attribute.
         /// </summary>
-        public string Keywords { get; } = keywords;
+        public string Keywords => keywords;
+
+        public int LabelCount => labelCount;
     }
 }
