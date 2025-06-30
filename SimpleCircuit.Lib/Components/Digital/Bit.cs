@@ -20,7 +20,6 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
         {
             var inst = new Instance(name);
-            inst.Variants.Add(Instance.Msb);
             return inst;
         }
 
@@ -31,20 +30,10 @@ namespace SimpleCircuit.Components.Digital
         private class Instance(string name) : ScaledOrientedDrawable(name)
         {
             private readonly List<string[]> _bits = [];
-            private int _maxWidth;
+            private int _maxWidth = 0;
 
             /// <inheritdoc />
             public override string Type => "bit";
-
-            /// <summary>
-            /// The variant for when the full array should be filled.
-            /// </summary>
-            public const string Full = "full";
-
-            /// <summary>
-            /// The variant for when the most-significant bit should come first.
-            /// </summary>
-            public const string Msb = "msb";
 
             [Description("The separator for the bit vector (default is an empty string, for which every character is a new bit).")]
             public string Separator { get; set; } = "";
@@ -69,7 +58,7 @@ namespace SimpleCircuit.Components.Digital
                             string label = Labels[i].Value;
                             if (label is null)
                                 continue;
-                            if (Separator == null)
+                            if (Separator is null)
                                 _bits.Add(["0"]);
                             else if (Separator.Length == 0)
                                 _bits.Add([.. label.Select(c => c.ToString())]);
@@ -79,8 +68,6 @@ namespace SimpleCircuit.Components.Digital
                         }
                         if (_bits.Count == 0)
                             _bits.Add(["0"]);
-                        if (_maxWidth == 0)
-                            _maxWidth = 1;
 
                         double hw = 0.5 * BlockSize;
 
@@ -89,30 +76,38 @@ namespace SimpleCircuit.Components.Digital
 
                         // Left
                         for (int i = 0; i < _bits.Count; i++)
-                            Pins.Add(new FixedOrientedPin($"left{i + 1}", $"The left pin of row {i + 1}.", this, new(-hw * _maxWidth, BlockSize * i), new(-1, 0)), $"left{i + 1}", $"l{i + 1}", $"w{i + 1}");
+                            Pins.Add(new FixedOrientedPin($"left{i + 1}", $"The left pin of row {i + 1}.", this, new((_maxWidth - _bits[i].Length) * BlockSize, BlockSize * i + hw), new(-1, 0)), $"left{i + 1}", $"l{i + 1}");
 
                         // Top
-                        double x = -hw * (_maxWidth - 1);
-                        int width = Variants.Contains(Full) ? _maxWidth : _bits[0].Length;
-                        for (int i = 0; i < width; i++)
+                        int row = 0, col = 0;
+                        while (row < _bits.Count)
                         {
-                            // Make a top pin
-                            int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
-                            Pins.Add(new FixedOrientedPin($"top{bit}", $"Top pin of bit {bit}.", this, new(x, -hw), new(0, -1)), $"t{bit}", $"u{bit}");
+                            while (col < _bits[row].Length)
+                            {
+                                Pins.Add(new FixedOrientedPin($"top{col + 1}", $"The top pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * row), new(0, -1)), $"top{col + 1}", $"t{col + 1}");
+                                col++;
+                            }
+                            while (row < _bits.Count && col >= _bits[row].Length)
+                                row++;
                         }
 
                         // Bottom
-                        width = Variants.Contains(Full) ? _maxWidth : _bits[^1].Length;
-                        for (int i = 0; i < width; i++)
+                        row = _bits.Count - 1; col = 0;
+                        while (row >= 0)
                         {
-                            int bit = Variants.Contains(Msb) ? _maxWidth - i - 1 : i;
-                            Pins.Add(new FixedOrientedPin($"bottom{bit}", $"Bottom pin of bit {bit}.", this, new(x, BlockSize * _bits.Count - hw), new(0, 1)), $"b{bit}", $"d{bit}");
-                            x += BlockSize;
+                            while (col < _bits[row].Length)
+                            {
+                                Pins.Add(new FixedOrientedPin($"bottom{col + 1}", $"The bottom pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * (row + 1)), new(0, 1)), $"bottom{col + 1}", $"b{col + 1}");
+                                col++;
+                            }
+                            while (row >= 0 && col >= _bits[row].Length)
+                                row--;
                         }
 
                         // Right
                         for (int i = 0; i < _bits.Count; i++)
-                            Pins.Add(new FixedOrientedPin($"right{i + 1}", $"The right pin of row {i + 1}", this, new(hw * _maxWidth, BlockSize * i), new(1, 0)), $"right{i + 1}", $"r{i + 1}", $"e{i + 1}");
+                            Pins.Add(new FixedOrientedPin($"right{i + 1}", $"The right pin of row {i + 1}", this, new(BlockSize * _bits[i].Length, BlockSize * i + hw), new(1, 0)), $"right{i + 1}", $"r{i + 1}", $"e{i + 1}");
+
                         break;
                 }
                 return result;
@@ -127,25 +122,17 @@ namespace SimpleCircuit.Components.Digital
 
                 var style = builder.Style.ModifyDashedDotted(this);
 
-                double hw = 0.5 * BlockSize;
-                double y = 0.0;
-                for (int i = 0; i < _bits.Count; i++)
+                double hw = BlockSize * 0.5;
+
+                for (int row = 0; row < _bits.Count; row++)
                 {
-                    double x = -hw * (_maxWidth - 1);
-                    var bits = _bits[i];
-                    for (int j = 0; j < _maxWidth; j++)
+                    var bits = _bits[row];
+                    for (int col = 0; col < bits.Length; col++)
                     {
-                        if (j < bits.Length || Variants.Contains(Full))
-                            builder.Rectangle(x - hw, y - hw, BlockSize, BlockSize, style);
-                        if (j < bits.Length)
-                        {
-                            var span = builder.TextFormatter.Format(bits[j], style);
-                            var bounds = span.Bounds.Bounds;
-                            builder.Text(span, new(x - bounds.Left - 0.5 * bounds.Width, y - bounds.Top - 0.5 * bounds.Height), Vector2.UX, TextOrientationType.Transformed);
-                        }
-                        x += BlockSize;
+                        builder.Rectangle(BlockSize * col, BlockSize * row, BlockSize, BlockSize, style);
+                        var span = builder.TextFormatter.Format(bits[col], style);
+                        builder.Text(span, new Vector2(BlockSize * col + hw, BlockSize * row + hw) - span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
                     }
-                    y += BlockSize;
                 }
             }
         }

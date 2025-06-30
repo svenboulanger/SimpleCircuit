@@ -14,8 +14,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            ExportDemos("all");
-            // ExportThemes("X <se> A(\"Label\", diffout)");
+            // ExportDemos("all");
+            ExportThemes("T <a 45> ADC(\"Hello\", flip)");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)
