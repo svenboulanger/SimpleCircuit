@@ -102,13 +102,13 @@ namespace SimpleCircuit.Components
                     if (_pinsByIndex[i] is not LoosePin pin || _spansByIndex[i] is null)
                         continue;
                     if (PointsLeft(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.Margin.Left, 0), Vector2.UX, TextOrientationType.UprightTransformed);
+                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.Margin.Left, 0), Vector2.UX, TextOrientationType.Transformed);
                     if (PointsRight(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.Margin.Right, 0), Vector2.UX, TextOrientationType.UprightTransformed);
+                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.Margin.Right, 0), Vector2.UX, TextOrientationType.Transformed);
                     if (PointsUp(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.Margin.Top), Vector2.UY, TextOrientationType.UprightTransformed);
+                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.Margin.Top), Vector2.UY, TextOrientationType.Transformed);
                     if (PointsDown(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.Margin.Bottom), Vector2.UY, TextOrientationType.UprightTransformed);
+                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.Margin.Bottom), Vector2.UY, TextOrientationType.Transformed);
                 }
             }
 

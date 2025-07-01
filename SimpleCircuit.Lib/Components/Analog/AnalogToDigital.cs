@@ -158,7 +158,7 @@ namespace SimpleCircuit.Components.Analog
                             x += 4;
 
                         double m = style.LineThickness * 0.5 + LabelMargin;
-                        _anchors[0] = new LabelAnchorPoint(new(x, 0), Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.MiddleBegin);
+                        _anchors[0] = new LabelAnchorPoint(new(x, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleBegin);
                         _anchors[1] = new LabelAnchorPoint(new(0, -_height * 0.5 - m), new(0, -1));
                         _anchors[2] = new LabelAnchorPoint(new(0, _height * 0.5 + m), new(0, 1));
                         break;

@@ -15,7 +15,10 @@ namespace Sandbox
         static void Main()
         {
             // ExportDemos("all");
-            ExportThemes("T <a 45> ADC(\"Hello\", flip)");
+            ExportThemes(@"T <a 45> ADC(""Hello"", flip, diffin)
+X <a -45> ADC(""Hello"", flip, diffin)
+X <a 135> ADC(""Hello"", flip, diffin)
+X <a -135> ADC(""Hello"", flip, diffin)");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)

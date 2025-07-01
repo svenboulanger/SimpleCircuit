@@ -9,23 +9,13 @@ namespace SimpleCircuit.Drawing.Builders
     public enum TextOrientationType
     {
         /// <summary>
-        /// Nothing special about the orientation type.
+        /// Nothing special about the orientation type. Just left-to-right text independent of the current transform.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// Indicates that the text should be kept "upright", i.e. legible without standing on your head.
-        /// </summary>
-        Upright = 0x01,
-
-        /// <summary>
         /// Indicates that the text is transformed.
         /// </summary>
-        Transformed = 0x02,
-
-        /// <summary>
-        /// Indicates that the text should be both transformed and upright.
-        /// </summary>
-        UprightTransformed = Upright | Transformed
+        Transformed = 0x02
     }
 }

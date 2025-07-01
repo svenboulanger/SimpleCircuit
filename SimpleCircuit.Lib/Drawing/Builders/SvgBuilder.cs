@@ -171,16 +171,19 @@ namespace SimpleCircuit.Drawing.Builders
                 orientation = CurrentTransform.ApplyDirection(orientation);
                 if (!orientation.IsZero())
                     orientation /= orientation.Length;
-            }
-            if ((type & TextOrientationType.Upright) != 0)
-            {
+
                 if (orientation.X < 0)
                 {
                     // Orientation is towards the left, so this will cause the text to be upside-down
                     // We will flip the orientation and make the text location start from the other end
-                    location += orientation * (bounds.Right + bounds.Left) + orientation.Perpendicular * (bounds.Top + bounds.Bottom);
+                    if (CurrentTransform.Matrix.Determinant < 0)
+                        location += orientation * (bounds.Right + bounds.Left);
+                    else
+                        location += orientation * (bounds.Right + bounds.Left) + orientation.Perpendicular * (bounds.Top + bounds.Bottom);
                     orientation = -orientation;
                 }
+                else if (CurrentTransform.Matrix.Determinant < 0)
+                    location -= orientation.Perpendicular * (bounds.Top + bounds.Bottom);
             }
 
             // Expand bounds

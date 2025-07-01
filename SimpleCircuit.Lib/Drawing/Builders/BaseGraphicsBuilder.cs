@@ -410,16 +410,15 @@ namespace SimpleCircuit.Drawing.Builders
                 switch (mode.ToLower())
                 {
                     case "transformed": type = TextOrientationType.Transformed; return true;
-                    case "upright": type = TextOrientationType.Upright; return true;
-                    case "upright-transformed": type = TextOrientationType.UprightTransformed; return true;
+                    case "none": type = TextOrientationType.None; return true;
                     default:
                         Diagnostics?.Post(ErrorCodes.InvalidTextOrientationType, mode);
-                        type = TextOrientationType.UprightTransformed;
+                        type = TextOrientationType.Transformed;
                         return false;
                 }
                 ;
             }
-            type = TextOrientationType.UprightTransformed;
+            type = TextOrientationType.Transformed;
             return true;
         }
         private bool TryGetAnchor(XmlNode node, out TextAnchor anchor)

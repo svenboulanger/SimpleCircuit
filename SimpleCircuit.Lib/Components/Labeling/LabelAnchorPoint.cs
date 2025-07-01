@@ -40,7 +40,7 @@ namespace SimpleCircuit.Components.Labeling
             Location = default;
             Expand = default;
             Orientation = Vector2.UX;
-            Type = TextOrientationType.Upright;
+            Type = TextOrientationType.None;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace SimpleCircuit.Components.Labeling
             Location = location;
             Expand = expand;
             Orientation = Vector2.UX;
-            Type = TextOrientationType.Upright;
+            Type = TextOrientationType.None;
         }
 
         /// <summary>

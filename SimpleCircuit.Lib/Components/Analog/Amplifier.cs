@@ -141,7 +141,7 @@ namespace SimpleCircuit.Components.Analog
                             default:
                                 _anchors = new(
                                     new(locA, expA),
-                                    new(new(-2.5, 0), Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.Center),
+                                    new(new(-2.5, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center),
                                     new(locB, expB));
                                 break;
                         }

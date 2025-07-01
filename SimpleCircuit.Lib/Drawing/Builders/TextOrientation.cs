@@ -10,17 +10,17 @@ namespace SimpleCircuit.Drawing.Builders
         /// <summary>
         /// Gets a normal text orientation.
         /// </summary>
-        public static TextOrientation Normal { get; } = new TextOrientation(Vector2.UX, TextOrientationType.Upright);
+        public static TextOrientation Normal { get; } = new TextOrientation(Vector2.UX, TextOrientationType.None);
 
         /// <summary>
         /// Gets a vertical text orientation.
         /// </summary>
-        public static TextOrientation Vertical { get; } = new TextOrientation(Vector2.UY, TextOrientationType.Upright);
+        public static TextOrientation Vertical { get; } = new TextOrientation(Vector2.UY, TextOrientationType.None);
 
         /// <summary>
         /// Gets a transformed text orientation.
         /// </summary>
-        public static TextOrientation Transformed { get; } = new TextOrientation(Vector2.UX, TextOrientationType.Transformed | TextOrientationType.Upright);
+        public static TextOrientation Transformed { get; } = new TextOrientation(Vector2.UX, TextOrientationType.Transformed | TextOrientationType.None);
 
         /// <summary>
         /// Gets the orientation of the text.
@@ -51,7 +51,7 @@ namespace SimpleCircuit.Drawing.Builders
         public TextOrientation(double x, double y)
         {
             Orientation = new Vector2(x, y);
-            Type = TextOrientationType.Upright;
+            Type = TextOrientationType.None;
         }
     }
 }

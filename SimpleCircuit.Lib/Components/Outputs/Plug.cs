@@ -66,13 +66,13 @@ namespace SimpleCircuit.Components.Outputs
                     if (Variants.Contains(_sealed))
                     {
                         var span = builder.TextFormatter.Format("h", style);
-                        builder.Text(span, new Vector2(0.5, 4 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Upright);
+                        builder.Text(span, new Vector2(0.5, 4 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.None);
                     }
                 }
                 else if (Variants.Contains(_sealed))
                 {
                     var span = builder.TextFormatter.Format("h", style);
-                    builder.Text(span, new Vector2(0.5, 2.5 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Upright);
+                    builder.Text(span, new Vector2(0.5, 2.5 + style.FontSize) - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.None);
                 }
 
                 if (Multiple > 1)
@@ -80,7 +80,7 @@ namespace SimpleCircuit.Components.Outputs
                     builder.Line(new(2.6, -1.4), new(-0.2, -4.2), style);
 
                     var span = builder.TextFormatter.Format(Multiple.ToString(), style);
-                    builder.Text(span, new Vector2(-0.2, -4.2) + new Vector2(-0.707, -0.707) * style.FontSize - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Upright);
+                    builder.Text(span, new Vector2(-0.2, -4.2) + new Vector2(-0.707, -0.707) * style.FontSize - builder.CurrentTransform.Matrix.Inverse * span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.None);
                 }
 
                 builder.ExtendPin(Pins["a"], style);

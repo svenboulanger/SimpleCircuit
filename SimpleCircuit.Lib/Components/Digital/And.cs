@@ -138,7 +138,7 @@ namespace SimpleCircuit.Components.Digital
                                 new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
                             _ => new(
                                 new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
-                                new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.UprightTransformed, TextAnchor.Center),
+                                new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center),
                                 new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
                         };
                         break;
@@ -188,7 +188,7 @@ namespace SimpleCircuit.Components.Digital
                     builder.Circle(new(Width * 0.5 + 1.5, 0), 1.5, style);
                 
                 var span = builder.TextFormatter.Format("&amp;", style);
-                builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
+                builder.Text(span, -span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Transformed);
 
                 _anchors.Draw(builder, this, style);
             }

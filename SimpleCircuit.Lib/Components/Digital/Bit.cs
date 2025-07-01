@@ -131,7 +131,7 @@ namespace SimpleCircuit.Components.Digital
                     {
                         builder.Rectangle(BlockSize * col, BlockSize * row, BlockSize, BlockSize, style);
                         var span = builder.TextFormatter.Format(bits[col], style);
-                        builder.Text(span, new Vector2(BlockSize * col + hw, BlockSize * row + hw) - span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.UprightTransformed);
+                        builder.Text(span, new Vector2(BlockSize * col + hw, BlockSize * row + hw) - span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Transformed);
                     }
                 }
             }
