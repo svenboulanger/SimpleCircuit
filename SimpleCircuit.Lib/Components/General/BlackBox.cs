@@ -90,7 +90,7 @@ namespace SimpleCircuit.Components
             [Description("The round-off corner radius.")]
             [Alias("r")]
             [Alias("radius")]
-            public double CornerRadius { get => _pins.CornerRadius; set => _pins.CornerRadius = value; }
+            public double CornerRadius { get; set; }
 
             /// <inheritdoc />
             public Labels Labels { get; } = new();
@@ -138,6 +138,13 @@ namespace SimpleCircuit.Components
                         context.Offsets.Add(_pins.Bottom);
                         break;
 
+                    case PreparationMode.Sizes:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        Labels.Format(context.TextFormatter, style);
+                        var bounds = BoxLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, BoxLabelAnchorPoints.Default, style);
+                        _pins.InnerBounds = bounds.Expand(Margin);
+                        break;
+
                     case PreparationMode.DrawableGroups:
                         context.GroupDrawableTo(this, X, Y);
                         break;
@@ -149,7 +156,7 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public void Render(IGraphicsBuilder builder)
             {
-                var style = Modifier?.Apply(builder.Style) ?? builder.Style;
+                var style = builder.Style.ModifyDashedDotted(this);
 
                 builder.BeginGroup(Name, ["blackbox"]);
                 var size = EndLocation - Location;
@@ -177,8 +184,8 @@ namespace SimpleCircuit.Components
 
                 // Update all pin locations as well
                 // We ignore pin 0, because that is a dummy pin
-                for (int i = 1; i < _pins.Count; i++)
-                    _pins[i].Update(context);
+                foreach (var pin in _pins)
+                    pin.Update(context);
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
@@ -22,6 +23,7 @@ namespace SimpleCircuit.Components
             private readonly Dictionary<string, IPin> _pinsByName = [];
             private readonly List<Span> _spansByIndex = [];
             private readonly List<IPin> _pinsByIndex = [];
+            private int _anonymousIndex = 0;
 
             /// <summary>
             /// The weight for minimum distances.
@@ -39,9 +41,9 @@ namespace SimpleCircuit.Components
             public string Bottom { get; }
 
             /// <summary>
-            /// Gets or sets the corner radius (used for margins).
+            /// Gets or sets the inner bounds for the labels.
             /// </summary>
-            public double CornerRadius { get; set; } = 0.0;
+            public Bounds InnerBounds { get; set; }
 
             /// <inheritdoc/>
             public IPin this[string name]
@@ -68,7 +70,22 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc/>
-            public IPin this[int index] => _pinsByIndex[index];
+            public IPin this[int index]
+            {
+                get
+                {
+                    if (index == 0 || index == _pinsByIndex.Count - 1)
+                    {
+                        // If we asked the last or first pin, let's create a new one
+                        _anonymousIndex++;
+                        string name = $"[ap{_anonymousIndex}]_";
+                        var pin = new LoosePin(name, name, _parent);
+                        _pinsByIndex.Add(pin);
+                        return pin;
+                    }
+                    return _pinsByIndex[index];
+                }
+            }
 
             /// <inheritdoc/>
             public int Count => _pinsByIndex.Count;
@@ -82,10 +99,6 @@ namespace SimpleCircuit.Components
                 _parent = parent;
                 Right = $"{parent.Name}.right";
                 Bottom = $"{parent.Name}.bottom";
-
-                // This pin is not used, but avoids breaking things...
-                var pin = new FixedPin("x", "x", _parent, new());
-                _pinsByIndex.Add(pin);
             }
 
             /// <inheritdoc/>
@@ -125,25 +138,29 @@ namespace SimpleCircuit.Components
                 int separator = name.IndexOf('_');
                 if (separator < 0)
                     return name;
-                return name[separator..];
+                name = name[separator..];
+                name = name.Replace("\\[", "[");
+                name = name.Replace("\\]", "]");
+                return name;
             }
 
             /// <inheritdoc />
             public void Register(IRegisterContext context)
             {
                 // Figure out the edge margins using the labels
-                double marginLeft = CornerRadius, marginTop = CornerRadius, marginRight = CornerRadius, marginBottom = CornerRadius;
+                double marginLeft, marginTop, marginRight, marginBottom;
+                marginLeft = marginTop = marginRight = marginBottom = _parent.CornerRadius;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
                     if (_pinsByIndex[i] is not LoosePin pin)
                         continue;
                     if (PointsLeft(pin))
                         marginLeft = Math.Max(marginLeft, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
-                    if (PointsRight(pin))
+                    else if (PointsRight(pin))
                         marginRight = Math.Max(marginRight, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
-                    if (PointsUp(pin))
+                    else if (PointsUp(pin))
                         marginTop = Math.Max(marginTop, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
-                    if (PointsDown(pin))
+                    else if (PointsDown(pin))
                         marginBottom = Math.Max(marginBottom, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
                 }
 
@@ -293,10 +310,12 @@ namespace SimpleCircuit.Components
                 }
 
                 // Add minimum width/height
-                if (minLeftHeight < _parent.MinHeight && minRightHeight < _parent.MinHeight)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minh", context.GetOffset(_parent.Y), context.GetOffset(Bottom), _parent.MinHeight, MinimumWeight);
-                if (minTopWidth < _parent.MinWidth && minBottomWidth < _parent.MinWidth)
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minw", context.GetOffset(_parent.X), context.GetOffset(Right), _parent.MinWidth, MinimumWeight);
+                double minHeight = Math.Max(_parent.MinHeight, marginTop + marginBottom + InnerBounds.Height);
+                if (minLeftHeight < minHeight && minRightHeight < minHeight)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minh", context.GetOffset(_parent.Y), context.GetOffset(Bottom), minHeight, MinimumWeight);
+                double minWidth = Math.Max(_parent.MinWidth, marginLeft + marginRight + InnerBounds.Width);
+                if (minTopWidth < minWidth && minBottomWidth < minWidth)
+                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minw", context.GetOffset(_parent.X), context.GetOffset(Right), minWidth, MinimumWeight);
             }
 
             private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
