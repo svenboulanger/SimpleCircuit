@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace SimpleCircuit.Components
 {
@@ -20,10 +21,22 @@ namespace SimpleCircuit.Components
         protected class PinCollection : IPinCollection
         {
             private readonly Instance _parent;
-            private readonly Dictionary<string, IPin> _pinsByName = [];
+            private readonly Dictionary<string, LoosePin> _pinsByName = [];
             private readonly List<Span> _spansByIndex = [];
-            private readonly List<IPin> _pinsByIndex = [];
+            private readonly List<LoosePin> _pinsByIndex = [];
+            private readonly List<Orientation> _pinOrientations = [];
             private int _anonymousIndex = 0;
+
+            /// <summary>
+            /// The possible orientations for a pin.
+            /// </summary>
+            private enum Orientation
+            {
+                Left,
+                Up,
+                Right,
+                Down
+            }
 
             /// <summary>
             /// The weight for minimum distances.
@@ -112,16 +125,21 @@ namespace SimpleCircuit.Components
             {
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
-                    if (_pinsByIndex[i] is not LoosePin pin || _spansByIndex[i] is null)
-                        continue;
-                    if (PointsLeft(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.Margin.Left, 0), Vector2.UX, TextOrientationType.Transformed);
-                    if (PointsRight(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.Margin.Right, 0), Vector2.UX, TextOrientationType.Transformed);
-                    if (PointsUp(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.Margin.Top), Vector2.UY, TextOrientationType.Transformed);
-                    if (PointsDown(pin))
-                        builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.Margin.Bottom), Vector2.UY, TextOrientationType.Transformed);
+                    switch (_pinOrientations[i])
+                    {
+                        case Orientation.Left:
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.Margin.Left, 0), Vector2.UX, TextOrientationType.Transformed);
+                            break;
+                        case Orientation.Right:
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.Margin.Right, 0), Vector2.UX, TextOrientationType.Transformed);
+                            break;
+                        case Orientation.Up:
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.Margin.Top), Vector2.UY, TextOrientationType.Transformed);
+                            break;
+                        case Orientation.Down:
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.Margin.Bottom), Vector2.UY, TextOrientationType.Transformed);
+                            break;
+                    }
                 }
             }
 
@@ -152,16 +170,23 @@ namespace SimpleCircuit.Components
                 marginLeft = marginTop = marginRight = marginBottom = _parent.CornerRadius;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
-                    if (_pinsByIndex[i] is not LoosePin pin)
-                        continue;
-                    if (PointsLeft(pin))
-                        marginLeft = Math.Max(marginLeft, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
-                    else if (PointsRight(pin))
-                        marginRight = Math.Max(marginRight, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
-                    else if (PointsUp(pin))
-                        marginTop = Math.Max(marginTop, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
-                    else if (PointsDown(pin))
-                        marginBottom = Math.Max(marginBottom, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
+                    switch (_pinOrientations[i])
+                    {
+                        case Orientation.Left:
+                            marginLeft = Math.Max(marginLeft, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
+                            break;
+                        case Orientation.Right:
+                            marginRight = Math.Max(marginRight, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
+                            break;
+                        case Orientation.Up:
+                            marginTop = Math.Max(marginTop, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
+                            break;
+                        case Orientation.Down:
+                            marginBottom = Math.Max(marginBottom, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
                 }
 
                 // Place north pins
@@ -169,85 +194,94 @@ namespace SimpleCircuit.Components
                 double minLeftHeight = 0, minTopWidth = 0, minRightHeight = 0, minBottomWidth = 0;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
-                    if (_pinsByIndex[i] is not LoosePin pin)
-                        continue;
-
                     RelativeItem lastOffset, nextOffset;
                     double minimum;
-                    if (PointsLeft(pin))
+                    var pin = _pinsByIndex[i];
+                    switch (_pinOrientations[i])
                     {
-                        nextOffset = context.GetOffset(pin.Y);
-                        double b = _spansByIndex[i].Bounds.Bounds.Height;
-                        if (lastLeftPin < 0)
-                        {
-                            lastOffset = context.GetOffset(_parent.Y);
-                            minimum = marginTop + _parent.Margin.Top + 0.5 * b;
-                            minLeftHeight = marginTop + _parent.Margin.Vertical + b;
-                        }
-                        else
-                        {
-                            lastOffset = context.GetOffset(_pinsByIndex[lastLeftPin].Y);
-                            minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastLeftPin].Bounds.Bounds.Height + b);
-                            minLeftHeight += _parent.Margin.Vertical + b;
-                        }
-                        lastLeftPin = i;
+                        case Orientation.Left:
+                            {
+                                nextOffset = context.GetOffset(pin.Y);
+                                double b = _spansByIndex[i].Bounds.Bounds.Height;
+                                if (lastLeftPin < 0)
+                                {
+                                    lastOffset = context.GetOffset(_parent.Y);
+                                    minimum = marginTop + _parent.Margin.Top + 0.5 * b;
+                                    minLeftHeight = marginTop + _parent.Margin.Vertical + b;
+                                }
+                                else
+                                {
+                                    lastOffset = context.GetOffset(_pinsByIndex[lastLeftPin].Y);
+                                    minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastLeftPin].Bounds.Bounds.Height + b);
+                                    minLeftHeight += _parent.Margin.Vertical + b;
+                                }
+                                lastLeftPin = i;
+                            }
+                            break;
+
+                        case Orientation.Right:
+                            {
+                                nextOffset = context.GetOffset(pin.Y);
+                                double b = _spansByIndex[i].Bounds.Bounds.Height;
+                                if (lastRightPin < 0)
+                                {
+                                    lastOffset = context.GetOffset(_parent.Y);
+                                    minimum = marginTop + _parent.Margin.Top + 0.5 * b;
+                                    minRightHeight = marginTop + _parent.Margin.Vertical + b;
+                                }
+                                else
+                                {
+                                    lastOffset = context.GetOffset(_pinsByIndex[lastRightPin].Y);
+                                    minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastRightPin].Bounds.Bounds.Height + b);
+                                    minRightHeight += _parent.Margin.Vertical + b;
+                                }
+                                lastRightPin = i;
+                            }
+                            break;
+
+                        case Orientation.Up:
+                            {
+                                nextOffset = context.GetOffset(pin.X);
+                                double r = _spansByIndex[i].Bounds.Bounds.Height;
+                                if (lastTopPin < 0)
+                                {
+                                    lastOffset = context.GetOffset(_parent.X);
+                                    minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
+                                    minTopWidth = marginLeft + _parent.Margin.Horizontal + r;
+                                }
+                                else
+                                {
+                                    lastOffset = context.GetOffset(_pinsByIndex[lastTopPin].X);
+                                    minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastTopPin].Bounds.Bounds.Height + r);
+                                    minTopWidth += _parent.Margin.Horizontal + r;
+                                }
+                                lastTopPin = i;
+                            }
+                            break;
+
+                        case Orientation.Down:
+                            {
+                                nextOffset = context.GetOffset(pin.X);
+                                double r = _spansByIndex[i].Bounds.Bounds.Height;
+                                if (lastBottomPin < 0)
+                                {
+                                    lastOffset = context.GetOffset(_parent.X);
+                                    minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
+                                    minBottomWidth = marginLeft + _parent.Margin.Horizontal + r;
+                                }
+                                else
+                                {
+                                    lastOffset = context.GetOffset(_pinsByIndex[lastBottomPin].X);
+                                    minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastBottomPin].Bounds.Bounds.Height + r);
+                                    minBottomWidth += _parent.Margin.Horizontal + r;
+                                }
+                                lastBottomPin = i;
+                            }
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
                     }
-                    else if (PointsRight(pin))
-                    {
-                        nextOffset = context.GetOffset(pin.Y);
-                        double b = _spansByIndex[i].Bounds.Bounds.Height;
-                        if (lastRightPin < 0)
-                        {
-                            lastOffset = context.GetOffset(_parent.Y);
-                            minimum = marginTop + _parent.Margin.Top + 0.5 * b;
-                            minRightHeight = marginTop + _parent.Margin.Vertical + b;
-                        }
-                        else
-                        {
-                            lastOffset = context.GetOffset(_pinsByIndex[lastRightPin].Y);
-                            minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastRightPin].Bounds.Bounds.Height + b);
-                            minRightHeight += _parent.Margin.Vertical + b;
-                        }
-                        lastRightPin = i;
-                    }
-                    else if (PointsUp(pin))
-                    {
-                        nextOffset = context.GetOffset(pin.X);
-                        double r = _spansByIndex[i].Bounds.Bounds.Height;
-                        if (lastTopPin < 0)
-                        {
-                            lastOffset = context.GetOffset(_parent.X);
-                            minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
-                            minTopWidth = marginLeft + _parent.Margin.Horizontal + r;
-                        }
-                        else
-                        {
-                            lastOffset = context.GetOffset(_pinsByIndex[lastTopPin].X);
-                            minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastTopPin].Bounds.Bounds.Height + r);
-                            minTopWidth += _parent.Margin.Horizontal + r;
-                        }
-                        lastTopPin = i;
-                    }
-                    else if (PointsDown(pin))
-                    {
-                        nextOffset = context.GetOffset(pin.X);
-                        double r = _spansByIndex[i].Bounds.Bounds.Height;
-                        if (lastBottomPin < 0)
-                        {
-                            lastOffset = context.GetOffset(_parent.X);
-                            minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
-                            minBottomWidth = marginLeft + _parent.Margin.Horizontal + r;
-                        }
-                        else
-                        {
-                            lastOffset = context.GetOffset(_pinsByIndex[lastBottomPin].X);
-                            minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastBottomPin].Bounds.Bounds.Height + r);
-                            minBottomWidth += _parent.Margin.Horizontal + r;
-                        }
-                        lastBottomPin = i;
-                    }
-                    else
-                        throw new NotImplementedException();
 
                     // Apply the minimum constraint
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.{i}", lastOffset, nextOffset, minimum, MinimumWeight);
@@ -318,60 +352,37 @@ namespace SimpleCircuit.Components
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minw", context.GetOffset(_parent.X), context.GetOffset(Right), minWidth, MinimumWeight);
             }
 
-            private static bool PointsUp(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0;
-            private static bool PointsDown(LoosePin pin) => Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y > 0;
-            private static bool PointsLeft(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X < 0;
-            private static bool PointsRight(LoosePin pin) => Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0;
-
             /// <inheritdoc />
             public PresenceResult Prepare(IPrepareContext context)
             {
                 var pins = _pinsByIndex.OfType<LoosePin>();
                 switch (context.Mode)
                 {
-                    case PreparationMode.Offsets:
-                        foreach (var pin in pins)
-                        {
-                            if (PointsUp(pin))
-                            {
-                                if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
-                                {
-                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, _parent.Y, pin.Name);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(pin.X);
-                            }
-                            else if (PointsDown(pin))
-                            {
-                                if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
-                                {
-                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, Bottom, pin.Name);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(pin.X);
-                            }
-                            else if (PointsLeft(pin))
-                            {
-                                if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
-                                {
-                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.X, pin.Name);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(pin.Y);
-                            }
-                            else if (PointsRight(pin))
-                            {
-                                if (!context.Offsets.Group(Right, pin.X, 0.0))
-                                {
-                                    context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.Name, pin.Name);
-                                    return PresenceResult.GiveUp;
-                                }
-                                context.Offsets.Add(pin.Y);
-                            }
-                        }
+                    case PreparationMode.Reset:
+                        _pinOrientations.Clear();
                         break;
 
                     case PreparationMode.Sizes:
+
+                        // The orientations have just finished, let's decide on the orientation for all pins now
+                        foreach (var pin in _pinsByIndex)
+                        {
+                            if (Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y < 0)
+                                _pinOrientations.Add(Orientation.Up);
+                            else if (Math.Abs(pin.Orientation.Y) > Math.Abs(pin.Orientation.X) && pin.Orientation.Y > 0)
+                                _pinOrientations.Add(Orientation.Down);
+                            else if (Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X < 0)
+                                _pinOrientations.Add(Orientation.Left);
+                            else if (Math.Abs(pin.Orientation.X) > Math.Abs(pin.Orientation.Y) && pin.Orientation.X > 0)
+                                _pinOrientations.Add(Orientation.Right);
+                            else
+                            {
+                                context.Diagnostics?.Post(pin.Sources, ErrorCodes.InvalidBlackBoxPinDirection, _parent.Name);
+                                return PresenceResult.GiveUp;
+                            }
+                        }
+
+                        // Format all the pin names
                         var style = context.Style.ModifyDashedDotted(_parent);
                         Span emptySpan = null;
                         foreach (var pin in _pinsByIndex)
@@ -383,6 +394,50 @@ namespace SimpleCircuit.Components
                             {
                                 emptySpan ??= context.TextFormatter.Format(string.Empty, style);
                                 _spansByIndex.Add(emptySpan);
+                            }
+                        }
+                        break;
+
+                    case PreparationMode.Offsets:
+                        for (int i = 0; i < _pinsByIndex.Count; i++)
+                        {
+                            var pin = _pinsByIndex[i];
+                            switch (_pinOrientations[i])
+                            {
+                                case Orientation.Up:
+                                    if (!context.Offsets.Group(_parent.Y, pin.Y, 0.0))
+                                    {
+                                        context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, _parent.Y, pin.Name);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                    context.Offsets.Add(pin.X);
+                                    break;
+                                case Orientation.Down:
+                                    if (!context.Offsets.Group(Bottom, pin.Y, 0.0))
+                                    {
+                                        context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongY, Bottom, pin.Name);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                    context.Offsets.Add(pin.X);
+                                    break;
+                                case Orientation.Left:
+                                    if (!context.Offsets.Group(_parent.X, pin.X, 0.0))
+                                    {
+                                        context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.X, pin.Name);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                    context.Offsets.Add(pin.Y);
+                                    break;
+                                case Orientation.Right:
+                                    if (!context.Offsets.Group(Right, pin.X, 0.0))
+                                    {
+                                        context.Diagnostics?.Post(ErrorCodes.CouldNotAlignAlongX, _parent.Name, pin.Name);
+                                        return PresenceResult.GiveUp;
+                                    }
+                                    context.Offsets.Add(pin.Y);
+                                    break;
+                                default:
+                                    return PresenceResult.GiveUp;
                             }
                         }
                         break;

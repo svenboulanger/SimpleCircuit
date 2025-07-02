@@ -1,4 +1,5 @@
-﻿using SpiceSharp.Entities;
+﻿using SimpleCircuit.Diagnostics;
+using SpiceSharp.Entities;
 
 namespace SimpleCircuit.Circuits.Contexts
 {
@@ -7,6 +8,11 @@ namespace SimpleCircuit.Circuits.Contexts
     /// </summary>
     public interface IRegisterContext
     {
+        /// <summary>
+        /// Gets the diagnostics handler.
+        /// </summary>
+        public IDiagnosticHandler Diagnostics { get; }
+
         /// <summary>
         /// Gets the circuit that will be solved.
         /// </summary>

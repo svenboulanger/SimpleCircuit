@@ -162,6 +162,8 @@
         [Diagnostic(SeverityLevel.Error, null, "For-loop increment is too small ({0})")]
         ForLoopIncrementTooSmall,
 
+        [Diagnostic(SeverityLevel.Error, null, "Invalid black box pin orientation on '{0}'")]
+        InvalidBlackBoxPinDirection,
         [Diagnostic(SeverityLevel.Warning, null, "Invalid marker '{0}'")]
         InvalidMarker,
         [Diagnostic(SeverityLevel.Error, null, "The name '{0}' is invalid")]
