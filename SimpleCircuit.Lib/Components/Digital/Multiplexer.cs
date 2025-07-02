@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
-            private CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "mux";
@@ -56,8 +56,7 @@ namespace SimpleCircuit.Components.Digital
                     case PreparationMode.Reset:
                         var style = context.Style.ModifyDashedDotted(this);
                         double m = style.LineThickness * 0.5 + LabelMargin;
-                        _anchors = new(
-                            new LabelAnchorPoint(new(0, 8 + m), new(0, 1)));
+                        _anchors[0] = new LabelAnchorPoint(new(0, 8 + m), new(0, 1));
                         break;
                 }
                 return base.Prepare(context);

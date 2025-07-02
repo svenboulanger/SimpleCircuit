@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// An Operational Transconductance Amplifier (OTA).
     /// </summary>
-    [Drawable("TA", "A transconductance amplifier.", "Analog", "programmable")]
-    [Drawable("OTA", "A transconductance amplifier.", "Analog", "programmable")]
+    [Drawable("TA", "A transconductance amplifier.", "Analog", "programmable", labelCount: 3)]
+    [Drawable("OTA", "A transconductance amplifier.", "Analog", "programmable", labelCount: 3)]
     public class OperationalTransconductanceAmplifier : DrawableFactory
     {
         private const string _differentialInput = "diffin";
@@ -31,10 +31,14 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "ota";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -43,12 +47,6 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name)
                 : base(name)
             {
-                Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "inn", "neg");
-                Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "inp", "pos");
-                Pins.Add(new FixedOrientedPin("negativepower", "The negative power.", this, new(0, -7), new(0, -1)), "vneg", "vn");
-                Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
-                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 0), new(1, 0)), "no", "outn");
-                Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "outp", "output");
                 _anchors = new(
                     new LabelAnchorPoint(new(2, 8), new(1, 1)),
                     new LabelAnchorPoint(new(), new(), Vector2.UX, TextOrientationType.Transformed),
@@ -65,50 +63,73 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
+                        Pins.Clear();
+                        Vector2 la0 = new(-5, 9), la1 = new(5, 5);
+                        Vector2 lb0 = new(5, -5), lb1 = new(-5, -9);
+
                         if (Variants.Contains(_differentialInput))
                         {
                             if (Variants.Contains(_swapInput))
                             {
-                                SetPinOffset(0, new(-5, 4));
-                                SetPinOffset(1, new(-5, -4));
+                                Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, 4), new(-1, 0)), "n", "inn", "neg");
+                                Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, -4), new(-1, 0)), "p", "inp", "pos");
                             }
                             else
                             {
-                                SetPinOffset(0, new(-5, -4));
-                                SetPinOffset(1, new(-5, 4));
+                                Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "inn", "neg");
+                                Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "inp", "pos");
                             }
                         }
                         else
                         {
-                            SetPinOffset(0, new(-5, 0));
-                            SetPinOffset(1, new(-5, 0));
+                            Pins.Add(new FixedOrientedPin("input", "The input.", this, new(-5, 0), new(-1, 0)), "in", "inp", "input", "i");
                         }
+
+                        // Add power pins
+                        Pins.Add(new FixedOrientedPin("negativepower", "The negative power.", this, new(0, -7), new(0, -1)), "vneg", "vn");
+                        Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
 
                         if (Variants.Contains(_differentialOutput))
                         {
                             if (Variants.Contains(_swapOutput))
                             {
-                                SetPinOffset(4, new(5, -4));
-                                SetPinOffset(5, new(5, 4));
+                                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, -4), new(1, 0)), "no", "outn");
+                                Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 4), new(1, 0)), "o", "out", "outp", "output");
+                                la1 = new(6, 8);
+                                lb0 = new(8, -7);
                             }
                             else
                             {
-                                SetPinOffset(4, new(5, 4));
-                                SetPinOffset(5, new(5, -4));
+                                Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 4), new(1, 0)), "no", "outn");
+                                Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, -4), new(1, 0)), "o", "out", "outp", "output");
+                                la1 = new(8, 7);
+                                lb0 = new(6, -8);
                             }
                         }
                         else
                         {
-                            SetPinOffset(4, new(5, 0));
-                            SetPinOffset(5, new(5, 0));
+                            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "out", "outp", "output", "o");
                         }
 
-
-                        // Update anchors
-                        _anchors[0] = new LabelAnchorPoint(new(2, 8), new(1, 1));
-                        _anchors[2] = new LabelAnchorPoint(new(2, -8), new(1, -1));
                         if (Variants.Contains(_programmable))
-                            _anchors[2] = new LabelAnchorPoint(new(2, -13), new(1, -1));
+                        {
+                            if (la0.Y < 10)
+                                la0 = new(-7, 10);
+                            if (lb0.Y > -12)
+                                lb0 = new(6, -12);
+                        }
+
+                        // Calculate the locations of the 2 outer anchor points
+                        var expA = (la1 - la0).Perpendicular;
+                        expA /= expA.Length;
+                        var locA = Vector2.AtX(0.0, la0, la1) + expA * LabelMargin;
+                        var expB = (lb1 - lb0).Perpendicular;
+                        expB /= expB.Length;
+                        var locB = Vector2.AtX(0.0, lb0, lb1) + expB * LabelMargin;
+                        _anchors = new(
+                            new LabelAnchorPoint(locA, expA),
+                            new LabelAnchorPoint(new(0, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center),
+                            new LabelAnchorPoint(locB, expB));
                         break;
                 }
                 return result;

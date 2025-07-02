@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components.Labeling;
+﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
@@ -12,7 +13,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A fixed household appliance.
     /// </summary>
-    [Drawable("APP", "A fixed household appliance.", "Outputs", "ventilator heater boiler cooking microwave overn washer dryer dishwasher refrigerator fridge freezer accu arei")]
+    [Drawable("APP", "A fixed household appliance.", "Outputs", "ventilator heater boiler cooking microwave overn washer dryer dishwasher refrigerator fridge freezer accu arei", labelCount: 2)]
     public class Appliance : DrawableFactory
     {
         private const string _ventilator = "ventilator";
@@ -36,7 +37,7 @@ namespace SimpleCircuit.Components.Outputs
         private class Instance : ScaledOrientedDrawable, IBoxDrawable, IRoundedBox
         {
             private const double _k = 0.5522847498;
-            private readonly static ILabelAnchorPoints<IBoxDrawable> _anchors = new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1);
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "appliance";
@@ -71,29 +72,37 @@ namespace SimpleCircuit.Components.Outputs
                 Pins.Add(new FixedOrientedPin("p", "The connection.", this, new(), new(-1, 0)), "p", "a");
             }
 
+            public override PresenceResult Prepare(IPrepareContext context)
+            {
+                switch (context.Mode)
+                {
+                    case PreparationMode.Reset:
+                        _anchors[0] = new LabelAnchorPoint(new(8, -8 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(8, 8 + LabelMargin), new(0, 1));
+                        break;
+                }
+                return base.Prepare(context);
+            }
+
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
-                if (Variants.Contains(_heater))
-                    DrawHeater(builder, Variants.Contains(_ventilator), Variants.Contains(_accu), style);
-                else
+                switch (Variants.Select(_ventilator, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer, _heater))
                 {
-                    switch (Variants.Select(_ventilator, _boiler, _cooking, _microwave, _oven, _washer, _dryer, _dishwasher, _refrigerator, _fridge, _freezer))
-                    {
-                        case 0: DrawVentilator(builder, style); break;
-                        case 1: DrawBoiler(builder, Variants.Contains(_accu), style); break;
-                        case 2: DrawCooking(builder, style); break;
-                        case 3: DrawMicroWave(builder, style); break;
-                        case 4: DrawOven(builder, style); break;
-                        case 5: DrawWasher(builder, style); break;
-                        case 6: DrawDryer(builder, style); break;
-                        case 7: DrawDishwasher(builder, style); break;
-                        case 8:
-                        case 9: DrawRefrigerator(builder, style); break;
-                        case 10: DrawFreezer(builder, style); break;
-                        default: DrawDefault(builder, style); break;
-                    }
+                    case 0: DrawVentilator(builder, style); break;
+                    case 1: DrawBoiler(builder, Variants.Contains(_accu), style); break;
+                    case 2: DrawCooking(builder, style); break;
+                    case 3: DrawMicroWave(builder, style); break;
+                    case 4: DrawOven(builder, style); break;
+                    case 5: DrawWasher(builder, style); break;
+                    case 6: DrawDryer(builder, style); break;
+                    case 7: DrawDishwasher(builder, style); break;
+                    case 8:
+                    case 9: DrawRefrigerator(builder, style); break;
+                    case 10: DrawFreezer(builder, style); break;
+                    case 11: DrawHeater(builder, Variants.Contains(_ventilator), Variants.Contains(_accu), style); break;
+                    default: DrawDefault(builder, style); break;
                 }
                 _anchors.Draw(builder, this, style);
             }
@@ -106,6 +115,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 if (ventilator)
                 {
+                    _anchors[0] = new LabelAnchorPoint(new(11, -8 - LabelMargin), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(11, 8 + LabelMargin), new(0, 1));
                     DrawBox(builder, 11, 0, 22, 16, style);
                     DrawVentilator(builder, 17, 0, style, 3);
                     DrawHeater(builder, 7, 0, 10, 10, style);
@@ -114,6 +125,8 @@ namespace SimpleCircuit.Components.Outputs
                 {
                     if (accumulator)
                     {
+                        _anchors[0] = new LabelAnchorPoint(new(11, -8 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(11, 8 + LabelMargin), new(0, 1));
                         DrawBox(builder, 11, 0, 22, 16, style);
                         DrawHeater(builder, 11, 0, 16, 12, style);
                     }
@@ -133,6 +146,7 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawCooking(IGraphicsBuilder builder, IStyle style)
             {
+                
                 DrawBox(builder, 8, 0, 16, 16, style);
                 builder.Circle(new(4, -4), 2, style);
                 builder.Circle(new(12, -4), 2, style);
@@ -173,6 +187,8 @@ namespace SimpleCircuit.Components.Outputs
             }
             private void DrawFreezer(IGraphicsBuilder builder, IStyle style)
             {
+                _anchors[0] = new LabelAnchorPoint(new(14, -8 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(14, 8 + LabelMargin), new(0, 1));
                 DrawBox(builder, 14, 0, 28, 16, style);
                 DrawIce(builder, 5, 0, style, 3.5);
                 DrawIce(builder, 14, 0, style, 3.5);

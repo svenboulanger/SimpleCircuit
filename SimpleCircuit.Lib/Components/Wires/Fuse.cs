@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Wires
     /// <summary>
     /// A fuse.
     /// </summary>
-    [Drawable("FUSE", "A fuse.", "Wires")]
+    [Drawable("FUSE", "A fuse.", "Wires", labelCount: 2)]
     public class Fuse : DrawableFactory
     {
         private const string _alt = "alt";
@@ -74,12 +74,13 @@ namespace SimpleCircuit.Components.Wires
             }
             private void DrawANSIalt(IGraphicsBuilder builder, IStyle style)
             {
+                builder.ExtendPins(Pins, style);
                 builder.Path(b => b
                     .MoveTo(new(-6, 0))
                     .CurveTo(new(-6, -1.65685424949), new(-4.65685424949, -3), new(-3, -3))
                     .CurveTo(new(-1.34314575051, -3), new(0, -1.65685424949), new())
                     .CurveTo(new(0, 1.65685424949), new(1.34314575051, 3), new(3, 3))
-                    .CurveTo(new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)), style);
+                    .CurveTo(new(4.65685424949, 3), new(6, 1.65685424949), new(6, 0)), style.AsStroke());
 
                 _anchors.Draw(builder, this, style);
             }

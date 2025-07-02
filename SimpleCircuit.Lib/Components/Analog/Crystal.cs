@@ -14,10 +14,14 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "crystal";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -43,6 +47,9 @@ namespace SimpleCircuit.Components.Analog
                 builder.Rectangle(-2.5, -5, 5, 10, style);
                 builder.Path(b => b.MoveTo(new(-4.5, -3.5)).Line(new(0, 7)).MoveTo(new(4.5, -3.5)).Line(new(0, 7)), style);
 
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
         }

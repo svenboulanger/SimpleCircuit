@@ -17,12 +17,16 @@ namespace SimpleCircuit.Components
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             private const string _anchor = "anchor";
 
             /// <inheritdoc />
             public override string Type => "power";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -32,7 +36,6 @@ namespace SimpleCircuit.Components
                 : base(name)
             {
                 Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
-                _anchors = new(new LabelAnchorPoint(new(0, -1.5), new(0, -1)));
             }
 
             /// <inheritdoc />
@@ -46,14 +49,15 @@ namespace SimpleCircuit.Components
                         new(),
                         new(4, 4)
                     ], style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                 }
                 else
                 {
                     builder.Line(new Vector2(-5, 0), new Vector2(5, 0), style.AsLineThickness(1.0));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -0.5 - LabelMargin), new(0, -1));
                 }
 
                 builder.ExtendPins(Pins, style);
-
                 _anchors.Draw(builder, this, style);
             }
         }

@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A light.
     /// </summary>
-    [Drawable("LIGHT", "A light point.", "Outputs", "direction directional diverging projector emergency wall arei")]
+    [Drawable("LIGHT", "A light point.", "Outputs", "direction directional diverging projector emergency wall arei", labelCount: 2)]
     public class Light : DrawableFactory
     {
         private const string _direction = "direction";
@@ -30,6 +30,10 @@ namespace SimpleCircuit.Components.Outputs
 
             /// <inheritdoc />
             public override string Type => "light";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -72,8 +76,8 @@ namespace SimpleCircuit.Components.Outputs
             {
                 var style = builder.Style.ModifyDashedDotted(this);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
 
                 if (!Variants.Contains(Options.Arei))
                     builder.Circle(new Vector2(), 4, style);
@@ -96,8 +100,8 @@ namespace SimpleCircuit.Components.Outputs
             private void DrawWall(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Line(new Vector2(-3, 5), new Vector2(3, 5), style);
-                if (_anchors[1].Location.Y < 6)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 6), new(0, 1));
+                if (_anchors[1].Location.Y < 5 + LabelMargin)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + LabelMargin), new(0, 1));
             }
             private void DrawProjector(IGraphicsBuilder builder, IStyle style)
             {
@@ -107,9 +111,9 @@ namespace SimpleCircuit.Components.Outputs
                     double s = Math.Sin(Math.PI * 0.95) * 6;
                     b.MoveTo(new(-c, -s));
                     b.ArcTo(6, 6, 0.0, false, false, new(c, -s));
-                }, style);
-                if (_anchors[0].Location.Y > -7)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                }, style.AsStroke());
+                if (_anchors[0].Location.Y > -6 - LabelMargin)
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
             }
             private void DrawDirectional(IGraphicsBuilder builder, bool diverging, IStyle style)
             {
@@ -123,8 +127,8 @@ namespace SimpleCircuit.Components.Outputs
                     builder.Arrow(new(-2, 6), new(-2, 12), style);
                     builder.Arrow(new(2, 6), new(2, 12), style);
                 }
-                if (_anchors[1].Location.Y < 13)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 13), new(0, 1));
+                if (_anchors[1].Location.Y < 12 + LabelMargin)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 12 + LabelMargin), new(0, 1));
             }
             private void DrawEmergency(IGraphicsBuilder builder, IStyle style)
             {

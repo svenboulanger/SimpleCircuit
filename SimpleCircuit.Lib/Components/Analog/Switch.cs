@@ -4,13 +4,14 @@ using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
+using System.Data.SqlTypes;
 
 namespace SimpleCircuit.Components.Analog
 {
     /// <summary>
     /// A switch.
     /// </summary>
-    [Drawable("S", "A switch. The controlling pin is optional.", "Analog", "push lamp window toggle knife reed arei")]
+    [Drawable("S", "A switch. The controlling pin is optional.", "Analog", "push lamp window toggle knife reed arei", labelCount: 2)]
     public class Switch : DrawableFactory
     {
         private const string _closed = "closed";
@@ -27,9 +28,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             [Description("The number of poles on the switch.")]
             [Alias("p")]
@@ -37,6 +36,10 @@ namespace SimpleCircuit.Components.Analog
 
             /// <inheritdoc />
             public override string Type => "switch";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -124,16 +127,17 @@ namespace SimpleCircuit.Components.Analog
                     builder.Circle(new(5, 0), 1, style);
                     builder.Line(new(-4, 0), new(4, 0), style);
                     builder.Line(new(0, 2), new(0, -2), style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -2 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 2 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                 }
                 else
                 {
                     builder.Polyline([new(-6, 0), new(-4, 0), new(2, -4)], style);
                     builder.Line(new(4, 0), new(6, 0), style);
                     builder.Line(new(-0.5, -4), new(1.5, -1.5), style);
+                    _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                 }
-
-                _anchors[0] = new LabelAnchorPoint(new(3, -3), new(1, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
             }
             private void DrawRegularSwitch(IGraphicsBuilder builder, IStyle style)
             {
@@ -153,14 +157,14 @@ namespace SimpleCircuit.Components.Analog
                     }, style);
 
                     // Update labels
-                    _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 6 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                 }
                 else
                 {
                     // Default labels
-                    _anchors[0] = new LabelAnchorPoint(new(0, -1.5), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, 1.5), new(0, 1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -0.5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 0.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                 }
 
                 builder.ExtendPins(Pins, style, 2, "a", "b");
@@ -178,8 +182,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Circle(new(0, -1), 1, style);
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -2.5)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -2.5), new(0, -1));
+                        if (_anchors[0].Location.Y > -2 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -2 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                     }
 
                     // The switch
@@ -195,8 +199,8 @@ namespace SimpleCircuit.Components.Analog
                     builder.Line(new(-4, 0), new(4, -4), style);
 
                     // Update labels
-                    if (_anchors[0].Location.Y > -5)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
+                    if (_anchors[0].Location.Y > -4 - style.LineThickness * 0.5 - LabelMargin)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                 }
 
                 switch (Variants.Select(_closing, _opening))
@@ -212,10 +216,10 @@ namespace SimpleCircuit.Components.Analog
                         }, style.AsStroke());
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -6)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
-                        if (_anchors[1].Location.Y < 3)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 3), new(0, 1));
+                        if (_anchors[0].Location.Y > -5 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                        if (_anchors[1].Location.Y < 2 + style.LineThickness * 0.5 + LabelMargin)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 2 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         break;
 
                     case 1:
@@ -228,10 +232,10 @@ namespace SimpleCircuit.Components.Analog
                         }, style.AsStroke());
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                        if (_anchors[1].Location.Y < 2)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                        if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                        if (_anchors[1].Location.Y < 1 + style.LineThickness * 0.5 + LabelMargin)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 1 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         break;
                 }
             }
@@ -242,8 +246,8 @@ namespace SimpleCircuit.Components.Analog
                 builder.Circle(new Vector2(5, 0), 1, style);
 
                 // Initialize labels
-                _anchors[0] = new LabelAnchorPoint(new(0, -2), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -0.5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 0.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
 
                 if (Variants.Contains(_closed))
                 {
@@ -255,8 +259,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Line(new(0, -2), new(0, -6), style);
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                     }
                     else
                     {
@@ -264,8 +268,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Line(new(0, 0), new(0, -6), style);
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                     }
                 }
                 else
@@ -277,8 +281,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Circle(new(0, -5), 1, style);
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                     }
                     else
                     {
@@ -286,13 +290,10 @@ namespace SimpleCircuit.Components.Analog
                         builder.Line(new(0, -4), new(0, -6), style);
 
                         // Update labels
-                        if (_anchors[0].Location.Y > -7)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
+                        if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                     }
                 }
-
-                if (_anchors[1].Location.Y < 2)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
             }
         }
     }

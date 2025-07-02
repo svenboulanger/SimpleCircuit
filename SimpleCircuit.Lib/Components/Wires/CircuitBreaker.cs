@@ -6,7 +6,10 @@ using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Wires
 {
-    [Drawable("CB", "A circuit breaker.", "Wires", "automatic arei")]
+    /// <summary>
+    /// A circuit breakder symbol.
+    /// </summary>
+    [Drawable("CB", "A circuit breaker.", "Wires", "automatic arei", labelCount: 2)]
     public class CircuitBreaker : DrawableFactory
     {
         /// <inheritdoc />
@@ -78,7 +81,7 @@ namespace SimpleCircuit.Components.Wires
 
                 builder.Path(b => b
                     .MoveTo(new(-4, -2))
-                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), style);
+                    .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), style.AsStrokeMarker());
 
                 _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));

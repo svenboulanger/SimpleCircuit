@@ -13,15 +13,14 @@ namespace SimpleCircuit
     /// </summary>
     public static class DemoHelper
     {
-        private class VariantCombination : IEquatable<VariantCombination>
+        private class VariantCombination(IEnumerable<string> items) : IEquatable<VariantCombination>
         {
-            public HashSet<string> Set { get; }
+            /// <summary>
+            /// Gets the set of variants in the combination.
+            /// </summary>
+            public HashSet<string> Set { get; } = [.. items];
 
-            public VariantCombination(IEnumerable<string> items)
-            {
-                Set = [.. items];
-            }
-
+            /// <inheritdoc />
             public override int GetHashCode()
             {
                 int hash = 0;
@@ -30,8 +29,10 @@ namespace SimpleCircuit
                 return hash;
             }
 
+            /// <inheritdoc />
             public override bool Equals(object obj) => obj is VariantCombination vc && Equals(vc);
 
+            /// <inheritdoc />
             public bool Equals(VariantCombination other)
             {
                 if (ReferenceEquals(this, other))
@@ -40,6 +41,9 @@ namespace SimpleCircuit
                     return false;
                 return Set.SetEquals(other.Set);
             }
+
+            /// <inheritdoc />
+            public override string ToString() => string.Join(", ", Set);
         }
 
         /// <summary>
@@ -108,13 +112,14 @@ namespace SimpleCircuit
                 }
 
                 // Also do a different orientation
-                sb.AppendLine($"X <sw 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
-                sb.AppendLine($"X <nw 5 color=\"red\"> {key}_{styles.Count + 1}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
-                sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count + 2}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
-                sb.AppendLine($"X <ne 5 color=\"red\"> {key}_{styles.Count + 3}_{row}({string.Join(", ", variants[row].Set)} {string.Join(", ", labels)})");
+                sb.AppendLine($"X <sw 5 color=\"red\"> {key}_{styles.Count}_{row}({string.Join(" ", variants[row].Set)} {string.Join(" ", labels)})");
+                sb.AppendLine($"X <sw 5 color=\"red\"> {key}_{styles.Count + 1}_{row}({string.Join(" ", variants[row].Set)} flip {string.Join(" ", labels)})");
+                sb.AppendLine($"X <nw 5 color=\"red\"> {key}_{styles.Count + 2}_{row}({string.Join(" ", variants[row].Set)} {string.Join(" ", labels)})");
+                sb.AppendLine($"X <se 5 color=\"red\"> {key}_{styles.Count + 3}_{row}({string.Join(" ", variants[row].Set)} {string.Join(" ", labels)})");
+                sb.AppendLine($"X <ne 5 color=\"red\"> {key}_{styles.Count + 4}_{row}({string.Join(" ", variants[row].Set)} {string.Join(" ", labels)})");
                 sb.AppendLine($"(y {key}_*_{row})");
             }
-            for (int col = 0; col < styles.Count + 2; col++)
+            for (int col = 0; col < styles.Count + 5; col++)
                 sb.AppendLine($"(x {key}_{col}_*)");
             return sb.ToString();
         }

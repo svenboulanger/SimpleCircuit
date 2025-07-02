@@ -121,9 +121,6 @@ namespace SimpleCircuit.Components.Digital
                     return;
 
                 var style = builder.Style.ModifyDashedDotted(this);
-
-                double hw = BlockSize * 0.5;
-
                 for (int row = 0; row < _bits.Count; row++)
                 {
                     var bits = _bits[row];
@@ -131,7 +128,7 @@ namespace SimpleCircuit.Components.Digital
                     {
                         builder.Rectangle(BlockSize * col, BlockSize * row, BlockSize, BlockSize, style);
                         var span = builder.TextFormatter.Format(bits[col], style);
-                        builder.Text(span, new Vector2(BlockSize * col + hw, BlockSize * row + hw) - span.Bounds.Bounds.Center, Vector2.UX, TextOrientationType.Transformed);
+                        builder.Text(span, new Vector2(BlockSize * (col + 0.5), BlockSize * (row + 0.5)) - new Vector2(span.Bounds.Bounds.Center.X, -style.FontSize * 0.5), Vector2.UX, TextOrientationType.Transformed);
                     }
                 }
             }

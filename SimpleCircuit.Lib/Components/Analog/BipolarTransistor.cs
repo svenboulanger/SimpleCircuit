@@ -34,6 +34,10 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "npn";
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <summary>
             /// Creates a new <see cref="Npn"/>.
             /// </summary>
@@ -56,10 +60,10 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0, style);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -8 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                 }
                 else
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -2 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
 
                 // Transistor
                 builder.ExtendPins(Pins, style);
@@ -75,6 +79,10 @@ namespace SimpleCircuit.Components.Analog
 
             /// <inheritdoc />
             public override string Type => "pnp";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Pnp"/>.
@@ -98,10 +106,10 @@ namespace SimpleCircuit.Components.Analog
                 if (Variants.Contains(_packaged))
                 {
                     builder.Circle(new(), 8.0, style);
-                    _anchors[0] = new LabelAnchorPoint(new(0, -9), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -8 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                 }
                 else
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
+                    _anchors[0] = new LabelAnchorPoint(new(0, -2 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
 
                 // Transistor
                 builder.ExtendPins(Pins, style);

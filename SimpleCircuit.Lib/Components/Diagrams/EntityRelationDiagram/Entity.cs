@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
     /// <summary>
     /// An entity for an ERD.
     /// </summary>
-    [Drawable("ENT", "An entity-relationship diagram entity. Any label after the first will be added as an attribute.", "ERD", "box rectangle")]
+    [Drawable("ENT", "An entity-relationship diagram entity. Any label after the first will be added as an attribute.", "ERD", "box rectangle", labelCount: 3)]
     public class Entity : DrawableFactory
     {
         /// <inheritdoc />
@@ -204,7 +204,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     // Draw the header
                     double s = _separators[0];
                     if (CornerRadius.IsZero())
-                        builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Drawing.Styles.Style.None, null)); // Header background
+                        builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Style.None, null)); // Header background
                     else
                     {
                         builder.Path(b =>
@@ -216,7 +216,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 .VerticalTo(_top + CornerRadius)
                                 .Arc(CornerRadius, CornerRadius, 0, false, true, new(CornerRadius, -CornerRadius))
                                 .Close();
-                        }, style.Modify(HeaderStyle).Color(Drawing.Styles.Style.None, null)); // Header background
+                        }, style.Modify(HeaderStyle).Color(Style.None, null)); // Header background
 
                         for (int i = 1; i < Labels.Count; i++)
                         {
@@ -224,11 +224,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                             if (i < Labels.Count - 1)
                             {
                                 double ns = _separators[i];
-                                builder.Rectangle(-_width * 0.5, s, _width, ns - s, rowStyle.Color(Drawing.Styles.Style.None, null));
+                                builder.Rectangle(-_width * 0.5, s, _width, ns - s, rowStyle.Color(Style.None, null));
                                 s = ns;
                             }
                             else if (CornerRadius.IsZero())
-                                builder.Rectangle(-_width * 0.5, s, _width, _bottom - s, rowStyle.Color(Drawing.Styles.Style.None, null));
+                                builder.Rectangle(-_width * 0.5, s, _width, _bottom - s, rowStyle.Color(Style.None, null));
                             else
                             {
                                 builder.Path(b =>
@@ -240,7 +240,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                         .Horizontal(-_width + 2 * CornerRadius)
                                         .Arc(CornerRadius, CornerRadius, 0, false, true, new(-CornerRadius, -CornerRadius))
                                         .Close();
-                                }, rowStyle.Color(Drawing.Styles.Style.None, null));
+                                }, rowStyle.Color(Style.None, null));
                             }
                         }
                     }
@@ -248,11 +248,11 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                 else
                 {
                     // There is only a header
-                    builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Modify(HeaderStyle).Color(Drawing.Styles.Style.None, null), CornerRadius, CornerRadius);
+                    builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Modify(HeaderStyle).Color(Style.None, null), CornerRadius, CornerRadius);
                 }
 
                 // The outline
-                builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Color(null, Drawing.Styles.Style.None), CornerRadius, CornerRadius);
+                builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Color(null, Style.None), CornerRadius, CornerRadius);
                 
                 _anchors.Draw(builder, this, style);
             }

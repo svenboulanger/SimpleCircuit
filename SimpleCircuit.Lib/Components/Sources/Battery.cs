@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Sources
     /// <summary>
     /// A battery.
     /// </summary>
-    [Drawable("BAT", "A battery.", "Sources", "cell cells")]
+    [Drawable("BAT", "A battery.", "Sources", "cell cells", labelCount: 2)]
     public class Battery : DrawableFactory
     {
         /// <inheritdoc />

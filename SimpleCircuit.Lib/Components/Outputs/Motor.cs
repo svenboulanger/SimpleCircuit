@@ -8,7 +8,7 @@ namespace SimpleCircuit.Components.Outputs
     /// <summary>
     /// A motor.
     /// </summary>
-    [Drawable("MOTOR", "A motor.", "Outputs")]
+    [Drawable("MOTOR", "A motor.", "Outputs", labelCount: 2)]
     public class Motor : DrawableFactory
     {
         private const string _signs = "signs";
@@ -19,10 +19,14 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "motor";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -33,14 +37,14 @@ namespace SimpleCircuit.Components.Outputs
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(5, 0), new(1, 0)), "n", "neg", "b");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -6), new(0, -1)),
-                    new LabelAnchorPoint(new(0, 6), new(0, 1)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
+                _anchors[0] = new LabelAnchorPoint(new(0, -5 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5 + LabelMargin), new(0, 1));
+
                 var style = builder.Style.ModifyDashedDotted(this);
                 if (!Variants.Contains(Options.Arei))
                     builder.ExtendPins(Pins, style);

@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Sources
     /// <summary>
     /// A voltage source.
     /// </summary>
-    [Drawable("V", "A voltage source.", "Sources")]
+    [Drawable("V", "A voltage source.", "Sources", labelCount: 2)]
     public class VoltageSource : DrawableFactory
     {
         /// <inheritdoc />
@@ -18,9 +18,7 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             private const string _ac = "ac";
             private const string _pulse = "pulse";
@@ -31,6 +29,10 @@ namespace SimpleCircuit.Components.Sources
 
             /// <inheritdoc />
             public override string Type => "vs";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -92,8 +94,8 @@ namespace SimpleCircuit.Components.Sources
 
             private void DrawAmericanSource(IGraphicsBuilder builder, IStyle style)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
 
                 // Circle
                 builder.Circle(new(0, 0), 6, style);
@@ -151,10 +153,10 @@ namespace SimpleCircuit.Components.Sources
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-6, -6), new(7.5, 7.5), style);
-                    if (_anchors[0].Location.Y > -7)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                    if (_anchors[1].Location.Y < 8.5)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 8.5), new(0, 1));
+                    if (_anchors[0].Location.Y > -6 - LabelMargin)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
+                    if (_anchors[1].Location.Y < 7.5 + LabelMargin)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7.5 + LabelMargin), new(0, 1));
                 }
                 _anchors.Draw(builder, this, style);
             }
@@ -164,16 +166,16 @@ namespace SimpleCircuit.Components.Sources
                 builder.Circle(new(0, 0), 4, style);
                 builder.Line(new(-4, 0), new(4, 0), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
+                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
 
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-4, -4), new(6, 6), style);
-                    if (_anchors[0].Location.Y > -5)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                    if (_anchors[1].Location.Y < 7)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                    if (_anchors[0].Location.Y > -4 - LabelMargin)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
+                    if (_anchors[1].Location.Y < 6 + LabelMargin)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
                 }
                 _anchors.Draw(builder, this, style);
             }

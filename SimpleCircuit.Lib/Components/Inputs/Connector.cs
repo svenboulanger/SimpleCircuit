@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Inputs
     /// <summary>
     /// A connector.
     /// </summary>
-    [Drawable("CONN", "A connector or fastener.", "Inputs", "male female")]
+    [Drawable("CONN", "A connector or fastener.", "Inputs", "male female", labelCount: 2)]
     public class Connector : DrawableFactory
     {
         private const string _male = "male";
@@ -147,7 +147,7 @@ namespace SimpleCircuit.Components.Inputs
 
                     default:
                         double s = Math.Sqrt(2) * 2;
-                        builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)), style);
+                        builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)), style.AsStroke());
                         builder.Circle(new(), 1.5, style);
                         _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));

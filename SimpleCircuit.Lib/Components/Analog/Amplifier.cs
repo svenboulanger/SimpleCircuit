@@ -59,6 +59,10 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "amplifier";
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
@@ -122,12 +126,14 @@ namespace SimpleCircuit.Components.Analog
                         }
 
                         // Calculate the locations of the 2 outer anchor points
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
                         var expA = (la1 - la0).Perpendicular;
                         expA /= expA.Length;
-                        var locA = Vector2.AtX(2.0, la0, la1) + expA;
+                        var locA = Vector2.AtX(2.0, la0, la1) + expA * m;
                         var expB = (lb1 - lb0).Perpendicular;
                         expB /= expB.Length;
-                        var locB = Vector2.AtX(2.0, lb0, lb1) + expB;
+                        var locB = Vector2.AtX(2.0, lb0, lb1) + expB * m;
                         switch (Variants.Select(_schmitt, _comparator))
                         {
                             case 0:
@@ -199,7 +205,7 @@ namespace SimpleCircuit.Components.Analog
                         builder.Path(b => b.MoveTo(new(-5, 2))
                         .LineTo(new(-3, 2))
                         .LineTo(new(-3, -2))
-                        .LineTo(new(-1, -2)), style.AsStrokeMarker(Drawing.Styles.Style.DefaultLineThickness));
+                        .LineTo(new(-1, -2)), style.AsStrokeMarker(Style.DefaultLineThickness));
                         break;
 
                     case 1: // Schmitt trigger
@@ -213,7 +219,7 @@ namespace SimpleCircuit.Components.Analog
                                 .LineTo(new(-2, 2))
                                 .LineTo(new(-2, -2))
                                 .LineTo(new(0, -2));
-                        }, style.AsStrokeMarker(Drawing.Styles.Style.DefaultLineThickness));
+                        }, style.AsStrokeMarker(Style.DefaultLineThickness));
                         break;
                 }
 

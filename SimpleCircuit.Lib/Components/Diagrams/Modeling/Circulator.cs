@@ -4,6 +4,9 @@ using SimpleCircuit.Drawing.Styles;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
+    /// <summary>
+    /// A circulator.
+    /// </summary>
     [Drawable("CIRC", "A circulator.", "Modeling", "rotate")]
     public class Circulator : DrawableFactory
     {

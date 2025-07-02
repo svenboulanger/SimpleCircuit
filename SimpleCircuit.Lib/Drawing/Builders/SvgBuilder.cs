@@ -3,6 +3,7 @@ using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -158,10 +159,6 @@ namespace SimpleCircuit.Drawing.Builders
             if (span is null)
                 return this;
 
-            // Create the group
-            var g = _document.CreateElement("g", Namespace);
-            _current.AppendChild(g);
-
             location = CurrentTransform.Apply(location);
             var bounds = span.Bounds.Bounds;
 
@@ -187,8 +184,12 @@ namespace SimpleCircuit.Drawing.Builders
             }
 
             // Expand bounds
-            foreach (var p in span.Bounds.Bounds)
+            foreach (var p in bounds)
                 Expand(location + p.X * orientation + p.Y * orientation.Perpendicular);
+
+            // Create the group
+            var g = _document.CreateElement("g", Namespace);
+            _current.AppendChild(g);
 
             // Apply orientation and location to the containing group
             double angle = Math.Atan2(orientation.Y, orientation.X) / Math.PI * 180.0;

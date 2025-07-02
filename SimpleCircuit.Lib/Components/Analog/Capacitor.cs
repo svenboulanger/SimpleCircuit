@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A capacitor.
     /// </summary>
-    [Drawable("C", "A capacitor.", "Analog", "electrolytic programmable sensor")]
+    [Drawable("C", "A capacitor.", "Analog", "electrolytic programmable sensor", labelCount: 2)]
     public class Capacitor : DrawableFactory
     {
         private const string _curved = "curved";
@@ -28,6 +28,10 @@ namespace SimpleCircuit.Components.Analog
 
             /// <inheritdoc />
             public override string Type => "capacitor";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -80,6 +84,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Path(b => b.MoveTo(new(3, -4)).CurveTo(new(1.5, -2), new(1.5, -0.5), new(1.5, 0)).SmoothTo(new(1.5, 2), new(3, 4)), style.AsStroke());
                         if (Variants.Contains(_signs))
                             builder.Signs(new Vector2(-4, 3), new Vector2(5, 3), style, vertical: true);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4.5 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 4.5 + LabelMargin), new(0, 1));
                         break;
 
                     case 1:
@@ -88,6 +94,8 @@ namespace SimpleCircuit.Components.Analog
                         builder.Rectangle(0.75, -4, 1.5, 8, style);
                         if (Variants.Contains(_signs))
                             builder.Signs(new(-5, 3), new(5, 3), style, vertical: true);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 4 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         break;
 
                     default:
@@ -97,16 +105,16 @@ namespace SimpleCircuit.Components.Analog
                         builder.Line(new(1.5, -4), new(1.5, 4), plateStyle);
                         if (Variants.Contains(_signs))
                             builder.Signs(new(-4, 3), new(4, 3), style, vertical: true);
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4.5 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 4.5 + LabelMargin), new(0, 1));
                         break;
                 }
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5.5), new(0, 1));
                 switch (Variants.Select(_programmable, _sensor))
                 {
                     case 0:
                         builder.Arrow(new(-4, 4), new(6, -5), style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -6), new(0, -1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                         break;
 
                     case 1:
@@ -115,8 +123,8 @@ namespace SimpleCircuit.Components.Analog
                             new(-4, 6),
                             new(4, -6)
                         ], style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         break;
                 }
                 _anchors.Draw(builder, this, style);

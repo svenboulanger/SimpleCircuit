@@ -8,8 +8,8 @@ namespace SimpleCircuit.Components
     /// <summary>
     /// A ground terminal.
     /// </summary>
-    [Drawable("GND", "A common ground symbol.", "General", "earth chassis vss vee")]
-    [Drawable("SGND", "A signal ground symbol.", "General", "earth chassis vss vee")]
+    [Drawable("GND", "A common ground symbol.", "General", "earth chassis vss vee", labelCount: 2)]
+    [Drawable("SGND", "A signal ground symbol.", "General", "earth chassis vss vee", labelCount: 2)]
     public class Ground : DrawableFactory
     {
         private const string _earth = "earth";
@@ -33,6 +33,10 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public override string Type => "ground";
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -48,8 +52,8 @@ namespace SimpleCircuit.Components
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
-                _anchors[0] = new LabelAnchorPoint(new(-6, 0), new(-1, 0));
-                _anchors[1] = new LabelAnchorPoint(new(6, 0), new(1, 0));
+                _anchors[0] = new LabelAnchorPoint(new(-5 - LabelMargin, 0), new(-1, 0));
+                _anchors[1] = new LabelAnchorPoint(new(5 + LabelMargin, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
@@ -66,24 +70,24 @@ namespace SimpleCircuit.Components
                 {
                     case 0:
                         drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), style);
-
-                        if (_anchors[0].Location.X > -9)
-                            _anchors[0] = new LabelAnchorPoint(new(-9, 0), new(-1, 0));
-                        if (_anchors[0].Location.X < 9)
-                            _anchors[1] = new LabelAnchorPoint(new(9, 0), new(1, 0));
-
                         drawing.ExtendPins(Pins, style, 6);
+
+                        if (_anchors[0].Location.X > -8 - LabelMargin)
+                            _anchors[0] = new LabelAnchorPoint(new(-8 - LabelMargin, 0), new(-1, 0));
+                        if (_anchors[1].Location.X < 8 + LabelMargin)
+                            _anchors[1] = new LabelAnchorPoint(new(8 + LabelMargin, 0), new(1, 0));
+
                         break;
 
                     case 1:
                         drawing.Circle(new(0, -1), 6.5, style);
-
-                        if (_anchors[0].Location.X > -7.5) 
-                            _anchors[0] = new LabelAnchorPoint(new(-7.5, 0), new(-1, 0));
-                        if (_anchors[1].Location.X < 7.5)
-                            _anchors[1] = new LabelAnchorPoint(new(7.5, 0), new(1, 0));
-
                         drawing.ExtendPins(Pins, style, 7.5);
+
+                        if (_anchors[0].Location.X > -6.5 - LabelMargin) 
+                            _anchors[0] = new LabelAnchorPoint(new(-6.5 - LabelMargin, 0), new(-1, 0));
+                        if (_anchors[1].Location.X < 6.5 + LabelMargin)
+                            _anchors[1] = new LabelAnchorPoint(new(6.5 + LabelMargin, 0), new(1, 0));
+
                         break;
 
                     default:
@@ -97,10 +101,12 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(-3, 2))
                     .LineTo(new(3, 2))
                     .MoveTo(new(-1, 4))
-                    .LineTo(new(1, 4)), style);
+                    .LineTo(new(1, 4)), style.AsStroke());
             }
             private void DrawEarth(IGraphicsBuilder drawing, IStyle style)
             {
+                drawing.ExtendPins(Pins, style, 3);
+
                 // Ground segments
                 drawing.Path(b => b
                     .MoveTo(new(-5, 0))
@@ -112,10 +118,9 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(5, 0))
                     .Line(new(-2, 4)), style);
 
-                if (_anchors[0].Location.X > -7)
-                    _anchors[0] = new LabelAnchorPoint(new(-7, 0), new(-1, 0));
+                if (_anchors[0].Location.X > -7 - LabelMargin)
+                    _anchors[0] = new LabelAnchorPoint(new(-7 - LabelMargin, 0), new(-1, 0));
 
-                drawing.ExtendPins(Pins, style, 3);
             }
             private void DrawSignalGround(IGraphicsBuilder drawing, IStyle style)
             {

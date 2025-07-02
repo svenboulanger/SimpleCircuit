@@ -9,8 +9,8 @@ namespace SimpleCircuit.Components.Sources
     /// <summary>
     /// A controlled voltage source.
     /// </summary>
-    [Drawable("E", "A controlled voltage source.", "Sources")]
-    [Drawable("H", "A controlled voltage source.", "Sources")]
+    [Drawable("E", "A controlled voltage source.", "Sources", labelCount: 2)]
+    [Drawable("H", "A controlled voltage source.", "Sources", labelCount: 2)]
     public class ControlledVoltageSource : DrawableFactory
     {
         /// <inheritdoc />
@@ -19,12 +19,14 @@ namespace SimpleCircuit.Components.Sources
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "cvs";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -52,12 +54,18 @@ namespace SimpleCircuit.Components.Sources
                             case 1:
                                 SetPinOffset(0, new(-4, 0));
                                 SetPinOffset(1, new(4, 0));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
                                 break;
 
                             case 0:
                             default:
                                 SetPinOffset(0, new(-6, 0));
                                 SetPinOffset(1, new(6, 0));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
                                 break;
                         }
                         break;
@@ -96,9 +104,6 @@ namespace SimpleCircuit.Components.Sources
 
                 // Plus and minus
                 builder.Signs(new(3, 0), new(-3, 0), style, vertical: true);
-
-                _anchors[0] = new LabelAnchorPoint(new(0, -7), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 7), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
             private void DrawEuropeanSource(IGraphicsBuilder builder, IStyle style)
@@ -108,9 +113,6 @@ namespace SimpleCircuit.Components.Sources
                     new(-4, 0), new(0, 4), new(4, 0), new(0, -4)
                 ], style);
                 builder.Line(new(-4, 0), new(4, 0), style);
-
-                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
         }

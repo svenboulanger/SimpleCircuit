@@ -48,6 +48,10 @@ namespace SimpleCircuit.Components.Analog
             [Alias("mw")]
             public double MinWidth { get; set; } = 4.0;
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
@@ -85,16 +89,17 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(1, new(_length * 0.5, 0.0));
 
                         // Set the anchors
+                        double w = _width * 0.5;
                         _anchors[1] = new(default, default, Vector2.UX, TextOrientationType.Transformed);
                         if (Variants.Contains(_programmable))
                         {
-                            _anchors[0] = new(new(0, -_width * 0.5 - 5), new(0, -1));
-                            _anchors[2] = new(new(0, _width * 0.5 + 2), new(0, 1));
+                            _anchors[0] = new(new(0, -w - 4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                            _anchors[2] = new(new(0, w + 1 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         }
                         else
                         {
-                            _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1));
-                            _anchors[2] = new(new(0, _width * 0.5 + 1), new(0, 1));
+                            _anchors[0] = new(new(0, -w - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                            _anchors[2] = new(new(0, w + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
                         }
                         break;
                 }

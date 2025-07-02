@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Analog
     /// <summary>
     /// A resistor.
     /// </summary>
-    [Drawable("R", "A resistor, potentially programmable.", "Analog", "programmable photo photoresistor thermistor memristor")]
+    [Drawable("R", "A resistor, potentially programmable.", "Analog", "programmable photo photoresistor thermistor memristor", labelCount: 2)]
     public class ResistorFactory : DrawableFactory
     {
         private const string _programmable = "programmable";
@@ -76,6 +76,10 @@ namespace SimpleCircuit.Components.Analog
             /// <inheritdoc />
             public override string Type => "resistor";
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <summary>
             /// Initializes a new instance of the <see cref="Instance"/> class.
             /// </summary>
@@ -98,11 +102,59 @@ namespace SimpleCircuit.Components.Analog
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
+                        double w = 0.5 * _width;
+                        double l = 0.5 * _length;
+                        Vector2 la0 = new(-l, w), la1 = new(l, w);
+                        Vector2 lb0 = new(l, -w), lb1 = new(-l, -w);
+
                         SetPinOffset(Pins["p"], new(-_length * 0.5, 0));
                         SetPinOffset(Pins["n"], new(_length * 0.5, 0));
-
                         double x = Length * (_wiper - 0.5);
                         SetPinOffset(Pins["c"], new(x, _width * 0.5));
+
+                        switch (Variants.Select(Options.American, Options.European))
+                        {
+                            case 1:
+                                switch (Variants.Select(_programmable, _photoresistor, _thermistor, _memristor))
+                                {
+                                    case 0:
+                                        la0 = new(-5, w + 1);
+                                        lb0 = new(6, -w - 3);
+                                        break;
+
+                                    case 1:
+                                        la0 = new(-4, w + 5);
+                                        la1 = new(0, w + 5);
+                                        break;
+
+                                    case 2:
+                                        la0 = new(-l * 0.85 + 2, w + 2);
+                                        lb0 = new(l * 0.85, -w - 2);
+                                        break;
+                                }
+                                break;
+
+                            case 0:
+                            default:
+                                switch (Variants.Select(_programmable, _photoresistor, _thermistor))
+                                {
+                                    case 0:
+                                        la0 = new(-5, w + 1);
+                                        lb0 = new(6, -w - 2);
+                                        break;
+
+                                    case 1:
+                                        la0 = new(-4, w + 5);
+                                        la1 = new(0, w + 5);
+                                        break;
+
+                                    case 2:
+                                        la0 = new(-8, w + 3);
+                                        lb0 = new(4, -w - 3);
+                                        break;
+                                }
+                                break;
+                        }
 
                         if (!_isSet)
                         {
@@ -112,9 +164,14 @@ namespace SimpleCircuit.Components.Analog
                                 _width = 8;
                         }
 
-                        double w = Width * 0.5;
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 1), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 1), new(0, 1));
+                        var expA = (la1 - la0).Perpendicular;
+                        expA /= expA.Length;
+                        var locA = Vector2.AtX(0.0, la0, la1) + expA * LabelMargin;
+                        var expB = (lb1 - lb0).Perpendicular;
+                        expB /= expB.Length;
+                        var locB = Vector2.AtX(0.0, lb0, lb1) + expB * LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(locA, expA);
+                        _anchors[1] = new LabelAnchorPoint(locB, expB);
                         break;
                 }
                 return result;
@@ -124,7 +181,6 @@ namespace SimpleCircuit.Components.Analog
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
-
                 builder.ExtendPins(Pins, style, 2, "a", "b");
 
                 switch (Variants.Select(Options.American, Options.European))
@@ -161,19 +217,15 @@ namespace SimpleCircuit.Components.Analog
                 points.Add(new(x, 0));
                 builder.Polyline(points, style);
 
-
                 switch (Variants.Select(_programmable, _photoresistor, _thermistor))
                 {
                     case 0:
                         builder.Arrow(new(-5, w + 1), new(6, -w - 2), style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 3), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1:
                         builder.Arrow(new(-4, w + 5), new(-2, w + 1), style);
                         builder.Arrow(new(0, w + 5), new(2, w + 1), style);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2:
@@ -181,8 +233,6 @@ namespace SimpleCircuit.Components.Analog
                         [
                             new(-8, w + 3), new(-4, w + 3), new(4, -w - 3)
                         ], style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(-3, w + 4), new(1, 1));
                         break;
                 }
             }
@@ -203,10 +253,7 @@ namespace SimpleCircuit.Components.Analog
                             builder.Line(new(-l, -w), new(l, w), style);
                             builder.Line(new(-l, w), new(l, -w), style);
                         }
-
                         builder.Arrow(new(-5, w + 1), new(6, -w - 3), style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 2), new(0, 1));
                         break;
 
                     case 1: // Photoresistor
@@ -218,7 +265,6 @@ namespace SimpleCircuit.Components.Analog
 
                         builder.Arrow(new(-4, w + 5), new(-2, w + 1), style);
                         builder.Arrow(new(0, w + 5), new(2, w + 1), style);
-                        _anchors[1] = new LabelAnchorPoint(new(0, w + 6), new(0, 1));
                         break;
 
                     case 2: // Thermistor
@@ -232,8 +278,6 @@ namespace SimpleCircuit.Components.Analog
                         [
                             new(-l * 0.85, w + 2), new(-l * 0.85 + 2, w + 2), new(l * 0.85, -w - 2)
                         ], style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -w - 4), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(-l * 0.85 + 2, w + 3), new(1, 1));
                         break;
 
                     case 3: // Memristor
