@@ -164,12 +164,14 @@ namespace SimpleCircuit.Components.Analog
                                 _width = 8;
                         }
 
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = 0.5 * style.LineThickness + LabelMargin;
                         var expA = (la1 - la0).Perpendicular;
                         expA /= expA.Length;
-                        var locA = Vector2.AtX(0.0, la0, la1) + expA * LabelMargin;
+                        var locA = Vector2.AtX(0.0, la0, la1) + expA * m;
                         var expB = (lb1 - lb0).Perpendicular;
                         expB /= expB.Length;
-                        var locB = Vector2.AtX(0.0, lb0, lb1) + expB * LabelMargin;
+                        var locB = Vector2.AtX(0.0, lb0, lb1) + expB * m;
                         _anchors[0] = new LabelAnchorPoint(locA, expA);
                         _anchors[1] = new LabelAnchorPoint(locB, expB);
                         break;

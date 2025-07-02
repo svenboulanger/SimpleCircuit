@@ -32,9 +32,6 @@ namespace SimpleCircuit.Components.Analog
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-4.5, 0), new(-1, 0)), "p", "pos", "a");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(4.5, 0), new(1, 0)), "n", "neg", "b");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -6), new(0, -1)),
-                    new LabelAnchorPoint(new(0, 6), new(0, 1)));
             }
 
             /// <inheritdoc />

@@ -41,6 +41,10 @@ namespace SimpleCircuit.Components.Analog
             [Description("The minimum width of the transmission line. Default is 6.")]
             public double MinWidth { get; set; } = 6.0;
 
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
             /// <summary>
             /// Draws the transmission line shape.
             /// </summary>
@@ -110,8 +114,9 @@ namespace SimpleCircuit.Components.Analog
                         SetPinOffset(3, new(_length * 0.5, 0.0));
 
                         // Calculate the anchor positions
-                        _anchors[0] = new(new(0, -_width * 0.5 - 1), new(0, -1));
-                        _anchors[1] = new(new(0, _width * 0.5 + 1), new(0, 1));
+                        double m = 0.5 * style.LineThickness + LabelMargin;
+                        _anchors[0] = new(new(0, -_width * 0.5 - m), new(0, -1));
+                        _anchors[1] = new(new(0, _width * 0.5 + m), new(0, 1));
                         _anchors[2] = new(new(0, 0), new(0, 0), Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center);
                         break;
                 }

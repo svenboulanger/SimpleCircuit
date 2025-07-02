@@ -22,10 +22,14 @@ namespace SimpleCircuit.Components.Analog
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "spdt";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -39,7 +43,6 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("control2", "The backside controlling pin.", this, new(0, 0), new(0, -1)), "c2", "ctrl2");
                 Pins.Add(new FixedOrientedPin("throw1", "The first throwing pin.", this, new(6, 4), new(1, 0)), "t1");
                 Pins.Add(new FixedOrientedPin("throw2", "The second throwing pin.", this, new(6, -4), new(1, 0)), "t2");
-                _anchors = new(new LabelAnchorPoint(new(-3, 3), new(-1, 1)));
             }
 
             /// <inheritdoc />
@@ -71,6 +74,13 @@ namespace SimpleCircuit.Components.Analog
                         };
                         SetPinOffset(1, loc);
                         SetPinOffset(2, loc);
+
+                        Vector2 a = new(-5, 0), b = new(5, 4);
+                        Vector2 n = (b - a).Perpendicular;
+                        n /= n.Length;
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = 0.5 + 0.5 * style.LineThickness + LabelMargin; // Add 0.5 from the circles representing the terminals
+                        _anchors[0] = new LabelAnchorPoint(Vector2.AtX(-2, a, b) + n * m, n);
                         break;
                 }
                 return result;

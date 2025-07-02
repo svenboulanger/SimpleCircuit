@@ -14,8 +14,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            // ExportDemos("all");
-            ExportThemes(@"X <r> BB1(""These are variants"") <r> X");
+            ExportDemos("all");
+            // ExportThemes(@"X <r> BB1(""These are variants"") <r> X");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)
@@ -94,6 +94,7 @@ namespace Sandbox
             // Go through each key in the evaluation context
             foreach (var pair in evalContext.Factory.Factories)
             {
+                logger.Reset();
                 parsingContext.Reset();
                 evalContext.Reset();
 

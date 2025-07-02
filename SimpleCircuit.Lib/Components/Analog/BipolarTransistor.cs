@@ -29,7 +29,7 @@ namespace SimpleCircuit.Components.Analog
 
         private class Npn : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "npn";
@@ -48,7 +48,6 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
-                _anchors = new(1);
             }
 
             /// <inheritdoc />
@@ -75,7 +74,7 @@ namespace SimpleCircuit.Components.Analog
         }
         private class Pnp : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "pnp";
@@ -94,7 +93,6 @@ namespace SimpleCircuit.Components.Analog
                 Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
                 Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
                 Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
-                _anchors = new(1);
             }
 
             /// <inheritdoc />

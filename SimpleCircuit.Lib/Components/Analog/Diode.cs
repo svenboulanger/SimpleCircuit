@@ -62,8 +62,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case PreparationMode.Reset:
                         var style = context.Style.ModifyDashedDotted(this);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 4 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 4 + m), new(0, 1));
                         switch (Variants.Select(_varactor, _zener, _tunnel, _schottky, _shockley, _tvs, _bidirectional))
                         {
                             case 0: // Varactor
@@ -93,13 +94,6 @@ namespace SimpleCircuit.Components.Analog
                                 SetPinOffset(0, new(-4, 0));
                                 SetPinOffset(1, new(4, 0));
                                 break;
-                        }
-
-                        switch (Variants.Select(_photodiode, _led, _laser))
-                        {
-                            case 0:
-                            case 1: break;
-                            case 2: break;
                         }
                         break;
                 }
@@ -198,10 +192,11 @@ namespace SimpleCircuit.Components.Analog
                             new(4, 4),
                             new(6, 5)
                         ], style);
-                        if (_anchors[0].Location.Y > -5 - style.LineThickness * 0.5 - LabelMargin)
-                            _anchors[0] = new LabelAnchorPoint(new(0, -5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                        if (_anchors[1].Location.Y < 5 + style.LineThickness * 0.5 + LabelMargin)
-                            _anchors[1] = new LabelAnchorPoint(new(0, 5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        if (_anchors[0].Location.Y > -5 - m)
+                            _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
+                        if (_anchors[1].Location.Y < 5 + m)
+                            _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
                         break;
 
                     default:
@@ -272,23 +267,27 @@ namespace SimpleCircuit.Components.Analog
             {
                 builder.Arrow(new(2, 7.5), new(1, 3.5), style);
                 builder.Arrow(new(-1, 9.5), new(-2, 5.5), style);
-                if (_anchors[1].Location.Y < 9.5 + style.LineThickness * 0.5 + LabelMargin)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 9.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < 9.5 + m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 9.5 + m), new(0, 1));
             }
             private void DrawLed(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Arrow(new(1, 3.5), new(2, 7.5), style);
                 builder.Arrow(new(-2, 5.5), new(-1, 9.5), style);
-                if (_anchors[1].Location.Y < 9.5 + style.LineThickness * 0.5 + LabelMargin)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 9.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < 9.5 + m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 9.5 + m), new(0, 1));
             }
             private void DrawLaser(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Line(new(0, -4), new(0, 4), style);
                 builder.Arrow(new(-2, 5), new(-2, 10), style);
                 builder.Arrow(new(2, 5), new(2, 10), style);
-                if (_anchors[1].Location.Y < 11)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 11), new(0, 1));
+
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < 10 + m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 10 + m), new(0, 1));
             }
             private void DrawTVSDiode(IGraphicsBuilder builder, IStyle style)
             {
@@ -309,8 +308,10 @@ namespace SimpleCircuit.Components.Analog
                     new(4, 4),
                     new(6, 5)
                 ], style);
-                if (_anchors[1].Location.Y < 5 + style.LineThickness * 0.5 + LabelMargin)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < 5 + m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
             }
             private void DrawBidirectional(IGraphicsBuilder builder, IStyle style)
             {
@@ -327,8 +328,10 @@ namespace SimpleCircuit.Components.Analog
                 ], style);
                 builder.Line(new(-4, -4), new(-4, -12), style);
                 builder.Line(new(4, -4), new(4, 4), style);
-                if (_anchors[0].Location.Y > -12 - style.LineThickness * 0.5 - LabelMargin)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -12 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[0].Location.Y > -12 - m)
+                    _anchors[0] = new LabelAnchorPoint(new(0, -12 - m), new(0, -1));
             }
         }
     }

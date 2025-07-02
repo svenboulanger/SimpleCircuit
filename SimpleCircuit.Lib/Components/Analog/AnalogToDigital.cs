@@ -102,12 +102,12 @@ namespace SimpleCircuit.Components.Analog
                         var labelBounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
 
                         // Determine the height
-                        _height = Height.IsZero() ? Math.Max(labelBounds.Height + Margin.Top + Margin.Bottom, MinHeight) : Height;
+                        _height = Height.IsZero() ? Math.Max(labelBounds.Height + Margin.Vertical, MinHeight) : Height;
 
                         // Determine the width
                         if (Width.IsZero())
                         {
-                            _width = Math.Max(labelBounds.Width + Margin.Left + Margin.Right, MinWidth);
+                            _width = Math.Max(labelBounds.Width + Margin.Horizontal, MinWidth);
                             if (Variants.Contains(_differentialInput))
                                 _width += 4.0;
                             _width += 0.5 * _height;

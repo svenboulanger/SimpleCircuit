@@ -33,10 +33,14 @@ namespace SimpleCircuit.Components.Analog
 
         private class Nmos : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(2);
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "nmos";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Nmos"/>.
@@ -102,16 +106,11 @@ namespace SimpleCircuit.Components.Analog
                     builder.Rectangle(-4, 2.5, 8, 1.5, style);
 
                 // Label
+                double m = style.LineThickness * 0.5 + LabelMargin;
                 if (Pins["b"].Connections > 0)
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
-                }
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -m), new(1, -1));
                 else
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
-                }
+                    _anchors[0] = new LabelAnchorPoint(new(0, -m), new(0, -1));
                 _anchors.Draw(builder, this, style);
             }
             private void DrawPackaged(IGraphicsBuilder builder)
@@ -142,19 +141,22 @@ namespace SimpleCircuit.Components.Analog
                 var marker = new Arrow(new(0, 4), new(0, 1));
                 marker.Draw(builder, style);
 
-
                 // Label
-                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
-                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
+                double m = 0.5 * style.LineThickness + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
                 _anchors.Draw(builder, this, style);
             }
         }
         private class Pmos : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(2);
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "pmos";
+
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Pmos"/>.
@@ -223,16 +225,11 @@ namespace SimpleCircuit.Components.Analog
                     builder.Rectangle(-4, 2.5, 8, 1.5, style);
 
                 // Label
+                double m = style.LineThickness * 0.5 + LabelMargin;
                 if (Pins["b"].Connections > 0)
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(-3, -3), new(-1, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(3, -3), new(1, -1));
-                }
+                    _anchors[0] = new LabelAnchorPoint(new(-3, -m), new(1, -1));
                 else
-                {
-                    _anchors[0] = new LabelAnchorPoint(new(0, -3), new(0, -1));
-                    _anchors[1] = new LabelAnchorPoint(new(0, -3), new(0, -1));
-                }
+                    _anchors[0] = new LabelAnchorPoint(new(0, -m), new(0, -1));
                 _anchors.Draw(builder, this, style);
             }
             private void DrawPackaged(IGraphicsBuilder builder)
@@ -258,8 +255,8 @@ namespace SimpleCircuit.Components.Analog
                 builder.Line(new(0, 0), new(-5, 0), style);
 
                 // Label
-                _anchors[0] = new LabelAnchorPoint(new(3, -11), new(1, 1));
-                _anchors[1] = new LabelAnchorPoint(new(-3, -11), new(-1, 1));
+                double m = 0.5 * style.LineThickness + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
                 _anchors.Draw(builder, this, style);
             }
         }

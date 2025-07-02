@@ -123,8 +123,9 @@ namespace SimpleCircuit.Components.Analog
                             new(-4, 6),
                             new(4, -6)
                         ], style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + m), new(0, 1));
                         break;
                 }
                 _anchors.Draw(builder, this, style);

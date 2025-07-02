@@ -47,10 +47,6 @@ namespace SimpleCircuit.Components.Analog
             public Instance(string name)
                 : base(name)
             {
-                _anchors = new(
-                    new LabelAnchorPoint(new(2, 8), new(1, 1)),
-                    new LabelAnchorPoint(new(), new(), Vector2.UX, TextOrientationType.Transformed),
-                    new LabelAnchorPoint(new(2, -8), new(1, -1)));
             }
 
             /// <inheritdoc />

@@ -84,8 +84,9 @@ namespace SimpleCircuit.Components.Analog
                 {
                     case PreparationMode.Reset:
                         var style = context.Style.ModifyDashedDotted(this);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 4 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 4 + m), new(0, 1));
 
                         // Let's clear the pins and re-add them correctly
                         Pins.Clear();
@@ -148,8 +149,10 @@ namespace SimpleCircuit.Components.Analog
                         {
                             var marker = new Dot(new(-l, 3.5), new(1, 0));
                             marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness));
-                            if (_anchors[1].Location.Y < 3.5 + 1.5 * Style.DefaultLineThickness + LabelMargin)
-                                _anchors[1] = new LabelAnchorPoint(new(0, 3.5 + 1.5 * Style.DefaultLineThickness + LabelMargin), new(0, 1));
+
+                            double m = Style.DefaultLineThickness * 1.5 + LabelMargin;
+                            if (_anchors[1].Location.Y < 3.5 + m)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 3.5 + m), new(0, 1));
                         }
                         else
                             _anchors[1] = new LabelAnchorPoint(new(0, style.LineThickness * 0.5 + LabelMargin), new(0, 1));
@@ -157,30 +160,33 @@ namespace SimpleCircuit.Components.Analog
                         if (Variants.Contains(_choke))
                         {
                             builder.Line(new(-l, -4.5), new(l, -4.5), style);
-                            if (_anchors[0].Location.Y > -4.5 - style.LineThickness * 0.5 - LabelMargin)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -4.5 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                            double m = style.LineThickness * 0.5 + LabelMargin;
+                            if (_anchors[0].Location.Y > -4.5 - m)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4.5 - m), new(0, -1));
                             if (!Variants.Contains(_singleLine))
                             {
                                 builder.Line(new(-l, -6), new(l, -6), style);
-                                if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+                                if (_anchors[0].Location.Y > -6 - m)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -10), style);
-                                if (_anchors[0].Location.Y > -10 - style.LineThickness * 0.5 - LabelMargin)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -10 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                                if (_anchors[1].Location.Y < 1.5 + style.LineThickness * 0.5 + LabelMargin)
-                                    _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+                                if (_anchors[0].Location.Y > -10 - m)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -10 - m), new(0, -1));
+                                if (_anchors[1].Location.Y < 1.5 + m)
+                                    _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + m), new(0, 1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             builder.Arrow(new(-l * 0.75, 1.5), new(l * 0.85, -7), style);
-                            if (_anchors[0].Location.Y > -7 - style.LineThickness * 0.5 - LabelMargin)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -7 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                            if (_anchors[1].Location.Y < 1.5 + style.LineThickness * 0.5 + LabelMargin)
-                                _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+
+                            double m = style.LineThickness * 0.5 + LabelMargin;
+                            if (_anchors[0].Location.Y > -7 - m)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -7 - m), new(0, -1));
+                            if (_anchors[1].Location.Y < 1.5 + m)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + m), new(0, 1));
                         }
                         break;
 
@@ -207,8 +213,10 @@ namespace SimpleCircuit.Components.Analog
                         {
                             var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
                             marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness));
-                            if (_anchors[1].Location.Y < 3.5 + 1.5 * Style.DefaultLineThickness + LabelMargin)
-                                _anchors[1] = new LabelAnchorPoint(new(0, 3.5 + 1.5 * Style.DefaultLineThickness + LabelMargin), new(0, 1));
+
+                            double m = 1.5 * Style.DefaultLineThickness + LabelMargin;
+                            if (_anchors[1].Location.Y < 3.5 + m)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 3.5 + m), new(0, 1));
                         }
                         else
                             _anchors[1] = new LabelAnchorPoint(new(0, 4 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
@@ -219,25 +227,31 @@ namespace SimpleCircuit.Components.Analog
                             if (!Variants.Contains(_singleLine))
                             {
                                 builder.Line(new(-l, -6), new(l, -6), style);
-                                if (_anchors[0].Location.Y > -6 - style.LineThickness * 0.5 - LabelMargin)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
+
+                                double m = style.LineThickness * 0.5 + LabelMargin;
+                                if (_anchors[0].Location.Y > -6 - m)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
                             }
                             if (Variants.Contains(_programmable))
                             {
                                 builder.Arrow(new(-l + 1, 5), new(l, -10), style);
-                                if (_anchors[0].Location.Y > -10 - style.LineThickness * 0.5 - LabelMargin)
-                                    _anchors[0] = new LabelAnchorPoint(new(0, -10 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                                if (_anchors[1].Location.Y < 5 + style.LineThickness * 0.5 + LabelMargin)
-                                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+
+                                double m = style.LineThickness * 0.5 + LabelMargin;
+                                if (_anchors[0].Location.Y > -10 - m)
+                                    _anchors[0] = new LabelAnchorPoint(new(0, -10 - m), new(0, -1));
+                                if (_anchors[1].Location.Y < 5 + m)
+                                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
                             }
                         }
                         else if (Variants.Contains(_programmable))
                         {
                             builder.Arrow(new(-l + 1, 5), new(l, -7), style);
-                            if (_anchors[0].Location.Y > -7 - style.LineThickness * 0.5 - LabelMargin)
-                                _anchors[0] = new LabelAnchorPoint(new(0, -7 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
-                            if (_anchors[1].Location.Y < 5 + style.LineThickness * 0.5 + LabelMargin)
-                                _anchors[1] = new LabelAnchorPoint(new(0, 5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
+
+                            double m = style.LineThickness * 0.5 + LabelMargin;
+                            if (_anchors[0].Location.Y > -7 - m)
+                                _anchors[0] = new LabelAnchorPoint(new(0, -7 - m), new(0, -1));
+                            if (_anchors[1].Location.Y < 5 + m)
+                                _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
                         }
                         break;
                 }
