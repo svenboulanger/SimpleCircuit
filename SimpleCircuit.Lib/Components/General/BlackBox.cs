@@ -183,9 +183,11 @@ namespace SimpleCircuit.Components
                 EndLocation = context.GetValue(_pins.Right, _pins.Bottom);
 
                 // Update all pin locations as well
-                // We ignore pin 0, because that is a dummy pin
                 foreach (var pin in _pins)
                     pin.Update(context);
+
+                // Update the bounds
+                Bounds = new(Location, EndLocation);
             }
         }
     }
