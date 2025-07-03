@@ -44,9 +44,11 @@ namespace SimpleCircuit.Components.General
             // Extract the metadata
             string description = definition.Attributes["description"]?.Value ?? string.Empty;
             string category = definition.Attributes["category"]?.Value ?? "Custom";
+            string strLabelCount = definition.Attributes["labels"]?.Value ?? "0";
             string keywords = definition.Attributes["keywords"]?.Value ?? string.Empty;
 
-            _metadata = new(key, description, category);
+            int.TryParse(strLabelCount, out int labelCount);
+            _metadata = new(key, description, labelCount, category);
             foreach (string keyword in keywords.Split([' ', ',', ';'], System.StringSplitOptions.RemoveEmptyEntries))
                 _metadata.Keywords.Add(keyword);
 

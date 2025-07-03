@@ -129,7 +129,17 @@ namespace SimpleCircuitOnline.Shared
                 {
                     _drawable = factory.Create(metadata.Key, metadata.Key, new Options(), null, null);
                     if (string.IsNullOrWhiteSpace(_drawable.Labels[0]?.Value))
-                        _drawable.Labels[0].Value = "label";
+                    {
+                        // Assign the labels immediately
+                        if (Metadata is not null)
+                        {
+                            for (int i = 0; i < Metadata.LabelCount; i++)
+                            {
+                                if (_drawable?.Labels is not null)
+                                    _drawable.Labels[i].Value = $"label {i + 1}";
+                            }
+                        }
+                    }
                     foreach (var variant in _drawable.Variants)
                         _initialVariants.Add(variant);
                     CreateSvg();

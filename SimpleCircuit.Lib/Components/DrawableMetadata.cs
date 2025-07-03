@@ -12,7 +12,7 @@ namespace SimpleCircuit.Components
     /// <param name="key">The key.</param>
     /// <param name="description">The description.</param>
     /// <param name="category">The category.</param>
-    public class DrawableMetadata(string key, string description, string category = null)
+    public class DrawableMetadata(string key, string description, int labelCount, string category = null)
     {
         /// <summary>
         /// Gets a key describing a drawable.
@@ -33,5 +33,10 @@ namespace SimpleCircuit.Components
         /// Gets keywords associated with the drawable.
         /// </summary>
         public HashSet<string> Keywords { get; } = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// Gets the number of labels.
+        /// </summary>
+        public int LabelCount => labelCount;
     }
 }

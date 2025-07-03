@@ -48,7 +48,7 @@ namespace SimpleCircuit.Components
         public DrawableMetadata GetMetadata(string key)
         {
             if (key == _key)
-                return new DrawableMetadata(_key, $"A subcircuit of type '{_key}'.", "Subcircuit");
+                return new DrawableMetadata(_key, $"A subcircuit of type '{_key}'.", 0, "Subcircuit");
             return null;
         }
 
