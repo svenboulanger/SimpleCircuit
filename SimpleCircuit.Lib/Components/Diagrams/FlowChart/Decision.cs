@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 using System;
@@ -22,9 +23,10 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// Creates a new action.
         /// </summary>
         /// <param name="name">The name of the action.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable, IRoundedDiamond
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private double _width, _height;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "decision";
@@ -55,10 +57,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
-            /// <inheritdoc />
-            [Description("The margin for labels to the edge.")]
-            [Alias("lm")]
-            public double LabelMargin { get; set; } = 1.0;
+            /// <summary>
+            /// The margins for the label when sizing.
+            /// </summary>
+            [Description("The margin of the label inside the decision when sizing based on content.")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             /// <inheritdoc />
             [Description("The corner radius for the left and right corner.")]
@@ -69,15 +72,6 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Description("The corner radius for the top and bottom corner.")]
             [Alias("ry")]
             public double CornerRadiusY { get; set; }
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new();
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -91,43 +85,32 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 switch (context.Mode)
                 {
                     case PreparationMode.Sizes:
-                        if (Width.IsZero() && Height.IsZero())
+                        if (Width.IsZero() || Height.IsZero())
                         {
-                            // The smallest circumference is where the same slope as the bounds is used
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
-                            _width = (bounds.Width + LabelMargin) * 2;
-                            _height = (bounds.Height + LabelMargin) * 2;
-                            _width = Math.Max(_width, MinWidth);
-                            _height = Math.Max(_height, MinHeight);
-                        }
-                        else if (Width.IsZero())
-                        {
-                            // Width is given, try to fit the height to contents
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
-                            _height = Height;
-                            _width = bounds.Width * Height / (Height - bounds.Height);
-                            if (_width < 0)
+                            var bounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            bounds = bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
+
+                            if (Width.IsZero() && Height.IsZero())
                             {
-                                // Not possible to fit!
-                                _width = bounds.Width * 2;
+                                _width = Math.Max(MinWidth, bounds.Width * 2);
+                                _height = Math.Max(MinHeight, bounds.Height * 2);
                             }
-                            _width = Math.Max(MinWidth, _width);
-                        }
-                        else if (Height.IsZero())
-                        {
-                            // Height is given, try to fit the width to contents
-                            var bounds = DiamondLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
-                            _width = Width;
-                            _height = bounds.Height * Width / (Width - bounds.Width);
-                            if (_height < 0)
-                                _height = bounds.Height * 2;
-                            _height = Math.Max(MinHeight, _height);
-                        }
-                        else
-                        {
-                            // Full size given
-                            _width = Width;
-                            _height = Height;
+                            else if (Width.IsZero())
+                            {
+                                _height = Height;
+                                _width = Math.Max(MinWidth, bounds.Width * Height / (Height - bounds.Height));
+                                if (_width < 0)
+                                    _width = bounds.Width * 2;
+                            }
+                            else
+                            {
+                                _width = Width;
+                                _height = Math.Max(MinHeight, bounds.Height * Width / (Width - bounds.Width));
+                                if (_height < 0)
+                                    _height = bounds.Height * 2;
+                            }
+
+                            _anchors[0] = new LabelAnchorPoint(-bounds.Center, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Origin);
                         }
                         break;
                 }
@@ -143,7 +126,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                 builder.Diamond(0.0, 0.0, _width, _height, style, CornerRadiusX, CornerRadiusY);
 
                 // Draw labels
-                DiamondLabelAnchorPoints.Default.Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

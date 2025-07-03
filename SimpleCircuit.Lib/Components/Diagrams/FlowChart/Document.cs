@@ -23,9 +23,10 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// Creates a new instance.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private double _width = 0.0, _height = 0.0;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <summary>
             /// Variant for multiple documents.
@@ -61,31 +62,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
-            /// <inheritdoc />
-            [Description("The margin for labels to the edge.")]
-            [Alias("lm")]
-            public double LabelMargin { get; set; } = 1.0;
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => Variants.Contains(Multiple) ? new(-_width * 0.5 - 4, -_height * 0.5 - 4) : new(-_width * 0.5, -_height * 0.5);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new();
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
-
             /// <summary>
             /// Gets or sets the margin for content when sizing.
             /// </summary>
             [Description("The margin used when sizing the block using the contents. The default is 2 on all sides.")]
             public Margins Margin { get; set; } = new(2, 2, 2, 2);
-
-            /// <summary>
-            /// Gets or sets the spacing between content when sizing.
-            /// </summary>
-            [Description("The spacing used between multiple labels when sizing the block using content.")]
-            public Vector2 Spacing { get; set; } = new(3, 3);
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -100,20 +81,25 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     case PreparationMode.Sizes:
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var b = BoxLabelAnchorPoints.Default.CalculateSize(this, Spacing);
+                            var style = context.Style.ModifyDashedDotted(this);
+                            var bounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            bounds = bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
                             if (Width.IsZero())
-                                _width = Math.Max(MinWidth, b.X + Margin.Left + Margin.Right - 2 * LabelMargin);
+                                _width = Math.Max(MinWidth, bounds.Width);
                             else
                                 _width = Width;
                             if (Height.IsZero())
-                                _height = Math.Max(MinHeight, b.Y + Margin.Top + Margin.Bottom - 2 * LabelMargin);
+                                _height = Math.Max(MinHeight, bounds.Height);
                             else
                                 _height = Height;
+
+                            _anchors[0] = new LabelAnchorPoint(-bounds.Center, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
                         }
                         else
                         {
                             _width = Width;
                             _height = Height;
+                            _anchors[0] = new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center);
                         }
                         break;
                 }
@@ -171,7 +157,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                     }
                 }
                 builder.Path(DrawPath, style);
-                BoxLabelAnchorPoints.Default.Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

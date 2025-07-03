@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
+    /// <summary>
+    /// An action for an Entity-Relationship Diagram.
+    /// </summary>
     [Drawable("ACT", "An entity-relationship diagram action.", "ERD", "diamond")]
     public class Action : DrawableFactory
     {
@@ -20,9 +23,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// Creates a new action.
         /// </summary>
         /// <param name="name">The name of the action.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), IBoxDrawable, IRoundedDiamond
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private double _width, _height;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "action";
@@ -41,7 +45,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
-            [Description("The margin of the label inside the ADC when sizing based on content.")]
+            [Description("The margin of the label inside the action when sizing based on content.")]
             public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             [Description("The margin for labels to the edge.")]
@@ -55,15 +59,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             [Description("The corner radius for the top and bottom corner.")]
             [Alias("ry")]
             public double CornerRadiusY { get; set; }
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(-_width * 0.5, -_height * 0.5);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => default;
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(_width * 0.5, _height * 0.5);
 
             /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
@@ -80,8 +75,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var bounds = LabelAnchorPoints<IBoxDrawable>.CalculateBounds(context.TextFormatter, this, 0, DiamondLabelAnchorPoints.Default, style);
-                            bounds = bounds.Expand(Margin);
+                            var bounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            bounds = bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
 
                             if (Width.IsZero() && Height.IsZero())
                             {
@@ -102,6 +97,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 if (_height < 0)
                                     _height = bounds.Height * 2;
                             }
+
+                            _anchors[0] = new LabelAnchorPoint(-bounds.Center, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Origin);
                         }
                         break;
                 }
@@ -113,7 +110,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 var style = builder.Style.ModifyDashedDotted(this);
                 builder.Diamond(0.0, 0.0, _width, _height, style, CornerRadiusX, CornerRadiusY);
-                DiamondLabelAnchorPoints.Default.Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

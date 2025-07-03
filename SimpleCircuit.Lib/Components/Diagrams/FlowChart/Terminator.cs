@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 using System;
@@ -21,7 +22,7 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
         /// <inheritdoc />
         private class Instance : DiagramBlockInstance
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint(new(), new()));
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
             private double _width = 0, _height = 0;
 
             /// <inheritdoc />
@@ -53,9 +54,11 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
             [Description("The minimum height of the block. Only used when determining the height from contents.")]
             public double MinHeight { get; set; } = 10.0;
 
-            /// <inheritdoc />
-            [Description("The margin of the label to the edge. Only used when sizing based on content.")]
-            public double LabelMargin { get; set; } = 1.0;
+            /// <summary>
+            /// Gets or sets the margin of content when sizing.
+            /// </summary>
+            [Description("The margin used when sizing the block using the contents.")]
+            public Margins Margin { get; set; } = new(2, 2, 2, 2);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -80,24 +83,27 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                         var style = context.Style.ModifyDashedDotted(this);
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var b = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            var bounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            bounds = bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
 
                             // Calculate the height
                             if (Height.IsZero())
-                                _height = Math.Max(MinHeight, b.Height);
+                                _height = Math.Max(MinHeight, bounds.Height);
                             else
                                 _height = Height;
 
                             // Calculate the width
                             if (Width.IsZero())
-                                _width = Math.Max(MinWidth, b.Width + _height);
+                                _width = Math.Max(MinWidth, bounds.Width + _height);
                             else
                                 _width = Width;
+                            _anchors[0] = new LabelAnchorPoint(-bounds.Center, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
                         }
                         else
                         {
                             _width = Width;
                             _height = Height;
+                            _anchors[0] = new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center);
                         }
                         break;
                 }

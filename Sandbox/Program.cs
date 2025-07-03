@@ -14,10 +14,8 @@ namespace Sandbox
     {
         static void Main()
         {
-            // ExportDemos("all");
-            ExportThemes(@".box
-X <r> BB1
-.endb");
+            ExportDemos("all");
+            // ExportThemes(@"");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)

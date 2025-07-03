@@ -10,7 +10,7 @@ using SimpleCircuit.Drawing.Builders;
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
     /// <summary>
-    /// An ERD attribute.
+    /// An attribute for an Entity-Relationship Diagram.
     /// </summary>
     [Drawable("ATTR", "An entity-relationship diagram attribute.", "ERD", "ellipse")]
     public class Attribute : DrawableFactory
@@ -22,9 +22,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
         /// Creates a new attribute.
         /// </summary>
         /// <param name="name">The name.</param>
-        private class Instance(string name) : DiagramBlockInstance(name), IEllipseDrawable
+        private class Instance(string name) : DiagramBlockInstance(name)
         {
             private double _width, _height;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "attribute";
@@ -55,15 +56,6 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
-            Vector2 IEllipseDrawable.Center => new();
-
-            /// <inheritdoc />
-            double IEllipseDrawable.RadiusX => _width * 0.5;
-
-            /// <inheritdoc />
-            double IEllipseDrawable.RadiusY => _height * 0.5;
-
-            /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 var result = base.Prepare(context);
@@ -76,16 +68,22 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                     case PreparationMode.Sizes:
                         if (Width.IsZero() || Height.IsZero())
                         {
-                            var bounds = EllipseLabelAnchorPoints.Default.CalculateSize(this, Spacing, Margin);
+                            var style = context.Style.ModifyDashedDotted(this);
+                            var bounds = LabelAnchorPoints<IDrawable>.CalculateBounds(context.TextFormatter, this, 0, _anchors, style);
+                            bounds = bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
+                            Vector2 size = bounds.Size * Math.Sqrt(2.0);
+
                             if (Width.IsZero())
-                                _width = Math.Max(MinWidth, bounds.X);
+                                _width = Math.Max(MinWidth, size.X);
                             if (Height.IsZero())
-                                _height = Math.Max(MinHeight, bounds.Y);
+                                _height = Math.Max(MinHeight, size.Y);
+                            _anchors[0] = new LabelAnchorPoint(-bounds.Center, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
                         }
                         else
                         {
                             _width = Width;
                             _height = Height;
+                            _anchors[0] = new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center);
                         }
                         break;
                 }
@@ -97,7 +95,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
             {
                 var style = builder.Style.ModifyDashedDotted(this);
                 builder.Ellipse(new(), _width * 0.5, _height * 0.5, style);
-                EllipseLabelAnchorPoints.Default.Draw(builder, this, style);
+                _anchors.Draw(builder, this, style);
             }
 
             /// <inheritdoc />

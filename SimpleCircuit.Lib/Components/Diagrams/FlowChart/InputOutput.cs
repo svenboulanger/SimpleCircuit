@@ -110,7 +110,8 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
                             var bounds = new ExpandableBounds();
                             foreach (var label in Labels)
                                 bounds.Expand(label.Formatted.Bounds.Bounds);
-                            var b = bounds.Bounds.Expand(Margin);
+                            var style = context.Style.ModifyDashedDotted(this);
+                            var b = bounds.Bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
 
                             if (Variants.Contains(Manual))
                             {

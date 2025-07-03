@@ -10,7 +10,7 @@ using SimpleCircuit.Drawing.Builders;
 namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 {
     /// <summary>
-    /// An entity for an ERD.
+    /// An entity for an Entity-Relationship Diagram.
     /// </summary>
     [Drawable("ENT", "An entity-relationship diagram entity. Any label after the first will be added as an attribute.", "ERD", "box rectangle", labelCount: 3)]
     public class Entity : DrawableFactory
@@ -72,15 +72,15 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
             [Description("The header style.")]
             [Alias("header")]
-            public IStyleModifier HeaderStyle { get; set; } = new BoldTextStyleModifier().Color("--light", "#666").JustifyCenter();
+            public IStyleModifier HeaderStyle { get; set; }
 
             [Description("The style for even rows.")]
             [Alias("even")]
-            public IStyleModifier EvenStyle { get; set; } = new ColorStyleModifier("--foreground", "white");
+            public IStyleModifier EvenStyle { get; set; }
 
             [Description("The style for odd rows.")]
             [Alias("odd")]
-            public IStyleModifier OddStyle { get; set; } = new ColorStyleModifier("--foreground", "#ddd");
+            public IStyleModifier OddStyle { get; set; }
 
             /// <summary>
             /// Gets or sets the margin.
@@ -129,7 +129,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                             // Header (vertical)
                             _anchors[0] = new LabelAnchorPoint(new(), new(0, 0));
-                            var bounds = Labels[0].Formatted.Bounds.Bounds.Expand(Margin);
+                            var bounds = Labels[0].Formatted.Bounds.Bounds.Expand(Margin).Expand(style.LineThickness * 0.5);
                             _width = Math.Max(bounds.Width, MinWidth);
                             _top = -bounds.Height * 0.5;
                             _bottom = bounds.Height * 0.5;
@@ -143,7 +143,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                                 // Get the bounds, and keep half a linespacing after and before the baseline of the text
                                 bounds = Labels[i].Formatted.Bounds.Bounds;
-                                _width = Math.Max(bounds.Width + Margin.Left + Margin.Right, _width);
+                                _width = Math.Max(bounds.Width + Margin.Horizontal + style.LineThickness, _width);
 
                                 // We will make sure that the locations are in increments of the line spacing.
                                 double t = Math.Ceiling(bounds.Top / iY) * iY - iY;
@@ -152,7 +152,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 SetPinOffset(i * 2 + 2, new(0, _bottom + (t + b) * 0.5));
 
                                 _bottom -= t;
-                                _anchors[i] = new LabelAnchorPoint(new(0, _bottom), Vector2.NaN, Vector2.UX, TextOrientationType.None);
+                                _anchors[i] = new LabelAnchorPoint(new(-bounds.Left + Margin.Left, _bottom), Vector2.NaN, Vector2.UX, TextOrientationType.None);
                                 _bottom += b;
                             }
 
@@ -166,9 +166,10 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                             // Place the attributes and pins horizontally
                             for (int i = 1; i < Labels.Count; i++)
                             {
-                                SetPinOffset(i * 2 + 1, new(-w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
-                                SetPinOffset(i * 2 + 2, new(w, ((FixedOrientedPin)Pins[i * 2 + 2]).Offset.Y));
-                                _anchors[i] = new LabelAnchorPoint(new(-w + Margin.Left, _anchors[i].Location.Y), Vector2.NaN, Vector2.UX, TextOrientationType.None);
+                                var offset = ((FixedOrientedPin)Pins[i * 2 + 2]).Offset;
+                                SetPinOffset(i * 2 + 1, new(-w, offset.Y));
+                                SetPinOffset(i * 2 + 2, new(w, offset.Y));
+                                _anchors[i] = new LabelAnchorPoint(new(_anchors[i].Location.X - w, _anchors[i].Location.Y), Vector2.NaN, Vector2.UX, TextOrientationType.None);
                             }
                         }
                         break;
@@ -201,10 +202,24 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
 
                 if (Labels.Count > 1)
                 {
-                    // Draw the header
                     double s = _separators[0];
                     if (CornerRadius.IsZero())
+                    {
                         builder.Rectangle(-_width * 0.5, _top, _width, s - _top, style.Modify(HeaderStyle).Color(Style.None, null)); // Header background
+
+                        for (int i = 1; i < Labels.Count; i++)
+                        {
+                            var rowStyle = i % 2 == 1 ? style.Modify(EvenStyle) : style.Modify(OddStyle);
+                            if (i < Labels.Count - 1)
+                            {
+                                double ns = _separators[i];
+                                builder.Rectangle(-_width * 0.5, s, _width, ns - s, rowStyle.Color(Style.None, null));
+                                s = ns; 
+                            }
+                            else
+                                builder.Rectangle(-_width * 0.5, s, _width, _bottom - s, rowStyle.Color(Style.None, null));
+                        }
+                    }
                     else
                     {
                         builder.Path(b =>
