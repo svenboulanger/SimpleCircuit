@@ -18,7 +18,7 @@ namespace SimpleCircuit.Components.Digital
 
         private class Instance : ScaledOrientedDrawable, IBoxDrawable
         {
-            private CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "latch";
@@ -49,6 +49,7 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("q", "The output pin.", this, new(9, -6), new(1, 0)), "q");
             }
 
+            /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 switch (context.Mode)
@@ -56,9 +57,8 @@ namespace SimpleCircuit.Components.Digital
                     case PreparationMode.Reset:
                         var style = context.Style.ModifyDashedDotted(this);
                         double m = style.LineThickness * 0.5 + LabelMargin;
-                        _anchors = new(
-                            new LabelAnchorPoint(new(0, -12 - m), new(0, -1)),
-                            new LabelAnchorPoint(new(0, 12 + m), new(0, 1)));
+                        _anchors[0] = new LabelAnchorPoint(new(0, -12 - m), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(0, 12 + m), new(0, 1));
                         break;
                 }
                 return base.Prepare(context);
@@ -77,18 +77,18 @@ namespace SimpleCircuit.Components.Digital
                 var textStyle = new FontSizeStyleModifier.Style(style, Style.DefaultFontSize);
 
                 var span = builder.TextFormatter.Format("S", textStyle);
-                builder.Text(span, new Vector2(-8, -6) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationType.Transformed);
+                builder.Text(span, new Vector2(-8 - span.Bounds.Bounds.Left, -6 + textStyle.FontSize * 0.5), Vector2.UX, TextOrientationType.Transformed);
 
                 span = builder.TextFormatter.Format("R", textStyle);
-                builder.Text(span, new Vector2(-8, 6) - span.Bounds.Bounds.MiddleLeft, Vector2.UX, TextOrientationType.Transformed);
+                builder.Text(span, new Vector2(-8 - span.Bounds.Bounds.Left, 6 + textStyle.FontSize * 0.5), Vector2.UX, TextOrientationType.Transformed);
 
                 span = builder.TextFormatter.Format("Q", textStyle);
-                builder.Text(span, new Vector2(8, -6) - span.Bounds.Bounds.MiddleRight, Vector2.UX, TextOrientationType.Transformed);
+                builder.Text(span, new Vector2(8 - span.Bounds.Bounds.Right, -6 + textStyle.FontSize * 0.5), Vector2.UX, TextOrientationType.Transformed);
 
                 if (Pins["nq"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("\\overline{Q}", textStyle);
-                    builder.Text(span, new Vector2(8, 6) - span.Bounds.Bounds.MiddleRight, Vector2.UX, TextOrientationType.Transformed);
+                    builder.Text(span, new Vector2(8 - span.Bounds.Bounds.Right, 6 + textStyle.FontSize * 0.5), Vector2.UX, TextOrientationType.Transformed);
                 }
 
                 _anchors.Draw(builder, this, style);

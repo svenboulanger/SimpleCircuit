@@ -18,9 +18,9 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name, !key.Equals("BUF"));
 
-        private class Instance : ScaledOrientedDrawable, IBoxDrawable
+        private class Instance : ScaledOrientedDrawable
         {
-            private CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
             private readonly bool _invertOutput;
 
             /// <inheritdoc />
@@ -30,15 +30,6 @@ namespace SimpleCircuit.Components.Digital
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(-5, -5);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new();
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(5, 5);
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -52,9 +43,6 @@ namespace SimpleCircuit.Components.Digital
                 Pins.Add(new FixedOrientedPin("positivepower", "The positive power pin.", this, new(0, -3), new(0, -1)), "vpos", "vp");
                 Pins.Add(new FixedOrientedPin("negativepower", "The negative power pin.", this, new(0, 3), new(0, 1)), "vneg", "vn");
                 Pins.Add(new FixedOrientedPin("output", "The output pin.", this, new(6, 0), new(1, 0)), "out", "output");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -7), new(0, -1)),
-                    new LabelAnchorPoint(new(0, 7), new(0, 1)));
                 _invertOutput = invertOutput;
             }
 
@@ -88,14 +76,18 @@ namespace SimpleCircuit.Components.Digital
 
                         var style = context.Style.ModifyDashedDotted(this);
                         double m = style.LineThickness * 0.5 + LabelMargin;
-                        _anchors = Variants.Select(Options.European, Options.American) switch
+                        switch (Variants.Select(Options.European, Options.American))
                         {
-                            0 => new(
-                                new LabelAnchorPoint(new(0, -5 - m), new(0, -1)),
-                                new LabelAnchorPoint(new(0, 5 + m), new(0, 1))),
-                            _ => new(
-                                new LabelAnchorPoint(new(0, -6 - m), new(0, -1)),
-                                new LabelAnchorPoint(new(0, 6 + m), new(0, 1))),
+
+                            case 0:
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
+                                break;
+
+                            default:
+                                _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 6 + m), new(0, 1));
+                                break;
                         };
                         break;
                 }

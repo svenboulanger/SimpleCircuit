@@ -22,7 +22,7 @@ namespace SimpleCircuit.Components.Digital
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="invertOutput">If <c>true</c>, the output is inverted.</param>
-        private class Instance(string name, bool invertOutput) : ScaledOrientedDrawable(name), IBoxDrawable
+        private class Instance(string name, bool invertOutput) : ScaledOrientedDrawable(name)
         {
             private int _inputs = 2;
             private double _spacing = 5;
@@ -97,15 +97,6 @@ namespace SimpleCircuit.Components.Digital
             public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => 0.5 * new Vector2(-Width, -Height);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new();
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Width, Height);
-
-            /// <inheritdoc />
             public override PresenceResult Prepare(IPrepareContext context)
             {
                 var result = base.Prepare(context);
@@ -147,16 +138,16 @@ namespace SimpleCircuit.Components.Digital
 
                         // Labels
                         var style = context.Style.ModifyDashedDotted(this);
-                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        double m = Height * 0.5 + style.LineThickness * 0.5 + LabelMargin;
                         _anchors = Variants.Select(Options.European, Options.American) switch
                         {
                             0 => new(
-                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
-                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                                new LabelAnchorPoint(new(0, -m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, m), new(0, 1))),
                             _ => new(
-                                new LabelAnchorPoint(new(0, -Height * 0.5 - m), new(0, -1)),
+                                new LabelAnchorPoint(new(0, -m), new(0, -1)),
                                 new LabelAnchorPoint(Vector2.Zero, Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.Center),
-                                new LabelAnchorPoint(new(0, Height * 0.5 + m), new(0, 1))),
+                                new LabelAnchorPoint(new(0, m), new(0, 1))),
                         };
                         break;
                 }
