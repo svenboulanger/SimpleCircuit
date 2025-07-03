@@ -57,13 +57,13 @@ namespace SimpleCircuit.Components.Outputs
                 switch (Variants.Select(_child))
                 {
                     case 0:
-                        builder.Path(b => b.MoveTo(new(4, -6)).LineTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)).LineTo(new(4, 6)), style);
+                        builder.Path(b => b.MoveTo(new(4, -6)).LineTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)).LineTo(new(4, 6)), style.AsStroke());
                         _anchors[0] = new LabelAnchorPoint(new(4, -6 - m), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(4, 6 + m), new(0, 1));
                         break;
 
                     default:
-                        builder.Path(b => b.MoveTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)), style);
+                        builder.Path(b => b.MoveTo(new(4, -4)).ArcTo(4, 4, 0, true, false, new(4, 4)), style.AsStroke());
                         _anchors[0] = new LabelAnchorPoint(new(4, -4 - m), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(4, 4 + m), new(0, 1));
                         break;
