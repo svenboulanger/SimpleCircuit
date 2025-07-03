@@ -55,17 +55,25 @@ namespace SimpleCircuit.Components.Sources
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
                         switch (Variants.Select(Options.American, Options.European))
                         {
                             case 1:
                                 SetPinOffset(0, new(-4, 0));
                                 SetPinOffset(1, new(4, 0));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 4 + m), new(0, 1));
                                 break;
 
                             case 0:
                             default:
                                 SetPinOffset(0, new(-6, 0));
                                 SetPinOffset(1, new(6, 0));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 6 + m), new(0, 1));
                                 break;
                         }
                         break;
@@ -94,9 +102,6 @@ namespace SimpleCircuit.Components.Sources
 
             private void DrawAmericanSource(IGraphicsBuilder builder, IStyle style)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
-
                 // Circle
                 builder.Circle(new(0, 0), 6, style);
 
@@ -153,10 +158,11 @@ namespace SimpleCircuit.Components.Sources
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-6, -6), new(7.5, 7.5), style);
-                    if (_anchors[0].Location.Y > -6 - LabelMargin)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
-                    if (_anchors[1].Location.Y < 7.5 + LabelMargin)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 7.5 + LabelMargin), new(0, 1));
+                    double m = style.LineThickness * 0.5 + LabelMargin;
+                    if (_anchors[0].Location.Y > -6 - m)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
+                    if (_anchors[1].Location.Y < 7.5 + m)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 7.5 + m), new(0, 1));
                 }
                 _anchors.Draw(builder, this, style);
             }
@@ -166,16 +172,14 @@ namespace SimpleCircuit.Components.Sources
                 builder.Circle(new(0, 0), 4, style);
                 builder.Line(new(-4, 0), new(4, 0), style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
-
                 if (Variants.Contains(_programmable))
                 {
                     builder.Arrow(new(-4, -4), new(6, 6), style);
-                    if (_anchors[0].Location.Y > -4 - LabelMargin)
-                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
-                    if (_anchors[1].Location.Y < 6 + LabelMargin)
-                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
+                    double m = style.LineThickness * 0.5 + LabelMargin;
+                    if (_anchors[0].Location.Y > -4 - m)
+                        _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                    if (_anchors[1].Location.Y < 6 + m)
+                        _anchors[1] = new LabelAnchorPoint(new(0, 6 + m), new(0, 1));
                 }
                 _anchors.Draw(builder, this, style);
             }

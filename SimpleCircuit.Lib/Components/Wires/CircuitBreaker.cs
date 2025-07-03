@@ -24,6 +24,13 @@ namespace SimpleCircuit.Components.Wires
             public override string Type => "circuitbreaker";
 
             /// <summary>
+            /// The distance from the label to the symbol.
+            /// </summary>
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
+
+            /// <summary>
             /// Creates a new <see cref="Instance"/>.
             /// </summary>
             /// <param name="name">The name.</param>
@@ -46,15 +53,33 @@ namespace SimpleCircuit.Components.Wires
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        if (Variants.Contains(Options.Arei) || Variants.Contains(Options.European))
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        switch (Variants.Select(Options.Arei, Options.European, Options.American))
                         {
-                            SetPinOffset(1, new(0, -2));
-                            SetPinOffset(2, new(0, -2));
-                        }
-                        else
-                        {
-                            SetPinOffset(1, new(0, -1.875));
-                            SetPinOffset(2, new(0, -1.875));
+                            case 0:
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new(0, -2));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -5.5 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
+                                break;
+
+                            case 1:
+                                SetPinOffset(1, new(0, -2));
+                                SetPinOffset(2, new(0, -2));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 1 + m), new(0, 1));
+                                break;
+
+                            default:
+                                SetPinOffset(1, new(0, -1.875));
+                                SetPinOffset(2, new(0, -1.875));
+
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4.5 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
+                                break;
                         }
                         break;
                 }
@@ -83,8 +108,6 @@ namespace SimpleCircuit.Components.Wires
                     .MoveTo(new(-4, -2))
                     .CurveTo(new(-2, -4.5), new(2, -4.5), new(4, -2)), style.AsStrokeMarker());
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -5.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
 
@@ -96,8 +119,6 @@ namespace SimpleCircuit.Components.Wires
                 builder.Line(new(-4, 0), new(4, -4), style);
                 builder.Cross(new(4, 0), 2, style);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -4), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 2), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
 
@@ -115,8 +136,6 @@ namespace SimpleCircuit.Components.Wires
                     new(1.25, -4.5), new(2, -3)
                 ], style.AsFilledMarker());
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -6.5), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 1), new(0, 1));
                 _anchors.Draw(builder, this, style);
             }
         }

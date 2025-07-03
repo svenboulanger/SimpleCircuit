@@ -31,9 +31,8 @@ namespace SimpleCircuit.Components
             public double Angle { get; set; }
 
             [Description("The label distance from the point. The default is 3.")]
-            [Alias("d")]
-            [Alias("l")]
-            public double Distance { get; set; } = 3.0;
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
             public override string Type => "point";
@@ -69,7 +68,8 @@ namespace SimpleCircuit.Components
                     builder.ExpandBounds(new());
 
                 var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                _anchors[0] = new LabelAnchorPoint(n * Distance, n, Vector2.UX, TextOrientationType.None);
+                double m = style.LineThickness * 3 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(n * m, n, Vector2.UX, TextOrientationType.None);
                 _anchors.Draw(builder, this, style);
             }
         }

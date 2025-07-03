@@ -49,14 +49,16 @@ namespace SimpleCircuit.Components.Sources
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
                         switch (Variants.Select(Options.American, Options.European))
                         {
                             case 1:
                                 SetPinOffset(0, new(-4, 0));
                                 SetPinOffset(1, new(4, 0));
 
-                                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 4 + m), new(0, 1));
                                 break;
 
                             case 0:
@@ -64,8 +66,8 @@ namespace SimpleCircuit.Components.Sources
                                 SetPinOffset(0, new(-6, 0));
                                 SetPinOffset(1, new(6, 0));
 
-                                _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, 6 + LabelMargin), new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 6 + m), new(0, 1));
                                 break;
                         }
                         break;

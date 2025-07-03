@@ -24,6 +24,9 @@ namespace SimpleCircuit.Components
             /// <inheritdoc />
             public override string Type => "power";
 
+            /// <summary>
+            /// The distance from the label to the symbol.
+            /// </summary>
             [Description("The margin for labels.")]
             [Alias("lm")]
             public double LabelMargin { get; set; } = 1.0;

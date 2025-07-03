@@ -19,10 +19,12 @@ namespace SimpleCircuit.Components.General
         {
             private readonly CustomLabelAnchorPoints _anchors = new(2);
 
+            /// <summary>
+            /// The label margin.
+            /// </summary>
             [Description("The distance of the text to the point.")]
-            [Alias("l")]
-            [Alias("d")]
-            public double Length { get; set; } = 2.0;
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 2.0;
 
             /// <inheritdoc />
             public override string Type => "direction";
@@ -41,9 +43,11 @@ namespace SimpleCircuit.Components.General
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -Length), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, Length), new(0, 1));
-                _anchors.Draw(builder, this, builder.Style.Modify(Modifier));
+                var style = builder.Style.Modify(Modifier);
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -m), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
+                _anchors.Draw(builder, this, style);
             }
         }
     }

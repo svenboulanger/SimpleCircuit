@@ -42,10 +42,11 @@ namespace SimpleCircuit.Components.Outputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(0, -5 - LabelMargin), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 5 + LabelMargin), new(0, 1));
-
                 var style = builder.Style.ModifyDashedDotted(this);
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -5 - m), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 5 + m), new(0, 1));
+
                 if (!Variants.Contains(Options.Arei))
                     builder.ExtendPins(Pins, style);
                 builder.Circle(new(), 5, style);

@@ -19,10 +19,17 @@ namespace SimpleCircuit.Components.Outputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(1);
 
             /// <inheritdoc />
             public override string Type => "speaker";
+
+            /// <summary>
+            /// The distance from the label to the symbol.
+            /// </summary>
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -41,6 +48,9 @@ namespace SimpleCircuit.Components.Outputs
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(6 + m, 0), new(1, 0));
+
                 builder.ExtendPins(Pins, style);
                 builder.Rectangle(-2, -4, 4, 8, style);
                 builder.Polygon([
@@ -51,7 +61,10 @@ namespace SimpleCircuit.Components.Outputs
                 ], style);
 
                 if (!Variants.Contains(_off))
+                {
                     DrawOn(builder, style);
+                    _anchors[0] = new LabelAnchorPoint(new(15.5 + m, 0), new(1, 0));
+                }
 
                 _anchors.Draw(builder, this, style);
             }

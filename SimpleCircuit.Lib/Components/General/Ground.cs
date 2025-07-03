@@ -52,8 +52,9 @@ namespace SimpleCircuit.Components
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
-                _anchors[0] = new LabelAnchorPoint(new(-5 - LabelMargin, 0), new(-1, 0));
-                _anchors[1] = new LabelAnchorPoint(new(5 + LabelMargin, 0), new(1, 0));
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(-5 - m, 0), new(-1, 0));
+                _anchors[1] = new LabelAnchorPoint(new(5 + m, 0), new(1, 0));
                 switch (Variants.Select(_earth, _chassis, _signal))
                 {
                     case 0:
@@ -72,10 +73,11 @@ namespace SimpleCircuit.Components
                         drawing.Path(b => b.MoveTo(new(-8, 4)).ArcTo(8, 8, 0, true, true, new(8, 4)), style);
                         drawing.ExtendPins(Pins, style, 6);
 
-                        if (_anchors[0].Location.X > -8 - LabelMargin)
-                            _anchors[0] = new LabelAnchorPoint(new(-8 - LabelMargin, 0), new(-1, 0));
-                        if (_anchors[1].Location.X < 8 + LabelMargin)
-                            _anchors[1] = new LabelAnchorPoint(new(8 + LabelMargin, 0), new(1, 0));
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        if (_anchors[0].Location.X > -8 - m)
+                            _anchors[0] = new LabelAnchorPoint(new(-8 - m, 0), new(-1, 0));
+                        if (_anchors[1].Location.X < 8 + m)
+                            _anchors[1] = new LabelAnchorPoint(new(8 + m, 0), new(1, 0));
 
                         break;
 
@@ -83,10 +85,11 @@ namespace SimpleCircuit.Components
                         drawing.Circle(new(0, -1), 6.5, style);
                         drawing.ExtendPins(Pins, style, 7.5);
 
-                        if (_anchors[0].Location.X > -6.5 - LabelMargin) 
-                            _anchors[0] = new LabelAnchorPoint(new(-6.5 - LabelMargin, 0), new(-1, 0));
-                        if (_anchors[1].Location.X < 6.5 + LabelMargin)
-                            _anchors[1] = new LabelAnchorPoint(new(6.5 + LabelMargin, 0), new(1, 0));
+                        m = style.LineThickness * 0.5 + LabelMargin;
+                        if (_anchors[0].Location.X > -6.5 - m) 
+                            _anchors[0] = new LabelAnchorPoint(new(-6.5 - m, 0), new(-1, 0));
+                        if (_anchors[1].Location.X < 6.5 + m)
+                            _anchors[1] = new LabelAnchorPoint(new(6.5 + m, 0), new(1, 0));
 
                         break;
 
@@ -118,8 +121,9 @@ namespace SimpleCircuit.Components
                     .MoveTo(new(5, 0))
                     .Line(new(-2, 4)), style);
 
-                if (_anchors[0].Location.X > -7 - LabelMargin)
-                    _anchors[0] = new LabelAnchorPoint(new(-7 - LabelMargin, 0), new(-1, 0));
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[0].Location.X > -7 - m)
+                    _anchors[0] = new LabelAnchorPoint(new(-7 - m, 0), new(-1, 0));
 
             }
             private void DrawSignalGround(IGraphicsBuilder drawing, IStyle style)

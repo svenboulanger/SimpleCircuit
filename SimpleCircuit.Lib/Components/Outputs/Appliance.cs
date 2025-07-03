@@ -34,22 +34,13 @@ namespace SimpleCircuit.Components.Outputs
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, IBoxDrawable, IRoundedBox
+        private class Instance : ScaledOrientedDrawable
         {
             private const double _k = 0.5522847498;
             private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "appliance";
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(0, -8);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new(8, 0);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(16, 8);
 
             /// <inheritdoc />
             [Description("The round-off corner radius.")]
@@ -77,8 +68,10 @@ namespace SimpleCircuit.Components.Outputs
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
-                        _anchors[0] = new LabelAnchorPoint(new(8, -8 - LabelMargin), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(8, 8 + LabelMargin), new(0, 1));
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors[0] = new LabelAnchorPoint(new(8, -8 - m), new(0, -1));
+                        _anchors[1] = new LabelAnchorPoint(new(8, 8 + m), new(0, 1));
                         break;
                 }
                 return base.Prepare(context);

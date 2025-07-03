@@ -40,10 +40,10 @@ namespace SimpleCircuit.Components.Inputs
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
-                _anchors[0] = new LabelAnchorPoint(new(-4 - LabelMargin, 0), new(-1, 0));
-                _anchors[1] = new LabelAnchorPoint(new(4 + LabelMargin, 0), new(1, 0));
-
                 var style = builder.Style.ModifyDashedDotted(this);
+                _anchors[0] = new LabelAnchorPoint(new(-4 - style.LineThickness * 0.5 - LabelMargin, 0), new(-1, 0));
+                _anchors[1] = new LabelAnchorPoint(new(4.5 + LabelMargin, 0), new(1, 0));
+
                 builder.Circle(new(), 4, style);
                 builder.Line(new(4, -4), new(4, 4), style.AsLineThickness(1.0));
 

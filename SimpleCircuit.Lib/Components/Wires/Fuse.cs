@@ -19,10 +19,17 @@ namespace SimpleCircuit.Components.Wires
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors;
+            private readonly CustomLabelAnchorPoints _anchors = new(2);
 
             /// <inheritdoc />
             public override string Type => "fuse";
+
+            /// <summary>
+            /// The distance from the label to the symbol.
+            /// </summary>
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -33,15 +40,15 @@ namespace SimpleCircuit.Components.Wires
             {
                 Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "a", "p", "pos");
                 Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "b", "n", "neg");
-                _anchors = new(
-                    new LabelAnchorPoint(new(0, -4), new(0, -1)),
-                    new LabelAnchorPoint(new(0, 4), new(0, 1)));
             }
 
             /// <inheritdoc />
             protected override void Draw(IGraphicsBuilder builder)
             {
                 var style = builder.Style.ModifyDashedDotted(this);
+                double m = style.LineThickness * 0.5 + LabelMargin;
+                _anchors[0] = new LabelAnchorPoint(new(0, -3 - m), new(0, -1));
+                _anchors[1] = new LabelAnchorPoint(new(0, 3 + m), new(0, 1));
                 switch (Variants.Select(Options.European, Options.American))
                 {
                     case 0: DrawIEC(builder, style); break;

@@ -58,17 +58,19 @@ namespace SimpleCircuit.Components.Wires
                         // Reset the pin locations
                         SetPinOffset(0, new(-Gap * 0.5, 0));
                         SetPinOffset(1, new(Gap * 0.5, 0));
-                        
+
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
                         switch (Variants.Select(_straight, _none))
                         {
                             case 1:
-                                _anchors[0] = new LabelAnchorPoint(new(0, -LabelMargin), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, LabelMargin), new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
                                 break;
 
                             default:
-                                _anchors[0] = new LabelAnchorPoint(new(0, -0.5 * Height - LabelMargin), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, 0.5 * Height + LabelMargin), new(0, 1));
+                                _anchors[0] = new LabelAnchorPoint(new(0, -0.5 * Height - m), new(0, -1));
+                                _anchors[1] = new LabelAnchorPoint(new(0, 0.5 * Height + m), new(0, 1));
                                 break;
                         }
                         break;

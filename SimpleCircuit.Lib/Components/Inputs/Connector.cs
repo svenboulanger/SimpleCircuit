@@ -22,12 +22,17 @@ namespace SimpleCircuit.Components.Inputs
 
         private class Instance : ScaledOrientedDrawable
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(
-                new LabelAnchorPoint(),
-                new LabelAnchorPoint());
+            private CustomLabelAnchorPoints _anchors;
 
             /// <inheritdoc />
             public override string Type => "connector";
+
+            /// <summary>
+            /// The distance from the label to the symbol.
+            /// </summary>
+            [Description("The margin for labels.")]
+            [Alias("lm")]
+            public double LabelMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -50,6 +55,12 @@ namespace SimpleCircuit.Components.Inputs
                 switch (context.Mode)
                 {
                     case PreparationMode.Reset:
+                        var style = context.Style.ModifyDashedDotted(this);
+                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        _anchors = new(
+                            new LabelAnchorPoint(new(0, -4 - m), new(0, -1)),
+                            new LabelAnchorPoint(new(0, 4 + m), new(0, 1)));
+
                         switch (Variants.Select(Options.American))
                         {
                             case 0:
@@ -93,16 +104,6 @@ namespace SimpleCircuit.Components.Inputs
                                     new(),
                                     new(-4, -4)
                                 ], style);
-
-                                if (Pins["p"].Connections > 0)
-                                {
-                                    _anchors[0] = new LabelAnchorPoint(new(1, 1), new(1, 1));
-                                    _anchors[1] = new LabelAnchorPoint(new(1, -1), new(1, -1));
-                                }
-                                else
-                                {
-                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(1, 0), new(1, 0));
-                                }
                                 builder.ExtendPin(Pins["n"], style, 5);
                                 break;
 
@@ -112,16 +113,6 @@ namespace SimpleCircuit.Components.Inputs
                                     new(),
                                     new(4, -4)
                                 ], style);
-
-                                if (Pins["p"].Connections > 0)
-                                {
-                                    _anchors[0] = new LabelAnchorPoint(new(5, 1), new(1, 1));
-                                    _anchors[1] = new LabelAnchorPoint(new(5, -1), new(1, -1));
-                                }
-                                else
-                                {
-                                    _anchors[0] = _anchors[1] = new LabelAnchorPoint(new(5, 0), new(1, 0));
-                                }
                                 builder.ExtendPin(Pins["n"], style, 5);
                                 break;
 
@@ -138,8 +129,6 @@ namespace SimpleCircuit.Components.Inputs
                                     new(-2, -4)
                                 ], style);
 
-                                _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                                _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                                 builder.ExtendPins(Pins, style,  5);
                                 break;
                         }
@@ -149,8 +138,6 @@ namespace SimpleCircuit.Components.Inputs
                         double s = Math.Sqrt(2) * 2;
                         builder.Path(b => b.MoveTo(new(s, -s)).ArcTo(4, 4, 0, true, false, new(s, s)), style.AsStroke());
                         builder.Circle(new(), 1.5, style);
-                        _anchors[0] = new LabelAnchorPoint(new(0, -5), new(0, -1));
-                        _anchors[1] = new LabelAnchorPoint(new(0, 5), new(0, 1));
                         builder.ExtendPin(Pins["n"], style);
                         builder.ExtendPin(Pins["p"], style, 4);
                         break;

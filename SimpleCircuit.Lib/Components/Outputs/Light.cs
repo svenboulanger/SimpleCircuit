@@ -26,7 +26,7 @@ namespace SimpleCircuit.Components.Outputs
         private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(2);
-            private static readonly double _sqrt2 = Math.Sqrt(2) * 4;
+            private static readonly double _sqrt2 = Math.Sqrt(2);
 
             /// <inheritdoc />
             public override string Type => "light";
@@ -76,13 +76,18 @@ namespace SimpleCircuit.Components.Outputs
             {
                 var style = builder.Style.ModifyDashedDotted(this);
 
-                _anchors[0] = new LabelAnchorPoint(new(0, -4 - LabelMargin), new(0, -1));
-                _anchors[1] = new LabelAnchorPoint(new(0, 4 + LabelMargin), new(0, 1));
+                double m = style.LineThickness * 0.5 + LabelMargin;
 
                 if (!Variants.Contains(Options.Arei))
+                {
+                    _anchors[0] = new LabelAnchorPoint(new(0, -4 - m), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 4 + m), new(0, 1));
                     builder.Circle(new Vector2(), 4, style);
+                }
                 else
                 {
+                    _anchors[0] = new LabelAnchorPoint(new(0, -4 / _sqrt2 - m), new(0, -1));
+                    _anchors[1] = new LabelAnchorPoint(new(0, 4 / _sqrt2 + m), new(0, 1));
                     if (Variants.Contains(_wall))
                         DrawWall(builder, style);
                     if (Variants.Contains(_projector))
@@ -93,15 +98,17 @@ namespace SimpleCircuit.Components.Outputs
                         DrawEmergency(builder, style);
                 }
 
-                builder.Cross(new(), _sqrt2, style);
+                builder.Cross(new(), 4 * _sqrt2, style);
                 _anchors.Draw(builder, this, style);
             }
 
             private void DrawWall(IGraphicsBuilder builder, IStyle style)
             {
                 builder.Line(new Vector2(-3, 5), new Vector2(3, 5), style);
-                if (_anchors[1].Location.Y < 5 + LabelMargin)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 5 + LabelMargin), new(0, 1));
+
+                double m = 5 + style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
             }
             private void DrawProjector(IGraphicsBuilder builder, IStyle style)
             {
@@ -112,8 +119,9 @@ namespace SimpleCircuit.Components.Outputs
                     b.MoveTo(new(-c, -s));
                     b.ArcTo(6, 6, 0.0, false, false, new(c, -s));
                 }, style.AsStroke());
-                if (_anchors[0].Location.Y > -6 - LabelMargin)
-                    _anchors[0] = new LabelAnchorPoint(new(0, -6 - LabelMargin), new(0, -1));
+                double m = -6 - style.LineThickness * 0.5 - LabelMargin;
+                if (_anchors[0].Location.Y > m)
+                    _anchors[0] = new LabelAnchorPoint(new(0, m), new(0, -1));
             }
             private void DrawDirectional(IGraphicsBuilder builder, bool diverging, IStyle style)
             {
@@ -127,8 +135,9 @@ namespace SimpleCircuit.Components.Outputs
                     builder.Arrow(new(-2, 6), new(-2, 12), style);
                     builder.Arrow(new(2, 6), new(2, 12), style);
                 }
-                if (_anchors[1].Location.Y < 12 + LabelMargin)
-                    _anchors[1] = new LabelAnchorPoint(new(0, 12 + LabelMargin), new(0, 1));
+                double m = 12 + style.LineThickness * 0.5 + LabelMargin;
+                if (_anchors[1].Location.Y < m)
+                    _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
             }
             private void DrawEmergency(IGraphicsBuilder builder, IStyle style)
             {
