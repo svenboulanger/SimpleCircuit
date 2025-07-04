@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Drawing.Builders;
+using SpiceSharp.General;
 
 namespace SimpleCircuit.Components
 {
@@ -76,16 +77,16 @@ namespace SimpleCircuit.Components
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
-            public double LabelMargin { get; set; } = 1.0;
+            public double OuterMargin { get; set; } = 1.0;
 
             /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(Location.X, Location.Y);
+            Bounds IBoxDrawable.OuterBounds => new(Location, EndLocation);
 
             /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => 0.5 * (Location + EndLocation);
+            Bounds IBoxDrawable.InnerBounds => new Bounds(Location, EndLocation).Shrink(_pins.InnerMargins);
 
             /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(EndLocation.X, EndLocation.Y);
+            Margins IBoxDrawable.InnerMargin => Margin;
 
             [Description("The round-off corner radius.")]
             [Alias("r")]

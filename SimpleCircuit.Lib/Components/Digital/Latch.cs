@@ -16,7 +16,7 @@ namespace SimpleCircuit.Components.Digital
         protected override IDrawable Factory(string key, string name)
             => new Instance(name);
 
-        private class Instance : ScaledOrientedDrawable, IBoxDrawable
+        private class Instance : ScaledOrientedDrawable
         {
             private readonly CustomLabelAnchorPoints _anchors = new(2);
 
@@ -25,16 +25,7 @@ namespace SimpleCircuit.Components.Digital
 
             [Description("The margin for labels to the edge.")]
             [Alias("lm")]
-            public double LabelMargin { get; set; } = 1.0;
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.TopLeft => new(-9, -12);
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.Center => new();
-
-            /// <inheritdoc />
-            Vector2 IBoxDrawable.BottomRight => new(9, 12);
+            public double OuterMargin { get; set; } = 1.0;
 
             /// <summary>
             /// Creates a new <see cref="Instance"/>.
@@ -56,7 +47,7 @@ namespace SimpleCircuit.Components.Digital
                 {
                     case PreparationMode.Reset:
                         var style = context.Style.ModifyDashedDotted(this);
-                        double m = style.LineThickness * 0.5 + LabelMargin;
+                        double m = style.LineThickness * 0.5 + OuterMargin;
                         _anchors[0] = new LabelAnchorPoint(new(0, -12 - m), new(0, -1));
                         _anchors[1] = new LabelAnchorPoint(new(0, 12 + m), new(0, 1));
                         break;

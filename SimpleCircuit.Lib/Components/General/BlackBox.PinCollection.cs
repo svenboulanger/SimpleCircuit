@@ -9,7 +9,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 
 namespace SimpleCircuit.Components
 {
@@ -57,6 +56,11 @@ namespace SimpleCircuit.Components
             /// Gets or sets the inner bounds for the labels.
             /// </summary>
             public Bounds InnerBounds { get; set; }
+
+            /// <summary>
+            /// Gets the inside margins after accommodating for the pins.
+            /// </summary>
+            public Margins InnerMargins { get; private set; }
 
             /// <inheritdoc/>
             public IPin this[string name]
@@ -188,6 +192,7 @@ namespace SimpleCircuit.Components
                             throw new NotImplementedException();
                     }
                 }
+                InnerMargins = new(marginLeft, marginTop, marginRight, marginBottom);
 
                 // Place north pins
                 int lastLeftPin = -1, lastTopPin = -1, lastBottomPin = -1, lastRightPin = -1;
@@ -306,21 +311,21 @@ namespace SimpleCircuit.Components
                     minRightHeight += marginBottom;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.r.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
-                if (lastLeftPin < 0 && lastRightPin < 0)
-                {
-                    // There are no vertical pins to determine spacing, so let's place a minimum constraint
-                    var lastOffset = context.GetOffset(_parent.Y);
-                    var nextOffset = context.GetOffset(Bottom);
-                    double minimum = Math.Max(marginTop + marginBottom, _parent.MinHeight);
-                    minLeftHeight = minRightHeight = minimum;
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.tb.m", lastOffset, nextOffset, minimum, MinimumWeight);
-                }
+                // if (lastLeftPin < 0 && lastRightPin < 0)
+                // {
+                //     // There are no vertical pins to determine spacing, so let's place a minimum constraint
+                //     var lastOffset = context.GetOffset(_parent.Y);
+                //     var nextOffset = context.GetOffset(Bottom);
+                //     double minimum = Math.Max(marginTop + marginBottom, _parent.MinHeight);
+                //     minLeftHeight = minRightHeight = minimum;
+                //     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.tb.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                // }
                 if (lastTopPin >= 0)
                 {
                     // Finish left side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastTopPin].X);
                     var nextOffset = context.GetOffset(Right);
-                    double minimum = marginBottom + _parent.Margin.Right + _spansByIndex[lastTopPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginRight + _parent.Margin.Right + _spansByIndex[lastTopPin].Bounds.Bounds.Height * 0.5;
                     minTopWidth += marginRight;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.t.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
@@ -329,19 +334,19 @@ namespace SimpleCircuit.Components
                     // Finish right side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastBottomPin].X);
                     var nextOffset = context.GetOffset(Right);
-                    double minimum = marginBottom + _parent.Margin.Right + _spansByIndex[lastBottomPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginRight + _parent.Margin.Right + _spansByIndex[lastBottomPin].Bounds.Bounds.Height * 0.5;
                     minBottomWidth += marginRight;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.b.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
-                if (lastTopPin < 0 && lastBottomPin < 0)
-                {
-                    // There are no vertical pins to determine spacing, so let's place a minimum constraint
-                    var lastOffset = context.GetOffset(_parent.X);
-                    var nextOffset = context.GetOffset(Right);
-                    double minimum = Math.Max(marginLeft + marginRight, _parent.MinWidth);
-                    minTopWidth = minBottomWidth = minimum;
-                    MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.lr.m", lastOffset, nextOffset, minimum, MinimumWeight);
-                }
+                // if (lastTopPin < 0 && lastBottomPin < 0)
+                // {
+                //     // There are no vertical pins to determine spacing, so let's place a minimum constraint
+                //     var lastOffset = context.GetOffset(_parent.X);
+                //     var nextOffset = context.GetOffset(Right);
+                //     double minimum = Math.Max(marginLeft + marginRight, _parent.MinWidth);
+                //     minTopWidth = minBottomWidth = minimum;
+                //     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.lr.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                // }
 
                 // Add minimum width/height
                 double minHeight = Math.Max(_parent.MinHeight, marginTop + marginBottom + InnerBounds.Height);

@@ -1,4 +1,6 @@
 ﻿using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Linq;
 
@@ -25,7 +27,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index)
+        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index, IStyle style)
         {
             // Normalize the index
             index %= Count;
@@ -36,74 +38,71 @@ namespace SimpleCircuit.Components.Labeling
             if (subject is IRoundedBox rb)
                 r = rb.CornerRadius;
 
+            double m = style?.LineThickness * 0.5 ?? 0.0;
             switch (index)
             {
                 case 0: // Center
-                    return new(subject.Center, new());
+                    return new(subject.InnerBounds.Shrink(m).Shrink(subject.InnerMargin).Center, Vector2.Zero, Vector2.UX, TextOrientationType.Transformed);
 
                 case 1: // Top-left above box
-                    return new(subject.TopLeft + new Vector2(r, -subject.LabelMargin), new(1, -1));
+                    return new(subject.OuterBounds.TopLeft + new Vector2(r, -m - subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
 
                 case 2: // Top center above box
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y - subject.LabelMargin), new(0, -1));
+                    return new(subject.OuterBounds.TopCenter + new Vector2(0, -m - subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomCenter);
 
                 case 3: // Top-right above box
-                    return new(new(subject.BottomRight.X - r, subject.TopLeft.Y - subject.LabelMargin), new(-1, -1));
+                    return new(subject.OuterBounds.TopRight + new Vector2(-r, -m - subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomRight);
 
                 case 4: // Top-right right of box
-                    return new(new(subject.BottomRight.X + subject.LabelMargin, subject.TopLeft.Y + r), new(1, 1));
+                    return new(subject.OuterBounds.TopRight + new Vector2(m + subject.OuterMargin, r), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopLeft);
 
                 case 5: // Middle-right right of box
-                    return new(new(subject.BottomRight.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    return new(subject.OuterBounds.MiddleRight + new Vector2(m + subject.OuterMargin, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleLeft);
 
                 case 6: // Bottom-right right of box
-                    return new(subject.BottomRight + new Vector2(subject.LabelMargin, -r), new(1, -1));
+                    return new(subject.OuterBounds.BottomRight + new Vector2(m + subject.OuterMargin, -r), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
 
                 case 7: // Bottom-right below box
-                    return new(subject.BottomRight + new Vector2(-r, subject.LabelMargin), new(-1, 1));
+                    return new(subject.OuterBounds.BottomRight + new Vector2(-r, m + subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
                      
                 case 8: // Bottom-center below box
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y + subject.LabelMargin), new(0, 1));
+                    return new(subject.OuterBounds.BottomCenter + new Vector2(0, m + subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopCenter);
 
-                case 9: // Bottom-right below box
-                    return new(new(subject.TopLeft.X + r, subject.BottomRight.Y + subject.LabelMargin), new(1, 1));
+                case 9: // Bottom-left below box
+                    return new(subject.OuterBounds.BottomLeft + new Vector2(r, m + subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopLeft);
 
                 case 10: // Bottom-left left of box
-                    return new(new(subject.TopLeft.X - subject.LabelMargin, subject.BottomRight.Y - r), new(-1, -1));
+                    return new(subject.OuterBounds.BottomLeft + new Vector2(-m - subject.OuterMargin, -r), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomRight);
 
                 case 11: // Middle-left left of box
-                    return new(new(subject.TopLeft.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    return new(subject.OuterBounds.MiddleLeft + new Vector2(-m - subject.OuterMargin, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleRight);
 
                 case 12: // Top-left left of box
-                    return new(subject.TopLeft + new Vector2(-subject.LabelMargin, r), new(-1, 1));
+                    return new(subject.OuterBounds.TopLeft + new Vector2(-m - subject.OuterMargin, r), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
 
                 case 13: // Top-left inside box
-                    double f = r * 0.70710678118;
-                    return new(subject.TopLeft + new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(1, 1));
+                    return new(subject.InnerBounds.TopLeft + new Vector2(m + subject.InnerMargin.Left, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopLeft);
 
                 case 14: // Top-center inside box
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.TopLeft.Y + subject.LabelMargin), new(0, 1));
+                    return new(subject.InnerBounds.TopCenter + new Vector2(0, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopCenter);
 
                 case 15: // Top-right inside box
-                    f = r * 0.70710678118;
-                    return new(new(subject.BottomRight.X - f - subject.LabelMargin, subject.TopLeft.Y + f + subject.LabelMargin), new(-1, 1));
+                    return new(subject.InnerBounds.TopRight + new Vector2(-m - subject.InnerMargin.Right, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
 
                 case 16: // Middle-right inside box
-                    return new(new(subject.BottomRight.X - subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(-1, 0));
+                    return new(subject.InnerBounds.MiddleRight + new Vector2(-m - subject.InnerMargin.Right, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleRight);
 
                 case 17: // Bottom-right inside box
-                    f = r * 0.70710678118;
-                    return new(subject.BottomRight - new Vector2(f + subject.LabelMargin, f + subject.LabelMargin), new(-1, -1));
+                    return new(subject.InnerBounds.BottomRight + new Vector2(-m - subject.InnerMargin.Right, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomRight);
                     
                 case 18: // Bottom-center inside box
-                    return new(new(0.5 * (subject.TopLeft.X + subject.BottomRight.X), subject.BottomRight.Y - subject.LabelMargin), new(0, -1));
+                    return new(subject.InnerBounds.BottomCenter + new Vector2(0, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
 
                 case 19: // Bottom-left inside box
-                    f = r * 0.70710678118;
-                    return new(new(subject.TopLeft.X + f + subject.LabelMargin, subject.BottomRight.Y - f - subject.LabelMargin), new(1, -1));
+                    return new(subject.InnerBounds.BottomLeft + new Vector2(m + subject.InnerMargin.Left, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
 
                 case 20: // Middle-left inside box
-                    return new(new(subject.TopLeft.X + subject.LabelMargin, 0.5 * (subject.TopLeft.Y + subject.BottomRight.Y)), new(1, 0));
+                    return new(subject.InnerBounds.MiddleLeft + new Vector2(m + subject.InnerMargin.Left, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleLeft);
             }
             throw new NotImplementedException();
         }
@@ -297,21 +296,21 @@ namespace SimpleCircuit.Components.Labeling
             // Calculate the total width and height
             double width = 0.0;
             if (leftWidth > 0)
-                width += leftWidth + subject.LabelMargin;
+                width += leftWidth + subject.OuterMargin;
             if (centerWidth > 0)
-                width += width.Equals(0.0) ? centerWidth + subject.LabelMargin : centerWidth + spacing.X;
+                width += width.Equals(0.0) ? centerWidth + subject.OuterMargin : centerWidth + spacing.X;
             if (rightWidth > 0)
-                width += width.Equals(0.0) ? rightWidth + subject.LabelMargin : rightWidth + spacing.X;
-            width += subject.LabelMargin;
+                width += width.Equals(0.0) ? rightWidth + subject.OuterMargin : rightWidth + spacing.X;
+            width += subject.OuterMargin;
 
             double height = 0.0;
             if (topHeight > 0)
                 height += topHeight;
             if (centerHeight > 0)
-                height += height.Equals(0.0) ? centerHeight + subject.LabelMargin : centerHeight + spacing.Y;
+                height += height.Equals(0.0) ? centerHeight + subject.OuterMargin : centerHeight + spacing.Y;
             if (bottomHeight > 0)
-                height += height.Equals(0.0) ? bottomHeight + subject.LabelMargin : bottomHeight + spacing.Y;
-            height += subject.LabelMargin;
+                height += height.Equals(0.0) ? bottomHeight + subject.OuterMargin : bottomHeight + spacing.Y;
+            height += subject.OuterMargin;
 
             return new(width, height);
         }

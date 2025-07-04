@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Drawing.Styles;
+using System;
 using System.Linq;
 using static SimpleCircuit.Components.CommonGraphical;
 
@@ -171,19 +172,18 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index)
+        public override LabelAnchorPoint GetAnchorPoint(IBoxDrawable subject, int index, IStyle style)
         {
             index %= Count;
             if (index < 0)
                 index += Count;
 
-            Vector2 c = 0.5 * (subject.TopLeft + subject.BottomRight);
-            Vector2 size = subject.BottomRight - subject.TopLeft;
+            Vector2 c = subject.InnerBounds.Center;
             Vector2 n, ox, oy;
             if (subject is IRoundedDiamond rd)
-                DiamondSize(size.X, size.Y, rd.CornerRadiusX, rd.CornerRadiusY, out n, out ox, out oy);
+                DiamondSize(subject.OuterBounds.Width, subject.OuterBounds.Height, rd.CornerRadiusX, rd.CornerRadiusY, out n, out ox, out oy);
             else
-                DiamondSize(size.X, size.Y, 0.0, 0.0, out n, out ox, out oy);
+                DiamondSize(subject.OuterBounds.Width, subject.OuterBounds.Height, 0.0, 0.0, out n, out ox, out oy);
 
             LabelAnchorPoint ComputeMidLocation(Vector2 a, Vector2 b)
             {
@@ -191,7 +191,7 @@ namespace SimpleCircuit.Components.Labeling
                 Vector2 n = b - a;
                 n = new Vector2(n.Y, -n.X);
                 n /= n.Length;
-                return new(p + subject.LabelMargin * n, new(n.X, n.Y));
+                return new(p + subject.OuterMargin * n, new(n.X, n.Y));
             }
 
             switch (index)
@@ -203,82 +203,82 @@ namespace SimpleCircuit.Components.Labeling
                 case 1:
                     // Top-left outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopLeftLeft),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopLeftTop));
 
                 case 2:
                     // Top
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.LabelMargin), new(0, -1));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Top) + new Vector2(0, -subject.OuterMargin), new(0, -1));
 
                 case 3:
                     // Top-right outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopRightTop),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopRightRight));
 
                 case 4:
                     // Right
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(subject.LabelMargin, 0), new(1, 0));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Right) + new Vector2(subject.OuterMargin, 0), new(1, 0));
 
                 case 5:
                     // Bottom-right outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomRightRight),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomRightBottom));
 
                 case 6:
                     // Bottom
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.LabelMargin), new(0, 1));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Bottom) + new Vector2(0, subject.OuterMargin), new(0, 1));
 
                 case 7:
                     // Bottom-left outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomLeftBottom),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomLeftLeft));
 
                 case 8:
                     // Left
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Left) + new Vector2(-subject.OuterMargin, 0), new(-1, 0));
 
                 case 9:
                     // Top-left inside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftTop),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopLeftLeft));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopLeftTop),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopLeftLeft));
 
                 case 10:
                     // Top inside
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.LabelMargin), new(0, 1));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Top) + new Vector2(0, subject.OuterMargin), new(0, 1));
 
                 case 11:
                     // Top-right inside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightRight),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.TopRightTop));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopRightRight),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.TopRightTop));
 
                 case 12:
                     // Right inside
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Right) + new Vector2(-subject.LabelMargin, 0), new(-1, 0));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Right) + new Vector2(-subject.OuterMargin, 0), new(-1, 0));
 
                 case 13:
                     // Bottom-right outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightBottom),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomRightRight));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomRightBottom),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomRightRight));
 
                 case 14:
                     // Bottom inside
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.LabelMargin), new(0, -1));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Bottom) + new Vector2(0, -subject.OuterMargin), new(0, -1));
 
                 case 15:
                     // Bottom-left outside
                     return ComputeMidLocation(
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftLeft),
-                        c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.BottomLeftBottom));
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomLeftLeft),
+                        c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.BottomLeftBottom));
 
                 case 16:
                     // Left inside
-                    return new(c + GetDiamondOffset(size.X, size.Y, ox, oy, DiamondLocation.Left) + new Vector2(subject.LabelMargin, 0), new(1, 0));
+                    return new(c + GetDiamondOffset(subject.OuterBounds.Width, subject.OuterBounds.Height, ox, oy, DiamondLocation.Left) + new Vector2(subject.OuterMargin, 0), new(1, 0));
 
                 default:
                     throw new NotImplementedException();

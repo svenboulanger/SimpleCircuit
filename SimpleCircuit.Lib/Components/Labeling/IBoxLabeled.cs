@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components.Labeling
+﻿using SimpleCircuit.Drawing;
+
+namespace SimpleCircuit.Components.Labeling
 {
     /// <summary>
     /// Describes a box shape that can be used for labeling.
@@ -6,23 +8,23 @@
     public interface IBoxDrawable : IDrawable
     {
         /// <summary>
-        /// Gets the top-left coordinate of the box.
+        /// Gets the outer bounds.
         /// </summary>
-        public Vector2 TopLeft { get; }
+        public Bounds OuterBounds { get; }
 
         /// <summary>
-        /// Gets the center coordinate of the box.
+        /// Gets the inner bounds.
         /// </summary>
-        public Vector2 Center { get; }
+        public Bounds InnerBounds { get; }
 
         /// <summary>
-        /// Gets the bottom-right coordinate of the box.
+        /// Gets the margins for labels when inside the box.
         /// </summary>
-        public Vector2 BottomRight { get; }
+        public Margins InnerMargin { get; }
 
         /// <summary>
-        /// Gets or sets the margin of labels from the edge.
+        /// Gets the margins for labels when outside the box.
         /// </summary>
-        public double LabelMargin { get; set; }
+        public double OuterMargin { get; }
     }
 }

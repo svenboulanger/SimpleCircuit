@@ -88,8 +88,10 @@ namespace SimpleCircuit.Components
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The offset between the two nodes.</param>
         /// <param name="weight"></param>
-        public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1)
+        public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1.0)
         {
+            // TODO: Remove this later!
+            weight = 100.0;
             double delta = lowest.Offset - highest.Offset;
             var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest.Representative, lowest.Representative, delta, minimum);
             component.SetParameter("weight", weight);

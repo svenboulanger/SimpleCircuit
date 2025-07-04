@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing;
 
 namespace SimpleCircuit.Components.Diagrams.Modeling
 {
@@ -13,14 +14,21 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
     /// </summary>
     public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxDrawable, IEllipseDrawable, IRoundedBox
     {
+        private static readonly ILabelAnchorPoints<IBoxDrawable> _boxLabelAnchorPoints = new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1);
+        private static readonly ILabelAnchorPoints<IEllipseDrawable> _ellipseLabelAnchorPoints = new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1);
+
         public const string Square = "square";
 
         [Description("The size of the model block.")]
         public double Size { get; set; }
 
-        [Description("The margin for labels to the edge.")]
-        [Alias("lm")]
-        public double LabelMargin { get; set; } = 1.0;
+        [Description("The margin for ouside labels to the edge.")]
+        [Alias("om")]
+        public double OuterMargin { get; set; } = 1.0;
+
+        [Description("The margin for inside labels to the edge")]
+        [Alias("im")]
+        public Margins InnerMargin { get; set; } = new(1, 1, 1, 1);
 
         [Description("The round-off corner radius.")]
         [Alias("r")]
@@ -28,13 +36,10 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         public double CornerRadius { get; set; }
 
         /// <inheritdoc />
-        Vector2 IBoxDrawable.TopLeft => -0.5 * new Vector2(Size, Size);
+        Bounds IBoxDrawable.InnerBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
 
         /// <inheritdoc />
-        Vector2 IBoxDrawable.Center =>  new();
-
-        /// <inheritdoc />
-        Vector2 IBoxDrawable.BottomRight => 0.5 * new Vector2(Size, Size);
+        Bounds IBoxDrawable.OuterBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
 
         /// <inheritdoc />
         Vector2 IEllipseDrawable.Center => new();
@@ -73,9 +78,9 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
         protected void DrawLabels(IGraphicsBuilder builder, IStyle style)
         {
             if (Variants.Contains(Square))
-                new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _boxLabelAnchorPoints.Draw(builder, this, style);
             else
-                new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1).Draw(builder, this, style);
+                _ellipseLabelAnchorPoints.Draw(builder, this, style);
         }
 
         /// <inheritdoc />

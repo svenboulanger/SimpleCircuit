@@ -38,8 +38,9 @@ namespace SimpleCircuit.Components.Labeling
         /// </summary>
         /// <param name="subject">The subject.</param>
         /// <param name="index">The index.</param>
+        /// <param name="style">The relevant style, which can be used to fine-tune anchor location.</param>
         /// <returns>Returns the label anchor point.</returns>
-        public LabelAnchorPoint GetAnchorPoint(T subject, int index);
+        public LabelAnchorPoint GetAnchorPoint(T subject, int index, IStyle style);
 
         /// <summary>
         /// Draws all labels of a <paramref name="subject"/> using the current set of label anchor points.

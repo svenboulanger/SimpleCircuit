@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using SimpleCircuit.Drawing.Styles;
+using System.Linq;
 
 namespace SimpleCircuit.Components.Labeling
 {
@@ -18,16 +19,16 @@ namespace SimpleCircuit.Components.Labeling
         public override int Count => _a.Count + _b.Count;
 
         /// <inheritdoc />
-        public override LabelAnchorPoint GetAnchorPoint(T subject, int index)
+        public override LabelAnchorPoint GetAnchorPoint(T subject, int index, IStyle style)
         {
             index %= Count;
             if (index < 0)
                 index += Count;
 
             if (index < _a.Count)
-                return _a.GetAnchorPoint(subject, index);
+                return _a.GetAnchorPoint(subject, index, style);
             else
-                return _b.GetAnchorPoint(subject, index - _a.Count);
+                return _b.GetAnchorPoint(subject, index - _a.Count, style);
         }
 
         /// <inheritdoc />

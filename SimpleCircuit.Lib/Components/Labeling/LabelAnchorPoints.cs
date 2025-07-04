@@ -19,7 +19,7 @@ namespace SimpleCircuit.Components.Labeling
         public abstract bool TryGetAnchorIndex(string name, out int index);
 
         /// <inheritdoc />
-        public abstract LabelAnchorPoint GetAnchorPoint(T subject, int index);
+        public abstract LabelAnchorPoint GetAnchorPoint(T subject, int index, IStyle style);
 
         /// <inheritdoc />
         public virtual Bounds GetBounds(T drawable, int index, ITextFormatter formatter, IStyle parentStyle)
@@ -69,7 +69,7 @@ namespace SimpleCircuit.Components.Labeling
 
             foreach (var pair in anchorLabels)
             {
-                var anchor = GetAnchorPoint(subject, pair.Key);
+                var anchor = GetAnchorPoint(subject, pair.Key, parentStyle);
                 DrawLabel(builder, anchor, pair.Value);
             }
         }

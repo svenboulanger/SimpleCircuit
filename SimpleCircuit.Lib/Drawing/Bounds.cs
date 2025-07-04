@@ -176,15 +176,29 @@ namespace SimpleCircuit.Drawing
         /// Expands the bounds.
         /// </summary>
         /// <param name="margin">The margin.</param>
-        /// <returns>Returns the new bounds with margins.</returns>
+        /// <returns>Returns the expanded bounds.</returns>
         public Bounds Expand(double margin) => new(Left - margin, Top - margin, Right + margin, Bottom + margin);
 
         /// <summary>
         /// Expands the bounds.
         /// </summary>
         /// <param name="margin">The margin.</param>
-        /// <returns>Returns the new bounds with margins.</returns>
+        /// <returns>Returns the expanded bounds.</returns>
         public Bounds Expand(Margins margin) => new(Left - margin.Left, Top - margin.Top, Right + margin.Right, Bottom + margin.Bottom);
+
+        /// <summary>
+        /// Shrinks the bounds.
+        /// </summary>
+        /// <param name="margin">The margin.</param>
+        /// <returns>Returns the shrunk bounds.</returns>
+        public Bounds Shrink(double margin) => new(Left + margin, Top + margin, Right - margin, Bottom - margin);
+
+        /// <summary>
+        /// Shrinks the bounds
+        /// </summary>
+        /// <param name="margin">The margin.</param>
+        /// <returns>Returns the shurnk bounds.</returns>
+        public Bounds Shrink(Margins margin) => new(Left + margin.Left, Top + margin.Top, Right - margin.Right, Bottom - margin.Bottom);
 
         /// <inheritdoc />
         public override string ToString()

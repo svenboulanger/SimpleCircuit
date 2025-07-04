@@ -14,8 +14,13 @@ namespace Sandbox
     {
         static void Main()
         {
-            ExportDemos("all");
-            // ExportThemes(@"");
+            // ExportDemos("all");
+            // ExportThemes(@"BB1 <r 5> X
+            //     BB1 <d 5> X
+            // ");
+            ExportThemes(@"Xtl <r +10> Xtr
+                Xtr <d +1> Xp1 <d +5> Xbr
+                Xtl <d +10> Xbl <r +1> Xp2 <r +5> Xbr");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)

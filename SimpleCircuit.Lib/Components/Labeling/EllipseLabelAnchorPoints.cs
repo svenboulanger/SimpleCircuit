@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Linq;
 
@@ -169,12 +170,13 @@ namespace SimpleCircuit.Components.Labeling
             return false;
         }
 
-        public override LabelAnchorPoint GetAnchorPoint(IEllipseDrawable subject, int index)
+        public override LabelAnchorPoint GetAnchorPoint(IEllipseDrawable subject, int index, IStyle style)
         {
             index %= Count;
             if (index < 0)
                 index += Count;
 
+            double m = style?.LineThickness * 0.5 ?? 0.0;
             switch (index)
             {
                 case 0:
@@ -186,44 +188,44 @@ namespace SimpleCircuit.Components.Labeling
                     Vector2 pt = new(-subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
                     Vector2 n = new(pt.Y, pt.X);
                     n /= n.Length;
-                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+                    return new(subject.Center + pt + (m + subject.OuterMargin) * n, new(n.X, n.Y));
 
                 case 2:
                     // Top
-                    return new(subject.Center + new Vector2(0, -subject.RadiusY - subject.LabelMargin), new(0, -1));
+                    return new(subject.Center + new Vector2(0, -subject.RadiusY - m - subject.OuterMargin), new(0, -1));
 
                 case 3:
                     // Top-right
                     pt = new(subject.RadiusX * 0.70710678118, -subject.RadiusY * 0.70710678118);
                     n = new(-pt.Y, -pt.X);
                     n /= n.Length;
-                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+                    return new(subject.Center + pt + (m + subject.OuterMargin) * n, new(n.X, n.Y));
 
                 case 4:
                     // Right
-                    return new(subject.Center + new Vector2(subject.RadiusX + subject.LabelMargin, 0), new(1, 0));
+                    return new(subject.Center + new Vector2(subject.RadiusX + m + subject.OuterMargin, 0), new(1, 0));
 
                 case 5:
                     // Bottom-right
                     pt = new(subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
                     n = new(pt.Y, pt.X);
                     n /= n.Length;
-                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+                    return new(subject.Center + pt + (m + subject.OuterMargin) * n, new(n.X, n.Y));
 
                 case 6:
                     // Bottom
-                    return new(subject.Center + new Vector2(0, subject.RadiusY + subject.LabelMargin), new(0, 1));
+                    return new(subject.Center + new Vector2(0, subject.RadiusY + m + subject.OuterMargin), new(0, 1));
 
                 case 7:
                     // Bottom-left
                     pt = new(-subject.RadiusX * 0.70710678118, subject.RadiusY * 0.70710678118);
                     n = new(-pt.Y, -pt.X);
                     n /= n.Length;
-                    return new(subject.Center + pt + subject.LabelMargin * n, new(n.X, n.Y));
+                    return new(subject.Center + pt + (m + subject.OuterMargin) * n, new(n.X, n.Y));
 
                 case 8:
                     // Left
-                    return new(subject.Center + new Vector2(-subject.RadiusX - subject.LabelMargin, 0), new(-1, 0));
+                    return new(subject.Center + new Vector2(-subject.RadiusX - m - subject.OuterMargin, 0), new(-1, 0));
 
                 default:
                     throw new NotImplementedException();

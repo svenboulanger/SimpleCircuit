@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleCircuit.Drawing.Styles;
+using System;
 using System.Linq;
 
 namespace SimpleCircuit.Components.Labeling
@@ -37,7 +38,7 @@ namespace SimpleCircuit.Components.Labeling
         }
 
         /// <inheritdoc />
-        public override LabelAnchorPoint GetAnchorPoint(T subject, int index)
-            => _anchors.GetAnchorPoint(subject, index);
+        public override LabelAnchorPoint GetAnchorPoint(T subject, int index, IStyle style)
+            => _anchors.GetAnchorPoint(subject, index, style);
     }
 }
