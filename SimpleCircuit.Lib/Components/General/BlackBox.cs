@@ -65,28 +65,31 @@ namespace SimpleCircuit.Components
             /// <summary>
             /// Gets or sets the margin for each pin label.
             /// </summary>
-            public Margins Margin { get; set; } = new(2, 2, 2, 2);
+            [Description("The margins for pin names.")]
+            [Alias("pm")]
+            public Margins PinMargins { get; set; } = new(2, 2, 2, 2);
 
             [Description("The minimum width.")]
             [Alias("minw")]
-            public double MinWidth { get; set; } = 30.0;
+            public double MinWidth { get; set; } = 10.0;
 
             [Description("The minimum height.")]
             [Alias("minh")]
             public double MinHeight { get; set; } = 10.0;
 
-            [Description("The margin for labels to the edge.")]
-            [Alias("lm")]
+            [Description("The margin for outside labels to the black box edge.")]
+            [Alias("om")]
             public double OuterMargin { get; set; } = 1.0;
+
+            [Description("The margin for inside labels to the black box edge.")]
+            [Alias("im")]
+            public Margins InnerMargins { get; set; } = new(1, 1, 1, 1);
 
             /// <inheritdoc />
             Bounds IBoxDrawable.OuterBounds => new(Location, EndLocation);
 
             /// <inheritdoc />
             Bounds IBoxDrawable.InnerBounds => new Bounds(Location, EndLocation).Shrink(_pins.InnerMargins);
-
-            /// <inheritdoc />
-            Margins IBoxDrawable.InnerMargin => Margin;
 
             [Description("The round-off corner radius.")]
             [Alias("r")]
@@ -142,8 +145,8 @@ namespace SimpleCircuit.Components
                     case PreparationMode.Sizes:
                         var style = context.Style.ModifyDashedDotted(this);
                         Labels.Format(context.TextFormatter, style);
-                        var bounds = BoxLabelAnchorPoints.CalculateBounds(context.TextFormatter, this, 0, BoxLabelAnchorPoints.Default, style);
-                        _pins.InnerBounds = bounds.Expand(Margin);
+                        var bounds = BoxLabelAnchorPoints.Default.CalculateSize(context.TextFormatter, this, style);
+                        _pins.InnerBounds = bounds.Expand(InnerMargins);
                         break;
 
                     case PreparationMode.DrawableGroups:
@@ -167,7 +170,7 @@ namespace SimpleCircuit.Components
                 BoxLabelAnchorPoints.Default.Draw(builder, this, style);
 
                 // Draw the port names
-                _pins.Render(builder);
+                _pins.Render(builder, style);
                 builder.EndGroup();
             }
 

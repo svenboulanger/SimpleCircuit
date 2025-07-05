@@ -15,8 +15,11 @@ namespace Sandbox
         static void Main()
         {
             // ExportDemos("all");
-            ExportThemes(@"BB1 <r 5> X
-                BB1 <d 5> X
+            ExportThemes(@"BB(""a"", ""b"", ""c"", ""d"", ""e"", ""f"", ""g"", ""h"", ""i"", ""j"", ""k"", ""l"", ""m"", ""n"", ""o"", ""p"", ""q"", ""r"", ""s"", ""t"", ""u"")
+
+BB~1[t] <r d +30 l> [longer]BB~1
+BB~1[b] <l d +30 r> [c]BB~1
+
             ");
             // ExportThemes(@"Xtl <r +10> Xtr
             //     Xbl <r +2> Xp2 <r +6> Xbr

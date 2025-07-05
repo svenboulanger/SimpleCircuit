@@ -86,7 +86,7 @@ namespace SimpleCircuit.Components
         /// <param name="lowest">The lowest node.</param>
         /// <param name="highest">The highest node.</param>
         /// <param name="minimum">The offset between the two nodes.</param>
-        /// <param name="weight"></param>
+        /// <param name="weight">The weight for the constraint when extended beyond the minimum.</param>
         public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1.0)
         {
             double delta = lowest.Offset - highest.Offset;

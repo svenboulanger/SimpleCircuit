@@ -112,7 +112,7 @@ namespace SimpleCircuit.Components.Annotations
         /// </summary>
         [Description("The margin for inside labels to the edge.")]
         [Alias("im")]
-        public Margins InnerMargin { get; set; } = new(2, 2, 2, 2);
+        public Margins InnerMargins { get; set; } = new(2, 2, 2, 2);
 
         /// <inheritdoc />
         public IStyleModifier Modifier { get; set; } = new ColorStyleModifier($"--primary", null);
