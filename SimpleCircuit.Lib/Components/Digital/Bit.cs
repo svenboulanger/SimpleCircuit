@@ -75,16 +75,17 @@ namespace SimpleCircuit.Components.Digital
                         Pins.Clear();
 
                         // Left
-                        for (int i = 0; i < _bits.Count; i++)
-                            Pins.Add(new FixedOrientedPin($"left{i + 1}", $"The left pin of row {i + 1}.", this, new((_maxWidth - _bits[i].Length) * BlockSize, BlockSize * i + hw), new(-1, 0)), $"left{i + 1}", $"l{i + 1}");
+                        int row, col;
+                        for (row = 0; row < _bits.Count; row++)
+                            Pins.Add(new FixedOrientedPin($"left{row + 1}", $"The left pin of row {row}.", this, new((_maxWidth - _bits[row].Length) * BlockSize, BlockSize * row + hw), new(-1, 0)), $"left{row}", $"l{row}", $"w{row}");
 
                         // Top
-                        int row = 0, col = 0;
+                        row = 0; col = 0;
                         while (row < _bits.Count)
                         {
                             while (col < _bits[row].Length)
                             {
-                                Pins.Add(new FixedOrientedPin($"top{col + 1}", $"The top pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * row), new(0, -1)), $"top{col + 1}", $"t{col + 1}");
+                                Pins.Add(new FixedOrientedPin($"top{col + 1}", $"The top pin of column {col}.", this, new(BlockSize * col + hw, BlockSize * row), new(0, -1)), $"top{col}", $"t{col}", $"n{col}");
                                 col++;
                             }
                             while (row < _bits.Count && col >= _bits[row].Length)
@@ -97,7 +98,7 @@ namespace SimpleCircuit.Components.Digital
                         {
                             while (col < _bits[row].Length)
                             {
-                                Pins.Add(new FixedOrientedPin($"bottom{col + 1}", $"The bottom pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * (row + 1)), new(0, 1)), $"bottom{col + 1}", $"b{col + 1}");
+                                Pins.Add(new FixedOrientedPin($"bottom{col + 1}", $"The bottom pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * (row + 1)), new(0, 1)), $"bottom{col}", $"b{col}", $"s{col}");
                                 col++;
                             }
                             while (row >= 0 && col >= _bits[row].Length)
@@ -105,8 +106,8 @@ namespace SimpleCircuit.Components.Digital
                         }
 
                         // Right
-                        for (int i = 0; i < _bits.Count; i++)
-                            Pins.Add(new FixedOrientedPin($"right{i + 1}", $"The right pin of row {i + 1}", this, new(BlockSize * _bits[i].Length, BlockSize * i + hw), new(1, 0)), $"right{i + 1}", $"r{i + 1}", $"e{i + 1}");
+                        for (row = 0; row < _bits.Count; row++)
+                            Pins.Add(new FixedOrientedPin($"right{row + 1}", $"The right pin of row {row + 1}", this, new(BlockSize * _bits[row].Length, BlockSize * row + hw), new(1, 0)), $"right{row}", $"r{row}", $"e{row}");
 
                         break;
                 }

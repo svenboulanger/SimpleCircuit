@@ -84,7 +84,7 @@
                             new Demo(
                                 "B3. Subcircuits",
                                 "Tutorial explaining how subcircuits work",
-                                "* --- Subcircuits ---\r\n\r\n* Subcircuits are solved as a separate mini-circuit and\r\n* will then act as a component on their own.\r\n* They should have ports, and can be followed by parameters.\r\n* For example:\r\n.subckt LPF DIRin[in] DIRout[b] r=\"1k&#937;\" c=\"1uF\" fg=\"--foreground\"\r\n    .property * fg = {fg}\r\n    DIRin <r> R(label1={r}) <r x r 5> DIRout\r\n    X <d> C(label1={c}) <d> GND\r\n.ends\r\n\r\n* The subcircuit name (LPF) can be used as a component key\r\n* The parameters can be passed like properties\r\nT(in, \"V_in\") <r> LPF1 <r> X1\r\nX1 <ne> LPF(r=\"2k&#937;\", fg=\"--primary\") <ne> T(\"V_out1\", out)\r\nX1 <se> LPF(c=\"2uF\", fg=\"--secondary\") <se> T(\"V_out2\", out)\r\n"),
+                                "* --- Subcircuits ---\r\n\r\n* Subcircuits are solved as a separate mini-circuit and\r\n* will then act as a component on their own.\r\n* They should have ports, and can be followed by parameters.\r\n* For example:\r\n.subckt LPF DIRin[in] DIRout[b] r=\"1k&#937;\" c=\"1uF\" fg=\"--foreground\"\r\n    .property *|wire fg = {fg}\r\n    DIRin <r> R(label1={r}) <r x r 5> DIRout\r\n    X <d> C(label1={c}) <d> GND\r\n.ends\r\n\r\n* The subcircuit name (LPF) can be used as a component key\r\n* The parameters can be passed like properties\r\nT(in, \"V_in\") <r> LPF1 <r> X1\r\nX1 <ne> LPF(r=\"2k&#937;\", fg=\"--primary\") <ne> T(\"V_out1\", out)\r\nX1 <se> LPF(c=\"2uF\", fg=\"--secondary\") <se> T(\"V_out2\", out)\r\n"),
                             new Demo(
                                 "B4. Queued Anonymous Points",
                                 "Tutorial explaining how to use queued anonymous points",
@@ -154,7 +154,7 @@
                     new Demo(
                         "Bit vector",
                         "A demonstration of how to use a bit vector component.",
-                        "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\", separator=\",\")\r\n\r\n.variants X -dot\r\n.property wire ml=3\r\n\r\nBIT1[b3] <d 5 r x r x r x r u> [b0]BIT1\r\nBIT1[b2] <d> X\r\nX <d +10 r +10 arrow> Xd(\"Data\")\r\nBIT1[b1] <d> X\r\n\r\nBIT1[b6] <d 5 r x r u> [b4]BIT1\r\nX <u> [b5]BIT1\r\nX~1 <d r arrow> Xa(\"Address\")\r\n\r\n(Xd <d +20> Xa)\r\n"),
+                        "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\", separator=\",\")\r\n\r\n.variants X -dot\r\n.property wire ml=3\r\n\r\nBIT1[b3] <d 5 r x r x r x r u> [b0]BIT1\r\nBIT1[b2] <d> X\r\nX <d +10 r +10 arrow> Xd(\"Data\")\r\nBIT1[b1] <d> X\r\n\r\nBIT1[b6] <d 5 r x r u> [b4]BIT1\r\nX <u> [b5]BIT1\r\nX~1 <d r +20 arrow> Xa(\"Address\")\r\n\r\n(Xa <d +20> Xd)\r\n"),
                     new Demo(
                         "Modeling diagram - negative feedback",
                         "A simple modeling diagram for negative feedback.",
