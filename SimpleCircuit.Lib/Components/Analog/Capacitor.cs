@@ -91,7 +91,7 @@ namespace SimpleCircuit.Components.Analog
                     case 1:
                         // Assymetric plates
                         builder.Rectangle(-2.25, -4, 1.5, 8, style);
-                        builder.Rectangle(0.75, -4, 1.5, 8, style);
+                        builder.Rectangle(0.75, -4, 1.5, 8, style.AsFilledMarker());
                         if (Variants.Contains(_signs))
                             builder.Signs(new(-5, 3), new(5, 3), style, vertical: true);
                         _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
