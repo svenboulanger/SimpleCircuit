@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SimpleCircuitOnline",
   "resources": {
-    "hash": "sha256-plGmn82bNCfgmh4JjLpFfh+Ed4p2pC0ZLveR3Iuu7II=",
+    "hash": "sha256-xCLBoJm8Y5lhRSBZS7L00Zi4+/qHc2H2Sk2A36WvV98=",
     "fingerprinting": {
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
       "BlazorMonaco.i33mlyw1st.wasm": "BlazorMonaco.wasm",
@@ -21,8 +21,8 @@
       "Microsoft.JSInterop.zon1z94s2j.wasm": "Microsoft.JSInterop.wasm",
       "Microsoft.JSInterop.WebAssembly.ynpjm7kaw7.wasm": "Microsoft.JSInterop.WebAssembly.wasm",
       "netstandard.2l8l8pbrxq.wasm": "netstandard.wasm",
-      "SimpleCircuit.Lib.bggv9e9zsl.wasm": "SimpleCircuit.Lib.wasm",
-      "SimpleCircuitOnline.mo85jexc5o.wasm": "SimpleCircuitOnline.wasm",
+      "SimpleCircuit.Lib.099yem4qty.wasm": "SimpleCircuit.Lib.wasm",
+      "SimpleCircuitOnline.wh4yj7vcp8.wasm": "SimpleCircuitOnline.wasm",
       "SkiaSharp.p6h2wzxq34.wasm": "SkiaSharp.wasm",
       "SpiceSharp.k5jm04zbp6.wasm": "SpiceSharp.wasm",
       "System.Collections.Concurrent.bo2qlscanc.wasm": "System.Collections.Concurrent.wasm",
@@ -102,8 +102,8 @@
       "Microsoft.JSInterop.zon1z94s2j.wasm": "sha256-MzUb+WugRU5XJEcm9Hm1s6+rF+r211wr7oEkZhS9dws=",
       "Microsoft.JSInterop.WebAssembly.ynpjm7kaw7.wasm": "sha256-rhpkBOcrE3Jka5EriY0f6+d/lxnwAWpcDQrLBwRBYfg=",
       "netstandard.2l8l8pbrxq.wasm": "sha256-tprFCMdze1xIJ2nnVPz+A/QqzRK4M0vHkq7u4gAwSUs=",
-      "SimpleCircuit.Lib.bggv9e9zsl.wasm": "sha256-9alDSpx1VjqbjwaEFviNla4sbtQESnrGnChyxT8lsW4=",
-      "SimpleCircuitOnline.mo85jexc5o.wasm": "sha256-ykkPKRg+KO2VRhqPDKtnLFgqjAQ4DrhTk10twtX57bg=",
+      "SimpleCircuit.Lib.099yem4qty.wasm": "sha256-VAldLZrJqr1Xp1fkU8lg3zaNtJ9PDc/hqPG2gIZF4OU=",
+      "SimpleCircuitOnline.wh4yj7vcp8.wasm": "sha256-RKpQpuJemxEQCsXfWs1v8jpRfc3khGdunsjMfLdsD/E=",
       "SkiaSharp.p6h2wzxq34.wasm": "sha256-fyCPi7d6YXvD4h/MjyVDuohEHhbQkTCPbe39CvQF+Ig=",
       "SpiceSharp.k5jm04zbp6.wasm": "sha256-eIqX2lws4cF+o0SKLEEiNOxMAmMnDeInDCz9UuMHzkc=",
       "System.Collections.Concurrent.bo2qlscanc.wasm": "sha256-9QrvTHTIpH7R/uyCklOQsvvAAeBQ+YcdXvPWxq/75Ik=",
