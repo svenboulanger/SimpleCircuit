@@ -191,12 +191,26 @@ namespace SimpleCircuit.Parser
                         if (Char == '\n')
                             ContinueToken();
                         Newline();
+
+                        if (Char == '+')
+                        {
+                            ContinueTrivia();
+                            ContinueLineContinuation();
+                            isTrivia = true;
+                        }
                         break;
 
                     case '\n':
                         NextType = TokenType.Newline;
                         ContinueToken();
                         Newline();
+
+                        if (Char == '+')
+                        {
+                            ContinueTrivia();
+                            ContinueLineContinuation();
+                            isTrivia = true;
+                        }
                         break;
 
                     case '\u2190': // Left arrow
@@ -327,6 +341,16 @@ namespace SimpleCircuit.Parser
                 Diagnostics?.Post(NextToken, ErrorCodes.QuoteMismatch);
             }
             ContinueToken();
+        }
+
+        private void ContinueLineContinuation()
+        {
+            char c = Char;
+            while (c == ' ' || c == '\t')
+            {
+                ContinueTrivia();
+                c = Char;
+            }
         }
     }
 }
