@@ -78,7 +78,6 @@ namespace SimpleCircuit.Components
         {
         }
 
-
         /// <summary>
         /// Adds a structure to the circuit that tries to guarantee a minimum between two relative items.
         /// </summary>
@@ -90,8 +89,6 @@ namespace SimpleCircuit.Components
         /// <param name="weight"></param>
         public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1.0)
         {
-            // TODO: Remove this later!
-            weight = 100.0;
             double delta = lowest.Offset - highest.Offset;
             var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest.Representative, lowest.Representative, delta, minimum);
             component.SetParameter("weight", weight);

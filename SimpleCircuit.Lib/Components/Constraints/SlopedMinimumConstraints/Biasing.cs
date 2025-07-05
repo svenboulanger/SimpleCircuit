@@ -24,7 +24,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
         private double _gnx2, _gnxny, _gny2;
         private Vector2 _i;
         private readonly double _xo;
-        private readonly Vector2 _iOn, _n;
+        private readonly Vector2 _iOn, _iOff, _n;
         private readonly bool _zeroX, _zeroY;
 
         /// <summary>
@@ -100,6 +100,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
             _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
             _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
             _i = _iOn = -_gOn * _n * (_parameters.Minimum + _n.Dot(_parameters.Offset));
+            _iOff = _parameters.Weight * _n * (_parameters.Minimum + _n.Dot(_parameters.Offset));
             _xo = _parameters.Normal.Dot(_parameters.Offset.Perpendicular);
         }
 
@@ -138,10 +139,10 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                     }
                     else
                     {
-                        _gnx2 = _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
-                        _gnxny = _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
-                        _gny2 = _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
-                        _i = new();
+                        _gnx2 = _n.X * _n.X * _parameters.Weight + _iteration.Gmin;
+                        _gnxny = _n.X * _n.Y * _parameters.Weight + _iteration.Gmin;
+                        _gny2 = _n.Y * _n.Y * _parameters.Weight + _iteration.Gmin;
+                        _i = _iOff;
                     }
                 }
             }

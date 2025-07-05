@@ -47,11 +47,11 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             
             // Calculate conductances
             _g = _gOn + _iteration.Gmin;
-            _gOff = _parameters.Weight + _iteration.Gmin;
+            _gOff = _parameters.Weight;
 
             // Calculate currents
             _iOn = (_parameters.Offset + _parameters.Minimum) * _gOn;
-            _iOff = _parameters.Offset * _gOff;
+            _iOff = (_parameters.Offset + _parameters.Minimum) * _gOff;
             _i = _iOn;
         }
 
