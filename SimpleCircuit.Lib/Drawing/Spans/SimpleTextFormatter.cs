@@ -17,6 +17,8 @@ namespace SimpleCircuit.Drawing.Spans
         /// <inheritdoc />
         public Span Format(string content, IStyle appearance)
         {
+            if (string.IsNullOrEmpty(content))
+                return new TextSpan(string.Empty, appearance, new Circuits.SpanBounds(new(0, 0, 0, 0), 0));
             content = content.Replace("<", "&lt;").Replace(">", "&gt;");
 
             var lexer = new SimpleTextLexer(content);

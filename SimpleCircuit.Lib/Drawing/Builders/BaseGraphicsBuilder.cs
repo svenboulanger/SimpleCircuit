@@ -172,10 +172,10 @@ namespace SimpleCircuit.Drawing.Builders
                     case "rect": DrawXmlRectangle(node, style); break;
                     case "text": DrawXmlText(node, style); break;
                     case "variant":
-                    case "v":
-                        // Just recursive thingy
-                        DrawXmlActions(node, context);
-                        break;
+                    case "v": DrawXmlActions(node, context); break;
+                    case "select":
+                    case "switch":
+                    case "s": DrawXmlSelect(node, context); break;
                     case "label": DrawXmlLabelAnchor(node, context); break;
                     case "group":
                     case "g":
@@ -889,6 +889,44 @@ namespace SimpleCircuit.Drawing.Builders
                 return false;
             var lexer = new VariantLexer(value);
             return VariantParser.Parse(lexer, context);
+        }
+
+        private void DrawXmlSelect(XmlNode node, IXmlDrawingContext context)
+        {
+            // We will construct a number of nodes of which we can only select one
+            Dictionary<string, List<XmlNode>> map = [];
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.Name == "case")
+                {
+                    // Get the variant name
+                    string variant = "default";
+                    if (child.Attributes is not null)
+                        variant = child.Attributes["variant"]?.Value ?? child.Attributes["v"]?.Value ?? "default";
+                    
+                    if (!map.TryGetValue(variant, out var list))
+                    {
+                        list = [];
+                        map.Add(variant, list);
+                    }
+                    list.Add(child);
+                }
+                else
+                {
+                    Diagnostics?.Post(ErrorCodes.CouldNotRecognizeDrawingCommand, node.Name);
+                    return;
+                }
+            }
+
+            // Now do the selection
+            string[] keys = [.. map.Where(p => p.Key != "default").Select(p => p.Key)];
+            int index = context.Variants.Select(keys);
+            string key = index < 0 ? "default" : keys[index];
+            if (map.TryGetValue(key, out var l))
+            {
+                foreach (var n in l)
+                    DrawXmlActions(n, context);
+            }
         }
 
         /// <inheritdoc />
