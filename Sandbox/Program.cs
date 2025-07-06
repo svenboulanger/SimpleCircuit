@@ -16,7 +16,8 @@ namespace Sandbox
         {
             // ExportDemos("all");
             ExportThemes(@"X1
-+ <r> R <r> X
+    + // Check
+  +     <r> R <r> X
             ");
             // ExportThemes(@"Xtl <r +10> Xtr
             //     Xbl <r +2> Xp2 <r +6> Xbr

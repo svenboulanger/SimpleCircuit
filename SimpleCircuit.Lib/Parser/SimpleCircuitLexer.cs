@@ -191,26 +191,14 @@ namespace SimpleCircuit.Parser
                         if (Char == '\n')
                             ContinueToken();
                         Newline();
-
-                        if (Char == '+')
-                        {
-                            ContinueTrivia();
-                            ContinueLineContinuation();
-                            isTrivia = true;
-                        }
+                        isTrivia = TryContinueLineContinuation();
                         break;
 
                     case '\n':
                         NextType = TokenType.Newline;
                         ContinueToken();
                         Newline();
-
-                        if (Char == '+')
-                        {
-                            ContinueTrivia();
-                            ContinueLineContinuation();
-                            isTrivia = true;
-                        }
+                        isTrivia = TryContinueLineContinuation();
                         break;
 
                     case '\u2190': // Left arrow
@@ -343,14 +331,28 @@ namespace SimpleCircuit.Parser
             ContinueToken();
         }
 
-        private void ContinueLineContinuation()
+        private bool TryContinueLineContinuation()
         {
-            char c = Char;
+            // Try to get to a '+'
+            int la = 0;
+            char c = LookAhead(la);
             while (c == ' ' || c == '\t')
             {
-                ContinueTrivia();
-                c = Char;
+                la++;
+                c = LookAhead(la);
             }
+            if (c == '+')
+            {
+                while (la >= 0)
+                {
+                    ContinueTrivia();
+                    la--;
+                }
+                while ((c = Char) == ' ' || c == '\t')
+                    ContinueTrivia();
+                return true;
+            }
+            return false;
         }
     }
 }
