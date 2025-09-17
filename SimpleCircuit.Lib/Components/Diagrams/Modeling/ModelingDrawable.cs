@@ -58,7 +58,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
             : base(name)
         {
             Size = size;
-            Modifier = new ColorStyleModifier(null, "white");
+            Modifier = new ColorStyleModifier(null, "--bg-opaque");
         }
 
         /// <inheritdoc />
