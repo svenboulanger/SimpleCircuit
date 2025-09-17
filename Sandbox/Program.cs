@@ -15,12 +15,15 @@ namespace Sandbox
         static void Main()
         {
             // ExportDemos("all");
-            // ExportThemes(@"BB1 <r 5> X
-            //     BB1 <d 5> X
-            // ");
-            ExportThemes(@"BB1 <r 10 d 10> R <d 10 l 10> BB1
-BB1 <d 10 r> C <r 10 u 10> BB1
-");
+            ExportThemes(@"X1
+    + // Check
+  +     <r> R <r> X
+            ");
+            // ExportThemes(@"Xtl <r +10> Xtr
+            //     Xbl <r +2> Xp2 <r +6> Xbr
+            //     Xtl <d +11> Xbl
+            //     Xtr <d +1> Xp1 <d +5> Xbr
+            //     ");
         }
 
         private static void Export(string filename, GraphicalCircuit circuit, IDiagnosticHandler diagnostics, string bgColor = null, bool view = false)

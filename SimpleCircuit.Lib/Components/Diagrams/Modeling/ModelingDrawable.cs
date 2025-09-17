@@ -28,7 +28,7 @@ namespace SimpleCircuit.Components.Diagrams.Modeling
 
         [Description("The margin for inside labels to the edge")]
         [Alias("im")]
-        public Margins InnerMargin { get; set; } = new(1, 1, 1, 1);
+        public Margins InnerMargins { get; set; } = new(1, 1, 1, 1);
 
         [Description("The round-off corner radius.")]
         [Alias("r")]

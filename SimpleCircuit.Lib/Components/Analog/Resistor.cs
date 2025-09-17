@@ -172,8 +172,8 @@ namespace SimpleCircuit.Components.Analog
                         var expB = (lb1 - lb0).Perpendicular;
                         expB /= expB.Length;
                         var locB = Vector2.AtX(0.0, lb0, lb1) + expB * m;
-                        _anchors[0] = new LabelAnchorPoint(locA, expA);
-                        _anchors[1] = new LabelAnchorPoint(locB, expB);
+                        _anchors[0] = new LabelAnchorPoint(locB, expB);
+                        _anchors[1] = new LabelAnchorPoint(locA, expA);
                         break;
                 }
                 return result;

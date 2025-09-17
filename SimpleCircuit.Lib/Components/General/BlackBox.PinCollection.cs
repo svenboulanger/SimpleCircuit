@@ -25,6 +25,7 @@ namespace SimpleCircuit.Components
             private readonly List<LoosePin> _pinsByIndex = [];
             private readonly List<Orientation> _pinOrientations = [];
             private int _anonymousIndex = 0;
+            private double _extraMargin = 0.0;
 
             /// <summary>
             /// The possible orientations for a pin.
@@ -125,23 +126,24 @@ namespace SimpleCircuit.Components
             }
 
             /// <inheritdoc />
-            public void Render(IGraphicsBuilder builder)
+            public void Render(IGraphicsBuilder builder, IStyle style)
             {
+                double m = style.LineThickness * 0.5;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
                     switch (_pinOrientations[i])
                     {
                         case Orientation.Left:
-                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.Margin.Left, 0), Vector2.UX, TextOrientationType.Transformed);
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft + new Vector2(_parent.PinMargins.Left + m, 0), Vector2.UX, TextOrientationType.Transformed);
                             break;
                         case Orientation.Right:
-                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.Margin.Right, 0), Vector2.UX, TextOrientationType.Transformed);
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight - new Vector2(_parent.PinMargins.Right - m, 0), Vector2.UX, TextOrientationType.Transformed);
                             break;
                         case Orientation.Up:
-                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.Margin.Top), Vector2.UY, TextOrientationType.Transformed);
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleLeft.Perpendicular + new Vector2(0, _parent.PinMargins.Top + m), Vector2.UY, TextOrientationType.Transformed);
                             break;
                         case Orientation.Down:
-                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.Margin.Bottom), Vector2.UY, TextOrientationType.Transformed);
+                            builder.Text(_spansByIndex[i], _pinsByIndex[i].Location - _spansByIndex[i].Bounds.Bounds.MiddleRight.Perpendicular - new Vector2(0, _parent.PinMargins.Bottom - m), Vector2.UY, TextOrientationType.Transformed);
                             break;
                     }
                 }
@@ -174,19 +176,23 @@ namespace SimpleCircuit.Components
                 marginLeft = marginTop = marginRight = marginBottom = _parent.CornerRadius;
                 for (int i = 0; i < _pinsByIndex.Count; i++)
                 {
+                    // Ignore pins that don't have any width to them
+                    if (_spansByIndex[i].Bounds.Bounds.Width.IsZero())
+                        continue;
+
                     switch (_pinOrientations[i])
                     {
                         case Orientation.Left:
-                            marginLeft = Math.Max(marginLeft, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
+                            marginLeft = Math.Max(marginLeft, _spansByIndex[i].Bounds.Bounds.Width + _parent.PinMargins.Horizontal + _extraMargin);
                             break;
                         case Orientation.Right:
-                            marginRight = Math.Max(marginRight, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Horizontal);
+                            marginRight = Math.Max(marginRight, _spansByIndex[i].Bounds.Bounds.Width + _parent.PinMargins.Horizontal + _extraMargin);
                             break;
                         case Orientation.Up:
-                            marginTop = Math.Max(marginTop, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
+                            marginTop = Math.Max(marginTop, _spansByIndex[i].Bounds.Bounds.Width + _parent.PinMargins.Vertical + _extraMargin);
                             break;
                         case Orientation.Down:
-                            marginBottom = Math.Max(marginBottom, _spansByIndex[i].Bounds.Bounds.Width + _parent.Margin.Vertical);
+                            marginBottom = Math.Max(marginBottom, _spansByIndex[i].Bounds.Bounds.Width + _parent.PinMargins.Vertical + _extraMargin);
                             break;
                         default:
                             throw new NotImplementedException();
@@ -211,14 +217,14 @@ namespace SimpleCircuit.Components
                                 if (lastLeftPin < 0)
                                 {
                                     lastOffset = context.GetOffset(_parent.Y);
-                                    minimum = marginTop + _parent.Margin.Top + 0.5 * b;
-                                    minLeftHeight = marginTop + _parent.Margin.Vertical + b;
+                                    minimum = marginTop + _parent.PinMargins.Top + 0.5 * b;
+                                    minLeftHeight = marginTop + _parent.PinMargins.Vertical + b;
                                 }
                                 else
                                 {
                                     lastOffset = context.GetOffset(_pinsByIndex[lastLeftPin].Y);
-                                    minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastLeftPin].Bounds.Bounds.Height + b);
-                                    minLeftHeight += _parent.Margin.Vertical + b;
+                                    minimum = _parent.PinMargins.Vertical + 0.5 * (_spansByIndex[lastLeftPin].Bounds.Bounds.Height + b);
+                                    minLeftHeight += _parent.PinMargins.Vertical + b;
                                 }
                                 lastLeftPin = i;
                             }
@@ -231,14 +237,14 @@ namespace SimpleCircuit.Components
                                 if (lastRightPin < 0)
                                 {
                                     lastOffset = context.GetOffset(_parent.Y);
-                                    minimum = marginTop + _parent.Margin.Top + 0.5 * b;
-                                    minRightHeight = marginTop + _parent.Margin.Vertical + b;
+                                    minimum = marginTop + _parent.PinMargins.Top + 0.5 * b;
+                                    minRightHeight = marginTop + _parent.PinMargins.Vertical + b;
                                 }
                                 else
                                 {
                                     lastOffset = context.GetOffset(_pinsByIndex[lastRightPin].Y);
-                                    minimum = _parent.Margin.Vertical + 0.5 * (_spansByIndex[lastRightPin].Bounds.Bounds.Height + b);
-                                    minRightHeight += _parent.Margin.Vertical + b;
+                                    minimum = _parent.PinMargins.Vertical + 0.5 * (_spansByIndex[lastRightPin].Bounds.Bounds.Height + b);
+                                    minRightHeight += _parent.PinMargins.Vertical + b;
                                 }
                                 lastRightPin = i;
                             }
@@ -251,14 +257,14 @@ namespace SimpleCircuit.Components
                                 if (lastTopPin < 0)
                                 {
                                     lastOffset = context.GetOffset(_parent.X);
-                                    minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
-                                    minTopWidth = marginLeft + _parent.Margin.Horizontal + r;
+                                    minimum = marginLeft + _parent.PinMargins.Left + 0.5 * r;
+                                    minTopWidth = marginLeft + _parent.PinMargins.Horizontal + r;
                                 }
                                 else
                                 {
                                     lastOffset = context.GetOffset(_pinsByIndex[lastTopPin].X);
-                                    minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastTopPin].Bounds.Bounds.Height + r);
-                                    minTopWidth += _parent.Margin.Horizontal + r;
+                                    minimum = _parent.PinMargins.Horizontal + 0.5 * (_spansByIndex[lastTopPin].Bounds.Bounds.Height + r);
+                                    minTopWidth += _parent.PinMargins.Horizontal + r;
                                 }
                                 lastTopPin = i;
                             }
@@ -271,14 +277,14 @@ namespace SimpleCircuit.Components
                                 if (lastBottomPin < 0)
                                 {
                                     lastOffset = context.GetOffset(_parent.X);
-                                    minimum = marginLeft + _parent.Margin.Left + 0.5 * r;
-                                    minBottomWidth = marginLeft + _parent.Margin.Horizontal + r;
+                                    minimum = marginLeft + _parent.PinMargins.Left + 0.5 * r;
+                                    minBottomWidth = marginLeft + _parent.PinMargins.Horizontal + r;
                                 }
                                 else
                                 {
                                     lastOffset = context.GetOffset(_pinsByIndex[lastBottomPin].X);
-                                    minimum = _parent.Margin.Horizontal + 0.5 * (_spansByIndex[lastBottomPin].Bounds.Bounds.Height + r);
-                                    minBottomWidth += _parent.Margin.Horizontal + r;
+                                    minimum = _parent.PinMargins.Horizontal + 0.5 * (_spansByIndex[lastBottomPin].Bounds.Bounds.Height + r);
+                                    minBottomWidth += _parent.PinMargins.Horizontal + r;
                                 }
                                 lastBottomPin = i;
                             }
@@ -298,7 +304,7 @@ namespace SimpleCircuit.Components
                     // Finish left side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastLeftPin].Y);
                     var nextOffset = context.GetOffset(Bottom);
-                    double minimum = marginBottom + _parent.Margin.Bottom + _spansByIndex[lastLeftPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginBottom + _parent.PinMargins.Bottom + _spansByIndex[lastLeftPin].Bounds.Bounds.Height * 0.5;
                     minLeftHeight += marginBottom;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
@@ -307,25 +313,16 @@ namespace SimpleCircuit.Components
                     // Finish right side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastRightPin].Y);
                     var nextOffset = context.GetOffset(Bottom);
-                    double minimum = marginBottom + _parent.Margin.Bottom + _spansByIndex[lastRightPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginBottom + _parent.PinMargins.Bottom + _spansByIndex[lastRightPin].Bounds.Bounds.Height * 0.5;
                     minRightHeight += marginBottom;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.r.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
-                // if (lastLeftPin < 0 && lastRightPin < 0)
-                // {
-                //     // There are no vertical pins to determine spacing, so let's place a minimum constraint
-                //     var lastOffset = context.GetOffset(_parent.Y);
-                //     var nextOffset = context.GetOffset(Bottom);
-                //     double minimum = Math.Max(marginTop + marginBottom, _parent.MinHeight);
-                //     minLeftHeight = minRightHeight = minimum;
-                //     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.tb.m", lastOffset, nextOffset, minimum, MinimumWeight);
-                // }
                 if (lastTopPin >= 0)
                 {
                     // Finish left side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastTopPin].X);
                     var nextOffset = context.GetOffset(Right);
-                    double minimum = marginRight + _parent.Margin.Right + _spansByIndex[lastTopPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginRight + _parent.PinMargins.Right + _spansByIndex[lastTopPin].Bounds.Bounds.Height * 0.5;
                     minTopWidth += marginRight;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.t.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
@@ -334,19 +331,10 @@ namespace SimpleCircuit.Components
                     // Finish right side minimum
                     var lastOffset = context.GetOffset(_pinsByIndex[lastBottomPin].X);
                     var nextOffset = context.GetOffset(Right);
-                    double minimum = marginRight + _parent.Margin.Right + _spansByIndex[lastBottomPin].Bounds.Bounds.Height * 0.5;
+                    double minimum = marginRight + _parent.PinMargins.Right + _spansByIndex[lastBottomPin].Bounds.Bounds.Height * 0.5;
                     minBottomWidth += marginRight;
                     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.b.m", lastOffset, nextOffset, minimum, MinimumWeight);
                 }
-                // if (lastTopPin < 0 && lastBottomPin < 0)
-                // {
-                //     // There are no vertical pins to determine spacing, so let's place a minimum constraint
-                //     var lastOffset = context.GetOffset(_parent.X);
-                //     var nextOffset = context.GetOffset(Right);
-                //     double minimum = Math.Max(marginLeft + marginRight, _parent.MinWidth);
-                //     minTopWidth = minBottomWidth = minimum;
-                //     MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.lr.m", lastOffset, nextOffset, minimum, MinimumWeight);
-                // }
 
                 // Add minimum width/height
                 double minHeight = Math.Max(_parent.MinHeight, marginTop + marginBottom + InnerBounds.Height);
@@ -368,6 +356,8 @@ namespace SimpleCircuit.Components
                         break;
 
                     case PreparationMode.Sizes:
+                        var style = context.Style.ModifyDashedDotted(_parent);
+                        _extraMargin = style.LineThickness * 0.5;
 
                         // The orientations have just finished, let's decide on the orientation for all pins now
                         foreach (var pin in _pinsByIndex)
@@ -388,7 +378,6 @@ namespace SimpleCircuit.Components
                         }
 
                         // Format all the pin names
-                        var style = context.Style.ModifyDashedDotted(_parent);
                         Span emptySpan = null;
                         foreach (var pin in _pinsByIndex)
                         {

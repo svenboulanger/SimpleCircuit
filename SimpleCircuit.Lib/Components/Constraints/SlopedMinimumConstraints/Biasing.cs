@@ -142,7 +142,7 @@ namespace SimpleCircuit.Components.Constraints.SlopedMinimumConstraints
                         _gnx2 = _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
                         _gnxny = _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
                         _gny2 = _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
-                        _i = _iOff;
+                        _i = new();
                     }
                 }
             }

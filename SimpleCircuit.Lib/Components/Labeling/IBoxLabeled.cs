@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Gets the margins for labels when inside the box.
         /// </summary>
-        public Margins InnerMargin { get; }
+        public Margins InnerMargins { get; }
 
         /// <summary>
         /// Gets the margins for labels when outside the box.

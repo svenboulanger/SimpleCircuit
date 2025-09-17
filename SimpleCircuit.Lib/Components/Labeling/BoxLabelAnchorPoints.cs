@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using System;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace SimpleCircuit.Components.Labeling
             switch (index)
             {
                 case 0: // Center
-                    return new(subject.InnerBounds.Shrink(m).Shrink(subject.InnerMargin).Center, Vector2.Zero, Vector2.UX, TextOrientationType.Transformed);
+                    return new(subject.InnerBounds.Shrink(m).Shrink(subject.InnerMargins).Center, Vector2.Zero, Vector2.UX, TextOrientationType.Transformed);
 
                 case 1: // Top-left above box
                     return new(subject.OuterBounds.TopLeft + new Vector2(r, -m - subject.OuterMargin), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
@@ -81,28 +82,28 @@ namespace SimpleCircuit.Components.Labeling
                     return new(subject.OuterBounds.TopLeft + new Vector2(-m - subject.OuterMargin, r), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
 
                 case 13: // Top-left inside box
-                    return new(subject.InnerBounds.TopLeft + new Vector2(m + subject.InnerMargin.Left, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopLeft);
+                    return new(subject.InnerBounds.TopLeft + new Vector2(m + subject.InnerMargins.Left, m + subject.InnerMargins.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopLeft);
 
                 case 14: // Top-center inside box
-                    return new(subject.InnerBounds.TopCenter + new Vector2(0, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopCenter);
+                    return new(subject.InnerBounds.TopCenter + new Vector2(0, m + subject.InnerMargins.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopCenter);
 
                 case 15: // Top-right inside box
-                    return new(subject.InnerBounds.TopRight + new Vector2(-m - subject.InnerMargin.Right, m + subject.InnerMargin.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
+                    return new(subject.InnerBounds.TopRight + new Vector2(-m - subject.InnerMargins.Right, m + subject.InnerMargins.Top), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.TopRight);
 
                 case 16: // Middle-right inside box
-                    return new(subject.InnerBounds.MiddleRight + new Vector2(-m - subject.InnerMargin.Right, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleRight);
+                    return new(subject.InnerBounds.MiddleRight + new Vector2(-m - subject.InnerMargins.Right, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleRight);
 
                 case 17: // Bottom-right inside box
-                    return new(subject.InnerBounds.BottomRight + new Vector2(-m - subject.InnerMargin.Right, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomRight);
+                    return new(subject.InnerBounds.BottomRight + new Vector2(-m - subject.InnerMargins.Right, -m - subject.InnerMargins.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomRight);
                     
                 case 18: // Bottom-center inside box
-                    return new(subject.InnerBounds.BottomCenter + new Vector2(0, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed);
+                    return new(subject.InnerBounds.BottomCenter + new Vector2(0, -m - subject.InnerMargins.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomCenter);
 
                 case 19: // Bottom-left inside box
-                    return new(subject.InnerBounds.BottomLeft + new Vector2(m + subject.InnerMargin.Left, -m - subject.InnerMargin.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
+                    return new(subject.InnerBounds.BottomLeft + new Vector2(m + subject.InnerMargins.Left, -m - subject.InnerMargins.Bottom), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.BottomLeft);
 
                 case 20: // Middle-left inside box
-                    return new(subject.InnerBounds.MiddleLeft + new Vector2(m + subject.InnerMargin.Left, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleLeft);
+                    return new(subject.InnerBounds.MiddleLeft + new Vector2(m + subject.InnerMargins.Left, 0), Vector2.NaN, Vector2.UX, TextOrientationType.Transformed, TextAnchor.MiddleLeft);
             }
             throw new NotImplementedException();
         }
@@ -221,60 +222,62 @@ namespace SimpleCircuit.Components.Labeling
         /// <summary>
         /// Calculates the size of a box that fits all the labels inside with given spacing.
         /// </summary>
+        /// <param name="formatter">The text formatter.</param>
         /// <param name="subject">The subject.</param>
-        /// <param name="spacing">The spacing.</param>
+        /// <param name="style">The style.</param>
         /// <returns>Returns the size as a vector.</returns>
-        public Vector2 CalculateSize(IBoxDrawable subject, Vector2 spacing)
+        public Bounds CalculateSize(ITextFormatter formatter, IBoxDrawable subject, IStyle style)
         {
             double leftWidth = 0.0, centerWidth = 0.0, rightWidth = 0.0;
             double topHeight = 0.0, centerHeight = 0.0, bottomHeight = 0.0;
+            var margins = subject.InnerMargins;
             void Expand(int index, Bounds bounds)
             {
                 switch (index)
                 {
                     case 0:
-                        centerWidth = Math.Max(bounds.Width, centerWidth);
-                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        centerWidth = Math.Max(bounds.Width + margins.Horizontal, centerWidth);
+                        centerHeight = Math.Max(bounds.Height + margins.Vertical, centerHeight);
                         break;
 
                     case 13:
-                        leftWidth = Math.Max(bounds.Width, leftWidth);
-                        topHeight = Math.Max(bounds.Height, topHeight);
+                        leftWidth = Math.Max(bounds.Width + margins.Horizontal, leftWidth);
+                        topHeight = Math.Max(bounds.Height + margins.Vertical, topHeight);
                         break;
 
                     case 14:
-                        centerWidth = Math.Max(bounds.Width, centerWidth);
-                        topHeight = Math.Max(bounds.Height, topHeight);
+                        centerWidth = Math.Max(bounds.Width + margins.Horizontal, centerWidth);
+                        topHeight = Math.Max(bounds.Height + margins.Vertical, topHeight);
                         break;
 
                     case 15:
-                        rightWidth = Math.Max(bounds.Width, rightWidth);
-                        topHeight = Math.Max(bounds.Height, topHeight);
+                        rightWidth = Math.Max(bounds.Width + margins.Horizontal, rightWidth);
+                        topHeight = Math.Max(bounds.Height + margins.Vertical, topHeight);
                         break;
 
                     case 16:
-                        rightWidth = Math.Max(bounds.Width, rightWidth);
-                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        rightWidth = Math.Max(bounds.Width + margins.Horizontal, rightWidth);
+                        centerHeight = Math.Max(bounds.Height + margins.Vertical, centerHeight);
                         break;
 
                     case 17:
-                        rightWidth = Math.Max(bounds.Width, rightWidth);
-                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        rightWidth = Math.Max(bounds.Width + margins.Horizontal, rightWidth);
+                        bottomHeight = Math.Max(bounds.Height + margins.Vertical, bottomHeight);
                         break;
 
                     case 18:
-                        centerWidth = Math.Max(bounds.Width, centerWidth);
-                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        centerWidth = Math.Max(bounds.Width + margins.Horizontal, centerWidth);
+                        bottomHeight = Math.Max(bounds.Height + margins.Vertical, bottomHeight);
                         break;
 
                     case 19:
-                        leftWidth = Math.Max(bounds.Width, leftWidth);
-                        bottomHeight = Math.Max(bounds.Height, bottomHeight);
+                        leftWidth = Math.Max(bounds.Width + margins.Horizontal, leftWidth);
+                        bottomHeight = Math.Max(bounds.Height + margins.Vertical, bottomHeight);
                         break;
 
                     case 20:
-                        leftWidth = Math.Max(bounds.Width, leftWidth);
-                        centerHeight = Math.Max(bounds.Height, centerHeight);
+                        leftWidth = Math.Max(bounds.Width + margins.Horizontal, leftWidth);
+                        centerHeight = Math.Max(bounds.Height + margins.Vertical, centerHeight);
                         break;
                 }
             }
@@ -282,37 +285,20 @@ namespace SimpleCircuit.Components.Labeling
             for (int i = 0; i < subject.Labels.Count; i++)
             {
                 var label = subject.Labels[i];
-                if (label?.Formatted is null)
+                if (string.IsNullOrWhiteSpace(label.Value))
                     continue;
+                if (label?.Formatted is null)
+                    label.Format(formatter, style);
                 if (!TryGetAnchorIndex(label.Anchor ?? i.ToString(), out int anchorIndex))
                     continue;
                 var bounds = label.Formatted.Bounds.Bounds;
 
                 // Expand
-                if (anchorIndex == 0 || anchorIndex >= 13 && anchorIndex <= 19)
-                    Expand(anchorIndex, bounds); break;
+                if (anchorIndex == 0 || anchorIndex >= 13 && anchorIndex <= 20)
+                    Expand(anchorIndex, bounds);
             }
 
-            // Calculate the total width and height
-            double width = 0.0;
-            if (leftWidth > 0)
-                width += leftWidth + subject.OuterMargin;
-            if (centerWidth > 0)
-                width += width.Equals(0.0) ? centerWidth + subject.OuterMargin : centerWidth + spacing.X;
-            if (rightWidth > 0)
-                width += width.Equals(0.0) ? rightWidth + subject.OuterMargin : rightWidth + spacing.X;
-            width += subject.OuterMargin;
-
-            double height = 0.0;
-            if (topHeight > 0)
-                height += topHeight;
-            if (centerHeight > 0)
-                height += height.Equals(0.0) ? centerHeight + subject.OuterMargin : centerHeight + spacing.Y;
-            if (bottomHeight > 0)
-                height += height.Equals(0.0) ? bottomHeight + subject.OuterMargin : bottomHeight + spacing.Y;
-            height += subject.OuterMargin;
-
-            return new(width, height);
+            return new(0, 0, leftWidth + centerWidth + rightWidth, topHeight + centerHeight + bottomHeight);
         }
     }
 }
