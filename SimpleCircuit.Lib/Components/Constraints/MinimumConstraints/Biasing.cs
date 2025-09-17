@@ -13,14 +13,14 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
     [BehaviorFor(typeof(MinimumConstraint))]
     public class Biasing : Behavior, IBiasingBehavior
     {
-        private const double _threshold = 0.01;
-        private const double _gOn = 1.0e4;
+        private const double _threshold = 0.1;
+        private const double _gOnFactor = 1.0e4;
         private readonly IIterationSimulationState _iteration;
         private readonly OnePort<double> _variables;
         private readonly ElementSet<double> _elements;
         private readonly Parameters _parameters;
         private bool _lastState, _state;
-        private readonly double _gOff, _iOn, _iOff;
+        private readonly double _gOn, _gOff, _iOn, _iOff;
         private double _g, _i;
 
         /// <summary>
@@ -46,12 +46,13 @@ namespace SimpleCircuit.Components.Constraints.MinimumConstraints
             _lastState = true;
             
             // Calculate conductances
-            _g = _gOn + _iteration.Gmin;
-            _gOff = _parameters.Weight + _iteration.Gmin;
+            _gOn = _parameters.Weight * _gOnFactor;
+            _gOff = _parameters.Weight;
+            _g = _gOn;
 
             // Calculate currents
             _iOn = (_parameters.Offset + _parameters.Minimum) * _gOn;
-            _iOff = _parameters.Offset * _gOff;
+            _iOff = (_parameters.Offset + _parameters.Minimum) * _gOff;
             _i = _iOn;
         }
 
