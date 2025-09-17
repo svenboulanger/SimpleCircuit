@@ -94,12 +94,12 @@ namespace SimpleCircuit.Components.Digital
                 if (Pins["s"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("set", textStyle);
-                    builder.Text(span, new Vector2(0, -11.5) - span.Bounds.Bounds.TopCenter, Vector2.UY, TextOrientationType.Transformed);
+                    builder.Text(span, new Vector2(0, -11.5) - span.Bounds.Bounds.TopCenter, Vector2.UX, TextOrientationType.Transformed);
                 }
                 if (Pins["r"].Connections > 0)
                 {
                     span = builder.TextFormatter.Format("rst", textStyle);
-                    builder.Text(span, new Vector2(0, 11.5) - span.Bounds.Bounds.BottomCenter - new Vector2(span.Bounds.Bounds.Width * 0.5, 0), Vector2.UY, TextOrientationType.Transformed);
+                    builder.Text(span, new Vector2(0, 11.5) - span.Bounds.Bounds.BottomCenter, Vector2.UX, TextOrientationType.Transformed);
                 }
 
                 _anchors.Draw(builder, this, style);
