@@ -154,7 +154,7 @@
                     new Demo(
                         "Bit vector",
                         "A demonstration of how to use a bit vector component.",
-                        "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\", separator=\",\")\r\n\r\n.variants X -dot\r\n.property wire ml=3\r\n\r\nBIT1[b3] <d 5 r x r x r x r u> [b0]BIT1\r\nBIT1[b2] <d> X\r\nX <d +10 r +10 arrow> Xd(\"Data\")\r\nBIT1[b1] <d> X\r\n\r\nBIT1[b6] <d 5 r x r u> [b4]BIT1\r\nX <u> [b5]BIT1\r\nX~1 <d r arrow> Xa(\"Address\")\r\n\r\n(Xd <d +20> Xa)\r\n"),
+                        "BIT1(\"A_2,A_1,A_0,D_3,D_2,D_1,D_0\", separator=\",\")\r\n\r\n.variants X -dot\r\n.property wire ml=3\r\n\r\nBIT1[b3] <d 5 r x r x r x r u> [b0]BIT1\r\nBIT1[b2] <d> X\r\nX <d +10 r +10 arrow> Xd(\"Data\")\r\nBIT1[b1] <d> X\r\n\r\nBIT1[b6] <d 5 r x r u> [b4]BIT1\r\nX <u> [b5]BIT1\r\nX~1 <d r +10 arrow> Xa(\"Address\")\r\n\r\n(Xd <d +20> Xa)\r\n"),
                     new Demo(
                         "Modeling diagram - negative feedback",
                         "A simple modeling diagram for negative feedback.",
