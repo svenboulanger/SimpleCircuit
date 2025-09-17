@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SimpleCircuitOnline",
   "resources": {
-    "hash": "sha256-QBlJxIWq6lQVYkjnpPJwtvuAv4Gz1JUiWnqFtznIXTc=",
+    "hash": "sha256-mJrTHIREhu5/7TCl/xFqwoSEzTMmjBQIkYHbazI2HVQ=",
     "fingerprinting": {
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
       "BlazorMonaco.i33mlyw1st.wasm": "BlazorMonaco.wasm",
@@ -21,8 +21,8 @@
       "Microsoft.JSInterop.cn6q5ns569.wasm": "Microsoft.JSInterop.wasm",
       "Microsoft.JSInterop.WebAssembly.imfqvv3x5h.wasm": "Microsoft.JSInterop.WebAssembly.wasm",
       "netstandard.4r3bm8s5r7.wasm": "netstandard.wasm",
-      "SimpleCircuit.Lib.lk40kxu8hn.wasm": "SimpleCircuit.Lib.wasm",
-      "SimpleCircuitOnline.25exp21k4h.wasm": "SimpleCircuitOnline.wasm",
+      "SimpleCircuit.Lib.xcck7bgyne.wasm": "SimpleCircuit.Lib.wasm",
+      "SimpleCircuitOnline.rlmq03geel.wasm": "SimpleCircuitOnline.wasm",
       "SkiaSharp.vansgpb18u.wasm": "SkiaSharp.wasm",
       "SpiceSharp.k5jm04zbp6.wasm": "SpiceSharp.wasm",
       "System.Collections.Concurrent.3sfziel9ae.wasm": "System.Collections.Concurrent.wasm",
@@ -102,8 +102,8 @@
       "Microsoft.JSInterop.cn6q5ns569.wasm": "sha256-2HrxeU7sXIqeGmHTuoBcd5Mb7rEl6AvTPahy3W+Pnzo=",
       "Microsoft.JSInterop.WebAssembly.imfqvv3x5h.wasm": "sha256-mpyjzA6YBuV9Qx5BUC8YbXP9YjZlM+k7YTVawzXJFgk=",
       "netstandard.4r3bm8s5r7.wasm": "sha256-wN10FmchoMAPZ0pNOHM1EbJS0XoElmuCEY18YfEhzr0=",
-      "SimpleCircuit.Lib.lk40kxu8hn.wasm": "sha256-21Bd82zh02v+fpIlaNPplk0qId6q34MywJ1TA4v4Uco=",
-      "SimpleCircuitOnline.25exp21k4h.wasm": "sha256-1tax4OIBs+k6GiVzMFaJ7Xc7bShTRNa8O9CZlthdcJE=",
+      "SimpleCircuit.Lib.xcck7bgyne.wasm": "sha256-b5GkwmDDPvCoiqZs9e4irVa/5YszRok/cHjMFAYnCaI=",
+      "SimpleCircuitOnline.rlmq03geel.wasm": "sha256-72Adhq0pY7BvxeveM3sXPxPBCCBsMxyDDRX8PKA6oKI=",
       "SkiaSharp.vansgpb18u.wasm": "sha256-92hsXG+rPXtAFh5xOj1OqLYwzNjcDoj+PzQrhiBd11g=",
       "SpiceSharp.k5jm04zbp6.wasm": "sha256-eIqX2lws4cF+o0SKLEEiNOxMAmMnDeInDCz9UuMHzkc=",
       "System.Collections.Concurrent.3sfziel9ae.wasm": "sha256-XeulnzIn7L/kJ8Trz3hA5T1AA/il2aOkhZgL3GunQt8=",
