@@ -148,8 +148,8 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram
                                 // We will make sure that the locations are in increments of the line spacing.
                                 double t = Math.Ceiling(bounds.Top / iY) * iY - iY;
                                 double b = Math.Floor(bounds.Bottom / iY) * iY + iY * 0.4;
-                                SetPinOffset(i * 2 + 1, new(0, _bottom + (t + b) * 0.5));
-                                SetPinOffset(i * 2 + 2, new(0, _bottom + (t + b) * 0.5));
+                                SetPinOffset(i * 2 + 1, new(0, _bottom + (b - t) * 0.5));
+                                SetPinOffset(i * 2 + 2, new(0, _bottom + (b - t) * 0.5));
 
                                 _bottom -= t;
                                 _anchors[i] = new LabelAnchorPoint(new(-bounds.Left + Margin.Left, _bottom), Vector2.NaN, Vector2.UX, TextOrientationType.None);

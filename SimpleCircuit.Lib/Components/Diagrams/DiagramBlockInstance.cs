@@ -4,12 +4,12 @@ using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleCircuit.Drawing.Styles;
-using SimpleCircuit.Drawing.Builders;
 
 namespace SimpleCircuit.Components.Diagrams
 {
@@ -191,5 +191,57 @@ namespace SimpleCircuit.Components.Diagrams
 
         /// <inheritdoc />
         public Vector2 TransformNormal(Vector2 local) => local;
+
+        /// <summary>
+        /// Updates the locations of pins based on the angle of the pin.
+        /// </summary>
+        /// <param name="pins">The pins.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="radius">The corner radius.</param>
+        public static void UpdatePinsRoundedBox(IReadOnlyList<LooselyOrientedPin> pins, Bounds bounds, double radius)
+        {
+            static Vector2 Interp(Vector2 a, Vector2 b, double ka)
+            {
+                double k = ka / (Math.PI * 0.5);
+                return (1 - k) * a + k * b;
+            }
+
+            foreach (var pin in pins)
+            {
+                double angle = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
+
+                // Deal with the corners first
+                if (Math.Abs(angle + Math.PI * 0.75) < 1e-3)
+                {
+                    double k = 0.29289321881 * radius;
+                    pin.Offset = new(bounds.Left + k, bounds.Top + k);
+                }
+                else if (Math.Abs(angle + Math.PI * 0.25) < 1e-3)
+                {
+                    double k = 0.29289321881 * radius;
+                    pin.Offset = new(bounds.Right - k, bounds.Top + k);
+                }
+                else if (Math.Abs(angle - Math.PI * 0.25) < 1e-3)
+                {
+                    double k = 0.29289321881 * radius;
+                    pin.Offset = new(bounds.Right - k, bounds.Bottom - k);
+                }
+                else if (Math.Abs(angle - Math.PI * 0.75) < 1e-3)
+                {
+                    double k = 0.29289321881 * radius;
+                    pin.Offset = new(bounds.Left + k, bounds.Bottom - k);
+                }
+                else if (angle < -Math.PI * 0.75)
+                    pin.Offset = Interp(new(bounds.Left, bounds.Bottom - radius), new(bounds.Left, bounds.Top + radius), angle + Math.PI * 1.25);
+                else if (angle < -Math.PI * 0.25)
+                    pin.Offset = Interp(new(bounds.Left + radius, bounds.Top), new(bounds.Right - radius, bounds.Top), angle + Math.PI * 0.75);
+                else if (angle < Math.PI * 0.25)
+                    pin.Offset = Interp(new(bounds.Right, bounds.Top + radius), new(bounds.Right, bounds.Bottom - radius), angle + Math.PI * 0.25);
+                else if (angle < Math.PI * 0.75)
+                    pin.Offset = Interp(new(bounds.Right - radius, bounds.Bottom), new(bounds.Left + radius, bounds.Bottom), angle - Math.PI * 0.25);
+                else
+                    pin.Offset = Interp(new(bounds.Left, bounds.Bottom - radius), new(bounds.Left, bounds.Top + radius), angle - Math.PI * 0.75);
+            }
+        }
     }
 }

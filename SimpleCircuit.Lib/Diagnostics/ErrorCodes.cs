@@ -49,7 +49,9 @@
         [Diagnostic(SeverityLevel.Error, null, "Could not find a pin '{0}' on component '{1}' in subcircuit '{2}' for creating a port")]
         CouldNotFindPinOnComponentInSubcircuitForPort,
         [Diagnostic(SeverityLevel.Error, null, "Could not find the property or variant '{0}' for {1}")]
-        CouldNotFindPropertyOrVariant,
+        CouldNotFindPropertyOrVariantFor,
+        [Diagnostic(SeverityLevel.Error, null, "Could not find property '{0}'")]
+        CouldNotFindProperty,
         [Diagnostic(SeverityLevel.Error, null, "Could not find a section with the name '{0}'")]
         CouldNotFindSectionWithName,
         [Diagnostic(SeverityLevel.Error, null, "Could not find a variable with the name'{0}'")]

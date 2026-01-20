@@ -20,7 +20,7 @@ namespace SimpleCircuit.Components
     /// </summary>
     public abstract class Drawable : IDrawable
     {
-        private readonly static ConcurrentDictionary<Type, Dictionary<string, Func<IDrawable, Token, object, bool>>> _cacheSetters = new();
+        private readonly static ConcurrentDictionary<Type, Dictionary<string, Func<object, Token, object, IDiagnosticHandler, bool>>> _cacheSetters = new();
 
         public const string Dashed = "dashed";
         public const string Dotted = "dotted";
@@ -88,12 +88,13 @@ namespace SimpleCircuit.Components
         /// <param name="key">The type.</param>
         /// <param name="diagnostics">The diagnostics handler.</param>
         /// <returns>Returns the dictionary.</returns>
-        private static Dictionary<string, Func<IDrawable, Token, object, bool>> CreateCache(Type key, IDiagnosticHandler diagnostics)
+        private static Dictionary<string, Func<object, Token, object, IDiagnosticHandler, bool>> CreateSetterCache(Type key, IDiagnosticHandler diagnostics)
         {
             // Extract the property names for the type
-            var result = new Dictionary<string, Func<IDrawable, Token, object, bool>>(StringComparer.OrdinalIgnoreCase);
+            var result = new Dictionary<string, Func<object, Token, object, IDiagnosticHandler, bool>>(StringComparer.OrdinalIgnoreCase);
             var properties = key.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<(PropertyInfo Property, string[] Names)> styledProperties = [];
             foreach (var property in properties)
             {
                 names.Clear();
@@ -113,26 +114,29 @@ namespace SimpleCircuit.Components
 
                 // Add the information
                 var p = property;
-                var setter = new Func<IDrawable, Token, object, bool>((drawable, token, value) =>
+                var setter = new Func<object, Token, object, IDiagnosticHandler, bool>((obj, token, value, diagnostics) =>
                 {
                     if (value is null)
                         return false;
                     var type = value.GetType();
                     if (p.PropertyType == type)
                     {
-                        p.SetValue(drawable, value);
+                        p.SetValue(obj, value);
                         return true;
                     }
                     else
                     {
                         // Some implicit type conversion here
                         if (p.PropertyType == typeof(int) && type == typeof(double))
-                            p.SetValue(drawable, (int)(double)value);
+                            p.SetValue(obj, (int)(double)value);
                         else if (p.PropertyType == typeof(double) && type == typeof(int))
-                            p.SetValue(drawable, (double)(int)value);
+                            p.SetValue(obj, (double)(int)value);
                         else
                         {
-                            diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariant, p, drawable.Name);
+                            if (obj is IDrawable drawable)
+                                diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, drawable.Name);
+                            else
+                                diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, token.Content);
                             return false;
                         }
                         return true;
@@ -140,26 +144,151 @@ namespace SimpleCircuit.Components
                 });
                 foreach (string name in names)
                     result[name] = setter;
+
+                // Also add extra notations for special types
+                if (p.PropertyType == typeof(IStyleModifier))
+                {
+                    // STYLING SUPPORT
+                    var opFunc = CreateStyleSetter<double>(p, (modifier, opacity) => modifier.Append(new OpacityStyleModifier(opacity, opacity)));
+                    var fgoFunc = CreateStyleSetter<double>(p, (modifier, opacity) => modifier.Append(new OpacityStyleModifier(opacity, null)));
+                    var bgoFunc = CreateStyleSetter<double>(p, (modifier, opacity) => modifier.Append(new OpacityStyleModifier(null, opacity)));
+                    var tFunc = CreateStyleSetter<double>(p, (modifier, thickness) => modifier.Append(new StrokeWidthStyleModifier(thickness)));
+                    var fsFunc = CreateStyleSetter<double>(p, (modifier, size) => modifier.Append(new FontSizeStyleModifier(size)));
+                    var lsFunc = CreateStyleSetter<double>(p, (modifier, lineSpacing) => modifier.Append(new LineSpacingStyleModifier(lineSpacing)));
+                    var bFunc = CreateStyleSetter<bool>(p, (modifier, isBold) => modifier.Append(new BoldTextStyleModifier(isBold)));
+                    var fgFunc = CreateStyleSetter<string>(p, (modifier, color) => modifier.Append(new ColorStyleModifier(color, null)));
+                    var bgFunc = CreateStyleSetter<string>(p, (modifier, color) => modifier.Append(new ColorStyleModifier(null, color)));
+                    var fontFunc = CreateStyleSetter<string>(p, (modifier, name) => modifier.Append(new FontFamilyStyleModifier(name)));
+                    foreach (string name in names)
+                    {
+                        result[$"{name}-transparency"] = opFunc;
+                        result[$"{name}-opacity"] = opFunc;
+                        result[$"{name}-alpha"] = opFunc;
+                        result[$"{name}-foregroundopacity"] = fgoFunc;
+                        result[$"{name}-fgo"] = fgoFunc;
+                        result[$"{name}-backgroundopacity"] = bgoFunc;
+                        result[$"{name}-bgo"] = bgoFunc;
+                        result[$"{name}-thickness"] = tFunc;
+                        result[$"{name}-t"] = tFunc;
+                        result[$"{name}-stroke-width"] = tFunc;
+                        result[$"{name}-fontsize"] = fsFunc;
+                        result[$"{name}-ls"] = lsFunc;
+                        result[$"{name}-linespacing"] = lsFunc;
+                        result[$"{name}-bold"] = bFunc;
+                        result[$"{name}-color"] = fgFunc;
+                        result[$"{name}-foreground"] = fgFunc;
+                        result[$"{name}-fg"] = fgFunc;
+                        result[$"{name}-background"] = bgFunc;
+                        result[$"{name}-bg"] = bgFunc;
+                        result[$"{name}-font"] = fontFunc;
+                        result[$"{name}-fontfamily"] = fontFunc;
+                    }
+                }
             }
+            
+            // STYLING SUPPORT
+            if (key.GetInterface(nameof(IStyled)) is not null)
+            {
+                var opFunc = CreateStyleSetter<double>((styled, opacity) => styled.AppendStyle(new OpacityStyleModifier(opacity, opacity)));
+                var fgoFunc = CreateStyleSetter<double>((styled, opacity) => styled.AppendStyle(new OpacityStyleModifier(opacity, null)));
+                var bgoFunc = CreateStyleSetter<double>((styled, opacity) => styled.AppendStyle(new OpacityStyleModifier(null, opacity)));
+                var tFunc = CreateStyleSetter<double>((styled, thickness) => styled.AppendStyle(new StrokeWidthStyleModifier(thickness)));
+                var fsFunc = CreateStyleSetter<double>((styled, size) => styled.AppendStyle(new FontSizeStyleModifier(size)));
+                var lsFunc = CreateStyleSetter<double>((styled, lineSpacing) => styled.AppendStyle(new LineSpacingStyleModifier(lineSpacing)));
+                var bFunc = CreateStyleSetter<bool>((styled, isBold) => styled.AppendStyle(new BoldTextStyleModifier(isBold)));
+                var fgFunc = CreateStyleSetter<string>((styled, color) => styled.AppendStyle(new ColorStyleModifier(color, null)));
+                var bgFunc = CreateStyleSetter<string>((styled, color) => styled.AppendStyle(new ColorStyleModifier(null, color)));
+                var fontFunc = CreateStyleSetter<string>((styled, name) => styled.AppendStyle(new FontFamilyStyleModifier(name)));
+
+                result["transparency"] = opFunc;
+                result["opacity"] = opFunc;
+                result["alpha"] = opFunc;
+                result["foregroundopacity"] = fgoFunc;
+                result["fgo"] = fgoFunc;
+                result["backgroundopacity"] = bgoFunc;
+                result["bgo"] = bgoFunc;
+                result["thickness"] = tFunc;
+                result["t"] = tFunc;
+                result["stroke-width"] = tFunc;
+                result["fontsize"] = fsFunc;
+                result["ls"] = lsFunc;
+                result["linespacing"] = lsFunc;
+                result["bold"] = bFunc;
+                result["color"] = fgFunc;
+                result["foreground"] = fgFunc;
+                result["fg"] = fgFunc;
+                result["background"] = bgFunc;
+                result["bg"] = bgFunc;
+                result["font"] = fontFunc;
+                result["fontfamily"] = fontFunc;
+            }
+            
             return result;
         }
 
+        private static Func<object, Token, object, IDiagnosticHandler, bool> CreateStyleSetter<T>(Action<IStyled, T> modifier)
+            => new((obj, token, value, diagnostics) =>
+            {
+                if (obj is not IStyled styled)
+                {
+                    diagnostics?.Post(token, ErrorCodes.CouldNotFindProperty, token.Content);
+                    return false;
+                }
+                if (value is T typedValue)
+                    modifier(styled, typedValue);
+                else if (value is int i && typeof(T) == typeof(double))
+                    modifier(styled, (T)(object)(double)(int)i);
+                else if (value is double dbl && typeof(T) == typeof(int))
+                    modifier(styled, (T)(object)(int)(double)dbl);
+                else
+                {
+                    diagnostics?.Post(token, ErrorCodes.CouldNotFindProperty, token.Content);
+                    return false;
+                }
+                return true;
+            });
+
+        private static Func<object, Token, object, IDiagnosticHandler, bool> CreateStyleSetter<T>(PropertyInfo property, Func<IStyleModifier, T, IStyleModifier> modifier)
+            => new((obj, token, value, diagnostics) =>
+            {
+                if (value is T typedValue)
+                {
+                    property.SetValue(obj, modifier(obj as IStyleModifier, typedValue));
+                    return true;
+                }
+                else if (value is int i && typeof(T) == typeof(double))
+                {
+                    property.SetValue(obj, modifier(obj as IStyleModifier, (T)(object)(double)(int)value));
+                    return true;
+                }
+                else if (value is double dbl && typeof(T) == typeof(int))
+                {
+                    property.SetValue(obj, modifier(obj as IStyleModifier, (T)(object)(int)(double)value));
+                    return true;
+                }
+                else
+                {
+                    diagnostics?.Post(token, ErrorCodes.CouldNotFindProperty, token.Content);
+                    return false;
+                }
+            });
+
         /// <inheritdoc />
-        public static bool SetProperty(IDrawable drawable, Token propertyToken, object value, IDiagnosticHandler diagnostics)
+        public static bool SetProperty(object obj, Token propertyToken, object value, IDiagnosticHandler diagnostics)
         {
-            if (drawable == null)
-                throw new ArgumentNullException(nameof(drawable));
+            if (obj is null)
+                throw new ArgumentNullException(nameof(obj));
 
             // Find the property
             string property = propertyToken.Content.ToString().ToLower();
 
             // Gets the dictionary that describes the property setters
-            var result = _cacheSetters.GetOrAdd(drawable.GetType(), key => CreateCache(key, diagnostics));
+            var result = _cacheSetters.GetOrAdd(obj.GetType(), key => CreateSetterCache(key, diagnostics));
 
             // First check defined properties
             if (result.TryGetValue(property, out var setter))
-                return setter(drawable, propertyToken, value);
-            else
+                return setter(obj, propertyToken, value, diagnostics);
+            else if (obj is IDrawable drawable)
             {
                 // Let's expose some special properties if there are labels at play
                 int index;
@@ -174,162 +303,107 @@ namespace SimpleCircuit.Components
                 }
                 else if (value is double number)
                 {
-                    switch (property)
+                    // 'anchor#' will designate the anchor for the label at the given index.
+                    if ((number - Math.Round(number)).IsZero() &&
+                        TryMatchIndexedProperty(property, "anchor", out index))
                     {
-                        case "transparency":
-                        case "opacity":
-                        case "alpha":
-                            drawable.AppendStyle(new OpacityStyleModifier(number, number));
-                            return true;
+                        drawable.Labels[index].Anchor = ((int)Math.Round(number)).ToString();
+                        return true;
+                    }
 
-                        case "foregroundopacity":
-                        case "fgo":
-                            drawable.AppendStyle(new OpacityStyleModifier(number, null));
-                            return true;
+                    // 'size#' will change the font size for the label at the given index.
+                    if (TryMatchIndexedProperty(property, "size", out index) ||
+                        TryMatchIndexedProperty(property, "fontsize", out index))
+                    {
+                        drawable.Labels[index].AppendStyle(new FontSizeStyleModifier(number));
+                        return true;
+                    }
 
-                        case "backgroundopacity":
-                        case "bgo":
-                            drawable.AppendStyle(new OpacityStyleModifier(null, number));
-                            return true;
+                    // 'opacity#' will change the opacity of the label at the given index.
+                    if (TryMatchIndexedProperty(property, "opacity", out index))
+                    {
+                        drawable.Labels[index].AppendStyle(new OpacityStyleModifier(number, number));
+                        return true;
+                    }
 
-                        case "thickness":
-                        case "t":
-                        case "stroke-width":
-                            drawable.AppendStyle(new StrokeWidthStyleModifier(number));
-                            return true;
+                    // 'justify#' will change the label justification at the given index.
+                    if (TryMatchIndexedProperty(property, "justify", out index) ||
+                        TryMatchIndexedProperty(property, "justification", out index))
+                    {
+                        drawable.Labels[index].AppendStyle(new JustificationStyleModifier(number));
+                        return true;
+                    }
 
-                        case "fontsize":
-                            drawable.AppendStyle(new FontSizeStyleModifier(number));
-                            return true;
-
-                        default:
-                            // 'anchor#' will designate the anchor for the label at the given index.
-                            if ((number - Math.Round(number)).IsZero() &&
-                                TryMatchIndexedProperty(property, "anchor", out index))
-                            {
-                                drawable.Labels[index].Anchor = ((int)Math.Round(number)).ToString();
-                                return true;
-                            }
-
-                            // 'size#' will change the font size for the label at the given index.
-                            if (TryMatchIndexedProperty(property, "size", out index) ||
-                                TryMatchIndexedProperty(property, "fontsize", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new FontSizeStyleModifier(number));
-                                return true;
-                            }
-
-                            // 'opacity#' will change the opacity of the label at the given index.
-                            if (TryMatchIndexedProperty(property, "opacity", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new OpacityStyleModifier(number, number));
-                                return true;
-                            }
-
-                            // 'justify#' will change the label justification at the given index.
-                            if (TryMatchIndexedProperty(property, "justify", out index) ||
-                                TryMatchIndexedProperty(property, "justification", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new JustificationStyleModifier(number));
-                                return true;
-                            }
-
-                            // 'ls#' or 'linespacing#' will designate the line spacing for the label at the given index.
-                            if (TryMatchIndexedProperty(property, "linespacing", out index) ||
-                                TryMatchIndexedProperty(property, "ls", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new LineSpacingStyleModifier(number));
-                                return true;
-                            }
-                            break;
+                    // 'ls#' or 'linespacing#' will designate the line spacing for the label at the given index.
+                    if (TryMatchIndexedProperty(property, "linespacing", out index) ||
+                        TryMatchIndexedProperty(property, "ls", out index))
+                    {
+                        drawable.Labels[index].AppendStyle(new LineSpacingStyleModifier(number));
+                        return true;
                     }
                 }
                 if (value is string label)
                 {
-                    switch (property)
+                    // 'color#', 'foreground#' or 'fg#' will change the color
+                    if (TryMatchIndexedProperty(property, "color", out index) ||
+                        TryMatchIndexedProperty(property, "foreground", out index) ||
+                        TryMatchIndexedProperty(property, "fg", out index))
                     {
-                        case "color":
-                        case "foreground":
-                        case "fg":
-                            drawable.AppendStyle(new ColorStyleModifier(label, null));
-                            return true;
+                        drawable.Labels[index].AppendStyle(new ColorStyleModifier(null, label));
+                        return true;
+                    }
 
-                        case "background":
-                        case "bg":
-                            drawable.AppendStyle(new ColorStyleModifier(null, label));
-                            return true;
+                    // 'fontfamily#' will change the font family
+                    if (TryMatchIndexedProperty(property, "font", out index) ||
+                        TryMatchIndexedProperty(property, "fontfamily", out index))
+                    {
+                        drawable.Labels[index].AppendStyle(new FontFamilyStyleModifier(label));
+                        return true;
+                    }
 
-                        case "fontfamily":
-                        case "font":
-                            drawable.AppendStyle(new FontFamilyStyleModifier(label));
-                            return true;
+                    // 'label#' will change the label at the given index.
+                    if (TryMatchIndexedProperty(property, "label", out index))
+                    {
+                        drawable.Labels[index].Value = label;
+                        return true;
+                    }
 
-                        default:
-                            // 'color#', 'foreground#' or 'fg#' will change the color
-                            if (TryMatchIndexedProperty(property, "color", out index) ||
-                                TryMatchIndexedProperty(property, "foreground", out index) ||
-                                TryMatchIndexedProperty(property, "fg", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new ColorStyleModifier(null, label));
-                                return true;
-                            }
-
-                            // 'fontfamily#' will change the font family
-                            if (TryMatchIndexedProperty(property, "font", out index) ||
-                                TryMatchIndexedProperty(property, "fontfamily", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new FontFamilyStyleModifier(label));
-                                return true;
-                            }
-
-                            // 'label#' will change the label at the given index.
-                            if (TryMatchIndexedProperty(property, "label", out index))
-                            {
-                                drawable.Labels[index].Value = label;
-                                return true;
-                            }
-
-                            // 'anchor#' will change the anchor for the label at the given index.
-                            if (TryMatchIndexedProperty(property, "anchor", out index))
-                            {
-                                drawable.Labels[index].Anchor = label;
-                                return true;
-                            }
-                            break;
+                    // 'anchor#' will change the anchor for the label at the given index.
+                    if (TryMatchIndexedProperty(property, "anchor", out index))
+                    {
+                        drawable.Labels[index].Anchor = label;
+                        return true;
                     }
                 }
 
                 // No property or label, if the value is a boolean, we can add a variant instead
                 if (value is bool b)
                 {
-                    switch (property)
+                    // 'bold#' will change whether the text is bold for the label at the given index.
+                    if (TryMatchIndexedProperty(property, "bold", out index))
                     {
-                        case "bold":
-                            drawable.AppendStyle(BoldTextStyleModifier.Default);
-                            return true;
-
-                        default:
-                            // 'bold#' will change whether the text is bold for the label at the given index.
-                            if (TryMatchIndexedProperty(property, "bold", out index))
-                            {
-                                drawable.Labels[index].AppendStyle(new BoldTextStyleModifier(b));
-                                return true;
-                            }
-
-                            // Treat as a variant
-                            if (b)
-                                drawable.Variants.Add(property);
-                            else
-                                drawable.Variants.Remove(property);
-                            return true;
+                        drawable.Labels[index].AppendStyle(new BoldTextStyleModifier(b));
+                        return true;
                     }
+
+                    // Treat as a variant
+                    if (b)
+                        drawable.Variants.Add(property);
+                    else
+                        drawable.Variants.Remove(property);
+                    return true;
                 }
                 else
                 {
                     // No idea what to do with this
-                    diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariant, property, drawable.Name);
+                    diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariantFor, property, drawable.Name);
                     return false;
                 }
+            }
+            else
+            {
+                diagnostics?.Post(propertyToken, ErrorCodes.CouldNotFindPropertyOrVariantFor, property, propertyToken.Content.ToString());
+                return false;
             }
         }
 

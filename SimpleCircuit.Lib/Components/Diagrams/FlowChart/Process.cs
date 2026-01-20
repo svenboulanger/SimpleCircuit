@@ -140,53 +140,9 @@ namespace SimpleCircuit.Components.Diagrams.FlowChart
 
             /// <inheritdoc />
             protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
-            {
-                double a = _width * 0.5;
-                double b = _height * 0.5;
-
-                static Vector2 Interp(Vector2 a, Vector2 b, double ka)
-                {
-                    double k = ka / (Math.PI * 0.5);
-                    return (1 - k) * a + k * b;
-                }
-
-                foreach (var pin in pins)
-                {
-                    double angle = Math.Atan2(pin.Orientation.Y, pin.Orientation.X);
-
-                    // Deal with the corners first
-                    if (Math.Abs(angle + Math.PI * 0.75) < 1e-3)
-                    {
-                        double k = 0.29289321881 * CornerRadius;
-                        pin.Offset = new(-a + k, -b + k);
-                    }
-                    else if (Math.Abs(angle + Math.PI * 0.25) < 1e-3)
-                    {
-                        double k = 0.29289321881 * CornerRadius;
-                        pin.Offset = new(a - k, -b + k);
-                    }
-                    else if (Math.Abs(angle - Math.PI * 0.25) < 1e-3)
-                    {
-                        double k = 0.29289321881 * CornerRadius;
-                        pin.Offset = new(a - k, b - k);
-                    }
-                    else if (Math.Abs(angle - Math.PI * 0.75) < 1e-3)
-                    {
-                        double k = 0.29289321881 * CornerRadius;
-                        pin.Offset = new(-a + k, b - k);
-                    }
-                    else if (angle < -Math.PI * 0.75)
-                        pin.Offset = Interp(new(-a, b - CornerRadius), new(-a, -b + CornerRadius), angle + Math.PI * 1.25);
-                    else if (angle < -Math.PI * 0.25)
-                        pin.Offset = Interp(new(-a + CornerRadius, -b), new(a - CornerRadius, -b), angle + Math.PI * 0.75);
-                    else if (angle < Math.PI * 0.25)
-                        pin.Offset = Interp(new(a, -b + CornerRadius), new(a, b - CornerRadius), angle + Math.PI * 0.25);
-                    else if (angle < Math.PI * 0.75)
-                        pin.Offset = Interp(new(a - CornerRadius, b), new(-a + CornerRadius, b), angle - Math.PI * 0.25);
-                    else
-                        pin.Offset = Interp(new(-a, b - CornerRadius), new(-a, -b + CornerRadius), angle - Math.PI * 0.75);
-                }
-            }
+                => UpdatePinsRoundedBox(pins,
+                    new(-0.5 * _width, -0.5 * _height, 0.5 * _width, 0.5 * _height),
+                    CornerRadius);
         }
     }
 }
