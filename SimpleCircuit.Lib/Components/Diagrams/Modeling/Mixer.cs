@@ -2,41 +2,40 @@
 using SimpleCircuit.Drawing.Styles;
 using System;
 
-namespace SimpleCircuit.Components.Diagrams.Modeling
+namespace SimpleCircuit.Components.Diagrams.Modeling;
+
+/// <summary>
+/// A mixer.
+/// </summary>
+[Drawable("MIX", "A mixer", "Modeling", "x")]
+public class Mixer : DrawableFactory
 {
+    /// <inheritdoc />
+    protected override IDrawable Factory(string key, string name)
+        => new Instance(name);
+
     /// <summary>
-    /// A mixer.
+    /// Creates a new <see cref="Instance"/>.
     /// </summary>
-    [Drawable("MIX", "A mixer", "Modeling", "x")]
-    public class Mixer : DrawableFactory
+    /// <param name="name">The name.</param>
+    private class Instance(string name) : ModelingDrawable(name)
     {
         /// <inheritdoc />
-        protected override IDrawable Factory(string key, string name)
-            => new Instance(name);
+        public override string Type => "mixer";
 
-        /// <summary>
-        /// Creates a new <see cref="Instance"/>.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        private class Instance(string name) : ModelingDrawable(name)
+        /// <inheritdoc />
+        protected override void Draw(IGraphicsBuilder builder)
         {
-            /// <inheritdoc />
-            public override string Type => "mixer";
+            base.Draw(builder);
+            var style = builder.Style.ModifyDashedDotted(this);
 
-            /// <inheritdoc />
-            protected override void Draw(IGraphicsBuilder builder)
-            {
-                base.Draw(builder);
-                var style = builder.Style.ModifyDashedDotted(this);
+            double s = Size * 0.5;
+            if (!Variants.Contains(Square))
+                s /= Math.Sqrt(2.0);
+            builder.Line(new(-s, -s), new(s, s), style);
+            builder.Line(new(-s, s), new(s, -s), style);
 
-                double s = Size * 0.5;
-                if (!Variants.Contains(Square))
-                    s /= Math.Sqrt(2.0);
-                builder.Line(new(-s, -s), new(s, s), style);
-                builder.Line(new(-s, s), new(s, -s), style);
-
-                DrawLabels(builder, style);
-            }
+            DrawLabels(builder, style);
         }
     }
 }

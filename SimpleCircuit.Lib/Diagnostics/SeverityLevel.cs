@@ -1,23 +1,22 @@
-﻿namespace SimpleCircuit.Diagnostics
+﻿namespace SimpleCircuit.Diagnostics;
+
+/// <summary>
+/// Possible severity levels for diagnostic messages.
+/// </summary>
+public enum SeverityLevel
 {
     /// <summary>
-    /// Possible severity levels for diagnostic messages.
+    /// An informational message.
     /// </summary>
-    public enum SeverityLevel
-    {
-        /// <summary>
-        /// An informational message.
-        /// </summary>
-        Info,
+    Info,
 
-        /// <summary>
-        /// A warning message.
-        /// </summary>
-        Warning,
+    /// <summary>
+    /// A warning message.
+    /// </summary>
+    Warning,
 
-        /// <summary>
-        /// An error message.
-        /// </summary>
-        Error
-    }
+    /// <summary>
+    /// An error message.
+    /// </summary>
+    Error
 }

@@ -1,13 +1,12 @@
-﻿namespace SimpleCircuit.Drawing.Styles
+﻿namespace SimpleCircuit.Drawing.Styles;
+
+/// <summary>
+/// Describes a styled item.
+/// </summary>
+public interface IStyled
 {
     /// <summary>
-    /// Describes a styled item.
+    /// Gets the style.
     /// </summary>
-    public interface IStyled
-    {
-        /// <summary>
-        /// Gets the style.
-        /// </summary>
-        public IStyleModifier Modifier { get; set; }
-    }
+    public IStyleModifier Modifier { get; set; }
 }

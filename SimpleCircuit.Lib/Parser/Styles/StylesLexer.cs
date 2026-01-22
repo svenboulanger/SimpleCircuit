@@ -1,130 +1,129 @@
 ﻿using SimpleCircuit.Diagnostics;
 using System;
 
-namespace SimpleCircuit.Parser.Styles
+namespace SimpleCircuit.Parser.Styles;
+
+[Flags]
+public enum TokenType
 {
-    [Flags]
-    public enum TokenType
+    /// <summary>
+    /// End of the content.
+    /// </summary>
+    EndOfContent = 0,
+
+    /// <summary>
+    /// A style (CSS) key.
+    /// </summary>
+    Key = 0x01,
+
+    /// <summary>
+    /// A string.
+    /// </summary>
+    String = 0x02,
+
+    /// <summary>
+    /// A parenthesis.
+    /// </summary>
+    Parenthesis = 0x04,
+
+    /// <summary>
+    /// A semicolon ';'.
+    /// </summary>
+    Semicolon = 0x08,
+
+    /// <summary>
+    /// A colon ':'.
+    /// </summary>
+    Colon = 0x10,
+
+    /// <summary>
+    /// Any character
+    /// </summary>
+    Any = 0x20,
+
+    /// <summary>
+    /// All token type.
+    /// </summary>
+    All = -1
+}
+
+public class StylesLexer(string text) : Lexer<TokenType>(text, text)
+{
+    /// <summary>
+    /// Gets or sets the diagnostic message handler.
+    /// </summary>
+    public IDiagnosticHandler Diagnostics { get; set; }
+
+    /// <inheritdoc />
+    public override bool Check(TokenType flags) => (Type & flags) != 0;
+
+    protected override void ReadToken()
     {
-        /// <summary>
-        /// End of the content.
-        /// </summary>
-        EndOfContent = 0,
+        while (Char == ' ' || Char == '\t')
+            ContinueTrivia();
 
-        /// <summary>
-        /// A style (CSS) key.
-        /// </summary>
-        Key = 0x01,
+        char c = Char;
+        switch (c)
+        {
+            case '\0':
+                NextType = TokenType.EndOfContent;
+                break;
 
-        /// <summary>
-        /// A string.
-        /// </summary>
-        String = 0x02,
+            case char l when char.IsLetter(l):
+                NextType = TokenType.Key;
+                ContinueToken();
+                while (char.IsLetterOrDigit(c = Char) || c == '-' || c == '_')
+                    ContinueToken();
+                break;
 
-        /// <summary>
-        /// A parenthesis.
-        /// </summary>
-        Parenthesis = 0x04,
+            case '(':
+            case ')':
+                NextType = TokenType.Parenthesis;
+                ContinueToken();
+                break;
 
-        /// <summary>
-        /// A semicolon ';'.
-        /// </summary>
-        Semicolon = 0x08,
+            case '\'':
+            case '"':
+                NextType = TokenType.String;
+                ContinueToken();
+                ContinueString(c);
+                break;
 
-        /// <summary>
-        /// A colon ':'.
-        /// </summary>
-        Colon = 0x10,
+            case ';':
+                NextType = TokenType.Semicolon;
+                ContinueToken();
+                break;
 
-        /// <summary>
-        /// Any character
-        /// </summary>
-        Any = 0x20,
+            case ':':
+                NextType = TokenType.Colon;
+                ContinueToken();
+                break;
 
-        /// <summary>
-        /// All token type.
-        /// </summary>
-        All = -1
+            default:
+                NextType = TokenType.Any;
+                ContinueToken();
+                break;
+        }
     }
 
-    public class StylesLexer(string text) : Lexer<TokenType>(text, text)
+    private void ContinueString(char end)
     {
-        /// <summary>
-        /// Gets or sets the diagnostic message handler.
-        /// </summary>
-        public IDiagnosticHandler Diagnostics { get; set; }
-
-        /// <inheritdoc />
-        public override bool Check(TokenType flags) => (Type & flags) != 0;
-
-        protected override void ReadToken()
+        char c = Char;
+        while (c != end && c != '\0' && c != '\r' && c != '\n')
         {
-            while (Char == ' ' || Char == '\t')
-                ContinueTrivia();
-
-            char c = Char;
-            switch (c)
+            if (c == '\\')
             {
-                case '\0':
-                    NextType = TokenType.EndOfContent;
-                    break;
-
-                case char l when char.IsLetter(l):
-                    NextType = TokenType.Key;
-                    ContinueToken();
-                    while (char.IsLetterOrDigit(c = Char) || c == '-' || c == '_')
-                        ContinueToken();
-                    break;
-
-                case '(':
-                case ')':
-                    NextType = TokenType.Parenthesis;
-                    ContinueToken();
-                    break;
-
-                case '\'':
-                case '"':
-                    NextType = TokenType.String;
-                    ContinueToken();
-                    ContinueString(c);
-                    break;
-
-                case ';':
-                    NextType = TokenType.Semicolon;
-                    ContinueToken();
-                    break;
-
-                case ':':
-                    NextType = TokenType.Colon;
-                    ContinueToken();
-                    break;
-
-                default:
-                    NextType = TokenType.Any;
-                    ContinueToken();
-                    break;
-            }
-        }
-
-        private void ContinueString(char end)
-        {
-            char c = Char;
-            while (c != end && c != '\0' && c != '\r' && c != '\n')
-            {
-                if (c == '\\')
-                {
-                    // Escape character
-                    ContinueToken();
-                }
-
+                // Escape character
                 ContinueToken();
-                c = Char;
             }
-            if (c != end)
-            {
-                Diagnostics?.Post(NextToken, ErrorCodes.QuoteMismatch);
-            }
+
             ContinueToken();
+            c = Char;
         }
+        if (c != end)
+        {
+            Diagnostics?.Post(NextToken, ErrorCodes.QuoteMismatch);
+        }
+        ContinueToken();
     }
 }

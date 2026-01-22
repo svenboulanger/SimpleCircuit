@@ -3,16 +3,15 @@ using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Parser.Variants;
 using System.Collections.Generic;
 
-namespace SimpleCircuit.Drawing.Builders
+namespace SimpleCircuit.Drawing.Builders;
+
+/// <summary>
+/// Describes a context that can be used when drawing XML.
+/// </summary>
+public interface IXmlDrawingContext : IVariantContext, IDrawable
 {
     /// <summary>
-    /// Describes a context that can be used when drawing XML.
+    /// Gets the label anchor points, if defined.
     /// </summary>
-    public interface IXmlDrawingContext : IVariantContext, IDrawable
-    {
-        /// <summary>
-        /// Gets the label anchor points, if defined.
-        /// </summary>
-        public IList<LabelAnchorPoint> Anchors { get; }
-    }
+    public IList<LabelAnchorPoint> Anchors { get; }
 }

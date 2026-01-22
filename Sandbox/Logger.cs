@@ -1,42 +1,41 @@
 ﻿using SimpleCircuit.Diagnostics;
 using System;
 
-namespace Sandbox
+namespace Sandbox;
+
+/// <summary>
+/// A logger that passes diagnostic messages to the console.
+/// </summary>
+public class Logger : IDiagnosticHandler
 {
     /// <summary>
-    /// A logger that passes diagnostic messages to the console.
+    /// Gets the number of errors.
     /// </summary>
-    public class Logger : IDiagnosticHandler
+    public int ErrorCount { get; private set; }
+
+    /// <inheritdoc />
+    public void Post(IDiagnosticMessage message)
     {
-        /// <summary>
-        /// Gets the number of errors.
-        /// </summary>
-        public int ErrorCount { get; private set; }
-
-        /// <inheritdoc />
-        public void Post(IDiagnosticMessage message)
+        if (message == null)
+            return;
+        Console.ForegroundColor = message.Severity switch
         {
-            if (message == null)
-                return;
-            Console.ForegroundColor = message.Severity switch
-            {
-                SeverityLevel.Warning => ConsoleColor.Yellow,
-                SeverityLevel.Error => ConsoleColor.Red,
-                _ => ConsoleColor.White
-            };
-            Console.WriteLine(message);
-            Console.ResetColor();
+            SeverityLevel.Warning => ConsoleColor.Yellow,
+            SeverityLevel.Error => ConsoleColor.Red,
+            _ => ConsoleColor.White
+        };
+        Console.WriteLine(message);
+        Console.ResetColor();
 
-            if (message.Severity == SeverityLevel.Error)
-                ErrorCount++;
-        }
+        if (message.Severity == SeverityLevel.Error)
+            ErrorCount++;
+    }
 
-        /// <summary>
-        /// Reset the error count.
-        /// </summary>
-        public void Reset()
-        {
-            ErrorCount = 0;
-        }
+    /// <summary>
+    /// Reset the error count.
+    /// </summary>
+    public void Reset()
+    {
+        ErrorCount = 0;
     }
 }

@@ -1,46 +1,45 @@
 ﻿using SimpleCircuit.Diagnostics;
 
-namespace SimpleCircuit
+namespace SimpleCircuit;
+
+/// <summary>
+/// An <see cref="IDiagnosticHandler"/> that logs to the console.
+/// </summary>
+public class ConsoleDiagnosticLogger : IDiagnosticHandler
 {
     /// <summary>
-    /// An <see cref="IDiagnosticHandler"/> that logs to the console.
+    /// Gets the number of errors encountered.
     /// </summary>
-    public class ConsoleDiagnosticLogger : IDiagnosticHandler
+    public int Errors { get; private set; }
+
+    /// <summary>
+    /// Gets the number of warnings encountered.
+    /// </summary>
+    public int Warnings { get; private set; }
+
+    /// <inheritdoc />
+    public void Post(IDiagnosticMessage message)
     {
-        /// <summary>
-        /// Gets the number of errors encountered.
-        /// </summary>
-        public int Errors { get; private set; }
-
-        /// <summary>
-        /// Gets the number of warnings encountered.
-        /// </summary>
-        public int Warnings { get; private set; }
-
-        /// <inheritdoc />
-        public void Post(IDiagnosticMessage message)
+        switch (message.Severity)
         {
-            switch (message.Severity)
-            {
-                case SeverityLevel.Info:
-                    Console.WriteLine(message);
-                    break;
+            case SeverityLevel.Info:
+                Console.WriteLine(message);
+                break;
 
-                case SeverityLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(message);
-                    Console.ResetColor();
-                    break;
+            case SeverityLevel.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(message);
+                Console.ResetColor();
+                break;
 
-                case SeverityLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine(message);
-                    Console.ResetColor();
-                    break;
-            }
+            case SeverityLevel.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine(message);
+                Console.ResetColor();
+                break;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"Logger - {Errors} errors and {Warnings} warnings";
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"Logger - {Errors} errors and {Warnings} warnings";
 }

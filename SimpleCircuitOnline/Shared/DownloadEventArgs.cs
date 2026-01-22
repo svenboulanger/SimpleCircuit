@@ -1,30 +1,29 @@
 ﻿using System;
 
-namespace SimpleCircuitOnline.Shared
+namespace SimpleCircuitOnline.Shared;
+
+/// <summary>
+/// Event arguments for a download event.
+/// </summary>
+/// <remarks>
+/// Creates a new download event argument.
+/// </remarks>
+/// <param name="type"></param>
+public class DownloadEventArgs(DownloadEventArgs.Types type) : EventArgs
 {
     /// <summary>
-    /// Event arguments for a download event.
+    /// Possible export types.
     /// </summary>
-    /// <remarks>
-    /// Creates a new download event argument.
-    /// </remarks>
-    /// <param name="type"></param>
-    public class DownloadEventArgs(DownloadEventArgs.Types type) : EventArgs
+    public enum Types
     {
-        /// <summary>
-        /// Possible export types.
-        /// </summary>
-        public enum Types
-        {
-            Svg,
-            Png,
-            Jpeg,
-            Link
-        }
-
-        /// <summary>
-        /// Gets the type.
-        /// </summary>
-        public Types Type { get; } = type;
+        Svg,
+        Png,
+        Jpeg,
+        Link
     }
+
+    /// <summary>
+    /// Gets the type.
+    /// </summary>
+    public Types Type { get; } = type;
 }

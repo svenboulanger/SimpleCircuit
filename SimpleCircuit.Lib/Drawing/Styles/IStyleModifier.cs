@@ -1,15 +1,14 @@
-﻿namespace SimpleCircuit.Drawing.Styles
+﻿namespace SimpleCircuit.Drawing.Styles;
+
+/// <summary>
+/// Describes a style modifier.
+/// </summary>
+public interface IStyleModifier
 {
     /// <summary>
-    /// Describes a style modifier.
+    /// Applies the style modifier.
     /// </summary>
-    public interface IStyleModifier
-    {
-        /// <summary>
-        /// Applies the style modifier.
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        /// <returns>Returns the style with the modifier applied.</returns>
-        public IStyle Apply(IStyle parent);
-    }
+    /// <param name="parent">The parent.</param>
+    /// <returns>Returns the style with the modifier applied.</returns>
+    public IStyle Apply(IStyle parent);
 }

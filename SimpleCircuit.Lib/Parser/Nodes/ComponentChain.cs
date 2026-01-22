@@ -3,40 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimpleCircuit.Parser.Nodes
+namespace SimpleCircuit.Parser.Nodes;
+
+/// <summary>
+/// A component chain.
+/// </summary>
+public record ComponentChain : SyntaxNode
 {
     /// <summary>
-    /// A component chain.
+    /// Gets the items in the chain.
     /// </summary>
-    public record ComponentChain : SyntaxNode
+    public SyntaxNode[] Items { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="ComponentChain"/>.
+    /// </summary>
+    /// <param name="items">The items.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="items"/> is <c>null</c>.</exception>
+    public ComponentChain(IEnumerable<SyntaxNode> items)
+        : base(items?.First().Location ?? default)
     {
-        /// <summary>
-        /// Gets the items in the chain.
-        /// </summary>
-        public SyntaxNode[] Items { get; }
+        Items = items?.ToArray() ?? throw new ArgumentNullException(nameof(items));
+    }
 
-        /// <summary>
-        /// Creates a new <see cref="ComponentChain"/>.
-        /// </summary>
-        /// <param name="items">The items.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="items"/> is <c>null</c>.</exception>
-        public ComponentChain(IEnumerable<SyntaxNode> items)
-            : base(items?.First().Location ?? default)
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        StringBuilder sb = new();
+        for (int i = 0; i < Items.Length; i++)
         {
-            Items = items?.ToArray() ?? throw new ArgumentNullException(nameof(items));
+            if (i > 0)
+                sb.Append(' ');
+            sb.Append(Items[i]);
         }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            StringBuilder sb = new();
-            for (int i = 0; i < Items.Length; i++)
-            {
-                if (i > 0)
-                    sb.Append(' ');
-                sb.Append(Items[i]);
-            }
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }

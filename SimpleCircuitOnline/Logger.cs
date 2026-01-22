@@ -1,50 +1,49 @@
 ﻿using System.Collections.Generic;
 using SimpleCircuit.Diagnostics;
 
-namespace SimpleCircuitOnline
+namespace SimpleCircuitOnline;
+
+/// <summary>
+/// A logger for diagnostic messages.
+/// </summary>
+public class Logger : IDiagnosticHandler
 {
     /// <summary>
-    /// A logger for diagnostic messages.
+    /// Gets the error messages.
     /// </summary>
-    public class Logger : IDiagnosticHandler
+    public List<IDiagnosticMessage> Messages { get; } = [];
+
+    /// <summary>
+    /// Gets the number of errors tracked by the logger.
+    /// </summary>
+    public int Errors { get; private set; }
+
+    /// <summary>
+    /// Creates a new <see cref="Logger"/>.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    public void Post(IDiagnosticMessage message)
     {
-        /// <summary>
-        /// Gets the error messages.
-        /// </summary>
-        public List<IDiagnosticMessage> Messages { get; } = [];
-
-        /// <summary>
-        /// Gets the number of errors tracked by the logger.
-        /// </summary>
-        public int Errors { get; private set; }
-
-        /// <summary>
-        /// Creates a new <see cref="Logger"/>.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        public void Post(IDiagnosticMessage message)
+        switch (message.Severity)
         {
-            switch (message.Severity)
-            {
-                case SeverityLevel.Info: break;
-                case SeverityLevel.Warning:
-                    Messages.Add(message);
-                    break;
+            case SeverityLevel.Info: break;
+            case SeverityLevel.Warning:
+                Messages.Add(message);
+                break;
 
-                case SeverityLevel.Error:
-                    Messages.Add(message);
-                    Errors++;
-                    break;
-            }
+            case SeverityLevel.Error:
+                Messages.Add(message);
+                Errors++;
+                break;
         }
+    }
 
-        /// <summary>
-        /// Clears any messages in the logger.
-        /// </summary>
-        public void Clear()
-        {
-            Messages.Clear();
-            Errors = 0;
-        }
+    /// <summary>
+    /// Clears any messages in the logger.
+    /// </summary>
+    public void Clear()
+    {
+        Messages.Clear();
+        Errors = 0;
     }
 }

@@ -4,65 +4,64 @@ using SimpleCircuit.Evaluator;
 using System;
 using System.Collections.Generic;
 
-namespace SimpleCircuitOnline.Shared
+namespace SimpleCircuitOnline.Shared;
+
+public partial class ComponentList
 {
-    public partial class ComponentList
+    private string _filterString = string.Empty;
+    private bool _expandAll = false;
+    private readonly HashSet<string> _searchTerms = [];
+    private readonly Dictionary<string, List<(DrawableMetadata, IDrawableFactory)>> _categories = [];
+
+    private bool IsFiltered((DrawableMetadata Metadata, IDrawableFactory Factory) item)
     {
-        private string _filterString = string.Empty;
-        private bool _expandAll = false;
-        private readonly HashSet<string> _searchTerms = [];
-        private readonly Dictionary<string, List<(DrawableMetadata, IDrawableFactory)>> _categories = [];
-
-        private bool IsFiltered((DrawableMetadata Metadata, IDrawableFactory Factory) item)
+        int count = 0;
+        foreach (string term in _searchTerms)
         {
-            int count = 0;
-            foreach (string term in _searchTerms)
-            {
-                if (StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term) ||
-                    item.Metadata.Keywords.Contains(term) ||
-                    item.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase))
-                    count++;
-            }
-            return count == _searchTerms.Count;
+            if (StringComparer.CurrentCultureIgnoreCase.Equals(item.Metadata.Key, term) ||
+                item.Metadata.Keywords.Contains(term) ||
+                item.Metadata.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase))
+                count++;
         }
+        return count == _searchTerms.Count;
+    }
 
-        private void UpdateFilter(EditContext context)
+    private void UpdateFilter(EditContext context)
+    {
+        _searchTerms.Clear();
+        if (string.IsNullOrWhiteSpace(_filterString))
         {
-            _searchTerms.Clear();
-            if (string.IsNullOrWhiteSpace(_filterString))
-            {
-                _expandAll = false;
-            }
-            else
-            {
-                foreach (string term in _filterString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                    _searchTerms.Add(term);
-                _expandAll = true;
-            }
-            StateHasChanged();
+            _expandAll = false;
         }
-
-        /// <summary>
-        /// Updates the list with the given parsing context.
-        /// </summary>
-        /// <param name="context">The evaluation context to resolve the components.</param>
-        public void Update(EvaluationContext context)
+        else
         {
-            _categories.Clear();
-            foreach (var pair in context.Factory.Factories)
-            {
-                // Let's add the metadata and a component of it for each category
-                var metadata = pair.Value.GetMetadata(pair.Key);
-                if (!_categories.TryGetValue(metadata.Category, out var list))
-                {
-                    list = [];
-                    _categories.Add(metadata.Category, list);
-                }
-
-                // Add our description
-                list.Add((metadata, pair.Value));
-            }
-            StateHasChanged();
+            foreach (string term in _filterString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                _searchTerms.Add(term);
+            _expandAll = true;
         }
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Updates the list with the given parsing context.
+    /// </summary>
+    /// <param name="context">The evaluation context to resolve the components.</param>
+    public void Update(EvaluationContext context)
+    {
+        _categories.Clear();
+        foreach (var pair in context.Factory.Factories)
+        {
+            // Let's add the metadata and a component of it for each category
+            var metadata = pair.Value.GetMetadata(pair.Key);
+            if (!_categories.TryGetValue(metadata.Category, out var list))
+            {
+                list = [];
+                _categories.Add(metadata.Category, list);
+            }
+
+            // Add our description
+            list.Add((metadata, pair.Value));
+        }
+        StateHasChanged();
     }
 }

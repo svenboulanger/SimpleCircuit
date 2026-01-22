@@ -2,83 +2,82 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SimpleCircuit.Drawing.Styles
+namespace SimpleCircuit.Drawing.Styles;
+
+/// <summary>
+/// A style modifier that changes or overrides variables for styles.
+/// </summary>
+public class VariableStyleModifier : IStyleModifier
 {
     /// <summary>
-    /// A style modifier that changes or overrides variables for styles.
+    /// Gets the variables that will override parent variables.
     /// </summary>
-    public class VariableStyleModifier : IStyleModifier
+    public Dictionary<string, string> Variables { get; } = [];
+
+    /// <summary>
+    /// A style that modifies the variables.
+    /// </summary>
+    public class Style(IStyle parent, IReadOnlyDictionary<string, string> variables) : IStyle
     {
-        /// <summary>
-        /// Gets the variables that will override parent variables.
-        /// </summary>
-        public Dictionary<string, string> Variables { get; } = [];
+        private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        private readonly IReadOnlyDictionary<string, string> _variables = variables ?? throw new ArgumentNullException(nameof(variables));
 
-        /// <summary>
-        /// A style that modifies the variables.
-        /// </summary>
-        public class Style(IStyle parent, IReadOnlyDictionary<string, string> variables) : IStyle
+        /// <inheritdoc />
+        public string Color => _parent.Color;
+
+        /// <inheritdoc />
+        public double Opacity => _parent.Opacity;
+
+        /// <inheritdoc />
+        public string Background => _parent.Background;
+
+        /// <inheritdoc />
+        public double BackgroundOpacity => _parent.BackgroundOpacity;
+
+        /// <inheritdoc />
+        public double LineThickness => _parent.LineThickness;
+
+        /// <inheritdoc />
+        public string FontFamily => _parent.FontFamily;
+
+        /// <inheritdoc />
+        public double FontSize => _parent.FontSize;
+
+        /// <inheritdoc />
+        public bool Bold => _parent.Bold;
+
+        /// <inheritdoc />
+        public double LineSpacing => _parent.LineSpacing;
+
+        /// <inheritdoc />
+        public double Justification => _parent.Justification;
+
+        /// <inheritdoc />
+        public string StrokeDashArray => _parent.StrokeDashArray;
+
+        /// <inheritdoc />
+        public bool TryGetVariable(string key, out string value)
         {
-            private readonly IStyle _parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            private readonly IReadOnlyDictionary<string, string> _variables = variables ?? throw new ArgumentNullException(nameof(variables));
+            // First try to find locally
+            if (_variables.TryGetValue(key, out value))
+                return true;
 
-            /// <inheritdoc />
-            public string Color => _parent.Color;
-
-            /// <inheritdoc />
-            public double Opacity => _parent.Opacity;
-
-            /// <inheritdoc />
-            public string Background => _parent.Background;
-
-            /// <inheritdoc />
-            public double BackgroundOpacity => _parent.BackgroundOpacity;
-
-            /// <inheritdoc />
-            public double LineThickness => _parent.LineThickness;
-
-            /// <inheritdoc />
-            public string FontFamily => _parent.FontFamily;
-
-            /// <inheritdoc />
-            public double FontSize => _parent.FontSize;
-
-            /// <inheritdoc />
-            public bool Bold => _parent.Bold;
-
-            /// <inheritdoc />
-            public double LineSpacing => _parent.LineSpacing;
-
-            /// <inheritdoc />
-            public double Justification => _parent.Justification;
-
-            /// <inheritdoc />
-            public string StrokeDashArray => _parent.StrokeDashArray;
-
-            /// <inheritdoc />
-            public bool TryGetVariable(string key, out string value)
-            {
-                // First try to find locally
-                if (_variables.TryGetValue(key, out value))
-                    return true;
-
-                // If it doesn't exist, refer to parent style
-                return _parent.TryGetVariable(key, out value);
-            }
-
-            /// <inheritdoc />
-            public bool RegisterVariable(string key, string value)
-            {
-                // If we have the variable, stop there
-                if (_variables.ContainsKey(key))
-                    return false;
-
-                // Doesn't exist, so let's add it to the parent
-                return _parent.RegisterVariable(key, value);
-            }
+            // If it doesn't exist, refer to parent style
+            return _parent.TryGetVariable(key, out value);
         }
 
         /// <inheritdoc />
-        public IStyle Apply(IStyle parent) => new Style(parent, Variables);
+        public bool RegisterVariable(string key, string value)
+        {
+            // If we have the variable, stop there
+            if (_variables.ContainsKey(key))
+                return false;
+
+            // Doesn't exist, so let's add it to the parent
+            return _parent.RegisterVariable(key, value);
+        }
     }
+
+    /// <inheritdoc />
+    public IStyle Apply(IStyle parent) => new Style(parent, Variables);
 }

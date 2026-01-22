@@ -1,30 +1,29 @@
-﻿namespace SimpleCircuit.Parser.SvgPathData
+﻿namespace SimpleCircuit.Parser.SvgPathData;
+
+public enum TokenType
 {
-    public enum TokenType
-    {
-        /// <summary>
-        /// End of the content.
-        /// </summary>
-        EndOfContent = 0,
+    /// <summary>
+    /// End of the content.
+    /// </summary>
+    EndOfContent = 0,
 
-        /// <summary>
-        /// A path data command.
-        /// </summary>
-        Command = 0x01,
+    /// <summary>
+    /// A path data command.
+    /// </summary>
+    Command = 0x01,
 
-        /// <summary>
-        /// A number.
-        /// </summary>
-        Number = 0x02,
+    /// <summary>
+    /// A number.
+    /// </summary>
+    Number = 0x02,
 
-        /// <summary>
-        /// An unknown token.
-        /// </summary>
-        Unknown = 0x04,
+    /// <summary>
+    /// An unknown token.
+    /// </summary>
+    Unknown = 0x04,
 
-        /// <summary>
-        /// All tokens.
-        /// </summary>
-        All = -1
-    }
+    /// <summary>
+    /// All tokens.
+    /// </summary>
+    All = -1
 }

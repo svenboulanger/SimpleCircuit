@@ -6,166 +6,165 @@ using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing;
 
-namespace SimpleCircuit.Components.Diagrams.Modeling
+namespace SimpleCircuit.Components.Diagrams.Modeling;
+
+/// <summary>
+/// A generic drawable used for modeling block diagrams.
+/// These blocks don't have an orientation, but they can be square or circular and have 8 pins in all major directions.
+/// </summary>
+public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxDrawable, IEllipseDrawable, IRoundedBox
 {
+    private static readonly ILabelAnchorPoints<IBoxDrawable> _boxLabelAnchorPoints = new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1);
+    private static readonly ILabelAnchorPoints<IEllipseDrawable> _ellipseLabelAnchorPoints = new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1);
+
+    public const string Square = "square";
+
+    [Description("The size of the model block.")]
+    public double Size { get; set; }
+
+    [Description("The margin for ouside labels to the edge.")]
+    [Alias("om")]
+    public double OuterMargin { get; set; } = 1.0;
+
+    [Description("The margin for inside labels to the edge")]
+    [Alias("im")]
+    public Margins InnerMargins { get; set; } = new(1, 1, 1, 1);
+
+    [Description("The round-off corner radius.")]
+    [Alias("r")]
+    [Alias("radius")]
+    public double CornerRadius { get; set; }
+
+    /// <inheritdoc />
+    Bounds IBoxDrawable.InnerBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
+
+    /// <inheritdoc />
+    Bounds IBoxDrawable.OuterBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
+
+    /// <inheritdoc />
+    Vector2 IEllipseDrawable.Center => new();
+
+    /// <inheritdoc />
+    double IEllipseDrawable.RadiusX => 0.5 * Size;
+
+    /// <inheritdoc />
+    double IEllipseDrawable.RadiusY => 0.5 * Size;
+
     /// <summary>
-    /// A generic drawable used for modeling block diagrams.
-    /// These blocks don't have an orientation, but they can be square or circular and have 8 pins in all major directions.
+    /// Creates a new <see cref="ModelingDrawable"/>.
     /// </summary>
-    public abstract class ModelingDrawable : DiagramBlockInstance, IScaledDrawable, IBoxDrawable, IEllipseDrawable, IRoundedBox
+    /// <param name="name">The name.</param>
+    protected ModelingDrawable(string name, double size = 8)
+        : base(name)
     {
-        private static readonly ILabelAnchorPoints<IBoxDrawable> _boxLabelAnchorPoints = new OffsetAnchorPoints<IBoxDrawable>(BoxLabelAnchorPoints.Default, 1);
-        private static readonly ILabelAnchorPoints<IEllipseDrawable> _ellipseLabelAnchorPoints = new OffsetAnchorPoints<IEllipseDrawable>(EllipseLabelAnchorPoints.Default, 1);
+        Size = size;
+        Modifier = new ColorStyleModifier(null, "--bg-opaque");
+    }
 
-        public const string Square = "square";
+    /// <inheritdoc />
+    protected override void Draw(IGraphicsBuilder builder)
+    {
+        var style = builder.Style.ModifyDashedDotted(this);
+        if (Variants.Contains(Square))
+            builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, style, CornerRadius, CornerRadius);
+        else
+            builder.Circle(new(), Size * 0.5, style);
+    }
 
-        [Description("The size of the model block.")]
-        public double Size { get; set; }
+    /// <summary>
+    /// Draws the labels for the drawable.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    protected void DrawLabels(IGraphicsBuilder builder, IStyle style)
+    {
+        if (Variants.Contains(Square))
+            _boxLabelAnchorPoints.Draw(builder, this, style);
+        else
+            _ellipseLabelAnchorPoints.Draw(builder, this, style);
+    }
 
-        [Description("The margin for ouside labels to the edge.")]
-        [Alias("om")]
-        public double OuterMargin { get; set; } = 1.0;
-
-        [Description("The margin for inside labels to the edge")]
-        [Alias("im")]
-        public Margins InnerMargins { get; set; } = new(1, 1, 1, 1);
-
-        [Description("The round-off corner radius.")]
-        [Alias("r")]
-        [Alias("radius")]
-        public double CornerRadius { get; set; }
-
-        /// <inheritdoc />
-        Bounds IBoxDrawable.InnerBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
-
-        /// <inheritdoc />
-        Bounds IBoxDrawable.OuterBounds => new(-Size * 0.5, -Size * 0.5, Size * 0.5, Size * 0.5);
-
-        /// <inheritdoc />
-        Vector2 IEllipseDrawable.Center => new();
-
-        /// <inheritdoc />
-        double IEllipseDrawable.RadiusX => 0.5 * Size;
-
-        /// <inheritdoc />
-        double IEllipseDrawable.RadiusY => 0.5 * Size;
-
-        /// <summary>
-        /// Creates a new <see cref="ModelingDrawable"/>.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        protected ModelingDrawable(string name, double size = 8)
-            : base(name)
+    /// <inheritdoc />
+    protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
+    {
+        double s = Size * 0.5;
+        if (Variants.Contains(Square))
         {
-            Size = size;
-            Modifier = new ColorStyleModifier(null, "--bg-opaque");
-        }
+            // Calculate the vectors that will indicate
+            double xp = Size * 0.5 - CornerRadius;
+            Vector2 n1 = new(xp, Size * 0.5);
+            Vector2 n2 = new(Size * 0.5, xp);
+            double l = n1.Length;
+            n1 /= l;
+            n2 /= l;
 
-        /// <inheritdoc />
-        protected override void Draw(IGraphicsBuilder builder)
-        {
-            var style = builder.Style.ModifyDashedDotted(this);
-            if (Variants.Contains(Square))
-                builder.Rectangle(-Size * 0.5, -Size * 0.5, Size, Size, style, CornerRadius, CornerRadius);
-            else
-                builder.Circle(new(), Size * 0.5, style);
-        }
-
-        /// <summary>
-        /// Draws the labels for the drawable.
-        /// </summary>
-        /// <param name="builder">The builder.</param>
-        protected void DrawLabels(IGraphicsBuilder builder, IStyle style)
-        {
-            if (Variants.Contains(Square))
-                _boxLabelAnchorPoints.Draw(builder, this, style);
-            else
-                _ellipseLabelAnchorPoints.Draw(builder, this, style);
-        }
-
-        /// <inheritdoc />
-        protected override void UpdatePins(IReadOnlyList<LooselyOrientedPin> pins)
-        {
-            double s = Size * 0.5;
-            if (Variants.Contains(Square))
+            foreach (var pin in pins)
             {
-                // Calculate the vectors that will indicate
-                double xp = Size * 0.5 - CornerRadius;
-                Vector2 n1 = new(xp, Size * 0.5);
-                Vector2 n2 = new(Size * 0.5, xp);
-                double l = n1.Length;
-                n1 /= l;
-                n2 /= l;
-
-                foreach (var pin in pins)
+                double x = pin.Orientation.X;
+                double y = pin.Orientation.Y;
+                if (x.IsZero() && y.IsZero())
                 {
-                    double x = pin.Orientation.X;
-                    double y = pin.Orientation.Y;
-                    if (x.IsZero() && y.IsZero())
-                    {
-                        pin.Offset = new();
-                        continue;
-                    }
+                    pin.Offset = new();
+                    continue;
+                }
 
-                    if (x > n1.X && y > n2.Y)
-                    {
-                        // Bottom-right corner
-                        Vector2 c = new(xp, xp);
-                        double k = c.Dot(pin.Orientation);
-                        k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
-                        pin.Offset = k * pin.Orientation;
-                        continue;
-                    }
-                    if (x > n1.X && y < -n2.Y)
-                    {
-                        // Top-right corner
-                        Vector2 c = new(xp, -xp);
-                        double k = c.Dot(pin.Orientation);
-                        k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
-                        pin.Offset = k * pin.Orientation;
-                        continue;
-                    }
-                    if (x < -n1.X && y < -n2.Y)
-                    {
-                        // Top-left corner
-                        Vector2 c = new(-xp, -xp);
-                        double k = c.Dot(pin.Orientation);
-                        k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
-                        pin.Offset = k * pin.Orientation;
-                        continue;
-                    }
-                    if (x < -n1.X && y > n2.Y)
-                    {
-                        // Bottom-left corner
-                        Vector2 c = new(-xp, xp);
-                        double k = c.Dot(pin.Orientation);
-                        k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
-                        pin.Offset = k * pin.Orientation;
-                        continue;
-                    }
+                if (x > n1.X && y > n2.Y)
+                {
+                    // Bottom-right corner
+                    Vector2 c = new(xp, xp);
+                    double k = c.Dot(pin.Orientation);
+                    k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
+                    pin.Offset = k * pin.Orientation;
+                    continue;
+                }
+                if (x > n1.X && y < -n2.Y)
+                {
+                    // Top-right corner
+                    Vector2 c = new(xp, -xp);
+                    double k = c.Dot(pin.Orientation);
+                    k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
+                    pin.Offset = k * pin.Orientation;
+                    continue;
+                }
+                if (x < -n1.X && y < -n2.Y)
+                {
+                    // Top-left corner
+                    Vector2 c = new(-xp, -xp);
+                    double k = c.Dot(pin.Orientation);
+                    k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
+                    pin.Offset = k * pin.Orientation;
+                    continue;
+                }
+                if (x < -n1.X && y > n2.Y)
+                {
+                    // Bottom-left corner
+                    Vector2 c = new(-xp, xp);
+                    double k = c.Dot(pin.Orientation);
+                    k += Math.Sqrt(k * k + CornerRadius * CornerRadius - c.X * c.X - c.Y * c.Y);
+                    pin.Offset = k * pin.Orientation;
+                    continue;
+                }
 
-                    if (x - y < 0)
-                    {
-                        if (x + y < 0)
-                            pin.Offset = new(-s, y / Math.Abs(x) * s);
-                        else
-                            pin.Offset = new(x / Math.Abs(y) * s, s);
-                    }
+                if (x - y < 0)
+                {
+                    if (x + y < 0)
+                        pin.Offset = new(-s, y / Math.Abs(x) * s);
                     else
-                    {
-                        if (x + y < 0)
-                            pin.Offset = new(x / Math.Abs(y) * s, -s);
-                        else
-                            pin.Offset = new(s, y / Math.Abs(x) * s);
-                    }
+                        pin.Offset = new(x / Math.Abs(y) * s, s);
+                }
+                else
+                {
+                    if (x + y < 0)
+                        pin.Offset = new(x / Math.Abs(y) * s, -s);
+                    else
+                        pin.Offset = new(s, y / Math.Abs(x) * s);
                 }
             }
-            else
-            {
-                // Assume a circle
-                foreach (var pin in pins)
-                    pin.Offset = pin.Orientation * s;
-            }
+        }
+        else
+        {
+            // Assume a circle
+            foreach (var pin in pins)
+                pin.Offset = pin.Orientation * s;
         }
     }
 }

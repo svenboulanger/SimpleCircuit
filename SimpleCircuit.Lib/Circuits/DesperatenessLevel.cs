@@ -1,23 +1,22 @@
-﻿namespace SimpleCircuit.Components
+﻿namespace SimpleCircuit.Components;
+
+/// <summary>
+/// The possible modes for presences to run in.
+/// </summary>
+public enum DesperatenessLevel
 {
     /// <summary>
-    /// The possible modes for presences to run in.
+    /// The presence is run for the first time.
     /// </summary>
-    public enum DesperatenessLevel
-    {
-        /// <summary>
-        /// The presence is run for the first time.
-        /// </summary>
-        Normal,
+    Normal,
 
-        /// <summary>
-        /// The solver only has presences that require the circuit to be fixed.
-        /// </summary>
-        Fix,
+    /// <summary>
+    /// The solver only has presences that require the circuit to be fixed.
+    /// </summary>
+    Fix,
 
-        /// <summary>
-        /// The solver will give up and the presence has a last chance to output diagnostics.
-        /// </summary>
-        GiveUp
-    }
+    /// <summary>
+    /// The solver will give up and the presence has a last chance to output diagnostics.
+    /// </summary>
+    GiveUp
 }

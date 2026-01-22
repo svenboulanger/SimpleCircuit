@@ -5,73 +5,72 @@ using SimpleCircuit.Drawing.Builders;
 using SimpleCircuit.Drawing.Styles;
 using System;
 
-namespace SimpleCircuit.Components
+namespace SimpleCircuit.Components;
+
+/// <summary>
+/// A factory for points.
+/// </summary>
+[Drawable(Key, "A point that can connect to multiple wires.", "General")]
+public class PointFactory : DrawableFactory
 {
     /// <summary>
-    /// A factory for points.
+    /// The key for points.
     /// </summary>
-    [Drawable(Key, "A point that can connect to multiple wires.", "General")]
-    public class PointFactory : DrawableFactory
+    public const string Key = "X";
+
+    /// <inheritdoc />
+    protected override IDrawable Factory(string key, string name)
+        => new Instance(name);
+
+    private class Instance : LocatedDrawable
     {
-        /// <summary>
-        /// The key for points.
-        /// </summary>
-        public const string Key = "X";
+        private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
+
+        [Description("The angle along which the label should extend. 0 degrees will put the text on the right.")]
+        [Alias("a")]
+        public double Angle { get; set; }
+
+        [Description("The label distance from the point. The default is 3.")]
+        [Alias("lm")]
+        public double LabelMargin { get; set; } = 1.0;
 
         /// <inheritdoc />
-        protected override IDrawable Factory(string key, string name)
-            => new Instance(name);
+        public override string Type => "point";
 
-        private class Instance : LocatedDrawable
+        /// <summary>
+        /// Creates a new <see cref="Instance"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        public Instance(string name)
+            : base(name)
         {
-            private readonly CustomLabelAnchorPoints _anchors = new(new LabelAnchorPoint());
+            Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
+            Variants.Add("dot");
+        }
 
-            [Description("The angle along which the label should extend. 0 degrees will put the text on the right.")]
-            [Alias("a")]
-            public double Angle { get; set; }
+        /// <inheritdoc />
+        protected override void Draw(IGraphicsBuilder builder)
+        {
+            var style = builder.Style.Modify(Modifier);
 
-            [Description("The label distance from the point. The default is 3.")]
-            [Alias("lm")]
-            public double LabelMargin { get; set; } = 1.0;
-
-            /// <inheritdoc />
-            public override string Type => "point";
-
-            /// <summary>
-            /// Creates a new <see cref="Instance"/>.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public Instance(string name)
-                : base(name)
+            if (Variants.Contains("dot"))
             {
-                Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
-                Variants.Add("dot");
-            }
-
-            /// <inheritdoc />
-            protected override void Draw(IGraphicsBuilder builder)
-            {
-                var style = builder.Style.Modify(Modifier);
-
-                if (Variants.Contains("dot"))
+                int connections = Pins[0].Connections;
+                if (Variants.Contains("forced") || connections == 0 || connections > 2)
                 {
-                    int connections = Pins[0].Connections;
-                    if (Variants.Contains("forced") || connections == 0 || connections > 2)
-                    {
-                        var marker = new Dot(new(), new(1, 0));
-                        marker.Draw(builder, style);
-                    }
-                    else
-                        builder.ExpandBounds(new());
+                    var marker = new Dot(new(), new(1, 0));
+                    marker.Draw(builder, style);
                 }
                 else
                     builder.ExpandBounds(new());
-
-                var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
-                double m = style.LineThickness * 3 + LabelMargin;
-                _anchors[0] = new LabelAnchorPoint(n * m, n, Vector2.UX, TextOrientationType.None);
-                _anchors.Draw(builder, this, style);
             }
+            else
+                builder.ExpandBounds(new());
+
+            var n = Vector2.Normal(-Angle / 180.0 * Math.PI);
+            double m = style.LineThickness * 3 + LabelMargin;
+            _anchors[0] = new LabelAnchorPoint(n * m, n, Vector2.UX, TextOrientationType.None);
+            _anchors.Draw(builder, this, style);
         }
     }
 }

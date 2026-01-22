@@ -2,93 +2,92 @@
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 
-namespace SimpleCircuit.Components.Pins
+namespace SimpleCircuit.Components.Pins;
+
+/// <summary>
+/// A pin with a loose oriententation (the orientation is set by whoever tries setting it).
+/// </summary>
+/// <remarks>
+/// Creates an loosely oriented pin. This means that the pin can still be oriented
+/// but its location can also be fixed.
+/// </remarks>
+/// <param name="name"></param>
+/// <param name="description"></param>
+/// <param name="owner"></param>
+public class LooselyOrientedPin(string name, string description, ILocatedDrawable owner)
+    : Pin(name, description, owner), IOrientedPin
 {
+    private readonly ILocatedDrawable _origin = owner;
+
+    /// <inheritdoc />
+    public bool HasFixedOrientation { get; private set; }
+
+    /// <inheritdoc />
+    public Vector2 Orientation { get; private set; }
+
+    /// <inheritdoc />
+    public bool HasFreeOrientation => !HasFixedOrientation;
+
     /// <summary>
-    /// A pin with a loose oriententation (the orientation is set by whoever tries setting it).
+    /// Gets or sets the offset of the pin relative to its owner.
     /// </summary>
-    /// <remarks>
-    /// Creates an loosely oriented pin. This means that the pin can still be oriented
-    /// but its location can also be fixed.
-    /// </remarks>
-    /// <param name="name"></param>
-    /// <param name="description"></param>
-    /// <param name="owner"></param>
-    public class LooselyOrientedPin(string name, string description, ILocatedDrawable owner)
-        : Pin(name, description, owner), IOrientedPin
+    public Vector2 Offset { get; set; }
+
+    /// <inheritdoc />
+    public override PresenceResult Prepare(IPrepareContext context)
     {
-        private readonly ILocatedDrawable _origin = owner;
-
-        /// <inheritdoc />
-        public bool HasFixedOrientation { get; private set; }
-
-        /// <inheritdoc />
-        public Vector2 Orientation { get; private set; }
-
-        /// <inheritdoc />
-        public bool HasFreeOrientation => !HasFixedOrientation;
-
-        /// <summary>
-        /// Gets or sets the offset of the pin relative to its owner.
-        /// </summary>
-        public Vector2 Offset { get; set; }
-
-        /// <inheritdoc />
-        public override PresenceResult Prepare(IPrepareContext context)
-        {
-            var result = base.Prepare(context);
-            if (result == PresenceResult.GiveUp)
-                return result;
-
-            var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
-            switch (context.Mode)
-            {
-                case PreparationMode.Offsets:
-                    if (!context.Offsets.Group(_origin.X, X, offset.X))
-                    {
-                        context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.X, Name);
-                        return PresenceResult.GiveUp;
-                    }
-                    if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
-                    {
-                        context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.Y, Name);
-                        return PresenceResult.GiveUp;
-                    }
-                    break;
-            }
+        var result = base.Prepare(context);
+        if (result == PresenceResult.GiveUp)
             return result;
-        }
 
-        /// <inheritdoc />
-        public override void Register(IRegisterContext context)
+        var offset = _origin is ITransformingDrawable tfd ? tfd.TransformOffset(Offset) : Offset;
+        switch (context.Mode)
         {
-        }
-
-        /// <inheritdoc />
-        public bool ResolveOrientation(Vector2 orientation, TextLocation source, IDiagnosticHandler diagnostics)
-        {
-            if (HasFixedOrientation)
-            {
-                // We cannot change the orientation after it has already been determined
-                if (orientation.Dot(Orientation) < 0.999)
+            case PreparationMode.Offsets:
+                if (!context.Offsets.Group(_origin.X, X, offset.X))
                 {
-                    diagnostics?.Post(source, ErrorCodes.CouldNotConstrainOrientation, Name);
-                    return false;
+                    context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.X, Name);
+                    return PresenceResult.GiveUp;
                 }
-            }
-            else
-            {
-                // We are not being difficult, just give the orientation it wants...
-                HasFixedOrientation = true;
-                Orientation = orientation;
-            }
-            return true;
+                if (!context.Offsets.Group(_origin.Y, Y, offset.Y))
+                {
+                    context.Diagnostics?.Post(ErrorCodes.CouldNotResolveFixedOffsetFor, offset.Y, Name);
+                    return PresenceResult.GiveUp;
+                }
+                break;
         }
-
-        /// <summary>
-        /// Convert to a string.
-        /// </summary>
-        /// <returns>The string representation.</returns>
-        public override string ToString() => $"{Owner.Name}[{Name}]";
+        return result;
     }
+
+    /// <inheritdoc />
+    public override void Register(IRegisterContext context)
+    {
+    }
+
+    /// <inheritdoc />
+    public bool ResolveOrientation(Vector2 orientation, TextLocation source, IDiagnosticHandler diagnostics)
+    {
+        if (HasFixedOrientation)
+        {
+            // We cannot change the orientation after it has already been determined
+            if (orientation.Dot(Orientation) < 0.999)
+            {
+                diagnostics?.Post(source, ErrorCodes.CouldNotConstrainOrientation, Name);
+                return false;
+            }
+        }
+        else
+        {
+            // We are not being difficult, just give the orientation it wants...
+            HasFixedOrientation = true;
+            Orientation = orientation;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Convert to a string.
+    /// </summary>
+    /// <returns>The string representation.</returns>
+    public override string ToString() => $"{Owner.Name}[{Name}]";
 }

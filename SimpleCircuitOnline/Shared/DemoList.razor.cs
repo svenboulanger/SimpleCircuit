@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SimpleCircuitOnline.Shared
+namespace SimpleCircuitOnline.Shared;
+
+public partial class DemoList
 {
-    public partial class DemoList
-    {
-    }
 }

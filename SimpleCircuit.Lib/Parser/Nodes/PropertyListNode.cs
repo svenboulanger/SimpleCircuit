@@ -3,77 +3,76 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SimpleCircuit.Parser.Nodes
+namespace SimpleCircuit.Parser.Nodes;
+
+/// <summary>
+/// A list of properties.
+/// </summary>
+public record PropertyListNode : SyntaxNode, IEquatable<PropertyListNode>
 {
     /// <summary>
-    /// A list of properties.
+    /// Gets the subject that should receive the properties.
     /// </summary>
-    public record PropertyListNode : SyntaxNode, IEquatable<PropertyListNode>
+    public SyntaxNode Subject { get; }
+
+    /// <summary>
+    /// Gets the properties.
+    /// </summary>
+    public SyntaxNode[] Properties { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="PropertyListNode"/>.
+    /// </summary>
+    /// <param name="subject">The subject.</param>
+    /// <param name="properties">The properties.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="subject"/> is <c>null</c>.</exception>
+    public PropertyListNode(SyntaxNode subject, IEnumerable<SyntaxNode> properties)
+        : base(subject?.Location ?? default)
     {
-        /// <summary>
-        /// Gets the subject that should receive the properties.
-        /// </summary>
-        public SyntaxNode Subject { get; }
+        Subject = subject ?? throw new ArgumentNullException(nameof(subject));
+        Properties = properties?.ToArray() ?? Array.Empty<SyntaxNode>();
+    }
 
-        /// <summary>
-        /// Gets the properties.
-        /// </summary>
-        public SyntaxNode[] Properties { get; }
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        int hash = Subject.GetHashCode();
+        for (int i = 0; i < Properties.Length; i++)
+            hash = (hash * 1023) ^ Properties[i].GetHashCode();
+        return hash;
+    }
 
-        /// <summary>
-        /// Creates a new <see cref="PropertyListNode"/>.
-        /// </summary>
-        /// <param name="subject">The subject.</param>
-        /// <param name="properties">The properties.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="subject"/> is <c>null</c>.</exception>
-        public PropertyListNode(SyntaxNode subject, IEnumerable<SyntaxNode> properties)
-            : base(subject?.Location ?? default)
+    /// <inheritdoc />
+    public virtual bool Equals(PropertyListNode other)
+    {
+        if (!Subject.Equals(other.Subject))
+            return false;
+        if (Properties.Length != other.Properties.Length)
+            return false;
+        for (int i = 0; i < Properties.Length; i++)
         {
-            Subject = subject ?? throw new ArgumentNullException(nameof(subject));
-            Properties = properties?.ToArray() ?? Array.Empty<SyntaxNode>();
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            int hash = Subject.GetHashCode();
-            for (int i = 0; i < Properties.Length; i++)
-                hash = (hash * 1023) ^ Properties[i].GetHashCode();
-            return hash;
-        }
-
-        /// <inheritdoc />
-        public virtual bool Equals(PropertyListNode other)
-        {
-            if (!Subject.Equals(other.Subject))
+            if (Properties[i] != other.Properties[i])
                 return false;
-            if (Properties.Length != other.Properties.Length)
-                return false;
+        }
+        return true;
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        StringBuilder sb = new();
+        sb.Append(Subject);
+        if (Properties.Length > 0)
+        {
+            sb.Append('(');
             for (int i = 0; i < Properties.Length; i++)
             {
-                if (Properties[i] != other.Properties[i])
-                    return false;
+                if (i > 0)
+                    sb.Append(' ');
+                sb.Append(Properties[i]);
             }
-            return true;
+            sb.Append(')');
         }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            StringBuilder sb = new();
-            sb.Append(Subject);
-            if (Properties.Length > 0)
-            {
-                sb.Append('(');
-                for (int i = 0; i < Properties.Length; i++)
-                {
-                    if (i > 0)
-                        sb.Append(' ');
-                    sb.Append(Properties[i]);
-                }
-                sb.Append(')');
-            }
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }
