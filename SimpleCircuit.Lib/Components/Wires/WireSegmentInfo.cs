@@ -28,6 +28,11 @@ public class WireSegmentInfo(TextLocation source)
     public bool IsMinimum { get; set; }
 
     /// <summary>
+    /// Determines whether the bounds should be used as an anchor.
+    /// </summary>
+    public bool UsesBounds { get; set; }
+
+    /// <summary>
     /// Gets the length of the wire.
     /// </summary>
     public double Length { get; set; }

@@ -1,5 +1,6 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Drawing;
+using SimpleCircuit.Drawing.Builders;
 
 namespace SimpleCircuit.Components;
 
@@ -8,11 +9,53 @@ namespace SimpleCircuit.Components;
 /// </summary>
 public abstract class LocatedDrawable : Drawable, ILocatedDrawable
 {
+    private bool _usedBounds;
+
     /// <inheritdoc />
     public string X { get; }
 
     /// <inheritdoc />
     public string Y { get; }
+
+    /// <inheritdoc />
+    public string Left
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.l";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Top
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.t";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Right
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.r";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Bottom
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.b";
+        }
+    }
 
     /// <inheritdoc />
     public Vector2 Location { get; private set; }
@@ -24,12 +67,11 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
     /// Initializes a new instance of the <see cref="LocatedDrawable"/> class.
     /// </summary>
     /// <param name="name">The name.</param>
-    /// <param name="point">The names of the coordinate of the drawable.</param>
-    protected LocatedDrawable(string name, (string X, string Y) point = default)
+    protected LocatedDrawable(string name)
         : base(name)
     {
-        X = point.X ?? $"{name}.x";
-        Y = point.Y ?? $"{name}.y";
+        X = $"{name}.x";
+        Y = $"{name}.y";
     }
 
     /// <inheritdoc />
@@ -66,6 +108,13 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
                 break;
 
             case PreparationMode.Offsets:
+                var r = RegisterBoundOffsets(context);
+                if (r == PresenceResult.GiveUp)
+                    return PresenceResult.GiveUp;
+                else if (r == PresenceResult.Incomplete)
+                    result = PresenceResult.Incomplete;
+
+                // Register the origin of the drawable
                 context.Offsets.Add(X);
                 context.Offsets.Add(Y);
                 break;
@@ -75,6 +124,33 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
                 break;
         }
         return result;
+    }
+
+    /// <summary>
+    /// Register the offsets that will define the bounds of the drawable.
+    /// The <see cref="Left"/>, <see cref="Top"/>, <see cref="Right"/> and <see cref="Bottom"/>
+    /// coordinates are linked here.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <returns>Returns the result.</returns>
+    protected virtual PresenceResult RegisterBoundOffsets(IPrepareContext context)
+    {
+        if (_usedBounds)
+        {
+            // Simply draw it and figure out the bounds from there
+            var builder = new BoundsBuilder(context.TextFormatter, context.Style, context.Diagnostics);
+            builder.BeginBounds();
+            builder.BeginTransform(CreateTransform());
+            Draw(builder);
+            builder.EndTransform();
+            builder.EndBounds(out var bounds);
+
+            context.Offsets.Group(X, Left, bounds.Left);
+            context.Offsets.Group(Y, Top, bounds.Top);
+            context.Offsets.Group(X, Right, bounds.Right);
+            context.Offsets.Group(Y, Bottom, bounds.Bottom);
+        }
+        return PresenceResult.Success;
     }
 
     /// <inheritdoc />

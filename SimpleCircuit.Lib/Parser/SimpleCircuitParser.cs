@@ -343,14 +343,16 @@ public static class SimpleCircuitParser
     {
         result = null;
 
-        if (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Number && lexer.Content.ToString() == "+")
+        if (lexer.Type == TokenType.Punctuator && lexer.NextType == TokenType.Number &&
+            (lexer.Content.ToString() == "+" || lexer.Content.ToString() == "++"))
         {
             // Minimum distance
             var plus = lexer.Token;
             lexer.Next();
             if (!ParseValueOrExpression(lexer, context, out var distance))
                 return false;
-            result = new UnaryNode(plus, distance, UnaryOperatortype.Positive);
+            result = new UnaryNode(plus, distance,
+                plus.Content.ToString() == "+" ? UnaryOperatortype.Positive : UnaryOperatortype.PrefixIncrement);
         }
         else
         {

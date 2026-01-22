@@ -1,6 +1,8 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +12,7 @@ namespace SimpleCircuit.Components.Wires;
 public class VirtualWire(string name, ILocatedPresence start, IEnumerable<WireSegmentInfo> segments, ILocatedPresence end, VirtualChainConstraints flags) : ICircuitSolverPresence
 {
     private readonly ILocatedPresence _start = start, _end = end;
+    private string _startX, _startY, _endX, _endY;
     private readonly List<WireSegmentInfo> _segments = segments?.ToList() ?? [];
     private readonly VirtualChainConstraints _axis = flags;
 
@@ -54,10 +57,73 @@ public class VirtualWire(string name, ILocatedPresence start, IEnumerable<WireSe
     {
         switch (context.Mode)
         {
+            case PreparationMode.Find:
+                // Find the anchor points, such that all bounded components know whether they should compute their bounds
+                if (_segments[0].UsesBounds && _start is IBoundedComponent boundedStart)
+                {
+                    var orientation = _segments[0].Orientation;
+                    if (orientation.IsZero())
+                    {
+                        _startX = _start.X;
+                        _startY = _start.Y;
+                    }
+                    else if (orientation.X.IsZero())
+                    {
+                        _startX = _start.X;
+                        _startY = orientation.Y > 0.0 ? boundedStart.Bottom : boundedStart.Top;
+                    }
+                    else if (orientation.Y.IsZero())
+                    {
+                        _startX = orientation.X > 0.0 ? boundedStart.Right : boundedStart.Left;
+                        _startY = _start.Y;
+                    }
+                    else
+                    {
+                        _startX = orientation.X > 0.0 ? boundedStart.Right : boundedStart.Left;
+                        _startY = orientation.Y > 0.0 ? boundedStart.Bottom : boundedStart.Top;
+                    }
+                }
+                else
+                {
+                    _startX = _start.X;
+                    _startY = _start.Y;
+                }
+
+                if (_segments[^1].UsesBounds && _end is IBoundedComponent boundedEnd)
+                {
+                    var orientation = _segments[0].Orientation;
+                    if (orientation.IsZero())
+                    {
+                        _endX = _end.X;
+                        _endY = _end.Y;
+                    }
+                    else if (orientation.X.IsZero())
+                    {
+                        _endX = _end.X;
+                        _endY = orientation.Y > 0.0 ? boundedEnd.Top : boundedEnd.Bottom;
+                    }
+                    else if (orientation.Y.IsZero())
+                    {
+                        _endX = orientation.X > 0.0 ? boundedEnd.Left : boundedEnd.Right;
+                        _endY = _end.Y;
+                    }
+                    else
+                    {
+                        _endX = orientation.X > 0.0 ? boundedEnd.Left : boundedEnd.Right;
+                        _endY = orientation.Y > 0.0 ? boundedEnd.Top : boundedEnd.Bottom;
+                    }
+                }
+                else
+                {
+                    _endX = _end.X;
+                    _endY = _end.Y;
+                }
+                break;
+
             case PreparationMode.Offsets:
-                if (Helpers.PrepareEntryOffset(_segments[0].Source, _start, StartX, StartY, _axis, context) == PresenceResult.GiveUp)
+                if (Helpers.PrepareEntryOffset(_segments[0].Source, _startX, _startY, StartX, StartY, _axis, context) == PresenceResult.GiveUp)
                     return PresenceResult.GiveUp;
-                if (Helpers.PrepareEntryOffset(_segments[^1].Source, _end, EndX, EndY, _axis, context) == PresenceResult.GiveUp)
+                if (Helpers.PrepareEntryOffset(_segments[^1].Source, _endX, _endY, EndX, EndY, _axis, context) == PresenceResult.GiveUp)
                     return PresenceResult.GiveUp;
                 return Helpers.PrepareSegmentsOffset(
                     GetXName, GetYName, i => _segments[i].Orientation,
@@ -91,10 +157,16 @@ public class VirtualWire(string name, ILocatedPresence start, IEnumerable<WireSe
             var orientation = segment.Orientation;
             double length = segment.Length < 0 ? MinimumLength : segment.Length;
 
-            if (doY && orientation.X.IsZero() && fromY.Representative != toY.Representative)
-                MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
-            if (doX && orientation.Y.IsZero() && fromX.Representative != toX.Representative)
-                MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
+            if (doY && orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
+            {
+                if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y, length))
+                    context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+            }
+            if (doX && orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
+            {
+                if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X, length))
+                    context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+            }
 
             if (!orientation.X.IsZero() && !orientation.Y.IsZero())
             {
@@ -102,9 +174,15 @@ public class VirtualWire(string name, ILocatedPresence start, IEnumerable<WireSe
                 if (doX && doY)
                     MinimumConstraint.AddDirectionalMinimum(context.Circuit, $"{x}.{y}", fromX, fromY, toX, toY, orientation, length);
                 else if (doX)
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
+                {
+                    if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X, length))
+                        context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+                }
                 else
-                    MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
+                {
+                    if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y, length))
+                        context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+                }
             }
             fromX = toX;
             fromY = toY;

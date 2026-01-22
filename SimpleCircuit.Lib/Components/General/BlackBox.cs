@@ -54,6 +54,18 @@ public partial class BlackBox : DrawableFactory
         public string Y { get; }
 
         /// <inheritdoc />
+        public string Left => X;
+
+        /// <inheritdoc />
+        public string Top => Y;
+
+        /// <inheritdoc />
+        public string Right => _pins.Right;
+
+        /// <inheritdoc />
+        public string Bottom => _pins.Bottom;
+
+        /// <inheritdoc />
         public Vector2 Location { get; protected set; }
 
         /// <inheritdoc />

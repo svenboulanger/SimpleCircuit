@@ -22,21 +22,21 @@ public static class Helpers
     /// <param name="axis">The axis.</param>
     /// <param name="context">The context.</param>
     /// <returns>Returns the result.</returns>
-    public static PresenceResult PrepareEntryOffset(TextLocation source, ILocatedPresence located, string x, string y, VirtualChainConstraints axis, IPrepareContext context)
+    public static PresenceResult PrepareEntryOffset(TextLocation source, string lx, string ly, string x, string y, VirtualChainConstraints axis, IPrepareContext context)
     {
         if ((axis & VirtualChainConstraints.X) != 0)
         {
-            if (!context.Offsets.Group(located.X, x, 0.0))
+            if (!context.Offsets.Group(lx, x, 0.0))
             {
-                context.Diagnostics?.Post(source, ErrorCodes.CouldNotAlignAlongX, located.X, x);
+                context.Diagnostics?.Post(source, ErrorCodes.CouldNotAlignAlongX, lx, x);
                 return PresenceResult.GiveUp;
             }
         }
         if ((axis & VirtualChainConstraints.Y) != 0)
         {
-            if (!context.Offsets.Group(located.Y, y, 0.0))
+            if (!context.Offsets.Group(ly, y, 0.0))
             {
-                context.Diagnostics?.Post(source, ErrorCodes.CouldNotAlignAlongX, located.X, x);
+                context.Diagnostics?.Post(source, ErrorCodes.CouldNotAlignAlongX, ly, y);
                 return PresenceResult.GiveUp;
             }
         }
@@ -70,7 +70,7 @@ public static class Helpers
             if (double.IsNaN(n.X) || double.IsNaN(n.Y))
                 continue;
 
-            switch (PrepareSegmentOffset(x, y, tx, ty, segments[i], n, axis, context))
+            switch (PrepareSegmentOffset("virtual segment", x, y, tx, ty, segments[i], n, axis, context))
             {
                 case PresenceResult.GiveUp: return PresenceResult.GiveUp;
                 case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
@@ -93,7 +93,7 @@ public static class Helpers
     /// <param name="axis">The axis.</param>
     /// <param name="context">The prepare context.</param>
     /// <returns>Returns the result.</returns>
-    public static PresenceResult PrepareSegmentOffset(string x, string y, string tx, string ty,
+    public static PresenceResult PrepareSegmentOffset(string name, string x, string y, string tx, string ty,
         WireSegmentInfo segment, Vector2 orientation, VirtualChainConstraints axis, IPrepareContext context)
     {
         // Ignore any unconstrained wires (no offsets can be defined then)
@@ -169,8 +169,8 @@ public static class Helpers
                         }
 
                         // Check whether the minimum distance is OK
-                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
+                        if (dx * dx + dy * dy < segment.Length * segment.Length - 1e-4)
+                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, name);
                     }
                     else if (isFixedX)
                     {
@@ -180,13 +180,13 @@ public static class Helpers
                         double dy = dx / orientation.X * orientation.Y;
                         if (!context.Offsets.Group(y, ty, dy))
                         {
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotResolveFixedOffsetFor, dy);
+                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotResolveFixedOffsetFor, dy, name);
                             return PresenceResult.GiveUp;
                         }
 
                         // Check whether the minimum distance is OK
-                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
+                        if (dx * dx + dy * dy < segment.Length * segment.Length - 1e-4)
+                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, name);
                     }
                     else if (isFixedY)
                     {
@@ -200,8 +200,8 @@ public static class Helpers
                         }
 
                         // Check whether the minimum distance is OK
-                        if (dx * dx + dy * dy > segment.Length * segment.Length + 0.001)
-                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance);
+                        if (dx * dx + dy * dy < segment.Length * segment.Length + 1e-4)
+                            context.Diagnostics?.Post(segment.Source, ErrorCodes.CouldNotSatisfyMinimumDistance, name);
                     }
                     else if (context.Desparateness == DesperatenessLevel.Normal)
                         return PresenceResult.Incomplete;

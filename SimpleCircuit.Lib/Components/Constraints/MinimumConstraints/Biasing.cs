@@ -46,9 +46,9 @@ public class Biasing : Behavior, IBiasingBehavior
         _lastState = true;
         
         // Calculate conductances
-        _gOn = _parameters.Weight * _gOnFactor;
+        _gOn = _gOnFactor;
         _gOff = _parameters.Weight;
-        _g = _gOn;
+        _g = _gOn + _iteration.Gmin;
 
         // Calculate currents
         _iOn = (_parameters.Offset + _parameters.Minimum) * _gOn;

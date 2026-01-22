@@ -295,7 +295,8 @@ public partial class BlackBox
                 }
 
                 // Apply the minimum constraint
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.{i}", lastOffset, nextOffset, minimum, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.{i}", lastOffset, nextOffset, minimum, MinimumWeight))
+                    context.Diagnostics?.Post(pin.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, pin.Name);
             }
 
             // Finish the minimum constraints where necessary
@@ -306,7 +307,8 @@ public partial class BlackBox
                 var nextOffset = context.GetOffset(Bottom);
                 double minimum = marginBottom + _parent.PinMargins.Bottom + _spansByIndex[lastLeftPin].Bounds.Bounds.Height * 0.5;
                 minLeftHeight += marginBottom;
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.l.m", lastOffset, nextOffset, minimum, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
             }
             if (lastRightPin >= 0)
             {
@@ -315,7 +317,8 @@ public partial class BlackBox
                 var nextOffset = context.GetOffset(Bottom);
                 double minimum = marginBottom + _parent.PinMargins.Bottom + _spansByIndex[lastRightPin].Bounds.Bounds.Height * 0.5;
                 minRightHeight += marginBottom;
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.r.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.r.m", lastOffset, nextOffset, minimum, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
             }
             if (lastTopPin >= 0)
             {
@@ -324,7 +327,8 @@ public partial class BlackBox
                 var nextOffset = context.GetOffset(Right);
                 double minimum = marginRight + _parent.PinMargins.Right + _spansByIndex[lastTopPin].Bounds.Bounds.Height * 0.5;
                 minTopWidth += marginRight;
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.t.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.t.m", lastOffset, nextOffset, minimum, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
             }
             if (lastBottomPin >= 0)
             {
@@ -333,16 +337,19 @@ public partial class BlackBox
                 var nextOffset = context.GetOffset(Right);
                 double minimum = marginRight + _parent.PinMargins.Right + _spansByIndex[lastBottomPin].Bounds.Bounds.Height * 0.5;
                 minBottomWidth += marginRight;
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.b.m", lastOffset, nextOffset, minimum, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.b.m", lastOffset, nextOffset, minimum, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
             }
 
             // Add minimum width/height
             double minHeight = Math.Max(_parent.MinHeight, marginTop + marginBottom + InnerBounds.Height);
             if (minLeftHeight < minHeight && minRightHeight < minHeight)
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minh", context.GetOffset(_parent.Y), context.GetOffset(Bottom), minHeight, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minh", context.GetOffset(_parent.Y), context.GetOffset(Bottom), minHeight, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
             double minWidth = Math.Max(_parent.MinWidth, marginLeft + marginRight + InnerBounds.Width);
             if (minTopWidth < minWidth && minBottomWidth < minWidth)
-                MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minw", context.GetOffset(_parent.X), context.GetOffset(Right), minWidth, MinimumWeight);
+                if (!MinimumConstraint.AddMinimum(context.Circuit, $"{_parent.Name}.minw", context.GetOffset(_parent.X), context.GetOffset(Right), minWidth, MinimumWeight))
+                    context.Diagnostics?.Post(_parent.Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, _parent.Name);
         }
 
         /// <inheritdoc />

@@ -228,7 +228,7 @@ public class Wire : Drawable
                 // Short wire ends to the correct pins
                 if (_p2w is not null)
                 {
-                    switch (Helpers.PrepareEntryOffset(_segments[0].Source, _p2w, StartX, StartY, Parser.Nodes.VirtualChainConstraints.XY, context))
+                    switch (Helpers.PrepareEntryOffset(_segments[0].Source, _p2w.X, _p2w.Y, StartX, StartY, Parser.Nodes.VirtualChainConstraints.XY, context))
                     {
                         case PresenceResult.GiveUp: return PresenceResult.GiveUp;
                         case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
@@ -236,7 +236,7 @@ public class Wire : Drawable
                 }
                 if (_w2p is not null)
                 {
-                    switch (Helpers.PrepareEntryOffset(_segments[^1].Source, _w2p, EndX, EndY, Parser.Nodes.VirtualChainConstraints.XY, context))
+                    switch (Helpers.PrepareEntryOffset(_segments[^1].Source, _w2p.X, _w2p.Y, EndX, EndY, Parser.Nodes.VirtualChainConstraints.XY, context))
                     {
                         case PresenceResult.GiveUp: return PresenceResult.GiveUp;
                         case PresenceResult.Incomplete: result = PresenceResult.Incomplete; break;
@@ -288,6 +288,10 @@ public class Wire : Drawable
         for (int i = 0; i < _segments.Count; i++)
         {
             var next = context.GetValue(GetXName(i), GetYName(i));
+
+            // Check the minimum distance
+            if ((next.X - last.X) * _segments[i].Orientation.X + (next.Y - last.Y) * _segments[i].Orientation.Y < _segments[i].Length - 1e-2)
+                context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
 
             // Add jump-over points if specified
             if (Variants.Contains(JumpOver))
@@ -371,10 +375,16 @@ public class Wire : Drawable
                 continue;
 
             // Wire is of minimum length
-            if (orientation.X.IsZero() && !StringComparer.Ordinal.Equals(fromY.Representative, toY.Representative))
-                MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y * length);
-            else if (orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
-                MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X * length);
+            if (orientation.X.IsZero())
+            {
+                if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, y, fromY, toY, orientation.Y, length))
+                    context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+            }
+            else if (orientation.Y.IsZero())
+            {
+                if (!MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, toX, orientation.X, length))
+                    context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+            }
             else if (!orientation.X.IsZero() && !orientation.Y.IsZero() && !StringComparer.Ordinal.Equals(fromX.Representative, toX.Representative))
                 MinimumConstraint.AddDirectionalMinimum(context.Circuit, x, fromX, fromY, toX, toY, orientation, length);
             fromX = toX;

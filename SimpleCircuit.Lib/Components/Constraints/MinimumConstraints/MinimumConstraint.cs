@@ -13,8 +13,8 @@ public partial class MinimumConstraint : Component<Parameters>
     /// Creates a new <see cref="MinimumConstraint"/>.
     /// </summary>
     /// <param name="name">The name of the constraint.</param>
-    /// <param name="x">The smallest coordinate.</param>
     /// <param name="tx">The largest coordinate.</param>
+    /// <param name="x">The smallest coordinate.</param>
     /// <param name="minimum">The minimum between the two coordinates.</param>
     public MinimumConstraint(string name, string tx, string x, double offset, double minimum)
         : base(name, 2)

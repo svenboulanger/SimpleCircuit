@@ -21,7 +21,7 @@ public class Biasing : Behavior, IBiasingBehavior
     private readonly Parameters _parameters;
     private readonly IVariable<double> _x1, _y1, _x2, _y2;
     private readonly ElementSet<double> _elements;
-    private double _gnx2, _gnxny, _gny2;
+    private double _gnx2, _gnxny, _gny2, _gOn, _gOff;
     private Vector2 _i;
     private readonly double _xo;
     private readonly Vector2 _iOn, _iOff, _n;
@@ -93,14 +93,18 @@ public class Biasing : Behavior, IBiasingBehavior
         }
 
         // Initialize
+        _gOn = _gOnFactor;
+        _gOff = _parameters.Weight;
         _state = true;
         _lastState = true;
         _n = _parameters.Normal;
-        _gnx2 = _gOnFactor * _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
-        _gnxny = _gOnFactor * _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
-        _gny2 = _gOnFactor * _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
-        _iOff = -_n * (_parameters.Minimum + _n.Dot(_parameters.Offset)) / _parameters.Weight;
-        _i = _iOn = _gOnFactor * _iOff; // -_gOnFactor / _parameters.Weight * _n * (_parameters.Minimum + _n.Dot(_parameters.Offset));
+        _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+        _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+        _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
+        Vector2 ci = -_n * (_parameters.Minimum + _n.Dot(_parameters.Offset));
+        _iOff = ci * _gOff;
+        _iOn = ci * _gOn;
+        _i = _iOn;
         _xo = _parameters.Normal.Dot(_parameters.Offset.Perpendicular);
     }
 
@@ -111,9 +115,9 @@ public class Biasing : Behavior, IBiasingBehavior
         if (_iteration.Mode == IterationModes.Fix || _iteration.Mode == IterationModes.Junction)
         {
             _state = true;
-            _gnx2 = _gOnFactor * _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
-            _gnxny = _gOnFactor * _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
-            _gny2 = _gOnFactor * _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
+            _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+            _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+            _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
         }
         else
         {
@@ -132,17 +136,17 @@ public class Biasing : Behavior, IBiasingBehavior
                 _iteration.IsConvergent = false;
                 if (_state)
                 {
-                    _gnx2 = _gOnFactor * _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
-                    _gnxny = _gOnFactor * _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
-                    _gny2 = _gOnFactor * _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
+                    _gnx2 = _gOn * _n.X * _n.X + _iteration.Gmin;
+                    _gnxny = _gOn * _n.X * _n.Y + _iteration.Gmin;
+                    _gny2 = _gOn * _n.Y * _n.Y + _iteration.Gmin;
                     _i = _iOn;
                 }
                 else
                 {
-                    _gnx2 = _n.X * _n.X / _parameters.Weight + _iteration.Gmin;
-                    _gnxny = _n.X * _n.Y / _parameters.Weight + _iteration.Gmin;
-                    _gny2 = _n.Y * _n.Y / _parameters.Weight + _iteration.Gmin;
-                    _i = new();
+                    _gnx2 = _gOff * _n.X * _n.X + _iteration.Gmin;
+                    _gnxny = _gOff * _n.X * _n.Y + _iteration.Gmin;
+                    _gny2 = _gOff * _n.Y * _n.Y + _iteration.Gmin;
+                    _i = _iOff;
                 }
             }
         }

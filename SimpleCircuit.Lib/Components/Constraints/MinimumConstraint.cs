@@ -1,8 +1,10 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SpiceSharp.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleCircuit.Components;
 
@@ -69,8 +71,11 @@ public class MinimumConstraint : ICircuitSolverPresence
     {
         var lowest = context.GetOffset(Lowest);
         var highest = context.GetOffset(Highest);
-        if (lowest.Representative != highest.Representative)
-            AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight);
+        if (!StringComparer.Ordinal.Equals(lowest.Representative, highest.Representative))
+        {
+            if (!AddMinimum(context.Circuit, Name, lowest, highest, Minimum, Weight))
+                context.Diagnostics?.Post(Sources, ErrorCodes.CouldNotSatisfyMinimumDistance, Name);
+        }
     }
 
     /// <inheritdoc />
@@ -86,13 +91,23 @@ public class MinimumConstraint : ICircuitSolverPresence
     /// <param name="lowest">The lowest node.</param>
     /// <param name="highest">The highest node.</param>
     /// <param name="minimum">The offset between the two nodes.</param>
-    /// <param name="weight">The weight for the constraint when extended beyond the minimum.</param>
-    public static void AddMinimum(IEntityCollection circuit, string name, RelativeItem lowest, RelativeItem highest, double minimum, double weight = 1.0)
+    /// <param name="weight">The weight of constraint when stretching longer than the minimum.</param>
+    public static bool AddMinimum(IEntityCollection circuit, string name,
+        RelativeItem lowest, RelativeItem highest,
+        double minimum, double weight = 1.0)
     {
+        if (StringComparer.Ordinal.Equals(lowest.Representative, highest.Representative))
+        {
+            // Double check that the minimum is guaranteed
+            if (lowest.Offset + minimum > highest.Offset + 1e-2)
+                return false; // This segment is violating!
+            return true; // No need to add a minimum constraint as the offsets already fixed it
+        }
         double delta = lowest.Offset - highest.Offset;
         var component = new Constraints.MinimumConstraints.MinimumConstraint(name, highest.Representative, lowest.Representative, delta, minimum);
         component.SetParameter("weight", weight);
         circuit.Add(component);
+        return true;
     }
 
     /// <summary>
@@ -102,22 +117,17 @@ public class MinimumConstraint : ICircuitSolverPresence
     /// <param name="name">A unique name for the elements.</param>
     /// <param name="start">The starting node.</param>
     /// <param name="end">The end node.</param>
-    /// <param name="minimum">The mininum.</param>
-    /// <param name="weight">The weight of the minimum.</param>
-    public static void AddDirectionalMinimum(IEntityCollection circuit, string name, RelativeItem start, RelativeItem end, double minimum, double weight = 1)
+    /// <param name="normal">The normal (direction).</param>
+    /// <param name="minimum">The mininum distance.</param>
+    /// <param name="weight">The weight of constraint when stretching longer than the minimum.</param>
+    public static bool AddDirectionalMinimum(IEntityCollection circuit, string name,
+        RelativeItem start, RelativeItem end,
+        double normal, double minimum, double weight = 1)
     {
-        if (StringComparer.Ordinal.Equals(start.Representative, end.Representative))
-        {
-            // Double check that the minimum is guaranteed
-            if (start.Offset + minimum < end.Offset - 1e-2)
-            {
-                throw new ArgumentException("Invalid minimum");
-            }
-        }
-        if (minimum > 0)
-            AddMinimum(circuit, name, start, end, minimum, weight);
+        if (normal > 0)
+            return AddMinimum(circuit, name, start, end, normal * minimum, weight);
         else
-            AddMinimum(circuit, name, end, start, -minimum, weight);
+            return AddMinimum(circuit, name, end, start, -normal * minimum, weight);
     }
 
     /// <summary>
@@ -131,6 +141,7 @@ public class MinimumConstraint : ICircuitSolverPresence
     /// <param name="toY">The end Y-coordinate.</param>
     /// <param name="normal">The normal (direction).</param>
     /// <param name="minimum">The minimum distance along <paramref name="normal"/>.</param>
+    /// <param name="weight">The weight of constraint when stretching longer than the minimum.</param>
     public static void AddDirectionalMinimum(IEntityCollection circuit, string name,
         RelativeItem fromX, RelativeItem fromY, RelativeItem toX, RelativeItem toY,
         Vector2 normal, double minimum, double weight = 1.0)

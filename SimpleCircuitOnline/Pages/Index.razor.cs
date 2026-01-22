@@ -552,6 +552,10 @@ public partial class Index
                 }
             }
         }
+        catch (SimpleCircuitDiagnosticException dEx)
+        {
+            _logger.Post(dEx.DiagnosticMessage);
+        }
         catch (Exception ex)
         {
             _logger.Post(new DiagnosticMessage(SeverityLevel.Error, "Exception", ex.Message));

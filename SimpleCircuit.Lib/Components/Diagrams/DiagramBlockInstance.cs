@@ -19,6 +19,7 @@ namespace SimpleCircuit.Components.Diagrams;
 public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
 {
     private readonly PinCollection _pins;
+    private bool _usedBounds;
 
     /// <inheritdoc />
     public string Name { get; }
@@ -54,6 +55,46 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
 
     /// <inheritdoc />
     public string Y { get; }
+
+    /// <inheritdoc />
+    public string Left
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.l";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Top
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.t";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Right
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.r";
+        }
+    }
+
+    /// <inheritdoc />
+    public string Bottom
+    {
+        get
+        {
+            _usedBounds = true;
+            return $"{Name}.b";
+        }
+    }
 
     /// <inheritdoc />
     public Vector2 Location { get; protected set; }
@@ -101,20 +142,28 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
     /// <inheritdoc />
     public virtual PresenceResult Prepare(IPrepareContext context)
     {
+        var result = PresenceResult.Success;
         switch (context.Mode)
         {
             case PreparationMode.Reset:
+                _usedBounds = false;
                 _pins.SortClockwise();
-                break;
-
-            case PreparationMode.Offsets:
-                context.Offsets.Add(X);
-                context.Offsets.Add(Y);
-                UpdatePins([.. _pins.Cast<LooselyOrientedPin>()]);
                 break;
 
             case PreparationMode.Sizes:
                 Labels.Format(context.TextFormatter, Modifier?.Apply(context.Style) ?? context.Style);
+                break;
+
+            case PreparationMode.Offsets:
+                var r = RegisterBoundOffsets(context);
+                if (r == PresenceResult.GiveUp)
+                    return PresenceResult.GiveUp;
+                else if (r == PresenceResult.Incomplete)
+                    result = PresenceResult.Incomplete;
+
+                context.Offsets.Add(X);
+                context.Offsets.Add(Y);
+                UpdatePins([.. _pins.Cast<LooselyOrientedPin>()]);
                 break;
 
             case PreparationMode.DrawableGroups:
@@ -122,7 +171,6 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
                 break;
         }
 
-        var result = PresenceResult.Success;
         foreach (var pin in _pins)
         {
             var r = pin.Prepare(context);
@@ -164,6 +212,31 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
     /// </summary>
     /// <param name="builder"></param>
     protected abstract void Draw(IGraphicsBuilder builder);
+
+    /// <summary>
+    /// Register the offsets that will define the bounds of the drawable.
+    /// The <see cref="Left"/>, <see cref="Top"/>, <see cref="Right"/> and <see cref="Bottom"/>
+    /// coordinates are linked here.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <returns>Returns the result.</returns>
+    protected virtual PresenceResult RegisterBoundOffsets(IPrepareContext context)
+    {
+        if (_usedBounds)
+        {
+            // Simply draw it and figure out the bounds from there
+            var builder = new BoundsBuilder(context.TextFormatter, context.Style, context.Diagnostics);
+            builder.BeginBounds();
+            Draw(builder);
+            builder.EndBounds(out var bounds);
+
+            context.Offsets.Group(X, Left, bounds.Left);
+            context.Offsets.Group(Y, Top, bounds.Top);
+            context.Offsets.Group(X, Right, bounds.Right);
+            context.Offsets.Group(Y, Bottom, bounds.Bottom);
+        }
+        return PresenceResult.Success;
+    }
 
     /// <inheritdoc />
     public void Register(IRegisterContext context)

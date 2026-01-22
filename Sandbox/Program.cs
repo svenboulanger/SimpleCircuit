@@ -16,10 +16,9 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-            ENT("A", "B", "C")
-            ENT~1[r1] <r> X
-            ENT~1[r2] <r> X
-            ENT~1(header-bg="#aaaaaa", alpha=0.5)
+        GND <u> R1 <u> C2(flip, "This is some pretty long text...") <u r d> R3 <d> GND
+        (y GND)
+        (x C2 <r ++5> R3)
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr

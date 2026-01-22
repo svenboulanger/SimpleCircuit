@@ -985,8 +985,12 @@ public static class StatementEvaluator
                     }
                     if (direction.Distance is not null)
                     {
-                        if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatortype.Positive)
+                        if (direction.Distance is UnaryNode unary &&
+                            (unary.Type == UnaryOperatortype.Positive || unary.Type == UnaryOperatortype.PrefixIncrement))
+                        {
                             segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
+                            segment.UsesBounds = unary.Type == UnaryOperatortype.PrefixIncrement;
+                        }
                         else
                         {
                             segment.Length = EvaluateAsDouble(direction.Distance, context, MinimumWireLength);
