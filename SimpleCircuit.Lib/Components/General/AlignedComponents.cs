@@ -4,7 +4,6 @@ using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SimpleCircuit.Components.General;
 
@@ -148,13 +147,17 @@ public class AlignedComponents : ILocatedPresence, IBoundedComponent
                     context.Offsets.Group(Right, X, 0.0);
                     context.Offsets.Group(Bottom, Y, 0.0);
                 }
-                // else if (_boundedPresences.Count == 1)
-                // {
-                //     context.Offsets.Group(Left, _boundedPresences[0].Left, 0.0);
-                //     context.Offsets.Group(Top, _boundedPresences[0].Top, 0.0);
-                //     context.Offsets.Group(Right, _boundedPresences[0].Right, 0.0);
-                //     context.Offsets.Group(Bottom, _boundedPresences[0].Bottom, 0.0);
-                // }
+                else if (_boundedPresences.Count == 1)
+                {
+                    if (_usedLeft)
+                        context.Offsets.Group(Left, _boundedPresences[0].Left, 0.0);
+                    if (_usedTop)
+                        context.Offsets.Group(Top, _boundedPresences[0].Top, 0.0);
+                    if (_usedRight)
+                        context.Offsets.Group(Right, _boundedPresences[0].Right, 0.0);
+                    if (_usedBottom)
+                        context.Offsets.Group(Bottom, _boundedPresences[0].Bottom, 0.0);
+                }
                 if (_presences.Count < 2)
                     return PresenceResult.Success;
 
@@ -186,7 +189,7 @@ public class AlignedComponents : ILocatedPresence, IBoundedComponent
                 break;
 
             case PreparationMode.Groups:
-                if (_boundedPresences.Count > 0)
+                if (_boundedPresences.Count > 1)
                 {
                     foreach (var bounded in _boundedPresences)
                     {
@@ -208,7 +211,7 @@ public class AlignedComponents : ILocatedPresence, IBoundedComponent
     /// <inheritdoc />
     public void Register(IRegisterContext context)
     {
-        if (_boundedPresences.Count > 0)
+        if (_boundedPresences.Count > 1)
         {
             // Define the bounded through solving
             var left = _usedLeft ? context.GetOffset(Left) : default;
