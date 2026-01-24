@@ -25,15 +25,17 @@ const wireKeywords = [
     ["dot", "A dot marker."],
     ["slash", "A slash marker."],
     ["plus", "A plus sign marker."],
+    ["plusa", "A plus sign marker."],
     ["plusb", "A plus sign marker on the other side."],
     ["minus", "A minus sign marker."],
+    ["minusa", "A minus sign marker."],
     ["minusb", "A minus sign marker on the other side."],
-    ["one", "An ERD-style \"one\" marker."],
-    ["onlyone", "An ERD-style \"one and only one\" marker."],
-    ["many", "An ERD-style \"many\" marker."],
-    ["zeroone", "An ERD-style \"zero or one\" marker."],
-    ["onemany", "An ERD-style \"one or many\" marker."],
-    ["zeromany", "An ERD-style \"zero or many\" marker"]
+    ["erd-one", "An ERD-style \"one\" marker."],
+    ["erd-only-one", "An ERD-style \"one and only one\" marker."],
+    ["erd-many", "An ERD-style \"many\" marker."],
+    ["erd-zero-one", "An ERD-style \"zero or one\" marker."],
+    ["erd-one-many", "An ERD-style \"one or many\" marker."],
+    ["erd-zero-many", "An ERD-style \"zero or many\" marker"]
 ];
 var componentKeywords = [];
 
@@ -144,7 +146,7 @@ function registerLanguage(keywords) {
             wire: [
                 { include: '@line_comment' },
                 { include: '@whitespace' },
-                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plusb?|minusb?|one|onlyone|many|zeroone|onemany|zeromany)\b|\?/, { token: 'pindirection.$S0' }],
+                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plus[ab]?|minus[ab]?|erd-one-many|erd-one|erd-only-one|erd-many|erd-zero-one|erd-zero-many)\b|\?/, { token: 'pindirection.$S0' }],
                 [/\b[xX]\b/, { token: 'queuedpoint.$S0', }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                 { include: '@number' },

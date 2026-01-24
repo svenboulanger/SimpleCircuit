@@ -197,10 +197,10 @@ public partial class Entity : DrawableFactory
                         }
 
                         // Expand depending on the number of pins
-                        _bottom = Math.Max(_bottom, _top + MinimumSpace * Math.Max(_pins.LeftCount, _pins.RightCount));
+                        _bottom = Math.Max(_bottom, _top + MinimumSpace * Math.Max(_pins.LeftCount, _pins.RightCount) + 2 * CornerRadius);
                         _bottom = Math.Max(_bottom, _top + MinHeight);
                         if (Width.Equals(0.0))
-                            _width = Math.Max(_width, MinimumSpace * Math.Max(_pins.TopCount, _pins.BottomCount));
+                            _width = Math.Max(_width, MinimumSpace * Math.Max(_pins.TopCount, _pins.BottomCount) + 2 * CornerRadius);
                         else
                             _width = Width;
 

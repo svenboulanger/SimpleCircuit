@@ -16,27 +16,8 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        .variant ENT* even-fontsize=4.0 odd-fontsize=4.0 odd-bg="#cccccc"
-
-        ENT1("Marks", "MarkId &#128273;", "studentid\nwith\nsome\nlonger\ntext", "SubjectId", "Date", "Mark")
-        ENT2("Subjects", "SubjectId &#128273;", "Title")
-        ENT3("Students", "StudentId &#128273;", "FirstName", "LastName", "GroupId")
-        ENT4("SUBJ\_TEACH", "STId &#128273;", "SubjectId", "TeacherId", "GroupId")
-        ENT5("Teachers", "FirstName", "LastName")
-        ENT6("Groups", "GroupId &#128273;", "Name")
-
-        ENT1 <erd-one-many r u erd-one-many> ENT2
-        ENT1 <erd-one-many l d r erd-only-one> ENT3
-
-        ENT3 <erd-one-many l d r erd-only-one> ENT6
-
-        ENT1 <erd-one-many r d r erd-one-many> ENT4
-        ENT4 <erd-one-many r erd-only-one> ENT5
-
-        ENT6 <erd-only-one r u r erd-one-many> ENT4
-
-        (x ENT1 <r ++5> ENT2)
-        (y ENT1 <d ++5> ENT3 <d ++5> ENT6)
+        X <r plus> X
+        X <r plusb> X
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr

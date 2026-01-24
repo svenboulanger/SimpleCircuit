@@ -857,6 +857,7 @@ public abstract class BaseGraphicsBuilder : IGraphicsBuilder
             case "erd-zero-many": markers.Add(new ERDZeroMany()); break;
             case "erd-zero-one": markers.Add(new ERDZeroOne()); break;
             case "plus": markers.Add(new Plus()); break;
+            case "plusb": markers.Add(new Plus() { OppositeSide = true }); break;
             case "minus": markers.Add(new Minus()); break;
             case "slash": markers.Add(new Slash()); break;
             default:

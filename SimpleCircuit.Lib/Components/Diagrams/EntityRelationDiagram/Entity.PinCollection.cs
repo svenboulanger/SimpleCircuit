@@ -165,8 +165,9 @@ public partial class Entity
 
                     // Distribute the pins evenly along the side of the entity
                     var bounds = _parent.RelativeBounds;
-                    if (_parent.CornerRadius * 2.0 > bounds.Width && _parent.CornerRadius * 2.0 > bounds.Height)
-                        bounds = bounds.Expand(-_parent.CornerRadius);
+                    var innerBounds = bounds;
+                    if (_parent.CornerRadius * 2.0 < bounds.Width && _parent.CornerRadius * 2.0 < bounds.Height)
+                        innerBounds = bounds.Expand(-_parent.CornerRadius);
                     int iLeft = 0, iTop = 0, iRight = 0, iBottom = 0;
                     for (int i = 0; i < _pinOrientations.Count; i++)
                     {
@@ -180,7 +181,7 @@ public partial class Entity
                                     return PresenceResult.GiveUp;
                                 }
                                 double f = (iTop + 0.5) / TopCount;
-                                context.Offsets.Group(_parent.X, pin.X, (1.0 - f) * bounds.Left + f * bounds.Right);
+                                context.Offsets.Group(_parent.X, pin.X, (1.0 - f) * innerBounds.Left + f * innerBounds.Right);
                                 iTop++;
                                 break;
 
@@ -191,7 +192,7 @@ public partial class Entity
                                     return PresenceResult.GiveUp;
                                 }
                                 f = (iBottom + 0.5) / BottomCount;
-                                context.Offsets.Group(_parent.X, pin.X, (1.0 - f) * bounds.Left + f * bounds.Right);
+                                context.Offsets.Group(_parent.X, pin.X, (1.0 - f) * innerBounds.Left + f * innerBounds.Right);
                                 iBottom++;
                                 break;
 
@@ -202,7 +203,7 @@ public partial class Entity
                                     return PresenceResult.GiveUp;
                                 }
                                 f = (iLeft + 0.5) / LeftCount;
-                                context.Offsets.Group(_parent.Y, pin.Y, (1.0 - f) * bounds.Top + f * bounds.Bottom);
+                                context.Offsets.Group(_parent.Y, pin.Y, (1.0 - f) * innerBounds.Top + f * innerBounds.Bottom);
                                 iLeft++;
                                 break;
 
@@ -213,7 +214,7 @@ public partial class Entity
                                     return PresenceResult.GiveUp;
                                 }
                                 f = (iRight + 0.5) / RightCount;
-                                context.Offsets.Group(_parent.Y, pin.Y, (1.0 - f) * bounds.Top + f * bounds.Bottom);
+                                context.Offsets.Group(_parent.Y, pin.Y, (1.0 - f) * innerBounds.Top + f * innerBounds.Bottom);
                                 iRight++;
                                 break;
 

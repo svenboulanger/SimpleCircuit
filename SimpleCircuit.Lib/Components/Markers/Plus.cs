@@ -12,6 +12,7 @@ namespace SimpleCircuit.Components.Markers;
 /// <param name="location">The location.</param>
 /// <param name="orientation">The orientation.</param>
 [Drawable("plus", "A generic plus symbol.", "General")]
+[Drawable("plusa", "A generic plus symbol.", "General")]
 public class Plus(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
 {
     /// <summary>
