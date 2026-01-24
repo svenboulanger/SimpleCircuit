@@ -44,8 +44,8 @@ public class Plug : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(), new(-1, 0)), "in", "a");
-            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(), new(1, 0)), "out", "b");
+            AddPin(new FixedOrientedPin("positive", "The positive pin.", this, new(), new(-1, 0)), "in", "a");
+            AddPin(new FixedOrientedPin("negative", "The negative pin.", this, new(), new(1, 0)), "out", "b");
         }
 
         /// <inheritdoc />

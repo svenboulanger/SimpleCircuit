@@ -34,10 +34,10 @@ public class Multiplexer : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("1", "The '1' input.", this, new(-5, -4), new(-1, 0)), "a", "1");
-            Pins.Add(new FixedOrientedPin("0", "The '0' input.", this, new(-5, 4), new(-1, 0)), "b", "0");
-            Pins.Add(new FixedOrientedPin("c", "The controlling input.", this, new(0, -6), new(0, -1)), "c");
-            Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
+            AddPin(new FixedOrientedPin("1", "The '1' input.", this, new(-5, -4), new(-1, 0)), "a", "1");
+            AddPin(new FixedOrientedPin("0", "The '0' input.", this, new(-5, 4), new(-1, 0)), "b", "0");
+            AddPin(new FixedOrientedPin("c", "The controlling input.", this, new(0, -6), new(0, -1)), "c");
+            AddPin(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "o", "out", "output");
         }
 
         public override PresenceResult Prepare(IPrepareContext context)

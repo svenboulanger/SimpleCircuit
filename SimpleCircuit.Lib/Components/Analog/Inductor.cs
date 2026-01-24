@@ -69,8 +69,8 @@ public class Inductor : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
-            Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
+            AddPin(new FixedOrientedPin("positive", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "a");
+            AddPin(new FixedOrientedPin("negative", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "b");
         }
 
         /// <inheritdoc />
@@ -92,7 +92,7 @@ public class Inductor : DrawableFactory
                     Pins.Clear();
 
                     double l = Length * 0.5;
-                    Pins.Add(new FixedOrientedPin("positive", "The positive pin.", this, new(-l, 0), new(-1, 0)), "p", "a");
+                    AddPin(new FixedOrientedPin("positive", "The positive pin.", this, new(-l, 0), new(-1, 0)), "p", "a");
 
                     // Add a tap for each winding
                     double x = -l;
@@ -103,7 +103,7 @@ public class Inductor : DrawableFactory
                             x += 3;
                             for (int i = 0; i < _windings - 1; i++)
                             {
-                                Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i}", this, new(x, 0), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
+                                AddPin(new FixedOrientedPin($"tap{i + 1}", $"Tap {i}", this, new(x, 0), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
                                 x += 3;
                             }
                             break;
@@ -112,12 +112,12 @@ public class Inductor : DrawableFactory
                             x += 3;
                             for (int i = 0; i < _windings; i++)
                             {
-                                Pins.Add(new FixedOrientedPin($"tap{i + 1}", $"Tap {i + 1}", this, new(x, 3), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
+                                AddPin(new FixedOrientedPin($"tap{i + 1}", $"Tap {i + 1}", this, new(x, 3), new(0, 1)), $"tap{i + 1}", $"t{i + 1}");
                                 x += 3;
                             }
                             break;
                     }
-                    Pins.Add(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
+                    AddPin(new FixedOrientedPin("negative", "The negative pin.", this, new(l, 0), new(1, 0)), "n", "b");
                     break;
             }
             return result;

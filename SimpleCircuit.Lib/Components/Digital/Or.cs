@@ -128,11 +128,11 @@ public class Or : DrawableFactory
                             double rt = 1 - t;
                             x = -(rt * rt * rt + t * t * t) * w - 3 * (rt * rt * t + rt * t * t) * w * 0.6;
                         }
-                        Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(x, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
+                        AddPin(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(x, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
                         y += Spacing;
                         c++;
                     }
-                    Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(w + 3, 0) : new(w, 0), new(1, 0)), "output", "out", "o");
+                    AddPin(new FixedOrientedPin("output", "Output", this, invertOutput ? new(w + 3, 0) : new(w, 0), new(1, 0)), "output", "out", "o");
 
                     // Labels
                     var style = context.Style.ModifyDashedDotted(this);

@@ -13,7 +13,7 @@ namespace SimpleCircuit.Components.Diagrams.EntityRelationDiagram;
 /// An entity for an Entity-Relationship Diagram.
 /// </summary>
 [Drawable("ENT", "An entity-relationship diagram entity. Any label after the first will be added as an attribute.", "ERD", "box rectangle", labelCount: 3)]
-public class Entity : DrawableFactory
+public partial class Entity : DrawableFactory
 {
     /// <inheritdoc />
     protected override IDrawable Factory(string key, string name)
@@ -22,13 +22,21 @@ public class Entity : DrawableFactory
     /// <summary>
     /// Creates a new entity.
     /// </summary>
-    /// <param name="name">The name of the entity.</param>
-    private class Instance(string name) : LocatedDrawable(name), IRoundedBox
+    private class Instance : LocatedDrawable, IRoundedBox
     {
         private double _width;
         private double _top, _bottom;
         private readonly List<double> _separators = [];
         private CustomLabelAnchorPoints _anchors = null;
+        private readonly PinCollection _pins;
+
+        /// <param name="name">The name of the entity.</param>
+        public Instance(string name)
+            : base(name)
+        {
+            _pins = new PinCollection(this);
+            Pins = _pins;
+        }
 
         /// <inheritdoc />
         public override string Type => "entity";
@@ -47,7 +55,13 @@ public class Entity : DrawableFactory
         /// Gets or sets the minimum width of the block.
         /// </summary>
         [Description("The minimum width of the entity block. Only used if the content is used to size the block.")]
-        public double MinWidth { get; set; }
+        public double MinWidth { get; set; } = 20.0;
+
+        /// <summary>
+        /// Gets or sets the minimum height of the block.
+        /// </summary>
+        [Description("The minimum height of the entity block. Only used if the content is used to size the block.")]
+        public double MinHeight { get; set; } = 10.0;
 
         /// <summary>
         /// Gets or sets the height of an attribute line.
@@ -70,6 +84,13 @@ public class Entity : DrawableFactory
         [Alias("radius")]
         public double CornerRadius { get; set; }
 
+        /// <summary>
+        /// Gets or sets the minimum space.
+        /// </summary>
+        [Description("The minimum space between (anonymous) pins.")]
+        [Alias("ms")]
+        public double MinimumSpace { get; set; } = 5.0;
+
         [Description("The header style.")]
         [Alias("header")]
         public IStyleModifier HeaderStyle { get; set; }
@@ -81,6 +102,12 @@ public class Entity : DrawableFactory
         [Description("The style for odd rows.")]
         [Alias("odd")]
         public IStyleModifier OddStyle { get; set; }
+
+        /// <summary>
+        /// Gets the bounds relative to the origin of the component.
+        /// </summary>
+        /// <remarks>This is used by the pins to calculate where they should be.</remarks>
+        public Bounds RelativeBounds => new(-0.5 * _width, _top, 0.5 * _width, _bottom);
 
         /// <summary>
         /// Gets or sets the margin.
@@ -95,6 +122,13 @@ public class Entity : DrawableFactory
             if (result == PresenceResult.GiveUp)
                 return result;
 
+            // Pass preparation to our pins
+            var r = _pins.Prepare(context);
+            if (r == PresenceResult.GiveUp)
+                return PresenceResult.GiveUp;
+            else if (r == PresenceResult.Incomplete)
+                result = r;
+
             switch (context.Mode)
             {
                 case PreparationMode.Reset:
@@ -106,17 +140,17 @@ public class Entity : DrawableFactory
                     if (Labels.Count > 0)
                     {
                         // Deal with header pins
-                        Pins.Add(new FixedOrientedPin("left", "The left pin", this, default, new(-1, 0)), "l", "w", "left");
-                        Pins.Add(new FixedOrientedPin("top", "The top pin", this, default, new(0, -1)), "t", "n", "top");
-                        Pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, default, new(0, 1)), "b", "s", "bottom");
+                        _pins.Add(new FixedOrientedPin("left", "The left pin", this, default, new(-1, 0)), "l", "w", "left");
+                        _pins.Add(new FixedOrientedPin("top", "The top pin", this, default, new(0, -1)), "t", "n", "top");
+                        _pins.Add(new FixedOrientedPin("bottom", "The bottom pin", this, default, new(0, 1)), "b", "s", "bottom");
 
                         // Deal with entity attributes
                         for (int i = 1; i < Labels.Count; i++)
                         {
-                            Pins.Add(new FixedOrientedPin($"attr {i} left", $"The left pin for attribute {i}.", this, default, new(-1, 0)), $"l{i}", $"w{i}", $"left{i}");
-                            Pins.Add(new FixedOrientedPin($"attr {i} right", $"The right pin of attribute {i}.", this, default, new(1, 0)), $"r{i}", $"e{i}", $"right{i}");
+                            _pins.Add(new FixedOrientedPin($"attr {i} left", $"The left pin for attribute {i}.", this, default, new(-1, 0)), $"l{i}", $"w{i}", $"left{i}");
+                            _pins.Add(new FixedOrientedPin($"attr {i} right", $"The right pin of attribute {i}.", this, default, new(1, 0)), $"r{i}", $"e{i}", $"right{i}");
                         }
-                        Pins.Add(new FixedOrientedPin("right", "The right pin", this, default, new(1, 0)), "r", "e", "right");
+                        _pins.Add(new FixedOrientedPin("right", "The right pin", this, default, new(1, 0)), "r", "e", "right");
                     }
                     break;
 
@@ -135,9 +169,14 @@ public class Entity : DrawableFactory
                         _bottom = bounds.Height * 0.5;
 
                         // Attributes (vertical)
-                        double iY = style.LineSpacing * style.FontSize;
                         for (int i = 1; i < Labels.Count; i++)
                         {
+                            IStyle cstyle;
+                            if (i % 2 == 1)
+                                cstyle = style.Modify(EvenStyle);
+                            else
+                                cstyle = style.Modify(OddStyle);
+
                             // Store the separator
                             _separators.Add(_bottom);
 
@@ -146,35 +185,47 @@ public class Entity : DrawableFactory
                             _width = Math.Max(bounds.Width + Margin.Horizontal + style.LineThickness, _width);
 
                             // We will make sure that the locations are in increments of the line spacing.
-                            double t = Math.Ceiling(bounds.Top / iY) * iY - iY;
-                            double b = Math.Floor(bounds.Bottom / iY) * iY + iY * 0.4;
-                            SetPinOffset(i * 2 + 1, new(0, _bottom + (b - t) * 0.5));
-                            SetPinOffset(i * 2 + 2, new(0, _bottom + (b - t) * 0.5));
+                            double iY = cstyle.LineSpacing * cstyle.FontSize;
+                            double t = bounds.Top - 0.25 * iY;
+                            double b = (Math.Floor(bounds.Bottom / iY + 0.4) + 0.4) * iY;
+                            _pins.SetPinOffset(i * 2 + 1, new(0, _bottom + (b - t) * 0.5));
+                            _pins.SetPinOffset(i * 2 + 2, new(0, _bottom + (b - t) * 0.5));
 
                             _bottom -= t;
                             _anchors[i] = new LabelAnchorPoint(new(-bounds.Left + Margin.Left, _bottom), Vector2.NaN, Vector2.UX, TextOrientationType.None);
                             _bottom += b;
                         }
 
+                        // Expand depending on the number of pins
+                        _bottom = Math.Max(_bottom, _top + MinimumSpace * Math.Max(_pins.LeftCount, _pins.RightCount));
+                        _bottom = Math.Max(_bottom, _top + MinHeight);
+                        if (Width.Equals(0.0))
+                            _width = Math.Max(_width, MinimumSpace * Math.Max(_pins.TopCount, _pins.BottomCount));
+                        else
+                            _width = Width;
+
                         // Place the header pins horizontally
                         double w = _width * 0.5;
-                        SetPinOffset(0, new(-w, 0)); // Left pin
-                        SetPinOffset(1, new(0, _top)); // Top pin
-                        SetPinOffset(2, new(0, _bottom)); // Bottom pin
-                        SetPinOffset(Pins.Count - 1, new(w, 0)); // Right pin
+                        _pins.SetPinOffset(0, new(-w, 0)); // Left pin
+                        _pins.SetPinOffset(1, new(0, _top)); // Top pin
+                        _pins.SetPinOffset(2, new(0, _bottom)); // Bottom pin
+                        _pins.SetPinOffset(1 + Labels.Count * 2, new(w, 0)); // Right pin
 
                         // Place the attributes and pins horizontally
                         for (int i = 1; i < Labels.Count; i++)
                         {
                             var offset = ((FixedOrientedPin)Pins[i * 2 + 2]).Offset;
-                            SetPinOffset(i * 2 + 1, new(-w, offset.Y));
-                            SetPinOffset(i * 2 + 2, new(w, offset.Y));
+                            _pins.SetPinOffset(i * 2 + 1, new(-w, offset.Y));
+                            _pins.SetPinOffset(i * 2 + 2, new(w, offset.Y));
                             _anchors[i] = new LabelAnchorPoint(new(_anchors[i].Location.X - w, _anchors[i].Location.Y), Vector2.NaN, Vector2.UX, TextOrientationType.None);
                         }
                     }
+                    else
+                    {
+                        _width = MinWidth;
+                    }
                     break;
             }
-
             return result;
         }
 

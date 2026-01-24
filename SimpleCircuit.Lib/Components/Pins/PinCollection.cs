@@ -43,6 +43,7 @@ public class PinCollection : IPinCollection
     /// </summary>
     /// <param name="pin">The pin.</param>
     /// <param name="names">The names.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="pin"/> is <c>null</c>.</exception>
     public void Add(IPin pin, params string[] names)
     {
         _pinsByIndex.Add(pin ?? throw new ArgumentNullException(nameof(pin)));

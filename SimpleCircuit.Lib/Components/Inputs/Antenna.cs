@@ -37,7 +37,7 @@ public class Antenna : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("pin", "The pin of the antenna.", this, new(), new(0, 1)), "p", "pin", "a");
+            AddPin(new FixedOrientedPin("pin", "The pin of the antenna.", this, new(), new(0, 1)), "p", "pin", "a");
             _anchors = new(
                 new LabelAnchorPoint(new(5, -2), new(1, 0)),
                 new LabelAnchorPoint(new(-5, -2), new(-1, 0)));

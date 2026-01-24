@@ -81,19 +81,19 @@ public class AnalogToDigital : DrawableFactory
                     // Inputs
                     if (Variants.Contains(_differentialInput))
                     {
-                        Pins.Add(new FixedOrientedPin("positiveinput", "The (positive) input", this, default, new(-1, 0)), "i", "in", "inp", "pi", "p");
-                        Pins.Add(new FixedOrientedPin("negativeinput", "The negative input.", this, default, new(-1, 0)), "inn", "ni", "n");
+                        AddPin(new FixedOrientedPin("positiveinput", "The (positive) input", this, default, new(-1, 0)), "i", "in", "inp", "pi", "p");
+                        AddPin(new FixedOrientedPin("negativeinput", "The negative input.", this, default, new(-1, 0)), "inn", "ni", "n");
                     }
                     else
-                        Pins.Add(new FixedOrientedPin("input", "The input.", this, default, new(-1, 0)), "i", "in", "inp", "pi", "p");
+                        AddPin(new FixedOrientedPin("input", "The input.", this, default, new(-1, 0)), "i", "in", "inp", "pi", "p");
 
                     if (Variants.Contains(_differentialOutput))
                     {
-                        Pins.Add(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, default, new(1, 0)), "o", "out", "outp", "po");
-                        Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, default, new(1, 0)), "outn", "no");
+                        AddPin(new FixedOrientedPin("positiveoutput", "The (positive) output.", this, default, new(1, 0)), "o", "out", "outp", "po");
+                        AddPin(new FixedOrientedPin("negativeoutput", "The negative output.", this, default, new(1, 0)), "outn", "no");
                     }
                     else
-                        Pins.Add(new FixedOrientedPin("output", "The output.", this, default, new(1, 0)), "o", "out", "outp", "po");
+                        AddPin(new FixedOrientedPin("output", "The output.", this, default, new(1, 0)), "o", "out", "outp", "po");
                     break;
 
                 case PreparationMode.Sizes:

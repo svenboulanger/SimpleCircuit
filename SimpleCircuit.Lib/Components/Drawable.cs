@@ -43,12 +43,9 @@ public abstract class Drawable : IDrawable
     public virtual string Type => "Drawable";
 
     /// <summary>
-    /// Gets the pins of the component.
+    /// Gets the pins of the drawable.
     /// </summary>
-    public PinCollection Pins { get; } = [];
-
-    /// <inheritdoc />
-    IPinCollection IDrawable.Pins => Pins;
+    public IPinCollection Pins { get; protected set; }
 
     /// <inheritdoc />
     public virtual int Order => 0;
@@ -71,11 +68,26 @@ public abstract class Drawable : IDrawable
     /// Creates a new component.
     /// </summary>
     /// <param name="name">The name of the component.</param>
-    protected Drawable(string name)
+    /// <param name="pinCollection">The pin collection.</param>
+    protected Drawable(string name, IPinCollection pinCollection = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentNullException(nameof(name));
         Name = name;
+        Pins = new PinCollection();
+    }
+
+    /// <summary>
+    /// Adds a pin to the pin collection if the current pin collection is a <see cref="PinCollection"/>.
+    /// </summary>
+    /// <param name="pin">The pin.</param>
+    /// <param name="names">The names of the pin.</param>
+    /// <exception cref="ArgumentException">Thrown if <see cref="Pins"/> is not a <see cref="PinCollection"/>.</exception>
+    protected void AddPin(IPin pin, params string[] names)
+    {
+        if (Pins is not PinCollection pinCollection)
+            throw new ArgumentException("Pin collection is not a regular pin collection");
+        pinCollection.Add(pin, names);
     }
 
     /// <inheritdoc />
@@ -253,17 +265,17 @@ public abstract class Drawable : IDrawable
         {
             if (value is T typedValue)
             {
-                property.SetValue(obj, modifier(obj as IStyleModifier, typedValue));
+                property.SetValue(obj, modifier(property.GetValue(obj) as IStyleModifier, typedValue));
                 return true;
             }
             else if (value is int i && typeof(T) == typeof(double))
             {
-                property.SetValue(obj, modifier(obj as IStyleModifier, (T)(object)(double)(int)value));
+                property.SetValue(obj, modifier(property.GetValue(obj) as IStyleModifier, (T)(object)(double)(int)value));
                 return true;
             }
             else if (value is double dbl && typeof(T) == typeof(int))
             {
-                property.SetValue(obj, modifier(obj as IStyleModifier, (T)(object)(int)(double)value));
+                property.SetValue(obj, modifier(property.GetValue(obj) as IStyleModifier, (T)(object)(int)(double)value));
                 return true;
             }
             else

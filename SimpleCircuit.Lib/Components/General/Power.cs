@@ -38,7 +38,7 @@ public class PowerFactory : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
+            AddPin(new FixedOrientedPin("a", "The pin.", this, new(), new(0, 1)), "x", "p", "a");
         }
 
         /// <inheritdoc />

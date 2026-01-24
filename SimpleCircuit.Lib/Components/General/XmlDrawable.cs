@@ -168,9 +168,9 @@ public class XmlDrawable : IDrawableFactory
                             if (extend == "true")
                                 _extend.Add(Pins.Count);
                             if (nx.IsZero() && ny.IsZero())
-                                Pins.Add(new FixedPin(name, description, this, new(x, y)), aliases);
+                                AddPin(new FixedPin(name, description, this, new(x, y)), [.. aliases]);
                             else
-                                Pins.Add(new FixedOrientedPin(name, description, this, new(x, y), new(nx, ny)), aliases);
+                                AddPin(new FixedOrientedPin(name, description, this, new(x, y), new(nx, ny)), [.. aliases]);
                         }
                         break;
 

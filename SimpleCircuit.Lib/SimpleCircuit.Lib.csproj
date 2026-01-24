@@ -40,6 +40,7 @@
     <Compile Include="Circuits\Contexts\ExtremeTracker.cs" />
     <Compile Include="Circuits\GraphicalCircuit.cs" />
     <Compile Include="Circuits\Contexts\RegisterContext.cs" />
+    <Compile Include="Circuits\IBoundedComponent.cs" />
     <Compile Include="Circuits\ICircuitPresence.cs" />
     <Compile Include="Circuits\ICircuitSolverPresence.cs" />
     <Compile Include="Circuits\ILocatedPresence.cs" />

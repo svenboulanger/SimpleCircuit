@@ -41,8 +41,8 @@ public class Cut : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("a", "The first pin.", this, new(-2, 0), new(-1, 0)), "a");
-            Pins.Add(new FixedOrientedPin("b", "The second pin.", this, new(2, 0), new(1, 0)), "b");
+            AddPin(new FixedOrientedPin("a", "The first pin.", this, new(-2, 0), new(-1, 0)), "a");
+            AddPin(new FixedOrientedPin("b", "The second pin.", this, new(2, 0), new(1, 0)), "b");
         }
 
         /// <inheritdoc />

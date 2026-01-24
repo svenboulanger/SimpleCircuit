@@ -20,7 +20,7 @@ public class Subcircuit : IDrawableFactory
 {
     private readonly string _key;
     private readonly SubcircuitDefinitionNode _definitionNode;
-    private readonly Dictionary<SubcircuitState, (GraphicalCircuit, List<Action<PinCollection, ILocatedDrawable>>)> _versions = [];
+    private readonly Dictionary<SubcircuitState, (GraphicalCircuit, List<Action<IPinCollection, ILocatedDrawable>>)> _versions = [];
     private readonly DrawableFactoryDictionary _factories;
     private readonly Options _options;
 
@@ -180,7 +180,7 @@ public class Subcircuit : IDrawableFactory
                             return PresenceResult.GiveUp;
 
                         HashSet<string> usedPins = [];
-                        List<Action<PinCollection, ILocatedDrawable>> pinFactories = [];
+                        List<Action<IPinCollection, ILocatedDrawable>> pinFactories = [];
                         foreach (var pinInfo in _parentFactory._definitionNode.Pins)
                         {
                             var r = RegisterPin(circuit, pinInfo, evalContext, pinFactories, usedPins, context.Diagnostics);
@@ -201,7 +201,7 @@ public class Subcircuit : IDrawableFactory
             return result;
         }
 
-        private PresenceResult RegisterPin(GraphicalCircuit circuit, SyntaxNode node, EvaluationContext context, List<Action<PinCollection, ILocatedDrawable>> pinFactories, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
+        private PresenceResult RegisterPin(GraphicalCircuit circuit, SyntaxNode node, EvaluationContext context, List<Action<IPinCollection, ILocatedDrawable>> pinFactories, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
         {
             switch (node)
             {
@@ -273,7 +273,7 @@ public class Subcircuit : IDrawableFactory
             return PresenceResult.Success;
         }
 
-        private static Action<PinCollection, ILocatedDrawable> CreatePinFactory(string drawableName, string pinName, IPin pin, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
+        private static Action<IPinCollection, ILocatedDrawable> CreatePinFactory(string drawableName, string pinName, IPin pin, HashSet<string> usedPins, IDiagnosticHandler diagnostics)
         {
             List<string> names = [];
 
@@ -320,13 +320,23 @@ public class Subcircuit : IDrawableFactory
                     {
                         var offset = oriented.Location;
                         var orientation = oriented.Orientation;
-                        return (pc, d) => pc.Add(new FixedOrientedPin(namePin, "Pin", d, offset, orientation), names);
+                        return (pc, d) =>
+                        {
+                            if (pc is not PinCollection pinCollection)
+                                throw new ArgumentException("Unexpected pin collection");
+                            pinCollection.Add(new FixedOrientedPin(namePin, "Pin", d, offset, orientation), names);
+                        };
                     }
 
                 case FixedPin @fixed:
                     {
                         var offset = @fixed.Location;
-                        return (pc, d) => pc.Add(new FixedPin(namePin, "Pin", d, offset), names);
+                        return (pc, d) =>
+                        {
+                            if (pc is not PinCollection pinCollection)
+                                throw new ArgumentException("Unexpected pin collection");
+                            pinCollection.Add(new FixedPin(namePin, "Pin", d, offset), names);
+                        };
                     }
 
                 default:

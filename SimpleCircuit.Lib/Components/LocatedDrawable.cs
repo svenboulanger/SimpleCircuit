@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Drawing.Builders;
 
@@ -67,8 +68,9 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
     /// Initializes a new instance of the <see cref="LocatedDrawable"/> class.
     /// </summary>
     /// <param name="name">The name.</param>
-    protected LocatedDrawable(string name)
-        : base(name)
+    /// <param name="pinCollection">An optional pin collection.</param>
+    protected LocatedDrawable(string name, IPinCollection pinCollection = null)
+        : base(name, pinCollection)
     {
         X = $"{name}.x";
         Y = $"{name}.y";
@@ -80,8 +82,8 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
         Location = context.GetValue(X, Y);
 
         // Give the pins a chance to update as well
-        for (int i = 0; i < Pins.Count; i++)
-            Pins[i].Update(context);
+        foreach (var pin in Pins)
+            pin.Update(context);
     }
 
     /// <inheritdoc />
@@ -92,9 +94,9 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
             return result;
 
         // Deal with the pins
-        for (int i = 0; i < Pins.Count; i++)
+        foreach (var pin in Pins)
         {
-            var r = Pins[i].Prepare(context);
+            var r = pin.Prepare(context);
             if (r == PresenceResult.GiveUp)
                 return PresenceResult.GiveUp;
             else if (r == PresenceResult.Incomplete)
@@ -156,7 +158,7 @@ public abstract class LocatedDrawable : Drawable, ILocatedDrawable
     /// <inheritdoc />
     public override void Register(IRegisterContext context)
     {
-        for (int i = 0; i < Pins.Count; i++)
-            Pins[i].Register(context);
+        foreach (var pin in Pins)
+            pin.Register(context);
     }
 }

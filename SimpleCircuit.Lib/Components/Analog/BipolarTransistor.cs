@@ -45,9 +45,9 @@ public class BipolarTransistor : DrawableFactory
         public Npn(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
-            Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
-            Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
+            AddPin(new FixedOrientedPin("emitter", "The emitter.", this, new(-6, 0), new(-1, 0)), "e", "emitter");
+            AddPin(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
+            AddPin(new FixedOrientedPin("collector", "The collector.", this, new(6, 0), new(1, 0)), "c", "collector");
         }
 
         /// <inheritdoc />
@@ -90,9 +90,9 @@ public class BipolarTransistor : DrawableFactory
         public Pnp(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
-            Pins.Add(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
-            Pins.Add(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
+            AddPin(new FixedOrientedPin("collector", "The collector.", this, new(-6, 0), new(-1, 0)), "c", "collector");
+            AddPin(new FixedOrientedPin("base", "The base.", this, new(0, 4), new(0, 1)), "b", "base");
+            AddPin(new FixedOrientedPin("emitter", "The emitter.", this, new(6, 0), new(1, 0)), "e", "emitter");
         }
 
         /// <inheritdoc />

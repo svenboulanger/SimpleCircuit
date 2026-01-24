@@ -90,7 +90,7 @@ public class Bit : DrawableFactory
                     // Left
                     int row, col;
                     for (row = 0; row < _bits.Count; row++)
-                        Pins.Add(new FixedOrientedPin($"left{row + 1}", $"The left pin of row {row}.", this, new((_maxWidth - _bits[row].Length) * BlockSize, BlockSize * row + hw), new(-1, 0)), $"left{row}", $"l{row}", $"w{row}");
+                        AddPin(new FixedOrientedPin($"left{row + 1}", $"The left pin of row {row}.", this, new((_maxWidth - _bits[row].Length) * BlockSize, BlockSize * row + hw), new(-1, 0)), $"left{row}", $"l{row}", $"w{row}");
 
                     // Top
                     row = 0; col = 0;
@@ -98,7 +98,7 @@ public class Bit : DrawableFactory
                     {
                         while (col < _bits[row].Length)
                         {
-                            Pins.Add(new FixedOrientedPin($"top{col + 1}", $"The top pin of column {col}.", this, new(BlockSize * col + hw, BlockSize * row), new(0, -1)), $"top{col}", $"t{col}", $"n{col}");
+                            AddPin(new FixedOrientedPin($"top{col + 1}", $"The top pin of column {col}.", this, new(BlockSize * col + hw, BlockSize * row), new(0, -1)), $"top{col}", $"t{col}", $"n{col}");
                             col++;
                         }
                         while (row < _bits.Count && col >= _bits[row].Length)
@@ -111,7 +111,7 @@ public class Bit : DrawableFactory
                     {
                         while (col < _bits[row].Length)
                         {
-                            Pins.Add(new FixedOrientedPin($"bottom{col + 1}", $"The bottom pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * (row + 1)), new(0, 1)), $"bottom{col}", $"b{col}", $"s{col}");
+                            AddPin(new FixedOrientedPin($"bottom{col + 1}", $"The bottom pin of column {col + 1}.", this, new(BlockSize * col + hw, BlockSize * (row + 1)), new(0, 1)), $"bottom{col}", $"b{col}", $"s{col}");
                             col++;
                         }
                         while (row >= 0 && col >= _bits[row].Length)
@@ -120,7 +120,7 @@ public class Bit : DrawableFactory
 
                     // Right
                     for (row = 0; row < _bits.Count; row++)
-                        Pins.Add(new FixedOrientedPin($"right{row + 1}", $"The right pin of row {row + 1}", this, new(BlockSize * _bits[row].Length, BlockSize * row + hw), new(1, 0)), $"right{row}", $"r{row}", $"e{row}");
+                        AddPin(new FixedOrientedPin($"right{row + 1}", $"The right pin of row {row + 1}", this, new(BlockSize * _bits[row].Length, BlockSize * row + hw), new(1, 0)), $"right{row}", $"r{row}", $"e{row}");
 
                     break;
             }

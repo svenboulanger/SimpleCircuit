@@ -60,7 +60,7 @@ public class Appliance : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("p", "The connection.", this, new(), new(-1, 0)), "p", "a");
+            AddPin(new FixedOrientedPin("p", "The connection.", this, new(), new(-1, 0)), "p", "a");
         }
 
         public override PresenceResult Prepare(IPrepareContext context)

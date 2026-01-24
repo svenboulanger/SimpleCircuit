@@ -113,11 +113,11 @@ public class And : DrawableFactory
                     char c = 'a';
                     for (int i = 0; i < _inputs; i++)
                     {
-                        Pins.Add(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(-r, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
+                        AddPin(new FixedOrientedPin($"input{i}", $"Input {i}", this, new(-r, y), new(-1, 0)), c.ToString(), $"in{i + 1}");
                         y += Spacing;
                         c++;
                     }
-                    Pins.Add(new FixedOrientedPin("output", "Output", this, invertOutput ? new(r + 3, 0) : new(r, 0), new(1, 0)), "output", "out", "o");
+                    AddPin(new FixedOrientedPin("output", "Output", this, invertOutput ? new(r + 3, 0) : new(r, 0), new(1, 0)), "output", "out", "o");
 
                     // Labels
                     var style = context.Style.ModifyDashedDotted(this);

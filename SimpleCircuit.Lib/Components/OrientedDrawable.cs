@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Circuits.Contexts;
+using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing;
 using SimpleCircuit.Parser;
@@ -37,9 +38,9 @@ public abstract class OrientedDrawable : LocatedDrawable, IOrientedDrawable
     /// Initializes a new instance of the <see cref="OrientedDrawable"/> class.
     /// </summary>
     /// <param name="name">The name.</param>
-    /// <param name="flipAxis">The relevant coordinates for flipping.</param>
-    protected OrientedDrawable(string name)
-        : base(name)
+    /// <param name="pinCollection">An optional pin collection.</param>
+    protected OrientedDrawable(string name, IPinCollection pinCollection = null)
+        : base(name, pinCollection)
     {
     }
 

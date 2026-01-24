@@ -67,44 +67,44 @@ public class OperationalTransconductanceAmplifier : DrawableFactory
                     {
                         if (Variants.Contains(_swapInput))
                         {
-                            Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, 4), new(-1, 0)), "n", "inn", "neg");
-                            Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, -4), new(-1, 0)), "p", "inp", "pos");
+                            AddPin(new FixedOrientedPin("negative", "The negative input.", this, new(-5, 4), new(-1, 0)), "n", "inn", "neg");
+                            AddPin(new FixedOrientedPin("positive", "The positive input.", this, new(-5, -4), new(-1, 0)), "p", "inp", "pos");
                         }
                         else
                         {
-                            Pins.Add(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "inn", "neg");
-                            Pins.Add(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "inp", "pos");
+                            AddPin(new FixedOrientedPin("negative", "The negative input.", this, new(-5, -4), new(-1, 0)), "n", "inn", "neg");
+                            AddPin(new FixedOrientedPin("positive", "The positive input.", this, new(-5, 4), new(-1, 0)), "p", "inp", "pos");
                         }
                     }
                     else
                     {
-                        Pins.Add(new FixedOrientedPin("input", "The input.", this, new(-5, 0), new(-1, 0)), "in", "inp", "input", "i");
+                        AddPin(new FixedOrientedPin("input", "The input.", this, new(-5, 0), new(-1, 0)), "in", "inp", "input", "i");
                     }
 
                     // Add power pins
-                    Pins.Add(new FixedOrientedPin("negativepower", "The negative power.", this, new(0, -7), new(0, -1)), "vneg", "vn");
-                    Pins.Add(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
+                    AddPin(new FixedOrientedPin("negativepower", "The negative power.", this, new(0, -7), new(0, -1)), "vneg", "vn");
+                    AddPin(new FixedOrientedPin("positivepower", "The positive power.", this, new(0, 7), new(0, 1)), "vpos", "vp");
 
                     if (Variants.Contains(_differentialOutput))
                     {
                         if (Variants.Contains(_swapOutput))
                         {
-                            Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, -4), new(1, 0)), "no", "outn");
-                            Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 4), new(1, 0)), "o", "out", "outp", "output");
+                            AddPin(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, -4), new(1, 0)), "no", "outn");
+                            AddPin(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, 4), new(1, 0)), "o", "out", "outp", "output");
                             la1 = new(6, 8);
                             lb0 = new(8, -7);
                         }
                         else
                         {
-                            Pins.Add(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 4), new(1, 0)), "no", "outn");
-                            Pins.Add(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, -4), new(1, 0)), "o", "out", "outp", "output");
+                            AddPin(new FixedOrientedPin("negativeoutput", "The negative output.", this, new(5, 4), new(1, 0)), "no", "outn");
+                            AddPin(new FixedOrientedPin("positiveoutput", "The output.", this, new(5, -4), new(1, 0)), "o", "out", "outp", "output");
                             la1 = new(8, 7);
                             lb0 = new(6, -8);
                         }
                     }
                     else
                     {
-                        Pins.Add(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "out", "outp", "output", "o");
+                        AddPin(new FixedOrientedPin("output", "The output.", this, new(5, 0), new(1, 0)), "out", "outp", "output", "o");
                     }
 
                     if (Variants.Contains(_programmable))

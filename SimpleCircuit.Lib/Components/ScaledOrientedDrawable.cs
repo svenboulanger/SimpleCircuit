@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Drawing;
+﻿using SimpleCircuit.Components.Pins;
+using SimpleCircuit.Drawing;
 using System;
 
 namespace SimpleCircuit.Components;
@@ -26,9 +27,9 @@ public abstract class ScaledOrientedDrawable : OrientedDrawable, IScaledDrawable
     /// Creates a new scaled, oriented drawable.
     /// </summary>
     /// <param name="name">The name of the drawable.</param>
-    /// <param name="options">The options.</param>
-    protected ScaledOrientedDrawable(string name)
-        : base(name)
+    /// <param name="pinCollection">An optional pin collection.</param>
+    protected ScaledOrientedDrawable(string name, IPinCollection pinCollection = null)
+        : base(name, pinCollection)
     {
     }
 

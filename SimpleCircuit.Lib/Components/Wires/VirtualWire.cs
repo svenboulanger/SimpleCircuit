@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Circuits.Contexts;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser;
 using SimpleCircuit.Parser.Nodes;

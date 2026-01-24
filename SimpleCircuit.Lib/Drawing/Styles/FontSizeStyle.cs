@@ -26,7 +26,7 @@ public class FontSizeStyleModifier(double fontSize = Style.DefaultFontSize) : IS
         public double Opacity => _parent.Opacity;
 
         /// <inheritdoc />
-        public string Background => _parent.Color;
+        public string Background => _parent.Background;
 
         /// <inheritdoc />
         public double BackgroundOpacity => _parent.Opacity;

@@ -1,4 +1,6 @@
-﻿namespace SimpleCircuit.Components;
+﻿using SimpleCircuit.Circuits;
+
+namespace SimpleCircuit.Components;
 
 /// <summary>
 /// Represents a drawable item with a 2D location.

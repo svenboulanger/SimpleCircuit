@@ -44,7 +44,7 @@ public class PointFactory : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
+            AddPin(new FixedPin(name, "The point.", this, new()), "x", "p", "a");
             Variants.Add("dot");
         }
 

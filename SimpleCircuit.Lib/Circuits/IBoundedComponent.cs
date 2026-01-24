@@ -1,9 +1,11 @@
-﻿namespace SimpleCircuit.Components;
+﻿using SimpleCircuit.Components;
+
+namespace SimpleCircuit.Circuits;
 
 /// <summary>
 /// Describes a component that has bounds.
 /// </summary>
-public interface IBoundedComponent
+public interface IBoundedComponent : ICircuitSolverPresence
 {
     /// <summary>
     /// Gets the left side coordinate.

@@ -83,10 +83,10 @@ public class TransmissionLine : DrawableFactory
         public Instance(string name)
             : base(name)
         {
-            Pins.Add(new FixedOrientedPin("left", "The left signal.", this, new(), new(-1, 0)), "a", "l");
-            Pins.Add(new FixedOrientedPin("leftground", "The left ground.", this, new(), new(0, 1)), "ga", "gl");
-            Pins.Add(new FixedOrientedPin("rightground", "The right ground.", this, new(), new(0, 1)), "gb", "gr");
-            Pins.Add(new FixedOrientedPin("right", "The right signal.", this, new(), new(1, 0)), "b", "r");
+            AddPin(new FixedOrientedPin("left", "The left signal.", this, new(), new(-1, 0)), "a", "l");
+            AddPin(new FixedOrientedPin("leftground", "The left ground.", this, new(), new(0, 1)), "ga", "gl");
+            AddPin(new FixedOrientedPin("rightground", "The right ground.", this, new(), new(0, 1)), "gb", "gr");
+            AddPin(new FixedOrientedPin("right", "The right signal.", this, new(), new(1, 0)), "b", "r");
         }
 
         /// <inheritdoc />
