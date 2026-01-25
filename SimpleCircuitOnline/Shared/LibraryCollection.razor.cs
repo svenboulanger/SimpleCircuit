@@ -99,6 +99,9 @@ public partial class LibraryCollection
         if (!SimpleCircuitParser.Parse(lexer, parsingContext, out var statements))
             return (null, null);
 
+        // Apply any global options
+        StatementEvaluator.EvaluateOptions(parsingContext.GlobalOptions, evalContext);
+
         // Evaluate the script
         StatementEvaluator.Evaluate(statements, evalContext);
 

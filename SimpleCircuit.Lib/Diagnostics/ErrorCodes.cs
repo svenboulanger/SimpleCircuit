@@ -146,6 +146,8 @@ public enum ErrorCodes
     ExpectedThemeDefinition,
     [Diagnostic(SeverityLevel.Error, null, "Expected a theme name")]
     ExpectedThemeName,
+    [Diagnostic(SeverityLevel.Error, null, "Expected a global option")]
+    ExpectedOptions,
     [Diagnostic(SeverityLevel.Error, null, "Expected a value or an expression")]
     ExpectedValueOrExpression,
     [Diagnostic(SeverityLevel.Error, null, "Expected a variable name")]

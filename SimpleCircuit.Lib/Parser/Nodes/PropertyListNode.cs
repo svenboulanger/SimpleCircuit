@@ -30,7 +30,7 @@ public record PropertyListNode : SyntaxNode, IEquatable<PropertyListNode>
         : base(subject?.Location ?? default)
     {
         Subject = subject ?? throw new ArgumentNullException(nameof(subject));
-        Properties = properties?.ToArray() ?? Array.Empty<SyntaxNode>();
+        Properties = properties?.ToArray() ?? [];
     }
 
     /// <inheritdoc />

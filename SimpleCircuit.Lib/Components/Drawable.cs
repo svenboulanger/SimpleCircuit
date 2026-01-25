@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Drawing.Builders;
+using SimpleCircuit.Parser.Variants;
 
 namespace SimpleCircuit.Components;
 
@@ -140,18 +141,43 @@ public abstract class Drawable : IDrawable
                 {
                     // Some implicit type conversion here
                     if (p.PropertyType == typeof(int) && type == typeof(double))
-                        p.SetValue(obj, (int)(double)value);
-                    else if (p.PropertyType == typeof(double) && type == typeof(int))
-                        p.SetValue(obj, (double)(int)value);
-                    else
                     {
-                        if (obj is IDrawable drawable)
-                            diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, drawable.Name);
-                        else
-                            diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, token.Content);
-                        return false;
+                        p.SetValue(obj, (int)(double)value);
+                        return true;
                     }
-                    return true;
+                    else if (p.PropertyType == typeof(double) && type == typeof(int))
+                    {
+                        p.SetValue(obj, (double)(int)value);
+                        return true;
+                    }
+                    else if (p.PropertyType == typeof(Margins))
+                    {
+                        if (type == typeof(double))
+                        {
+                            double m = (double)value;
+                            p.SetValue(obj, new Margins(m, m, m, m));
+                            return true;
+                        }
+                        else if (type == typeof(int))
+                        {
+                            double m = (int)value;
+                            p.SetValue(obj, new Margins(m, m, m, m));
+                            return true;
+                        }
+                        else if (type == typeof(Vector2))
+                        {
+                            Vector2 v = (Vector2)value;
+                            p.SetValue(obj, new Margins(v.X, v.Y, v.X, v.Y));
+                            return true;
+                        }
+                    }
+
+                    // Nothing worked
+                    if (obj is IDrawable drawable)
+                        diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, drawable.Name);
+                    else
+                        diagnostics?.Post(token, ErrorCodes.CouldNotFindPropertyOrVariantFor, p, token.Content);
+                    return false;
                 }
             });
             foreach (string name in names)

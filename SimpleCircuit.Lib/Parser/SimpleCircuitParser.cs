@@ -71,6 +71,10 @@ public static class SimpleCircuitParser
                         controlStatements.Add(statement);
                         break;
 
+                    case OptionsNode:
+                        context.GlobalOptions.Add((OptionsNode)statement);
+                        break;
+
                     default:
                         statements.Add(statement);
                         break;
@@ -1198,6 +1202,19 @@ public static class SimpleCircuitParser
                     }
                     break;
 
+                case "option":
+                case "options":
+                    lexer.Next(); // '.'
+                    lexer.Next(); // 'option(s)'
+                    if (!ParseOptions(word, lexer, context, out result))
+                        return false;
+                    if (result is null)
+                    {
+                        context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedOptions);
+                        return false;
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -1755,6 +1772,25 @@ public static class SimpleCircuitParser
 
         // OK
         result = new ThemeNode(theme, name, properties);
+        return true;
+    }
+
+    private static bool ParseOptions(Token options, SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+    {
+        result = null;
+
+        // Parse properties
+        if (!ParsePropertyList(lexer, context, out var properties))
+            return false;
+
+        // We now expect the end of the line
+        if (!lexer.Branch(TokenType.Newline))
+        {
+            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedNewline);
+            return false;
+        }
+
+        result = new OptionsNode(options, properties);
         return true;
     }
 }

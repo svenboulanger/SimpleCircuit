@@ -61,8 +61,27 @@ public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
     /// Gets or sets the margin for components inside the box.
     /// </summary>
     [Description("The margins for components inside the box.")]
+    [Alias("cm")]
+    public Margins ComponentMargin { get; set; } = new(3, 3, 3, 3);
+
+    /// <summary>
+    /// Gets or sets the overall margin of the box.
+    /// </summary>
+    [Description("Shorthand for setting all margins simultaneously.")]
     [Alias("m")]
-    public Margins Margin { get; set; } = new(3, 3, 3, 3);
+    public Margins Margin
+    {
+        get => new(
+            Math.Max(ComponentMargin.Left, WireMargin),
+            Math.Max(ComponentMargin.Top, WireMargin),
+            Math.Max(ComponentMargin.Right, WireMargin),
+            Math.Max(ComponentMargin.Bottom, WireMargin));
+        set
+        {
+            ComponentMargin = new(value.Left, value.Top, value.Right, value.Bottom);
+            WireMargin = Math.Max(Math.Max(value.Left, value.Right), Math.Max(value.Top, value.Bottom));
+        }
+    }
 
     /// <summary>
     /// Gets or sets the margin for wires inside the box.

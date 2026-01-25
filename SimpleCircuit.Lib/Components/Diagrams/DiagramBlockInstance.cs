@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Circuits.Contexts;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Circuits.Contexts;
 using SimpleCircuit.Components.Labeling;
 using SimpleCircuit.Components.Pins;
 using SimpleCircuit.Components.Variants;
@@ -16,7 +17,7 @@ namespace SimpleCircuit.Components.Diagrams;
 /// <summary>
 /// A diagram block.
 /// </summary>
-public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable
+public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable, IBoundedComponent
 {
     private readonly PinCollection _pins;
     private bool _usedBounds;

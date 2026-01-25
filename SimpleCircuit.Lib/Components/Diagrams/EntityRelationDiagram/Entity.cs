@@ -22,13 +22,14 @@ public partial class Entity : DrawableFactory
     /// <summary>
     /// Creates a new entity.
     /// </summary>
-    private class Instance : LocatedDrawable, IRoundedBox
+    private class Instance : BoundedDrawable, IRoundedBox
     {
         private double _width;
         private double _top, _bottom;
         private readonly List<double> _separators = [];
         private CustomLabelAnchorPoints _anchors = null;
         private readonly PinCollection _pins;
+        private bool _extendsBeyondBounds = false;
 
         /// <param name="name">The name of the entity.</param>
         public Instance(string name)
@@ -133,6 +134,7 @@ public partial class Entity : DrawableFactory
             {
                 case PreparationMode.Reset:
                     Pins.Clear();
+                    _extendsBeyondBounds = false;
                     _anchors = new CustomLabelAnchorPoints(Labels.Count);
                     _separators.Clear();
 
@@ -199,10 +201,12 @@ public partial class Entity : DrawableFactory
                         // Expand depending on the number of pins
                         _bottom = Math.Max(_bottom, _top + MinimumSpace * Math.Max(_pins.LeftCount, _pins.RightCount) + 2 * CornerRadius);
                         _bottom = Math.Max(_bottom, _top + MinHeight);
-                        if (Width.Equals(0.0))
-                            _width = Math.Max(_width, MinimumSpace * Math.Max(_pins.TopCount, _pins.BottomCount) + 2 * CornerRadius);
-                        else
+                        _width = Math.Max(_width, MinimumSpace * Math.Max(_pins.TopCount, _pins.BottomCount) + 2 * CornerRadius);
+                        if (Width > 0.0)
+                        {
+                            _extendsBeyondBounds = _width > Width;
                             _width = Width;
+                        }
 
                         // Place the header pins horizontally
                         double w = _width * 0.5;
@@ -321,6 +325,28 @@ public partial class Entity : DrawableFactory
             builder.Rectangle(-_width * 0.5, _top, _width, _bottom - _top, style.Color(null, Style.None), CornerRadius, CornerRadius);
             
             _anchors.Draw(builder, this, style);
+        }
+
+        /// <inheritdoc />
+        protected override PresenceResult RegisterBoundOffsets(IPrepareContext context)
+        {
+            if (!UsedBounds)
+                return PresenceResult.Success;
+
+            if (Width.Equals(0.0) || !_extendsBeyondBounds)
+            {
+                if (!context.Offsets.Group(X, Left, -0.5 * _width) ||
+                    !context.Offsets.Group(Y, Top, _top) ||
+                    !context.Offsets.Group(X, Right, 0.5 * _width) ||
+                    !context.Offsets.Group(Y, Bottom, _bottom))
+                    return PresenceResult.GiveUp;
+                return PresenceResult.Success;
+            }
+            else
+            {
+                // The contents go over the bounds, so let's fall back to the general case
+                return base.RegisterBoundOffsets(context);
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Components;
 using SimpleCircuit.Components.Markers;
+using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
@@ -84,6 +86,16 @@ public class EvaluationContext
     /// Gets the queue of anonymous points.
     /// </summary>
     public Queue<ILocatedDrawable> QueuedPoints { get; } = [];
+
+    /// <summary>
+    /// Gets or sets the last bounded component.
+    /// </summary>
+    public IBoundedComponent LastBoundedComponent { get; set; }
+
+    /// <summary>
+    /// Gets the currently queued margins.
+    /// </summary>
+    public List<WireSegmentInfo> QueuedMargins { get; } = [];
 
     /// <summary>
     /// Gets or sets the base path of the evaluation context.

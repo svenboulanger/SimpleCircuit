@@ -1,4 +1,5 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Parser.Nodes;
 using System.Collections.Generic;
 
 namespace SimpleCircuit.Parser;
@@ -25,11 +26,17 @@ public class ParsingContext
     public HashSet<string> ReferencedVariables { get; } = [];
 
     /// <summary>
+    /// Gets a list of all global option statements.
+    /// </summary>
+    public List<OptionsNode> GlobalOptions { get; } = [];
+
+    /// <summary>
     /// Resets the parsing context.
     /// </summary>
     public void Reset()
     {
         AllowFactoryExtension = true;
         ReferencedVariables.Clear();
+        GlobalOptions.Clear();
     }
 }

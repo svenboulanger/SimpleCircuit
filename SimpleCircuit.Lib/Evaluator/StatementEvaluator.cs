@@ -1,4 +1,5 @@
-﻿using SimpleCircuit.Components;
+﻿using SimpleCircuit.Circuits;
+using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
@@ -52,6 +53,47 @@ public static class StatementEvaluator
         }
     }
 
+    /// <summary>
+    /// Evaluates option statements to modify the current global options.
+    /// </summary>
+    /// <param name="options">The statements.</param>
+    /// <param name="context">The evaluation context.</param>
+    public static void EvaluateOptions(IEnumerable<OptionsNode> options, EvaluationContext context)
+    {
+        foreach (var node in options)
+        {
+            foreach (var property in node.Properties)
+            {
+                switch (property)
+                {
+                    case BinaryNode binary:
+                        switch (binary.Type)
+                        {
+                            case BinaryOperatortype.Assignment:
+                                // Set property
+                                string propertyName = EvaluateName(binary.Left, context);
+                                if (propertyName is null)
+                                    return;
+                                object value = EvaluateExpression(binary.Right, context);
+                                if (!Drawable.SetProperty(context.Options,
+                                    new(binary.Left.Location, propertyName.AsMemory()),
+                                    value,
+                                    context.Diagnostics))
+                                    return;
+                                break;
+                        }
+                        break;
+
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+        }
+
+        // Apply the options to the circuit
+        context.Options.Apply(context.Circuit);
+    }
+
     private static void EvaluateScoped(ScopedStatementsNode statements, EvaluationContext context)
     {
         // First set up the new scope, and apply the parameter definitions to them
@@ -79,6 +121,8 @@ public static class StatementEvaluator
                     {
                         // Assume a component
                         var component = ProcessComponent(pnp.Name, context);
+
+                        // Deal with pins of a drawable
                         if (component is IDrawable drawable)
                         {
                             if (pnp.PinLeft is not null)
@@ -102,6 +146,7 @@ public static class StatementEvaluator
                         }
                         else
                             lastPin = null;
+                        ApplyQueuedMargins(component, context);   
                     }
                     break;
 
@@ -122,6 +167,7 @@ public static class StatementEvaluator
                         else
                             lastPin = null;
                         lastWire = null;
+                        ApplyQueuedMargins(component, context);
                     }
                     break;
 
@@ -148,6 +194,40 @@ public static class StatementEvaluator
 
         if (lastWire is not null)
             ProcessWire(lastPin, lastWire, null, context);
+    }
+    private static void ApplyQueuedMargins(ICircuitPresence component, EvaluationContext context)
+    {
+        if (component is IBoundedComponent bounded)
+        {
+            // Deal with queued margins
+            if (context.QueuedMargins.Count > 0)
+            {
+                if (context.LastBoundedComponent is not null)
+                {
+                    // Determine the axis
+                    VirtualChainConstraints constraints = VirtualChainConstraints.None;
+                    foreach (var segment in context.QueuedMargins)
+                    {
+                        if (!segment.Orientation.X.IsZero())
+                            constraints |= VirtualChainConstraints.X;
+                        if (!segment.Orientation.Y.IsZero())
+                            constraints |= VirtualChainConstraints.Y;
+                    }
+
+                    // Create an additional virtual chain
+                    var virtualWire = new VirtualWire(context.GetVirtualName(),
+                        (ILocatedPresence)context.LastBoundedComponent,
+                        context.QueuedMargins,
+                        (ILocatedPresence)bounded,
+                        constraints);
+                    context.Circuit.Add(virtualWire);
+                }
+                context.QueuedMargins.Clear();
+            }
+
+            // Track the last bounded component
+            context.LastBoundedComponent = bounded;
+        }
     }
     private static void Evaluate(VirtualChainNode virtualChain, EvaluationContext context)
     {
@@ -831,8 +911,24 @@ public static class StatementEvaluator
                         }
                         if (direction.Distance is not null)
                         {
-                            if (direction.Distance is UnaryNode unary && unary.Type == UnaryOperatortype.Positive)
+                            if (direction.Distance is UnaryNode unary && 
+                                (unary.Type == UnaryOperatortype.Positive || unary.Type == UnaryOperatortype.PrefixIncrement))
+                            {
                                 segment.Length = EvaluateAsDouble(unary.Argument, context, MinimumWireLength);
+
+                                // Queue a margin
+                                if (unary.Type == UnaryOperatortype.PrefixIncrement)
+                                {
+                                    var info = new WireSegmentInfo(unary.Location)
+                                    {
+                                        UsesBounds = true,
+                                        IsMinimum = true,
+                                        Length = segment.Length,
+                                        Orientation = segment.Orientation
+                                    };
+                                    context.QueuedMargins.Add(info);
+                                }
+                            }
                             else
                             {
                                 segment.Length = EvaluateAsDouble(direction.Distance, context, MinimumWireLength);

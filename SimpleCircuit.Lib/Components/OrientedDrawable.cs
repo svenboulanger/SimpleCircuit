@@ -9,7 +9,7 @@ namespace SimpleCircuit.Components;
 /// <summary>
 /// Default implementation for a component that has a location and an orientation.
 /// </summary>
-public abstract class OrientedDrawable : LocatedDrawable, IOrientedDrawable
+public abstract class OrientedDrawable : BoundedDrawable, IOrientedDrawable
 {
     private int _dof = 2;
     private Vector2 _p, _b;

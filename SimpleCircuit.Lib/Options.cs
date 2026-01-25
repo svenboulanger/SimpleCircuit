@@ -21,10 +21,10 @@ public class Options
     public const string European = "euro";
 
     [Description("The spacing in X-direction between two unconnected circuit diagrams. The default is 10.")]
-    public double SpacingX { get; set; } = 20.0;
+    public double SpacingX { get; set; } = 10.0;
 
     [Description("The spacing in Y-direction between two unconnected circuit diagrams. The default is 10.")]
-    public double SpacingY { get; set; } = 20.0;
+    public double SpacingY { get; set; } = 10.0;
 
     /// <summary>
     /// Applies the options to the given graphical circuit.
