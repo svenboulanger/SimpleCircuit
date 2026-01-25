@@ -75,6 +75,7 @@ public class Capacitor : DrawableFactory
         protected override void Draw(IGraphicsBuilder builder)
         {
             var style = builder.Style.ModifyDashedDotted(this);
+            builder.ExtendPins(Pins, style, 3.5);
 
             // Because the component is symmetrical, we can keep it upright in an even better way
             bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
@@ -85,7 +86,6 @@ public class Capacitor : DrawableFactory
                     builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
             }
 
-            builder.ExtendPins(Pins, style, 3.5);
             switch (Variants.Select(_curved, _electrolytic))
             {
                 case 0:

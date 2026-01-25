@@ -158,8 +158,17 @@ public abstract class OrientedDrawable : BoundedDrawable, IOrientedDrawable
                 // We already have one axis, we want to flip around that instead
                 Vector2 altp = new(_p.Y, -_p.X);
                 Vector2 altb = new(_b.Y, -_b.X);
-                if (KeepUpright && altp.Y > 0.0)
-                    altp = -altp;
+                if (KeepUpright)
+                {
+                    var nTransform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;
+                    if (nTransform.A22.IsZero())
+                    {
+                        if (nTransform.A12 < 0.0)
+                            altp = -altp;
+                    }
+                    else if (nTransform.A22 < 0.0)
+                        altp = -altp;
+                }
                 if (Flipped)
                     altp = -altp;
                 Transform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;

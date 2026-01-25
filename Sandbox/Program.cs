@@ -16,8 +16,16 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        R("R_1", programmable) <r d l> R("R_2", programmable)
-        R~1[c] <u> T(in)
+        .option keepupright = true
+
+        X <r> C("R")
+        X <a 45> C("R")
+        X <u> C("R")
+        X <a 135> C("R")
+        X <l> C("R")
+        X <a -135> C("R")
+        X <d> C("R")
+        X <a -45> C("R")
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr

@@ -128,6 +128,7 @@ public class Inductor : DrawableFactory
         protected override void Draw(IGraphicsBuilder builder)
         {
             var style = builder.Style.ModifyDashedDotted(this);
+            builder.ExtendPins(Pins, style, 2, "a", "b");
 
             // Because the component is symmetrical, we can keep it upright in an even better way
             bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
@@ -138,7 +139,6 @@ public class Inductor : DrawableFactory
                     builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
             }
 
-            builder.ExtendPins(Pins, style, 2, "a", "b");
             double l = Length * 0.5;
             switch (Variants.Select(Options.American, Options.European))
             {

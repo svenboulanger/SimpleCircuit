@@ -16,6 +16,7 @@ namespace SimpleCircuit.Components.Analog;
 public class Impedance : DrawableFactory
 {
     private const string _programmable = "programmable";
+    private const string _asymmetric = "_asymmetric";
 
     /// <inheritdoc />
     protected override IDrawable Factory(string key, string name)
@@ -113,6 +114,15 @@ public class Impedance : DrawableFactory
             var style = builder.Style.ModifyDashedDotted(this);
             builder.ExtendPins(Pins, style);
 
+            // Because the component is symmetrical, we can keep it upright in an even better way
+            bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             // The rectangle
             double w = _width * 0.5;
             builder.Rectangle(-_length * 0.5, -w, _length, _width, style);
@@ -120,6 +130,9 @@ public class Impedance : DrawableFactory
             if (Variants.Contains(_programmable))
                 builder.Arrow(new(-5, w + 1), new(6, -w - 4), style);
             _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
     }
 }

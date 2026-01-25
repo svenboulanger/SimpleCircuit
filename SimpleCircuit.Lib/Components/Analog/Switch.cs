@@ -104,6 +104,25 @@ public class Switch : DrawableFactory
 
             // Because the component is symmetrical, we can keep it upright in an even better way
             bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
+
+            switch (Variants.Select(_knife, _push))
+            {
+                case 0: // Knife switch
+                    DrawKnifeSwitch(builder, style, applyTransform);
+                    break;
+
+                case 1: // Push switch
+                    DrawPushSwitch(builder, style, applyTransform);
+                    break;
+
+                default:
+                    DrawRegularSwitch(builder, style, applyTransform);
+                    break;
+            }
+        }
+
+        private void DrawKnifeSwitch(IGraphicsBuilder builder, IStyle style, bool applyTransform)
+        {
             if (applyTransform)
             {
                 builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
@@ -111,28 +130,6 @@ public class Switch : DrawableFactory
                     builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
             }
 
-            switch (Variants.Select(_knife, _push))
-            {
-                case 0: // Knife switch
-                    DrawKnifeSwitch(builder, style);
-                    break;
-
-                case 1: // Push switch
-                    DrawPushSwitch(builder, style);
-                    break;
-
-                default:
-                    DrawRegularSwitch(builder, style);
-                    break;
-            }
-            _anchors.Draw(builder, this, style);
-
-            if (applyTransform)
-                builder.EndTransform();
-        }
-
-        private void DrawKnifeSwitch(IGraphicsBuilder builder, IStyle style)
-        {
             if (Variants.Contains(_closed))
             {
                 builder.Circle(new(-5, 0), 1, style);
@@ -150,9 +147,22 @@ public class Switch : DrawableFactory
                 _anchors[0] = new LabelAnchorPoint(new(0, -4 - style.LineThickness * 0.5 - LabelMargin), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 1.5 + style.LineThickness * 0.5 + LabelMargin), new(0, 1));
             }
+            _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
-        private void DrawRegularSwitch(IGraphicsBuilder builder, IStyle style)
+        private void DrawRegularSwitch(IGraphicsBuilder builder, IStyle style, bool applyTransform)
         {
+            builder.ExtendPins(Pins, style, 2, "a", "b");
+
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             double m = style.LineThickness * 0.5 + LabelMargin;
             if (Variants.Contains(_reed))
             {
@@ -179,8 +189,6 @@ public class Switch : DrawableFactory
                 _anchors[0] = new LabelAnchorPoint(new(0, -0.5 - m), new(0, -1));
                 _anchors[1] = new LabelAnchorPoint(new(0, 0.5 + m), new(0, 1));
             }
-
-            builder.ExtendPins(Pins, style, 2, "a", "b");
 
             // Switch terminals
             builder.Circle(new Vector2(-5, 0), 1, style);
@@ -251,9 +259,20 @@ public class Switch : DrawableFactory
                         _anchors[1] = new LabelAnchorPoint(new(0, 1 + m), new(0, 1));
                     break;
             }
+            _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
-        private void DrawPushSwitch(IGraphicsBuilder builder, IStyle style)
+        private void DrawPushSwitch(IGraphicsBuilder builder, IStyle style, bool applyTransform)
         {
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             // Switch terminals
             builder.Circle(new Vector2(-5, 0), 1, style);
             builder.Circle(new Vector2(5, 0), 1, style);
@@ -308,6 +327,10 @@ public class Switch : DrawableFactory
                         _anchors[0] = new LabelAnchorPoint(new(0, -6 - m), new(0, -1));
                 }
             }
+            _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
     }
 }
