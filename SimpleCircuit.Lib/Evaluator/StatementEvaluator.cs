@@ -790,6 +790,10 @@ public static class StatementEvaluator
     }
     private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context, HashSet<Marker> markers = null)
     {
+        // Use options
+        if (presence is IOrientedDrawable oriented)
+            oriented.KeepUpright = context.Options.KeepUpright;
+
         int labelIndex = 0;
         foreach (var property in properties)
         {

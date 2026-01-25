@@ -20,6 +20,7 @@ public class Switch : DrawableFactory
     private const string _closing = "closing";
     private const string _opening = "opening";
     private const string _reed = "reed";
+    private const string _asymmetric = "asymmetric";
 
     /// <inheritdoc />
     protected override IDrawable Factory(string key, string name)
@@ -101,6 +102,15 @@ public class Switch : DrawableFactory
         {
             var style = builder.Style.ModifyDashedDotted(this);
 
+            // Because the component is symmetrical, we can keep it upright in an even better way
+            bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             switch (Variants.Select(_knife, _push))
             {
                 case 0: // Knife switch
@@ -116,6 +126,9 @@ public class Switch : DrawableFactory
                     break;
             }
             _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
 
         private void DrawKnifeSwitch(IGraphicsBuilder builder, IStyle style)

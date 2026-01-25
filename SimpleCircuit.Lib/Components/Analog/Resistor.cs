@@ -18,6 +18,7 @@ public class ResistorFactory : DrawableFactory
     private const string _thermistor = "thermistor";
     private const string _x = "x";
     private const string _memristor = "memristor";
+    private const string _asymmetric = "asymmetric";
 
     /// <inheritdoc />
     protected override IDrawable Factory(string key, string name)
@@ -90,6 +91,7 @@ public class ResistorFactory : DrawableFactory
             AddPin(new FixedOrientedPin("p", "The positive pin.", this, new(-6, 0), new(-1, 0)), "p", "pos", "a");
             AddPin(new FixedOrientedPin("ctrl", "The controlling pin.", this, new(0, 4), new(0, 1)), "c", "ctrl");
             AddPin(new FixedOrientedPin("n", "The negative pin.", this, new(6, 0), new(1, 0)), "n", "neg", "b");
+            KeepUpright = true;
         }
 
         /// <inheritdoc />
@@ -185,6 +187,15 @@ public class ResistorFactory : DrawableFactory
             var style = builder.Style.ModifyDashedDotted(this);
             builder.ExtendPins(Pins, style, 2, "a", "b");
 
+            // Because the component is symmetrical, we can keep it upright in an even better way
+            bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             switch (Variants.Select(Options.American, Options.European))
             {
                 case 1:
@@ -196,6 +207,9 @@ public class ResistorFactory : DrawableFactory
                     break;
             }
             _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
         private void DrawAmericanResistor(IGraphicsBuilder builder, IStyle style)
         {

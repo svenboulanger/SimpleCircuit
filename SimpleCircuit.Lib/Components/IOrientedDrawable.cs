@@ -9,6 +9,12 @@ namespace SimpleCircuit.Components;
 public interface IOrientedDrawable : ITransformingDrawable
 {
     /// <summary>
+    /// Gets or sets whether the component should be kept upright if there is a degree of freedom
+    /// that can be used to do this.
+    /// </summary>
+    public bool KeepUpright { get; set; }
+
+    /// <summary>
     /// Determines whether the relative orientation given is already constrained.
     /// </summary>
     /// <param name="p">The local vector orientation.</param>

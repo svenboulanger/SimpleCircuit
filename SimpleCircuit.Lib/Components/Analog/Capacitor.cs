@@ -17,6 +17,7 @@ public class Capacitor : DrawableFactory
     private const string _electrolytic = "electrolytic";
     private const string _programmable = "programmable";
     private const string _sensor = "sensor";
+    private const string _asymmetric = "asymmetric";
 
     /// <inheritdoc />
     protected override IDrawable Factory(string key, string name)
@@ -75,6 +76,15 @@ public class Capacitor : DrawableFactory
         {
             var style = builder.Style.ModifyDashedDotted(this);
 
+            // Because the component is symmetrical, we can keep it upright in an even better way
+            bool applyTransform = KeepUpright && !Variants.Contains(_asymmetric);
+            if (applyTransform)
+            {
+                builder.BeginTransform(new(Vector2.Zero, Drawing.Matrix2.Scale(
+                    builder.CurrentTransform.Matrix.A11 < 0.0 ? -1.0 : 1.0,
+                    builder.CurrentTransform.Matrix.A22 < 0.0 ? -1.0 : 1.0)));
+            }
+
             builder.ExtendPins(Pins, style, 3.5);
             switch (Variants.Select(_curved, _electrolytic))
             {
@@ -129,6 +139,9 @@ public class Capacitor : DrawableFactory
                     break;
             }
             _anchors.Draw(builder, this, style);
+
+            if (applyTransform)
+                builder.EndTransform();
         }
     }
 }

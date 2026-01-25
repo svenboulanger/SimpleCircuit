@@ -31,6 +31,14 @@ public abstract class OrientedDrawable : BoundedDrawable, IOrientedDrawable
         }
     }
 
+    /// <summary>
+    /// Gets or sets a flag that makes the component stay upright.
+    /// If <c>true</c>, the component is flipped if upside-down. If <c>false</c>, the
+    /// component is only rotated. None of it matters however if the component is
+    /// fully constrained!
+    /// </summary>
+    public bool KeepUpright { get; set; } = true;
+
     /// <inheritdoc />
     public int OrientationDegreesOfFreedom => _dof;
 
@@ -143,13 +151,15 @@ public abstract class OrientedDrawable : BoundedDrawable, IOrientedDrawable
         {
             case 2:
                 // Just whatever
-                Transform = Flipped ? (new(-1, 0, 0, -1)) : Matrix2.Identity;
+                Transform = Flipped ? new(-1, 0, 0, -1) : Matrix2.Identity;
                 break;
 
             case 1:
                 // We already have one axis, we want to flip around that instead
                 Vector2 altp = new(_p.Y, -_p.X);
                 Vector2 altb = new(_b.Y, -_b.X);
+                if (KeepUpright && altp.Y > 0.0)
+                    altp = -altp;
                 if (Flipped)
                     altp = -altp;
                 Transform = new Matrix2(_b.X, altb.X, _b.Y, altb.Y) * new Matrix2(_p.X, altp.X, _p.Y, altp.Y).Inverse;
