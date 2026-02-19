@@ -147,13 +147,20 @@ public partial class DropZone
             return;
         }
 
-        if (doc.DocumentElement.Name.ToLower() == "svg")
+        if (doc.DocumentElement.Name.Equals("svg", StringComparison.OrdinalIgnoreCase))
         {
             var args = new UploadSvgEventArgs();
 
-            // Search for the script
+            // Search for the script (sc:script is legacy, sc:netlist is the new one to avoid blacklisted tags)
             StringWriter swScript = new();
             foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("sc:script"))
+            {
+                if (node.ChildNodes.Count == 1 && node.ChildNodes[0] is XmlCDataSection cdata)
+                    swScript.WriteLine(cdata.Data);
+                else
+                    swScript.WriteLine(node.InnerText);
+            }
+            foreach (XmlNode node in doc.DocumentElement.GetElementsByTagName("sc:netlist"))
             {
                 if (node.ChildNodes.Count == 1 && node.ChildNodes[0] is XmlCDataSection cdata)
                     swScript.WriteLine(cdata.Data);
@@ -177,7 +184,7 @@ public partial class DropZone
 
             result = args;
         }
-        else if (doc.DocumentElement.Name.ToLower() == "symbols")
+        else if (doc.DocumentElement.Name.Equals("symbols", StringComparison.OrdinalIgnoreCase))
         {
             var args = new UploadLibraryEventArgs
             {

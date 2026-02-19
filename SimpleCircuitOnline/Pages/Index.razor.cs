@@ -526,7 +526,7 @@ public partial class Index
                 // Include XML data
                 if (includeScript)
                 {
-                    ckt.Metadata.Add("script", EncodeScript(code));
+                    ckt.Metadata.Add("netlist", EncodeScript(code));
                     if (_simpleCircuitVersion != null)
                         ckt.Metadata.Add("version", _simpleCircuitVersion);
                 }
