@@ -77,7 +77,7 @@ public class Style : IStyle
     /// <summary>
     /// The default font family.
     /// </summary>
-    public const string DefaultFontFamily = "Arial";
+    public const string DefaultFontFamily = "DejaVu Sans, sans-serif";
 
     /// <summary>
     /// The default font size.

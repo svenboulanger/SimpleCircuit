@@ -8,7 +8,7 @@ description: >-
   with `.` such as `.subckt`/`.param`/`.for`/`.if`/`.section`/`.symbol`, virtual
   chains in `( )`, or `.sc` circuit files), or when authoring demos, tutorials,
   unit-test scripts, or documentation for the language. Also covers the
-  `SimpleCircuit` command-line tool that renders script files to SVG/PNG/JPG.
+  `SimpleCircuit` command-line tool that renders script files to SVG.
 ---
 
 # SimpleCircuit scripting language
@@ -274,9 +274,9 @@ the user's platform from the project's latest GitHub release:
 | macOS arm64 (Apple Silicon) | `https://github.com/svenboulanger/SimpleCircuit/releases/latest/download/SimpleCircuit-osx-arm64.tar.gz` |
 
 Each archive contains a single executable (`SimpleCircuit` / `SimpleCircuit.exe`).
-Extract it, and on Linux/macOS make it executable (`chmod +x SimpleCircuit`); on
-Linux it also needs `libfontconfig1` present for image rendering. Put it on the
-`PATH` or invoke it by path.
+Extract it, and on Linux/macOS make it executable (`chmod +x SimpleCircuit`). Text
+measurement uses a font embedded in the tool, so no system fonts or native
+libraries are required. Put it on the `PATH` or invoke it by path.
 
 If the user prefers to build from source instead, clone the repository and build
 the CLI with `dotnet run --project SimpleCircuit -- <args>` (or publish it), which
@@ -299,11 +299,9 @@ With no arguments at all, the tool prints `No files specified` and exits.
 
 ### Output format
 
-The output format is chosen by the **output file's extension**:
-
-- `.png` → PNG (transparent background)
-- `.jpg` / `.jpeg` → JPEG (white background)
-- anything else (e.g. `.svg`) → SVG
+The tool only produces **SVG**. Raster output (PNG/JPG) is no longer supported;
+requesting a `.png`/`.jpg`/`.jpeg` output emits a warning and writes an SVG with
+the same base name instead.
 
 If `-o` is omitted, the output defaults to the input path with its extension
 replaced by `.svg` (same folder, same base name).
@@ -312,11 +310,11 @@ replaced by `.svg` (same folder, same base name).
 # Render diagram.sc → diagram.svg (next to the input)
 SimpleCircuit diagram.sc
 
-# Explicit output, PNG chosen by extension
-SimpleCircuit diagram.sc -o out/diagram.png
+# Explicit output path
+SimpleCircuit diagram.sc -o out/diagram.svg
 
 # Several files in one run; each -o binds to the file before it
-SimpleCircuit a.sc -o a.svg b.sc -o b.png c.sc
+SimpleCircuit a.sc -o a.svg b.sc -o b.svg c.sc
 
 # Print version
 SimpleCircuit --version
@@ -329,7 +327,7 @@ type the same file/`-o` arguments you would pass on the command line (quotes gro
 tokens with spaces). An empty line, `quit`, or `exit` leaves the loop.
 
 ```
-> diagram.sc -o diagram.png
+> diagram.sc -o diagram.svg
 > "my circuit.sc" -o "my circuit.svg"
 > quit
 ```

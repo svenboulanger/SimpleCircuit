@@ -58,7 +58,7 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
     /// <summary>
     /// Gets the text formatter.
     /// </summary>
-    public ITextFormatter TextFormatter => formatter ?? new SimpleTextFormatter(new SkiaTextMeasurer());
+    public ITextFormatter TextFormatter => formatter ?? new SimpleTextFormatter(new FontsTextMeasurer());
 
     /// <summary>
     /// Gets the style.

@@ -14,7 +14,7 @@ public class SimpleTextContext(ITextMeasurer measurer)
     /// <summary>
     /// Gets the text measurer.
     /// </summary>
-    public ITextMeasurer Measurer { get; } = measurer ?? new SkiaTextMeasurer();
+    public ITextMeasurer Measurer { get; } = measurer ?? new FontsTextMeasurer();
 
     /// <summary>
     /// Gets the text builder.
