@@ -104,6 +104,8 @@ public partial class Job
         if (_context?.Circuit != null && _context.Circuit.Count > 0)
         {
             var doc = _context.Circuit.Render(diagnostics);
+            if (doc is null)
+                return;
 
             switch (Path.GetExtension(outputFilename).ToLower())
             {

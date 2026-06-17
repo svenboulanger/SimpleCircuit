@@ -2,7 +2,7 @@
   "profiles": {
     "SimpleCircuit": {
       "commandName": "Project",
-      "commandLineArgs": "-cli"
+      "commandLineArgs": "T:\\SimpleCircuit\\5T_OTA.sc"
     }
   }
 }
