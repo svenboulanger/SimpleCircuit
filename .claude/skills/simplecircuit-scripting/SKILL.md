@@ -260,6 +260,28 @@ referencing `SimpleCircuit.Lib`) is a batch converter: it reads script files and
 renders each to an image. Run it with `dotnet run --project SimpleCircuit -- <args>`
 or invoke the built `SimpleCircuit` executable directly.
 
+### Getting the tool
+
+If `SimpleCircuit` isn't available, a self-contained release binary
+(no .NET install required) — offer to download the asset matching 
+the user's platform from the project's latest GitHub release:
+
+| Platform | Download URL |
+|---|---|
+| Windows x64 | `https://github.com/svenboulanger/SimpleCircuit/releases/latest/download/SimpleCircuit-win-x64.zip` |
+| Linux x64 | `https://github.com/svenboulanger/SimpleCircuit/releases/latest/download/SimpleCircuit-linux-x64.tar.gz` |
+| macOS x64 (Intel) | `https://github.com/svenboulanger/SimpleCircuit/releases/latest/download/SimpleCircuit-osx-x64.tar.gz` |
+| macOS arm64 (Apple Silicon) | `https://github.com/svenboulanger/SimpleCircuit/releases/latest/download/SimpleCircuit-osx-arm64.tar.gz` |
+
+Each archive contains a single executable (`SimpleCircuit` / `SimpleCircuit.exe`).
+Extract it, and on Linux/macOS make it executable (`chmod +x SimpleCircuit`); on
+Linux it also needs `libfontconfig1` present for image rendering. Put it on the
+`PATH` or invoke it by path.
+
+If the user prefers to build from source instead, clone the repository and build
+the CLI with `dotnet run --project SimpleCircuit -- <args>` (or publish it), which
+requires the .NET 10 SDK. Either way, only proceed once the user confirms.
+
 ### Arguments
 
 Arguments are positional and processed left to right. Any token that isn't a
