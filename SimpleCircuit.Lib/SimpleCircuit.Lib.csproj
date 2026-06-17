@@ -66,7 +66,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <EmbeddedResource Include="Fonts\DejaVuSans.ttf">
+      <LogicalName>SimpleCircuit.Fonts.DejaVuSans.ttf</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Fonts\DejaVuSans-Bold.ttf">
+      <LogicalName>SimpleCircuit.Fonts.DejaVuSans-Bold.ttf</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.1" />
     <PackageReference Include="SpiceSharp" Version="3.2.3" />
     <PackageReference Include="SpiceSharpGenerator" Version="1.0.9">
       <PrivateAssets>all</PrivateAssets>

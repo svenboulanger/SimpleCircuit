@@ -3,7 +3,6 @@ using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
-using Svg.Skia;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -107,37 +106,19 @@ public partial class Job
             if (doc is null)
                 return;
 
+            // Raster output (PNG/JPG) is no longer supported now that the SVG rasterizer
+            // (SkiaSharp/Svg.Skia) has been removed. Warn and emit an SVG instead.
             switch (Path.GetExtension(outputFilename).ToLower())
             {
                 case ".png":
-                    using (var svg = new SKSvg())
-                    using (var reader = new XmlNodeReader(doc))
-                    {
-                        var picture = svg.Load(reader);
-                        if (picture != null)
-                        {
-                            svg.Save(outputFilename, SkiaSharp.SKColors.Transparent, SkiaSharp.SKEncodedImageFormat.Png);
-                            diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}' to a PNG, output at '{outputFilename}'."));
-                        }
-                    }
-                    break;
-
                 case ".jpg":
                 case ".jpeg":
-                    using (var svg = new SKSvg())
-                    using (var reader = new XmlNodeReader(doc))
-                    {
-                        var picture = svg.Load(reader);
-                        if (picture != null)
-                        {
-                            svg.Save(outputFilename, SkiaSharp.SKColors.White, SkiaSharp.SKEncodedImageFormat.Jpeg);
-                            diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Info, "JOB01", $"Finished converting '{Filename}' to JPG, output at '{outputFilename}'."));
-                        }
-                    }
-                    break;
+                    diagnostics?.Post(new DiagnosticMessage(SeverityLevel.Warning, "JOB03", $"Raster output is no longer supported; writing an SVG instead of '{Path.GetFileName(outputFilename)}'."));
+                    outputFilename = Path.ChangeExtension(outputFilename, ".svg");
+                    goto default;
 
                 default:
-                    // Finally write the resulting document to svg
+                    // Write the resulting document to svg
                     using (var writer = XmlWriter.Create(outputFilename, new XmlWriterSettings()))
                     {
                         doc.WriteTo(writer);
