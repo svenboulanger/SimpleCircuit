@@ -97,7 +97,7 @@ public partial class Program
     /// <param name="args">The arguments.</param>
     /// <param name="interactiveMode">If <c>true</c>, the arguments specify that interactive mode should start; otherwise, <c>false</c>.</param>
     /// <returns>A list of jobs to execute.</returns>
-    private static IReadOnlyList<Job> ReadJobs(string[] args, out bool interactiveMode)
+    private static List<Job> ReadJobs(string[] args, out bool interactiveMode)
     {
         interactiveMode = false;
         var jobs = new List<Job>();

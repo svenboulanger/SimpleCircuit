@@ -1,4 +1,6 @@
 ﻿using SimpleCircuit.Diagnostics;
+using SimpleCircuit.Drawing.Spans;
+using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Evaluator;
 using SimpleCircuit.Parser;
 using Svg.Skia;
@@ -31,6 +33,11 @@ public partial class Job
     public string OutputFilename { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the text formatter.
+    /// </summary>
+    public ITextFormatter? TextFormatter { get; set; }
+
+    /// <summary>
     /// Computes the graphical circuit.
     /// </summary>
     public void Compute()
@@ -58,7 +65,7 @@ public partial class Job
                 return;
 
             // Evaluate
-            _context = new EvaluationContext(true, null, parsingContext.Options);
+            _context = new EvaluationContext(true, new Style(), TextFormatter);
             StatementEvaluator.Evaluate(statements, _context);
         }
     }
