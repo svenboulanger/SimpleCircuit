@@ -260,18 +260,11 @@ referencing `SimpleCircuit.Lib`) is a batch converter: it reads script files and
 renders each to an image. Run it with `dotnet run --project SimpleCircuit -- <args>`
 or invoke the built `SimpleCircuit` executable directly.
 
-**This repository ships a prebuilt Linux x64 binary at `tools/SimpleCircuit`**
-(committed automatically by the release workflow). When working inside the repo,
-this is the preferred way to run the tool — invoke `tools/SimpleCircuit <file>`
-directly (run `chmod +x tools/SimpleCircuit` once if it isn't already
-executable). Otherwise fall back to a `SimpleCircuit` on the `PATH`, or get the
-tool as described below.
-
 ### Getting the tool
 
-For other platforms — or outside this repo — use a self-contained release binary
-(no .NET install required); offer to download the asset matching the user's
-platform from the project's latest GitHub release:
+If `SimpleCircuit` isn't available, a self-contained release binary
+(no .NET install required) — offer to download the asset matching 
+the user's platform from the project's latest GitHub release:
 
 | Platform | Download URL |
 |---|---|

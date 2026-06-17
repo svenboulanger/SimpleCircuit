@@ -47,7 +47,6 @@ jobs:
           --self-contained true
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:EnableCompressionInSingleFile=true
           -p:DebugType=none
           -o publish/${{ matrix.rid }}
 
@@ -79,43 +78,3 @@ jobs:
         with:
           files: ${{ steps.package.outputs.asset }}
           fail_on_unmatched_files: true
-
-  # Commit the prebuilt Linux x64 binary into the repo so the Claude skill can
-  # invoke it directly from a checkout, without downloading from the release-asset
-  # CDN (which may be blocked by a sandbox allowlist).
-  commit-binary:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout master
-        uses: actions/checkout@v4
-        with:
-          ref: master
-          fetch-depth: 0
-
-      - name: Download linux-x64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: SimpleCircuit-linux-x64
-          path: artifact
-
-      - name: Place binary in tools/
-        run: |
-          set -euo pipefail
-          mkdir -p tools
-          tar -xzf artifact/SimpleCircuit-linux-x64.tar.gz -C tools
-          chmod +x tools/SimpleCircuit
-
-      - name: Commit and push to master
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f tools/SimpleCircuit
-          if git diff --cached --quiet; then
-            echo "Binary unchanged — nothing to commit."
-            exit 0
-          fi
-          git commit -m "Update prebuilt Linux x64 CLI binary (${GITHUB_REF_NAME})"
-          git push origin HEAD:master
