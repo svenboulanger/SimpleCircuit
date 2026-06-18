@@ -12,6 +12,7 @@ using SimpleCircuit.Drawing.Styles;
 using SimpleCircuit.Parser.SimpleTexts;
 using SpiceSharp;
 using SpiceSharp.Components;
+using SpiceSharp.Entities;
 using SpiceSharp.Simulations;
 
 namespace SimpleCircuit;
@@ -54,6 +55,26 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
     /// Gets or sets the minimum spacing in X- and Y-direction.
     /// </summary>
     public Vector2 Spacing { get; set; } = new(10.0, 10.0);
+
+    /// <summary>
+    /// Gets or sets whether overlapping components inside a connected group are automatically pushed
+    /// apart by injecting minimum-distance constraints and re-solving. Enabled by default.
+    /// </summary>
+    public bool ResolveOverlaps { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the maximum number of re-solves used to resolve overlapping components when
+    /// <see cref="ResolveOverlaps"/> is enabled.
+    /// </summary>
+    public int MaxOverlapIterations { get; set; } = 5;
+
+    /// <summary>
+    /// Gets or sets the gap that overlapping components are pushed apart to when
+    /// <see cref="ResolveOverlaps"/> is enabled. This is also the detection threshold: components
+    /// closer than this margin count as overlapping. Kept small by default so that only genuine (or
+    /// near-touching) overlaps are resolved, rather than re-spacing every nearby component.
+    /// </summary>
+    public Vector2 OverlapMargin { get; set; } = new(5.0, 5.0);
 
     /// <summary>
     /// Gets the text formatter.
@@ -148,8 +169,51 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
         if (!Prepare(presences, prepareContext))
             return false;
 
-        // Space loose blocks next to each other to avoid overlaps
+        // Solve once, then optionally keep injecting overlap constraints and re-solving until no
+        // overlaps remain (or we run out of iterations). The common case pays only for a single
+        // extra detection pass.
+        List<ICircuitPresence> extra = [];
+        var constrainedPairs = new HashSet<string>();
+        int overlapCounter = 0;
+        for (int iteration = 0; ; iteration++)
+        {
+            // Build the working set: original presences plus the accumulated overlap constraints.
+            List<ICircuitPresence> working = extra.Count == 0 ? presences : [.. presences, .. extra];
+            if (!SolveOnce(prepareContext, working, diagnostics, out var circuit))
+                return false;
+
+            // Nothing more to do if the feature is off, we are out of iterations, or there is no
+            // solvable circuit (in which case there are no movable positions anyway).
+            if (!ResolveOverlaps || iteration >= MaxOverlapIterations || circuit is null || circuit.Count == 0)
+                break;
+
+            var overlaps = OverlapResolver.DetectOverlaps(this, prepareContext, diagnostics, OverlapMargin);
+            if (overlaps.Count == 0)
+                break;
+
+            var added = OverlapResolver.BuildConstraints(overlaps, prepareContext, circuit, OverlapMargin, constrainedPairs, ref overlapCounter);
+            if (added.Count == 0)
+                break; // Remaining overlaps are rigid -> left as-is.
+            extra.AddRange(added);
+        }
+
+        Solved = true;
+        return true;
+    }
+
+    /// <summary>
+    /// Performs a single solve pass: registers all presences, grounds floating nodes, runs the
+    /// operating point and updates the presences with the result.
+    /// </summary>
+    /// <param name="prepareContext">The prepare context.</param>
+    /// <param name="presences">The presences to register and update.</param>
+    /// <param name="diagnostics">The diagnostics handler.</param>
+    /// <param name="circuit">The circuit that was built and solved (empty if there was nothing to solve).</param>
+    /// <returns>Returns <c>true</c> if the pass succeeded; otherwise, <c>false</c>.</returns>
+    private bool SolveOnce(PrepareContext prepareContext, List<ICircuitPresence> presences, IDiagnosticHandler diagnostics, out IEntityCollection circuit)
+    {
         var registerContext = new RegisterContext(diagnostics, prepareContext);
+        circuit = registerContext.Circuit;
         List<IDiagnosticMessage> warnings = [];
         void Log(object sender, SpiceSharp.WarningEventArgs e)
         {
@@ -171,11 +235,7 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
             var updateContext = new UpdateContext(diagnostics, null, prepareContext);
 
             // Apply spacing
-            if (!Update(prepareContext, updateContext, presences))
-                return false;
-
-            Solved = true;
-            return true;
+            return Update(prepareContext, updateContext, presences);
         }
 
         // Solve the circuit
@@ -192,8 +252,7 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
             var updateContext = new UpdateContext(diagnostics, state, prepareContext);
 
             // Apply spacing
-            if (!Update(prepareContext, updateContext, presences))
-                return false;
+            return Update(prepareContext, updateContext, presences);
         }
         catch (SpiceSharpException ex)
         {
@@ -209,9 +268,6 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
         {
             SpiceSharpWarning.WarningGenerated -= Log;
         }
-
-        Solved = true;
-        return true;
     }
 
     private bool Prepare(IEnumerable<ICircuitPresence> presences, PrepareContext context)

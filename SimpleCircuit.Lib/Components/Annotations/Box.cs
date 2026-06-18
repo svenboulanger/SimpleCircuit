@@ -175,6 +175,7 @@ public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
             var style = builder.Style.Modify(Modifier);
 
             // Expand the bounds by the margins
+            builder.BeginBounds();
             builder.BeginGroup(Name, ["annotation"], !Variants.Contains(Over));
             var matrix = builder.CurrentTransform.Matrix.Inverse;
             builder.BeginTransform(new Transform(-matrix * builder.CurrentTransform.Offset, matrix));
@@ -190,6 +191,8 @@ public class Box(string name) : IAnnotation, IBoxDrawable, IRoundedBox
             }
             builder.EndTransform();
             builder.EndGroup();
+            builder.EndBounds(out var bounds);
+            Bounds = bounds;
         }
     }
 

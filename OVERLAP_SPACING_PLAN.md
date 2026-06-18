@@ -1,5 +1,10 @@
 # Plan: Automatic spacing of overlapping components
 
+> **Status: implemented.** `SimpleCircuit.Lib/Circuits/OverlapResolver.cs` holds the
+> detection/constraint logic; `GraphicalCircuit.Solve()` was split into `SolveOnce()`
+> plus the resolution loop, with `ResolveOverlaps` / `MaxOverlapIterations` properties
+> (also exposed as `.option`s). Enabled by default.
+
 ## Goal
 
 Within a connected group, detect components whose bounding boxes overlap and push
@@ -240,11 +245,14 @@ finite => it terminates, and `MaxOverlapIterations` (default ~5) is a backstop.
 
 ## Configuration (on `GraphicalCircuit`)
 
-- `bool ResolveOverlaps { get; set; }` — **recommended default `false`** (opt-in, matches
-  "can be"; avoids silently changing existing diagrams). Easy to flip to `true` later.
+- `bool ResolveOverlaps { get; set; } = true` — enabled by default; the tight `OverlapMargin`
+  keeps it from re-spacing merely-nearby components, so genuine overlaps are fixed without
+  disturbing well-formed diagrams.
 - `int MaxOverlapIterations { get; set; } = 5`.
-- Reuse `Spacing` for the separation margin, or add `Vector2 OverlapMargin` if a tighter
-  gap than the inter-block spacing is wanted.
+- `Vector2 OverlapMargin { get; set; } = (5, 5)` — a dedicated, tight gap (also the
+  detection threshold) so only genuine / near-touching overlaps are resolved instead of
+  re-spacing every component within the inter-block `Spacing`. Exposed as `OverlapMarginX`
+  / `OverlapMarginY` options.
 
 ## Performance
 

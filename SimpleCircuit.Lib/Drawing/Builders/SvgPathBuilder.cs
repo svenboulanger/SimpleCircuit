@@ -46,12 +46,15 @@ public class SvgPathBuilder(Transform transform, ExpandableBounds bounds) : IPat
         {
             Append($"M{_transform.Offset.ToSVG()}");
             _last = _transform.Offset;
+            _isFirst = false;
         }
     }
 
     /// <inheritdoc />
     public IPathBuilder MoveTo(Vector2 location)
     {
+        _isFirst = false;
+
         // Local coordinate space
         _p1 = _h1 = _p2;
         _p2 = _h2 = location;

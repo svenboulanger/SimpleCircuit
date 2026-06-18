@@ -197,6 +197,8 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable, 
             foreach (string name in GroupClasses)
                 classes.Add(name);
         }
+
+        builder.BeginBounds();
         builder.BeginGroup(Name, classes);
 
         // Transform all the elements inside the drawing method
@@ -206,6 +208,8 @@ public abstract class DiagramBlockInstance : ILocatedDrawable, IScaledDrawable, 
 
         // Stop grouping elements
         builder.EndGroup();
+        builder.EndBounds(out var bounds);
+        Bounds = bounds;
     }
 
     /// <summary>

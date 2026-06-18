@@ -36,12 +36,17 @@ public class BoundsPathBuilder(Transform transform, ExpandableBounds bounds) : I
     private void InitializePath()
     {
         if (_isFirst && !_transform.Offset.IsZero())
+        {
             _last = _transform.Offset;
+            _isFirst = false;
+        }
     }
 
     /// <inheritdoc />
     public IPathBuilder MoveTo(Vector2 location)
     {
+        _isFirst = false;
+
         // Local coordinate space
         _p1 = _h1 = _p2;
         _p2 = _h2 = location;

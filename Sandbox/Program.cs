@@ -16,16 +16,43 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        .option keepupright = true
+        * Example for ERD diagrams
 
-        X <r> C("R")
-        X <a 45> C("R")
-        X <u> C("R")
-        X <a 135> C("R")
-        X <l> C("R")
-        X <a -135> C("R")
-        X <d> C("R")
-        X <a -45> C("R")
+        * General styling
+        .variant ENT*|ENT r=2
+        + header-bg="--primary" header-fg="white"
+        + odd-bg="#eeeeee" odd-fg="black" odd-fontsize=3
+        + even-fontsize=3
+
+        * Define the tables
+        ENTplayers("Players", "Player Id &#128273;",
+        + "First name", "Last name")
+        ENTgame("Games", "Game Id &#128273;", 
+        + "Player 1 Id &#8674;", "Player 2 Id &#8674;",
+        + "Score 1", "Score 2", "Score 3", "Date")
+        ENTranking("Ranking", "Ranking Id &#128273;",
+        + "Player Id &#8674;",
+        + "Date", "Rank")
+        ENTtournament("Tournament", "Tournament Id &#128273;"
+        + "Name", "Date")
+        ENTcompetition("Competition", "Competition Id &#128273;"
+        + "Name", "StartDate")
+        ENTmeeting("Competition Meeting", "Meeting Id &#128273;"
+        + "Competition Id &#8674;",
+        + "Date")
+
+        * Display the links
+        ENTgame <erd-one-many r 10 u r erd-only-one> ENTplayers
+        ENTplayers <erd-only-one d r erd-zero-many> ENTranking
+
+        ENTmeeting <erd-zero-many r d erd-zero-many> ENTplayers
+        ENTcompetition <erd-zero-many r d erd-zero-many> ENTplayers
+        ENTtournament <erd-zero-many r d erd-zero-many> ENTplayers
+
+        ENTcompetition <erd-only-one l d r erd-zero-many> ENTmeeting
+
+        .option resolveoverlaps = true
+        
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr
