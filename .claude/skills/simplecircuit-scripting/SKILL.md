@@ -138,6 +138,13 @@ GND <u 5> V <u 20 r 10> R <r 0> T // fixed lengths
 GND <a 45> V <a 45 a -45> R       // odd angles
 ```
 
+Prefer **bare direction** wires (`<r>`, `<u d>`) — they already carry the default
+minimum, and the engine now pushes overlapping components apart automatically
+(`ResolveOverlaps` is on by default; tune the gap with the `OverlapMarginX` /
+`OverlapMarginY` options). Reach for an explicit minimum (`+n`) or fixed (`n`) length
+only when you actually need to pin spacing or a position; over-specifying lengths
+fights both the solver and the auto-spacing.
+
 ### Markers
 
 Place a marker word inside the wire to draw a symbol on it; position depends on
@@ -225,7 +232,7 @@ matching `.end…` (most accept `.ends` / `.end` as well).
 | Statement | Purpose |
 |---|---|
 | `.param name = value` | define a parameter in the current scope |
-| `.option(s) Key=Value` | global options (e.g. `SpacingX`, `SpacingY`, `KeepUpright`) |
+| `.option(s) Key=Value` | global options (e.g. `SpacingX`, `SpacingY`, `KeepUpright`, `ResolveOverlaps`, `OverlapMarginX`, `OverlapMarginY`) |
 | `.variant(s) <filter> v1 v2` | force variants on all components matching a filter |
 | `.property / .properties <filter> k=v` | force properties on matching components/`wire` |
 | `.if {cond}` … `.elif {cond}` … `.else` … `.endif` | conditional blocks |
@@ -356,8 +363,9 @@ errors is reported but not rendered; a script with no circuit elements reports
 
 - Build the skeleton with named nodes (`Xout`, `Xfb`, `Xminus`) first, then add
   `( … )` virtual chains to align and tidy.
-- Prefer minimum-length (`+n`) wires; reach for fixed lengths (`n`) only when you
-  must pin something exactly.
+- Prefer bare direction wires (`<r>`, `<u d>`) and let the engine auto-space
+  overlapping components (`ResolveOverlaps`, on by default); add an explicit minimum
+  (`+n`) or fixed length (`n`) only when you must pin spacing or position exactly.
 - Use `(y GND)` / `(x T)` early — aligning grounds and terminals fixes most
   "drifting" layouts.
 - When a circuit repeats, reach for `.for`, `.subckt`, or `.section` instead of
