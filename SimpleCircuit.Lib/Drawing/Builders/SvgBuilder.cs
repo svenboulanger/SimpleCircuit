@@ -1,6 +1,7 @@
 ﻿using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Spans;
 using SimpleCircuit.Drawing.Styles;
+using SimpleCircuit.Parser.SimpleTexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,11 +33,20 @@ public class SvgBuilder : BaseGraphicsBuilder
     private readonly XmlDocument _document;
     private XmlNode _current;
     private readonly Stack<Transform> _tf = new();
+    private bool _usesBold;
 
     /// <summary>
     /// Gets or sets the margin used along the border to make sure everything is included.
     /// </summary>
     public Margins Margin { get; set; } = new(2, 2, 2, 2);
+
+    /// <summary>
+    /// Gets or sets whether the embedded font face should be embedded directly into the
+    /// generated SVG via an <c>@font-face</c> rule with a base64 data-URI. This produces a
+    /// fully self-contained SVG at the cost of a significantly larger file (the full font
+    /// is roughly 0.7-1 MB per weight). Disabled by default.
+    /// </summary>
+    public bool EmbedFonts { get; set; }
 
     /// <summary>
     /// Removes empty groups.
@@ -217,6 +227,8 @@ public class SvgBuilder : BaseGraphicsBuilder
                 {
                     // Make a span at the specified location
                     var element = _document.CreateElement("tspan", Namespace);
+                    if (textSpan.Appearance.Bold)
+                        _usesBold = true;
                     element.SetAttribute("style", textSpan.Appearance.CreateTextStyle(Diagnostics));
                     element.SetAttribute("x", textSpan.Offset.X.ToSVG());
                     element.SetAttribute("y", textSpan.Offset.Y.ToSVG());
@@ -358,7 +370,32 @@ public class SvgBuilder : BaseGraphicsBuilder
         svg.SetAttribute("height", ((int)bounds.Height * 5).ToString());
         svg.SetAttribute("viewBox", $"{bounds.Left.ToSVG()} {bounds.Top.ToSVG()} {bounds.Width.ToSVG()} {bounds.Height.ToSVG()}");
 
+        if (EmbedFonts)
+            EmbedFontFaces(svg);
+
         return _document;
+    }
+
+    /// <summary>
+    /// Injects a <c>&lt;defs&gt;&lt;style&gt;</c> block containing <c>@font-face</c> rules that
+    /// embed the font face as base64 data-URIs, making the SVG self-contained. Only the bold
+    /// weight that is actually used is embedded to limit the file size.
+    /// </summary>
+    /// <param name="svg">The root SVG element.</param>
+    private void EmbedFontFaces(XmlElement svg)
+    {
+        string css = EmbeddedFonts.CreateFontFaceStylesheet(includeBold: _usesBold);
+        if (string.IsNullOrEmpty(css))
+            return;
+
+        var defs = _document.CreateElement("defs", Namespace);
+        var style = _document.CreateElement("style", Namespace);
+        style.SetAttribute("type", "text/css");
+        style.AppendChild(_document.CreateCDataSection(css));
+        defs.AppendChild(style);
+
+        // Place the definitions first so the font face is available before any glyphs are drawn.
+        svg.PrependChild(defs);
     }
 
     /// <summary>

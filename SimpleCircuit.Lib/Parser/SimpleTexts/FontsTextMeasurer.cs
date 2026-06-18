@@ -44,18 +44,14 @@ public class FontsTextMeasurer : ITextMeasurer
     static FontsTextMeasurer()
     {
         _embedded = new FontCollection();
-        var assembly = typeof(FontsTextMeasurer).Assembly;
         FontFamily fallback = default;
-        foreach (string name in new[] { "SimpleCircuit.Fonts.DejaVuSans.ttf", "SimpleCircuit.Fonts.DejaVuSans-Bold.ttf" })
+        foreach (byte[] font in new[] { EmbeddedFonts.Regular, EmbeddedFonts.Bold })
         {
-            using var stream = assembly.GetManifestResourceStream(name);
-            if (stream is null)
+            if (font is null || font.Length == 0)
                 continue;
 
             // Copy to a seekable in-memory stream; the font collection may read it lazily.
-            var ms = new MemoryStream();
-            stream.CopyTo(ms);
-            ms.Position = 0;
+            var ms = new MemoryStream(font, writable: false);
             fallback = _embedded.Add(ms);
         }
         _fallback = fallback;

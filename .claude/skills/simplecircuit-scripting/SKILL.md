@@ -292,6 +292,7 @@ file becomes its own job. Relative paths resolve against the current directory.
 |---|---|
 | `<file>` | Add an input script file as a job. The script's extension does not matter — its contents are read as SimpleCircuit script. |
 | `-o` / `-out <file>` | Set the output path for the **immediately preceding** input file. |
+| `-ef` / `--embed-fonts` | Embed the DejaVu Sans font face directly into the generated SVG(s) via an `@font-face` base64 data-URI, producing fully self-contained SVGs. Applies to every job regardless of position. Off by default; adds ~1 MB per file (~2 MB if bold text is used). |
 | `-v` / `--version` | Print the SimpleCircuit library version and continue. |
 | `-cli` | After processing any file jobs, drop into interactive mode. |
 

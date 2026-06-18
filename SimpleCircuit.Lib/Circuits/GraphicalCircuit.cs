@@ -438,8 +438,11 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
     /// Renders the graphical circuit to an SVG XML document.
     /// </summary>
     /// <param name="diagnostics">The diagnostics handler.</param>
+    /// <param name="embedFonts">If <c>true</c>, the font face is embedded directly into the SVG
+    /// via an <c>@font-face</c> rule with a base64 data-URI, producing a fully self-contained
+    /// (but considerably larger) SVG. Disabled by default.</param>
     /// <returns>The XML document, or <c>null</c> if the process failed.</returns>
-    public XmlDocument Render(IDiagnosticHandler diagnostics)
+    public XmlDocument Render(IDiagnosticHandler diagnostics, bool embedFonts = false)
     {
         if (!Solved)
         {
@@ -448,7 +451,7 @@ public class GraphicalCircuit(IStyle style = null, ITextFormatter formatter = nu
         }
 
         // Create our drawing
-        var drawing = new SvgBuilder(TextFormatter, Style, diagnostics);
+        var drawing = new SvgBuilder(TextFormatter, Style, diagnostics) { EmbedFonts = embedFonts };
 
         // Draw
         Render(drawing);

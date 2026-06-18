@@ -102,10 +102,20 @@ public partial class Program
         interactiveMode = false;
         var jobs = new List<Job>();
         Job? currentJob = null;
+        bool embedFonts = false;
         for (int i = 0; i < args.Length; i++)
         {
             switch (args[i])
             {
+                case "-ef":
+                case "--embed-fonts":
+                    // Embed the font face into the generated SVG(s). Applies to every job,
+                    // regardless of where the flag appears on the command line.
+                    embedFonts = true;
+                    if (currentJob != null)
+                        currentJob.EmbedFonts = true;
+                    break;
+
                 case "-v":
                 case "--version":
                     // Show the version of SimpleCircuit.Lib
@@ -133,7 +143,8 @@ public partial class Program
                         filename = Path.Combine(Directory.GetCurrentDirectory(), filename);
                     currentJob = new Job()
                     {
-                        Filename = filename
+                        Filename = filename,
+                        EmbedFonts = embedFonts
                     };
                     break;
             }

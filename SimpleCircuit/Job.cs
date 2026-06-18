@@ -37,6 +37,12 @@ public partial class Job
     public ITextFormatter? TextFormatter { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the font face should be embedded directly into the generated SVG.
+    /// This produces a fully self-contained SVG at the cost of a much larger file size.
+    /// </summary>
+    public bool EmbedFonts { get; set; }
+
+    /// <summary>
     /// Computes the graphical circuit.
     /// </summary>
     public void Compute()
@@ -102,7 +108,7 @@ public partial class Job
         // Render
         if (_context?.Circuit != null && _context.Circuit.Count > 0)
         {
-            var doc = _context.Circuit.Render(diagnostics);
+            var doc = _context.Circuit.Render(diagnostics, EmbedFonts);
             if (doc is null)
                 return;
 
