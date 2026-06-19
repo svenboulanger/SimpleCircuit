@@ -5,15 +5,14 @@ namespace SimpleCircuit.Tests.Evaluator;
 
 public class ExpressionTests
 {
-    // Note: the operators '%' (modulo) and '^' (xor) exist in the expression parser
-    // and evaluator, but are not produced by the lexer, so they are not usable from
-    // a script and are intentionally not tested here.
     [Theory]
     [InlineData("1+2", 3.0)]
     [InlineData("2*3+4", 10.0)]   // precedence
     [InlineData("2+3*4", 14.0)]
     [InlineData("(2+3)*4", 20.0)] // brackets
     [InlineData("10/4", 2.5)]
+    [InlineData("7%3", 1.0)]      // modulo
+    [InlineData("2+7%3", 3.0)]    // modulo binds tighter than addition
     [InlineData("-5", -5.0)]
     [InlineData("+5", 5.0)]
     public void Arithmetic(string expr, double expected)
@@ -61,6 +60,8 @@ public class ExpressionTests
     [Theory]
     [InlineData("6 & 3", 2.0)]
     [InlineData("4 | 1", 5.0)]
+    [InlineData("6 ^ 3", 5.0)]   // xor
+    [InlineData("5 ^ 1", 4.0)]
     [InlineData("1 << 3", 8.0)]
     [InlineData("16 >> 2", 4.0)]
     public void Bitwise(string expr, double expected)

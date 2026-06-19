@@ -112,6 +112,8 @@ public class SimpleCircuitLexer : Lexer<TokenType>
                 case ',':
                 case ':':
                 case '~':
+                case '%':
+                case '^':
                     NextType = TokenType.Punctuator;
                     ContinueToken();
                     break;
