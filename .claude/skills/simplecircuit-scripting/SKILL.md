@@ -84,6 +84,14 @@ Inside `( ... )` after a component, comma (or space) separated:
 - **Label** — a bare string is a label: `R("1k")`, `V("\overline{v^2_n}")`.
   Multiple labels allowed: `R("label 1", "label 2")`.
 
+Labels support a little LaTeX-style markup — `_`/`^` for sub/superscript,
+`\overline{}`, `\underline{}`, `\textb{}` (bold), `\textcolor{c}{}` — and **HTML
+entities** for symbols: `&Omega;`, `&mu;`, `&deg;`, `&plusmn;`, `&le;`, `&ge;`,
+`&ne;`, `&approx;`, `&infin;`, Greek `&alpha;`…`&omega;`/`&Alpha;`…`&Omega;`, etc.
+Any standard HTML entity name works, as do numeric refs (`&#937;`, `&#x3A9;`); a
+bare `&` that isn't a valid entity renders literally. E.g. `R("10 &Omega;")`,
+`C("4.7 &mu;F")`.
+
 Common styling properties (most components):
 `color`/`fg`/`foreground`, `bg`/`background`, `thickness`/`t`, `fontsize`,
 `font`/`fontfamily`, `bold`, `opacity`/`alpha`, `fgo`, `bgo`, and the variants

@@ -253,6 +253,15 @@ V("\overline{v^2_n}")
 C("a \textb{\textcolor{red}{b_i}}")
 D("a \textcolor{#007bff}{b^(k)}")
 
+* Labels also accept HTML named entities and numeric character
+* references, which are handy for Greek letters and math symbols:
+*  - &Omega; &mu; &deg; &plusmn; &le; &ge; &ne; &approx; &infin; etc.
+*  - any standard HTML entity name works, as does &#937; or &#x3A9;.
+*  - a literal & that is not a valid entity is shown as-is.
+R("R = 10 &Omega;")
+C("C_load = 4.7 &mu;F")
+T("&theta; &le; 90&deg;")
+
 * Labels are placed at anchor positions
 * E.g., for an ADC, the first label is normally placed
 * inside the symbol, but we can change this by specifying
