@@ -413,14 +413,21 @@ public static class ExpressionParser
         {
             if (span[i] == 'e' || span[i] == 'E')
             {
-                if (i + 1 < span.Length &&
-                    (span[i + 1] == '+' || span[i + 1] == '-' || char.IsDigit(span[i + 1])))
+                if (i + 1 < span.Length)
                 {
-                    // This is an exponential part
-                    i += 2;
-                    while (i < span.Length && char.IsDigit(span[i]))
+                    if (span[i + 1] == '+' || span[i + 1] == '-')
+                    {
+                        if (i + 2 < span.Length && char.IsDigit(span[i + 2]))
+                            i += 2;
+                        else
+                            break;
+                    }
+                    else if (char.IsDigit(span[i + 1]))
                         i++;
                 }
+                while (i < span.Length && char.IsDigit(span[i]))
+                    i++;
+                break;
             }
             else if (!char.IsDigit(span[i]) && span[i] != '.')
                 break;

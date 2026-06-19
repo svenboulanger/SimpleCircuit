@@ -296,7 +296,7 @@ public static class ExpressionEvaluator
 
         if (dict.TryGetValue(Tuple.Create(left.GetType(), right.GetType()), out var func))
             return func(left, right);
-        context.Diagnostics?.Post(binary.Operator.Location, ErrorCodes.CouldNotOperateForArgumenttype, left.GetType().Name, right.GetType().Name);
+        context.Diagnostics?.Post(binary.Operator.Location, ErrorCodes.CouldNotOperateForArgumenttype, name, left.GetType().Name, right.GetType().Name);
         return false;
     }
     private static object Evaluate(CallNode call, EvaluationContext context)
