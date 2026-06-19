@@ -865,7 +865,23 @@ public static class StatementEvaluator
     {
         List<WireSegmentInfo> segments = [];
         List<Marker> markers = [];
+        List<Marker> startWireMarkers = []; // always -> segments[0].StartMarkers
+        List<Marker> endWireMarkers = [];   // always -> segments[^1].EndMarkers
         List<SyntaxNode> propertiesAndVariants = [];
+
+        // Recognizes a wire shorthand class word. If matched, it expands into a
+        // start + end marker on the whole wire, and is still kept as a variant so
+        // the wire carries it as a CSS/SVG class.
+        bool TryShorthand(string name, SyntaxNode node)
+        {
+            if (!context.WireMarkerClasses.TryGetValue(name, out var factories))
+                return false;
+            startWireMarkers.Add(factories.Start());
+            endWireMarkers.Add(factories.End());
+            propertiesAndVariants.Add(node);
+            return true;
+        }
+
         for (int i = 0; i < wire.Items.Length; i++)
         {
             var item = wire.Items[i];
@@ -963,7 +979,7 @@ public static class StatementEvaluator
                         string name = literal.Value.ToString();
                         if (context.Markers.TryGetValue(name, out var func))
                             markers.Add(func());
-                        else
+                        else if (!TryShorthand(name, literal))
                             propertiesAndVariants.Add(literal);
                     }
                     break;
@@ -975,10 +991,11 @@ public static class StatementEvaluator
                         string name = EvaluateName(unary.Argument, context);
                         if (name is null)
                             continue;
+                        var variantNode = new IdentifierNode(new(unary.Location, name.AsMemory()));
                         if (context.Markers.TryGetValue(name, out var func))
                             markers.Add(func());
-                        else
-                            propertiesAndVariants.Add(new IdentifierNode(new(unary.Location, name.AsMemory())));
+                        else if (!TryShorthand(name, variantNode))
+                            propertiesAndVariants.Add(variantNode);
                     }
                     else if (unary.Type == UnaryOperatortype.Negative)
                         propertiesAndVariants.Add(unary); // Can't "remove" markers - so we already know it's a variant
@@ -990,7 +1007,7 @@ public static class StatementEvaluator
                     {
                         if (context.Markers.TryGetValue(id.Name, out var func))
                             markers.Add(func());
-                        else
+                        else if (!TryShorthand(id.Name, id))
                             propertiesAndVariants.Add(id);
                     }
                     break;
@@ -1005,10 +1022,11 @@ public static class StatementEvaluator
                         string name = EvaluateName(bn, context);
                         if (name is null)
                             continue;
+                        var variantNode = new IdentifierNode(new(bn.Location, name.AsMemory()));
                         if (context.Markers.TryGetValue(name, out var func))
                             markers.Add(func());
-                        else
-                            propertiesAndVariants.Add(new IdentifierNode(new(bn.Location, name.AsMemory())));
+                        else if (!TryShorthand(name, variantNode))
+                            propertiesAndVariants.Add(variantNode);
                     }
                     break;
 
@@ -1021,6 +1039,16 @@ public static class StatementEvaluator
         {
             if (segments.Count > 0)
                 segments[^1].EndMarkers = [.. markers];
+        }
+
+        // Apply the wire shorthand markers to the global start/end of the wire.
+        // These are appended so they coexist with manually placed markers.
+        if (segments.Count > 0)
+        {
+            if (startWireMarkers.Count > 0)
+                segments[0].StartMarkers = [.. segments[0].StartMarkers ?? [], .. startWireMarkers];
+            if (endWireMarkers.Count > 0)
+                segments[^1].EndMarkers = [.. segments[^1].EndMarkers ?? [], .. endWireMarkers];
         }
 
         // Create the wire

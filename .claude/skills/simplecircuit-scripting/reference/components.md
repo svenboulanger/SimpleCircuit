@@ -139,6 +139,36 @@ Usage recap:
 
 Example: `Xa <d arrow> Xb`, `ENTgame <erd-one-many r u r erd-only-one> ENTplayers`.
 
+### ERD cardinality shorthands
+
+A single shorthand word placed **anywhere** in a wire expands into an ERD marker at
+the wire's global **start** and one at its global **end**, so you don't have to hand-
+place a marker per segment. The word is also kept as a CSS/SVG variant class on the
+wire, and combines with (does not replace) any manually placed markers.
+
+```
+ENTgame <one-to-many r u r> ENTplayers   // erd-only-one at start, erd-one-many at end
+```
+
+| Shorthand | Start marker | End marker |
+|---|---|---|
+| `one-to-one` | `erd-only-one` | `erd-only-one` |
+| `one-to-zeroone` | `erd-only-one` | `erd-zero-one` |
+| `zeroone-to-one` | `erd-zero-one` | `erd-only-one` |
+| `one-to-onemany` | `erd-only-one` | `erd-one-many` |
+| `onemany-to-one` | `erd-one-many` | `erd-only-one` |
+| `one-to-many` | `erd-only-one` | `erd-zero-many` |
+| `many-to-one` | `erd-zero-many` | `erd-only-one` |
+| `zeroone-to-zeroone` | `erd-zero-one` | `erd-zero-one` |
+| `zeroone-to-onemany` | `erd-zero-one` | `erd-one-many` |
+| `onemany-to-zeroone` | `erd-one-many` | `erd-zero-one` |
+| `zeroone-to-many` | `erd-zero-one` | `erd-zero-many` |
+| `many-to-zeroone` | `erd-zero-many` | `erd-zero-one` |
+| `onemany-to-onemany` | `erd-one-many` | `erd-one-many` |
+| `onemany-to-many` | `erd-one-many` | `erd-zero-many` |
+| `many-to-onemany` | `erd-zero-many` | `erd-one-many` |
+| `many-to-many` | `erd-zero-many` | `erd-zero-many` |
+
 ## Common style variant pairs (most components)
 
 - `dashed`, `dotted` — line styles.

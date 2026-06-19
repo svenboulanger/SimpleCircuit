@@ -35,7 +35,23 @@ const wireKeywords = [
     ["erd-many", "An ERD-style \"many\" marker."],
     ["erd-zero-one", "An ERD-style \"zero or one\" marker."],
     ["erd-one-many", "An ERD-style \"one or many\" marker."],
-    ["erd-zero-many", "An ERD-style \"zero or many\" marker"]
+    ["erd-zero-many", "An ERD-style \"zero or many\" marker"],
+    ["one-to-one", "ERD shorthand: erd-only-one at the wire start and end."],
+    ["one-to-zeroone", "ERD shorthand: erd-only-one at the wire start, erd-zero-one at the end."],
+    ["zeroone-to-one", "ERD shorthand: erd-zero-one at the wire start, erd-only-one at the end."],
+    ["one-to-onemany", "ERD shorthand: erd-only-one at the wire start, erd-one-many at the end."],
+    ["onemany-to-one", "ERD shorthand: erd-one-many at the wire start, erd-only-one at the end."],
+    ["one-to-many", "ERD shorthand: erd-only-one at the wire start, erd-zero-many at the end."],
+    ["many-to-one", "ERD shorthand: erd-zero-many at the wire start, erd-only-one at the end."],
+    ["zeroone-to-zeroone", "ERD shorthand: erd-zero-one at the wire start and end."],
+    ["zeroone-to-onemany", "ERD shorthand: erd-zero-one at the wire start, erd-one-many at the end."],
+    ["onemany-to-zeroone", "ERD shorthand: erd-one-many at the wire start, erd-zero-one at the end."],
+    ["zeroone-to-many", "ERD shorthand: erd-zero-one at the wire start, erd-zero-many at the end."],
+    ["many-to-zeroone", "ERD shorthand: erd-zero-many at the wire start, erd-zero-one at the end."],
+    ["onemany-to-onemany", "ERD shorthand: erd-one-many at the wire start and end."],
+    ["onemany-to-many", "ERD shorthand: erd-one-many at the wire start, erd-zero-many at the end."],
+    ["many-to-onemany", "ERD shorthand: erd-zero-many at the wire start, erd-one-many at the end."],
+    ["many-to-many", "ERD shorthand: erd-zero-many at the wire start and end."]
 ];
 var componentKeywords = [];
 
@@ -146,7 +162,7 @@ function registerLanguage(keywords) {
             wire: [
                 { include: '@line_comment' },
                 { include: '@whitespace' },
-                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plus[ab]?|minus[ab]?|erd-one-many|erd-one|erd-only-one|erd-many|erd-zero-one|erd-zero-many)\b|\?/, { token: 'pindirection.$S0' }],
+                [/\b([lurdneswa]|ne|nw|se|sw|hidden|nojump|nojmp|n?jmp|dotted|dashed|arrow|rarrow|dot|slash|plus[ab]?|minus[ab]?|erd-one-many|erd-one|erd-only-one|erd-many|erd-zero-one|erd-zero-many|(one|zeroone|onemany|many)-to-(one|zeroone|onemany|many))\b|\?/, { token: 'pindirection.$S0' }],
                 [/\b[xX]\b/, { token: 'queuedpoint.$S0', }],
                 [/\>/, { token: 'bracket.$S0', bracket: '@close', next: '@pop' }],
                 { include: '@number' },

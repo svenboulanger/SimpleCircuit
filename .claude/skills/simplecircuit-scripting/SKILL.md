@@ -160,6 +160,13 @@ Markers: `arrow`, `reverse-arrow`, `dot`, `slash`, `plus`/`plusa`/`plusb`,
 `minus`/`minusa`/`minusb`, and ERD cardinalities `erd-one`, `erd-many`,
 `erd-one-many`, `erd-only-one`, `erd-zero-one`, `erd-zero-many`.
 
+**ERD cardinality shorthands** — a single word placed *anywhere* in a wire expands
+into an ERD marker at the wire's global start and end (and stays a CSS class on the
+wire). E.g. `ENTgame <one-to-many r u r> ENTplayers` puts `erd-only-one` at the
+start and `erd-one-many` at the end. Names follow the pattern `<start>-to-<end>`
+where each side is `one`/`zeroone`/`onemany`/`many`; see `reference/components.md`
+for the full table.
+
 ## Virtual chains — alignment
 
 Wrap a chain in `( ... )` to constrain positions **without drawing** anything. Used

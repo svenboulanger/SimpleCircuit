@@ -63,6 +63,36 @@ public class EvaluationContext
     public Dictionary<string, Func<Marker>> Markers { get; } = [];
 
     /// <summary>
+    /// Maps a wire shorthand class name to the marker factories applied to the
+    /// start and end of the whole wire. Resolved against <see cref="Markers"/>.
+    /// </summary>
+    public Dictionary<string, (Func<Marker> Start, Func<Marker> End)> WireMarkerClasses { get; } = [];
+
+    /// <summary>
+    /// The default wire shorthand classes. Each entry maps a class name to the
+    /// existing marker keys placed at the global start and end of the wire.
+    /// </summary>
+    private static readonly (string Class, string Start, string End)[] _defaultWireClasses =
+    [
+        ("one-to-one",         "erd-only-one",  "erd-only-one"),
+        ("one-to-zeroone",     "erd-only-one",  "erd-zero-one"),
+        ("zeroone-to-one",     "erd-zero-one",  "erd-only-one"),
+        ("one-to-onemany",     "erd-only-one",  "erd-one-many"),
+        ("onemany-to-one",     "erd-one-many",  "erd-only-one"),
+        ("one-to-many",        "erd-only-one",  "erd-zero-many"),
+        ("many-to-one",        "erd-zero-many", "erd-only-one"),
+        ("zeroone-to-zeroone", "erd-zero-one",  "erd-zero-one"),
+        ("zeroone-to-onemany", "erd-zero-one",  "erd-one-many"),
+        ("onemany-to-zeroone", "erd-one-many",  "erd-zero-one"),
+        ("zeroone-to-many",    "erd-zero-one",  "erd-zero-many"),
+        ("many-to-zeroone",    "erd-zero-many", "erd-zero-one"),
+        ("onemany-to-onemany", "erd-one-many",  "erd-one-many"),
+        ("onemany-to-many",    "erd-one-many",  "erd-zero-many"),
+        ("many-to-onemany",    "erd-zero-many", "erd-one-many"),
+        ("many-to-many",       "erd-zero-many", "erd-zero-many"),
+    ];
+
+    /// <summary>
     /// Gets the factory for components.
     /// </summary>
     public DrawableFactoryDictionary Factory { get; } = new();
@@ -141,6 +171,17 @@ public class EvaluationContext
                         }
                     }
                 }
+            }
+
+            // Resolve the wire shorthand classes against the registered markers.
+            // The table is hard-coded developer data, so an unresolved key is a bug.
+            foreach (var (cls, start, end) in _defaultWireClasses)
+            {
+                if (!Markers.TryGetValue(start, out var startFactory))
+                    throw new InvalidOperationException($"Wire class '{cls}' references unknown start marker '{start}'.");
+                if (!Markers.TryGetValue(end, out var endFactory))
+                    throw new InvalidOperationException($"Wire class '{cls}' references unknown end marker '{end}'.");
+                WireMarkerClasses.Add(cls, (startFactory, endFactory));
             }
         }
         Circuit = new GraphicalCircuit(style, formatter);
