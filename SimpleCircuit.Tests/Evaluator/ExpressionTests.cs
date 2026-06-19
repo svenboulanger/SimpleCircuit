@@ -87,8 +87,9 @@ public class ExpressionTests
 
     [Theory]
     [InlineData("round(2.4)", 2.0)]
-    [InlineData("round(2.5)", 2.0)]      // Math.Round default is banker's rounding (to even)
+    [InlineData("round(2.5)", 3.0)]      // round half away from zero
     [InlineData("round(3.5)", 4.0)]
+    [InlineData("round(-2.5)", -3.0)]
     [InlineData("round(2.345, 2)", 2.35)]
     public void RoundFunction(string expr, double expected)
         => Assert.Equal(expected, (double)ExpressionRunner.Evaluate(expr), 9);

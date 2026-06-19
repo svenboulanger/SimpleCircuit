@@ -320,7 +320,7 @@ public static class ExpressionEvaluator
                         if (args.Length == 1)
                         {
                             if (TryGetDouble(args[0], context, out double d))
-                                return Math.Round(d);
+                                return Math.Round(d, MidpointRounding.AwayFromZero);
                             else
                                 return null;
                         }
@@ -328,7 +328,7 @@ public static class ExpressionEvaluator
                         {
                             if (TryGetDouble(args[0], context, out double d) &&
                                 TryGetInteger(args[1], context, out int i))
-                                return Math.Round(d, i);
+                                return Math.Round(d, i, MidpointRounding.AwayFromZero);
                             else
                                 return null;
                         }
