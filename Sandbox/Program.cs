@@ -16,42 +16,55 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        * Example for ERD diagrams
+        * You can change the array size with these parameters
+        .param rows = 3
+        .param columns = 3
 
-        * General styling
-        .variant ENT*|ENT r=2
-        + header-bg="--primary" header-fg="white"
-        + odd-bg="#eeeeee" odd-fg="black" odd-fontsize=3
-        + even-fontsize=3
+        * Define a single pixel
+        .subckt PIXEL DIRleft DIRtop DIRbottom DIRright fg="--foreground"
+            .property *|wire fg={fg}
 
-        * Define the tables
-        ENTplayers("Players", "Player Id &#128273;",
-        + "First name", "Last name")
-        ENTgame("Games", "Game Id &#128273;", 
-        + "Player 1 Id &#8674;", "Player 2 Id &#8674;",
-        + "Score 1", "Score 2", "Score 3", "Date")
-        ENTranking("Ranking", "Ranking Id &#128273;",
-        + "Player Id &#8674;",
-        + "Date", "Rank")
-        ENTtournament("Tournament", "Tournament Id &#128273;"
-        + "Name", "Date")
-        ENTcompetition("Competition", "Competition Id &#128273;"
-        + "Name", "StartDate")
-        ENTmeeting("Competition Meeting", "Meeting Id &#128273;"
-        + "Competition Id &#8674;",
-        + "Date")
+            * Main branch
+            GND <u> D(photodiode, flip) <u> Xd <u> MNrst <u> POW
+            Xd <r> [g]MNsf[d] <u> POW
 
-        * Display the links
-        ENTgame <erd-one-many r 10 u r erd-only-one> ENTplayers
-        ENTplayers <erd-only-one d r erd-zero-many> ENTranking
+            * Inputs
+            MNrst[g] <l> T("RST")
+            MNsf[s] <d r> MNsel <r> Xcol
+            MNsel[g] <u 60> Xrow
 
-        ENTmeeting <erd-zero-many r d erd-zero-many> ENTplayers
-        ENTcompetition <erd-zero-many r d erd-zero-many> ENTplayers
-        ENTtournament <erd-zero-many r d erd-zero-many> ENTplayers
+            * Make column and row lines (DIR is used as direction for pins)
+            Xcol <u 70> DIRtop
+            Xcol <d 15> DIRbottom
+            Xrow <l 60> DIRleft
+            Xrow <r 20> DIRright
+        .ends
 
-        ENTcompetition <erd-only-one l d r erd-zero-many> ENTmeeting
+        * Now we will use for-loops to make an array of the pixel
+        .for r 1 {rows} 1
+            .for c 1 {columns} 1
+                Xh_{r}_{c} <r> PIXEL_{r}_{c} <r> Xh_{r}_{c+1}
+                Xv_{r}_{c} <d> [DIRtop]PIXEL_{r}_{c}[DIRbottom] <d> Xv_{r+1}_{c}
+            .endf
+        .endf
 
-        .option resolveoverlaps = true
+        * Show the row driver
+        .for r 1 {rows} 1
+            .param index = {r - round((rows + 1) / 2)}
+            T(label1={"ROWSEL_in,y" + (index > 0 ? "+" + index : index == 0 ? "" : index)}, in) <r> Xh_{r}_1
+        .endf
+
+        * Show the column output
+        .for c 1 {columns} 1
+            .param index = {c - round((columns + 1) / 2)}
+            T(label1={"COL_out,x" + (index > 0 ? "+" + index : index == 0 ? "" : index)}, out) <u> Xv_{rows+1}_{c}
+        .endf
+
+        * Let's make the center pixel in the primary color
+        PIXEL_{round((rows + 1) / 2)}_{round((columns + 1) / 2)}(fg="--primary")
+
+        * Let's make the top-left pixel in danger color
+        PIXEL_1_1(fg="--danger")
         
         """);
         // ExportThemes(@"Xtl <r +10> Xtr

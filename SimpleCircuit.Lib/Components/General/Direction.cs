@@ -48,6 +48,9 @@ public class Direction : DrawableFactory
             _anchors[0] = new LabelAnchorPoint(new(0, -m), new(0, -1));
             _anchors[1] = new LabelAnchorPoint(new(0, m), new(0, 1));
             _anchors.Draw(builder, this, style);
+
+            // Make sure we expand the bounds to at least this point
+            builder.ExpandBounds(new());
         }
     }
 }
