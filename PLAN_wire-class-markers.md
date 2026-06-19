@@ -87,16 +87,34 @@ targets exactly these two slots.
 
 ## Proposed design
 
-### 1. A registry mapping class name → (start marker key, end marker key)
+The design splits cleanly along the two constraints:
 
-Add a lookup that mirrors the existing `Markers` dictionary. Recommended location:
-`EvaluationContext` so it lives alongside `Markers` and is easy to extend later.
+- **Where the shorthand variants live** → `EvaluationContext` (sections 1–2 below).
+- **How a matched shorthand turns into first/last-segment markers** → entirely inside
+  `StatementEvaluator.ProcessWire` (section 3 below). No other class
+  (`Wire`, `CreateWire`, the parser) needs to change to place the markers.
+
+### 1. `EvaluationContext` owns the registry of possible shorthand variants
+
+The set of possible shorthand variants is **stored on `EvaluationContext`**, right
+alongside the existing `Markers` dictionary
+([EvaluationContext.cs:63](SimpleCircuit.Lib/Evaluator/EvaluationContext.cs)). This
+is the home for the data because `Markers` already lives there, the constructor
+already does marker reflection there, and `ProcessWire` already receives the
+`EvaluationContext`.
 
 ```csharp
-// EvaluationContext.cs
-/// <summary>Maps a wire shorthand class to its (start, end) marker keys.</summary>
-public Dictionary<string, (string Start, string End)> WireMarkerClasses { get; } = [];
+// EvaluationContext.cs — next to `public Dictionary<string, Func<Marker>> Markers { get; } = [];`
+/// <summary>
+/// Maps a wire shorthand class name to the marker factories applied to the
+/// start and end of the whole wire. Resolved against <see cref="Markers"/>.
+/// </summary>
+public Dictionary<string, (Func<Marker> Start, Func<Marker> End)> WireMarkerClasses { get; } = [];
 ```
+
+Storing the **resolved factories** (not the raw key strings) means each shorthand
+is validated once, at construction time, and `ProcessWire` can call the factories
+directly without another dictionary lookup.
 
 Populate it from a single hard-coded table that corresponds 1:1 with the table
 above (this is the one place to edit when the table is finalized):
@@ -123,39 +141,88 @@ private static readonly (string Class, string Start, string End)[] _defaultWireC
 ];
 ```
 
-Resolve each `(Start, End)` against `Markers` at registration time so that an
-unknown marker key is reported once, not per wire.
+Resolve each `(Start, End)` against `Markers` at registration time (in the
+constructor, right after the marker reflection loop). The table is hard-coded, so a
+key that doesn't resolve is a **developer error**, not a user-script error: throw
+(e.g. `InvalidOperationException` / `KeyNotFoundException`) naming the offending
+shorthand and key so it surfaces immediately during development rather than
+degrading silently at runtime.
 
-### 2. Recognize the shorthand in `ProcessWire`
+```csharp
+foreach (var (cls, start, end) in _defaultWireClasses)
+{
+    if (!Markers.TryGetValue(start, out var startFactory))
+        throw new InvalidOperationException($"Wire class '{cls}' references unknown start marker '{start}'.");
+    if (!Markers.TryGetValue(end, out var endFactory))
+        throw new InvalidOperationException($"Wire class '{cls}' references unknown end marker '{end}'.");
+    WireMarkerClasses.Add(cls, (startFactory, endFactory));
+}
+```
 
-In the item loop of `ProcessWire`, in every branch that currently falls through to
-"treat as variant/property" for a bare word (`LiteralNode`, `IdentifierNode`,
-`UnaryNode Positive`, concatenation), add a check **before** the variant fallback:
+### 2. Recognize the shorthand in `ProcessWire` (in `StatementEvaluator`)
 
-1. If the word is in `context.Markers` → existing behavior (positional marker).
-2. **Else if the word is in `context.WireMarkerClasses`** → record the resolved
-   start-marker factory and end-marker factory into two new locals
-   (`fullWireStartMarkers`, `fullWireEndMarkers`) and (decision below) optionally
-   still add the word as a variant.
+All wire-side logic stays in `StatementEvaluator.ProcessWire`
+([StatementEvaluator.cs:864](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)).
+That method already walks `wire.Items` and, for each bare word, looks it up in
+`context.Markers` and either collects a `Marker` or pushes the node into
+`propertiesAndVariants`. The shorthand recognition slots into the same branches.
+
+The bare-word branches today are:
+- `LiteralNode` → [:963–968](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)
+- `UnaryNode` (Positive) → [:975–981](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)
+- `IdentifierNode` → [:991–994](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)
+- `BinaryNode` (Concatenate) → [:1005–1011](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)
+
+In each, insert a check **between** the `context.Markers` lookup and the
+variant/property fallback:
+
+1. If the word is in `context.Markers` → existing behavior (positional marker,
+   appended to the local `markers` list).
+2. **Else if the word is in `context.WireMarkerClasses`** → invoke the resolved
+   `Start`/`End` factories and collect the results into two new locals,
+   `startWireMarkers` / `endWireMarkers` (see section 3), **and** still push the
+   word into `propertiesAndVariants` so it remains a CSS/variant class (decision 1).
 3. Else → variant/property fallback (unchanged).
 
-### 3. Apply the collected full-wire markers after the loop
+To avoid repeating this in four places, factor it into a small local helper inside
+`ProcessWire`, e.g. `bool TryShorthand(string name, SyntaxNode node)`, that does the
+`WireMarkerClasses` lookup, fills `startWireMarkers`/`endWireMarkers`, adds the
+variant node, and returns whether it matched.
 
-After the segment list is built (just before/after the existing trailing-marker
-block at [StatementEvaluator.cs:1020](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)):
+### 3. Apply the collected full-wire markers — also in `ProcessWire`
+
+`ProcessWire` already declares `List<Marker> markers = []` and attaches it to
+`segments[0].StartMarkers` (first segment) or `segments[^1].EndMarkers` (last
+segment) by list position
+([:884–890](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs) and the trailing
+block at [:1020–1024](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)). The
+shorthand markers reuse exactly this first/last-segment mechanism — they are not a
+new concept, just two extra accumulator lists that always target the global ends:
+
+```csharp
+// new locals next to `List<Marker> markers = [];`
+List<Marker> startWireMarkers = [];   // always → segments[0].StartMarkers
+List<Marker> endWireMarkers = [];     // always → segments[^1].EndMarkers
+```
+
+After the loop, alongside the existing trailing-`markers` block at
+[:1020](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs) and guarded by the same
+`segments.Count > 0` (decision 4), append (not overwrite) onto the first/last
+segment so shorthand and manually placed markers coexist (decisions 2 & 3):
 
 ```csharp
 if (segments.Count > 0)
 {
-    if (fullWireStartMarkers.Count > 0)
-        segments[0].StartMarkers = Combine(segments[0].StartMarkers, fullWireStartMarkers);
-    if (fullWireEndMarkers.Count > 0)
-        segments[^1].EndMarkers = Combine(segments[^1].EndMarkers, fullWireEndMarkers);
+    if (startWireMarkers.Count > 0)
+        segments[0].StartMarkers = [.. segments[0].StartMarkers ?? [], .. startWireMarkers];
+    if (endWireMarkers.Count > 0)
+        segments[^1].EndMarkers = [.. segments[^1].EndMarkers ?? [], .. endWireMarkers];
 }
 ```
 
-`Combine` appends to whatever markers were already placed explicitly so the
-shorthand and manual markers coexist rather than overwrite.
+Because both lists target `segments[0]`/`segments[^1]` regardless of where the
+shorthand word appeared in `wire.Items`, a shorthand at the start, middle, or end of
+the wire produces identical results.
 
 ---
 
@@ -188,29 +255,29 @@ shorthand and manual markers coexist rather than overwrite.
 
 ## Implementation steps
 
-1. **Registry** — add `WireMarkerClasses` to
-   [EvaluationContext.cs](SimpleCircuit.Lib/Evaluator/EvaluationContext.cs) and a
-   private default table; populate + validate it in the constructor right after the
-   marker reflection loop (resolve start/end keys against `Markers`, post a
-   diagnostic for an unknown marker key — no reserved-word collision check needed,
-   per decision 5).
-2. **New error code** — add to
-   [ErrorCodes.cs](SimpleCircuit.Lib/Diagnostics/ErrorCodes.cs) for "unknown marker
-   key referenced by wire class".
-3. **Evaluator** — in
-   [StatementEvaluator.ProcessWire](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs):
-   add `fullWireStartMarkers`/`fullWireEndMarkers` locals, the recognition checks in
-   the four bare-word branches, the `Combine` helper, and the post-loop application
-   (guarded by `segments.Count > 0`, per decision 4). When a shorthand is matched,
-   **also** push the word into `propertiesAndVariants` so it is added as a variant by
-   `CreateWire`/`ApplyPropertiesAndVariants` (decision 1).
-4. **Docs & skill**
+1. **Registry on `EvaluationContext`** — add the `WireMarkerClasses` property and a
+   private default table to
+   [EvaluationContext.cs](SimpleCircuit.Lib/Evaluator/EvaluationContext.cs);
+   populate + validate it in the constructor right after the marker reflection loop
+   (resolve start/end keys against `Markers` into factory pairs, **throwing** if a
+   key doesn't resolve since the table is hard-coded developer data — no
+   reserved-word collision check needed, per decision 5). This is the single source
+   of truth for the possible shorthand variants.
+2. **Evaluator** — in
+   [StatementEvaluator.ProcessWire](SimpleCircuit.Lib/Evaluator/StatementEvaluator.cs)
+   (and nowhere else): add `startWireMarkers`/`endWireMarkers` locals, the
+   `TryShorthand` recognition helper wired into the four bare-word branches, and the
+   post-loop application that appends them to `segments[0].StartMarkers` /
+   `segments[^1].EndMarkers` (guarded by `segments.Count > 0`, per decision 4). When
+   a shorthand is matched, **also** push the word into `propertiesAndVariants` so it
+   is added as a variant by `CreateWire`/`ApplyPropertiesAndVariants` (decision 1).
+3. **Docs & skill**
    - Update the markers section of the scripting skill
      ([.claude/skills/simplecircuit-scripting/SKILL.md](.claude/skills/simplecircuit-scripting/SKILL.md))
      and `reference/components.md` with the shorthand table.
    - Update the online help / marker listing if markers are surfaced in the UI
      ([SimpleCircuitOnline/Shared/GlobalOptionList.razor.cs](SimpleCircuitOnline/Shared/GlobalOptionList.razor.cs)).
-5. **Version bump** consistent with recent commits (e.g. `Bump version to …`).
+4. **Version bump** consistent with recent commits (e.g. `Bump version to …`).
 
 ---
 
@@ -227,6 +294,11 @@ Add evaluator/render tests (mirroring existing wire/marker tests) covering:
 - Zero-segment wire (e.g. `<>`) with a shorthand is a no-op — not drawn, no markers
   (decision 4).
 - The wire's SVG group carries the shorthand as a class (decision 1).
+- **Registry integrity** — constructing an `EvaluationContext` (which populates
+  `WireMarkerClasses` from the default table) does not throw, i.e. every shorthand's
+  start/end key resolves against `Markers`. This is the regression guard against a
+  developer typo in `_defaultWireClasses`, replacing what would otherwise be a
+  silent runtime failure.
 
 ---
 
