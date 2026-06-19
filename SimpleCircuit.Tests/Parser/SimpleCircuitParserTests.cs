@@ -50,11 +50,32 @@ public class SimpleCircuitParserTests
     [Fact]
     public void ForLoop_ParsesToForLoopNode()
     {
-        // Syntax: .for <var> <start> <end> <increment> — all four values are required.
+        // Syntax: .for <var> <start> <end> [<increment>] — the increment is optional.
         string script = ".for i 1 3 1\nR\n.endfor";
         ScriptRunner.TryParse(script, out var statements, out var diag);
         Assert.False(diag.HasErrors);
         Assert.Contains(FlattenStatements(statements), s => s is ForLoopNode);
+    }
+
+    [Fact]
+    public void ForLoop_WithoutIncrement_ParsesWithNullIncrement()
+    {
+        // The 4th argument may be omitted; the increment defaults to +/-1 at evaluation.
+        string script = ".for i 1 3\nR\n.endfor";
+        ScriptRunner.TryParse(script, out var statements, out var diag);
+        Assert.False(diag.HasErrors);
+        var loop = Assert.IsType<ForLoopNode>(FlattenStatements(statements).First(s => s is ForLoopNode));
+        Assert.Null(loop.Increment);
+    }
+
+    [Fact]
+    public void ForLoop_WithoutEndValue_ReportsExpectedEndValue()
+    {
+        // A missing end value must be caught (previously the guard wrongly re-checked start).
+        string script = ".for i 1\nR\n.endfor";
+        ScriptRunner.TryParse(script, out _, out var diag);
+        Assert.True(diag.HasErrors);
+        Assert.Contains(diag.Messages, m => m.Message.Contains("end value"));
     }
 
     [Fact]

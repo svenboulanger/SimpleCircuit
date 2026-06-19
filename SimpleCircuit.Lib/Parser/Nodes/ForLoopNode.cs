@@ -29,7 +29,8 @@ public record ForLoopNode : SyntaxNode
     public SyntaxNode End { get; }
 
     /// <summary>
-    /// Gets the increment value.
+    /// Gets the increment value. May be <c>null</c>, in which case the loop uses
+    /// a default step of +1 or -1 depending on the loop direction.
     /// </summary>
     public SyntaxNode Increment { get; }
 
@@ -44,7 +45,7 @@ public record ForLoopNode : SyntaxNode
     /// <param name="variable">The variable.</param>
     /// <param name="start">The start value.</param>
     /// <param name="end">The end value.</param>
-    /// <param name="increment">The increment.</param>
+    /// <param name="increment">The increment, or <c>null</c> for a default step of +/-1.</param>
     /// <param name="statements">The statements.</param>
     public ForLoopNode(Token forToken, Token variable, SyntaxNode start, SyntaxNode end, SyntaxNode increment, ScopedStatementsNode statements)
         : base(forToken.Location)
@@ -53,7 +54,7 @@ public record ForLoopNode : SyntaxNode
         Variable = variable;
         Start = start ?? throw new ArgumentNullException(nameof(start));
         End = end ?? throw new ArgumentNullException(nameof(end));
-        Increment = increment ?? throw new ArgumentNullException(nameof(increment));
+        Increment = increment;
         Statements = statements ?? ScopedStatementsNode.Empty;
     }
 
@@ -69,8 +70,11 @@ public record ForLoopNode : SyntaxNode
         sb.Append(Start);
         sb.Append(' ');
         sb.Append(End);
-        sb.Append(' ');
-        sb.Append(Increment);
+        if (Increment is not null)
+        {
+            sb.Append(' ');
+            sb.Append(Increment);
+        }
         sb.AppendLine();
         sb.AppendLine(Statements.ToString());
         sb.Append(".endfor");

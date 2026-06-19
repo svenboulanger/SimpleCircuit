@@ -39,6 +39,40 @@ public class PipelineTests
     }
 
     [Fact]
+    public void ForLoop_DefaultIncrement_CountsUp()
+    {
+        // .for i 1 3 (no increment) defaults to +1: i = 1, 2, 3 -> three resistors.
+        var looped = ScriptRunner.Evaluate(".for i 1 3\nR\n.endfor", out var diag);
+        Assert.False(diag.HasErrors);
+        Assert.Equal(3, DistinctResistorCount(looped));
+    }
+
+    [Fact]
+    public void ForLoop_DefaultIncrement_CountsDown()
+    {
+        // .for i 3 1 (no increment) defaults to -1: i = 3, 2, 1 -> three resistors.
+        var looped = ScriptRunner.Evaluate(".for i 3 1\nR\n.endfor", out var diag);
+        Assert.False(diag.HasErrors);
+        Assert.Equal(3, DistinctResistorCount(looped));
+    }
+
+    [Fact]
+    public void ForLoop_ExplicitIncrement_Unchanged()
+    {
+        // .for i 1 3 2 still steps by 2: i = 1, 3 -> two resistors.
+        var looped = ScriptRunner.Evaluate(".for i 1 3 2\nR\n.endfor", out var diag);
+        Assert.False(diag.HasErrors);
+        Assert.Equal(2, DistinctResistorCount(looped));
+    }
+
+    private static int DistinctResistorCount(SimpleCircuit.Evaluator.EvaluationContext context)
+        => context.Circuit
+            .Select(p => p.Name)
+            .Where(n => n.Contains('R'))
+            .Distinct()
+            .Count();
+
+    [Fact]
     public void IfElse_OnlyTakesTrueBranch()
     {
         var taken = ScriptRunner.Evaluate(".if true\nR\n.else\nC\n.endif", out var diag);

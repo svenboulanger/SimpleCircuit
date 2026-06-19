@@ -251,7 +251,7 @@ matching `.end…` (most accept `.ends` / `.end` as well).
 | `.variant(s) <filter> v1 v2` | force variants on all components matching a filter |
 | `.property / .properties <filter> k=v` | force properties on matching components/`wire` |
 | `.if {cond}` … `.elif {cond}` … `.else` … `.endif` | conditional blocks |
-| `.for i start end inc` … `.endf` | loop; `i` is available as a parameter inside |
+| `.for i start end [inc]` … `.endf` | loop; `i` is available as a parameter inside. `inc` is optional and defaults to +1 (counting up) or -1 (counting down) based on `start`/`end` |
 | `.scope` … `.ends` | a nested scope for properties/variants/params |
 | `.section NAME [props]` … `.ends` | named, isolated group; reuse with `.section B A(props)`; access inner items with `/` (`SEC/Vin`) |
 | `.subckt NAME ports [params]` … `.ends` | define a reusable subcircuit; ports are usually `DIR…` points; then use `NAME` as a component key |
@@ -266,6 +266,10 @@ Filters accept wildcards and `|` alternation: `.property *|wire fg={fg}`,
 ```
 .for i 0 5 1
     X{i} <r +5> R(label1={"R_" + i}) <r +5> X{i + 1}
+.endf
+
+.for i 1 5          // increment omitted: defaults to +1
+    R{i}
 .endf
 
 .subckt LPF DIRin[in] DIRout[b] r="1k" c="1uF"

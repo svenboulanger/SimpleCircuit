@@ -526,7 +526,9 @@ public static class StatementEvaluator
         string variableName = forLoop.Variable.Content.ToString();
         double start = EvaluateAsDouble(forLoop.Start, context, 0.0);
         double end = EvaluateAsDouble(forLoop.End, context, 1.0);
-        double increment = EvaluateAsDouble(forLoop.Increment, context, 1.0);
+        double increment = forLoop.Increment is null
+            ? 1.0
+            : EvaluateAsDouble(forLoop.Increment, context, 1.0);
 
         // Make sure we don't end up in an infinite loop
         if (increment.IsZero())

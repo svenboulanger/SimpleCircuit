@@ -1462,20 +1462,17 @@ public static class SimpleCircuitParser
         // Parse the end value
         if (!ParseValueOrExpression(lexer, context, out var end))
             return false;
-        if (start is null)
+        if (end is null)
         {
             context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedEndValue);
             return false;
         }
 
-        // Parse the increment value
+        // Parse the optional increment value. When omitted (next token is the
+        // newline), increment stays null and the evaluator uses a step of +/-1
+        // based on the loop direction.
         if (!ParseValueOrExpression(lexer, context, out var increment))
             return false;
-        if (increment is null)
-        {
-            context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedIncrementValue);
-            return false;
-        }
 
         // New line
         if (!lexer.Branch(TokenType.Newline))
