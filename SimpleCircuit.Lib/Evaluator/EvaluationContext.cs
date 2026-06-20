@@ -90,6 +90,9 @@ public class EvaluationContext
         ("onemany-to-many",    "erd-one-many",  "erd-zero-many"),
         ("many-to-onemany",    "erd-zero-many", "erd-one-many"),
         ("many-to-many",       "erd-zero-many", "erd-zero-many"),
+        ("f-arrow",            "",              "arrow"),
+        ("b-arrow",            "arrow",         ""),
+        ("d-arrow",            "arrow",         "arrow"),
     ];
 
     /// <summary>
@@ -177,9 +180,10 @@ public class EvaluationContext
             // The table is hard-coded developer data, so an unresolved key is a bug.
             foreach (var (cls, start, end) in _defaultWireClasses)
             {
-                if (!Markers.TryGetValue(start, out var startFactory))
+                Func<Marker> startFactory = null, endFactory = null;
+                if (!string.IsNullOrEmpty(start) && !Markers.TryGetValue(start, out startFactory))
                     throw new InvalidOperationException($"Wire class '{cls}' references unknown start marker '{start}'.");
-                if (!Markers.TryGetValue(end, out var endFactory))
+                if (!string.IsNullOrEmpty(end) && !Markers.TryGetValue(end, out endFactory))
                     throw new InvalidOperationException($"Wire class '{cls}' references unknown end marker '{end}'.");
                 WireMarkerClasses.Add(cls, (startFactory, endFactory));
             }

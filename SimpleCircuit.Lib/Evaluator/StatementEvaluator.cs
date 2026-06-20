@@ -878,8 +878,10 @@ public static class StatementEvaluator
         {
             if (!context.WireMarkerClasses.TryGetValue(name, out var factories))
                 return false;
-            startWireMarkers.Add(factories.Start());
-            endWireMarkers.Add(factories.End());
+            if (factories.Start != null)
+                startWireMarkers.Add(factories.Start());
+            if (factories.End != null)
+                endWireMarkers.Add(factories.End());
             propertiesAndVariants.Add(node);
             return true;
         }
