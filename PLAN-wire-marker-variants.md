@@ -2,9 +2,15 @@
 
 ## Goal
 
-Make shorthand wire classes (e.g. `d-arrow`, `f-arrow`, `one-to-many`, …) behave like
+Make shorthand wire classes (e.g. `dbl-arrow`, `fwd-arrow`, `one-to-many`, …) behave like
 regular variants: they can be **added and removed** through the normal variant
 mechanism (`+class` / `-class`, `.variant`, property toggles, etc.).
+
+> **Naming note:** the arrow shorthands were renamed `f-arrow`→`fwd-arrow`,
+> `b-arrow`→`bck-arrow`, `d-arrow`→`dbl-arrow` (commit "Rename shorthand arrows to avoid
+> conflict with direction"). The old `d-arrow` collided with the down-direction keyword
+> `d` (the parser read `d` + `-arrow`). The new names begin with non-direction prefixes,
+> so the class names parse cleanly as variants and **no lexer/parser change is required**.
 
 Today these classes are expanded into concrete `Marker` instances **during parsing**
 and baked onto the wire's segments. Because the marker instances are fixed at parse
@@ -77,7 +83,7 @@ positionally-placed direct markers), using a marker registry passed down to draw
 ### 1. Pass the marker registry down to drawing (not parsing)
 Provide a draw-time resolver that maps:
 - a **marker name** (`arrow`, `dot`, `erd-one`, …) → a new `Marker` instance, and
-- a **shorthand class name** (`d-arrow`, `one-to-many`, …) → its start/end marker keys.
+- a **shorthand class name** (`dbl-arrow`, `one-to-many`, …) → its start/end marker keys.
 
 Introduce a single `MarkerRegistry` (in `Components/Markers`) that:
 - lazily reflection-scans the assembly once for `[Drawable]` marker types →
@@ -206,7 +212,7 @@ At the start of `Wire.Draw` (after points are known), build the marker list:
 3. Draw the path (unchanged), capturing `points`, `startNormals`, `endNormals`.
 4. Call `marker.Draw(points, startNormals, endNormals, builder, style)` for each marker.
 
-Because this reads `Variants` live, `+d-arrow` / `-d-arrow` and `.variant` toggles now
+Because this reads `Variants` live, `+dbl-arrow` / `-dbl-arrow` and `.variant` toggles now
 add/remove markers correctly.
 
 ---
@@ -254,9 +260,9 @@ add/remove markers correctly.
 ## Testing
 
 - Unit/script tests under the existing test project for:
-  - `wire +d-arrow` produces arrows at both ends; `-d-arrow` removes them.
+  - `wire +dbl-arrow` produces arrows at both ends; `-dbl-arrow` removes them.
   - Toggling a class via `.variant` after wire creation updates the drawing.
-  - Per-segment marker placement (`A <r arrow r d-arrow d> B`) lands on the correct
+  - Per-segment marker placement (`A <r arrow r dbl-arrow d> B`) lands on the correct
     segment, including with `Radius > 0` (rounded corners).
   - ERD relationship classes (`one-to-many`, etc.) still render identically to before.
   - Manual markers and shorthand-class markers coexist (no regressions).

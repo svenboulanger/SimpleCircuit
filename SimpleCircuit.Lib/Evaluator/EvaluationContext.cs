@@ -90,9 +90,9 @@ public class EvaluationContext
         ("onemany-to-many",    "erd-one-many",  "erd-zero-many"),
         ("many-to-onemany",    "erd-zero-many", "erd-one-many"),
         ("many-to-many",       "erd-zero-many", "erd-zero-many"),
-        ("f-arrow",            "",              "arrow"),
-        ("b-arrow",            "arrow",         ""),
-        ("d-arrow",            "arrow",         "arrow"),
+        ("fwd-arrow",          "",              "arrow"),
+        ("bck-arrow",          "arrow",         ""),
+        ("dbl-arrow",          "arrow",         "arrow"),
     ];
 
     /// <summary>
