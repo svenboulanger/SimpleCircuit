@@ -10,7 +10,7 @@ namespace SimpleCircuit.Components.Markers;
 /// <param name="location">The location.</param>
 /// <param name="orientation">The orientation.</param>
 [Drawable("arrow", "An arrow", "General")]
-public class Arrow(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class Arrow : SegmentMarker
 {
     private readonly static Vector2[] _points = [new(-2.5, -1), new(0, 0), new(-2.5, 1)];
 

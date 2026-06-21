@@ -790,7 +790,7 @@ public static class StatementEvaluator
         foreach (var statement in controlStatements)
             Evaluate(statement, context);
     }
-    private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context, HashSet<Marker> markers = null)
+    private static void ApplyPropertiesAndVariants(IDrawable presence, IEnumerable<SyntaxNode> properties, EvaluationContext context)
     {
         // Use options
         if (presence is IOrientedDrawable oriented)
@@ -866,25 +866,8 @@ public static class StatementEvaluator
     private static void ProcessWire(PinReference startPin, WireNode wire, PinReference endPin, EvaluationContext context)
     {
         List<WireSegmentInfo> segments = [];
-        List<Marker> markers = [];
-        List<Marker> startWireMarkers = []; // always -> segments[0].StartMarkers
-        List<Marker> endWireMarkers = [];   // always -> segments[^1].EndMarkers
+        List<string> variants = [];
         List<SyntaxNode> propertiesAndVariants = [];
-
-        // Recognizes a wire shorthand class word. If matched, it expands into a
-        // start + end marker on the whole wire, and is still kept as a variant so
-        // the wire carries it as a CSS/SVG class.
-        bool TryShorthand(string name, SyntaxNode node)
-        {
-            if (!context.WireMarkerClasses.TryGetValue(name, out var factories))
-                return false;
-            if (factories.Start != null)
-                startWireMarkers.Add(factories.Start());
-            if (factories.End != null)
-                endWireMarkers.Add(factories.End());
-            propertiesAndVariants.Add(node);
-            return true;
-        }
 
         for (int i = 0; i < wire.Items.Length; i++)
         {
@@ -899,16 +882,9 @@ public static class StatementEvaluator
                             IsMinimum = true,
                             Length = MinimumWireLength
                         };
-
-                        // Handle markers
-                        if (markers.Count > 0)
-                        {
-                            if (segments.Count == 0)
-                                segment.StartMarkers = [.. markers];
-                            else
-                                segments[^1].EndMarkers = [.. markers];
-                        }
-                        markers.Clear();
+                        foreach (var variant in variants)
+                            segment.Variants.Add(variant);
+                        variants.Clear();
 
                         if (direction.Angle is not null)
                         {
@@ -981,10 +957,7 @@ public static class StatementEvaluator
                     else
                     {
                         string name = literal.Value.ToString();
-                        if (context.Markers.TryGetValue(name, out var func))
-                            markers.Add(func());
-                        else if (!TryShorthand(name, literal))
-                            propertiesAndVariants.Add(literal);
+                        variants.Add(name);
                     }
                     break;
 
@@ -995,11 +968,7 @@ public static class StatementEvaluator
                         string name = EvaluateName(unary.Argument, context);
                         if (name is null)
                             continue;
-                        var variantNode = new IdentifierNode(new(unary.Location, name.AsMemory()));
-                        if (context.Markers.TryGetValue(name, out var func))
-                            markers.Add(func());
-                        else if (!TryShorthand(name, variantNode))
-                            propertiesAndVariants.Add(variantNode);
+                        variants.Add(name);
                     }
                     else if (unary.Type == UnaryOperatortype.Negative)
                         propertiesAndVariants.Add(unary); // Can't "remove" markers - so we already know it's a variant
@@ -1008,12 +977,7 @@ public static class StatementEvaluator
                     break;
 
                 case IdentifierNode id:
-                    {
-                        if (context.Markers.TryGetValue(id.Name, out var func))
-                            markers.Add(func());
-                        else if (!TryShorthand(id.Name, id))
-                            propertiesAndVariants.Add(id);
-                    }
+                    variants.Add(id.Name);
                     break;
 
                 case QuotedNode: // Label
@@ -1026,11 +990,7 @@ public static class StatementEvaluator
                         string name = EvaluateName(bn, context);
                         if (name is null)
                             continue;
-                        var variantNode = new IdentifierNode(new(bn.Location, name.AsMemory()));
-                        if (context.Markers.TryGetValue(name, out var func))
-                            markers.Add(func());
-                        else if (!TryShorthand(name, variantNode))
-                            propertiesAndVariants.Add(variantNode);
+                        variants.Add(name);
                     }
                     break;
 
@@ -1039,26 +999,11 @@ public static class StatementEvaluator
                     break;
             }
         }
-        if (markers.Count > 0)
-        {
-            if (segments.Count > 0)
-                segments[^1].EndMarkers = [.. markers];
-        }
-
-        // Apply the wire shorthand markers to the global start/end of the wire.
-        // These are appended so they coexist with manually placed markers.
-        if (segments.Count > 0)
-        {
-            if (startWireMarkers.Count > 0)
-                segments[0].StartMarkers = [.. segments[0].StartMarkers ?? [], .. startWireMarkers];
-            if (endWireMarkers.Count > 0)
-                segments[^1].EndMarkers = [.. segments[^1].EndMarkers ?? [], .. endWireMarkers];
-        }
 
         // Create the wire
-        CreateWire(startPin, segments, propertiesAndVariants, endPin, context);
+        CreateWire(startPin, segments, propertiesAndVariants, variants, endPin, context);
     }
-    private static void CreateWire(PinReference startPin, List<WireSegmentInfo> segments, List<SyntaxNode> propertiesAndVariants, PinReference endPin, EvaluationContext context)
+    private static void CreateWire(PinReference startPin, List<WireSegmentInfo> segments, List<SyntaxNode> propertiesAndVariants, List<string> lastVariants, PinReference endPin, EvaluationContext context)
     {
         string wireName = context.GetWireName();
         if (segments.Count > 0)
@@ -1070,7 +1015,10 @@ public static class StatementEvaluator
                 context.Circuit.Add(new PinOrientationConstraint($"{wireName}.e", endPin, 0, segments[^1], true));
 
             // Create the wire
-            var result = new Wire(wireName, startPin, segments, endPin);
+            var lastVariantSet = new HashSet<string>();
+            foreach (var variant in lastVariants)
+                lastVariantSet.Add(variant);
+            var result = new Wire(wireName, startPin, segments, lastVariantSet, endPin);
             context.NotifyDrawable(result);
             context.CurrentScope.ApplyDefaults(wireName, result, context.Diagnostics);
 

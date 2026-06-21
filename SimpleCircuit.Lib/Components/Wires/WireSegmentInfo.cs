@@ -1,5 +1,7 @@
 ﻿using SimpleCircuit.Components.Markers;
+using SimpleCircuit.Components.Variants;
 using SimpleCircuit.Parser;
+using System.Collections.Generic;
 
 namespace SimpleCircuit.Components.Wires;
 
@@ -38,12 +40,7 @@ public class WireSegmentInfo(TextLocation source)
     public double Length { get; set; }
 
     /// <summary>
-    /// Gets or sets the start marker.
+    /// Gets the variants specified on the wire segment.
     /// </summary>
-    public Marker[] StartMarkers { get; set; }
-
-    /// <summary>
-    /// Gets or sets the end marker.
-    /// </summary>
-    public Marker[] EndMarkers { get; set; }
+    public HashSet<string> Variants { get; } = [];
 }

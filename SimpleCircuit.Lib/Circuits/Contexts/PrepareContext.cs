@@ -41,6 +41,9 @@ public class PrepareContext : IPrepareContext
     /// <inheritdoc />
     public IStyle Style { get; }
 
+    /// <inheritdoc />
+    public MarkerSet Markers { get; } = new();
+
     /// <summary>
     /// Creates a new <see cref="PrepareContext"/>.
     /// </summary>

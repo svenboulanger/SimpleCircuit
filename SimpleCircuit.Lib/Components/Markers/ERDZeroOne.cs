@@ -6,13 +6,8 @@ namespace SimpleCircuit.Components.Markers;
 /// <summary>
 /// An entity-relation diagram marker for "zero or one".
 /// </summary>
-/// <remarks>
-/// Creates an entity-relationship diagram marker for "zero or one".
-/// </remarks>
-/// <param name="location">The location.</param>
-/// <param name="orientation">The orientation.</param>
 [Drawable("erd-zero-one", "An Entity-Relationship Diagram zero or one-symbol.", "ERD")]
-public class ERDZeroOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class ERDZeroOne : SegmentMarker
 {
     /// <inheritdoc />
     protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)

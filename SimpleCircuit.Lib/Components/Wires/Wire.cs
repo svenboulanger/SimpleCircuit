@@ -22,6 +22,8 @@ public class Wire : Drawable
     private readonly List<WirePoint> _localPoints = [];
     private readonly List<Vector2> _points = [];
     private const double _jumpOverRadius = 1.5;
+    private readonly List<Marker> _markers = [];
+    private readonly HashSet<string> _lastVariants = [];
 
     /// <summary>
     /// The variant used for invisible wires.
@@ -84,13 +86,24 @@ public class Wire : Drawable
     /// <param name="name">The name of the wire.</param>
     /// <param name="pinToWire">The pin that will start the wire.</param>
     /// <param name="segments">The wire segments.</param>
+    /// <param name="lastVariants">The variants added after the last segment.</param>
     /// <param name="wireToPin">The pin that will end the wire.</param>
-    public Wire(string name, PinReference pinToWire, IEnumerable<WireSegmentInfo> segments, PinReference wireToPin)
+    public Wire(string name, PinReference pinToWire, IEnumerable<WireSegmentInfo> segments, HashSet<string> lastVariants, PinReference wireToPin)
         : base(name)
     {
         _pinToWire = pinToWire;
         _segments = segments?.ToList() ?? throw new ArgumentNullException(nameof(segments)); ;
+        _lastVariants = lastVariants ?? [];
         _wireToPin = wireToPin;
+
+        // Also promote any segment variants to wire variants
+        foreach (var segment in _segments)
+        {
+            foreach (var variant in segment.Variants)
+                Variants.Add(variant);
+        }
+        foreach (var variant in _lastVariants)
+            Variants.Add(variant);
     }
 
     /// <inheritdoc />
@@ -103,6 +116,7 @@ public class Wire : Drawable
         {
             case PreparationMode.Reset:
                 _localPoints.Clear();
+                _markers.Clear();
                 _p2w = null;
                 _w2p = null;
                 break;
@@ -119,6 +133,41 @@ public class Wire : Drawable
                     _w2p = _wireToPin?.GetOrCreate(context.Diagnostics, 0);
                     if (_w2p is not null)
                         _w2p.Connections++;
+                }
+
+                // Make the markers
+                var set = new HashSet<string>();
+                for (int i = 0; i < _segments.Count; i++)
+                {
+                    foreach (var variant in _segments[i].Variants)
+                    {
+                        // Check if this variant represents a marker
+                        if (context.Markers.TryCreateMarker(variant, out var marker))
+                        {
+                            if (marker is SegmentMarker segMarker)
+                                segMarker.Segment = i;
+                            _markers.Add(marker);
+                            set.Add(variant);
+                        }
+                    }
+                }
+                foreach (var variant in _lastVariants)
+                {
+                    if (context.Markers.TryCreateMarker(variant, out var marker))
+                    {
+                        if (marker is SegmentMarker segMarker)
+                            segMarker.Segment = _segments.Count;
+                        _markers.Add(marker);
+                        set.Add(variant);
+                    }
+                }
+                foreach (var variant in Variants)
+                {
+                    if (set.Add(variant))
+                    {
+                        if (context.Markers.TryCreateMarker(variant, out var marker))
+                            _markers.Add(marker);
+                    }
                 }
                 break;
 
@@ -396,7 +445,8 @@ public class Wire : Drawable
     protected override void Draw(IGraphicsBuilder builder)
     {
         var style = builder.Style.ModifyDashedDotted(this);
-        List<Marker> markers = [];
+        List<SegmentInfo> segmentInfos = [];
+
         if (!Variants.Contains(Hidden) && _localPoints.Count > 0)
         {
             // Compute the graphical style
@@ -404,13 +454,14 @@ public class Wire : Drawable
             _points.Clear();
             builder.Path(builder =>
             {
-                builder.MoveTo(_localPoints[0].Location);
-                _points.Add(tf.Apply(_localPoints[0].Location));
+                Vector2 start = _localPoints[0].Location, startNormal = new(1, 0);
+                builder.MoveTo(start);
+                _points.Add(tf.Apply(start));
                 int segment = 0;
-                var startMarkers = _segments[0].StartMarkers;
-                var last = _localPoints[0].Location;
+                var last = start;
                 for (int i = 1; i < _localPoints.Count; i++)
                 {
+                    bool hasStartNormal = false;
                     var current = _localPoints[i].Location;
 
                     // Draw a small half circle for crossing over this point
@@ -422,17 +473,10 @@ public class Wire : Drawable
                         var m = current + ny * _jumpOverRadius;
 
                         builder.LineTo(s);
-
-                        // Deal with the start marker
-                        if (startMarkers != null)
+                        if (!hasStartNormal)
                         {
-                            foreach (var marker in startMarkers)
-                            {
-                                marker.Location = builder.Start;
-                                marker.Orientation = -builder.StartNormal; // We will invert the direction to align with the nature of circuits and diagrams
-                                markers.Add(marker);
-                                startMarkers = null;
-                            }
+                            startNormal = builder.StartNormal;
+                            hasStartNormal = true;
                         }
 
                         nx *= 0.55 * _jumpOverRadius;
@@ -442,9 +486,18 @@ public class Wire : Drawable
                     }
                     else
                     {
+                        // This point crosses from one segment to the next
                         _points.Add(tf.Apply(_localPoints[i].Location));
                         if (Radius.IsZero() || i >= _localPoints.Count - 1)
+                        {
                             builder.LineTo(current);
+                            if (!hasStartNormal)
+                            {
+                                startNormal = builder.StartNormal;
+                                hasStartNormal = true;
+                            }
+                            segmentInfos.Add(new(start, startNormal, builder.End, builder.EndNormal));
+                        }
                         else
                         {
                             var nu = last - current;
@@ -457,7 +510,15 @@ public class Wire : Drawable
                                 nv /= lv;
                                 double dot = nu.Dot(nv);
                                 if (dot > 0.999 || dot < -0.999)
+                                {
                                     builder.LineTo(current);
+                                    if (!hasStartNormal)
+                                    {
+                                        startNormal = builder.StartNormal;
+                                        hasStartNormal = true;
+                                    }
+                                    segmentInfos.Add(new(start, startNormal, builder.End, builder.EndNormal));
+                                }
                                 else
                                 {
                                     // Rounded corner
@@ -466,47 +527,40 @@ public class Wire : Drawable
                                     {
                                         // No place, just do straight line again
                                         builder.LineTo(current);
+                                        if (!hasStartNormal)
+                                        {
+                                            startNormal = builder.StartNormal;
+                                            hasStartNormal = true;
+                                        }
+                                        segmentInfos.Add(new(start, startNormal, builder.End, builder.EndNormal));
                                     }
                                     else
                                     {
                                         // Segments
                                         builder.LineTo(current + nu * x);
+                                        if (!hasStartNormal)
+                                        {
+                                            startNormal = builder.StartNormal;
+                                            hasStartNormal = true;
+                                        }
+
+                                        segmentInfos.Add(new(start, startNormal, builder.End, builder.EndNormal));
                                         builder.ArcTo(Radius, Radius, 0.0, false, nu.X * nv.Y - nu.Y * nv.X < 0.0, current + nv * x);
                                     }
                                 }
                             }
-                            else 
+                            else
+                            {
                                 builder.LineTo(current); // We can't fit a curve
-                        }
-
-                        // Deal with the start marker
-                        if (startMarkers != null)
-                        {
-                            foreach (var marker in startMarkers)
-                            {
-                                marker.Location = builder.Start;
-                                marker.Orientation = -builder.StartNormal; // We will invert the direction to align with the nature of circuits and diagrams
-                                markers.Add(marker);
-                                startMarkers = null;
-                            }
-                        }
-
-                        // Deal with the end marker
-                        var endMarkers = _segments[segment].EndMarkers;
-                        if (endMarkers != null)
-                        {
-                            foreach (var marker in endMarkers)
-                            {
-                                marker.Location = builder.End;
-                                marker.Orientation = builder.EndNormal;
-                                markers.Add(marker);
+                                if (!hasStartNormal)
+                                {
+                                    startNormal = builder.StartNormal;
+                                    hasStartNormal = true;
+                                }
+                                segmentInfos.Add(new(start, startNormal, builder.End, builder.EndNormal));
                             }
                         }
                         segment++;
-
-                        // Prepare for the next start marker
-                        if (segment < _segments.Count)
-                            startMarkers = _segments[segment].StartMarkers;
                     }
 
                     last = current;
@@ -514,8 +568,8 @@ public class Wire : Drawable
             }, style);
 
             // Draw the markers (if any)
-            foreach (var marker in markers)
-                marker?.Draw(builder, style);
+            foreach (var marker in _markers)
+                marker.Draw(builder, style, segmentInfos);
         }
     }
 

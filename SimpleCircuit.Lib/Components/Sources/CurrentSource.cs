@@ -102,11 +102,9 @@ public class CurrentSource : DrawableFactory
             {
                 case 1:
                     builder.Line(new(-3.5, 0), new(3.5, 0), style);
-                    var marker = new Arrow(new(-3.5, 0), new(-1, 0));
-                    marker.Draw(builder, style);
-                    marker.Location = new(3.5, 0);
-                    marker.Orientation = new(1, 0);
-                    marker.Draw(builder, style);
+                    var marker = new Arrow() { Segment = 1 };
+                    marker.Draw(builder, style, [new(default, default, new(-3.5, 0), new(-1, 0))]);
+                    marker.Draw(builder, style, [new(default, default, new(3.5, 0), new(1, 0))]);
                     break;
 
                 default:

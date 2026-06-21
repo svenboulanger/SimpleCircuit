@@ -290,8 +290,8 @@ public static class CommonGraphical
         // Draw the marker
         var normal = end - start;
         normal /= normal.Length;
-        var marker = new Arrow(end, normal);
-        marker.Draw(builder, appearance);
+        var marker = new Arrow() { Segment = 1 };
+        marker.Draw(builder, appearance, [new(default, default, end, normal)]);
     }
 
     /// <summary>
@@ -375,8 +375,8 @@ public static class CommonGraphical
                 builder.Line(fop.Offset, fop.Offset + fop.RelativeOrientation * length, appearance);
             else if (pin is FixedPin fp)
             {
-                var marker = new Dot(fp.Offset, new(1, 0));
-                marker.Draw(builder, appearance);
+                var marker = new Dot() { Segment = 1 };
+                marker.Draw(builder, appearance, [new(default, default, fp.Offset, new(1, 0))]);
             }
         }
     }

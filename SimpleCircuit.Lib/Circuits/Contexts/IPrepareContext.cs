@@ -45,6 +45,11 @@ public interface IPrepareContext
     public NodeGrouper Groups { get; }
 
     /// <summary>
+    /// Gets a class with defined markers.
+    /// </summary>
+    public MarkerSet Markers { get; }
+
+    /// <summary>
     /// Gets the global appearance that any drawable may derive from.
     /// </summary>
     public IStyle Style { get; }

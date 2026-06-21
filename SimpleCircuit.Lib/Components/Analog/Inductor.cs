@@ -157,8 +157,9 @@ public class Inductor : DrawableFactory
 
                     if (Variants.Contains(_dot))
                     {
-                        var marker = new Dot(new(-l, 3.5), new(1, 0));
-                        marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness));
+                        var marker = new Dot() { Segment = 0 };
+                        marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness),
+                            [new(default, default, new(-l, 3.5), new(1, 0))]);
 
                         double m = Style.DefaultLineThickness * 1.5 + LabelMargin;
                         if (_anchors[1].Location.Y < 3.5 + m)
@@ -221,8 +222,9 @@ public class Inductor : DrawableFactory
 
                     if (Variants.Contains(_dot))
                     {
-                        var marker = new Dot(new(-l - 2, 3.5), new(1, 0));
-                        marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness));
+                        var marker = new Dot() { Segment = 1 };
+                        marker.Draw(builder, style.AsLineThickness(Style.DefaultLineThickness),
+                            [new(default, default, new(-l - 2, 3.5), new(1, 0))]);
 
                         double m = 1.5 * Style.DefaultLineThickness + LabelMargin;
                         if (_anchors[1].Location.Y < 3.5 + m)

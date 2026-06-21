@@ -232,8 +232,8 @@ public class Switch : DrawableFactory
                     {
                         b.MoveTo(new(-3, -5))
                         .CurveTo(new(1, -3), new(1, -2), new(2, 2));
-                        var marker = new Arrow(b.End, b.EndNormal);
-                        marker.Draw(builder, style);
+                        var marker = new Arrow() { Segment = 1 };
+                        marker.Draw(builder, style, [new(default, default, b.End, b.EndNormal)]);
                     }, style.AsStroke());
 
                     // Update labels
@@ -248,8 +248,8 @@ public class Switch : DrawableFactory
                     builder.Path(b =>
                     {
                         b.MoveTo(new(-4, -6)).CurveTo(new(1, -3), new(1, -2), new(2, 1));
-                        var marker = new Arrow(b.End, b.EndNormal);
-                        marker.Draw(builder, style);
+                        var marker = new Arrow() { Segment = 1 };
+                        marker.Draw(builder, style, [new(default, default, b.End, b.EndNormal)]);
                     }, style.AsStroke());
 
                     // Update labels

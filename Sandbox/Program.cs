@@ -16,56 +16,8 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        * You can change the array size with these parameters
-        .param rows = 3
-        .param columns = 3
-
-        * Define a single pixel
-        .subckt PIXEL DIRleft DIRtop DIRbottom DIRright fg="--foreground"
-            .property *|wire fg={fg}
-
-            * Main branch
-            GND <u> D(photodiode, flip) <u> Xd <u> MNrst <u> POW
-            Xd <r> [g]MNsf[d] <u> POW
-
-            * Inputs
-            MNrst[g] <l> T("RST")
-            MNsf[s] <d r> MNsel <r> Xcol
-            MNsel[g] <u 60> Xrow
-
-            * Make column and row lines (DIR is used as direction for pins)
-            Xcol <u 70> DIRtop
-            Xcol <d 15> DIRbottom
-            Xrow <l 60> DIRleft
-            Xrow <r 20> DIRright
-        .ends
-
-        * Now we will use for-loops to make an array of the pixel
-        .for r 1 {rows} 1
-            .for c 1 {columns} 1
-                Xh_{r}_{c} <r> PIXEL_{r}_{c} <r> Xh_{r}_{c+1}
-                Xv_{r}_{c} <d> [DIRtop]PIXEL_{r}_{c}[DIRbottom] <d> Xv_{r+1}_{c}
-            .endf
-        .endf
-
-        * Show the row driver
-        .for r 1 {rows} 1
-            .param index = {r - round((rows + 1) / 2)}
-            T(label1={"ROWSEL_in,y" + (index > 0 ? "+" + index : index == 0 ? "" : index)}, in) <r> Xh_{r}_1
-        .endf
-
-        * Show the column output
-        .for c 1 {columns} 1
-            .param index = {c - round((columns + 1) / 2)}
-            T(label1={"COL_out,x" + (index > 0 ? "+" + index : index == 0 ? "" : index)}, out) <u> Xv_{rows+1}_{c}
-        .endf
-
-        * Let's make the center pixel in the primary color
-        PIXEL_{round((rows + 1) / 2)}_{round((columns + 1) / 2)}(fg="--primary")
-
-        * Let's make the top-left pixel in danger color
-        PIXEL_1_1(fg="--danger")
-        
+        .property wire r=3 dbl-arrow
+        ENT("A") <r> ENT("B")
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr

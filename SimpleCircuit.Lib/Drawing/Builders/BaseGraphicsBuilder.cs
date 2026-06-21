@@ -876,9 +876,9 @@ public abstract class BaseGraphicsBuilder : IGraphicsBuilder
             orientation /= orientation.Length;
         foreach (var marker in markers)
         {
-            marker.Location = location;
-            marker.Orientation = orientation;
-            marker.Draw(this, appearance);
+            if (marker is SegmentMarker sm)
+                sm.Segment = 1;
+            marker.Draw(this, appearance, [new(location, -orientation, location, orientation)]);
         }
     }
 

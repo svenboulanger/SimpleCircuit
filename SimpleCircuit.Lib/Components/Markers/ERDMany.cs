@@ -7,13 +7,8 @@ namespace SimpleCircuit.Components.Markers;
 /// <summary>
 /// An entity-relationship diagram marker for "many".
 /// </summary>
-/// <remarks>
-/// Creates a new entity-relationship diagram marker for "many".
-/// </remarks>
-/// <param name="location">The location.</param>
-/// <param name="orientation">The orientation.</param>
 [Drawable("erd-many", "An Entity-Relationship Diagram many-symbol.", "ERD")]
-public class ERDMany(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class ERDMany : SegmentMarker
 {
     private readonly static Vector2[] _points = [new(0, -1.5), new(-3, 0), new(0, 1.5)];
 

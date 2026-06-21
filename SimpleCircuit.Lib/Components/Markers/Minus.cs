@@ -6,14 +6,9 @@ namespace SimpleCircuit.Components.Markers;
 /// <summary>
 /// A minus marker.
 /// </summary>
-/// <remarks>
-/// Creates a new minus marker.
-/// </remarks>
-/// <param name="location">The location.</param>
-/// <param name="orientation">The orientation.</param>
 [Drawable("minus", "A generic minus symbol.", "General")]
 [Drawable("minusa", "A generic minus symbol.", "General")]
-public class Minus(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class Minus : SegmentMarker
 {
     /// <summary>
     /// Gets whether the plus should be drawn on the opposite side.

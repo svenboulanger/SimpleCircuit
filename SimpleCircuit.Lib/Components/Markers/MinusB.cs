@@ -9,10 +9,7 @@ public class MinusB : Minus
     /// <summary>
     /// Creates a new <see cref="MinusB"/> marker.
     /// </summary>
-    /// <param name="location">The location.</param>
-    /// <param name="orientation">The orientation.</param>
-    public MinusB(Vector2 location = default, Vector2 orientation = default)
-        : base(location, orientation)
+    public MinusB()
     {
         OppositeSide = true;
     }

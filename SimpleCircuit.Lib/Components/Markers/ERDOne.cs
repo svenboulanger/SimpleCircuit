@@ -6,13 +6,8 @@ namespace SimpleCircuit.Components.Markers;
 /// <summary>
 /// An entity-relationship diagram marker for "one".
 /// </summary>
-/// <remarks>
-/// Creates a new entity-relationship diagram marker for "one".
-/// </remarks>
-/// <param name="location">The location.</param>
-/// <param name="orientation">The orientation.</param>
 [Drawable("erd-one", "An Entity-Relationship Diagram one-symbol.", "ERD")]
-public class ERDOne(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class ERDOne : SegmentMarker
 {
     /// <inheritdoc />
     protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)

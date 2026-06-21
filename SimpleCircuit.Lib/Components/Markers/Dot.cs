@@ -9,10 +9,8 @@ namespace SimpleCircuit.Components.Markers;
 /// <remarks>
 /// Creates a new dot marker.
 /// </remarks>
-/// <param name="location">The location.</param>
-/// <param name="orientation">The orientation.</param>
 [Drawable("dot", "A generic dot.", "General")]
-public class Dot(Vector2 location = new(), Vector2 orientation = new()) : Marker(location, orientation)
+public class Dot : SegmentMarker
 {
     /// <inheritdoc />
     protected override void DrawMarker(IGraphicsBuilder builder, IStyle style)

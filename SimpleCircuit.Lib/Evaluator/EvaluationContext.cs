@@ -58,44 +58,6 @@ public class EvaluationContext
     public HashSet<string> UsedExpressionParameters { get; } = [];
 
     /// <summary>
-    /// Gets possible markers.
-    /// </summary>
-    public Dictionary<string, Func<Marker>> Markers { get; } = [];
-
-    /// <summary>
-    /// Maps a wire shorthand class name to the marker factories applied to the
-    /// start and end of the whole wire. Resolved against <see cref="Markers"/>.
-    /// </summary>
-    public Dictionary<string, (Func<Marker> Start, Func<Marker> End)> WireMarkerClasses { get; } = [];
-
-    /// <summary>
-    /// The default wire shorthand classes. Each entry maps a class name to the
-    /// existing marker keys placed at the global start and end of the wire.
-    /// </summary>
-    private static readonly (string Class, string Start, string End)[] _defaultWireClasses =
-    [
-        ("one-to-one",         "erd-only-one",  "erd-only-one"),
-        ("one-to-zeroone",     "erd-only-one",  "erd-zero-one"),
-        ("zeroone-to-one",     "erd-zero-one",  "erd-only-one"),
-        ("one-to-onemany",     "erd-only-one",  "erd-one-many"),
-        ("onemany-to-one",     "erd-one-many",  "erd-only-one"),
-        ("one-to-many",        "erd-only-one",  "erd-zero-many"),
-        ("many-to-one",        "erd-zero-many", "erd-only-one"),
-        ("zeroone-to-zeroone", "erd-zero-one",  "erd-zero-one"),
-        ("zeroone-to-onemany", "erd-zero-one",  "erd-one-many"),
-        ("onemany-to-zeroone", "erd-one-many",  "erd-zero-one"),
-        ("zeroone-to-many",    "erd-zero-one",  "erd-zero-many"),
-        ("many-to-zeroone",    "erd-zero-many", "erd-zero-one"),
-        ("onemany-to-onemany", "erd-one-many",  "erd-one-many"),
-        ("onemany-to-many",    "erd-one-many",  "erd-zero-many"),
-        ("many-to-onemany",    "erd-zero-many", "erd-one-many"),
-        ("many-to-many",       "erd-zero-many", "erd-zero-many"),
-        ("fwd-arrow",          "",              "arrow"),
-        ("bck-arrow",          "arrow",         ""),
-        ("dbl-arrow",          "arrow",         "arrow"),
-    ];
-
-    /// <summary>
     /// Gets the factory for components.
     /// </summary>
     public DrawableFactoryDictionary Factory { get; } = new();
@@ -150,44 +112,7 @@ public class EvaluationContext
     public EvaluationContext(bool loadAssembly = true, IStyle style = null, ITextFormatter formatter = null, Options options = null)
     {
         if (loadAssembly)
-        {
             Factory.RegisterAssembly(typeof(ParsingContext).Assembly);
-
-            // Search for markers in the assembly
-            foreach (var t in typeof(ParsingContext).Assembly.GetTypes())
-            {
-                if (t.IsAbstract || t.IsInterface || t.IsGenericType)
-                    continue;
-                var nt = t;
-                while (nt is not null)
-                {
-                    nt = nt.BaseType;
-                    if (nt == typeof(Marker))
-                    {
-                        // Version where location and orientation is given
-                        var ctor = t.GetConstructor([typeof(Vector2), typeof(Vector2)]);
-                        if (ctor is not null)
-                        {
-                            Marker factory() => (Marker)Activator.CreateInstance(t, [new Vector2(), new Vector2()]);
-                            foreach (var attribute in t.GetCustomAttributes<DrawableAttribute>())
-                                Markers.Add(attribute.Key, factory);
-                        }
-                    }
-                }
-            }
-
-            // Resolve the wire shorthand classes against the registered markers.
-            // The table is hard-coded developer data, so an unresolved key is a bug.
-            foreach (var (cls, start, end) in _defaultWireClasses)
-            {
-                Func<Marker> startFactory = null, endFactory = null;
-                if (!string.IsNullOrEmpty(start) && !Markers.TryGetValue(start, out startFactory))
-                    throw new InvalidOperationException($"Wire class '{cls}' references unknown start marker '{start}'.");
-                if (!string.IsNullOrEmpty(end) && !Markers.TryGetValue(end, out endFactory))
-                    throw new InvalidOperationException($"Wire class '{cls}' references unknown end marker '{end}'.");
-                WireMarkerClasses.Add(cls, (startFactory, endFactory));
-            }
-        }
         Circuit = new GraphicalCircuit(style, formatter);
         Options = options ?? new Options();
         CurrentScope = new();

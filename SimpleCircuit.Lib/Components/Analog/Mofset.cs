@@ -138,8 +138,8 @@ public class Mofset : DrawableFactory
                 new(0, 4)
             ], style);
 
-            var marker = new Arrow(new(0, 4), new(0, 1));
-            marker.Draw(builder, style);
+            var marker = new Arrow() { Segment = 1 };
+            marker.Draw(builder, style, [new(default, default, new(0, 4), new(0, 1))]);
 
             // Label
             double m = 0.5 * style.LineThickness + LabelMargin;

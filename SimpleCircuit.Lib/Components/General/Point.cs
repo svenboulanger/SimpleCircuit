@@ -58,8 +58,8 @@ public class PointFactory : DrawableFactory
                 int connections = Pins[0].Connections;
                 if (Variants.Contains("forced") || connections == 0 || connections > 2)
                 {
-                    var marker = new Dot(new(), new(1, 0));
-                    marker.Draw(builder, style);
+                    var marker = new Dot() { Segment = 1 };
+                    marker.Draw(builder, style, [new(default, default, new(), new(1, 0))]);
                 }
                 else
                     builder.ExpandBounds(new());
