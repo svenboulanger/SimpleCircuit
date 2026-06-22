@@ -3,7 +3,6 @@ using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Parser.Nodes;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -227,41 +226,19 @@ public static class SimpleCircuitParser
     }
     private static bool ParseWireItem(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
     {
-        // Wire direction
+        // First try parsing a wire direction
         if (!ParseWireDirection(lexer, context, out result))
             return false;
         if (result is not null)
             return true;
 
-        // Detect queued anonymous points
+        // Try parsing a queued anonymous points
         if (lexer.Check(TokenType.Word, "x") && lexer.NextType != TokenType.Punctuator && lexer.NextContent.ToString() != "=")
             return true;
 
-        // Deal with variants or properties
-        if (!ParsePropertyOrVariantName(lexer, context, out var word))
+        // Parse a wire segment variant or property
+        if (!ParsePropertyOrVariant(lexer, context, out result))
             return false;
-        if (word is not null)
-        {
-            if (lexer.Branch(TokenType.Punctuator, "=", out var assignmentToken))
-            {
-                // Turn into a property
-                if (!ParseValueOrExpression(lexer, context, out var value))
-                    return false;
-                if (value is null)
-                {
-                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedValueOrExpression);
-                    result = null;
-                    return false;
-                }
-                result = new BinaryNode(BinaryOperatortype.Assignment, word, assignmentToken, value);
-            }
-            else
-            {
-                // Turn into a variant
-                result = word;
-            }
-            return true;
-        }
         return true;
     }
     private static bool ParseWireDirection(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
@@ -277,7 +254,9 @@ public static class SimpleCircuitParser
         }
 
         // Direction letters
-        else if (lexer.Type == TokenType.Word && !(lexer.NextType == TokenType.Punctuator && lexer.NextContent.ToString() == "="))
+        else if (lexer.Type == TokenType.Word &&
+            (lexer.NextHasTrivia ||
+            !(lexer.NextType == TokenType.Punctuator && (lexer.NextContent.ToString() == "="))))
         {
             switch (lexer.Content.ToString())
             {
@@ -521,7 +500,7 @@ public static class SimpleCircuitParser
         // Properties (optional)
         if (lexer.Branch(TokenType.Punctuator, "("))
         {
-            if (!ParsePropertyList(lexer, context, out var properties))
+            if (!ParsePropertiesAndVariants(lexer, context, out var properties))
             {
                 lexer.SkipToTokenOrLine(TokenType.Punctuator, ")");
                 return false;
@@ -631,10 +610,10 @@ public static class SimpleCircuitParser
         return true;
     }
 
-    private static bool ParsePropertyList(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
+    private static bool ParsePropertiesAndVariants(SimpleCircuitLexer lexer, ParsingContext context, out List<SyntaxNode> result)
     {
         // Property
-        if (!ParseProperty(lexer, context, out var property))
+        if (!ParsePropertyOrVariant(lexer, context, out var property))
         {
             result = null;
             return false;
@@ -652,7 +631,7 @@ public static class SimpleCircuitParser
             lexer.Branch(TokenType.Punctuator, ",");
 
             // Property
-            if (!ParseProperty(lexer, context, out property))
+            if (!ParsePropertyOrVariant(lexer, context, out property))
             {
                 result = null;
                 return false;
@@ -662,130 +641,67 @@ public static class SimpleCircuitParser
             result.Add(property);
         }
     }
-    private static bool ParsePropertyOrVariantName(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
-    {
-        result = null;
-        bool continueThis = true, isFirst = true;
-        while (continueThis)
-        {
-            if (!isFirst && lexer.HasTrivia)
-                break;
-
-            switch (lexer.Type)
-            {
-                case TokenType.Word:
-                    result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
-                    lexer.Next();
-                    break;
-
-                case TokenType.Number:
-                    result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
-                    lexer.Next();
-                    break;
-
-                case TokenType.Punctuator:
-                    switch (lexer.Content.ToString())
-                    {
-                        case "{":
-                            {
-                                var leftBracket = lexer.Token;
-                                lexer.Next(); // '{'
-
-                                // Expression
-                                if (!ExpressionParser.ParseExpression(lexer, context, out var expression))
-                                    return false;
-                                if (expression is null)
-                                {
-                                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedExpression);
-                                    return false;
-                                }
-
-                                // '}'
-                                if (!lexer.Branch(TokenType.Punctuator, "}"))
-                                {
-                                    context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedGeneric, "}");
-                                    return false;
-                                }
-                                result = result is null ? expression : new BinaryNode(BinaryOperatortype.Concatenate, result, default, expression);
-                            }
-                            break;
-
-                        case "-":
-                            if (!isFirst)
-                            {
-                                // '-' should not start a name
-                                result = result is null ? new LiteralNode(lexer.Token) : new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
-                                lexer.Next();
-                            }
-                            else
-                                continueThis = false;
-                            break;
-
-                        default:
-                            continueThis = false;
-                            break;
-                    }
-                    break;
-
-                default:
-                    continueThis = false;
-                    break;
-            }
-            isFirst = false;
-        }
-        return true;
-    }
-    private static bool ParseProperty(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
+    private static bool ParsePropertyOrVariant(SimpleCircuitLexer lexer, ParsingContext context, out SyntaxNode result)
     {
         result = null;
 
-        if (!ParsePropertyOrVariantName(lexer, context, out var word))
-            return false;
-        if (word is not null)
-        {
-            // word '=' value
-            if (lexer.Branch(TokenType.Punctuator, "=", out var assignment))
-            {
-                if (!ParseValueOrExpression(lexer, context, out var value))
-                    return false;
-                result = new BinaryNode(BinaryOperatortype.Assignment, word, assignment, value);
-            }
-            else
-                // word
-                result = word;
-            return true;
-        }
-        
+        // Addition of a variant
         if (lexer.Branch(TokenType.Punctuator, "+", out var op))
         {
             // '+' word
-            if (!ParsePropertyOrVariantName(lexer, context, out word))
+            if (!ParseName(lexer, context, out var variant))
                 return false;
-            if (word is null)
+            if (variant is null)
             {
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                 return false;
             }
-            result = new UnaryNode(op, word, UnaryOperatortype.Positive);
+            result = new UnaryNode(op, variant, UnaryOperatortype.Positive);
             return true;
         }
-        
+
+        // Subtraction of a variant
         if (lexer.Branch(TokenType.Punctuator, "-", out op))
         {
             // '-' word
-            if (!ParsePropertyOrVariantName(lexer, context, out word))
+            if (!ParseName(lexer, context, out var variant))
                 return false;
-            if (word is null)
+            if (variant is null)
             {
                 context.Diagnostics?.Post(lexer.Token, ErrorCodes.ExpectedVariantName);
                 return false;
             }
-            result = new UnaryNode(op, word, UnaryOperatortype.Negative);
+            result = new UnaryNode(op, variant, UnaryOperatortype.Negative);
             return true;
         }
-        
+
+        // Label
         if (lexer.Branch(TokenType.String, out var stringLiteral))
+        {
             result = new QuotedNode(stringLiteral);
+            return true;
+        }
+
+        // A word - can be addition of a variant or a property
+        if (!ParseName(lexer, context, out var name))
+            return false;
+        if (name is null)
+            return true;
+
+        // The name becomes a property name
+        if (lexer.Branch(TokenType.Punctuator, "=", out var assignment))
+        {
+            // A property assignment
+            if (!ParseValueOrExpression(lexer, context, out var value))
+                return false;
+            result = new BinaryNode(BinaryOperatortype.Assignment, name, assignment, value);
+        }
+        else
+        {
+            // A variant name
+            result = name;
+        }
+
         return true;
     }
 
@@ -827,7 +743,9 @@ public static class SimpleCircuitParser
                     break;
 
                 case TokenType.Punctuator:
-                    if (result is not null && lexer.Content.Span[0] == DrawableFactoryDictionary.Separator)
+                    if (result is not null && lexer.Content.Length == 1 && (
+                        lexer.Content.Span[0] == DrawableFactoryDictionary.Separator ||
+                        lexer.Content.Span[0] == '-'))
                     {
                         result = new BinaryNode(BinaryOperatortype.Concatenate, result, default, new LiteralNode(lexer.Token));
                         lexer.Next();
@@ -999,16 +917,16 @@ public static class SimpleCircuitParser
 
                     result = new BracketNode(bracketLeft, expression, bracketRight);
                 }
-                else if (lexer.Branch(TokenType.Punctuator, "-", out var minus))
+                else if (lexer.NextType == TokenType.Number && lexer.Branch(TokenType.Punctuator, "-", out var minus))
                 {
-                    // parse a number
+                    // Parse a number
                     if (!ParseValueOrExpression(lexer, context, out var argument))
                         return false;
                     result = new UnaryNode(minus, argument, UnaryOperatortype.Negative);
                 }
-                else if (lexer.Branch(TokenType.Punctuator, "+", out var plus))
+                else if (lexer.NextType == TokenType.Number && lexer.Branch(TokenType.Punctuator, "+", out var plus))
                 {
-                    if (!ParseValueOrExpression(lexer, context, out var argument))
+                    if (!ParseValueOrExpression(lexer, context, out var argument) && lexer.NextType == TokenType.Number)
                         return false;
                     result = new UnaryNode(plus, argument, UnaryOperatortype.Positive);
                 }
@@ -1034,6 +952,7 @@ public static class SimpleCircuitParser
                         break;
 
                     default:
+                        // Don't know what this is
                         result = null;
                         break;
                 }
@@ -1240,7 +1159,7 @@ public static class SimpleCircuitParser
         }
 
         // Start reading properties
-        if (!ParsePropertyList(lexer, context, out var properties))
+        if (!ParsePropertiesAndVariants(lexer, context, out var properties))
             return false;
         result = new ControlPropertyNode(name, properties);
         return true;
@@ -1271,7 +1190,7 @@ public static class SimpleCircuitParser
         result = null;
 
         // Properties and variants
-        if (!ParsePropertyList(lexer, context, out var propertyList))
+        if (!ParsePropertiesAndVariants(lexer, context, out var propertyList))
             return false;
 
         // Start the statements
@@ -1314,7 +1233,7 @@ public static class SimpleCircuitParser
         result = null;
 
         // Properties
-        if (!ParsePropertyList(lexer, context, out var propertyList))
+        if (!ParsePropertiesAndVariants(lexer, context, out var propertyList))
             return false;
 
         // Start the statements
@@ -1384,7 +1303,7 @@ public static class SimpleCircuitParser
             if (lexer.Branch(TokenType.Punctuator, "("))
             {
                 // Read the property list
-                if (!ParsePropertyList(lexer, context, out propertyList))
+                if (!ParsePropertiesAndVariants(lexer, context, out propertyList))
                     return false;
 
                 if (!lexer.Branch(TokenType.Punctuator, ")"))
@@ -1401,7 +1320,7 @@ public static class SimpleCircuitParser
         }
 
         // This is a parameter list of a section definition
-        if (!ParsePropertyList(lexer, context, out propertyList))
+        if (!ParsePropertiesAndVariants(lexer, context, out propertyList))
             return false;
 
         // Start the statements
@@ -1705,7 +1624,7 @@ public static class SimpleCircuitParser
         List<SyntaxNode> properties = null;
         if (lexer.Check(~TokenType.Newline))
         {
-            if (!ParsePropertyList(lexer, context, out properties))
+            if (!ParsePropertiesAndVariants(lexer, context, out properties))
                 return false;
         }
 
@@ -1757,7 +1676,7 @@ public static class SimpleCircuitParser
         }
 
         // Parse properties
-        if (!ParsePropertyList(lexer, context, out var properties))
+        if (!ParsePropertiesAndVariants(lexer, context, out var properties))
             return false;
 
         // We now expect the end of the line
@@ -1777,7 +1696,7 @@ public static class SimpleCircuitParser
         result = null;
 
         // Parse properties
-        if (!ParsePropertyList(lexer, context, out var properties))
+        if (!ParsePropertiesAndVariants(lexer, context, out var properties))
             return false;
 
         // We now expect the end of the line

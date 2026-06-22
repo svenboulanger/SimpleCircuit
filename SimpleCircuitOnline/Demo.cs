@@ -118,7 +118,7 @@ public class DemoCategory(string title)
                 new Demo(
                     "Full bridge rectifier",
                     "The circuit on ElectroBOOM's \"FULL BRIDGE RECTIFIER!!\" t-shirt.",
-                    "* Top diode\r\nTlt <r> Xlt <r> D1 <r> Xrt <r> Trt(\"+\")\r\n\r\n* Bottom diode\r\nTlb <r> Xlb <r> [n]D4[p] <r> Xrb <r> Trb(\"-\")\r\n\r\n* Cross diodes\r\nXlb <u r> D2 <r u> Xrt\r\nXrb <u l> D3 <l u> Xlt\r\n\r\n* Horizontally align all diodes\r\n(x D*)\r\n\r\n* Alignment of some wires\r\n(x Xlt <r 5> Xlb)\r\n\r\n* Align the terminals\r\n(x Tlt <d> Tlb)\r\n(x Trt <d> Trb)\r\n"),
+                    "* Top diode\r\nTlt <r> Xlt <r> D1 <r> Xrt <r> Trt(\"+\")\r\n\r\n* Bottom diode\r\nTlb <r> Xlb <r> [n]D4[p] <r> Xrb <r> Trb(\"-\")\r\n\r\n* Cross diodes\r\nXlb <u r> D2 <r u> Xrt\r\nXrb <u l> D3 <l u> Xlt\r\n\r\n* Align things along the X-axis\r\n(x Tl* <r> Xlt <r 5> Xlb <r> D* <r> Tr*)\r\n"),
                 new Demo(
                     "Two-way light switch",
                     "A circuit for switching the same light with two switches.",
@@ -134,7 +134,7 @@ public class DemoCategory(string title)
                 new Demo(
                     "Full adder",
                     "The digital logic for a full adder",
-                    ".property Ti* in\r\n.property To* out\r\n\r\n* Inputs\r\nTia(\"A\") <r> Xa <r> [a]XOR1\r\nTib(\"B\") <r> Xb <r> [b]XOR1\r\nTic(\"Cin\") <r> Xc <r> [b]XOR2\r\n\r\n* First XOR\r\nXOR1[o] <r se r> Xab <r> [a]XOR2\r\nXab <d r> [a]AND1\r\n\r\n* XOR gate and two AND gates\r\nXOR2[o] <r> Tos(\"S\")\r\nXc <d r> [b]AND1\r\nXa <d r> [a]AND2\r\nXb <d r> [b]AND2\r\n\r\n* Last OR gate for carry out\r\nAND1[o] <r se r> [a]OR1\r\nAND2[o] <r ne r> [b]OR1\r\nOR1[o] <r> Toc(\"Cout\")\r\n\r\n* Align terminals using the wildcard '*'\r\n(x Ti*)\r\n(x To*)\r\n\r\n* Other alignment\r\n(x Xb <r 5> Xa)\r\n(x Xc <r 5> Xab)\r\n(xy XOR2 <d +15> AND1 <d +15> AND2)\r\n"),
+                    ".property Ti* in\r\n.property To* out\r\n\r\n* Inputs\r\nTia(\"A\") <r> Xa <r> [a]XOR1\r\nTib(\"B\") <r> Xb <r> [b]XOR1\r\nTic(\"Cin\") <r> Xc <r> [b]XOR2\r\n\r\n* First XOR\r\nXOR1[o] <r se r> Xab <r> [a]XOR2\r\nXab <d r> [a]AND1\r\n\r\n* XOR gate and two AND gates\r\nXOR2[o] <r> Tos(\"S\")\r\nXc <d r> [b]AND1\r\nXa <d r> [a]AND2\r\nXb <d r> [b]AND2\r\n\r\n* Last OR gate for carry out\r\nAND1[o] <r se r> [a]OR1\r\nAND2[o] <r ne r> [b]OR1\r\nOR1[o] <r> Toc(\"Cout\")\r\n\r\n* Align terminals using the wildcard '*'\r\n(x Ti* <r> To*)\r\n\r\n* Other alignment\r\n(x Xb <r 5> Xa)\r\n(x Xc <r 5> Xab)\r\n(xy XOR2 <d +15> AND1 <d +15> AND2)\r\n"),
                 new Demo(
                     "Transformers",
                     "A demonstration of some improvised transformers.",
@@ -166,7 +166,7 @@ public class DemoCategory(string title)
                 new Demo(
                     "Flowchart - Engineering",
                     "Demonstration of flowcharts using the engineering flowchart.",
-                    "* Overall styling\r\n.property FT minheight=20\r\n.property FT* minheight=20\r\n.property FD rx=1 ry=3 minheight=20 bg=\"#fcc\"\r\n.property FTok* bg=\"#cfc\"\r\n.property wire r=3\r\n\r\n* First terminal\r\nFT(\"start\") <d> FD(\"Does it move?\")\r\n\r\n* Top branch\r\nFD~1 <l d> DIR(\"yes\") <d arrow> FD\r\nFD~2 <r d> DIR(\"no\") <d arrow> FD\r\n\r\n* Sub branch left\r\nFD~2(\"Should it?\")\r\nFD~2 <l d> DIR(\"no\") <d arrow> FTok1(\"No problem\")\r\nFD~2 <r d> DIR(\"yes\") <d arrow> FTnok1(\"WD-40\")\r\n\r\n* Sub branch right\r\nFD~1(\"Should it?\")\r\nFD~1 <l d> DIR(\"no\") <d arrow> FTnok2(\"Duck tape\")\r\nFD~1 <r d> DIR(\"yes\") <d arrow> FTok2(\"No problem\")\r\n\r\n(y FT*)"),
+                    "* Some styling header\r\n.property wire r = 2.5 fwd-arrow\r\n.property X -dot\r\n.property FP justify=0 r=1\r\n.property FP* justify=0 r=1\r\n.property FPta bg=\"rgb(200, 255, 200)\"\r\n.property FPny bg=\"rgb(200, 255, 255)\"\r\n\r\n* Turn arouuuund...\r\nFPta(\"Turn\\naround\")\r\n\r\n* ... every now and then I ...\r\nFPta <r d> FP1(\"every now\\nand then I\")\r\nFPta <d> FP(\"bright eyes\") <r a 80> FP1\r\n\r\n* ... get a little bit ...\r\nFP1 <r> FP2(\"get a little bit\" width=50 height=10)\r\n\r\n* Lines\r\nFP2 <d r> FP(\"lonely and you're never coming 'round\") <r u -fwd-arrow> X <u l d> FPta\r\nFP2 <d r> FP(\"tired of listening to the sound of my tears\") <r u -fwd-arrow> X~1\r\nFP2 <d r> FP(\"nervous that the best of all the years have gone by\") <r u -fwd-arrow> X~1\r\nFP2 <d r> FP(\"terrified and then I see the look in your eyes\") <r u -fwd-arrow> X~1\r\n\r\n* ... fall apart ...\r\nFP1 <d +50> FPfa(\"fall apart\")\r\nFPfa <d> FPny(\"and I\\nneed you\")\r\n\r\n* This is a little hack to allow you to connect to different positions\r\nFPny <a 30 0 r> FPnt(\"now,\\ntonight\") <d +0 l arrow a 150 0> FPny\r\nFPny <d r> FP(\"more than\\never!!\")\r\n\r\n"),
                 new Demo(
                     "Entity-Relationship Diagram",
                     "Demonstration of an entity-relationship diagram (ERD) for a simple sports system.",

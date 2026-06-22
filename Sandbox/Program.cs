@@ -16,8 +16,24 @@ public class Program
     {
         // ExportDemos("all");
         ExportThemes("""
-        .property wire r=3 dbl-arrow
-        ENT("A") <r> ENT("B")
+        * --- Annotation Boxes ---
+
+        * Annotation boxes are '.box' statements that will draw
+        * a box around everything inside
+        .box
+            R1
+        .endb
+
+        R1 <r> C1 <r> L1
+
+        * Annotation boxes can be styled and labeled
+        .box "Danger zone" r=2 fg="--danger" anchor1="s"
+            L1
+            S1 <r> Z2
+        .endb
+
+        (x L1 <d> S1)
+        
         """);
         // ExportThemes(@"Xtl <r +10> Xtr
         //     Xbl <r +2> Xp2 <r +6> Xbr

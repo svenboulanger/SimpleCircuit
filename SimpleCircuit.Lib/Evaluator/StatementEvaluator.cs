@@ -3,7 +3,6 @@ using SimpleCircuit.Components;
 using SimpleCircuit.Components.Annotations;
 using SimpleCircuit.Components.Constraints;
 using SimpleCircuit.Components.General;
-using SimpleCircuit.Components.Markers;
 using SimpleCircuit.Components.Wires;
 using SimpleCircuit.Diagnostics;
 using SimpleCircuit.Drawing.Styles;
@@ -373,6 +372,10 @@ public static class StatementEvaluator
                     switch (binary.Type)
                     {
                         case BinaryOperatortype.Concatenate:
+                            string name = EvaluateName(binary, context);
+                            if (name is null)
+                                return;
+                            includes.Add(name);
                             break;
 
                         case BinaryOperatortype.Assignment:
