@@ -40,11 +40,14 @@ public static class TextEntities
         ["Phi"] = 934, ["Chi"] = 935, ["Psi"] = 936, ["Omega"] = 937,
 
         // Common symbols
+        ["amp"] = 38,       // &
+        ["copy"] = 169,     // ©
         ["ohm"] = 937,      // rendered as a capital Omega
         ["mho"] = 8487,     // rendered as upside down capital Omega
         ["micro"] = 181,    // µ
         ["deg"] = 176,      // °
         ["plusmn"] = 177,   // ±
+        ["pm"] = 177,       // ±
         ["times"] = 215,    // ×
         ["divide"] = 247,   // ÷
         ["le"] = 8804,      // ≤
@@ -59,6 +62,25 @@ public static class TextEntities
         ["nabla"] = 8711,   // ∇
         ["middot"] = 183,   // ·
         ["hellip"] = 8230,  // …
+        ["dia"] = 8960,     // ⌀
+        ["permil"] = 8240,  // ‰
+        ["pertenk"] = 8241, // ‱
+        ["hbar"] = 8463,    // ℏ
+        ["planckh"] = 8462, // ℎ
+        ["Laplacetrf"] = 8466, // ℒ
+        ["Lscr"] = 8466,    // ℒ
+        ["lagran"] = 8466,  // ℒ
+        ["Fouriertrf"] = 8497, // ℱ
+        ["Fscr"] = 8497,    // ℱ
+        ["zeetrf"] = 2131,  // ℨ
+        ["Zfr"] = 2131,     // ℨ
+        ["expectation"] = 8496, // ℰ
+
+        // Electronics
+        ["elec"] = 8961,    // ⌁ - added
+        ["accur"] = 9190,   // ⏦ - added
+        ["elnode"] = 9191,  // ⏧ - added
+        ["highv"] = 9889,   // ⚡ - added
 
         // Arrows
         ["larr"] = 8592,    // ←
@@ -66,5 +88,16 @@ public static class TextEntities
         ["rarr"] = 8594,    // →
         ["darr"] = 8595,    // ↓
         ["harr"] = 8596,    // ↔
+        ["varr"] = 8597,    // ↕
+        ["ldarr"] = 8672,   // ⇠ - added
+        ["udarr"] = 8673,   // ⇡ - added
+        ["rdarr"] = 8674,   // ⇢ - added
+        ["ddarr"] = 8675,   // ⇣ - added
+
+        // ERD
+        ["key"] = 128273,   // 🔑 - added
+        ["null"] = 9216,    // ␀ - added
+        ["larrhk"] = 8617,  // ↩
+        ["rarrhk"] = 8618,  // ↪
     };
 }
