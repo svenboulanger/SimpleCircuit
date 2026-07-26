@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#f4f5f4; }
+a { color:#0e7c8a; text-decoration:none; }
+a:hover { color:#0a5d68; text-decoration:underline; }
+</style>
+</helmet>
+
+<section style="display:flex; flex-direction:column; gap:28px; padding:56px 56px 24px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#1b1d1c;">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:760px;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:#6b7270;">Turn 2 · route mark, mirrored · colour study</div>
+    <h1 style="margin:0; font-size:34px; font-weight:600; letter-spacing:-0.02em;">The S route, in six colours</h1>
+    <p style="margin:0; font-size:15px; line-height:1.55; color:#4a504e; text-wrap:pretty;">The wire now runs right-to-left on the top rung, so it reads as a proper <strong style="font-weight:600;">S</strong>. Every colour below is picked to sit next to Bootstrap blue <span style="font-family:'JetBrains Mono',monospace; font-size:13px;">#007bff</span> without clashing — the app's buttons and links can stay exactly as they are.</p>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:56px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; padding:36px 40px;">
+    <svg width="150" height="150" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#007bff" stroke-width="7"></path>
+      <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+      <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+    </svg>
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <svg width="62" height="62" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#007bff" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+        <span style="font-size:34px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#007bff;">Circuit</span></span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#6b7270; line-height:1.6;">mirrored route · nodes at both terminals<br>the wire enters top-right, exits bottom-left</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+    <div id="2a" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#007bff; color:#fff; padding:3px 7px; border-radius:5px;">2a</span>
+        <span style="font-size:14px; font-weight:600;">Bootstrap blue</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#007bff</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#007bff" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#007bff;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#4da3ff" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="14" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#4da3ff;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#007bff; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ffffff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#007bff; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">no new colour to justify</span>
+      </div>
+    </div>
+
+    <div id="2b" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#3b4ec9; color:#fff; padding:3px 7px; border-radius:5px;">2b</span>
+        <span style="font-size:14px; font-weight:600;">Indigo</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#3b4ec9</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#3b4ec9" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#3b4ec9;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#8b97f5" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="14" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#8b97f5;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#3b4ec9; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ffffff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#3b4ec9; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">deeper, reads as “brand”</span>
+      </div>
+    </div>
+
+    <div id="2c" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#0aa2c0; color:#fff; padding:3px 7px; border-radius:5px;">2c</span>
+        <span style="font-size:14px; font-weight:600;">Cyan</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#0aa2c0</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#0aa2c0" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0aa2c0;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#3fc3d4" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="14" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#0aa2c0; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ffffff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#0aa2c0; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">neighbour of the UI blue</span>
+      </div>
+    </div>
+
+    <div id="2d" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#7048c8; color:#fff; padding:3px 7px; border-radius:5px;">2d</span>
+        <span style="font-size:14px; font-weight:600;">Violet</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#7048c8</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#7048c8" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#7048c8;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#a98bf0" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="14" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#a98bf0;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#7048c8; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ffffff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#7048c8; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">distinct, still cool-toned</span>
+      </div>
+    </div>
+
+    <div id="2e" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#e8590c; color:#fff; padding:3px 7px; border-radius:5px;">2e</span>
+        <span style="font-size:14px; font-weight:600;">Signal orange</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#e8590c</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#e8590c" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="14" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#e8590c;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ff8a4c" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="14" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#ff8a4c;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#e8590c; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#ffffff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#e8590c; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">complement — pops in a tab strip</span>
+      </div>
+    </div>
+
+    <div id="2f" style="width:296px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:9px; padding:13px 16px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; background:#1b1d1c; color:#fff; padding:3px 7px; border-radius:5px;">2f</span>
+        <span style="font-size:14px; font-weight:600;">Ink + blue node</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">#1b1d1c</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:26px 0 18px;">
+        <svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#1b1d1c" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#007bff"></circle>
+          <circle cx="14" cy="72" r="7" fill="#007bff"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:0 0 22px;">
+        <span style="font-size:22px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#1b1d1c;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:18px 0; background:#141716;">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#f2f4f3" stroke-width="7"></path>
+          <circle cx="86" cy="24" r="7" fill="#4da3ff"></circle>
+          <circle cx="14" cy="72" r="7" fill="#4da3ff"></circle>
+        </svg>
+        <span style="font-size:20px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#f2f4f3;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid #eef0ef;">
+        <div style="width:32px; height:32px; border-radius:7px; background:#1b1d1c; display:flex; align-items:center; justify-content:center;">
+          <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M86 24 H38 A12 12 0 0 0 38 48 H62 A12 12 0 0 1 62 72 H14" stroke="#4da3ff" stroke-width="10"></path>
+          </svg>
+        </div>
+        <div style="width:16px; height:16px; border-radius:4px; background:#1b1d1c; display:flex; align-items:center; justify-content:center;">
+          <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#4da3ff" stroke-width="13"></path>
+          </svg>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270;">quietest; blue stays the UI's job</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; padding:18px 20px;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#6b7270; margin-bottom:14px;">All six at 16px, side by side</div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="width:16px; height:16px; border-radius:4px; background:#007bff; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path></svg></div>
+      <div style="width:16px; height:16px; border-radius:4px; background:#3b4ec9; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path></svg></div>
+      <div style="width:16px; height:16px; border-radius:4px; background:#0aa2c0; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path></svg></div>
+      <div style="width:16px; height:16px; border-radius:4px; background:#7048c8; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path></svg></div>
+      <div style="width:16px; height:16px; border-radius:4px; background:#e8590c; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#ffffff" stroke-width="13"></path></svg></div>
+      <div style="width:16px; height:16px; border-radius:4px; background:#1b1d1c; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M82 26 H40 A14 14 0 0 0 40 50 H60 A14 14 0 0 1 60 74 H18" stroke="#4da3ff" stroke-width="13"></path></svg></div>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; margin-left:8px;">2a → 2f, actual size</span>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex; flex-direction:column; gap:28px; padding:32px 56px 56px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#1b1d1c; border-top:1px solid #dfe2e0;">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:760px;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:#6b7270;">Turn 1 · five marks</div>
+    <h1 style="margin:0; font-size:34px; font-weight:600; letter-spacing:-0.02em;">SimpleCircuit — logo &amp; favicon proposals</h1>
+    <p style="margin:0; font-size:15px; line-height:1.55; color:#4a504e; text-wrap:pretty;">Each proposal: mark, horizontal lockup, dark variant, and true-size 32px / 16px favicon. All marks are stroke-based geometry on a 100×100 grid with round caps — they survive down to 16px and could be re-drawn as SimpleCircuit scripts. Accent is a teal-cyan <span style="font-family:'JetBrains Mono',monospace; font-size:13px;">oklch(0.60 0.11 205)</span> ≈ #0e7c8a, warmer and less generic than the app's current #007bff.</p>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start;">
+
+    <div id="1a" style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em; background:#0e7c8a; color:#fff; padding:3px 7px; border-radius:5px;">1a</span>
+        <span style="font-size:15px; font-weight:600;">Resistor</span>
+        <span style="font-size:13px; color:#6b7270;">the one symbol everyone reads</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:38px 0 30px;">
+        <svg width="132" height="132" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 50 H26" stroke="#0e7c8a" stroke-width="7"></path>
+          <path d="M74 50 H94" stroke="#0e7c8a" stroke-width="7"></path>
+          <rect x="26" y="31" width="48" height="38" rx="9" stroke="#1b1d1c" stroke-width="7"></rect>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 30px;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 50 H26" stroke="#0e7c8a" stroke-width="7"></path>
+          <path d="M74 50 H94" stroke="#0e7c8a" stroke-width="7"></path>
+          <rect x="26" y="31" width="48" height="38" rx="9" stroke="#1b1d1c" stroke-width="7"></rect>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0e7c8a;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:26px 0; background:#141716;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 50 H26" stroke="#3fc3d4" stroke-width="7"></path>
+          <path d="M74 50 H94" stroke="#3fc3d4" stroke-width="7"></path>
+          <rect x="26" y="31" width="48" height="38" rx="9" stroke="#f2f4f3" stroke-width="7"></rect>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px; padding:16px 18px; border-top:1px solid #eef0ef;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:7px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="26" height="26" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 50 H24" stroke="#8fe3ee" stroke-width="9"></path>
+              <path d="M76 50 H96" stroke="#8fe3ee" stroke-width="9"></path>
+              <rect x="25" y="30" width="50" height="40" rx="10" stroke="#ffffff" stroke-width="9"></rect>
+            </svg>
+          </div>
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M4 50 H22" stroke="#8fe3ee" stroke-width="11"></path>
+              <path d="M78 50 H96" stroke="#8fe3ee" stroke-width="11"></path>
+              <rect x="24" y="30" width="52" height="40" rx="10" stroke="#ffffff" stroke-width="11"></rect>
+            </svg>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; line-height:1.5;">32 / 16 px · knocked out on solid teal</span>
+      </div>
+    </div>
+
+    <div id="1b" style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em; background:#0e7c8a; color:#fff; padding:3px 7px; border-radius:5px;">1b</span>
+        <span style="font-size:15px; font-weight:600;">Ground</span>
+        <span style="font-size:13px; color:#6b7270;">where every script starts</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:38px 0 30px;">
+        <svg width="132" height="132" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 16 V48" stroke="#0e7c8a" stroke-width="7"></path>
+          <path d="M22 50 H78" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M32 66 H68" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M42 82 H58" stroke="#1b1d1c" stroke-width="7"></path>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 30px;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 16 V48" stroke="#0e7c8a" stroke-width="7"></path>
+          <path d="M22 50 H78" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M32 66 H68" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M42 82 H58" stroke="#1b1d1c" stroke-width="7"></path>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0e7c8a;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:26px 0; background:#141716;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 16 V48" stroke="#3fc3d4" stroke-width="7"></path>
+          <path d="M22 50 H78" stroke="#f2f4f3" stroke-width="7"></path>
+          <path d="M32 66 H68" stroke="#f2f4f3" stroke-width="7"></path>
+          <path d="M42 82 H58" stroke="#f2f4f3" stroke-width="7"></path>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px; padding:16px 18px; border-top:1px solid #eef0ef;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:7px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="26" height="26" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M50 12 V46" stroke="#8fe3ee" stroke-width="10"></path>
+              <path d="M18 50 H82" stroke="#ffffff" stroke-width="10"></path>
+              <path d="M31 70 H69" stroke="#ffffff" stroke-width="10"></path>
+              <path d="M44 88 H56" stroke="#ffffff" stroke-width="10"></path>
+            </svg>
+          </div>
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M50 12 V44" stroke="#8fe3ee" stroke-width="12"></path>
+              <path d="M16 52 H84" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M32 74 H68" stroke="#ffffff" stroke-width="12"></path>
+            </svg>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; line-height:1.5;">32 / 16 px · 16px drops the third bar</span>
+      </div>
+    </div>
+
+    <div id="1c" style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em; background:#0e7c8a; color:#fff; padding:3px 7px; border-radius:5px;">1c</span>
+        <span style="font-size:15px; font-weight:600;">Route</span>
+        <span style="font-size:13px; color:#6b7270;">an orthogonal wire that draws an S</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:38px 0 30px;">
+        <svg width="132" height="132" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 24 H62 A12 12 0 0 1 62 48 H38 A12 12 0 0 0 38 72 H86" stroke="#0e7c8a" stroke-width="7"></path>
+          <circle cx="14" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="86" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 30px;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 24 H62 A12 12 0 0 1 62 48 H38 A12 12 0 0 0 38 72 H86" stroke="#0e7c8a" stroke-width="7"></path>
+          <circle cx="14" cy="24" r="7" fill="#1b1d1c"></circle>
+          <circle cx="86" cy="72" r="7" fill="#1b1d1c"></circle>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0e7c8a;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:26px 0; background:#141716;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 24 H62 A12 12 0 0 1 62 48 H38 A12 12 0 0 0 38 72 H86" stroke="#3fc3d4" stroke-width="7"></path>
+          <circle cx="14" cy="24" r="7" fill="#f2f4f3"></circle>
+          <circle cx="86" cy="72" r="7" fill="#f2f4f3"></circle>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px; padding:16px 18px; border-top:1px solid #eef0ef;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:7px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 24 H62 A12 12 0 0 1 62 48 H38 A12 12 0 0 0 38 72 H86" stroke="#ffffff" stroke-width="10"></path>
+              <circle cx="14" cy="24" r="8" fill="#8fe3ee"></circle>
+              <circle cx="86" cy="72" r="8" fill="#8fe3ee"></circle>
+            </svg>
+          </div>
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 26 H60 A14 14 0 0 1 60 50 H40 A14 14 0 0 0 40 74 H82" stroke="#ffffff" stroke-width="13"></path>
+            </svg>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; line-height:1.5;">32 / 16 px · nodes drop out at 16</span>
+      </div>
+    </div>
+
+    <div id="1d" style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em; background:#0e7c8a; color:#fff; padding:3px 7px; border-radius:5px;">1d</span>
+        <span style="font-size:15px; font-weight:600;">Node</span>
+        <span style="font-size:13px; color:#6b7270;">a junction with four pins</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:38px 0 30px;">
+        <svg width="132" height="132" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 8 V32" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M50 68 V92" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M8 50 H32" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M68 50 H92" stroke="#1b1d1c" stroke-width="7"></path>
+          <circle cx="50" cy="50" r="18" fill="#0e7c8a"></circle>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 30px;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 8 V32" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M50 68 V92" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M8 50 H32" stroke="#1b1d1c" stroke-width="7"></path>
+          <path d="M68 50 H92" stroke="#1b1d1c" stroke-width="7"></path>
+          <circle cx="50" cy="50" r="18" fill="#0e7c8a"></circle>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0e7c8a;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:26px 0; background:#141716;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+          <path d="M50 8 V32" stroke="#f2f4f3" stroke-width="7"></path>
+          <path d="M50 68 V92" stroke="#f2f4f3" stroke-width="7"></path>
+          <path d="M8 50 H32" stroke="#f2f4f3" stroke-width="7"></path>
+          <path d="M68 50 H92" stroke="#f2f4f3" stroke-width="7"></path>
+          <circle cx="50" cy="50" r="18" fill="#3fc3d4"></circle>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px; padding:16px 18px; border-top:1px solid #eef0ef;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:7px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M50 6 V30" stroke="#ffffff" stroke-width="10"></path>
+              <path d="M50 70 V94" stroke="#ffffff" stroke-width="10"></path>
+              <path d="M6 50 H30" stroke="#ffffff" stroke-width="10"></path>
+              <path d="M70 50 H94" stroke="#ffffff" stroke-width="10"></path>
+              <circle cx="50" cy="50" r="18" fill="#8fe3ee"></circle>
+            </svg>
+          </div>
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M50 8 V28" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M50 72 V92" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M8 50 H28" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M72 50 H92" stroke="#ffffff" stroke-width="12"></path>
+              <circle cx="50" cy="50" r="19" fill="#8fe3ee"></circle>
+            </svg>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; line-height:1.5;">32 / 16 px · strongest at tiny sizes</span>
+      </div>
+    </div>
+
+    <div id="1e" style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #eef0ef;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em; background:#0e7c8a; color:#fff; padding:3px 7px; border-radius:5px;">1e</span>
+        <span style="font-size:15px; font-weight:600;">Loop C</span>
+        <span style="font-size:13px; color:#6b7270;">a closed circuit that reads as “C”</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; padding:38px 0 30px;">
+        <svg width="132" height="132" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M76 26 A34 34 0 1 0 76 74" stroke="#1b1d1c" stroke-width="7"></path>
+          <rect x="62" y="38" width="30" height="24" rx="7" fill="#ffffff" stroke="#0e7c8a" stroke-width="7"></rect>
+        </svg>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 30px;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M76 26 A34 34 0 1 0 76 74" stroke="#1b1d1c" stroke-width="7"></path>
+          <rect x="62" y="38" width="30" height="24" rx="7" fill="#ffffff" stroke="#0e7c8a" stroke-width="7"></rect>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#1b1d1c;">Simple</span><span style="font-weight:700; color:#0e7c8a;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding:26px 0; background:#141716;">
+        <svg width="56" height="56" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M76 26 A34 34 0 1 0 76 74" stroke="#f2f4f3" stroke-width="7"></path>
+          <rect x="62" y="38" width="30" height="24" rx="7" fill="#141716" stroke="#3fc3d4" stroke-width="7"></rect>
+        </svg>
+        <span style="font-size:29px; letter-spacing:-0.02em;"><span style="font-weight:400; color:#f2f4f3;">Simple</span><span style="font-weight:700; color:#3fc3d4;">Circuit</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px; padding:16px 18px; border-top:1px solid #eef0ef;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:7px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="27" height="27" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M74 24 A36 36 0 1 0 74 76" stroke="#ffffff" stroke-width="10"></path>
+              <rect x="60" y="36" width="34" height="28" rx="8" fill="#0e7c8a" stroke="#8fe3ee" stroke-width="10"></rect>
+            </svg>
+          </div>
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M72 24 A36 36 0 1 0 72 76" stroke="#ffffff" stroke-width="14"></path>
+            </svg>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b7270; line-height:1.5;">32 / 16 px · 16px keeps the arc only</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start; padding-top:8px;">
+    <div style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; padding:18px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#6b7270; margin-bottom:12px;">Palette</div>
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+          <div style="height:44px; border-radius:8px; background:#0e7c8a;"></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#4a504e;">#0e7c8a</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+          <div style="height:44px; border-radius:8px; background:#3fc3d4;"></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#4a504e;">#3fc3d4</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+          <div style="height:44px; border-radius:8px; background:#1b1d1c;"></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#4a504e;">#1b1d1c</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+          <div style="height:44px; border-radius:8px; background:#f4f5f4; border:1px solid #e2e5e3;"></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#4a504e;">#f4f5f4</span>
+        </div>
+      </div>
+    </div>
+    <div style="width:430px; background:#ffffff; border:1px solid #e2e5e3; border-radius:14px; padding:18px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#6b7270; margin-bottom:12px;">In browser tab</div>
+      <div style="display:flex; align-items:center; gap:8px; background:#e8eae9; border-radius:9px 9px 0 0; padding:8px 10px;">
+        <div style="display:flex; align-items:center; gap:7px; background:#fff; border-radius:7px; padding:6px 12px; font-size:12px; color:#1b1d1c;">
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M50 8 V28" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M50 72 V92" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M8 50 H28" stroke="#ffffff" stroke-width="12"></path>
+              <path d="M72 50 H92" stroke="#ffffff" stroke-width="12"></path>
+              <circle cx="50" cy="50" r="19" fill="#8fe3ee"></circle>
+            </svg>
+          </div>
+          SimpleCircuit
+        </div>
+        <div style="display:flex; align-items:center; gap:7px; border-radius:7px; padding:6px 12px; font-size:12px; color:#6b7270;">
+          <div style="width:16px; height:16px; border-radius:4px; background:#0e7c8a; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+              <path d="M4 50 H22" stroke="#8fe3ee" stroke-width="11"></path>
+              <path d="M78 50 H96" stroke="#8fe3ee" stroke-width="11"></path>
+              <rect x="24" y="30" width="52" height="40" rx="10" stroke="#ffffff" stroke-width="11"></rect>
+            </svg>
+          </div>
+          Docs
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</x-dc>
+</body>
+</html>
