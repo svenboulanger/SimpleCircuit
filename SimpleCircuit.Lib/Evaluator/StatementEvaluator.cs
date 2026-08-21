@@ -84,7 +84,8 @@ public static class StatementEvaluator
                         break;
 
                     default:
-                        throw new NotImplementedException();
+                        context.Diagnostics?.Post(property.Location, ErrorCodes.ExpectedPropertyAssignment);
+                        return;
                 }
             }
         }
