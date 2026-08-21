@@ -37,6 +37,7 @@ public abstract class OrientedDrawable : BoundedDrawable, IOrientedDrawable
     /// component is only rotated. None of it matters however if the component is
     /// fully constrained!
     /// </summary>
+    [Description("Tries to keep the component upright when partially constrained.")]
     public bool KeepUpright { get; set; } = true;
 
     /// <inheritdoc />
